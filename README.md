@@ -60,10 +60,8 @@ or shows them. Shortcuts: Space = play/pause, Left/Right = -5 s/+5 s, L = loop
 on/off, C = subtitles on/off, F = fullscreen. `make open` plays `src/index.html`
 with the same player.
 
-`make serve` serves only that page over HTTP on `127.0.0.1` (rebuilding it first if needed). The
-port is `CASPER_PORT` in a Casper workspace, 8000 otherwise; override it with
-`make serve PORT=9000`. In Casper, the Run button (`casper run`) serves the player and shows its
-URL in the info panel; the Render button renders the video and opens the MP4.
+`make serve` serves only that page over HTTP on `127.0.0.1` (rebuilding it first if needed), on
+port 8000 by default; override it with `make serve PORT=9000`.
 
 `make serve` hot-reloads: edit a file in `src/` and the server rebuilds the
 page, then every open tab reloads by itself and resumes at the same position
