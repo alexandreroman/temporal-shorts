@@ -35,3 +35,4 @@
 - [Home page design](references/feedback_home-page.md) — equal stretched cards, count-agnostic grid, card order, no "silent"
 - [HTML links and viewing](references/project_html-links.md) — cards link to `themes/<theme>/`, home button to `/`; view pages with `make serve` only
 - [No video durations in docs](references/feedback_no-durations-in-docs.md) — length is never written; `make timeline` is the source
+- [Player 0.5x speed](references/project_player-speed.md) — 0.5x stretches still moments only; ambient loops read G

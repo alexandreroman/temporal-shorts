@@ -201,8 +201,9 @@ function buildAll() {
   segs.innerHTML = CHAPTERS.map(() => '<i><b></b></i>').join('');
 }
 
-function renderAt(t) {
-  G = t;
+// `g` is the ambient clock (G) driving continuous loops such as spinners and blinks; scenes animate on `t`.
+function renderAt(t, g = t) {
+  G = g;
   let cur = null;
   for (const sc of scenes) {
     const vis = t >= sc.start && t < sc.end;

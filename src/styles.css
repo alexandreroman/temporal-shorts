@@ -130,3 +130,5 @@ html,body{margin:0;background:var(--bg)}
 }
 #seek:hover b:after,#seek.drag b:after{opacity:1}
 #time{flex:none;font-family:'Mono',monospace;font-size:14px;letter-spacing:.06em;color:var(--slate);white-space:nowrap}
+/* Fixed width, wide enough for "0.5x", so the bar does not shift when the speed changes. */
+#ctl #speed{width:52px;font-family:'Mono',monospace;font-size:14px;letter-spacing:.06em}

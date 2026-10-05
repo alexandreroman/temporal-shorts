@@ -107,12 +107,16 @@ theme folder, `themes/<theme>/`, which only an HTTP server resolves to its
 players. Each player has its scripts, fonts and logo inlined, so it needs
 no other file. The animation fits the window and plays once, unless loop
 is enabled (it is off by default); the controls (home, play/pause, seek
-bar, time, loop, subtitles, fullscreen) hide after a few seconds of
+bar, time, speed, loop, subtitles, fullscreen) hide after a few seconds of
 playback and come back when the mouse moves. The home button goes back to
-the home page (`/`). Subtitles are shown by default; the CC button hides or
-shows them. Shortcuts: Space = play/pause, Left/Right = previous/next
-section (Left first restarts the current section if more than 2 s in), L =
-loop on/off, C = subtitles on/off, F = fullscreen.
+the home page (`/`). Playback runs at 1x by default; the speed button
+switches between 1x and 0.5x. At 0.5x, only the still moments between
+animations stretch, which leaves time to explain the screen; the
+animations keep their normal speed. Subtitles are shown by default; the CC
+button hides or shows them. Shortcuts: Space = play/pause, Left/Right =
+previous/next section (Left first restarts the current section if more
+than 2 s in), S = speed 1x/0.5x, L = loop on/off, C = subtitles on/off,
+F = fullscreen.
 
 `make serve` serves the home page on `/` and each player on
 `/themes/<theme>/`, over HTTP on `127.0.0.1` (rebuilding them first if

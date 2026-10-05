@@ -34,11 +34,13 @@ function startPlayer() {
   // Absolute: `make serve`, the only way to view the pages, serves the home page on /.
   ctl.innerHTML = '<a id="home" href="/" aria-label="All videos"></a>'
     + '<button type="button" id="play"></button><div id="seek"><i><b></b></i></div>'
-    + '<span id="time"></span><button type="button" id="loop"></button><button type="button" id="subs"></button>'
+    + '<span id="time"></span><button type="button" id="speed" aria-label="Playback speed"></button>'
+    + '<button type="button" id="loop"></button><button type="button" id="subs"></button>'
     + '<button type="button" id="fs"></button>';
   document.body.appendChild(ctl);
   const homeLink = document.getElementById('home');
   const playButton = document.getElementById('play');
+  const speedButton = document.getElementById('speed');
   const loopButton = document.getElementById('loop');
   const subtitlesButton = document.getElementById('subs');
   const fullscreenButton = document.getElementById('fs');
@@ -62,19 +64,22 @@ function startPlayer() {
   fit();
 
   let time = 0;
+  // Ambient clock (G in renderAt): always real time, so ambient loops never play in slow motion.
+  let ambient = 0;
   let playing = true;
   let dragging = false;
   let lastTick = performance.now();
   let hideTimer = 0;
   let subtitlesShown = true;
   let looping = false;
+  let speed = 1;
 
   // Resume at the same position after a reload: the `make serve` hot reload, or F5.
   // Browser settings can block sessionStorage; the player then simply starts from the beginning.
   // One key per page: the session is shared by every theme page of the same origin.
   const STATE_KEY = 'player-state:' + location.pathname;
   addEventListener('pagehide', () => {
-    try { sessionStorage.setItem(STATE_KEY, JSON.stringify({ time, playing })); } catch {}
+    try { sessionStorage.setItem(STATE_KEY, JSON.stringify({ time, playing, speed })); } catch {}
   });
   if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
     try {
@@ -82,9 +87,11 @@ function startPlayer() {
       if (saved) {
         time = clamp(saved.time, 0, TOTAL);
         playing = saved.playing;
+        speed = saved.speed === 0.5 ? 0.5 : 1;
       }
     } catch {}
   }
+  ambient = time;
 
   function formatTime(seconds) {
     const s = Math.floor(seconds);
@@ -101,13 +108,29 @@ function startPlayer() {
   }
 
   function show() {
-    renderAt(time);
+    renderAt(time, ambient);
     updateControls();
   }
 
   function seek(t) {
     time = clamp(t, 0, TOTAL);
+    ambient = time;
     show();
+  }
+
+  // Tells whether a story animation is running at `time`. Scenes animate on the timeline, while ambient
+  // loops (spinners, blinks, dashed flows) read G: with G held still, the visible scene roots only change
+  // when the story moves. Subtitles and the header (whose chapter progress always grows) are left out.
+  // renderAt() is deterministic, so these probe renders leave nothing behind once show() runs.
+  const PROBE_STEP = 0.05;
+
+  function sceneSnapshot(t) {
+    renderAt(t, ambient);
+    return scenes.filter(sc => t >= sc.start && t < sc.end).map(sc => sc.root.outerHTML).join('');
+  }
+
+  function isAnimating() {
+    return sceneSnapshot(time) !== sceneSnapshot(Math.min(time + PROBE_STEP, TOTAL));
   }
 
   // A section is a scene. Left acts like a media player's "previous" button: it restarts the current
@@ -129,11 +152,24 @@ function startPlayer() {
     if (playing) {
       playing = false;
     } else {
-      if (time >= TOTAL) time = 0;
+      if (time >= TOTAL) {
+        time = 0;
+        ambient = 0;
+      }
       playing = true;
     }
     show();
     wake();
+  }
+
+  function toggleSpeed() {
+    speed = speed === 1 ? 0.5 : 1;
+    updateSpeedButton();
+  }
+
+  function updateSpeedButton() {
+    speedButton.textContent = speed === 1 ? '1x' : '0.5x';
+    speedButton.setAttribute('aria-pressed', String(speed !== 1));
   }
 
   function toggleLoop() {
@@ -185,10 +221,15 @@ function startPlayer() {
     const dt = Math.min((now - lastTick) / 1000, 0.25);
     lastTick = now;
     if (playing && !dragging) {
-      time += dt;
+      // Below 1x, only the still moments stretch, leaving time to explain the screen; animations keep
+      // their normal speed. At 1x the probe is skipped entirely.
+      const rate = speed < 1 && !isAnimating() ? speed : 1;
+      time += dt * rate;
+      ambient += dt;
       if (time >= TOTAL) {
         if (looping) {
           time -= TOTAL; // wrap to the start and keep playing
+          ambient = time;
         } else {
           time = TOTAL; // stop on the last frame
           playing = false;
@@ -223,13 +264,14 @@ function startPlayer() {
   seekBar.addEventListener('pointercancel', endDrag);
 
   playButton.addEventListener('click', togglePlay);
+  speedButton.addEventListener('click', toggleSpeed);
   loopButton.addEventListener('click', toggleLoop);
   subtitlesButton.addEventListener('click', toggleSubtitles);
   fullscreenButton.addEventListener('click', toggleFullscreen);
   fullscreenButton.hidden = !document.fullscreenEnabled;
   // Keep mouse clicks from focusing the controls, so Space stays a global play/pause key.
   // Keyboard users can still Tab to a control and activate it natively.
-  for (const control of [homeLink, playButton, loopButton, subtitlesButton, fullscreenButton]) {
+  for (const control of [homeLink, playButton, speedButton, loopButton, subtitlesButton, fullscreenButton]) {
     control.addEventListener('mousedown', event => event.preventDefault());
   }
 
@@ -239,6 +281,7 @@ function startPlayer() {
     if (event.key === ' ') togglePlay();
     else if (event.key === 'ArrowLeft') previousSection();
     else if (event.key === 'ArrowRight') nextSection();
+    else if (event.key === 's' || event.key === 'S') toggleSpeed();
     else if (event.key === 'l' || event.key === 'L') toggleLoop();
     else if (event.key === 'c' || event.key === 'C') toggleSubtitles();
     else if (event.key === 'f' || event.key === 'F') toggleFullscreen();
@@ -250,6 +293,7 @@ function startPlayer() {
   document.addEventListener('fullscreenchange', updateFullscreenButton);
 
   setIcon(homeLink, 'home', 'All videos');
+  updateSpeedButton();
   updateLoopButton();
   updateSubtitlesButton();
   updateFullscreenButton();
