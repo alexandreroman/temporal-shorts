@@ -102,20 +102,18 @@ To check a single frame, open
 
 `make html` builds `output/index.html`, the home page, and one player per
 theme, `output/themes/<theme>/index.html`: `output/` mirrors `src/`, so the
-links between the pages are the same in both. Each file has its scripts,
-fonts and logo inlined: send a player by email or open it in any browser,
-offline, with nothing else. The home page links to the players below it,
-so keep the `output/` tree together to browse them all. The animation fits
-the window and plays once, unless loop is enabled (it is off by default);
-the controls (home, play/pause, seek bar, time, loop, subtitles,
-fullscreen) hide after a few seconds of playback and come back when the
-mouse moves. The home button goes back to the home page
-(`../../index.html` from the player). Subtitles are shown by default; the
-CC button hides or shows them. Shortcuts: Space = play/pause, Left/Right =
-previous/next section (Left first restarts the current section if more
-than 2 s in), L = loop on/off, C = subtitles on/off, F = fullscreen.
-`make open` opens `src/index.html`, the home page, whose cards play each
-theme live with the same player.
+links between the pages are the same in both. The home page links to each
+theme folder, `themes/<theme>/`, which only an HTTP server resolves to its
+`index.html`: `make serve` is the only way to view the home page and the
+players. Each player has its scripts, fonts and logo inlined, so it needs
+no other file. The animation fits the window and plays once, unless loop
+is enabled (it is off by default); the controls (home, play/pause, seek
+bar, time, loop, subtitles, fullscreen) hide after a few seconds of
+playback and come back when the mouse moves. The home button goes back to
+the home page (`../../index.html` from the player). Subtitles are shown by
+default; the CC button hides or shows them. Shortcuts: Space = play/pause,
+Left/Right = previous/next section (Left first restarts the current section
+if more than 2 s in), L = loop on/off, C = subtitles on/off, F = fullscreen.
 
 `make serve` serves the home page on `/` and each player on
 `/themes/<theme>/`, over HTTP on `127.0.0.1` (rebuilding them first if
@@ -171,9 +169,8 @@ editing different scenes never touch the same file.
    scene scripts. The new folder is a theme as soon as its page exists:
    `--theme` and `THEME=<theme>` accept it, and `make html` builds it.
 2. Create `src/themes/<theme>/scenes/` with the scene files.
-3. Add a card linking to `themes/<theme>/index.html` in `src/index.html`
-   (spell out `index.html`: a folder link does not open it over
-   `file://`); the cards wrap and keep the same size, with no CSS change.
+3. Add a card linking to `themes/<theme>/` in `src/index.html`; the cards
+   wrap and keep the same size, with no CSS change.
 4. Write the script in `docs/<theme>/script.md`.
 
 Keep each video under 3:00 (`make timeline THEME=<theme>`).

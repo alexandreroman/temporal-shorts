@@ -58,7 +58,7 @@ workspaces run `make setup` automatically.
 - `src/`: the animations, one file per concern so parallel edits rarely
   conflict:
   - `index.html`, `home.css`: home page, one card per theme, linking to
-    `themes/<theme>/index.html`
+    `themes/<theme>/`
   - `styles.css`: brand styles and live-player CSS
   - `engine.js`: timeline, helpers, components; chapter titles come from
     the scenes
@@ -145,13 +145,14 @@ not shared with the team.
 - New scene: add a file in `src/themes/<theme>/scenes/` and one `<script>`
   line in `src/themes/<theme>/index.html`, in playing order.
 - New theme: folder `src/themes/<theme>/` with its page `index.html` and
-  its scenes, a card linking to `themes/<theme>/index.html` in
-  `src/index.html` and `docs/<theme>/script.md`.
+  its scenes, a card linking to `themes/<theme>/` in `src/index.html` and
+  `docs/<theme>/script.md`.
 - Relative URLs must work from `src/` and `output/` alike: theme pages
-  live two folders below the home page. Spell out `index.html` in links
-  (folder links do not open it over `file://`), and resolve asset URLs
-  built in JS against the script (`document.currentScript.src`, see
-  `LOGO`), not the page.
+  live two folders below the home page. Link to folders
+  (`themes/<theme>/`): `make serve` is the only way to view the HTML pages.
+  Resolve asset URLs built in JS against the script
+  (`document.currentScript.src`, see `LOGO`), not the page: Playwright
+  opens theme pages over `file://` to render frames.
 - Live-mode player code (`startPlayer()`, `.live` CSS) must never affect the
   frozen `?t=` mode: rendered frames must stay pixel-identical.
 - Check frames with `make preview` before `make render`; after a text change,
