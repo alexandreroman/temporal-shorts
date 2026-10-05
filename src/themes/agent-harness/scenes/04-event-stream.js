@@ -169,38 +169,43 @@
       s.bar.fill = s.bar.querySelector('.fill'); s.bar.head = s.bar.querySelector('.head');
     },
     update(t, c, s) {
-      // stream: the agents appear one by one, then the lane, then chips leave the agents in turn and merge into it
+      // stream: the agents appear one by one, then the lane, then chips leave the agents in turn and merge into it.
+      // The flow is an endless loop: it starts at chipsFrom on the story clock t, but its chips move on the ambient
+      // clock g. In the live player g may run ahead of t, so the flow can start mid-way: it fades in just before
+      // chipsFrom, when no chip shows yet in frozen frames (there g equals t)
       const chipsFrom = c[0] + 3.0;
+      const g = ambientTime(this);
+      const flowIn = P(t, chipsFrom - 0.3, 0.3, linear);
       s.agents.forEach((e, i) => {
         const p = P(t, c[0] + 0.1 + i * 0.4, 0.5, backOut);
         place(e, AGENT.x, agentY(i), p, clamp(p * 2));
         // the tile lights up as it emits a chip
-        const sinceLast = (t - chipsFrom - i * CHIP_EVERY) % (3 * CHIP_EVERY);
-        const emitting = t >= chipsFrom + i * CHIP_EVERY && sinceLast < 0.25;
+        const sinceLast = (g - chipsFrom - i * CHIP_EVERY) % (3 * CHIP_EVERY);
+        const emitting = t >= chipsFrom && g >= chipsFrom + i * CHIP_EVERY && sinceLast < 0.25;
         e.style.borderColor = emitting ? C.uv : C.line;
       });
-      s.guides.forEach((g, i) => draw(g, P(t, c[0] + 1.8 + i * 0.1, 0.6)));
+      s.guides.forEach((line, i) => draw(line, P(t, c[0] + 1.8 + i * 0.1, 0.6)));
       place(s.lane, LANE.x, LANE.y, 1, P(t, c[0] + 1.9, 0.5));
       place(s.laneL, LANE.x, LANE.y - LANE.h / 2 - 34, 1, P(t, c[0] + 2.0, 0.5));
       const sp = P(t, c[0] + 5.0, 0.45, backOut);
       place(s.same, LANE.x, LANE.y + LANE.h / 2 + 46, sp, clamp(sp * 2));
       s.chips.forEach((e, k) => {
         // the latest chip this element carries: k, k + CHIP_POOL, k + 2 * CHIP_POOL...
-        const cycle = Math.max(0, Math.floor((t - chipsFrom - k * CHIP_EVERY) / (CHIP_POOL * CHIP_EVERY)));
+        const cycle = Math.max(0, Math.floor((g - chipsFrom - k * CHIP_EVERY) / (CHIP_POOL * CHIP_EVERY)));
         const leave = chipsFrom + (k + cycle * CHIP_POOL) * CHIP_EVERY;
         let x, y;
-        if (t < leave + CHIP_MERGE) {
-          const u = lerp(MERGE_FROM, 1, clamp((t - leave) / CHIP_MERGE));
+        if (g < leave + CHIP_MERGE) {
+          const u = lerp(MERGE_FROM, 1, clamp((g - leave) / CHIP_MERGE));
           const [p0, p1, p2, p3] = guide(k % 3);
           x = cubic(p0[0], p1[0], p2[0], p3[0], u);
           y = cubic(p0[1], p1[1], p2[1], p3[1], u);
         } else {
-          x = lerp(LANE.entry, LANE.exit, clamp((t - leave - CHIP_MERGE) / CHIP_LANE));
+          x = lerp(LANE.entry, LANE.exit, clamp((g - leave - CHIP_MERGE) / CHIP_LANE));
           y = LANE.y;
         }
         const end = leave + CHIP_MERGE + CHIP_LANE;
-        const o = t < leave ? 0 : P(t, leave, 0.12, linear) * (1 - P(t, end - 0.25, 0.25, linear));
-        place(e, x, y, 1, o);
+        const o = g < leave ? 0 : P(g, leave, 0.12, linear) * (1 - P(g, end - 0.25, 0.25, linear));
+        place(e, x, y, 1, o * flowIn);
       });
 
       // console: rows arrive live one by one; then it switches to replay, rewinds, and sweeps them again

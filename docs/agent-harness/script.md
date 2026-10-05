@@ -184,7 +184,9 @@ Lisbon.
   - Visuals: SELF-DESCRIBING tag; the struck pill gives way to a Trip
     planner agent with its TOOLS (`search_web`); a dashed arrow "READS ITS
     INTERFACE" arches from TravelAgent to the Trip planner, and `plan_trip`
-    joins its tools, tagged "FROM TravelAgent".
+    joins its tools, tagged "FROM TravelAgent"; TravelAgent is tagged CHILD
+    WORKFLOW of the Trip planner (PARENT AGENT): subagents run as Temporal
+    child workflows.
 - **3:20** A typed request goes in, TravelAgent does the work, and a typed
   result comes back.
   - Visuals: a TYPED REQUEST (`plan_trip`, `destination: "Lisbon"`,

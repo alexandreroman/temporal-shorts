@@ -53,7 +53,7 @@
       + `<div style="flex:none">${ICON('agent', 46, C.ink)}</div>`
       + `<div><div style="font-size:34px;line-height:1.1">${name}</div>`
       + `<div class="lbl" style="font-size:15px;padding-left:0;margin-top:4px">${label}</div></div>`
-      + '<div class="tagSlot" style="margin-left:auto"></div></div>'
+      + '<div class="tagSlot" style="margin-left:auto;display:flex;gap:20px"></div></div>'
       + '<div style="height:2px;background:var(--line);margin:20px 0 22px"></div>' // CARD.rule in total
       + `<div class="cols mono" style="display:flex;height:${CARD.cols}px;line-height:${CARD.cols}px;font-size:14px;`
       + `letter-spacing:.12em;color:var(--slate);padding:0 17.5px">${colsHtml}</div>`
@@ -87,7 +87,7 @@
       + 'FROM <span style="color:var(--ink)">TravelAgent</span></span></div>'
       + `<span class="ok" style="margin-left:auto;display:flex">${ICON('check', 28, C.neon, 2.6)}</span></div>`
       + `<div class="row" style="${ROW_CSS}"><b class="mono" style="font-size:22px">search_web</b></div>`;
-    const e = makeAgentCard(p, 'Trip planner', 'Agent', '<span>TOOLS</span>', rows, PARENT.w);
+    const e = makeAgentCard(p, 'Trip planner', 'Parent agent', '<span>TOOLS</span>', rows, PARENT.w);
     e.from = e.querySelector('.from');
     e.ok = e.querySelector('.ok');
     return e;
@@ -139,9 +139,14 @@
       s.pill.txt = s.pill.querySelector('.txt'); s.pill.strike = s.pill.querySelector('.strike');
       s.parent = makeParentCard(root);
       s.travel = makeTravelCard(root);
-      s.self = E(s.travel.tagSlot, 'Self-describing', 'pill uv', {
+      // the header tags, side by side: CHILD WORKFLOW (solid UV, a Temporal fact: the parent starts TravelAgent
+      // as its child workflow), then SELF-DESCRIBING at the card's right edge
+      const headerTag = (text, css = {}) => E(s.travel.tagSlot, text, 'pill uv', {
         position: 'static', display: 'inline-block', fontSize: '16px', padding: '6px 12px 6px calc(12px + .1em)',
+        ...css,
       });
+      s.child = headerTag('Child workflow', { background: C.uv, color: '#FFFFFF' });
+      s.self = headerTag('Self-describing');
       // the three exchanges between the cards, each with its label on its outer side
       const r = 18;
       const arch = `M ${ARCH_X1} ${CARDS_TOP - 10} V ${ARCH_Y + r} Q ${ARCH_X1} ${ARCH_Y} ${ARCH_X1 - r} ${ARCH_Y}`
@@ -179,6 +184,10 @@
       const parentIn = P(t, c[1] + 0.9, 0.5, backOut);
       place(s.parent, PARENT.x, PARENT.y, parentIn, clamp(parentIn * 2));
       showRow(s.parent.cols, P(t, c[1] + 1.2, 0.3));
+      // once the parent is in, TravelAgent is tagged as its child workflow
+      const cp = P(t, c[1] + 1.5, 0.45, backOut);
+      s.child.style.opacity = clamp(cp * 2);
+      s.child.style.transform = `scale(${cp})`;
 
       // step 1: the Trip planner reads TravelAgent's interface and plan_trip joins its tools
       draw(s.readArrow, P(t, c[1] + 2.0, 0.6));

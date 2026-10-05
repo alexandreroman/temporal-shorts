@@ -397,8 +397,8 @@
       const pR2 = P(t, b2 + BEAT.reply + 0.1, 0.45, backOut);
       place(s.reply2, COL.right, reply2Y, pR2, clamp(pR2 * 2) * out);
       typeWords(s.reply2, clamp((t - (b2 + BEAT.reply + 0.2)) / 1.0));
-      // the empty slot breathes while the harness waits, then the second message takes its place
-      const breathe = 0.8 + 0.2 * Math.cos((t - b1 - BEAT.wait) * 4);
+      // the empty slot breathes while the harness waits (an ambient loop), then the second message takes its place
+      const breathe = 0.8 + 0.2 * Math.cos((ambientTime(this) - b1 - BEAT.wait) * 4);
       const slotO = P(t, b1 + BEAT.wait, 0.4) * (1 - P(t, b2 + BEAT.msg, 0.3));
       place(s.slot, COL.left, msg2Y, 1, slotO * breathe * out);
       const p2 = P(t, b2 + BEAT.msg, 0.45, backOut);

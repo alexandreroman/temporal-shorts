@@ -157,9 +157,10 @@
       s.planner.foot.style.opacity = P(t, c[1] + 2.5, 0.4);
       draw(s.link, P(t, c[1] + 3.2, 0.6), out);
       place(s.linkL, (LINK.from + LINK.to) / 2, LINK.y - 30, 1, P(t, c[1] + 3.6, 0.4) * out);
-      // session traffic: a pulse runs along the link once it is drawn
+      // session traffic: once the link is drawn, a pulse runs along it in an endless loop. It starts on the story
+      // clock t but runs its laps on the ambient clock, which equals t in frozen frames
       const pulseStart = c[1] + 3.9, pulseLap = 1.4;
-      const lap = ((t - pulseStart) % pulseLap) / pulseLap;
+      const lap = ((ambientTime(this) - pulseStart) % pulseLap) / pulseLap;
       const pulseOn = t >= pulseStart ? Math.sin(Math.PI * lap) : 0;
       place(s.pulse, lerp(LINK.from + 10, LINK.to - 16, lap), LINK.y, 1, pulseOn * out);
       place(s.sdkRow, UI.x, BOTTOM - UI.tagH / 2, 1, P(t, c[1] + 5.0, 0.4) * out);

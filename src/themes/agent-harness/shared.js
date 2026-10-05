@@ -79,6 +79,14 @@ function showRow(e, p, dx = 26) {
   e.style.transform = `translateX(${(1 - p) * dx}px)`;
 }
 
+// Ambient clock of a scene: G counted from the scene's start, so it equals the scene time t in frozen frames.
+// Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G keeps real time while t
+// slows down at 0.5x, and the player only counts the story moving on t as motion. Call it from update()
+// as ambientTime(this). Story animations stay on t.
+function ambientTime(sc) {
+  return G - sc.start;
+}
+
 // Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it
 function swell(t, at, amp) {
   return 1 + amp * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
