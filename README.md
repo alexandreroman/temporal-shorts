@@ -1,4 +1,4 @@
-# temporal-agent-101
+# Durable AI Agents with Temporal
 
 Explainer video (2 min 59, English, no sound, burned-in subtitles) for a non-technical audience:
 how an AI agent works, and why it needs Durable Execution with Temporal.

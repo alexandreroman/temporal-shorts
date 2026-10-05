@@ -1,4 +1,4 @@
-# temporal-agent-101
+# Durable AI Agents with Temporal
 
 A 3-minute silent explainer video, rendered from a deterministic HTML
 animation, that shows a non-technical audience how AI agents work and why
