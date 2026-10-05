@@ -64,7 +64,7 @@
       s.mem.vide.style.opacity = P(t, c[1] + 1.2, 0.4) * (1 - P(t, restart, 0.3));
       const add1 = [0.8, 1.3, 1.9, 2.4, 3.0].map(x => c[0] + x), add2 = [0.6, 0.9, 1.4, 1.7, 2.3].map(x => c[2] + x);
       s.mblocks.forEach((b, i) => {
-        const x = 720 - 300 + i * 150, y = 650;
+        const x = 720 + (i - 2) * 165, y = 650;
         if (t < restart) {
           placeMemBlock(b, x, y, P(t, add1[i], 0.35, backOut), P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn), sx, sy);
         } else {

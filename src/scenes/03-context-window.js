@@ -3,8 +3,8 @@
 {
   scene({
     chapter: 3, title: 'The context window',
-    // pans left as the cone fades, to make room for the bill
-    shift: (t, c) => pan(t, [-90, 42], [[c[1] + 2.6, -136, 42]]),
+    // one fixed offset fits both the cone phase and the bill phase
+    shift: [-113, 42],
     subs: [
       {
         text: "Everything sent to the model fits on one page: the <b>context window</b>. "
@@ -88,7 +88,7 @@
       s.gf.style.background = fill > 0.98 ? C.red : `linear-gradient(0deg, ${C.uv}, ${C.violet})`;
       place(s.gauge, 1130, 480, 1, P(t, c[0] + 1.6, 0.5));
       place(s.gaugeL, 1130, 810, 1, P(t, c[0] + 1.6, 0.5));
-      place(s.full, 1130, 150, P(t, c[1] + 4.0, 0.4, backOut), P(t, c[1] + 4.0, 0.3));
+      place(s.full, 1130, 136, P(t, c[1] + 4.0, 0.4, backOut), P(t, c[1] + 4.0, 0.3));
       s.cone.style.opacity = win(t, c[1] + 0.2, c[1] + 2.6, 0.4);
       place(s.g1, 1560, 205, 1, win(t, c[1] + 0.8, c[1] + 2.8, 0.4));
       const bp = P(t, c[1] + 3.0, 0.5, backOut);

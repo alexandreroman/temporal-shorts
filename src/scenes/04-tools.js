@@ -3,8 +3,8 @@
 {
   scene({
     chapter: 4, title: 'Tools',
-    // pans down as the question card fades out
-    shift: (t, c) => pan(t, [25, 57], [[c[2] + 0.4, 25, 20]]),
+    // one fixed offset fits both the question-card phase and the final phase
+    shift: [25, 38],
     subs: [
       { text: "The model can't check the weather or send an email. So we give it <b>tools</b>.", after: 0.6 },
       {
