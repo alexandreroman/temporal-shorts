@@ -135,8 +135,8 @@ not shared with the team.
   choosing a dependency.
 - Everything in this repository is in English: video text, docs, code
   comments, commit messages. No em dash in subtitles or on-screen labels.
-- Keep each video ≤ 3:00 (`make timeline THEME=<theme>`). Key every
-  animation to `c[i]` (subtitle start) so timings follow text changes.
+- Videos have no maximum length (`make timeline THEME=<theme>` reports
+  it). Key every animation to `c[i]` (subtitle start) so timings follow text changes.
 - Keep rendering deterministic (no `Math.random`): parallel workers render
   segments independently.
 - Use classic `<script src>` tags, not ES modules: Playwright opens

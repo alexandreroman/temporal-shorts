@@ -177,7 +177,7 @@ editing different scenes never touch the same file.
    wrap and keep the same size, with no CSS change.
 4. Write the script in `docs/<theme>/script.md`.
 
-Keep each video under 3:00 (`make timeline THEME=<theme>`).
+Videos have no maximum length; `make timeline THEME=<theme>` reports it.
 
 Conventions: see `CLAUDE.md`. Brand rules and decision history: see the
 project memory in `.claude/project-memory/`.

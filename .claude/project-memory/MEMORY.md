@@ -21,7 +21,7 @@
 > only makes sense knowing the prior state,
 > rewrite it.
 
-- [Video objective and audience](references/project_objective.md) — durable-ai-agents: 7 topics, non-technical audience, ≤ 3:00
+- [Video objective and audience](references/project_objective.md) — durable-ai-agents: 7 topics, non-technical audience, no maximum length
 - [Durable Execution theme story](references/project_durable-execution-theme.md) — order #1042, server then Worker, replay
 - [Airy layout and consistent details](references/feedback_airy-layout.md) — fill the free band, shared edges, arrowhead = stroke color, uniform tiles
 - [Temporal brand rules](references/project_brand.md) — colors, style, fonts, icons and their source
