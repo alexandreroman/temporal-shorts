@@ -11,18 +11,22 @@
   };
   const TYPE_ORDER = ['TURN', 'MODEL', 'TOOL', 'APPROVAL', 'TOKENS'];
   const SDKS = ['OpenAI Agents SDK', 'Google Gen AI SDK', 'Pydantic AI'];
-  const AGENT = { x: 278, y0: 382, gap: 140, w: 364 }; // agent tiles, stacked on the left
+  // Layout grid, final positions: the agents column on the left (x 140-500), the lane in the middle, the console
+  // on the right (x 1140-1780). The agents column and the console share their top (y 227) and bottom (y 817).
+  const AGENT = { x: 320, y0: 302, gap: 220, w: 360, h: 150 }; // three equal tiles, 70 px apart
   const agentY = i => AGENT.y0 + i * AGENT.gap;
-  const LANE = { x: 870, y: 522, w: 580, entry: 650, exit: 1100 }; // the stream lane and where chips enter and leave it
-  // guide curve from agent i into the lane: chips ride it from MERGE_FROM on, so they leave clear of the tile
-  const guide = i => [[AGENT.x + AGENT.w / 2 + 8, agentY(i)], [570, agentY(i)], [540, LANE.y], [LANE.entry, LANE.y]];
-  const MERGE_FROM = 0.25;
+  const LANE = { x: 850, y: 522, w: 460, h: 76, entry: 690, exit: 1020 }; // the lane and where chips enter and leave it
+  // guide curve from agent i into the lane: chips ride it from MERGE_FROM on, emerging from under the tile.
+  // The curves turn early enough that a chip rising from the lowest agent passes clear of the SAME EVENTS tag.
+  const guide = i => [[AGENT.x + AGENT.w / 2 + 8, agentY(i)], [550, agentY(i)], [530, LANE.y], [LANE.entry, LANE.y]];
+  const MERGE_FROM = 0.1;
   // chip n leaves agent n % 3 every CHIP_EVERY seconds, until the scene ends; it curves into the lane, then runs
   // along it. A pool of CHIP_POOL elements is recycled: chip n uses element n % CHIP_POOL. The pool size is a
   // multiple of the 5 types and the 3 agents, so an element keeps its type and agent, and it outlasts a chip's
   // life (CHIP_POOL * CHIP_EVERY > CHIP_MERGE + CHIP_LANE), so an element is free again when it is reused.
-  const CHIP_EVERY = 0.4, CHIP_MERGE = 0.45, CHIP_LANE = 1.4, CHIP_POOL = 15;
-  const CONSOLE = { x: 1525, y: 522, w: 620, h: 470, row0: 76, rowGap: 46 };
+  const CHIP_EVERY = 0.4, CHIP_MERGE = 0.5, CHIP_LANE = 1.0, CHIP_POOL = 15;
+  const CONSOLE = { x: 1460, y: 522, w: 640, h: 590, row0: 88, rowGap: 62, rowH: 46 };
+  const BAR_W = 540; // replay track, from the play icon to 32 px before the console's right edge
   const ROWS = [
     ['TURN', 'turn started'],
     ['MODEL', 'model call · 812 tokens'],
@@ -42,8 +46,8 @@
   // the same chip, as inline HTML for the console rows (fixed width so the row texts line up)
   const chipHtml = type => {
     const css = EVENT_TYPES[type];
-    return `<span class="mono" style="display:inline-block;width:118px;text-align:center;font-size:14px;`
-      + `letter-spacing:.1em;padding:3px 0 3px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
+    return `<span class="mono" style="display:inline-block;width:132px;text-align:center;font-size:16px;`
+      + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
       + `background:${css.background};color:${type === 'TOKENS' ? '#5B6475' : css.color}">${type}</span>`;
   };
   const linear = p => p;
@@ -54,8 +58,9 @@
 
   scene({
     chapter: 4, title: 'One event stream',
-    // agents and lane first, then the camera follows the stream to the console as it slides in
-    shift: (t, c) => pan(t, [332, 0], [[c[1], -6, 0]], 0.9),
+    // agents and lane first, centered; then the camera follows the stream to the console as it slides in,
+    // and the final layout spans the grid (x 140-1780) with no offset
+    shift: (t, c) => pan(t, [350, 0], [[c[1], 0, 0]], 0.9),
     subs: [
       {
         text: "Every agent publishes the same event stream: turns, model calls, tool calls, approvals and token usage.",
@@ -68,23 +73,26 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.agents = SDKS.map(sdk => E(root,
-        `<div style="flex:none">${ICON('agent', 52, C.ink, 1.8)}</div><div style="margin-left:18px">`
-        + '<div class="mono" style="font-size:15px;letter-spacing:.12em;color:var(--slate)">AGENT</div>'
-        + `<div style="font-size:26px;margin-top:2px;white-space:nowrap">${sdk}</div></div>`,
-        'tile', {
-          width: AGENT.w + 'px', height: '104px', display: 'flex', alignItems: 'center', padding: '0 24px',
-          textAlign: 'left',
-        }));
-      s.lane = E(root, '', 'tile', { width: LANE.w + 'px', height: '70px', borderColor: C.uv });
+      s.lane = E(root, '', 'tile', { width: LANE.w + 'px', height: LANE.h + 'px', borderColor: C.uv });
       s.laneL = E(root,
         `<div style="display:flex;align-items:center;gap:12px">${ICON('stream', 26, C.ink, 1.8)}`
         + '<span>Agent event stream</span></div>', 'lbl', { color: 'var(--ink)' });
+      // 18 px so the tag stays narrower than the lane, clear of the chips curving in from the lowest agent
       s.same = tag(root, 'Same events for every agent', 'uv');
+      s.same.style.fontSize = '18px';
       s.chips = Array.from({ length: CHIP_POOL }, (_, k) => {
         const type = TYPE_ORDER[k % TYPE_ORDER.length];
         return E(root, type, 'mono', chipCss(type, '16px'));
       });
+      // the agent tiles sit above the chips, so a chip slides out from under its tile
+      s.agents = SDKS.map(sdk => E(root,
+        `<div style="flex:none">${ICON('agent', 56, C.ink, 1.8)}</div><div style="margin-left:18px">`
+        + '<div class="mono" style="font-size:16px;letter-spacing:.12em;color:var(--slate)">AGENT</div>'
+        + `<div style="font-size:26px;margin-top:4px;white-space:nowrap">${sdk}</div></div>`,
+        'tile', {
+          width: AGENT.w + 'px', height: AGENT.h + 'px', display: 'flex', alignItems: 'center', padding: '0 24px',
+          textAlign: 'left',
+        }));
       s.guides = SDKS.map((_, i) => {
         const [p0, p1, p2, p3] = guide(i);
         return path(s.svg, `M ${p0} C ${p1} ${p2} ${p3}`, C.line, 2, false);
@@ -94,15 +102,15 @@
 
       // console: a white card with mono event rows, a LIVE / REPLAY badge and a replay bar
       s.console = E(root,
-        '<div class="mono" style="position:absolute;left:26px;top:22px;font-size:18px;letter-spacing:.14em;'
-        + `display:flex;gap:10px;align-items:center">${ICON('eye', 22, '#141414', 1.8)} CONSOLE</div>`,
+        '<div class="mono" style="position:absolute;left:28px;top:26px;font-size:20px;letter-spacing:.14em;'
+        + `display:flex;gap:12px;align-items:center">${ICON('eye', 24, '#141414', 1.8)} CONSOLE</div>`,
         '', {
           width: CONSOLE.w + 'px', height: CONSOLE.h + 'px', background: '#F8FAFC', color: '#141414',
           borderRadius: 'var(--r)',
         });
       const badgeCss = color => ({
-        left: 'auto', right: '22px', top: '18px', transform: 'none', display: 'flex', alignItems: 'center', gap: '8px',
-        fontSize: '15px', letterSpacing: '.12em', padding: '4px 10px 4px calc(10px + .12em)', borderRadius: '4px',
+        left: 'auto', right: '24px', top: '22px', transform: 'none', display: 'flex', alignItems: 'center', gap: '8px',
+        fontSize: '16px', letterSpacing: '.12em', padding: '4px 10px 4px calc(10px + .12em)', borderRadius: '4px',
         border: `1.5px solid ${color}`, color, transformOrigin: 'right center',
       });
       s.live = E(s.console,
@@ -112,26 +120,27 @@
       s.replay = E(s.console, `${ICON('play', 14, C.uv, 2.4)}REPLAY`, 'mono',
         { ...badgeCss(C.uv), background: 'rgba(68,76,231,.1)' });
       s.marks = [HUMAN_ROW, TOTAL_ROW].map(i => E(s.console, '', '', {
-        left: '14px', top: (CONSOLE.row0 - 2 + i * CONSOLE.rowGap) + 'px', width: (CONSOLE.w - 28) + 'px',
-        height: '42px', borderRadius: 'var(--rs)', transform: 'none',
+        left: '14px', top: (CONSOLE.row0 - 4 + i * CONSOLE.rowGap) + 'px', width: (CONSOLE.w - 28) + 'px',
+        height: (CONSOLE.rowH + 8) + 'px', borderRadius: 'var(--rs)', transform: 'none',
         background: i === HUMAN_ROW ? 'rgba(182,100,255,.16)' : 'rgba(68,76,231,.12)',
         borderLeft: `4px solid ${i === HUMAN_ROW ? C.violet : C.uv}`,
       }));
       s.scan = E(s.console, '', '', {
-        left: '14px', width: (CONSOLE.w - 28) + 'px', height: '42px', background: 'rgba(68,76,231,.2)',
-        borderRadius: 'var(--rs)', transform: 'none',
+        left: '14px', width: (CONSOLE.w - 28) + 'px', height: (CONSOLE.rowH + 8) + 'px',
+        background: 'rgba(68,76,231,.2)', borderRadius: 'var(--rs)', transform: 'none',
       });
       s.rows = ROWS.map(([type, text], i) => E(s.console,
-        `${chipHtml(type)}<span style="margin-left:18px;${i === TOTAL_ROW ? 'font-weight:700' : ''}">${text}</span>`,
+        `${chipHtml(type)}<span style="margin-left:20px;${i === TOTAL_ROW ? 'font-weight:700' : ''}">${text}</span>`,
         'mono', {
-          left: '26px', top: (CONSOLE.row0 + i * CONSOLE.rowGap) + 'px', fontSize: '20px', whiteSpace: 'nowrap',
-          display: 'flex', alignItems: 'center', height: '38px', transform: 'none',
+          left: '28px', top: (CONSOLE.row0 + i * CONSOLE.rowGap) + 'px', fontSize: '22px', whiteSpace: 'nowrap',
+          display: 'flex', alignItems: 'center', height: CONSOLE.rowH + 'px', transform: 'none',
         }));
       s.tags = [HUMAN_ROW, TOTAL_ROW].map(i => {
         const e = statusTag(s.console);
+        // centered on its row: the tag is 31 px tall at 16 px
         Object.assign(e.style, {
-          left: 'auto', right: '28px', top: (CONSOLE.row0 + 5 + i * CONSOLE.rowGap) + 'px',
-          transformOrigin: 'right center',
+          left: 'auto', right: '28px', top: (CONSOLE.row0 + (CONSOLE.rowH - 31) / 2 + i * CONSOLE.rowGap) + 'px',
+          fontSize: '16px', transformOrigin: 'right center',
         });
         return e;
       });
@@ -139,11 +148,14 @@
       setStatus(s.tags[1], 'COST', 'reused');
       // replay bar: play icon, track, filled part up to the playhead, playhead
       s.bar = E(s.console,
-        `${ICON('play', 22, C.uv, 2.2)}<div class="track" style="position:relative;margin-left:16px;width:500px;`
+        `${ICON('play', 24, C.uv, 2.2)}<div class="track" style="position:relative;margin-left:16px;width:${BAR_W}px;`
         + 'height:6px;border-radius:3px;background:#D5DAE3"><div class="fill" style="position:absolute;left:0;top:0;'
         + `height:6px;border-radius:3px;background:${C.uv}"></div><div class="head" style="position:absolute;top:-8px;`
         + `width:12px;height:22px;margin-left:-6px;border-radius:3px;background:${C.uv}"></div></div>`,
-        '', { left: '28px', top: '414px', display: 'flex', alignItems: 'center', transform: 'none' });
+        '', {
+          left: '28px', top: (CONSOLE.row0 + LAST_ROW * CONSOLE.rowGap + CONSOLE.rowH + 30) + 'px', display: 'flex',
+          alignItems: 'center', transform: 'none',
+        });
       s.bar.fill = s.bar.querySelector('.fill'); s.bar.head = s.bar.querySelector('.head');
     },
     update(t, c, s) {
@@ -159,9 +171,9 @@
       });
       s.guides.forEach((g, i) => draw(g, P(t, c[0] + 0.6 + i * 0.1, 0.5)));
       place(s.lane, LANE.x, LANE.y, 1, P(t, c[0] + 0.7, 0.5));
-      place(s.laneL, LANE.x, LANE.y - 67, 1, P(t, c[0] + 0.8, 0.5));
+      place(s.laneL, LANE.x, LANE.y - LANE.h / 2 - 34, 1, P(t, c[0] + 0.8, 0.5));
       const sp = P(t, c[0] + 3.6, 0.45, backOut);
-      place(s.same, LANE.x, LANE.y + 78, sp, clamp(sp * 2));
+      place(s.same, LANE.x, LANE.y + LANE.h / 2 + 46, sp, clamp(sp * 2));
       s.chips.forEach((e, k) => {
         // the latest chip this element carries: k, k + CHIP_POOL, k + 2 * CHIP_POOL...
         const cycle = Math.max(0, Math.floor((t - chipsFrom - k * CHIP_EVERY) / (CHIP_POOL * CHIP_EVERY)));
@@ -195,8 +207,8 @@
       // playhead: at the end when the replay starts, rewound to the start, then swept forward
       let head = 1 - P(t, rewind, 0.4);
       if (t >= sweep) head = clamp((t - sweep) / sweepD);
-      s.bar.fill.style.width = (head * 500) + 'px';
-      s.bar.head.style.left = (head * 500) + 'px';
+      s.bar.fill.style.width = (head * BAR_W) + 'px';
+      s.bar.head.style.left = (head * BAR_W) + 'px';
       s.rows.forEach((r, i) => {
         const p = P(t, rowAt(i), 0.3);
         showRow(r, p);
@@ -206,7 +218,7 @@
       });
       const scanning = win(t, sweep, sweep + sweepD + 0.3, 0.2);
       s.scan.style.opacity = scanning;
-      s.scan.style.top = (CONSOLE.row0 - 2 + head * LAST_ROW * CONSOLE.rowGap) + 'px';
+      s.scan.style.top = (CONSOLE.row0 - 4 + head * LAST_ROW * CONSOLE.rowGap) + 'px';
       // where a human stepped in and what it cost stay marked once the sweep reaches them
       [HUMAN_ROW, TOTAL_ROW].forEach((row, j) => {
         const at = sweep + sweepD * row / LAST_ROW;

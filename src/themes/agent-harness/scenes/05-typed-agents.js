@@ -21,18 +21,17 @@
   const ROW_CSS = `display:flex;align-items:center;height:${CARD.rowH}px;margin-top:${CARD.rowGap}px;padding:0 16px;`
     + `border:1.5px solid transparent;border-radius:var(--rs);background:${ROW_BG}`;
 
-  // phase 1: the crossed-out pill on the left, TravelAgent on the right
-  const PILL = { x: 500, y: 522 };
-  const TRAVEL_SOLO = { x: 1215, y: 522 };
-  // phase 2: the Trip planner on the left, TravelAgent on the right, a 500 px gap between them for the calls.
-  // The cards sit lower than in phase 1: the READS ITS INTERFACE link arches over them.
-  const CARDS_Y = 568, CARDS_TOP = CARDS_Y - CARD_H / 2;
-  const PARENT = { x: 290, y: CARDS_Y, w: 380 };
-  const TRAVEL = { x: 1400, y: CARDS_Y, w: 840 };
+  // Layout grid: the Trip planner's column on the left (x 140-520), TravelAgent on the right (x 960-1780), a
+  // 440 px gap between them for the calls. TravelAgent stays in place in both phases; in phase 1 the crossed-out
+  // pill holds the left column, where the Trip planner appears in phase 2. CARDS_Y balances both phases around
+  // y 522: the cards alone in phase 1, the cards and the READS ITS INTERFACE link arching over them in phase 2.
+  const CARDS_Y = 545, CARDS_TOP = CARDS_Y - CARD_H / 2;
+  const PARENT = { x: 330, y: CARDS_Y, w: 380 };
+  const TRAVEL = { x: 1370, y: CARDS_Y, w: 820 };
   const GAP = { x0: PARENT.x + PARENT.w / 2, x1: TRAVEL.x - TRAVEL.w / 2 };
   const GAP_MID = (GAP.x0 + GAP.x1) / 2;
   // the interface link leaves TravelAgent's top, runs at ARCH_Y and drops onto the Trip planner's top
-  const ARCH_Y = CARDS_TOP - 64, ARCH_X0 = PARENT.x, ARCH_X1 = GAP.x1 + 140;
+  const ARCH_Y = CARDS_TOP - 56, ARCH_X0 = PARENT.x, ARCH_X1 = GAP.x1 + 140;
   // plan_trip is the first row of both cards: the request runs along its top edge, the result along its bottom
   // edge. Each label sits just outside its arrow, and each value card rides outside its label, so a card in
   // transit never covers an arrow, a label or a card's text.
@@ -67,10 +66,10 @@
   };
   // TravelAgent: one row per typed operation, signature then output type
   const makeTravelCard = p => {
-    const outW = 150;
+    const outW = 144; // fits the Itinerary type; the arrow is centered between the signature and the type
     const rows = TRAVEL_OPS.map(([signature, out]) => `<div class="row" style="${ROW_CSS}">`
       + `<span class="mono" style="flex:1;font-size:22px;white-space:nowrap">${signature}</span>`
-      + '<span class="mono" style="width:40px;font-size:22px;color:var(--slate)">→</span>'
+      + '<span class="mono" style="width:40px;text-align:center;font-size:22px;color:var(--slate)">→</span>'
       + `<span style="width:${outW}px"><span class="mono" style="font-size:22px;padding:2px 10px;border-radius:4px;`
       + `border:1.5px solid ${C.uv};background:rgba(68,76,231,.18)">${out}</span></span></div>`).join('');
     const cols = `<span style="flex:1">INPUT</span><span style="width:${outW + 40}px;padding-left:40px">OUTPUT</span>`;
@@ -108,7 +107,7 @@
 
   scene({
     chapter: 5, title: 'Typed, composable agents',
-    // both phases are laid out around the stage center (the cards move down at c[1]), so no offset is needed
+    // laid out at final positions on the grid (x 140-1780), so no offset is needed
     shift: [0, 0],
     subs: [
       {
@@ -122,11 +121,14 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      // the strike sits on the pill's center line and overhangs its 1.5 px border by 8 px on each side
+      // the strike sits on the pill's center line and overhangs its 1.5 px border by 8 px on each side.
+      // A tighter letter spacing fits the big pill in the Trip planner's column.
       s.pill = E(root,
         '<span class="txt">Text in, text out</span>'
         + '<div class="strike" style="position:absolute;left:-9.5px;right:-9.5px;top:50%;height:4px;margin-top:-2px;'
-        + `background:${C.red};border-radius:2px;transform:rotate(-4deg)"></div>`, 'pill big');
+        + `background:${C.red};border-radius:2px;transform:rotate(-4deg)"></div>`, 'pill big', {
+          letterSpacing: '.05em', padding: '12px 22px 12px calc(22px + .05em)',
+        });
       s.pill.txt = s.pill.querySelector('.txt'); s.pill.strike = s.pill.querySelector('.strike');
       s.parent = makeParentCard(root);
       s.travel = makeTravelCard(root);
@@ -150,24 +152,23 @@
       s.result = makeValueCard(root, 'RESULT', 'Itinerary', field('total_usd', '895'), C.violet);
     },
     update(t, c, s) {
-      // phase 1: "text in, text out" is struck out, TravelAgent lists its typed operations
+      // phase 1: "text in, text out" is struck out in the left column, TravelAgent lists its typed operations
       const pp = P(t, c[0] + 0.1, 0.5, backOut);
-      place(s.pill, PILL.x, PILL.y, pp, clamp(pp * 2) * (1 - P(t, c[1], 0.35)));
+      place(s.pill, PARENT.x, PARENT.y, pp, clamp(pp * 2) * (1 - P(t, c[1], 0.35)));
       // the strike is drawn from left to right by clipping its end, so it keeps its centered position
       const struck = P(t, c[0] + 1.2, 0.35);
       s.pill.strike.style.clipPath = `inset(0 ${((1 - struck) * 100).toFixed(2)}% 0 0)`;
       s.pill.txt.style.opacity = lerp(1, 0.5, struck);
 
       const tp = P(t, c[0] + 1.6, 0.5, backOut);
-      const move = P(t, c[1] + 0.05, 0.7);
-      place(s.travel, lerp(TRAVEL_SOLO.x, TRAVEL.x, move), lerp(TRAVEL_SOLO.y, TRAVEL.y, move), tp, clamp(tp * 2));
+      place(s.travel, TRAVEL.x, TRAVEL.y, tp, clamp(tp * 2));
       showRow(s.travel.cols, P(t, c[0] + 2.3, 0.3));
       s.travel.rows.forEach((row, i) => showRow(row, P(t, c[0] + 2.6 + i * 0.8, 0.35)));
       const sp = P(t, c[1] + 0.15, 0.45, backOut);
       s.self.style.opacity = clamp(sp * 2);
       s.self.style.transform = `scale(${sp})`;
 
-      // phase 2: the Trip planner appears with its tools
+      // phase 2: the Trip planner takes the pill's place, with its tools
       const parentIn = P(t, c[1] + 0.3, 0.5, backOut);
       place(s.parent, PARENT.x, PARENT.y, parentIn, clamp(parentIn * 2));
       showRow(s.parent.cols, P(t, c[1] + 0.5, 0.3));
@@ -181,10 +182,11 @@
       // search_web sits in the first row, then slides down to make room before the chip lands
       const inserted = P(t, copied + 0.1, 0.4);
       const [planRow, searchRow] = s.parent.rows;
-      showRow(planRow, P(t, copied + 0.7, 0.35));
+      // the row appears in place once the landed chip has faded (copied + 1.1), so one plan_trip shows at a time
+      showRow(planRow, P(t, copied + 1.1, 0.3), 0);
       searchRow.style.opacity = P(t, c[1] + 0.6, 0.35);
       searchRow.style.transform = `translateY(${(-(CARD.rowH + CARD.rowGap) * (1 - inserted)).toFixed(2)}px)`;
-      const fp = P(t, copied + 0.95, 0.4, backOut);
+      const fp = P(t, copied + 1.3, 0.4, backOut);
       s.parent.from.style.opacity = clamp(fp * 2);
       s.parent.from.style.transform = `scale(${fp})`;
 

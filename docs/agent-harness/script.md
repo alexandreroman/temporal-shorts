@@ -133,13 +133,14 @@ Lisbon.
 
 - **1:35** An agent is more than text in, text out: it exposes typed
   operations, with their inputs and outputs.
-  - Visuals: "TEXT IN, TEXT OUT" struck out in red; the TravelAgent card
-    lists its OPERATIONS, INPUT then OUTPUT: `plan_trip(destination: str,
-    nights: int) → Itinerary`, `set_budget(max_usd: float) → Ack`.
+  - Visuals: "TEXT IN, TEXT OUT" struck out in red on the left; the
+    TravelAgent card on the right lists its OPERATIONS, INPUT then
+    OUTPUT: `plan_trip(destination: str, nights: int) → Itinerary`,
+    `set_budget(max_usd: float) → Ack`.
 - **1:42** Other agents read that interface and call it as a tool: a typed
   request in, a typed result out.
-  - Visuals: SELF-DESCRIBING tag; a Trip planner agent appears on the left
-    with its TOOLS; TravelAgent moves right; a dashed arrow "READS ITS
+  - Visuals: SELF-DESCRIBING tag; the struck pill gives way to a Trip
+    planner agent with its TOOLS (`search_web`); a dashed arrow "READS ITS
     INTERFACE" arches from TravelAgent to the Trip planner, and `plan_trip`
     joins its tools, tagged "FROM TravelAgent"; a TYPED REQUEST
     (`plan_trip`, `destination: "Lisbon"`, `nights: 3`) travels to
@@ -158,8 +159,8 @@ Lisbon.
   stays durable, approved and visible.
   - Visuals: the script runs: both searches fan out at once and check,
     "best: $480", `book_flight` passes an APPROVAL gate (APPROVED) and runs;
-    each call SAVED; tags DURABLE / APPROVED / VISIBLE; "6 vs 1 round
-    trip".
+    each call SAVED; EVERY CALL: DURABLE / APPROVED / VISIBLE; under the
+    dimmed side, "6 ROUND TRIPS vs 1 ROUND TRIP".
 
 ## 07 Built for real products
 

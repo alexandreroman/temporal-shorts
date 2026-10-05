@@ -37,13 +37,18 @@
   // the harness frame around the loop, with its header row above the model; it leaves 60 px or more around
   // the loop, and 50 px between the bottom arc and the Workflow pill on its bottom edge
   const FRAME = { x0: LOOP.cx - 360, x1: LOOP.cx + 360, y0: LOOP.cy - 400, y1: LOOP.cy + 304, r: 10 };
-  const FRAME_MID = (FRAME.y0 + FRAME.y1) / 2;
   // capabilities plugged into the frame: [icon, label, side (-1 left, 1 right), row (0 top, 1 bottom)]
   const CAPS = [
     ['retry', 'Crash recovery', -1, 0], ['user', 'Human approvals', -1, 1],
     ['eye', 'Observability', 1, 0], ['layers', 'Composition', 1, 1],
   ];
-  const CAP = { w: 290, h: 150, dx: 575, dy: 100 }; // tile size, distance from the loop center, row offset
+  // the tiles fill the sides of the content frame (x 140 to 1780): the outer edges on the frame's sides, the top
+  // row aligned with the harness frame's top, the bottom row with its bottom (the scene's shift is 0 by then)
+  const CAP = { w: 360, h: 190, outerX0: 140, outerX1: 1780 };
+  const capX = side => (side < 0 ? CAP.outerX0 + CAP.w / 2 : CAP.outerX1 - CAP.w / 2);
+  const capY = row => (row ? FRAME.y1 - CAP.h / 2 : FRAME.y0 + CAP.h / 2);
+  // the harness frame's edge on a side, where the link from a tile plugs in
+  const frameX = side => (side < 0 ? FRAME.x0 : FRAME.x1);
   // the SDK tags sit well below the loop, where the frame's bottom edge comes later
   const SDK_Y = LOOP.cy + 330;
   scene({
@@ -82,10 +87,9 @@
           + `V ${y1 - r} A ${r} ${r} 0 0 ${sweep} ${corner} ${y1} H ${cx}`;
       };
       s.frame = [1, -1].map(side => path(s.svg, halfFrame(side), C.uv, 3, false));
-      s.links = CAPS.map(([, , side, row]) => {
-        const y = FRAME_MID + (row ? CAP.dy : -CAP.dy);
-        return path(s.svg, `M ${cx + side * (CAP.dx - CAP.w / 2)} ${y} H ${cx + side * (x1 - cx)}`, C.uv, 2.5, false);
-      });
+      // each link runs from the tile's inner edge to the frame's edge
+      s.links = CAPS.map(([, , side, row]) =>
+        path(s.svg, `M ${capX(side) - side * CAP.w / 2} ${capY(row)} H ${frameX(side)}`, C.uv, 2.5, false));
       // under the nodes, so it slips behind each node it reaches
       s.token = E(root, '', '', {
         width: '22px', height: '22px', background: C.neon, boxShadow: '0 0 22px 6px rgba(219,255,75,.45)',
@@ -170,12 +174,11 @@
       // c[2]: each capability pops beside the frame as the subtitle names it, and plugs in with a short link
       CAPS.forEach(([, , side, row], i) => {
         const a = c[2] + 2.4 + i * 0.8;
-        const y = FRAME_MID + (row ? CAP.dy : -CAP.dy);
         const p = P(t, a, 0.45, backOut);
-        place(s.caps[i], LOOP.cx + side * CAP.dx, y, p, clamp(p * 2));
+        place(s.caps[i], capX(side), capY(row), p, clamp(p * 2));
         draw(s.links[i], P(t, a + 0.3, 0.3));
         const pp = P(t, a + 0.55, 0.3, backOut);
-        place(s.plugs[i], LOOP.cx + side * (FRAME.x1 - LOOP.cx), y, pp, clamp(pp * 2));
+        place(s.plugs[i], frameX(side), capY(row), pp, clamp(pp * 2));
       });
     }
   });

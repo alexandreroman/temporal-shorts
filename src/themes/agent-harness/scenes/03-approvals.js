@@ -1,19 +1,38 @@
 // ===================== 3. HUMAN APPROVALS
 // The block keeps every name declared in this file local to this scene.
 {
-  // Layout: agent on the left, the APPROVAL POLICY gate in the middle (two blocks around the lane the calls
-  // travel along), the tools on the right, the person under the gate.
-  const LANE = 440;
-  const AGENT = { x: 200, y: LANE };
-  // the gate blocks are wide enough for the rules' full tool names; their left edge keeps 20 px from the parked call
-  const GATE = { x: 860, w: 300, topY: 320, rulesY: 572, rulesH: 184, judgeY: 197 };
-  const PARK = { x: 550, y: LANE }; // where a gated call stops, in front of the gate
-  // rows 120 px apart, so a status tag stays twice as close to its own call as to the next row
-  const TOOLS = { x: 1460, y: 460, h: 440, rowX: 1460, rows: [345, 465, 585] };
-  const YOU = { x: 860, y: 770 };
-  const FROM = [470, LANE]; // where a call pops out, next to the agent
-  const EXIT_X = 1100; // past the gate, where a call turns toward its tool row
+  // Layout, in final stage coordinates (shift 0) on the content frame x 140-1780, y 150-880: three columns
+  // crossed by one horizontal lane the calls travel along. Left, the agent; center, the gate column (AUTO MODE
+  // and its rule on top, reserved from the start, then the APPROVAL POLICY block above the lane, its RULES
+  // below it, the person at the bottom); right, the tools. Related components keep 40 px gutters.
+  const TOP = 150, BOTTOM = 880, LEFT = 140, RIGHT = 1780, GUTTER = 40;
+  const CALL_W = 280, CALL_H = 48; // a tool call chip
   const TAG_DY = 54; // a status tag sits under its call, 13 px clear of it
+  // the gate column: blocks wide enough for the rules' full tool names and for YOU beside its two buttons
+  const GATE = { x: 960, w: 380 };
+  GATE.x0 = GATE.x - GATE.w / 2; GATE.x1 = GATE.x + GATE.w / 2;
+  const JUDGE = { y0: TOP, h: 64 };
+  const RULE_CARD = { y0: JUDGE.y0 + JUDGE.h + 12, h: 40 }; // attached under AUTO MODE
+  const POLICY = { y0: RULE_CARD.y0 + RULE_CARD.h + GUTTER, h: 142 };
+  // the lane runs between the policy block and its rules, with 20 px on each side of a passing call
+  const LANE = POLICY.y0 + POLICY.h + 20 + CALL_H / 2;
+  const RULES = { y0: LANE + CALL_H / 2 + 20, h: 164 };
+  // the person and the two buttons span the column width; their bottom is the content bottom
+  const YOU = { w: 190, h: 140, buttonW: 170 };
+  YOU.y = BOTTOM - YOU.h / 2; YOU.x = GATE.x0 + YOU.w / 2; YOU.buttonX = GATE.x1 - YOU.buttonW / 2;
+  // the agent's orb touches the left edge, centered on the lane
+  const ORB = 200;
+  const AGENT = { x: LEFT + ORB / 2, y: LANE };
+  const FROM = [AGENT.x + ORB / 2 + GUTTER + CALL_W / 2, LANE]; // where a call pops out, next to the agent
+  // where a gated call stops, GUTTER in front of the gate; the durable wait tile sits above it, its top
+  // aligned with the policy block's
+  const PARK = { x: GATE.x0 - GUTTER - CALL_W / 2, y: LANE };
+  const WAIT = { y0: POLICY.y0, y1: LANE - CALL_H / 2 - GUTTER };
+  // the tools panel spans from the column top down to the rules' bottom; 3 rows 150 px apart under its header
+  const TOOLS = { x0: GATE.x1 + 120, x1: RIGHT, y0: TOP, y1: RULES.y0 + RULES.h };
+  TOOLS.rowX = (TOOLS.x0 + TOOLS.x1) / 2;
+  TOOLS.rows = [0, 1, 2].map(i => TOOLS.y0 + 125 + i * 150);
+  const EXIT_X = GATE.x1 + 90; // past the gate, where a call turns toward its tool row
   const WAITS = ['5 MIN', '30 MIN', '3 H', '9 H', '1 DAY', '2 DAYS'];
 
   // position along a route: starts at `from`, then eases to each [at, d, x, y] leg in turn (legs may overlap)
@@ -27,12 +46,6 @@
   const GATE_HIT = 0.42;
   // 0 -> 1 -> 0 over [at, at + d]
   const bump = (t, at, d) => Math.sin(Math.PI * clamp((t - at) / d));
-  // like place(), but x is the left edge of the element
-  const placeLeft = (e, x, y, o) => {
-    e.style.transform = `translate(${x}px,${y}px) translate(0,-50%)`;
-    e.style.opacity = clamp(o);
-    e.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
-  };
 
   // status tag under a call, a little larger than the shared one: 'ok' (allowed, approved, done) or 'wait'
   const makeTag = p => {
@@ -43,8 +56,8 @@
 
   scene({
     chapter: 3, title: 'Human approvals',
-    // one fixed offset fits both the policy phase and the taller auto-mode phase (judge docked on top)
-    shift: [30, -1],
+    // laid out in final coordinates: the gate column reserves the AUTO MODE space from the start
+    shift: [0, 0],
     subs: [
       {
         text: "Some tool calls need a person's OK first, like a payment. The approval policy decides which ones.",
@@ -61,13 +74,15 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.lane = path(s.svg, `M 300 ${LANE} L 1170 ${LANE}`, C.line, 2, false, '6,12');
-      const askD = `M ${PARK.x} 520 C ${PARK.x} 680 600 ${YOU.y} ${YOU.x - 112} ${YOU.y}`;
+      s.lane = path(s.svg, `M ${AGENT.x + ORB / 2 + 20} ${LANE} L ${TOOLS.x0 - 20} ${LANE}`, C.line, 2, false, '6,12');
+      // from under the parked call's tag, down to the person's left edge
+      const askY0 = LANE + TAG_DY + 30, askX1 = GATE.x0 - 12;
+      const askD = `M ${PARK.x} ${askY0} C ${PARK.x} ${YOU.y - 40} ${PARK.x + 40} ${YOU.y} ${askX1} ${YOU.y}`;
       s.ask = arrowPath(s.svg, askD, C.violet, 2.5, '8,8');
-      s.agent = makeLLM(root, 160, 'AGENT');
+      s.agent = makeLLM(root, ORB, 'AGENT');
 
       // the gate: policy block above the lane, its rules below it, by tool name (the catch-all row in slate)
-      s.gate = iconTile(root, 'shield', 'Approval policy', GATE.w, 160);
+      s.gate = iconTile(root, 'shield', 'Approval policy', GATE.w, POLICY.h);
       const rule = (name, verdict, nameColor, verdictColor) =>
         '<div style="display:flex;justify-content:space-between;padding:5px 12px;border-radius:var(--rs)">'
         + `<span style="color:${nameColor}">${name}</span>`
@@ -77,30 +92,34 @@
         + rule('search_flights', 'ALLOW', C.ink, C.neon) + rule('search_hotels', 'ALLOW', C.ink, C.neon)
         + rule('everything else', 'ASK', C.slate, C.violet),
         'tile mono', {
-          width: GATE.w + 'px', height: GATE.rulesH + 'px', fontSize: '18px', padding: '16px 14px',
+          width: GATE.w + 'px', height: RULES.h + 'px', fontSize: '18px', padding: '16px 14px',
           display: 'flex', flexDirection: 'column', justifyContent: 'center',
         });
       // rule rows, in order: search_flights, search_hotels, everything else
       s.ruleRows = [...s.rules.children].slice(1);
+      // AUTO MODE's rule card, created first so it slides out from under the AUTO MODE tile
+      s.rule = E(root, 'approve: hotel under $500', 'mono', {
+        width: GATE.w + 'px', height: RULE_CARD.h + 'px', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', fontSize: '20px', background: C.ink, color: '#141414',
+        borderLeft: '5px solid ' + C.uv, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
+      });
       s.judge = E(root,
         `${ICON('bolt', 30, C.ink, 1.8)}<span class="mono" style="font-size:19px;letter-spacing:.1em">AUTO MODE</span>`,
         'tile', {
-          width: GATE.w + 'px', height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: GATE.w + 'px', height: JUDGE.h + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
           gap: '12px',
         });
-      s.rule = E(root, 'approve: hotel under $500', 'mono', {
-        fontSize: '20px', background: C.ink, color: '#141414', padding: '8px 16px',
-        borderLeft: '5px solid ' + C.uv, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
-      });
 
       s.tools = E(root,
         '<div class="lbl" style="position:absolute;left:22px;top:16px;display:flex;gap:10px;align-items:center">'
         + `${ICON('gear', 22, C.slate, 1.8)} Tools</div>`,
-        'tile', { width: '560px', height: TOOLS.h + 'px', textAlign: 'left' });
+        'tile', { width: (TOOLS.x1 - TOOLS.x0) + 'px', height: (TOOLS.y1 - TOOLS.y0) + 'px', textAlign: 'left' });
 
       // the person who approves, with the two buttons
-      s.you = iconTile(root, 'user', 'You', 200, 150);
-      const button = label => E(root, label, 'pill', { width: '170px', textAlign: 'center', padding: '9px 0' });
+      s.you = iconTile(root, 'user', 'You', YOU.w, YOU.h);
+      const button = label => E(root, label, 'pill', {
+        width: YOU.buttonW + 'px', textAlign: 'center', padding: '9px 0',
+      });
       s.approve = button('Approve'); s.deny = button('Deny');
 
       // durable wait: a clock racing through the waiting time, and a pause badge on the parked call
@@ -112,7 +131,10 @@
         + '<path class="mh" d="M12 12V5.5"/><path class="hh" d="M12 12h4"/></svg>'
         + `<span class="mono" style="font-size:22px;letter-spacing:.06em;color:${C.violet}">WAITING `
         + '<span class="d" style="display:inline-block;min-width:6.6ch;text-align:left"></span></span></div>',
-        'tile', { width: '280px', padding: '14px 0', borderColor: C.violet });
+        'tile', {
+          width: CALL_W + 'px', height: (WAIT.y1 - WAIT.y0) + 'px', borderColor: C.violet,
+          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        });
       s.waitD = s.wait.querySelector('.d');
       s.minute = s.wait.querySelector('.mh'); s.hour = s.wait.querySelector('.hh');
       s.pause = E(root, ICON('pause', 22, C.violet, 1.8), '', {
@@ -127,7 +149,7 @@
       ];
       s.calls = calls.map(([name, arg]) => {
         const e = callCard(root, name, arg, 'uv');
-        Object.assign(e.style, { width: '280px', textAlign: 'center' });
+        Object.assign(e.style, { width: CALL_W + 'px', textAlign: 'center' });
         return e;
       });
       s.tags = s.calls.map(() => makeTag(root));
@@ -153,7 +175,7 @@
       [s.gate, s.rules].forEach((e, i) => {
         const p = P(t, c[0] + 0.2 + i * 0.1, 0.5, backOut);
         e.style.borderColor = gateColor;
-        place(e, GATE.x, i === 0 ? GATE.topY : GATE.rulesY, p, clamp(p * 2));
+        place(e, GATE.x, i === 0 ? POLICY.y0 + POLICY.h / 2 : RULES.y0 + RULES.h / 2, p, clamp(p * 2));
       });
       // the rule a call matches lights up: each search its own ALLOW row, the bookings the ASK row
       const searchLit = i => t >= cross[i] + 0.2 && t < cross[i] + 1.2;
@@ -164,7 +186,7 @@
         row.style.background = ruleLit[i] ? litColor : 'transparent';
       });
       const tp = P(t, c[0] + 0.4, 0.5, backOut);
-      place(s.tools, TOOLS.x, TOOLS.y, tp, clamp(tp * 2));
+      place(s.tools, TOOLS.rowX, (TOOLS.y0 + TOOLS.y1) / 2, tp, clamp(tp * 2));
 
       const yp = P(t, c[0] + 0.6, 0.5, backOut);
       const youWaits = (t >= c[1] + 1.2 && t < approve + 0.05) || t >= c[2] + 5.3;
@@ -174,8 +196,8 @@
       const pressed = t >= approve + 0.05 && t < c[2] + 0.2;
       s.approve.className = 'abs pill' + (pressed ? ' neon' : '');
       const bp = P(t, c[0] + 0.75, 0.45, backOut), dp = P(t, c[0] + 0.85, 0.45, backOut);
-      place(s.approve, YOU.x + 210, YOU.y - 28, bp * (1 - 0.08 * bump(t, approve, 0.25)), clamp(bp * 2));
-      place(s.deny, YOU.x + 210, YOU.y + 28, dp, clamp(dp * 2));
+      place(s.approve, YOU.buttonX, YOU.y - 28, bp * (1 - 0.08 * bump(t, approve, 0.25)), clamp(bp * 2));
+      place(s.deny, YOU.buttonX, YOU.y + 28, dp, clamp(dp * 2));
 
       // tool calls: pop out next to the agent, then follow their route; tags ride under them
       const placeCall = (i, appear, legs, cls, fade = Infinity) => {
@@ -213,9 +235,10 @@
       else placeTag(2, f2, booked, 'BOOKED', 'ok');
 
       const pp = P(t, c[1] + 0.2, 0.45, backOut);
-      place(s.pause, PARK.x - 170, PARK.y, pp, clamp(pp * 2) * (1 - P(t, approved, 0.3)));
+      // the 44 px pause badge sits 8 px left of the parked call
+      place(s.pause, PARK.x - CALL_W / 2 - 30, PARK.y, pp, clamp(pp * 2) * (1 - P(t, approved, 0.3)));
       const wp = P(t, c[1] + 0.5, 0.45, backOut);
-      place(s.wait, PARK.x, 330, wp, clamp(wp * 2) * (1 - P(t, approved + 0.1, 0.3)));
+      place(s.wait, PARK.x, (WAIT.y0 + WAIT.y1) / 2, wp, clamp(wp * 2) * (1 - P(t, approved + 0.1, 0.3)));
       // the waiting time races from minutes to days; the clock hands spin with it
       const race = clamp((t - c[1] - 0.9) / 2.4);
       s.waitD.textContent = WAITS[Math.min(WAITS.length - 1, Math.floor(race * WAITS.length))];
@@ -228,10 +251,11 @@
       const judgeOk = t >= autoOk - 0.1 && t < autoOk + 0.9;
       const judgeUnsure = t >= escalate - 0.1 && t < c[2] + 5.0;
       s.judge.style.borderColor = judgeOk ? C.neon : judgeUnsure ? C.violet : C.line;
-      place(s.judge, GATE.x, GATE.judgeY - 30 * (1 - jp), 1, jp);
+      place(s.judge, GATE.x, JUDGE.y0 + JUDGE.h / 2 - 30 * (1 - jp), 1, jp);
+      // its rule slides out from under it
       const rp = P(t, c[2] + 0.7, 0.4);
       s.rule.style.borderLeftColor = judgeOk ? C.neon : judgeUnsure ? C.violet : C.uv;
-      placeLeft(s.rule, GATE.x + GATE.w / 2 + 20 - 20 * (1 - rp), GATE.judgeY, rp);
+      place(s.rule, GATE.x, RULE_CARD.y0 + RULE_CARD.h / 2 - 12 * (1 - rp), 1, rp);
 
       const h0 = placeCall(3, c[2] + 1.3, [[c[2] + 1.6, 0.7, PARK.x, PARK.y], ...through(cross[3], 1)], 'uv');
       const hotelLands = c[2] + 4.05;
