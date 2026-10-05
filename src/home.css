@@ -15,11 +15,7 @@
 .home main{position:relative;width:100%;max-width:1720px;padding:72px clamp(20px,4vw,60px) 96px}
 .home header{text-align:center;margin-bottom:64px}
 .home .logo{display:block;height:48px;margin:0 auto 48px}
-.home .kicker{
-  margin:0;font-family:'Mono',monospace;font-size:16px;letter-spacing:.14em;padding-left:.14em;
-  text-transform:uppercase;color:var(--slate);
-}
-.home h1{margin:18px 0 0;font-size:clamp(44px,6vw,76px);font-weight:400;line-height:1.04;letter-spacing:-2px}
+.home h1{margin:0;font-size:clamp(44px,6vw,76px);font-weight:400;line-height:1.04;letter-spacing:-2px}
 .home .lead{margin:20px 0 0;font-size:20px;line-height:1.4;color:var(--slate)}
 /* Every card gets the same width and height, whatever its text and however many cards there are: as many
    equal columns as fit (376 px at least), stretched to share the width, and every row as tall as the tallest
