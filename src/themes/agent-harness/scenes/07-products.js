@@ -80,9 +80,9 @@
       s.laptop = makeStep(root, 'laptop', "User's laptop", 300, 150);
       // opaque pill colors, so the dashed arrow does not show through the cards traveling on it
       s.call = callCard(root, 'read_file', '"trip.md"', 'violet');
-      s.call.style.background = '#2B1F35';
+      s.call.style.background = OPAQUE.violet;
       s.result = callCard(root, 'result', '"Lisbon, 3 nights"', 'uv');
-      s.result.style.background = '#1D1E3A';
+      s.result.style.background = OPAQUE.uv;
 
       // the product UI, built with the typed React or Svelte SDK
       s.lblR = E(root, 'Your UI', 'lbl');
@@ -119,11 +119,7 @@
       const uiIn = pop(3.4);
       place(s.lblR, UI.x, LEFT.labelY, 1, P(t, c[0] + 3.4, 0.4) * out);
       place(s.planner, UI.x, UI.y, uiIn, clamp(uiIn * 2) * out);
-      s.planner.rows.forEach((row, i) => {
-        const p = P(t, c[0] + 3.8 + i * 0.2, 0.35);
-        row.style.opacity = p;
-        row.style.transform = `translateX(${(1 - p) * 24}px)`;
-      });
+      s.planner.rows.forEach((row, i) => showRow(row, P(t, c[0] + 3.8 + i * 0.2, 0.35), 24));
       s.planner.foot.style.opacity = P(t, c[0] + 4.4, 0.35);
       draw(s.link, P(t, c[0] + 4.6, 0.5), out);
       place(s.linkL, (LINK.from + LINK.to) / 2, LINK.y - 30, 1, P(t, c[0] + 4.9, 0.35) * out);

@@ -28,7 +28,7 @@
   const PLAN_ROW_Y = CHILD_TOP + 176; // plan_trip row, where the request lands and the result leaves
 
   // agent card: icon and name, OPERATIONS label, INPUT / OUTPUT column labels, one row per typed operation
-  function makeAgentCard(p, name, ops, w, outW) {
+  const makeAgentCard = (p, name, ops, w, outW) => {
     const e = E(p,
       `<div style="display:flex;align-items:center;gap:16px"><div style="flex:none">${ICON('agent', 46, C.ink)}</div>`
       + `<div><div style="font-size:32px;line-height:1.1">${name}</div>`
@@ -49,23 +49,16 @@
     e.ops = [...e.querySelectorAll('.op')];
     e.tagSlot = e.querySelector('.tagSlot');
     return e;
-  }
-  // light card carrying a typed value along a link: a label, the operation or type, then the fields
-  function makeValueCard(p, label, title, fields, accent) {
-    return E(p,
-      `<div class="mono" style="font-size:15px;letter-spacing:.12em;color:#5B6475">${label} `
-      + `<b style="color:#141414;font-size:18px;letter-spacing:0">${title}</b></div>`
-      + `<div class="mono" style="font-size:22px;line-height:1.35;margin-top:4px">${fields}</div>`,
-      '', {
-        width: '330px', background: '#F8FAFC', color: '#141414', padding: '10px 18px 12px',
-        borderLeft: `6px solid ${accent}`, borderRadius: 'var(--r)',
-      });
-  }
-  // a row slides in from the left as it appears
-  const showRow = (e, p) => {
-    e.style.opacity = p;
-    e.style.transform = `translateX(${(1 - p) * 26}px)`;
   };
+  // light card carrying a typed value along a link: a label, the operation or type, then the fields
+  const makeValueCard = (p, label, title, fields, accent) => E(p,
+    `<div class="mono" style="font-size:15px;letter-spacing:.12em;color:#5B6475">${label} `
+    + `<b style="color:#141414;font-size:18px;letter-spacing:0">${title}</b></div>`
+    + `<div class="mono" style="font-size:22px;line-height:1.35;margin-top:4px">${fields}</div>`,
+    '', {
+      width: '330px', background: '#F8FAFC', color: '#141414', padding: '10px 18px 12px',
+      borderLeft: `6px solid ${accent}`, borderRadius: 'var(--r)',
+    });
 
   scene({
     chapter: 5, title: 'Typed, composable agents',
@@ -114,7 +107,7 @@
       ];
       s.contracts = [0, 1].map(() => E(root, 'Typed contract', 'lbl', { color: 'var(--ink)' }));
       s.request = makeValueCard(root, 'REQUEST', 'plan_trip', 'destination: "Lisbon"<br>nights: 3', C.uv);
-      s.result = makeValueCard(root, 'RESULT', 'Itinerary', 'total_usd: 1240', C.violet);
+      s.result = makeValueCard(root, 'RESULT', 'Itinerary', 'total_usd: 895', C.violet);
     },
     update(t, c, s) {
       // phase 1: "text in, text out" is struck out, TravelAgent lists its typed operations

@@ -1,7 +1,7 @@
 // ===================== 2. SURVIVES CRASHES
 // The block keeps every name declared in this file local to this scene.
 {
-  // One agent turn: model steps (UV rows) and tool steps (black rows), as in the reference chapter 7
+  // One agent turn: model steps (UV rows) and tool steps (black rows), as in durable-ai-agents chapter 7
   const STEPS = [
     { icon: 'agent', label: 'Plan', call: ['Model:', 'plan the trip'], row: 'Model: plan the trip' },
     {
@@ -22,7 +22,7 @@
   const rowTop = i => HIST.row0 + i * HIST.rowGap; // inside the Event History card
   const rowY = i => HIST.y - HIST.h / 2 + rowTop(i) + 18; // on the stage, where result cards land
 
-  // the step tiles in a row joined by thin links (the reference makeStepRow, with this turn's five steps)
+  // the step tiles in a row joined by thin links (durable-ai-agents `makeStepRow`, with this turn's five steps)
   const makeTurnRow = (root, svg) => {
     const xs = STEPS.map((_, i) => ROW.x0 + i * ROW.gap);
     const links = xs.slice(1).map((x, i) => {
@@ -47,6 +47,33 @@
     });
     return e;
   };
+  // app instance panel: spinning gear and name at the top left, status text at the top right
+  const makeAppPanel = (p, name, w, h) => {
+    const e = E(p,
+      '<div style="position:absolute;left:24px;top:20px;display:flex;align-items:center;gap:12px">'
+      + `<div class="gear">${ICON('gear', 30, C.ink, 1.8)}</div>`
+      + `<span class="mono" style="font-size:20px;letter-spacing:.1em">${name}</span></div>`
+      + '<div class="st mono" style="position:absolute;right:24px;top:26px;font-size:16px;letter-spacing:.08em;'
+      + 'color:var(--slate)"></div>',
+      'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
+    e.gear = e.querySelector('.gear'); e.st = e.querySelector('.st');
+    return e;
+  };
+  // state: 'idle', 'running' (the gear spins) or 'crashed' (red)
+  const setAppStatus = (app, text, state) => {
+    const crashed = state === 'crashed';
+    app.st.textContent = text;
+    app.st.style.color = crashed ? C.red : C.slate;
+    app.style.borderColor = crashed ? C.red : C.violet;
+    gearSpin(app, state === 'running' ? 1 : 0);
+  };
+  // screen shake around a crash, as [dx, dy]
+  const shakeAt = (t, crashAt) => {
+    const k = Math.max(0, 1 - Math.abs(t - crashAt - 0.2) / 0.4);
+    return [Math.sin(G * 90) * 12 * k, Math.cos(G * 77) * 8 * k];
+  };
+  // red flash intensity (0 to 1) peaking at the crash
+  const flashAt = (t, crashAt) => Math.max(0, 1 - Math.abs(t - crashAt) / 0.28);
 
   scene({
     chapter: 2, title: 'Survives crashes',
@@ -208,10 +235,10 @@
         e.style.borderColor = g > 0.5 || hint > 0.5 ? C.neon : C.line;
         e.style.boxShadow = `0 0 ${Math.round(28 * g)}px rgba(219,255,75,${(0.3 * g).toFixed(2)})`;
       });
-      // the number pops when it changes
-      const bump = (at) => 0.12 * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
-      s.billed.n.style.transform = `scale(${1 + bump(saved[0]) + bump(saved[2]) + bump(saved[4])})`;
-      s.booked.n.style.transform = `scale(${1 + bump(saved[3])})`;
+      // the number pops when it changes (the model calls are saved far apart, so their swells never overlap)
+      const billedSwell = Math.max(...[0, 2, 4].map(i => swell(t, saved[i], 0.12)));
+      s.billed.n.style.transform = `scale(${billedSwell})`;
+      s.booked.n.style.transform = `scale(${swell(t, saved[3], 0.12)})`;
       const counterIn = i => P(t, c[0] + 0.5 + i * 0.12, 0.45, backOut);
       const counterX = [APP.x - APP.w / 2 + COUNTER.w / 2, APP.x + APP.w / 2 - COUNTER.w / 2];
       [s.billed, s.booked].forEach((e, i) => {
@@ -236,11 +263,7 @@
       // Event History rows and their status tags
       s.kept.style.opacity = P(t, crashAt + 0.7, 0.4);
       s.cut.style.opacity = P(t, crashAt + 0.3, 0.3);
-      s.rows.forEach((r, i) => {
-        const p = P(t, saved[i] - 0.1, 0.3);
-        r.style.opacity = p;
-        r.style.transform = `translateX(${(1 - p) * 26}px)`;
-      });
+      s.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
       s.tags.forEach((e, i) => {
         const isReused = i < 4 && t >= replay[i] + 0.05, isTold = i < 4 && t >= told[i];
         if (isTold) setStatus(e, isModel(i) ? 'REUSED, NOT RE-BILLED' : 'REUSED, NOT RE-RUN', 'reused');
@@ -248,7 +271,7 @@
         else setStatus(e, 'SAVED', 'saved');
         const switchedAt = isTold ? told[i] : isReused ? replay[i] + 0.05 : saved[i];
         e.style.opacity = P(t, saved[i], 0.25);
-        e.style.transform = `scale(${1 + 0.14 * Math.max(0, 1 - Math.abs(t - switchedAt - 0.1) / 0.25)})`;
+        e.style.transform = `scale(${swell(t, switchedAt, 0.14)})`;
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 0.5);
       s.scan.style.opacity = scanning >= 0 ? 1 : 0;

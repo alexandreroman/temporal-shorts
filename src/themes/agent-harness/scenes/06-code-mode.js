@@ -7,9 +7,10 @@
   // the 6 round trips (tool index of each call) and their timing, from c[0] + TRIPS.at
   const TRIPS = { at: 0.8, gap: 0.5, out: 0.22, targets: [0, 1, 0, 1, 0, 2] };
   // Right: the script card, the tools it calls, their SAVED statuses and the closing tags
-  const CODE = { x: 1310, y: 370, w: 760, h: 320, lineTop: 74, lineH: 38, textX: 28 };
+  const CODE = { x: 1310, y: 370, w: 820, h: 320, lineTop: 74, lineH: 38, textX: 28 };
   const RIGHT = { toolX: [1060, 1310, 1560], toolY: 745, gateY: 600, savedY: 835, tagY: 900 };
   const CARD_BOTTOM = CODE.y + CODE.h / 2 + 4;
+  const ONE_TRIP_X = LEFT.x + 317; // the 1 ROUND TRIP pill, right of the counter and its "vs"
   // the run highlight: the gather block (lines 1-4), then the min line, then the book_flight line
   const HIGHLIGHT = [{ at: 0.6, from: 0, to: 3 }, { at: 2.4, from: 4, to: 4 }, { at: 3.4, from: 5, to: 5 }];
   const HIGHLIGHT_END = 5.5;
@@ -18,11 +19,17 @@
   const kw = s => [s, C.violet], tool = s => [s, '#A5ABFF'], str = s => [s, C.ink];
   const id = s => [s, C.ink], pun = s => [s, C.slate];
   const SCRIPT = [
-    [id('flights'), pun(', '), id('hotels'), pun(' = '), kw('await'), pun(' '), id('gather'), pun('(')],
+    [
+      id('flights'), pun(', '), id('hotels'), pun(' = '), kw('await'), pun(' '), id('asyncio'), pun('.'),
+      id('gather'), pun('('),
+    ],
     [pun('    '), tool('search_flights'), pun('('), id('to'), pun('='), str('"LIS"'), pun('),')],
     [pun('    '), tool('search_hotels'), pun('('), id('city'), pun('='), str('"Lisbon"'), pun('),')],
     [pun(')')],
-    [id('best'), pun(' = '), id('min'), pun('('), id('flights'), pun(', '), id('key'), pun('='), id('price'), pun(')')],
+    [
+      id('best'), pun(' = '), id('min'), pun('('), id('flights'), pun(', '), id('key'), pun('='), kw('lambda'),
+      pun(' '), id('f'), pun(': '), id('f'), pun('.'), id('price'), pun(')'),
+    ],
     [kw('await'), pun(' '), tool('book_flight'), pun('('), id('best'), pun(')')],
   ];
   const lineLength = line => line.reduce((n, [s]) => n + s.length, 0);
@@ -45,6 +52,8 @@
     return shown;
   });
   const lineY = i => CODE.lineTop + i * CODE.lineH;
+  // center of the best: $480 pill, on line 5 (the min line) about 20 px right of its end, inside the card
+  const BEST_X = CODE.w - 100;
   const CHAR_W = 13.2; // advance of a 22 px JetBrains Mono character
 
   // step tile whose label is a tool name in code font (iconTile uppercases its labels)
@@ -53,15 +62,14 @@
     Object.assign(e.querySelector('.mono').style, { textTransform: 'none', letterSpacing: '.02em', paddingLeft: '0' });
     return e;
   };
-  // pill with an icon before its text
-  const iconPill = (p, icon, text, cls) => E(p,
-    `<span style="display:flex;align-items:center;gap:10px">${ICON(icon, 22, C.ink, 2)}${text}</span>`,
-    'pill ' + cls);
+  // UV pill with an icon before its text, as inline HTML for the closing row
+  const iconPillHtml = (icon, text) => '<span class="pill uv" style="display:flex;align-items:center;gap:10px">'
+    + `${ICON(icon, 22, C.ink, 2)}${text}</span>`;
 
   scene({
     chapter: 6, title: 'Code Mode',
     // the run phase adds the statuses and tags at the bottom: one compromise offset fits both phases
-    shift: [22, -14],
+    shift: [8, -14],
     subs: [
       {
         text: "With Code Mode, the model writes a short Python script instead of calling tools one at a time.",
@@ -84,7 +92,9 @@
       s.trip = E(root, '', 'pill', { fontSize: '16px', padding: '5px 12px 5px calc(12px + .1em)' });
       s.counter = makeCounter(root, 'Round trips', 260);
       s.vs = E(root, 'vs', 'lbl', { fontSize: '22px' });
-      s.turn = tag(root, '1 turn', 'uv big');
+      // a little smaller than .pill.big, so it fits between the counter and the tools
+      s.oneTrip = tag(root, '1 round trip', 'uv');
+      Object.assign(s.oneTrip.style, { fontSize: '26px', padding: '11px 22px 11px calc(22px + .1em)' });
 
       // right: the script written by the model, typed line by line
       s.lblR = E(root, 'Code Mode', 'lbl');
@@ -124,8 +134,12 @@
         .map(([icon, name]) => makeToolStep(root, icon, name));
       s.gate = E(root, '', 'pill');
       s.saved = s.steps.map(() => statusTag(root));
-      s.tags = [['retry', 'Durable'], ['shield', 'Approved'], ['eye', 'Visible']]
-        .map(([icon, text]) => iconPill(root, icon, text, 'uv'));
+      // what every call keeps: one row, centered under the tools but not aligned with their columns
+      s.tagRow = E(root,
+        '<span class="lbl" style="font-size:18px">Every call</span>'
+        + iconPillHtml('retry', 'Durable') + iconPillHtml('shield', 'Approved') + iconPillHtml('eye', 'Visible'),
+        '', { display: 'flex', alignItems: 'center', gap: '20px' });
+      s.tags = [...s.tagRow.querySelectorAll('.pill')];
     },
     update(t, c, s) {
       // ---- c[0], left: six quick round trips, then the whole side dims
@@ -157,7 +171,7 @@
           s.trip.textContent = goingOut ? 'call' : 'result';
           s.trip.className = 'abs pill ' + (goingOut ? 'uv' : '');
           // opaque, so the connector does not show through the card traveling on it
-          s.trip.style.background = goingOut ? '#1D1E3A' : 'var(--surface)';
+          s.trip.style.background = goingOut ? OPAQUE.uv : 'var(--surface)';
         }
         place(s.trip, x, y, 1, 1);
         if (Math.abs(t - a - TRIPS.out) < 0.12) busyTool = target;
@@ -214,7 +228,7 @@
       stepState(s.steps[1], searchState);
       // the cheapest flight is picked
       const bestIn = P(t, c[1] + 2.6, 0.45, backOut);
-      place(s.best, CODE.w - CODE.textX - 82, lineY(4), bestIn, clamp(bestIn * 2));
+      place(s.best, BEST_X, lineY(4), bestIn, clamp(bestIn * 2));
       // book_flight passes the approval gate first
       draw(s.toGate, P(t, c[1] + 3.5, 0.4));
       const gateIn = P(t, c[1] + 3.7, 0.4, backOut);
@@ -227,8 +241,7 @@
           + (approved ? ICON('check', 20, C.neon, 2.6) + 'Approved' : ICON('lock', 20, C.violet, 2) + 'Approval')
           + '</span>';
       }
-      const gatePop = 1 + 0.12 * Math.max(0, 1 - Math.abs(t - c[1] - 4.5) / 0.2);
-      place(s.gate, RIGHT.toolX[2], RIGHT.gateY, gateIn * gatePop, clamp(gateIn * 2));
+      place(s.gate, RIGHT.toolX[2], RIGHT.gateY, gateIn * swell(t, c[1] + 4.4, 0.12), clamp(gateIn * 2));
       draw(s.fromGate, P(t, c[1] + 4.5, 0.3));
       stepState(s.steps[2], t >= c[1] + 5.3 ? 2 : t >= c[1] + 4.75 ? 1 : 0);
       // every call is saved as soon as it completes
@@ -239,14 +252,16 @@
         place(e, RIGHT.toolX[i], RIGHT.savedY, p, clamp(p * 2));
       });
 
-      // ---- c[1], payoff: what every call keeps, and one turn instead of six round trips
+      // ---- c[1], payoff: what every call keeps, and one round trip instead of six
+      place(s.tagRow, CODE.x, RIGHT.tagY, 1, P(t, c[1] + 5.6, 0.4));
       s.tags.forEach((e, i) => {
         const p = P(t, c[1] + 5.7 + i * 0.2, 0.45, backOut);
-        place(e, RIGHT.toolX[i], RIGHT.tagY, p, clamp(p * 2));
+        e.style.transform = `scale(${p})`;
+        e.style.opacity = clamp(p * 2);
       });
       place(s.vs, LEFT.x + 145, LEFT.counterY, 1, P(t, c[1] + 6.2, 0.3));
-      const turnIn = P(t, c[1] + 6.3, 0.45, backOut);
-      place(s.turn, LEFT.x + 290, LEFT.counterY, turnIn, clamp(turnIn * 2));
+      const oneTripIn = P(t, c[1] + 6.3, 0.45, backOut);
+      place(s.oneTrip, ONE_TRIP_X, LEFT.counterY, oneTripIn, clamp(oneTripIn * 2));
     }
   });
 }

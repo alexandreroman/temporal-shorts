@@ -17,8 +17,11 @@
   // guide curve from agent i into the lane: chips ride it from MERGE_FROM on, so they leave clear of the tile
   const guide = i => [[AGENT.x + AGENT.w / 2 + 8, agentY(i)], [570, agentY(i)], [540, LANE.y], [LANE.entry, LANE.y]];
   const MERGE_FROM = 0.25;
-  // chip k leaves agent k % 3 every CHIP_EVERY seconds; it curves into the lane, then runs along it
-  const CHIP_EVERY = 0.4, CHIP_MERGE = 0.45, CHIP_LANE = 1.4, CHIP_COUNT = 36;
+  // chip n leaves agent n % 3 every CHIP_EVERY seconds, until the scene ends; it curves into the lane, then runs
+  // along it. A pool of CHIP_POOL elements is recycled: chip n uses element n % CHIP_POOL. The pool size is a
+  // multiple of the 5 types and the 3 agents, so an element keeps its type and agent, and it outlasts a chip's
+  // life (CHIP_POOL * CHIP_EVERY > CHIP_MERGE + CHIP_LANE), so an element is free again when it is reused.
+  const CHIP_EVERY = 0.4, CHIP_MERGE = 0.45, CHIP_LANE = 1.4, CHIP_POOL = 15;
   const CONSOLE = { x: 1525, y: 522, w: 620, h: 470, row0: 76, rowGap: 46 };
   const ROWS = [
     ['TURN', 'turn started'],
@@ -78,7 +81,7 @@
         `<div style="display:flex;align-items:center;gap:12px">${ICON('stream', 26, C.ink, 1.8)}`
         + '<span>Agent event stream</span></div>', 'lbl', { color: 'var(--ink)' });
       s.same = tag(root, 'Same events for every agent', 'uv');
-      s.chips = Array.from({ length: CHIP_COUNT }, (_, k) => {
+      s.chips = Array.from({ length: CHIP_POOL }, (_, k) => {
         const type = TYPE_ORDER[k % TYPE_ORDER.length];
         return E(root, type, 'mono', chipCss(type, '16px'));
       });
@@ -160,7 +163,9 @@
       const sp = P(t, c[0] + 3.6, 0.45, backOut);
       place(s.same, LANE.x, LANE.y + 78, sp, clamp(sp * 2));
       s.chips.forEach((e, k) => {
-        const leave = chipsFrom + k * CHIP_EVERY;
+        // the latest chip this element carries: k, k + CHIP_POOL, k + 2 * CHIP_POOL...
+        const cycle = Math.max(0, Math.floor((t - chipsFrom - k * CHIP_EVERY) / (CHIP_POOL * CHIP_EVERY)));
+        const leave = chipsFrom + (k + cycle * CHIP_POOL) * CHIP_EVERY;
         let x, y;
         if (t < leave + CHIP_MERGE) {
           const u = lerp(MERGE_FROM, 1, clamp((t - leave) / CHIP_MERGE));
@@ -182,11 +187,10 @@
       const cp = P(t, c[1] + 0.3, 0.6);
       place(s.console, lerp(CONSOLE.x + 120, CONSOLE.x, cp), CONSOLE.y, 1, cp);
       draw(s.feed, P(t, c[1] + 0.7, 0.4));
-      const pulse = 1 + 0.15 * Math.max(0, 1 - Math.abs(t - toReplay - 0.1) / 0.25);
       s.live.style.opacity = P(t, c[1] + 0.6, 0.3) * (t < toReplay ? 1 : 0);
       s.live.dot.style.opacity = 0.35 + 0.65 * (0.5 + 0.5 * Math.cos(G * 6));
       s.replay.style.opacity = t < toReplay ? 0 : 1;
-      s.replay.style.transform = `scale(${pulse})`;
+      s.replay.style.transform = `scale(${swell(t, toReplay, 0.15)})`;
       s.bar.style.opacity = P(t, toReplay, 0.3);
       // playhead: at the end when the replay starts, rewound to the start, then swept forward
       let head = 1 - P(t, rewind, 0.4);
@@ -195,10 +199,10 @@
       s.bar.head.style.left = (head * 500) + 'px';
       s.rows.forEach((r, i) => {
         const p = P(t, rowAt(i), 0.3);
+        showRow(r, p);
         // a row dims while the playhead is before it
         const reached = clamp(1 + (head - i / LAST_ROW) * 12);
         r.style.opacity = p * lerp(0.3, 1, reached);
-        r.style.transform = `translateX(${(1 - p) * 26}px)`;
       });
       const scanning = win(t, sweep, sweep + sweepD + 0.3, 0.2);
       s.scan.style.opacity = scanning;
@@ -208,7 +212,7 @@
         const at = sweep + sweepD * row / LAST_ROW;
         s.marks[j].style.opacity = P(t, at, 0.3);
         s.tags[j].style.opacity = P(t, at, 0.25);
-        s.tags[j].style.transform = `scale(${1 + 0.14 * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25)})`;
+        s.tags[j].style.transform = `scale(${swell(t, at, 0.14)})`;
       });
     }
   });

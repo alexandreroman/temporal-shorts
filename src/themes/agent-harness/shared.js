@@ -9,11 +9,8 @@ Object.assign(ICONS, {
   code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
   lock: '<rect x="5" y="11" width="14" height="10"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/>',
   shield: '<path d="M12 3l8 3v6c0 4.5-3.4 7.7-8 9-4.6-1.3-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
-  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
   pause: '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>',
   laptop: '<rect x="5" y="5" width="14" height="10"/><path d="M5 15l-2 4h18l-2-4"/>',
-  phone: '<rect x="7" y="3" width="10" height="18"/><path d="M11 18h2"/>',
-  browser: '<rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M6 6.5h.01M8.5 6.5h.01"/>',
   layers: '<path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"/>',
   stream: '<path d="M3 7h11M3 12h17M3 17h11M17 9l3 3-3 3"/>',
   cloud: '<path d="M7 19h10.5a4.5 4.5 0 0 0 .4-9A6 6 0 0 0 6.3 11.6 3.8 3.8 0 0 0 7 19z"/>',
@@ -39,18 +36,20 @@ function statusTag(p) {
     whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px',
   });
 }
+// saved: neon on black, for white panels; ok: neon outline, for the dark stage; both carry a check
 const STATUS_KINDS = {
   saved: { background: '#141414', color: C.neon, borderColor: 'transparent' },
+  ok: { background: 'rgba(219,255,75,.08)', color: C.neon, borderColor: C.neon },
   reused: { background: C.uv, color: '#FFFFFF', borderColor: 'transparent' },
   wait: { background: 'rgba(182,100,255,.14)', color: C.violet, borderColor: C.violet },
-  bad: { background: 'rgba(255,90,95,.1)', color: C.red, borderColor: C.red },
 };
-// kind: 'saved' (with a check), 'reused', 'wait' or 'bad'; the DOM is only rewritten when label or kind changes
+const CHECKED_KINDS = ['saved', 'ok'];
+// kind: 'saved', 'ok', 'reused' or 'wait'; the DOM is only rewritten when label or kind changes
 function setStatus(e, label, kind) {
   const key = kind + ':' + label;
   if (e._l === key) return;
   e._l = key;
-  e.innerHTML = kind === 'saved' ? ICON('check', 16, C.neon, 2.6) + label : label;
+  e.innerHTML = CHECKED_KINDS.includes(kind) ? ICON('check', 16, C.neon, 2.6) + label : label;
   Object.assign(e.style, STATUS_KINDS[kind]);
 }
 
@@ -70,31 +69,17 @@ function setCounter(e, n, note = '', noteColor = C.neon) {
   e.note.textContent = note; e.note.style.color = noteColor;
 }
 
-// App instance panel: spinning gear and name at the top left, status text at the top right
-function makeAppPanel(p, name, w, h) {
-  const e = E(p,
-    '<div style="position:absolute;left:24px;top:20px;display:flex;align-items:center;gap:12px">'
-    + `<div class="gear">${ICON('gear', 30, C.ink, 1.8)}</div>`
-    + `<span class="mono" style="font-size:20px;letter-spacing:.1em">${name}</span></div>`
-    + '<div class="st mono" style="position:absolute;right:24px;top:26px;font-size:16px;letter-spacing:.08em;'
-    + 'color:var(--slate)"></div>',
-    'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
-  e.gear = e.querySelector('.gear'); e.st = e.querySelector('.st');
-  return e;
-}
-// state: 'idle', 'running' (the gear spins) or 'crashed' (red)
-function setAppStatus(app, text, state) {
-  const crashed = state === 'crashed';
-  app.st.textContent = text;
-  app.st.style.color = crashed ? C.red : C.slate;
-  app.style.borderColor = crashed ? C.red : C.violet;
-  gearSpin(app, state === 'running' ? 1 : 0);
+// Opaque equivalents of the .pill.uv and .pill.violet tints on the Space Black stage: a pill that sits on
+// a line (a lane, a frame, a connector) needs a solid background, or the line shows through it.
+const OPAQUE = { uv: '#1D1E3A', violet: '#2B1F35' };
+
+// A list row fades in as it slides into place from dx px to its right (p from 0 to 1)
+function showRow(e, p, dx = 26) {
+  e.style.opacity = p;
+  e.style.transform = `translateX(${(1 - p) * dx}px)`;
 }
 
-// screen shake around a crash, as [dx, dy]
-function shakeAt(t, crashAt) {
-  const k = Math.max(0, 1 - Math.abs(t - crashAt - 0.2) / 0.4);
-  return [Math.sin(G * 90) * 12 * k, Math.cos(G * 77) * 8 * k];
+// Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it
+function swell(t, at, amp) {
+  return 1 + amp * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
 }
-// red flash intensity (0 to 1) peaking at the crash
-function flashAt(t, crashAt) { return Math.max(0, 1 - Math.abs(t - crashAt) / 0.28); }

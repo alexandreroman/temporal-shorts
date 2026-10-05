@@ -107,7 +107,7 @@
         });
       // opaque UV tint so the frame line does not show through the pill
       s.workflow = tag(root, 'Temporal Workflow', 'uv');
-      s.workflow.style.background = '#1D1E3A';
+      s.workflow.style.background = OPAQUE.uv;
       s.caps = CAPS.map(([icon, label]) => {
         const e = iconTile(root, icon, label, CAP.w, CAP.h);
         e.style.borderColor = C.uv;

@@ -100,7 +100,8 @@ Lisbon.
 - **0:55** Some tool calls need a person's OK first, like a payment. The
   approval policy decides which ones.
   - Visuals: the AGENT sends tool calls along a lane through the APPROVAL
-    POLICY gate and its RULES (`search_*` ALLOW, `book_*` ASK) to TOOLS:
+    POLICY gate and its RULES (`search_flights` ALLOW, `search_hotels`
+    ALLOW, everything else ASK) to TOOLS:
     `search_flights` and `search_hotels` are ALLOWED; `book_flight $480`
     stops at the gate: NEEDS APPROVAL.
 - **1:03** The call pauses inside the Workflow, for minutes or days, then
@@ -140,7 +141,7 @@ Lisbon.
   - Visuals: SELF-DESCRIBING tag; a Trip planner (PARENT AGENT) above
     TravelAgent and CalendarAgent, linked by TYPED CONTRACT lines; a request
     (`plan_trip`, `destination: "Lisbon", nights: 3`) travels down into
-    TravelAgent, a result (`Itinerary`, `total_usd: 1240`) comes back up,
+    TravelAgent, a result (`Itinerary`, `total_usd: 895`) comes back up,
     the parent checks.
 
 ## 06 Code Mode
@@ -149,13 +150,14 @@ Lisbon.
   calling tools one at a time.
   - Visuals: ONE CALL AT A TIME: a model and three tool tiles ping-pong six
     times (ROUND TRIPS 6), then dim; CODE MODE: a SCRIPT WRITTEN BY THE
-    MODEL is typed: `gather(search_flights, search_hotels)`, `min` by price,
-    `book_flight(best)`.
+    MODEL is typed: `asyncio.gather(search_flights, search_hotels)`, `min`
+    by price, `book_flight(best)`.
 - **1:58** Loops, conditions and parallel calls in one turn, and every call
   stays durable, approved and visible.
   - Visuals: the script runs: both searches fan out at once and check,
     "best: $480", `book_flight` passes an APPROVAL gate (APPROVED) and runs;
-    each call SAVED; tags DURABLE / APPROVED / VISIBLE; "6 vs 1 TURN".
+    each call SAVED; tags DURABLE / APPROVED / VISIBLE; "6 vs 1 round
+    trip".
 
 ## 07 Built for real products
 
@@ -168,8 +170,9 @@ Lisbon.
     SESSION; tags REACT / SVELTE.
 - **2:15** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
-  - Visuals: six recap tiles in subtitle order: Survives crashes / Event
-    stream / Typed subagents / Human approvals / Code Mode / Your AI SDK.
+  - Visuals: six recap tiles, one per chapter, as the subtitle names them:
+    Survives crashes / Event stream / Typed subagents / Human approvals /
+    Code Mode / Your AI SDK.
 
 ## Outro
 
