@@ -59,6 +59,28 @@ html,body{margin:0;background:var(--bg)}
 .lbl{white-space:nowrap;font-family:'Mono';font-size:20px;letter-spacing:.12em;padding-left:.12em;text-transform:uppercase;color:var(--slate)}
 .tile{background:var(--surface);border:1.5px solid #3A4150;border-radius:var(--r);text-align:center}
 .big-t{white-space:nowrap}
+/* Live player (page opened without ?t=): fit-to-window stage and playback controls.
+   Every rule targets .live or the #ctl overlay, both created by startPlayer() only, so the frozen
+   ?t= frames used by the renderer stay pixel-identical. */
+.live,.live body{height:100%;overflow:hidden}
+.live #stage{position:absolute;left:50%;top:50%;transform-origin:50% 50%}
+.live.idle body{cursor:none}
+/* While the controls are shown, lift the subtitle above them (--sub-lift is in stage pixels, set by fit()). */
+.live #subw{transition:transform .3s}
+.live:not(.idle) #subw{transform:translateY(calc(-1 * var(--sub-lift, 0px)))}
+#ctl{position:fixed;left:50%;bottom:20px;z-index:1;transform:translateX(-50%);width:min(880px,calc(100% - 32px));display:flex;align-items:center;gap:14px;padding:8px 14px;background:rgba(20,20,20,.88);border:1px solid var(--line);border-radius:var(--rs);color:var(--ink);transition:opacity .3s}
+.idle #ctl{opacity:0;pointer-events:none}
+#ctl button{display:flex;align-items:center;justify-content:center;flex:none;width:36px;height:36px;padding:0;border:0;background:none;color:var(--ink);border-radius:var(--rs);cursor:pointer}
+#ctl button[hidden]{display:none}
+#ctl button:hover{background:rgba(248,250,252,.08)}
+#ctl button:focus-visible{outline:2px solid var(--uv);outline-offset:1px}
+#ctl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#seek{flex:1;height:28px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+#seek i{display:block;width:100%;height:4px;border-radius:2px;background:rgba(248,250,252,.14)}
+#seek b{position:relative;display:block;height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,var(--violet),var(--uv))}
+#seek b:after{content:'';position:absolute;right:-6px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:3px;background:var(--ink);opacity:0;transition:opacity .15s}
+#seek:hover b:after,#seek.drag b:after{opacity:1}
+#time{flex:none;font-family:'Mono',monospace;font-size:14px;letter-spacing:.06em;color:var(--slate);white-space:nowrap}
 </style></head>
 <body>
 <div id="stage">
@@ -75,11 +97,188 @@ for(let i=0;i<110;i++){const e=document.createElement('i');e.style.left=(r()*192
 <script src="engine.js"></script>
 <script src="scenes.js"></script>
 <script>
+// Live player: started only when the page is opened without ?t=. Frozen mode never runs this code.
+function startPlayer() {
+  const root = document.documentElement;
+  const stage = document.getElementById('stage');
+  root.classList.add('live');
+
+  const ICON_PATHS = {
+    play: '<path d="M7 4.5v15l12-7.5z"/>',
+    pause: '<path d="M8 5v14M16 5v14"/>',
+    replay: '<path d="M4.6 15a8 8 0 1 0 1.8-8.7L4 8.5"/><path d="M4 3.5v5h5"/>',
+    enterFullscreen: '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>',
+    exitFullscreen: '<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>',
+  };
+  function setIcon(button, name, label) {
+    if (button.dataset.icon === name) return;
+    button.dataset.icon = name;
+    button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON_PATHS[name]}</svg>`;
+    button.setAttribute('aria-label', label);
+  }
+
+  // The overlay lives outside #stage so it keeps its size whatever the stage scale.
+  const ctl = document.createElement('div');
+  ctl.id = 'ctl';
+  ctl.innerHTML = '<button type="button" id="play"></button><div id="seek"><i><b></b></i></div>'
+    + '<span id="time"></span><button type="button" id="fs"></button>';
+  document.body.appendChild(ctl);
+  const playButton = document.getElementById('play');
+  const fullscreenButton = document.getElementById('fs');
+  const seekBar = document.getElementById('seek');
+  const seekFill = seekBar.querySelector('b');
+  const timeLabel = document.getElementById('time');
+
+  // Scale the 1920x1080 stage to fit the window, centered; the body background letterboxes it.
+  function fit() {
+    const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(-50%,-50%) scale(${scale})`;
+    // The subtitle sits 50 stage px above the stage bottom. If the controls cover it, compute how far
+    // to lift it (in stage px) so it clears them with a 12 px screen margin.
+    const letterboxBelow = (innerHeight - 1080 * scale) / 2;
+    const subtitleBottom = letterboxBelow + 50 * scale;
+    const controlsTop = innerHeight - ctl.getBoundingClientRect().top;
+    const lift = Math.max(0, controlsTop + 12 - subtitleBottom) / scale;
+    stage.style.setProperty('--sub-lift', `${lift}px`);
+  }
+  addEventListener('resize', fit);
+  fit();
+
+  let time = 0;
+  let playing = true;
+  let dragging = false;
+  let lastTick = performance.now();
+  let hideTimer = 0;
+
+  function formatTime(seconds) {
+    const s = Math.floor(seconds);
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  }
+
+  function updateControls() {
+    if (playing) setIcon(playButton, 'pause', 'Pause');
+    else if (time >= TOTAL) setIcon(playButton, 'replay', 'Replay');
+    else setIcon(playButton, 'play', 'Play');
+    seekFill.style.width = (time / TOTAL * 100) + '%';
+    timeLabel.textContent = `${formatTime(time)} / ${formatTime(TOTAL)}`;
+    if (!playing) root.classList.remove('idle');
+  }
+
+  function show() {
+    renderAt(time);
+    updateControls();
+  }
+
+  function seek(t) {
+    time = clamp(t, 0, TOTAL);
+    show();
+  }
+
+  function togglePlay() {
+    if (playing) {
+      playing = false;
+    } else {
+      if (time >= TOTAL) time = 0;
+      playing = true;
+    }
+    show();
+    wake();
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenEnabled) return;
+    if (document.fullscreenElement) document.exitFullscreen();
+    else root.requestFullscreen();
+  }
+
+  function updateFullscreenButton() {
+    if (document.fullscreenElement) setIcon(fullscreenButton, 'exitFullscreen', 'Exit fullscreen');
+    else setIcon(fullscreenButton, 'enterFullscreen', 'Fullscreen');
+  }
+
+  // Show the controls, then hide them (and the cursor) after 2.5 s without activity while playing.
+  function wake() {
+    root.classList.remove('idle');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (playing && !dragging && !ctl.matches(':hover')) root.classList.add('idle');
+    }, 2500);
+  }
+
+  function tick() {
+    const now = performance.now();
+    // Cap the step: a background tab gets no frames and should resume where it stopped, not jump ahead.
+    const dt = Math.min((now - lastTick) / 1000, 0.25);
+    lastTick = now;
+    if (playing && !dragging) {
+      time += dt;
+      if (time >= TOTAL) {
+        time = TOTAL; // stop on the last frame instead of looping
+        playing = false;
+      }
+      show();
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function seekToPointer(event) {
+    const box = seekBar.getBoundingClientRect();
+    seek((event.clientX - box.left) / box.width * TOTAL);
+  }
+
+  function endDrag() {
+    dragging = false;
+    seekBar.classList.remove('drag');
+    wake();
+  }
+
+  seekBar.addEventListener('pointerdown', event => {
+    dragging = true;
+    seekBar.classList.add('drag');
+    seekBar.setPointerCapture(event.pointerId);
+    seekToPointer(event);
+  });
+  seekBar.addEventListener('pointermove', event => {
+    if (dragging) seekToPointer(event);
+  });
+  seekBar.addEventListener('pointerup', endDrag);
+  seekBar.addEventListener('pointercancel', endDrag);
+
+  playButton.addEventListener('click', togglePlay);
+  fullscreenButton.addEventListener('click', toggleFullscreen);
+  fullscreenButton.hidden = !document.fullscreenEnabled;
+  // Keep mouse clicks from focusing the buttons, so Space stays a global play/pause key.
+  // Keyboard users can still Tab to a button and activate it natively.
+  for (const button of [playButton, fullscreenButton]) {
+    button.addEventListener('mousedown', event => event.preventDefault());
+  }
+
+  document.addEventListener('keydown', event => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (event.key === ' ' && event.target instanceof HTMLButtonElement) return;
+    if (event.key === ' ') togglePlay();
+    else if (event.key === 'ArrowLeft') seek(time - 5);
+    else if (event.key === 'ArrowRight') seek(time + 5);
+    else if (event.key === 'f' || event.key === 'F') toggleFullscreen();
+    else return;
+    event.preventDefault();
+    wake();
+  });
+  document.addEventListener('mousemove', wake);
+  document.addEventListener('fullscreenchange', updateFullscreenButton);
+
+  updateFullscreenButton();
+  show();
+  wake();
+  requestAnimationFrame(tick);
+}
+</script>
+<script>
 buildAll();
 const st=document.getElementById('stage');
 ['hdr','segs','subw'].forEach(id=>st.appendChild(document.getElementById(id)));
 const q=new URLSearchParams(location.search);
 if(q.has('t')) renderAt(parseFloat(q.get('t')));
-else { let t0=performance.now(); (function loop(){ renderAt(((performance.now()-t0)/1000)%TOTAL); requestAnimationFrame(loop);})(); }
+else startPlayer();
 </script>
 </body></html>

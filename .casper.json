@@ -2,7 +2,8 @@
   "workspace": {
     "scripts": {
       "setup": "make setup",
-      "run": "make render && open output/ai-agents-temporal-en.mp4"
+      "render": "make render && open output/ai-agents-temporal-en.mp4",
+      "run": "make serve"
     }
   }
 }

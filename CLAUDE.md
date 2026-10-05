@@ -21,18 +21,22 @@ make timeline                # scenes, subtitle timings and TOTAL duration
 make preview T="12 40 136"   # contact sheet -> output/preview.png
 make render                  # MP4, only if sources changed (-B to force)
 make srt                     # SRT, only if sources changed
+make html                    # standalone HTML player, only if sources changed
+make serve                   # HTML player on localhost:CASPER_PORT, else 8000
 ```
 
-In Casper, `casper run` (or the Run button) renders the video and opens the
-MP4; new workspaces run `make setup` automatically (`.casper.json`).
+In Casper (`.casper.json`), Run (`casper run`) serves the HTML player on
+`CASPER_PORT` (8000 in the primary workspace), Render (`casper run render`)
+renders and opens the MP4; new workspaces run `make setup` automatically.
 
 ## Modules
 
 - `src/`: the animation: `index.html` (stage, CSS), `engine.js` (timeline,
   helpers, components), `scenes.js` (subtitles and animations of 9 scenes)
-- `scripts/`: setup, frame preview, parallel render, timeline, SRT export
+- `scripts/`: setup, frame preview, parallel render, timeline, SRT export,
+  standalone HTML build and server
 - `docs/script.md`: full script: subtitles, timings, visuals
-- `output/`: generated `.srt` and `.mp4`
+- `output/`: generated `.srt`, `.mp4` and standalone `.html`
 
 ## Agents
 
@@ -88,5 +92,7 @@ not shared with the team.
   (subtitle start) so timings follow text changes.
 - Keep rendering deterministic (no `Math.random`): parallel workers render
   segments independently.
+- Live-mode player code (`startPlayer()`, `.live` CSS) must never affect the
+  frozen `?t=` mode: rendered frames must stay pixel-identical.
 - Check frames with `make preview` before `make render`; after a text change,
   run `make srt` and update `docs/script.md`.
