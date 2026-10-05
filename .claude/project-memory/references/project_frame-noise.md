@@ -14,7 +14,7 @@ Three kinds of differences are capture noise, not source changes:
   channel from one run to the next.
 - **Specks:** isolated pixels on tile edges and corners vary by 1 to 2
   levels, a few dozen pixels per frame at most. In chapter 7 they sit on
-  the step tiles, the memory panel corner (around x 827-835, y 564-573)
+  the step tiles, the memory panel corner (around x 827-835, y 596-605)
   and the LLM bill corner. They vary between pages that render the exact
   same sequence of frames.
 - **Rare layer re-raster:** about one page in fifteen draws some moving or

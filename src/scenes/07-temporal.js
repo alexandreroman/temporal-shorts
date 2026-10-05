@@ -9,6 +9,8 @@
   const HIST = { x: 1380, y: 580, cardX: 1050, row0: 447, rowGap: 44 }; // Event History card and its rows
   const memSlot = i => MEM.slot0 + i * MEM.slotGap;
   const rowY = i => HIST.row0 + i * HIST.rowGap;
+  // the big intro logo flies into the TEMPORAL panel header from c[0] + FLIGHT.at, for FLIGHT.d seconds
+  const FLIGHT = { at: 1.9, d: 0.8 };
   const makeAppPanel = (p, name) => {
     const e = E(p, `<div style="position:absolute;left:24px;top:20px;display:flex;align-items:center;gap:12px"><div class="gear">${ICON('gear', 30, C.ink, 1.8)}</div><span class="mono" style="font-size:20px;letter-spacing:.1em">${name}</span></div><div class="st mono" style="position:absolute;right:24px;top:26px;font-size:16px;letter-spacing:.08em;color:var(--slate)"></div>`, 'tile', { width: '780px', height: '310px', textAlign: 'left' });
     e.gear = e.querySelector('.gear'); e.st = e.querySelector('.st');
@@ -28,6 +30,10 @@
   };
   scene({
     chapter: 7, title: 'Durable Execution with Temporal',
+    // logo, then the app and Temporal panels, then the budget and benefits as the panels fade.
+    // The first pan runs with the logo flight and ends on whole pixels as it lands, so the
+    // native-size header logo that takes over stays pixel-aligned.
+    shift: (t, c) => pan(t, [0, -18], [[c[0] + FLIGHT.at, 0, 32], [c[4], 0, -10]], FLIGHT.d),
     subs: [
       { text: "<b>Durable Execution</b> with Temporal fixes this. Temporal keeps an Event History of the agent, outside the app.", after: 0.3 },
       { text: "After each LLM call or tool call, Temporal saves the result in the history before the agent moves on.", after: 0.2 },
@@ -85,7 +91,7 @@
       // Temporal logo: big intro, then it flies into the header of the Temporal panel.
       // Once landed, the native-size header logo takes over (hard swap, never both): Chromium rasterizes a
       // scaled-down image differently depending on the frames rendered before, which breaks parallel rendering.
-      const lp = P(t, c[0] + 0.1, 0.7, backOut), fl = P(t, c[0] + 1.9, 0.8);
+      const lp = P(t, c[0] + 0.1, 0.7, backOut), fl = P(t, c[0] + FLIGHT.at, FLIGHT.d);
       const landed = fl >= 1;
       const logoOpacity = landed ? 0 : clamp(lp * 2) * (1 - out);
       place(s.logo, lerp(960, 1005, fl), lerp(540, 325, fl), lp * lerp(1 + 0.06 * P(t, c[0] + 1.2, 0.6), 34 / 150, fl), logoOpacity);
