@@ -77,8 +77,9 @@ animation shows.
 
 - **1:47** Now the app running the agent crashes in the middle of the booking.
   Restarts, deploys, network cuts: it happens every day.
-  - Visuals: 4 steps, APP MEMORY blocks, LLM CALLS BILLED counter (3), ticket "1
-    booking", flash + APP CRASH.
+  - Visuals: 4 steps, APP MEMORY blocks (each with its step icon, LLM blocks in
+    UV, tool blocks in black), LLM CALLS BILLED counter (3), ticket
+    "1 booking", flash + APP CRASH.
 - **1:56** The context lived in the app's memory, not in the LLM. It's gone, so
   the agent has to start over.
   - Visuals: Memory blocks fall, EMPTY, "Start over" arrow.
@@ -97,8 +98,8 @@ animation shows.
   history before the agent moves on.
   - Visuals: Steps 1 to 3: for each row the app works (LLM rows bill a call), a
     RESULT card travels from the app to Temporal, the row appears with SAVED, a
-    block joins APP MEMORY, only then the step is checked; counter 3, ticket "1
-    booking".
+    block with the step icon joins APP MEMORY, only then the step is checked;
+    counter 3, ticket "1 booking".
 - **2:28** If the app crashes, another copy runs the agent again from the start.
   For every step already saved…
   - Visuals: Step 4 starts, flash + shake, A CRASHED, memory blocks fall
