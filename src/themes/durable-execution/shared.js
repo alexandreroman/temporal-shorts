@@ -444,3 +444,10 @@ Object.assign(ICONS, {
   list: '<path d="M9 6h12M9 12h12M9 18h12"/><path d="M3.5 6h1M3.5 12h1M3.5 18h1"/>',
   chevron: '<path d="M6 9l6 6 6-6"/>',
 });
+
+// ---------- Worker status icons (chapter 8): free (pause), restarting (power), deploying a new version (upload)
+Object.assign(ICONS, {
+  pause: '<path d="M8.5 5v14M15.5 5v14"/>',
+  power: '<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
+  upload: '<path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 14v6h16v-6"/>',
+});

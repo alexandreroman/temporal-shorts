@@ -203,15 +203,32 @@ money is tracked by a CARD CHARGED counter in dollars.
     retry policy, then "None"; DURATION counts live, and the badge turns
     Completed.
 
-## 08 What you get
+## 08 Durable timers
 
 - **2:41** A Workflow can even wait for days, for a delivery or a reply,
   without tying up a Worker.
-  - Visuals: Code card with `await sleep('30 days');` between
-    `shipPackage` and `askForReview`; a DURABLE TIMER tile fast-forwards
-    from day 1 to day 30 while the Worker shows FREE FOR OTHER WORK; on
-    day 30 (TIME IS UP) the next line runs.
-- **2:48** You write the business logic. Temporal handles retries, state
+  - Visuals: Left, a WORKER A panel (VERSION 1) with the `workflows.ts`
+    card: `shipPackage`, a comment, `await sleep('30 days');`,
+    `askForReview`, above a WORKER STATUS block; right, the TEMPORAL panel
+    with an EVENT HISTORY card and a DURABLE TIMER block. shipPackage runs,
+    row "shipPackage: tracking 1Z-48" SAVED; a START TIMER chip saves row
+    "TimerStarted: 30 days"; DAY 1 / 30, SLEEPING; the Worker shows FREE
+    FOR OTHER WORK.
+- **2:48** The timer is saved in the Event History, so Worker restarts and
+  deploys during the wait change nothing.
+  - Visuals: The timer ticks day by day to day 30 while the TimerStarted
+    row stays lit; the Worker shows RESTARTING…, then DEPLOYING V2…, and
+    WORKER A gives way to WORKER B (VERSION 2).
+- **2:56** On day 30, Temporal wakes the Workflow up: a Worker replays its
+  history and runs the next line.
+  - Visuals: TIME IS UP, row "TimerFired" SAVED; a WAKE UP chip flies to
+    the sleep line; Worker B shows REPLAYING… as the highlight walks the
+    code with the history rows, then RUNNING on `askForReview`, row
+    "askForReview: review requested" SAVED.
+
+## 09 What you get
+
+- **3:04** You write the business logic. Temporal handles retries, state
   and recovery, with full visibility.
   - Visuals: "You write the business logic", Temporal logo + a slate
     "HANDLES THE REST" sized to its wordmark, then 4 identical tiles:
@@ -220,7 +237,7 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 ## Outro
 
-- **2:57** Durable Execution: your code runs to completion, whatever fails
+- **3:13** Durable Execution: your code runs to completion, whatever fails
   along the way.
   - Visuals: The 4 step tiles checked, title "Durable Execution", violet
     line "YOUR CODE RUNS TO COMPLETION", Temporal logo.
