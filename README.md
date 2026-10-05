@@ -33,7 +33,7 @@ make preview T="3 140 160"   # contact sheet -> output/preview.png
 make render                  # full video -> output/ai-agents-temporal-en.mp4
 make srt                     # subtitles -> output/ai-agents-temporal-en.srt
 make html                    # standalone player -> output/ai-agents-temporal-en.html
-make serve                   # serves that player on http://localhost:8000
+make serve                   # hot-reloading player on http://localhost:8000
 ```
 
 `make render`, `make srt` and `make html` only rebuild when a source file (`src/`,
@@ -62,6 +62,12 @@ with the same player.
 port is `CASPER_PORT` in a Casper workspace, 8000 otherwise; override it with
 `make serve PORT=9000`. In Casper, the Run button (`casper run`) serves the player and shows its
 URL in the info panel; the Render button renders the video and opens the MP4.
+
+`make serve` hot-reloads: edit a file in `src/` and the server rebuilds the
+page, then every open tab reloads by itself and resumes at the same position
+(a manual reload resumes too). A failed build prints its error and keeps the
+last good page. The reload script is added to the served page only, never to
+the built file.
 
 ## Editing
 
