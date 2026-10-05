@@ -272,3 +272,72 @@ function shakeAt(t, crashAt) {
 }
 // red flash intensity (0 to 1) peaking at the crash
 function flashAt(t, crashAt) { return Math.max(0, 1 - Math.abs(t - crashAt) / 0.28); }
+
+// ---------- one shot for chapters 5 and 6: Worker panel with the code card on the left, CARD CHARGED counter
+// and order status under it, TEMPORAL panel with the Event History on the right. Both chapters build it with
+// the same coordinates, so the cut from chapter 5 to chapter 6 reads as one continuous shot.
+// Coordinates are on the 1080 px stage; EH.shift centers the composition at (960, 522).
+const EH = {
+  shift: [10, -63],
+  worker: { x: 450, y: 470 },
+  temporal: { x: 1420, y: 515, w: 760, h: 490 },
+  histW: 700,
+  histTop: 348, // the history card hangs 78 px below the top of the TEMPORAL panel, under its logo header
+  charge: { x: 270, y: 800 },
+  orderLeft: 470, // the order status pill is left-aligned next to the counter (its width follows its text)
+  crashRow: 3, // the Worker crashes while row 4 (shipPackage) is running
+  crashGap: 40, // room above row 4 for the "WORKER CRASHED HERE" line
+  lineEndX: 688, // RESULT chips leave and reach the code at the right end of the lines
+  spinX: 740, // running spinner, at the right end of the highlighted line
+  rowStartX: 1190, // RESULT chips reach and leave the history at the start of the row text
+};
+// Stage y of code line i and of history row i (rows below the crash line sit EH.crashGap lower)
+const ehLineY = i => EH.worker.y + WORKER.codeDy - (CODE.padY * 2 + ORDER_CODE.length * CODE.lineH) / 2
+  + CODE.padY + (i + 0.5) * CODE.lineH;
+const ehRowY = i => EH.histTop + HIST.row0 + (i + 0.5) * HIST.rowGap + (i >= EH.crashRow ? EH.crashGap : 0);
+
+// Builds the shot: one Worker panel per name (stacked in the same place), then the code card (WORKFLOW tab),
+// its spinner, the counter, the order status, the TEMPORAL panel and the Event History with room for the crash line
+function makeEventHistoryShot(root, workerNames) {
+  const shot = {};
+  shot.workers = workerNames.map(name => makeWorkerPanel(root, name));
+  shot.code = makeCodeCard(root, { header: 'Workflow' });
+  shot.code.hdr.style.opacity = 1;
+  shot.spin = E(root,
+    '<div style="width:26px;height:26px;border:3px solid rgba(182,100,255,.3);'
+    + `border-top-color:${C.violet};border-radius:50%"></div>`);
+  shot.spin.ring = shot.spin.firstChild;
+  shot.charge = makeCharge(root);
+  shot.order = makeOrderStatus(root);
+  shot.temporal = makeTemporalPanel(root, EH.temporal.w, EH.temporal.h);
+  const hist = makeHistory(root, HISTORY_ROWS, EH.histW);
+  hist.h += EH.crashGap;
+  hist.style.height = hist.h + 'px';
+  for (let i = EH.crashRow; i < hist.rows.length; i++) {
+    hist.rows[i].style.top = (parseFloat(hist.rows[i].style.top) + EH.crashGap) + 'px';
+    hist.tags[i].style.top = (parseFloat(hist.tags[i].style.top) + EH.crashGap) + 'px';
+  }
+  hist.rowY = i => ehRowY(i) - EH.histTop - hist.h / 2;
+  shot.hist = hist;
+  return shot;
+}
+// Places everything but the Worker panels (o: opacity of each part; [sx, sy]: shake of the Worker side)
+function placeEventHistoryShot(shot, o, sx = 0, sy = 0) {
+  place(shot.code, EH.worker.x + sx, EH.worker.y + WORKER.codeDy + sy, 1, o.code);
+  place(shot.charge, EH.charge.x, EH.charge.y, 1 + 0.06 * (o.chargePop || 0), o.charge);
+  // left-aligned: the pill keeps its left edge when its status text changes
+  place(shot.order, EH.orderLeft, EH.charge.y, 1, o.order);
+  shot.order.style.transform = `translate(${EH.orderLeft}px,${EH.charge.y}px) translate(0,-50%)`;
+  place(shot.temporal, EH.temporal.x, EH.temporal.y, 1, o.temporal);
+  place(shot.hist, EH.temporal.x, EH.histTop + shot.hist.h / 2, 1, o.hist);
+}
+// Running spinner at the right end of code line i (fractional i follows the sliding highlight)
+function setCodeSpinner(shot, i, o, sx = 0, sy = 0) {
+  place(shot.spin, EH.spinX + sx, ehLineY(i) + sy, 1, o);
+  shot.spin.ring.style.transform = `rotate(${G * 400}deg)`;
+}
+// Crash marks of the shot: rows 1-3 tinted, "WORKER CRASHED HERE" centered in the room above row 4
+function markEventHistoryCrash(hist, oKept, oCut) {
+  markHistoryCrash(hist, EH.crashRow, oKept, oCut);
+  hist.cut.style.top = (HIST.row0 + EH.crashRow * HIST.rowGap + EH.crashGap / 2 - 1) + 'px';
+}
