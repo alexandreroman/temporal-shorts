@@ -14,8 +14,9 @@ from a deterministic HTML animation. Each video is a theme:
   Execution with Temporal
 - `agent-harness`: Temporal Agent Harness, a presentation of the
   experimental project of the same name for developers: durable agents
-  built with the AI SDKs they already use, human approvals, one event
-  stream, typed subagents and Code Mode
+  built with the AI SDKs they already use, turns, human approvals, one
+  event stream, typed subagents and Code Mode; it may run up to 5:00 (an
+  exception to the 3:00 limit) so every scene takes its time
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the scripts require `--theme`. A home page

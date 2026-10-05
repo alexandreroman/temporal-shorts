@@ -24,7 +24,7 @@ takes its time.
 - Running example: a travel agent planning a 3-night trip to Lisbon, with
   the harness's real example tool names in code font (`search_flights`,
   `search_hotels`, `book_flight`, `book_hotel`) and one set of figures
-  across chapters ($480 flight, $895 trip total).
+  across chapters: $480 flight, $390 hotel, $25 tour, $895 trip total.
 - Vocabulary: the runtime is "the app", as in
   [On-screen vocabulary](feedback_vocabulary.md); the SDKs are "OpenAI
   Agents SDK", "Google Gen AI SDK" and "Pydantic AI"; subtitles name
@@ -37,8 +37,8 @@ takes its time.
 - Centering: chapter scenes are laid out in final coordinates with
   `shift: [0, 0]` (see
   [Agent Harness layout grid](feedback_agent-harness-layout-grid.md));
-  chapter 1 eases with `pan()` while its SDK tags fade, and chapter 4 while
-  its console slides in.
+  chapter 1 eases with `pan()` while its SDK tags fade, chapter 4 while its
+  console slides in, and chapter 7 while its UI window enters.
 
 **Why:** the audience writes code and will spot an invented feature or
 broken snippet; one example with consistent figures keeps the chapters

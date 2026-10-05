@@ -79,14 +79,9 @@ function showRow(e, p, dx = 26) {
   e.style.transform = `translateX(${(1 - p) * dx}px)`;
 }
 
-// Short pulse when a value or status changes at `at`: 1 at its peak, 0 outside it; drives swell() or a flash
-function pulse(t, at) {
-  return Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
-}
-
 // Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it
 function swell(t, at, amp) {
-  return 1 + amp * pulse(t, at);
+  return 1 + amp * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
 }
 
 // Number of arrow head markers created so far: it makes each marker id unique in the document

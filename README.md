@@ -16,7 +16,8 @@ subtitles) about Temporal. Each video is a theme:
 - **Temporal Agent Harness** (`agent-harness`): for developers, the
   experimental project of the same name: AI agents that run as durable
   Temporal Workflows while you keep your AI SDK, with human approvals, one
-  event stream, typed subagents and Code Mode.
+  event stream, typed subagents and Code Mode. It may run up to 5:00, an
+  exception to the 3:00 limit, so every scene takes its time.
 
 A home page lists the themes and opens their players.
 

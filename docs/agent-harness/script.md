@@ -73,24 +73,26 @@ Lisbon.
   - Visuals: MESSAGES on the left, REPLIES on the right of the frame; "Plan
     a trip to Lisbon, 3 nights" enters the frame and opens TURN 1 (RUNNING,
     "RUN BY THE HARNESS"); the loop makes a lap; the AGENT reply "Your
-    trip: flight $480, hotel $390, tour $25." is typed word by word and
-    TURN 1 shows ENDED; the loop dims: "WAITING FOR THE NEXT MESSAGE".
+    trip: flight $480, hotel $390." is typed word by word and TURN 1 shows
+    ENDED; the loop dims: "WAITING FOR THE NEXT MESSAGE".
 - **0:39** The next message opens turn 2. The agent stays alive between
   turns, with its state intact.
-  - Visuals: "Make it 4 nights" opens TURN 2, the loop laps again, "Updated:
-    4 nights, hotel $520." is typed under the first reply and TURN 2 shows
-    ENDED.
-- **0:47** An LLM call is one step. A turn is the whole job behind one
-  message: often many model and tool calls.
+  - Visuals: "Add a city tour" opens TURN 2, the loop laps again, "Added:
+    Tram 28 tour $25. Total $895." is typed under the first reply and TURN 2
+    shows ENDED.
+- **0:47** An LLM call is one step. A turn lasts until the agent is idle
+  again: often many model and tool calls.
   - Visuals: the frame gives way to a comparison: AN LLM CALL, ONE STEP
-    (`text in` → Model → `text out`) above A TURN, THE WHOLE JOB BEHIND ONE
-    MESSAGE: from the user message to the reply, Model, `search_flights`,
-    Model, `search_hotels`, Model appear one by one, linked in a wave.
-- **0:57** The harness saves each call as it completes, and streams the
-  whole turn as one unit.
-  - Visuals: each call gets SAVED in turn; violet arrows retrace the whole
-    turn and a bracket under it reads STREAMED AS ONE TURN.
-- **1:05** It adds what is painful to build yourself: crash recovery,
+    (`text in` → Model → `text out`, deliberately short) above A TURN, UNTIL
+    THE AGENT IS IDLE AGAIN: from the user message to the reply, Model,
+    `search_flights`, Model, `search_hotels`, Model appear one by one,
+    linked in a wave.
+- **0:57** The harness saves each call as it completes, and streams every
+  step of the turn live.
+  - Visuals: as each call gets SAVED, the violet stream link to it draws and
+    the chip lights; a bracket under the whole turn reads STREAMED LIVE,
+    REPLAYABLE.
+- **1:06** It adds what is painful to build yourself: crash recovery,
   approvals, observability, composition.
   - Visuals: the harness frame returns; four capability tiles plug into the
     frame in subtitle order, two on each side, aligned with the frame's top
@@ -99,7 +101,7 @@ Lisbon.
 
 ## 02 Survives crashes
 
-- **1:18** Every model call and tool call is saved in the agent's Temporal
+- **1:17** Every model call and tool call is saved in the agent's Temporal
   history as soon as it completes.
   - Visuals: five step tiles (PLAN, SEARCH FLIGHTS, PICK, BOOK FLIGHT,
     REPLY); APP INSTANCE A works on step 1, then step 2: each finished step
@@ -107,23 +109,23 @@ Lisbon.
     the app), where its row appears with SAVED (Model: plan the trip /
     search_flights: 3 flights found); MODEL CALLS BILLED counts the model
     steps.
-- **1:27** The next step starts only after the previous result is saved,
+- **1:26** The next step starts only after the previous result is saved,
   outside the app.
   - Visuals: steps 3 and 4 run the same way (Model: pick the $480 flight /
     book_flight: booked, $480), each starting once the previous row shows
     SAVED; MODEL CALLS BILLED 2, FLIGHTS BOOKED 1.
-- **1:34** If the app crashes mid-turn, another copy picks up the agent
+- **1:33** If the app crashes mid-turn, another copy picks up the agent
   exactly where it left off.
   - Visuals: step 5 starts, flash + shake, A turns red (CRASHED), "APP
     CRASHED HERE" under row 4 and the saved rows tinted; APP INSTANCE B
     takes over (TAKING OVER).
-- **1:41** Instance B replays the history: steps 1 to 4 return their saved
+- **1:40** Instance B replays the history: steps 1 to 4 return their saved
   results, then step 5 runs for real.
   - Visuals: rows 1 to 4 are handed back one by one (REUSED, "STEP n: FROM
     THE HISTORY"), the steps re-check without running, the counters show
     NOT RE-BILLED / NOT RE-RUN; step 5 then runs and is SAVED (Model: write
     the reply).
-- **1:51** Saved results are reused, not redone: no token is paid twice, and
+- **1:50** Saved results are reused, not redone: no token is paid twice, and
   no tool runs twice.
   - Visuals: tags "REUSED, NOT RE-BILLED" (model rows) and "REUSED, NOT
     RE-RUN" (tool rows); counters glow: MODEL CALLS BILLED 3 "NOT 5",
@@ -131,29 +133,30 @@ Lisbon.
 
 ## 03 Human approvals
 
-- **2:01** Some tool calls need a person's OK first, like a payment. The
+- **2:00** Some tool calls need a person's OK first, like a payment. The
   approval policy decides which ones.
   - Visuals: the AGENT sends tool calls along a lane through the APPROVAL
     POLICY gate and its RULES (`search_flights` ALLOW, `search_hotels`
     ALLOW, everything else ASK) to TOOLS: `search_flights` and
     `search_hotels` are ALLOWED; `book_flight $480` stops at the gate:
     NEEDS APPROVAL.
-- **2:10** The call pauses inside the Workflow, for minutes or days, then
+- **2:09** The call pauses inside the Workflow, for minutes or days, then
   resumes as soon as someone approves.
   - Visuals: pause badge, DURABLE WAIT clock racing from "5 MIN" to "2
     DAYS", a request line to YOU; APPROVE is pressed, the call becomes
     APPROVED, passes the gate and runs: BOOKED.
-- **2:20** Auto mode lets code or a model approve routine calls, judged
+- **2:19** Auto mode lets code or a model approve routine calls, judged
   against criteria you define.
   - Visuals: an AUTO MODE judge docks on the gate with its rule "approve:
     hotel under $500"; `book_hotel $210` parks while the judge works, then
     is AUTO-APPROVED and runs.
-- **2:28** Anything unclear, like a $2,400 hotel, still goes to a human.
+- **2:27** Anything it won't approve, like a $2,400 hotel, still goes to a
+  human.
   - Visuals: `book_hotel $2,400` parks, is ESCALATED and drops to YOU.
 
 ## 04 One event stream
 
-- **2:37** Every agent publishes the same event stream: turns, model calls,
+- **2:38** Every agent publishes the same event stream: turns, model calls,
   tool calls, approvals and token usage.
   - Visuals: three agents (OpenAI Agents SDK, Google Gen AI SDK, Pydantic
     AI) emit typed event chips (TURN, MODEL, TOOL, APPROVAL, TOKENS) that
@@ -162,7 +165,7 @@ Lisbon.
   as it happens.
   - Visuals: the view pans to a CONSOLE fed by the lane; seven event rows
     appear one by one under a LIVE badge.
-- **2:53** Or replay it afterward: exactly what it did, what it cost and
+- **2:54** Or replay it afterward: exactly what it did, what it cost and
   where a human stepped in.
   - Visuals: the badge switches to REPLAY, the playhead rewinds and sweeps
     the rows again; "approved by a human" gets a HUMAN tag and "turn ended
@@ -196,7 +199,7 @@ Lisbon.
     times (6 ROUND TRIPS), then dim; CODE MODE: a SCRIPT WRITTEN BY THE
     MODEL is typed: `asyncio.gather(search_flights, search_hotels)`, `min`
     by price, `book_flight(best)`.
-- **3:39** Loops, conditions and parallel calls all run inside the script,
+- **3:40** Loops, conditions and parallel calls all run inside the script,
   in one turn.
   - Visuals: the script runs: both searches run at once and are SAVED;
     "best: $480" on the `min` line.
@@ -220,13 +223,13 @@ Lisbon.
     a TYPED SESSION; a TYPED SDKS row: REACT / SVELTE.
 - **4:14** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
-  - Visuals: six recap tiles, one per chapter, as the subtitle names them:
-    Survives crashes / Event stream / Typed subagents / Human approvals /
-    Code Mode / Your AI SDK.
+  - Visuals: six recap tiles land one by one, one per topic: Survives
+    crashes / Event stream / Typed subagents / Human approvals / Code Mode /
+    Your AI SDK.
 
 ## Outro
 
-- **4:24** Temporal Agent Harness is experimental and open source. Try the
+- **4:25** Temporal Agent Harness is experimental and open source. Try the
   examples and build your own agents.
   - Visuals: LLM orb, takeaway title "Your agent, harnessed", violet line
     "YOUR LOOP AND YOUR SDKS, RUN DURABLY BY TEMPORAL", EXPERIMENTAL tag,

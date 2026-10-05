@@ -112,7 +112,7 @@
       },
       {
         text: "Every call stays durable, approved and visible, and the whole script takes one round trip, not six.",
-        // the tag row settles about 1 s before the window ends; post then holds the final composition
+        // the tag row settles at c[2] + 6.65, about 1 s before the window ends; post then holds the final composition
         after: 1.0,
       },
     ],
@@ -304,10 +304,10 @@
       place(s.vs, (COUNT.x[0] + COUNT.x[1]) / 2, COUNT.y, 1, compare);
       const oneTripIn = P(t, c[2] + 5.3, 0.45, backOut);
       place(s.oneTrip, COUNT.x[1], COUNT.y, oneTripIn, clamp(oneTripIn * 2));
-      // and what every call keeps
-      place(s.tagRow, CODE.x, BOTTOM - RIGHT.tagH / 2, 1, P(t, c[2] + 6.5, 0.4));
+      // and what every call keeps, right after the payoff
+      place(s.tagRow, CODE.x, BOTTOM - RIGHT.tagH / 2, 1, P(t, c[2] + 5.5, 0.4));
       s.tags.forEach((e, i) => {
-        const p = P(t, c[2] + 6.6 + i * 0.3, 0.45, backOut);
+        const p = P(t, c[2] + 5.6 + i * 0.3, 0.45, backOut);
         e.style.transform = `scale(${p})`;
         e.style.opacity = clamp(p * 2);
       });

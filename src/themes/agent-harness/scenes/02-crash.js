@@ -87,7 +87,7 @@
     subs: [
       {
         text: "Every model call and tool call is saved in the agent's Temporal history as soon as it completes.",
-        after: 1.3,
+        after: 1.75,
       },
       { text: 'The next step starts only after the previous result is saved, outside the app.', after: 2.2 },
       { text: "If the app crashes mid-turn, another copy picks up the agent exactly where it left off.", after: 0.6 },

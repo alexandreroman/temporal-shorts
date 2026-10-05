@@ -75,10 +75,10 @@
   // the SDK tags sit well below the loop, where the frame's bottom edge comes later
   const SDK_Y = LOOP.cy + 330;
   // the turn beat uses the side columns before the capability tiles take them: messages on the left, replies on
-  // the right. Headings on the harness header's center line, cards below with explicit even heights (2, 3 and
-  // 1 lines of text), so their centers rest on whole pixels
+  // the right. Headings on the harness header's center line, cards below with explicit even heights (2 or 1
+  // lines of text), so their centers rest on whole pixels
   const COL = { left: capX(-1), right: capX(1), headY: FRAME.y0 + 38, top: FRAME.y0 + 79, gap: 40 };
-  const CARD_H = { msg1: 124, reply1: 162, msg2: 88, reply2: 124 };
+  const CARD_H = { msg1: 124, reply1: 124, msg2: 88, reply2: 124 };
   const msg1Y = COL.top + CARD_H.msg1 / 2;
   const reply1Y = COL.top + CARD_H.reply1 / 2;
   const msg2Y = COL.top + CARD_H.msg1 + COL.gap + CARD_H.msg2 / 2;
@@ -129,11 +129,12 @@
   // that leads to it, and the reply comes out
   const CMP_AT = { head1: 0.3, strip: 0.6, head2: 1.4, msg: 1.6, call0: 2.5, callGap: 1.0, link: 0.4 };
   CMP_AT.reply = CMP_AT.call0 + TURN_CALLS.length * CMP_AT.callGap;
-  // the durability beat of c[5]: each call is saved, one after the other, then the whole turn streams, one link
-  // after the other, the bracket closes under it and the pill pops on it
-  const SAVE_AT = { saved0: 0.4, savedGap: 0.8, seg: 0.25 };
-  SAVE_AT.stream = SAVE_AT.saved0 + TURN_CALLS.length * SAVE_AT.savedGap;
-  SAVE_AT.streamed = SAVE_AT.stream + 6 * SAVE_AT.seg;
+  // the durability beat of c[5]: each call is saved, and streams live at once: the link leading to it draws and
+  // the chip lights. After the last call, the reply streams, the bracket closes under the turn and the pill pops
+  const SAVE_AT = { saved0: 0.5, savedGap: 1.2, seg: 0.35 };
+  const savedAt = i => SAVE_AT.saved0 + i * SAVE_AT.savedGap;
+  SAVE_AT.reply = savedAt(TURN_CALLS.length - 1) + SAVE_AT.seg;
+  SAVE_AT.streamed = SAVE_AT.reply + 0.5;
   // a straight arrow drawn inline in a flex row, its head filled explicitly (see arrowPath)
   const inlineArrow = (w, color) => `<svg width="${w}" height="14" viewBox="0 0 ${w} 14" style="display:block">`
     + `<path d="M1.5 7 H ${w - 8}" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>`
@@ -169,16 +170,16 @@
         after: 1.9,
       },
       {
-        text: "An LLM call is one step. A turn is the whole job behind one message: often many model and tool calls.",
+        text: "An LLM call is one step. A turn lasts until the agent is idle again: often many model and tool calls.",
         after: 2.5,
       },
       {
-        text: "The harness saves each call as it completes, and streams the whole turn as one unit.",
-        after: 2.3,
+        text: "The harness saves each call as it completes, and streams every step of the turn live.",
+        after: 2.7,
       },
       {
         text: "It adds what is painful to build yourself: crash recovery, approvals, observability, composition.",
-        after: 2.8,
+        after: 0.8,
       },
     ],
     build(root, s) {
@@ -245,9 +246,9 @@
         return e;
       };
       s.msg1 = card('Plan a trip to Lisbon, 3 nights', 'user', 'USER', CARD_H.msg1);
-      s.reply1 = card('Your trip: flight $480, hotel $390, tour $25.', 'llm', 'AGENT', CARD_H.reply1);
-      s.msg2 = card('Make it 4 nights', 'user', 'USER', CARD_H.msg2);
-      s.reply2 = card('Updated: 4 nights, hotel $520.', 'llm', 'AGENT', CARD_H.reply2);
+      s.reply1 = card('Your trip: flight $480, hotel $390.', 'llm', 'AGENT', CARD_H.reply1);
+      s.msg2 = card('Add a city tour', 'user', 'USER', CARD_H.msg2);
+      s.reply2 = card('Added: Tram 28 tour $25. Total $895.', 'llm', 'AGENT', CARD_H.reply2);
       // the empty slot where the next message lands while the harness waits
       s.slot = E(root, 'Waiting for the next message', 'lbl', {
         width: CAP.w + 'px', height: CARD_H.msg2 + 'px', fontSize: '16px', border: `1.5px dashed ${C.slate}`,
@@ -278,7 +279,7 @@
       Object.assign(s.status.style, {
         position: 'relative', opacity: 1, fontSize: '16px', width: '124px', height: '32px', justifyContent: 'center',
       });
-      // c[4]: one LLM call, a compact strip on the top row
+      // c[4]: one LLM call, a compact strip on the top row, deliberately short against the long turn row below
       s.callHead = makeHeading(root, 'An LLM call', 'One step', CMP.head1Top);
       const codeText = text => `<span class="mono" style="font-size:22px;color:var(--slate)">${text}</span>`;
       s.callStrip = E(root, codeText('text in') + inlineArrow(64, C.slate), '', {
@@ -289,14 +290,14 @@
       Object.assign(model.style, { position: 'relative', opacity: 1 });
       s.callStrip.insertAdjacentHTML('beforeend', inlineArrow(64, C.slate) + codeText('text out'));
       // one turn, on the bottom row: slate links under the chips, and their violet copies for the stream
-      s.turnHead = makeHeading(root, 'A turn', 'The whole job behind one message', CMP.head2Top);
+      s.turnHead = makeHeading(root, 'A turn', 'Until the agent is idle again', CMP.head2Top);
       s.turnLinks = turnLinks().map(d => arrowPath(s.svg, d, C.slate, 2.5));
       s.streamLinks = turnLinks().map(d => arrowPath(s.svg, d, C.violet, 3));
       const { left, right, bracketY, tick } = CMP;
       s.bracket = path(s.svg, `M ${left} ${bracketY - tick} V ${bracketY} H ${right} V ${bracketY - tick}`,
         C.violet, 2.5, false);
       s.turnMsg = card('Plan a trip to Lisbon, 3 nights', 'user', 'USER', CARD_H.msg1);
-      s.turnReply = card('Your trip: flight $480, hotel $390, tour $25.', 'llm', 'AGENT', CARD_H.reply1);
+      s.turnReply = card('Your trip: flight $480, hotel $390.', 'llm', 'AGENT', CARD_H.reply1);
       [s.turnMsg, s.turnReply].forEach(e => { e.style.width = CMP.cardW + 'px'; });
       s.calls = TURN_CALLS.map(([name, cls]) => callCard(root, name, '', cls));
       s.saved = TURN_CALLS.map(() => {
@@ -306,7 +307,7 @@
         return e;
       });
       // opaque violet tint, so the bracket line does not show through the pill
-      s.streamed = tag(root, 'Streamed as one turn', 'violet');
+      s.streamed = tag(root, 'Streamed live, replayable', 'violet');
       s.streamed.style.background = OPAQUE.violet;
     },
     update(t, c, s) {
@@ -322,8 +323,9 @@
       const tokenAway = P(t, c[2] + BEAT.wait, 0.4) * (1 - P(t, c[3] + BEAT.run, 0.2));
       const loopO = (1 - 0.5 * idle) * harnessO;
       s.arcs.forEach((a, i) => draw(a, P(t, c[0] + 3.0 + i * 0.3, 0.45), loopO));
-      // token: one eased leg per node, so it slows down as it reaches each node and slips behind it; between
-      // runs it rests behind the model (hidden while the dimmed model would show it through)
+      // token: one eased leg per node, so it slows down as it reaches each node and slips behind it. Between runs
+      // it rests hidden behind the model, so it hides whenever the harness is not fully lit: a dimmed or fading
+      // model would show it through
       const u = tokenLegs(t, c);
       let near = -1, deg = NODES[0].deg;
       if (u !== null) {
@@ -335,8 +337,6 @@
         });
       }
       const [tx, ty] = loopPos(deg);
-      // it rests behind the model from turn 2 on, so it simply hides while the harness is not fully lit: a
-      // half-transparent model would show it through
       const harnessLit = harnessO === 1 ? 1 : 0;
       place(s.token, tx, ty, 1, P(t, c[0] + TOKEN_AT, 0.3) * (1 - tokenAway) * harnessLit);
       const [mx, my] = loopPos(NODES[0].deg);
@@ -378,8 +378,7 @@
       const p1 = P(t, b1 + BEAT.msg, 0.45, backOut);
       place(s.msg1, COL.left, msg1Y, p1, clamp(p1 * 2) * out);
       draw(s.in1, P(t, b1 + BEAT.arrow, 0.4), out);
-      // the badge pops as the message enters the frame; later changes only swap its text and colors: a text
-      // scaled after it came to rest rasterizes differently depending on the frames rendered before
+      // the badge pops as the message enters the frame, then its status swells briefly at each change
       const pB = P(t, b1 + BEAT.run, 0.45, backOut);
       s.badge.style.transform = `scale(${pB})`;
       s.badge.style.opacity = clamp(P(t, b1 + BEAT.run, 0.45) * 2) * out;
@@ -387,6 +386,8 @@
       s.turnN.textContent = turn2 ? '2' : '1';
       const ended = t >= (turn2 ? b2 : b1) + BEAT.ended;
       setStatus(s.status, ended ? 'ENDED' : 'RUNNING', ended ? 'ok' : 'wait');
+      const statusSwell = Math.max(...[b1 + BEAT.ended, b2 + BEAT.run, b2 + BEAT.ended].map(at => swell(t, at, 0.08)));
+      s.status.style.transform = `scale(${statusSwell})`;
       // each reply streams out word by word once its lap is back on the model, the second under the first
       draw(s.out1, P(t, b1 + BEAT.reply, 0.3), out);
       const pR1 = P(t, b1 + BEAT.reply + 0.1, 0.45, backOut);
@@ -404,7 +405,7 @@
       place(s.msg2, COL.left, msg2Y, p2, clamp(p2 * 2) * out);
       draw(s.in2, P(t, b2 + BEAT.arrow, 0.4), out);
       // c[4]: the LLM call row, then the turn row: each call pops after the link leading to it, then the reply.
-      // c[5]: each call is saved, then the whole turn streams, link after link, and the bracket closes under it.
+      // c[5]: each call streams live as soon as it is saved, then the reply, and the bracket closes under the turn.
       // All of it fades out at c[6]
       const cmpO = 1 - P(t, c[6], 0.4);
       const b4 = c[4], b5 = c[5];
@@ -418,8 +419,9 @@
       fadeIn(s.turnHead, CMP_AT.head2);
       const pMsg = P(t, b4 + CMP_AT.msg, 0.45, backOut);
       place(s.turnMsg, CMP.left + CMP.cardW / 2, CMP.cardY, pMsg, clamp(pMsg * 2) * cmpO);
-      // link k leads into call k (the last one into the reply card) and streams in the k-th slot of the sweep
-      const streamAt = k => b5 + SAVE_AT.stream + k * SAVE_AT.seg;
+      // link k leads into call k and streams as soon as call k is saved; the last one, into the reply card,
+      // streams once the last call is lit
+      const streamAt = k => b5 + (k < TURN_CALLS.length ? savedAt(k) : SAVE_AT.reply);
       s.turnLinks.forEach((l, k) => {
         const at = k < TURN_CALLS.length ? CMP_AT.call0 + k * CMP_AT.callGap : CMP_AT.reply;
         draw(l, P(t, b4 + at - CMP_AT.link, CMP_AT.link), cmpO);
@@ -427,22 +429,23 @@
       });
       s.calls.forEach((e, i) => {
         const p = P(t, b4 + CMP_AT.call0 + i * CMP_AT.callGap, 0.4, backOut);
-        // the chip's border turns violet as the stream reaches it (no swell: see the turn badge)
-        place(e, CMP.xs[i], callY(i), p, clamp(p * 2) * cmpO);
-        e.style.borderColor = t >= streamAt(i + 1) ? C.violet : (isModelCall(i) ? C.uv : '');
-        const pS = P(t, b5 + SAVE_AT.saved0 + i * SAVE_AT.savedGap, 0.3, backOut);
+        // the chip lights violet and swells as the stream reaches it
+        const litAt = streamAt(i) + SAVE_AT.seg;
+        place(e, CMP.xs[i], callY(i), p * swell(t, litAt, 0.08), clamp(p * 2) * cmpO);
+        e.style.borderColor = t >= litAt ? C.violet : (isModelCall(i) ? C.uv : '');
+        const pS = P(t, b5 + savedAt(i), 0.3, backOut);
         place(s.saved[i], CMP.xs[i], statusY(i), pS, clamp(pS * 2) * cmpO);
       });
       const pReply = P(t, b4 + CMP_AT.reply, 0.45, backOut);
       place(s.turnReply, CMP.right - CMP.cardW / 2, CMP.cardY, pReply, clamp(pReply * 2) * cmpO);
-      // the bracket draws under the turn along with the sweep, then the pill pops on it (half a pixel low, so
+      // the bracket draws under the turn as the reply streams, then the pill pops on it (half a pixel low, so
       // the 49 px pill rests on whole pixels)
-      draw(s.bracket, P(t, b5 + SAVE_AT.stream, SAVE_AT.streamed - SAVE_AT.stream, x => x), cmpO);
+      draw(s.bracket, P(t, b5 + SAVE_AT.reply, SAVE_AT.streamed - SAVE_AT.reply, x => x), cmpO);
       const pSt = P(t, b5 + SAVE_AT.streamed, 0.45, backOut);
       place(s.streamed, 960, CMP.bracketY + 0.5, pSt, clamp(pSt * 2) * cmpO);
       // c[6]: each capability pops beside the frame as the subtitle names it, and plugs in with a short link
       CAPS.forEach(([, , side, row], i) => {
-        const a = c[6] + 2.4 + i * 1.5;
+        const a = c[6] + 1.6 + i * 1.2;
         const p = P(t, a, 0.45, backOut);
         place(s.caps[i], capX(side), capY(row), p, clamp(p * 2));
         draw(s.links[i], P(t, a + 0.3, 0.3));

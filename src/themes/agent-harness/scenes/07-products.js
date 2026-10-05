@@ -84,7 +84,7 @@
     subs: [
       {
         text: "Callback tools run on the user's own device: the agent asks, the laptop runs the tool and replies.",
-        after: 1.1,
+        after: 1.55,
       },
       {
         text: "Typed React and Svelte SDKs turn your agent into a live, typed session inside your product UI.",

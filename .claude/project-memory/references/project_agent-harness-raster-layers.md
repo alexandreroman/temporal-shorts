@@ -16,7 +16,7 @@ above 100) depending on the frames rendered before it.
 
 **Why:** the renderer splits the video into segments drawn by parallel
 workers that start at arbitrary frames; a layer keeps the raster of earlier
-scales and positions, so segments disagreed. The override costs no
+scales and positions, so segments disagree. The override costs no
 measurable render time.
 
 **How to apply:** keep the override on this theme's page; scenes need no

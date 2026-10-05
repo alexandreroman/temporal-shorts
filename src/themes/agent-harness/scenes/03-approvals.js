@@ -70,10 +70,13 @@
       },
       {
         text: "The call pauses inside the Workflow, for minutes or days, then resumes as soon as someone approves.",
-        after: 2.4,
+        after: 2.85,
       },
-      { text: 'Auto mode lets code or a model approve routine calls, judged against criteria you define.', after: 1.4 },
-      { text: 'Anything unclear, like a $2,400 hotel, still goes to a human.', after: 1.45 },
+      {
+        text: 'Auto mode lets code or a model approve routine calls, judged against criteria you define.',
+        after: 1.85,
+      },
+      { text: "Anything it won't approve, like a $2,400 hotel, still goes to a human.", after: 1.45 },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
@@ -263,8 +266,8 @@
       const jp = P(t, c[2] + 0.3, 0.5);
       const judging = (t >= hotelParked && t < autoOk - 0.1) || (t >= bigParked && t < escalate - 0.1);
       const judgeOk = t >= autoOk - 0.1 && t < autoOk + 1.2;
-      const judgeUnsure = t >= escalate - 0.1 && t < drop + 0.4;
-      const judgeColor = judgeOk ? C.neon : judgeUnsure ? C.violet : judging ? C.uv : C.line;
+      const judgeDeclines = t >= escalate - 0.1 && t < drop + 0.4;
+      const judgeColor = judgeOk ? C.neon : judgeDeclines ? C.violet : judging ? C.uv : C.line;
       s.judge.style.borderColor = judgeColor;
       place(s.judge, GATE.x, JUDGE.y0 + JUDGE.h / 2 - 30 * (1 - jp), 1, jp);
       // its rule slides out from under it
