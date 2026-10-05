@@ -1,20 +1,21 @@
 ---
 name: "Arrow heads in Safari"
-description: "agent-harness arrows use arrowPath(): explicit head fill, since WebKit ignores context-stroke"
+description: "engine path() fills each arrow head with its line color: one marker per SVG layer and color"
 type: project
 ---
 
 # Arrow heads in Safari
 
-The engine's arrow marker (`src/engine.js`, `svgLayer()` / `path()`) fills
-the head with `fill="context-stroke"`. WebKit (Safari) does not render it,
-so in the live HTML player the heads do not match the arrow body.
+The engine's `path()` (`src/engine.js`) gives each arrow head an explicit
+fill equal to its line color, through `arrowHead(svg, color)`: one marker
+per SVG layer and color, created on first use in that layer's `<defs>`,
+cached on the layer, with document-unique ids. Every theme draws arrows
+with `path()`.
 
-**Why:** viewers open the HTML players in Safari too; Chromium (the render)
-shows no difference.
+**Why:** WebKit (Safari) does not render `fill="context-stroke"`, so heads
+filled that way come out black in the live HTML player opened in Safari,
+while Chromium (the render) shows them right.
 
-**How to apply:** in the `agent-harness` theme, every arrow is drawn with
-`arrowPath(svg, d, color, w, dash = null)` from the theme's `shared.js`. It
-adds one marker per SVG layer and color with an explicit `fill`, same
-geometry as the engine's, so rendered frames stay pixel-identical. Plain
-lines (`arrow = false`) use the engine's `path()`.
+**How to apply:** draw arrows with `path(svg, d, color, w)`; never fill a
+marker with `context-stroke`. A change to arrow heads is checked in both
+Chromium frames and WebKit (Playwright's WebKit).

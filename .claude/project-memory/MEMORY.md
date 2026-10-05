@@ -26,7 +26,7 @@
 - [Temporal Web UI reference](references/reference_temporal-web-ui.md) — local dev server UI, dark-mode colors, real page layout
 - [Airy layout and consistent details](references/feedback_airy-layout.md) — fill the free band, shared edges, arrowhead = stroke color, uniform tiles
 - [Agent Harness video: audience and story](references/project_agent-harness-video.md) — developers, travel example, claims match the harness docs
-- [Arrow heads in Safari](references/project_arrow-heads-safari.md) — agent-harness arrows use arrowPath(), explicit head fill
+- [Arrow heads in Safari](references/project_arrow-heads-safari.md) — engine `path()` fills heads with the line color, no context-stroke
 - [Agent Harness: no per-element layers](references/project_agent-harness-raster-layers.md) — `.abs` will-change off on the theme page
 - [Agent Harness layout grid](references/feedback_agent-harness-layout-grid.md) — content frame x 140-1780, y 150-880, aligned zones
 - [Temporal brand rules](references/project_brand.md) — colors, style, fonts, icons and their source

@@ -108,7 +108,7 @@
         return path(s.svg, `M ${p0} C ${p1} ${p2} ${p3}`, C.line, 2, false);
       });
       const laneEnd = LANE.x + LANE.w / 2 + 8, consoleStart = CONSOLE.x - CONSOLE.w / 2 - 8;
-      s.feed = arrowPath(s.svg, `M ${laneEnd} ${LANE.y} L ${consoleStart} ${LANE.y}`, C.uv, 3);
+      s.feed = path(s.svg, `M ${laneEnd} ${LANE.y} L ${consoleStart} ${LANE.y}`, C.uv, 3, true);
 
       // console: a white card with mono event rows, a LIVE / REPLAY badge and a replay bar
       s.console = E(root,

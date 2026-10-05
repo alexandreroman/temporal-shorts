@@ -162,7 +162,7 @@
       });
 
       // right: the calls made by the script, straight down from the card to each tool; book_flight via the gate
-      const down = (x, y0, y1) => arrowPath(s.svg, `M ${x} ${y0} L ${x} ${y1}`, C.uv, 3);
+      const down = (x, y0, y1) => path(s.svg, `M ${x} ${y0} L ${x} ${y1}`, C.uv, 3, true);
       s.fanFlights = down(STEP.x[0], CARD_BOTTOM, STEP_TOP);
       s.fanHotels = down(STEP.x[1], CARD_BOTTOM, STEP_TOP);
       s.toGate = down(STEP.x[2], CARD_BOTTOM, RIGHT.gateY - GATE_HALF - 6);

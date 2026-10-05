@@ -135,7 +135,7 @@
   const savedAt = i => SAVE_AT.saved0 + i * SAVE_AT.savedGap;
   SAVE_AT.reply = savedAt(TURN_CALLS.length - 1) + SAVE_AT.seg;
   SAVE_AT.streamed = SAVE_AT.reply + 0.5;
-  // a straight arrow drawn inline in a flex row, its head filled explicitly (see arrowPath)
+  // a straight arrow drawn inline in a flex row, its head filled explicitly (see arrowHead in engine.js)
   const inlineArrow = (w, color) => `<svg width="${w}" height="14" viewBox="0 0 ${w} 14" style="display:block">`
     + `<path d="M1.5 7 H ${w - 8}" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>`
     + `<path d="M${w - 12} 1.5 L${w} 7 L${w - 12} 12.5 z" fill="${color}"/></svg>`;
@@ -190,7 +190,7 @@
         background: 'rgba(68,76,231,.07)', borderRadius: 'var(--r)',
       });
       s.svg = svgLayer(root);
-      s.arcs = NODES.map((_, i) => arrowPath(s.svg, arcD(i), C.slate, 2.5));
+      s.arcs = NODES.map((_, i) => path(s.svg, arcD(i), C.slate, 2.5, true));
       // the frame draws in two halves, from the top center down both sides, meeting at the bottom center
       const cx = LOOP.cx;
       // side 1 runs clockwise down the right edge, side -1 counterclockwise down the left edge
@@ -257,11 +257,11 @@
       // each arrow runs from a card's inner edge to the frame's edge (or back), its head on the far end; the reply
       // leaves on the first message's line, so the two read as one flow through the harness
       const inX0 = CAP.outerX0 + CAP.w + 8, inX1 = FRAME.x0 - 5;
-      s.in1 = arrowPath(s.svg, `M ${inX0} ${msg1Y} H ${inX1}`, C.violet, 2.5);
-      s.in2 = arrowPath(s.svg, `M ${inX0} ${msg2Y} H ${inX1}`, C.violet, 2.5);
+      s.in1 = path(s.svg, `M ${inX0} ${msg1Y} H ${inX1}`, C.violet, 2.5, true);
+      s.in2 = path(s.svg, `M ${inX0} ${msg2Y} H ${inX1}`, C.violet, 2.5, true);
       const outX0 = FRAME.x1 + 5, outX1 = CAP.outerX1 - CAP.w - 8;
-      s.out1 = arrowPath(s.svg, `M ${outX0} ${msg1Y} H ${outX1}`, C.uv, 2.5);
-      s.out2 = arrowPath(s.svg, `M ${outX0} ${reply2Y} H ${outX1}`, C.uv, 2.5);
+      s.out1 = path(s.svg, `M ${outX0} ${msg1Y} H ${outX1}`, C.uv, 2.5, true);
+      s.out2 = path(s.svg, `M ${outX0} ${reply2Y} H ${outX1}`, C.uv, 2.5, true);
       // the turn badge (turn number, then its status) above the line naming who runs the turns; right-aligned,
       // so it pops from its right edge
       s.badge = E(root,
@@ -291,8 +291,8 @@
       s.callStrip.insertAdjacentHTML('beforeend', inlineArrow(64, C.slate) + codeText('text out'));
       // one turn, on the bottom row: slate links under the chips, and their violet copies for the stream
       s.turnHead = makeHeading(root, 'A turn', 'Until the agent is idle again', CMP.head2Top);
-      s.turnLinks = turnLinks().map(d => arrowPath(s.svg, d, C.slate, 2.5));
-      s.streamLinks = turnLinks().map(d => arrowPath(s.svg, d, C.violet, 3));
+      s.turnLinks = turnLinks().map(d => path(s.svg, d, C.slate, 2.5, true));
+      s.streamLinks = turnLinks().map(d => path(s.svg, d, C.violet, 3, true));
       const { left, right, bracketY, tick } = CMP;
       s.bracket = path(s.svg, `M ${left} ${bracketY - tick} V ${bracketY} H ${right} V ${bracketY - tick}`,
         C.violet, 2.5, false);

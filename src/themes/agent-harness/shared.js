@@ -91,30 +91,3 @@ function ambientTime(sc) {
 function swell(t, at, amp) {
   return 1 + amp * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
 }
-
-// Number of arrow head markers created so far: it makes each marker id unique in the document
-let arrowHeadCount = 0;
-
-// Arrow path (engine path() with arrow = true) whose head has an explicit fill: the engine's head uses
-// fill="context-stroke", which WebKit (Safari) does not render. One marker per SVG layer and color,
-// cached on the layer by color, so any CSS color works and no id selector is parsed.
-function arrowPath(svg, d, color, w, dash = null) {
-  const p = path(svg, d, color, w, true, dash);
-  svg._heads ??= new Map();
-  if (!svg._heads.has(color)) {
-    arrowHeadCount += 1;
-    const id = `ah-head-${arrowHeadCount}`;
-    const marker = document.createElementNS(SVGNS, 'marker');
-    const attrs = { id, viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 5, markerHeight: 5,
-      orient: 'auto-start-reverse' };
-    for (const [name, value] of Object.entries(attrs)) marker.setAttribute(name, value);
-    const head = document.createElementNS(SVGNS, 'path');
-    head.setAttribute('d', 'M0,0 L10,5 L0,10 z');
-    head.setAttribute('fill', color);
-    marker.appendChild(head);
-    svg.querySelector('defs').appendChild(marker);
-    svg._heads.set(color, `url(#${id})`);
-  }
-  p._marker = svg._heads.get(color);
-  return p;
-}

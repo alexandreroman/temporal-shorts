@@ -84,7 +84,7 @@
       // from under the parked call's tag, down to the person's left edge
       const askY0 = LANE + TAG_DY + 30, askX1 = GATE.x0 - 12;
       const askD = `M ${PARK.x} ${askY0} C ${PARK.x} ${YOU.y - 40} ${PARK.x + 40} ${YOU.y} ${askX1} ${YOU.y}`;
-      s.ask = arrowPath(s.svg, askD, C.violet, 2.5, '8,8');
+      s.ask = path(s.svg, askD, C.violet, 2.5, true, '8,8');
       s.agent = makeLLM(root, ORB, 'AGENT');
 
       // the gate: policy block above the lane, its rules below it, by tool name (the catch-all row in slate)
