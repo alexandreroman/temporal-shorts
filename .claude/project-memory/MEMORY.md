@@ -22,6 +22,7 @@
 > rewrite it.
 
 - [Video objective and audience](references/project_objective.md) — durable-ai-agents: 7 topics, non-technical audience, ≤ 3:00
+- [Durable Execution theme story](references/project_durable-execution-theme.md) — order #1042, server then Worker, replay
 - [Temporal brand rules](references/project_brand.md) — colors, style, fonts, icons and their source
 - [Official Temporal logo](references/reference_logo.md) — official lockup only, cropped viewBox
 - [On-screen vocabulary](references/feedback_vocabulary.md) — "the app" for the runtime, company names for LLMs
