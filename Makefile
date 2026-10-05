@@ -38,7 +38,7 @@ ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$
 # its fresh timestamp would make Make treat it as up to date.
 .DELETE_ON_ERROR:
 
-.PHONY: setup timeline preview render srt html serve open clean
+.PHONY: setup timeline preview render srt html serve clean
 
 setup:            ## venv + Playwright Chromium + brand stand-in fonts
 	bash scripts/setup.sh
@@ -62,9 +62,6 @@ html: $(HTML)     ## home page + one standalone HTML player per theme -> output/
 
 serve: $(HTML)    ## home page and players on http://localhost:PORT (CASPER_PORT, else 8000)
 	$(PY) scripts/serve_html.py --port $(PORT)
-
-open:             ## open the home page (theme picker) to play the animations live
-	open src/index.html
 
 clean:            ## delete every generated file: output/ (MP4, SRT, HTML, previews, render leftovers)
 	rm -rf output
