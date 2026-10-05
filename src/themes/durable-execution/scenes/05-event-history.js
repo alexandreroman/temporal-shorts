@@ -24,7 +24,7 @@
     update(t, c, s) {
       const { shot } = s;
       const [worker] = shot.workers;
-      // first run: chargeCard (line 2, row 2) and reserveItem (line 3, row 3) are saved, then shipPackage runs
+      // first run: chargeCard and reserveItem (steps 0 and 1) are saved, then shipPackage runs
       const go = c[1] + 0.2, started = c[1] + 0.5;
       const run = [0, 1, 2].map(i => c[1] + 1.0 + i * 1.3);
       // only the first two finish before the crash of chapter 6
@@ -42,15 +42,15 @@
       setCharge(shot.charge, t >= saved[0] ? 42 : 0);
       setOrderStatus(shot.order, 'PENDING');
 
-      // code highlight: the function header, then each line once the previous result is saved
+      // code highlight: the function header, then each await line once the previous result is saved
       let line = 0;
-      run.forEach((r, i) => { line = lerp(line, i + 1, P(t, r, 0.25)); });
+      run.forEach((r, i) => { line = lerp(line, ehStepLine(i), P(t, r, 0.25)); });
       setCodeLine(shot.code, line, P(t, go, 0.3));
       const spinning = runningSpin(t, run[0]) + runningSpin(t, run[1]) + P(t, run[2] + 0.2, 0.15);
       setCodeSpinner(shot, line, spinning);
 
       // RESULT chips: from the line end to the history row, absorbed as the row is written
-      s.chips.forEach((e, i) => flyResultToHistory(e, t, res[i], i + 1));
+      s.chips.forEach((e, i) => flyResultToHistory(e, t, res[i], i));
 
       // Event History: "Workflow started", then one row per saved result, each tagged SAVED
       const written = [started, saved[0], saved[1]];

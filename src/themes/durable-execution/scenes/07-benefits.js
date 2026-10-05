@@ -9,7 +9,8 @@
     "await sleep('30 days');",
     'await askForReview(order);',
   ];
-  const SLEEP_LINE = 2, DAYS = 30;
+  const SLEEP_LINE = WAIT_CODE.findIndex(line => line.includes('sleep(')), REVIEW_LINE = WAIT_CODE.length - 1;
+  const DAYS = 30;
   // code card as in chapters 5 and 6 (26 px text on 44 px lines): 640 x 220, its top edge at y=335
   const CARD = { x: 580, y: 445, w: 640, font: 26, lineH: 44, padY: 22 };
   const WK = { x: 580, y: 699, h: 88 }; // 100 px below the card: y 655..743
@@ -72,9 +73,9 @@
     ],
     build(root, s) {
       const { w, font, lineH, padY } = CARD;
-      s.code = makeCodeCard(root, { lines: WAIT_CODE, header: 'Workflow', w, font, lineH, padY });
+      s.code = makeCodeCard(root, { lines: WAIT_CODE, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY });
       s.code.lines[1].style.color = '#7C8698'; // the comment line, slate like the punctuation
-      s.checks = [0, SLEEP_LINE, 3].map(i => makeLineCheck(s.code, i));
+      s.checks = [0, SLEEP_LINE, REVIEW_LINE].map(i => makeLineCheck(s.code, i));
       s.worker = makeWorkerPanel(root, 'WORKER', CARD.w, WK.h);
       // the panel lays out its name and status for a 76 px strip: center them vertically in this taller one
       s.worker.firstChild.style.top = (WK.h / 2 - 15) + 'px';
@@ -101,7 +102,7 @@
       const cp = P(t, c[0] + 0.1, 0.5, backOut);
       place(s.code, CARD.x, CARD.y, cp, clamp(cp * 2) * (1 - out));
       s.code.hdr.style.opacity = 1;
-      const line = lerp(lerp(0, SLEEP_LINE, P(t, sleepAt, 0.35)), 3, P(t, reviewAt, 0.3));
+      const line = lerp(lerp(0, SLEEP_LINE, P(t, sleepAt, 0.35)), REVIEW_LINE, P(t, reviewAt, 0.3));
       setCodeLine(s.code, line, P(t, shipAt, 0.3));
       const checkAt = [shipAt + 0.6, wakeAt + 0.05, reviewAt + 0.8];
       s.checks.forEach((e, i) => {

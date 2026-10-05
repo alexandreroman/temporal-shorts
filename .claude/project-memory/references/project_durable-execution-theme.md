@@ -22,6 +22,11 @@ The script and its example table live in `docs/durable-execution/script.md`.
   `chargeCard` and `reserveItem` are saved; Worker B replays from the start,
   Temporal hands back the two saved results, then `shipPackage` runs for
   real.
+- Code on screen is real Temporal TypeScript SDK code: ordinary typed code
+  before Temporal (`async function placeOrder(order: Order)`), then the
+  Workflow as an exported async function, its Activities obtained with
+  `proxyActivities<typeof activities>({ startToCloseTimeout })`, and
+  durable timers with `sleep('30 days')`.
 - Accuracy: Temporal runs Activities at least once and they still need to
   be idempotent, so the video never presents idempotency keys as plumbing
   Temporal removes (the chapter 3 tiles are retry loops, status table,
@@ -43,5 +48,5 @@ easy to follow and matches how Temporal replays Workflow code against
 recorded Activity results; the idempotency rule keeps the claims true.
 
 **How to apply:** keep the example, the vocabulary split, the crash point,
-the idempotency rule and the raster rule consistent across scenes,
-subtitles and the script when editing this theme.
+the real-code rule, the idempotency rule and the raster rule consistent
+across scenes, subtitles and the script when editing this theme.

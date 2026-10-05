@@ -3,7 +3,7 @@
 // plumbing outgrowing the business logic, and bugs pop on the plumbing.
 // The block keeps every name declared in this file local to this scene.
 {
-  // One column of 3 tiles on each side, symmetric about the card (x 175-465 and 1455-1745, 175 px from the card);
+  // One column of 3 tiles on each side, symmetric about the card (x 175-465 and 1455-1745, 155 px from the card);
   // the card is centered on the middle row (Y0), with the BUSINESS LOGIC label above it and the LINES OF CODE bar
   // below it, as wide as the card, its bottom edge level with the bottom tiles
   const Y0 = 522;
@@ -23,7 +23,7 @@
   const tileY = p => Y0 + (p.row - 1) * TILE.pitch;
   const wireY = p => CARD.y + (p.row - 1) * 80; // where the wire meets the card edge
   // LINES OF CODE bar: business logic stays thin, plumbing grows to fill the rest (whole pixels at rest)
-  const BAR = { w: 640, h: 44, biz: 96, gap: 4 };
+  const BAR = { w: CODE.w, h: 44, biz: 96, gap: 4 };
   const plumbingWidth = BAR.w - BAR.biz - BAR.gap;
   const BAR_HALF_H = 56.5; // half the measured height (113 px) of the bar block: its edges land on whole pixels
   // tiles that get a bug, in popping order

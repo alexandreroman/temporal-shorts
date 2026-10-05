@@ -1,37 +1,44 @@
 // ===================== 4. DURABLE EXECUTION WITH TEMPORAL
-// Temporal logo and the code card alone: it runs to completion. The card becomes a Workflow, each await line
-// links to an Activity tile calling its service; then Ship package fails and Temporal retries it, with
-// growing delays, until it succeeds.
+// Temporal logo and the code card alone: it runs to completion. The card becomes a Workflow (a workflows.ts excerpt
+// with the TypeScript SDK), its Activities declaration lights up and each await line links to an Activity tile
+// calling its service; then Ship package fails and Temporal retries it, with growing delays, until it succeeds.
 // The block keeps every name declared in this file local to this scene.
 {
-  // Layout: the logo sits above the code card, on its vertical axis, and moves with it. Alone, the logo, the card
-  // and the badge stand in the middle, 106 px apart; then the card slides left to make room for a column of
-  // 4 Activity tiles (one row per step, 56 px apart) and, on the right, the services they call, each centered on
-  // its row. Next to the Activities, the card's center is level with the column's center and the logo's top with
-  // the column's top; the composition spans x 120..1800.
-  const ROW = { y0: 522, pitch: 176 }; // middle of the 4 rows, distance between rows
+  // Layout: the Temporal logo stays on top, centered on x=960. Alone, the code card (the workflows.ts excerpt) and
+  // the badge stand under it, about 94 px apart; then the card and the badge slide left to make room for a column
+  // of 4 Activity tiles (one row per step, 48 px apart) and, on the right, the services they call, each centered on
+  // its row. Next to the Activities, the card's top is level with the column's top (its await lines face the
+  // middle of the column) and the badge's bottom with the column's bottom; the composition spans x 120..1800 and
+  // y 142..902 in both phases.
+  const ROW = { y0: 574, pitch: 176 }; // middle of the 4 rows, distance between rows
   const rowY = i => ROW.y0 + (i - 1.5) * ROW.pitch;
-  // code card as in chapters 5 and 6 (26 px text on 44 px lines), centered alone at (x0, y0), then at (x, y)
-  const CARD = { w: 630, font: 26, lineH: 44, padY: 22, x0: 960, y0: 530, x: 435, y: ROW.y0 };
-  const CARD_H = CARD.padY * 2 + ORDER_CODE.length * CARD.lineH; // 308
-  const STACK_GAP = 106; // logo to card, card to badge
-  const LOGO_BOX = { h: 64, w: 245 }; // the logo's height and width
-  const LOGO_DY = -(CARD_H / 2 + STACK_GAP + LOGO_BOX.h / 2); // logo center relative to the card center
-  const BADGE_DY = CARD_H / 2 + STACK_GAP + 24.5; // badge (49 px high) center relative to the card center
-  const TILE = { x: 1050, w: 300, h: 120 };
-  const SERVICE = { x: 1695, w: 210, h: 64 };
+  // code card: 20 px text on 38 px lines (its 62-character first line fits), 820 x 458; centered alone at
+  // (x0, y0), then at (x, y): x 120..940, y 246..704
+  const CARD = {
+    w: 820, font: 20, lineH: 38, padY: 20, padX: 18, gutter: 36, x0: 960, y0: 529, x: 530, y: 475,
+  };
+  const CARD_H = CARD.padY * 2 + WORKFLOWS_TS.length * CARD.lineH; // 458
+  const LOGO_BOX = { h: 64, w: 245, top: 142 }; // the logo's height, width and top edge
+  const BADGE_Y = CARD.y0 + CARD_H / 2 + 95 + 24.5; // badge (49 px high) center, 95 px under the card alone
+  // lines of the card: the Activities declaration on top, then the Workflow function
+  const DECLARATION_LINES = WORKFLOWS_TS.indexOf('');
+  const FUNCTION_LINE = WORKFLOWS_TS.indexOf(WORKFLOW_CODE[0]);
+  const LAST_LINE = WORKFLOWS_TS.length - 1;
+  const TILE = { x: 1139, w: 190, h: 128 }; // x 1044..1234, 104 px right of the card
+  const SERVICE = { x: 1706, w: 188, h: 64 }; // x 1612..1800
   // Ship package retry line: attempt markers on its link to the Carrier, the gaps grow with the delays; the first
-  // and last markers sit 33 px from the tile and the chip
+  // and last markers sit 27 px from the tile and the chip
   const SHIP = 2;
-  const ATTEMPT_X = [1250, 1376, 1540];
+  const ATTEMPT_X = [1278, 1398, 1568];
   const MARK = 34;
+  const RUNNING = 'rgba(182,100,255,.28)'; // the code highlight, as in setCodeLine
 
-  // Activity tile: icon, ACTIVITY kicker and label, with the makeStep status marks (see stepState)
+  // Activity tile: icon, ACTIVITY kicker and label stacked in the middle, with the makeStep status marks
+  // (see stepState)
   const makeActivity = (p, step) => addStatusMarks(E(p,
-    '<div style="display:flex;align-items:center;gap:20px;height:100%;padding-left:26px">'
-    + `${ICON(step.icon, 42, C.ink)}<div style="text-align:left">`
-    + '<div class="lbl" style="font-size:14px;padding-left:0">Activity</div>'
-    + `<div style="font-size:24px;margin-top:6px;white-space:nowrap">${step.label}</div></div></div>`,
+    '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%">'
+    + `${ICON(step.icon, 36, C.ink)}<div class="lbl" style="font-size:14px;margin-top:10px">Activity</div>`
+    + `<div style="font-size:24px;margin-top:4px;white-space:nowrap">${step.label}</div></div>`,
     'tile', { width: TILE.w + 'px', height: TILE.h + 'px' }));
   const makeService = (p, name) => E(p,
     `${ICON('server', 24, C.slate, 1.8)}<span class="mono" style="font-size:18px;letter-spacing:.1em;`
@@ -82,14 +89,19 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      // native-size logo on whole pixels (never scaled), laid out at its place above the card alone
+      // native-size logo on whole pixels (never scaled), at its place on top of both phases
       s.logo = E(root, `<img src="${LOGO}" style="height:${LOGO_BOX.h}px;display:block">`, '', {
-        left: (CARD.x0 - Math.round(LOGO_BOX.w / 2)) + 'px', top: (CARD.y0 + LOGO_DY - LOGO_BOX.h / 2) + 'px',
+        left: (960 - Math.round(LOGO_BOX.w / 2)) + 'px', top: LOGO_BOX.top + 'px',
       });
-      const { w, font, lineH, padY } = CARD;
-      s.card = makeCodeCard(root, { header: 'Workflow', w, font, lineH, padY });
+      const { w, font, lineH, padY, padX, gutter } = CARD;
+      s.card = makeCodeCard(root, {
+        lines: WORKFLOWS_TS, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY, padX, gutter,
+      });
       s.badge = tag(root, `${ICON('check', 22, C.neon, 2.6)}Runs to completion`, 'neon');
-      Object.assign(s.badge.style, { display: 'flex', alignItems: 'center', gap: '10px' });
+      // whole-pixel size (content: 349.4 x 49), so the badge centered under the card rests on whole pixels
+      Object.assign(s.badge.style, {
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '350px',
+      });
       // a neon ring around the card when the bolt bounces off it
       s.ring = E(root, '', '', {
         width: (s.card.w + 20) + 'px', height: (s.card.h + 20) + 'px', border: '2px solid ' + C.neon,
@@ -101,7 +113,7 @@
       const cardRight = CARD.x + s.card.w / 2 + 4, tileLeft = TILE.x - TILE.w / 2 - 4;
       const mx = (cardRight + tileLeft) / 2;
       s.calls = ORDER_STEPS.map((_, i) => {
-        const y0 = CARD.y + s.card.lineY(i + 1), y1 = rowY(i);
+        const y0 = CARD.y + s.card.lineY(awaitLine(WORKFLOWS_TS, i)), y1 = rowY(i);
         return path(s.svg, `M ${cardRight} ${y0} C ${mx} ${y0} ${mx} ${y1} ${tileLeft} ${y1}`, C.uv, 2.5, false);
       });
       s.links = ORDER_STEPS.map((_, i) => path(s.svg,
@@ -120,17 +132,18 @@
       s.retries.style.fontSize = '18px';
     },
     update(t, c, s) {
-      // ---- c[0]: the logo, then the code card alone, running to completion; at c[1] both slide left together
+      // ---- c[0]: the logo, then the code card alone, running to completion; at c[1] the card and its badge slide
+      // left
       const lp = P(t, c[0] + 0.1, 0.6);
       const slide = P(t, c[1] + 0.2, 0.9);
       const cardX = lerp(CARD.x0, CARD.x, slide), cardY = lerp(CARD.y0, CARD.y, slide);
       s.logo.style.opacity = lp;
-      s.logo.style.transform = `translate(${cardX - CARD.x0}px,${cardY - CARD.y0 + (1 - lp) * 16}px)`;
+      s.logo.style.transform = `translateY(${(1 - lp) * 16}px)`;
       const cp = P(t, c[0] + 0.5, 0.6, backOut);
       place(s.card, cardX, cardY, cp, clamp(cp * 2));
       s.card.hdr.style.opacity = P(t, c[1] + 1.4, 0.4);
       const bp = popIn(t, c[0] + 2.9, 0.08);
-      place(s.badge, CARD.x0, CARD.y0 + BADGE_DY, bp.s, bp.o * (1 - P(t, c[1], 0.3)));
+      place(s.badge, cardX, BADGE_Y, bp.s, bp.o);
 
       // a failure bolt hits the card and bounces off
       const hit = c[0] + 4.6;
@@ -159,12 +172,17 @@
       // the highlight follows the await line of the running Activity, red while Ship package waits to retry
       const active = run.findLastIndex(a => t >= a);
       if (t < c[1]) {
-        // c[0]: the highlight walks the whole function, top to bottom
-        setCodeLine(s.card, lerp(0, 5, P(t, c[0] + 1.2, 1.6)), win(t, c[0] + 1.1, c[0] + 3.0, 0.25));
+        // c[0]: the highlight walks the whole Workflow function, top to bottom
+        const walk = lerp(FUNCTION_LINE, LAST_LINE, P(t, c[0] + 1.2, 1.6));
+        setCodeLine(s.card, walk, win(t, c[0] + 1.1, c[0] + 3.0, 0.25));
+      } else if (t < c[2]) {
+        // c[1]: the Activities declaration lights up while the Activity tiles appear
+        setCodeLine(s.card, 0, win(t, c[1] + 2.3, c[1] + 6.0, 0.3), RUNNING, DECLARATION_LINES);
       } else {
         const waiting = active === SHIP && stepStates[SHIP] === 3;
-        const color = waiting ? 'rgba(255,90,95,.3)' : 'rgba(182,100,255,.28)';
-        setCodeLine(s.card, Math.max(active, 0) + 1, win(t, run[0], run[3] + 0.8, 0.25), color);
+        const color = waiting ? 'rgba(255,90,95,.3)' : RUNNING;
+        const line = awaitLine(WORKFLOWS_TS, Math.max(active, 0));
+        setCodeLine(s.card, line, win(t, run[0], run[3] + 0.8, 0.25), color);
       }
 
       // ---- c[1]: each await line links to its Activity tile, then each Activity to the service it calls

@@ -10,7 +10,7 @@
   const SERVICE_LINK = [ROW.y + ROW.h / 2 + 4, SERVICE_Y - 28]; // y range of the link from a step to its service
   // c[1]: step i runs from RUN0 + i * RUN_GAP for RUN_D seconds, in step with the words of the subtitle
   const RUN0 = 0.2, RUN_GAP = 1.15, RUN_D = 0.9;
-  // c[2]: the code highlight sits on line 1 + i (step i) from LINE0 + i * LINE_GAP
+  // c[2]: the code highlight sits on the await line of step i from LINE0 + i * LINE_GAP
   const LINE0 = 1.2, LINE_GAP = 0.7;
 
   const makeOrderCard = root => {
@@ -106,7 +106,7 @@
       const cp = P(t, codeIn, 0.5);
       place(s.code, 960, CODE_Y, 1, cp);
       s.code.style.transform += ` translateY(${(1 - cp) * 20}px)`;
-      let line = 1;
+      let line = awaitLine(ORDER_CODE, 0);
       for (let i = 1; i < 4; i++) line += P(t, c[2] + LINE0 + i * LINE_GAP, 0.2);
       setCodeLine(s.code, line, P(t, c[2] + LINE0 - 0.2, 0.3) * (1 - P(t, c[2] + LINE0 + 4 * LINE_GAP, 0.3)));
       const dp = popIn(t, c[2] + LINE0 + 4 * LINE_GAP + 0.2, 0.08);

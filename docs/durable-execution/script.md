@@ -13,8 +13,8 @@ animation shows.
 
 The video introduces the principles of Durable Execution with Temporal
 Workflows, outside any AI context, to everyone: developers new to Temporal
-and tech-curious viewers alike. The only code on screen is a four-line
-function.
+and tech-curious viewers alike. The code on screen is real Temporal
+TypeScript SDK code, kept short.
 
 One example runs through the whole video: online order #1042, $42, four
 steps, each calling another service:
@@ -26,16 +26,38 @@ steps, each calling another service:
 | Ship package  | `shipPackage`  | `truck` | Carrier   | tracking 1Z-48   |
 | Email receipt | `emailReceipt` | `mail`  | Email     | receipt sent     |
 
-The code, shown in a white code card:
+The code, shown in a white code card. Chapters 1 to 3 (before Temporal)
+show ordinary code:
 
-```js
-async function placeOrder(order) {
+```ts
+async function placeOrder(order: Order) {
   await chargeCard(order);
   await reserveItem(order);
   await shipPackage(order);
   await emailReceipt(order);
 }
 ```
+
+From chapter 4 on, the card carries a WORKFLOW tab and a `workflows.ts`
+label. Chapter 4 shows the excerpt: the Activities obtained with
+`proxyActivities`, then the Workflow, an exported async function. Chapters
+5 and 6 show the Workflow alone, from `export async function` on:
+
+```ts
+const { chargeCard, reserveItem, shipPackage, emailReceipt } =
+  proxyActivities<typeof activities>({
+    startToCloseTimeout: '1 minute',
+  });
+
+export async function placeOrder(order: Order) {
+  await chargeCard(order);
+  await reserveItem(order);
+  await shipPackage(order);
+  await emailReceipt(order);
+}
+```
+
+Chapter 7 adds a durable timer, `await sleep('30 days');`.
 
 Vocabulary: before Temporal enters (chapters 1 to 3) the machine running the
 code is "the server"; from chapter 5 on it is "the Worker". The order's
@@ -102,14 +124,15 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 - **1:12** Durable Execution takes another path: your code runs to
   completion, even when servers fail.
-  - Visuals: Temporal logo; the code card alone, a highlight walks it, a
-    neon RUNS TO COMPLETION badge; a red bolt bounces off the card.
+  - Visuals: Temporal logo; the `workflows.ts` card alone, a highlight
+    walks the Workflow, a neon RUNS TO COMPLETION badge; a red bolt bounces
+    off the card.
 - **1:19** With Temporal, you write the process as a Workflow, and each
   step that calls a service as an Activity.
-  - Visuals: The card slides left with a WORKFLOW tab, the logo traveling
-    above it; each `await` line
-    links to an ACTIVITY tile on the right (Charge card, Reserve item, Ship
-    package, Email receipt), each linked to its service.
+  - Visuals: The card slides left, the badge with it; the `proxyActivities`
+    declaration lights up while each `await` line links to an ACTIVITY tile
+    on the right (Charge card, Reserve item, Ship package, Email receipt),
+    each linked to its service.
 - **1:27** If an Activity fails, Temporal retries it automatically, with
   growing delays, until it succeeds.
   - Visuals: Charge card and Reserve item check; Ship package fails

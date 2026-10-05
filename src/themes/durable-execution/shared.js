@@ -47,32 +47,46 @@ function placeStepRow(row, t, a, states) {
   row.links.forEach((l, i) => draw(l, P(t, a + 0.4 + i * 0.12, 0.35)));
 }
 
-// ---------- code card: white card showing a few lines of JavaScript, one div per line
+// ---------- code card: white card showing a few lines of TypeScript, one div per line
 // Card height = 2 * padY + lines * lineH (256 px for the 6 lines of the order code).
-const CODE = { w: 640, font: 24, lineH: 36, padY: 20, padX: 20, gutter: 40, tabH: 34 };
-const ORDER_CODE = [
-  'async function placeOrder(order) {',
-  ...ORDER_STEPS.map(step => `  await ${step.fn}(order);`),
-  '}',
+const CODE = { w: 680, font: 24, lineH: 36, padY: 20, padX: 20, gutter: 40, tabH: 34 };
+const ORDER_AWAITS = ORDER_STEPS.map(step => `  await ${step.fn}(order);`);
+// Chapters 1 to 3: the order code before Temporal, an ordinary function
+const ORDER_CODE = ['async function placeOrder(order: Order) {', ...ORDER_AWAITS, '}'];
+// Chapters 5 and 6: the Workflow, as exported from workflows.ts (Temporal TypeScript SDK)
+const WORKFLOW_CODE = ['export async function placeOrder(order: Order) {', ...ORDER_AWAITS, '}'];
+// Chapter 4: the whole workflows.ts excerpt, the Activities declared above the Workflow (Prettier layout)
+const WORKFLOWS_TS = [
+  'const { chargeCard, reserveItem, shipPackage, emailReceipt } =',
+  '  proxyActivities<typeof activities>({',
+  "    startToCloseTimeout: '1 minute',",
+  '  });',
+  '',
+  ...WORKFLOW_CODE,
 ];
-// Light syntax coloring of one plain JavaScript line (no HTML): keywords UV, strings violet,
-// called function names bold, punctuation slate
+// Index of the `await` line of step i (ORDER_STEPS[i]) in a list of code lines
+const awaitLine = (lines, i) => lines.findIndex(line => line.includes(`await ${ORDER_STEPS[i].fn}(`));
+// Light syntax coloring of one plain TypeScript line (no HTML): keywords UV, strings violet, called function names
+// bold, punctuation slate (angle brackets escaped), everything else (names, types) default ink
 function highlightJs(line) {
-  const token = /('[^']*')|\b(async|function|await|return|const)\b|([A-Za-z_]\w*)(?=\()|([(){};,.])/g;
+  const token = /('[^']*')|\b(export|async|function|await|const|typeof)\b|([A-Za-z_]\w*)(?=[(<])|([(){}<>:;,.=])/g;
+  const escaped = { '<': '&lt;', '>': '&gt;' };
   return line.replace(token, (m, str, kw, fn, punct) => {
     if (str) return `<span style="color:${C.violet}">${str}</span>`;
     if (kw) return `<span style="color:${C.uv}">${kw}</span>`;
     if (fn) return `<span style="font-weight:700">${fn}</span>`;
-    return `<span style="color:#7C8698">${punct}</span>`;
+    return `<span style="color:#7C8698">${escaped[punct] || punct}</span>`;
   });
 }
-// opts.lines: plain JavaScript lines (default: the order code); opts.header: label of the tab on top of the card
-// (hidden until card.hdr.style.opacity is set); opts.font, opts.lineH, opts.padY: text metrics (default: CODE).
+// opts.lines: plain TypeScript lines (default: the order code); opts.header: label of the tab on top of the card and
+// opts.file: file name shown next to it (both hidden until card.hdr.style.opacity is set); opts.font, opts.lineH,
+// opts.padY, opts.padX, opts.gutter: text metrics (default: CODE).
 // Returns the card element with: w, h, lineH, padY, lines (one div per line), bar (highlight, see setCodeLine),
 // hdr (tab or null) and lineY(i): y of the middle of line i relative to the card center.
 function makeCodeCard(parent, opts = {}) {
   const {
-    lines = ORDER_CODE, header = null, w = CODE.w, font = CODE.font, lineH = CODE.lineH, padY = CODE.padY,
+    lines = ORDER_CODE, header = null, file = null, w = CODE.w, font = CODE.font, lineH = CODE.lineH,
+    padY = CODE.padY, padX = CODE.padX, gutter = CODE.gutter,
   } = opts;
   const h = padY * 2 + lines.length * lineH;
   const card = E(parent, '', '', {
@@ -85,9 +99,9 @@ function makeCodeCard(parent, opts = {}) {
   });
   card.lines = lines.map((src, i) => {
     const e = E(card,
-      `<span style="display:inline-block;width:${CODE.gutter}px;color:#B4BCCB">${i + 1}</span>${highlightJs(src)}`,
+      `<span style="display:inline-block;width:${gutter}px;color:#B4BCCB">${i + 1}</span>${highlightJs(src)}`,
       'mono', {
-        left: CODE.padX + 'px', top: (padY + i * lineH) + 'px', height: lineH + 'px',
+        left: padX + 'px', top: (padY + i * lineH) + 'px', height: lineH + 'px',
         lineHeight: lineH + 'px', fontSize: font + 'px', whiteSpace: 'pre', transform: 'none',
       });
     e.style.opacity = 1;
@@ -95,19 +109,26 @@ function makeCodeCard(parent, opts = {}) {
   });
   card.hdr = null;
   if (header) {
-    // a tab standing on the top edge, so showing it never moves the code
-    card.hdr = E(card, `${ICON('code', 18, '#FFFFFF', 2)}<span>${header}</span>`, 'mono', {
-      left: '18px', top: -CODE.tabH + 'px', height: CODE.tabH + 'px', padding: '0 14px 0 12px', display: 'flex',
-      alignItems: 'center', gap: '8px', background: C.uv, color: '#FFFFFF', fontSize: '15px', letterSpacing: '.12em',
-      textTransform: 'uppercase', borderRadius: 'var(--rs) var(--rs) 0 0', transform: 'none', whiteSpace: 'nowrap',
-    });
+    // a tab standing on the top edge, so showing it never moves the code; the file name follows it, in slate
+    const fileLabel = file
+      ? `<span style="font-size:16px;letter-spacing:.04em;color:${C.slate}">${file}</span>` : '';
+    card.hdr = E(card,
+      `<div style="height:${CODE.tabH}px;padding:0 14px 0 12px;display:flex;align-items:center;gap:8px;`
+      + `background:${C.uv};color:#FFFFFF;font-size:15px;letter-spacing:.12em;text-transform:uppercase;`
+      + `border-radius:var(--rs) var(--rs) 0 0">${ICON('code', 18, '#FFFFFF', 2)}<span>${header}</span></div>`
+      + fileLabel,
+      'mono', {
+        left: '18px', top: -CODE.tabH + 'px', height: CODE.tabH + 'px', display: 'flex', alignItems: 'center',
+        gap: '16px', transform: 'none', whiteSpace: 'nowrap',
+      });
   }
   card.lineY = i => -h / 2 + padY + (i + 0.5) * lineH;
   return card;
 }
-// Highlight line i (0-based; a fractional i slides between lines) with opacity o
-function setCodeLine(card, i, o, color = 'rgba(182,100,255,.28)') {
+// Highlight n lines from line i (0-based; a fractional i slides between lines) with opacity o
+function setCodeLine(card, i, o, color = 'rgba(182,100,255,.28)', n = 1) {
   card.bar.style.top = (card.padY + i * card.lineH) + 'px';
+  card.bar.style.height = (n * card.lineH) + 'px';
   card.bar.style.background = color;
   card.bar.style.opacity = clamp(o);
 }
@@ -299,50 +320,55 @@ function flashAt(t, crashAt) { return Math.max(0, 1 - Math.abs(t - crashAt) / 0.
 // reads as one continuous shot.
 // Coordinates are on the 1080 px stage; EH.shift centers the composition at (960, 522). Every part sits on a few
 // shared lines, and every size is even, so the parts rest on whole pixels:
-// - x 120 and 820: left and right edges of the Worker column (Worker panel; counter left, order pill right);
-//   x 1050 and 1800: edges of the TEMPORAL panel, 230 px right of the Worker column (room for the chips and arrow)
+// - x 120 and 920: left and right edges of the Worker column (Worker panel; counter left, order pill right);
+//   x 1056 and 1800: edges of the TEMPORAL panel, 136 px right of the Worker column (room for the chips and arrow)
 // - y 152: top of both panels; y 892: bottom of the counter, the pill row and the TEMPORAL panel
 // - y 692: top of the counter row; y 792: middle of the counter, the order pill and WORKFLOW COMPLETE
 // - 50 px between the Worker panel and the counter row, and between the counter and the order pill
-// - the history card fills the TEMPORAL panel under its logo header, 35 px inside its sides and 36 px above its
-//   bottom
+// - the code card and the history card sit 32 px inside the sides of their panel
 const EH = {
   shift: [0, 0],
-  worker: { x: 470, y: 397, w: 700, h: 490 }, // x 120..820, y 152..642
-  // code card: 6 lines of 46 px, its top 126 px below the panel top (under its tab), 36 px of panel under it
-  code: { w: 630, font: 26, lineH: 46, padY: 26, dy: 45 },
-  temporal: { x: 1425, y: 522, w: 750, h: 740 }, // x 1050..1800, y 152..892
-  // history card: x 1085..1765, y 232..856, 80 px below the top of the TEMPORAL panel (under its logo header);
+  worker: { x: 520, y: 397, w: 800, h: 490 }, // x 120..920, y 152..642
+  // code card: x 152..888, 6 lines of 46 px, its top 126 px below the panel top (under its tab), 36 px of panel
+  // under it; 23 px text, so the 48 characters of the export line fit with 20 px to spare
+  code: { w: 736, font: 23, lineH: 46, padY: 26, padX: 18, gutter: 36, dy: 45 },
+  temporal: { x: 1428, y: 522, w: 744, h: 740 }, // x 1056..1800, y 152..892
+  // history card: x 1088..1768, y 232..860, 80 px below the top of the TEMPORAL panel (under its logo header);
   // its 6 rows of 60 px and the crash line end at y 728
-  hist: { w: 680, h: 624, top: 232 },
-  charge: { x: 260, y: 792, w: 280 }, // counter: x 120..400, y 692..892
-  // order status pill: x 450..820, centered on the counter row; its fixed width fits its longest status
+  hist: { w: 680, h: 628, top: 232 },
+  charge: { x: 310, y: 792, w: 380 }, // counter: x 120..500, y 692..892
+  // order status pill: x 550..920, centered on the counter row; its fixed width fits its longest status
   // (ORDER #1042 | COMPLETE), so neither edge moves when the status changes
-  order: { left: 450, w: 370 },
-  // WORKFLOW COMPLETE (50 px high), in the free room at the bottom of the history card, level with the counter row:
-  // 39 px under the last row and above the card's bottom edge
+  order: { left: 550, w: 370 },
+  // WORKFLOW COMPLETE (50 px high), in the free room at the bottom of the history card, level with the counter row
   doneY: 792,
   crashRow: 3, // the Worker crashes while row 4 (shipPackage) is running
   crashGap: 60, // room above row 4 for the "WORKER CRASHED HERE" line, one row high
-  lineEndX: 713, // RESULT chips leave and reach the code at the right end of the lines (558 px into the card)
-  spinX: 755, // running spinner, at the right end of the highlighted line (30 px from the card's right edge)
-  rowStartX: 1205, // RESULT chips reach and leave the history at the start of the row text (120 px into the card)
+  lineEndX: 816, // RESULT chips leave and reach the code near the card's right edge (72 px inside it)
+  spinX: 858, // running spinner, at the right end of the highlighted line (30 px from the card's right edge)
+  rowStartX: 1208, // RESULT chips reach and leave the history at the start of the row text (120 px into the card)
 };
 // Stage y of code line i and of history row i (rows below the crash line sit EH.crashGap lower)
-const ehLineY = i => EH.worker.y + EH.code.dy - (EH.code.padY * 2 + ORDER_CODE.length * EH.code.lineH) / 2
+const ehLineY = i => EH.worker.y + EH.code.dy - (EH.code.padY * 2 + WORKFLOW_CODE.length * EH.code.lineH) / 2
   + EH.code.padY + (i + 0.5) * EH.code.lineH;
 const ehRowY = i => EH.hist.top + HIST.row0 + (i + 0.5) * HIST.rowGap + (i >= EH.crashRow ? EH.crashGap : 0);
+// Code line and history row of step i (ORDER_STEPS[i]): its await line, and the row after "Workflow started"
+const ehStepLine = i => awaitLine(WORKFLOW_CODE, i);
+const ehStepRow = i => i + 1;
 // Activity timing of the shot: an Activity started at `run` sends its RESULT at run + RESULT_LAG, and its
 // history row is saved SAVE_LAG later
 const RESULT_LAG = 0.5, SAVE_LAG = 0.6;
 
-// Builds the shot: one Worker panel per name (stacked in the same place), then the code card (WORKFLOW tab),
-// its spinner, the counter, the order status, the TEMPORAL panel and the Event History with room for the crash line
+// Builds the shot: one Worker panel per name (stacked in the same place), then the code card (WORKFLOW tab and
+// file name), its spinner, the counter, the order status, the TEMPORAL panel and the Event History with room for
+// the crash line
 function makeEventHistoryShot(root, workerNames) {
   const shot = {};
   shot.workers = workerNames.map(name => makeWorkerPanel(root, name, EH.worker.w, EH.worker.h));
-  const { w, font, lineH, padY } = EH.code;
-  shot.code = makeCodeCard(root, { header: 'Workflow', w, font, lineH, padY });
+  const { w, font, lineH, padY, padX, gutter } = EH.code;
+  shot.code = makeCodeCard(root, {
+    lines: WORKFLOW_CODE, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY, padX, gutter,
+  });
   shot.code.hdr.style.opacity = 1;
   shot.spin = E(root,
     '<div style="width:26px;height:26px;border:3px solid rgba(182,100,255,.3);'
@@ -377,14 +403,14 @@ function flyChip(chip, t, at, x0, y0, x1, y1) {
   const f = P(t, at + 0.1, 0.45), ab = P(t, at + 0.55, 0.4, easeIn);
   place(chip, lerp(x0, x1, f), lerp(y0, y1, f), 1 - 0.65 * ab, P(t, at, 0.2) * (1 - ab));
 }
-// RESULT chip of step i (code line i, history row i): appears at `at` at the end of the code line, flies to the
-// start of the history row and is absorbed there
+// RESULT chip of step i: appears at `at` at the end of its await line, flies to the start of its history row and
+// is absorbed there
 function flyResultToHistory(chip, t, at, i) {
-  flyChip(chip, t, at, EH.lineEndX, ehLineY(i), EH.rowStartX, ehRowY(i));
+  flyChip(chip, t, at, EH.lineEndX, ehLineY(ehStepLine(i)), EH.rowStartX, ehRowY(ehStepRow(i)));
 }
-// The way back when replaying: from the start of history row i to the end of code line i
+// The way back when replaying: from the start of the history row of step i to the end of its await line
 function flyResultToCode(chip, t, at, i) {
-  flyChip(chip, t, at, EH.rowStartX, ehRowY(i), EH.lineEndX, ehLineY(i));
+  flyChip(chip, t, at, EH.rowStartX, ehRowY(ehStepRow(i)), EH.lineEndX, ehLineY(ehStepLine(i)));
 }
 // Crash marks of the shot: rows 1-3 tinted (oKept), "WORKER CRASHED HERE" in the room above row 4 (oCut)
 function markEventHistoryCrash(hist, oKept, oCut) {
