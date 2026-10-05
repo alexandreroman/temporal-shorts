@@ -23,6 +23,7 @@
 
 - [Video objective and audience](references/project_objective.md) — durable-ai-agents: 7 topics, non-technical audience, no maximum length
 - [Durable Execution theme story](references/project_durable-execution-theme.md) — order #1042, server then Worker, replay
+- [Temporal Web UI reference](references/reference_temporal-web-ui.md) — local dev server UI, dark-mode colors, real page layout
 - [Airy layout and consistent details](references/feedback_airy-layout.md) — fill the free band, shared edges, arrowhead = stroke color, uniform tiles
 - [Temporal brand rules](references/project_brand.md) — colors, style, fonts, icons and their source
 - [Official Temporal logo](references/reference_logo.md) — official lockup only, cropped viewBox
