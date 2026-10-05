@@ -1,4 +1,4 @@
-"""Write output/<name>.srt from the subtitle timings computed in src/scenes.js."""
+"""Write output/<name>.srt from the subtitle timings of the scenes in src/scenes/."""
 import json, re, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))

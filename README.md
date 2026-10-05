@@ -10,9 +10,12 @@ by ffmpeg.
 ## Contents
 
 ```
-src/index.html        1920x1080 page: Temporal brand styles, starry background, subtitles, header
+src/index.html        1920x1080 page: starry background, subtitles, header, ordered script list
+src/styles.css        Temporal brand styles and the live player's CSS
 src/engine.js         engine: timeline, easing, placement, SVG icons, components (LLM orb, app, cards)
-src/scenes.js         the 9 scenes (subtitle text + animations)
+src/shared.js         brand helpers shared by the scenes (colors, tiles, steps)
+src/scenes/           the 9 scenes, one file each (subtitle text + animations)
+src/player.js         live player: controls, fit-to-window, shortcuts
 src/assets/           official Temporal logo (white horizontal lockup, cropped viewBox)
 src/fonts/            stand-in fonts, downloaded by make setup (see src/fonts/README.md)
 scripts/              setup, render, preview, timeline, SRT export, HTML build and server
@@ -71,10 +74,23 @@ the built file.
 
 ## Editing
 
-- Subtitle text: `subs` of the relevant scene in `src/scenes.js`. The duration adapts to the text
-  length and shifts everything after it; check with `make timeline`, then `make preview`.
-- Animation: the scene's `update(t, c, s)` function, where `t` is the scene's local time and `c[i]`
-  the moment subtitle `i` starts. Every animation is keyed to these cues.
-- Colors, fonts, styles: `:root` and the CSS in `src/index.html`, constant `C` at the top of `src/scenes.js`.
+Each scene lives in its own file in `src/scenes/`, so people editing different
+scenes never touch the same file.
+
+- Subtitle text: `subs` of the relevant scene in `src/scenes/`. The duration
+  adapts to the text length and shifts everything after it; check with
+  `make timeline`, then `make preview`.
+- Animation: the scene's `update(t, c, s)` function, where `t` is the scene's
+  local time and `c[i]` the moment subtitle `i` starts. Every animation is
+  keyed to these cues.
+- Chapter title: `title` next to `chapter` on the first scene of the chapter.
+  The header and the progress segments are derived from it.
+- New scene: create a file in `src/scenes/` that calls `scene({...})` inside a
+  `{ ... }` block, so its helpers stay local to the file. Then add one
+  `<script src="scenes/...">` line to `src/index.html`, in playing order.
+  Scripts are classic `<script src>` tags, not ES modules: Chromium blocks
+  modules on `file://`, which the renderer uses.
+- Colors, fonts, styles: `:root` and the CSS in `src/styles.css`, constant `C`
+  in `src/shared.js`.
 
 Architecture details, brand rules and decision history: see `CLAUDE.md`.

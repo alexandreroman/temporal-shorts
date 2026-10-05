@@ -8,9 +8,10 @@ HTML  := output/ai-agents-temporal-en.html
 # workspace and plain checkouts have none. Override with: make serve PORT=9000
 PORT ?= $(if $(CASPER_PORT),$(CASPER_PORT),8000)
 
-# Inputs shared by the video, the subtitles and the HTML player. Fonts are
-# downloaded by `make setup`, so $(wildcard) expands to nothing when absent.
-ANIMATION_SOURCES := src/index.html src/engine.js src/scenes.js \
+# Inputs shared by the video, the subtitles and the HTML player. The wildcards
+# pick up new scripts, stylesheets and scene files. Fonts are downloaded by
+# `make setup`, so $(wildcard) expands to nothing when absent.
+ANIMATION_SOURCES := src/index.html $(wildcard src/*.js src/*.css src/scenes/*.js) \
                      $(wildcard src/assets/*) $(wildcard src/fonts/*) \
                      scripts/common.py
 
