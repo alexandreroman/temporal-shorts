@@ -416,7 +416,7 @@ scene({
   ],
   build(root, s) {
     s.svg = svgLayer(root);
-    s.title = E(root, `<img src="assets/temporal-logo-horizontal-light-cropped.svg" style="height:150px;display:block;margin:0 auto"><div class="mono" style="font-size:26px;letter-spacing:.16em;color:var(--violet);margin-top:40px">DURABLE EXECUTION</div>`, '', { textAlign: 'center' });
+    s.title = E(root, `<img src="assets/temporal-logo-horizontal-light-cropped.svg" style="height:150px;display:block">`);
     s.A = makeWorker(root, 'APP INSTANCE A'); s.B = makeWorker(root, 'APP INSTANCE B');
     s.steps = STEPS.map(([i, l]) => makeStep(root, i, l, 240, 112));
     s.jr = E(root, `<div class="mono" style="position:absolute;left:26px;top:20px;font-size:18px;letter-spacing:.14em;color:#141414;display:flex;gap:10px;align-items:center">${ICON('book', 22, '#141414', 1.8)} EVENT HISTORY</div><div class="mono" style="position:absolute;right:26px;top:22px;font-size:14px;letter-spacing:.1em;color:#5B6475">STORED OUTSIDE THE APP</div>`, '', { width: '1040px', height: '440px', background: '#F8FAFC', color: '#141414', borderRadius: 'var(--r)' });
@@ -446,7 +446,7 @@ scene({
   },
   update(t, c, s) {
     const tp = P(t, c[0] + 0.1, 0.7, backOut);
-    place(s.title, 960, 420, tp * (1 + 0.06 * P(t, c[0] + 1.6, 0.6)), clamp(tp * 2) * (1 - P(t, c[0] + 1.8, 0.5)));
+    place(s.title, 960, 540, tp * (1 + 0.06 * P(t, c[0] + 1.6, 0.6)), clamp(tp * 2) * (1 - P(t, c[0] + 1.8, 0.5)));
     const rowT = [0, 1, 2, 3, 4, 5].map(i => c[0] + 3.2 + i * 0.55).concat([c[1] + 4.6, c[1] + 5.4]);
     const crashAt = c[1] + 0.3, bOn = c[1] + 1.2;
     const sceneOut = P(t, c[2] + 3.4, 0.5);
