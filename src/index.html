@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<style>
+/* Fonts: stand-ins for Temporal's Aeonik / Noto Sans Mono (not available here). Fetched by scripts/setup.sh.
+   Each src list tries the static TTF first, then the Fontsource woff2. */
+@font-face{font-family:'Brand';src:url(fonts/InstrumentSans-Regular.ttf),url(fonts/instrument-sans-latin-400-normal.woff2) format('woff2');font-weight:400}
+@font-face{font-family:'Brand';src:url(fonts/InstrumentSans-Bold.ttf),url(fonts/instrument-sans-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:'Mono';src:url(fonts/JetBrainsMono-Regular.ttf),url(fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2');font-weight:400}
+@font-face{font-family:'Mono';src:url(fonts/JetBrainsMono-Bold.ttf),url(fonts/jetbrains-mono-latin-700-normal.woff2) format('woff2');font-weight:700}
+:root{--bg:#141414;--ink:#F8FAFC;--slate:#94A3B8;--line:#333A46;--uv:#444CE7;--violet:#B664FF;--neon:#DBFF4B;--red:#FF5A5F;--surface:#1B1B1F;--r:10px;--rs:6px;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:'Brand',sans-serif;color:var(--ink)}
+#sky{position:absolute;inset:0}
+#sky i{position:absolute;width:2px;height:2px;background:#F8FAFC;border-radius:50%}
+#band{position:absolute;left:-10%;right:-10%;bottom:0;height:520px;background:radial-gradient(ellipse at 50% 100%,rgba(182,100,255,.20), rgba(68,76,231,.12) 40%, rgba(20,20,20,0) 70%)}
+.scene{position:absolute;inset:0;display:none}
+.abs{position:absolute;left:0;top:0;will-change:transform,opacity}
+.layer{position:absolute;left:0;top:0;pointer-events:none}
+.mono{font-family:'Mono',monospace}
+#hdr{position:absolute;left:80px;top:54px;display:flex;align-items:center;gap:14px;opacity:0;font-family:'Mono';font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate)}
+#hdr .num{color:var(--ink)}
+#hdr .num:after{content:' /';color:var(--slate)}
+#segs{position:absolute;right:80px;top:64px;display:flex;gap:6px;opacity:0}
+#segs i{display:block;width:56px;height:3px;border-radius:2px;background:rgba(248,250,252,.14);overflow:hidden}
+#segs b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--uv))}
+#subw{position:absolute;left:0;right:0;bottom:50px;display:flex;justify-content:center;opacity:0}
+#sub{max-width:1760px;text-align:center;font-size:30px;line-height:1.36;color:var(--ink);background:rgba(0,0,0,.86);padding:12px 30px 14px;border-bottom:3px solid var(--uv);border-radius:var(--r)}
+/* LLM orb */
+.llm-glow{position:absolute;inset:-40%;border-radius:50%;background:radial-gradient(circle, rgba(182,100,255,.35) 0%, rgba(68,76,231,.12) 40%, rgba(68,76,231,0) 68%)}
+.llm-body{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 32% 28%, #D7A8FF 0%, #B664FF 30%, #6A55F0 62%, #444CE7 100%)}
+.llm-eye{position:absolute;top:34%;width:1.6em;height:2.2em;border-radius:50%;background:#F8FAFC;overflow:hidden}
+.llm-eye.l{left:28%}.llm-eye.r{right:28%}
+.pupil{position:absolute;left:.42em;top:.7em;width:.8em;height:.9em;border-radius:50%;background:#141414}
+.llm-dots{position:absolute;right:-1.3em;top:-1.4em;display:flex;gap:.3em;background:#F8FAFC;padding:.45em .6em;border-radius:var(--rs);opacity:0}
+.llm-dots i{display:block;width:.55em;height:.55em;background:var(--uv);border-radius:2px}
+.llm-q{position:absolute;left:-1.2em;top:-1.6em;font-size:2.6em;font-weight:700;color:var(--neon);opacity:0}
+.llm-label,.app-label{position:absolute;left:50%;top:calc(100% + 18px);transform:translateX(-50%);white-space:nowrap;font-family:'Mono';font-size:22px;letter-spacing:.12em;padding-left:.12em;color:var(--slate)}
+/* app */
+.app{width:300px;height:220px}
+.app-win{position:absolute;inset:0;background:var(--surface);border:1.5px solid #4B5363;border-radius:var(--r);overflow:hidden}
+.app-bar{height:32px;border-bottom:1.5px solid #4B5363;display:flex;gap:8px;align-items:center;padding-left:14px}
+.app-bar i{width:9px;height:9px;background:var(--slate);opacity:.6;border-radius:2px}
+.app-lines{padding:24px 22px;display:flex;flex-direction:column;gap:16px}
+.app-lines b{display:block;height:10px;background:rgba(248,250,252,.18);border-radius:3px}
+.app-gear{position:absolute;right:18px;bottom:14px;opacity:.35}
+/* text cards */
+.card{max-width:640px;background:var(--ink);color:var(--bg);padding:12px 22px 14px;border-left:6px solid var(--violet);border-radius:var(--r)}
+.card .who{font-family:'Mono';font-size:16px;letter-spacing:.12em;color:#5B6475;margin-bottom:4px}
+.card .txt{font-family:'Mono';font-size:27px;line-height:1.35}
+.k-user{border-left-color:var(--violet)} .k-llm{border-left-color:var(--uv)} .k-tool{border-left-color:var(--neon)}
+.k-ok{border-left-color:var(--uv)} .k-bad{border-left-color:var(--red)}
+.pill{white-space:nowrap;padding:9px 18px 9px calc(18px + .1em);background:rgba(248,250,252,.04);border:1.5px solid #4B5363;font-family:'Mono';font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);border-radius:var(--rs)}
+.pill.big{font-size:30px;padding:12px 26px 12px calc(26px + .1em)}
+.pill.uv{border-color:var(--uv);background:rgba(68,76,231,.18)}
+.pill.violet{border-color:var(--violet);background:rgba(182,100,255,.14)}
+.pill.neon{border-color:var(--neon);color:var(--neon);background:rgba(219,255,75,.08)}
+.pill.red{border-color:var(--red);color:var(--red);background:rgba(255,90,95,.1)}
+.lbl{white-space:nowrap;font-family:'Mono';font-size:20px;letter-spacing:.12em;padding-left:.12em;text-transform:uppercase;color:var(--slate)}
+.tile{background:var(--surface);border:1.5px solid #3A4150;border-radius:var(--r);text-align:center}
+.big-t{white-space:nowrap}
+</style></head>
+<body>
+<div id="stage">
+  <div id="sky"></div><div id="band"></div>
+  <div id="hdr"><span class="num">01</span><span class="ttl"></span></div>
+  <div id="segs"></div>
+  <div id="subw"><div id="sub"></div></div>
+</div>
+<script>
+// deterministic star field
+(function(){let s=7;const r=()=>{s=(s*16807)%2147483647;return s/2147483647};const sky=document.getElementById('sky');
+for(let i=0;i<110;i++){const e=document.createElement('i');e.style.left=(r()*1920)+'px';e.style.top=(r()*1080)+'px';e.style.opacity=(0.08+r()*0.35).toFixed(2);if(r()>.85){e.style.width=e.style.height='3px'}sky.appendChild(e);}})();
+</script>
+<script src="engine.js"></script>
+<script src="scenes.js"></script>
+<script>
+buildAll();
+const st=document.getElementById('stage');
+['hdr','segs','subw'].forEach(id=>st.appendChild(document.getElementById(id)));
+const q=new URLSearchParams(location.search);
+if(q.has('t')) renderAt(parseFloat(q.get('t')));
+else { let t0=performance.now(); (function loop(){ renderAt(((performance.now()-t0)/1000)%TOTAL); requestAnimationFrame(loop);})(); }
+</script>
+</body></html>

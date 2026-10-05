@@ -1,0 +1,29 @@
+---
+name: "Temporal brand rules"
+description: "Colors, style, fonts and icon rules applied to the video, with their source"
+type: project
+---
+
+# Temporal brand rules
+
+Source: https://temporal.io/brand (official colors) plus the temporal.io site.
+
+- Official colors: UV `#444CE7` (main accent), Space Black `#141414`
+  (background, dark mode preferred), Off White `#F8FAFC` (text).
+- Site additions: violet `#B664FF` (violet to UV gradient), neon `#DBFF4B`
+  for status only ("done/saved" and the budget argument), red `#FF5A5F` for
+  failures (as in the Temporal UI), slate `#94A3B8` for secondary text.
+- Style: slightly rounded corners on rectangular shapes (`--r` 10 px for
+  surfaces, `--rs` 6 px for pills and small blocks, 2 to 5 px for
+  micro-elements), thin rules `#3A4150`, flat surfaces, spaced-out uppercase
+  monospace labels, subtle starry sky, gradient glow anchored to the bottom
+  edge with no hard edge (the background runs continuously behind the
+  subtitles).
+- Fonts: Aeonik and Noto Sans Mono are unavailable; Instrument Sans (`Brand`)
+  and JetBrains Mono (`Mono`) stand in for them.
+- Icons: hand-drawn stroke SVG set in `engine.js`; no emoji (off-brand).
+
+**Why:** the video is published under the Temporal brand.
+
+**How to apply:** reuse the CSS variables and `C` constants; use neon only as
+a status signal; swap in Aeonik if official fonts become available.

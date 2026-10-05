@@ -1,0 +1,8 @@
+{
+  "workspace": {
+    "scripts": {
+      "setup": "make setup",
+      "run": "make render && open output/ai-agents-temporal-en.mp4"
+    }
+  }
+}
