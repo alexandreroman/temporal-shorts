@@ -3,7 +3,9 @@
 // a loop and checks each step; Ship package fails first, retries, then passes (a hint of what Temporal does).
 // The block keeps every name declared in this file local to this scene.
 {
-  const CHAIN = { x: 1360, y: 540, tile: 116, pitch: 156 }; // tile centers every `pitch` px, links in between
+  // tile centers every `pitch` px, links in between; badge: size of the status badge right of each tile
+  const CHAIN = { x: 1500, y: 522, tile: 132, pitch: 188, badge: 44 };
+  const TITLE_X = 700; // center of the title block, level with the middle of the chain
   const tileY = i => CHAIN.y + (i - 1.5) * CHAIN.pitch;
   const gap = CHAIN.tile / 2 + 2; // links stop 2 px short of the tiles
   const linkPath = i => `M ${CHAIN.x} ${tileY(i) + gap} L ${CHAIN.x} ${tileY(i + 1) - gap}`;
@@ -14,7 +16,7 @@
   scene({
     pre: 1.0,
     // title + chain, measured: centered at (960, 522)
-    shift: [75, 0],
+    shift: [18, 0],
     subs: [
       {
         text: "Payments, orders, sign-ups: most apps run processes made of several steps. What if one fails halfway?",
@@ -24,35 +26,37 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.t = E(root,
-        `<img src="${LOGO}" style="height:58px;display:block;margin-bottom:46px">`
-        + '<div class="mono" style="font-size:22px;letter-spacing:.14em;color:var(--slate)">'
+        `<img src="${LOGO}" style="height:64px;display:block;margin-bottom:52px">`
+        + '<div class="mono" style="font-size:24px;letter-spacing:.14em;color:var(--slate)">'
         + 'AN INTRODUCTION FOR EVERYONE</div>'
-        + '<div style="font-size:116px;line-height:1.02;letter-spacing:-3px;margin-top:22px">'
+        + '<div style="font-size:128px;line-height:1.02;letter-spacing:-3px;margin-top:26px">'
         + 'What is Durable<br>Execution?</div>'
-        + '<div class="mono" style="font-size:24px;letter-spacing:.12em;color:var(--violet);margin-top:34px">'
-        + 'WITH TEMPORAL WORKFLOWS</div>');
+        + '<div class="mono" style="font-size:26px;letter-spacing:.12em;color:var(--violet);margin-top:40px">'
+        + 'WITH TEMPORAL WORKFLOWS</div>',
+        // whole-pixel box (measured content: 893.8 x 509), so the centered block lands on whole pixels
+        '', { width: '894px', height: '510px' });
       s.links = [0, 1, 2].map(i => path(s.svg, linkPath(i), C.line, 2, false));
       s.lit = [0, 1, 2].map(i => path(s.svg, linkPath(i), C.neon, 2.5, false)); // neon trail of the pulse
-      s.tiles = ORDER_STEPS.map(step => E(root, ICON(step.icon, 50, C.ink, 1.7), 'tile', {
+      s.tiles = ORDER_STEPS.map(step => E(root, ICON(step.icon, 58, C.ink, 1.7), 'tile', {
         width: CHAIN.tile + 'px', height: CHAIN.tile + 'px', display: 'flex', alignItems: 'center',
         justifyContent: 'center',
       }));
       // status badge to the right of each tile: check, failure cross or retry arrow
       s.badges = ORDER_STEPS.map(() => {
         const b = E(root,
-          `<div class="ok" style="position:absolute;inset:0">${ICON('check', 38, C.neon, 2.6)}</div>`
-          + `<div class="ko" style="position:absolute;inset:0">${ICON('x', 38, C.red, 2.6)}</div>`
-          + `<div class="re" style="position:absolute;inset:0">${ICON('retry', 38, C.violet, 2.4)}</div>`,
-          '', { width: '38px', height: '38px' });
+          `<div class="ok" style="position:absolute;inset:0">${ICON('check', CHAIN.badge, C.neon, 2.6)}</div>`
+          + `<div class="ko" style="position:absolute;inset:0">${ICON('x', CHAIN.badge, C.red, 2.6)}</div>`
+          + `<div class="re" style="position:absolute;inset:0">${ICON('retry', CHAIN.badge, C.violet, 2.4)}</div>`,
+          '', { width: CHAIN.badge + 'px', height: CHAIN.badge + 'px' });
         b.ok = b.querySelector('.ok'); b.ko = b.querySelector('.ko'); b.re = b.querySelector('.re');
         return b;
       });
       s.dot = E(root, '', '', {
-        width: '16px', height: '16px', borderRadius: '50%', background: C.neon, boxShadow: `0 0 18px ${C.neon}`,
+        width: '18px', height: '18px', borderRadius: '50%', background: C.neon, boxShadow: `0 0 20px ${C.neon}`,
       });
     },
     update(t, c, s) {
-      place(s.t, 700, 440, 1, P(t, 0.15, 0.9));
+      place(s.t, TITLE_X, CHAIN.y, 1, P(t, 0.15, 0.9));
       s.t.style.transform += ` translateY(${(1 - P(t, 0.15, 0.9)) * 24}px)`;
       // time inside the current pass of the pulse (negative before the first pass)
       const u = t < LOOP.start ? -1 : (t - LOOP.start) % LOOP.period;
@@ -76,8 +80,9 @@
         e.style.boxShadow = g > 0.01 ? `0 0 ${Math.round(30 * g)}px rgba(${rgb},${(0.5 * g).toFixed(3)})` : 'none';
         // badge: the check pops in and fades with the reset; the cross and the retry arrow show while they last
         const b = s.badges[i];
-        const shown = passed ? fade : failed || retrying ? 1 : 0;
-        place(b, CHAIN.x + CHAIN.tile / 2 + 36, tileY(i), passed ? P(u, hitAt(i), 0.35, backOut) : 1, shown);
+        const pop = passed ? popIn(u, hitAt(i)) : { o: 1, s: 1 };
+        const shown = passed ? fade * pop.o : failed || retrying ? 1 : 0;
+        place(b, CHAIN.x + CHAIN.tile / 2 + 44, tileY(i), pop.s, shown);
         b.ok.style.opacity = passed ? 1 : 0;
         b.ko.style.opacity = failed ? 1 : 0;
         b.re.style.opacity = retrying ? 1 : 0;

@@ -72,14 +72,15 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 - **0:32** But in real life, things fail: networks drop, services time out,
   servers restart for a deploy.
-  - Visuals: Step row, order status (PENDING) and CARD CHARGED counter
-    ($0); red tags NETWORK CUT / TIMEOUT / RESTART pop in over the links,
-    each jolting its neighbors.
+  - Visuals: Step row; under it, two equal tiles, each under two steps: the
+    ORDER #1042 status (PENDING) and the CARD CHARGED counter ($0); red
+    tags NETWORK CUT / TIMEOUT / RESTART pop in over the links, each
+    jolting its neighbors.
 - **0:40** Here, the server crashes right after charging the card. The
   order is stuck: paid, but never shipped.
   - Visuals: Charge card runs and checks, counter $42; Reserve item runs,
     red flash + shake + bolt, SERVER CRASH; Reserve item fails, status
-    "PAID, NOT SHIPPED" in red.
+    "PAID, NOT SHIPPED" in red with a STUCK note.
 - **0:47** Restart it from the top, and the card is charged a second time.
   The customer pays twice.
   - Visuals: Red "Start over" arrow back to Charge card, steps and status
@@ -105,7 +106,8 @@ money is tracked by a CARD CHARGED counter in dollars.
     neon RUNS TO COMPLETION badge; a red bolt bounces off the card.
 - **1:19** With Temporal, you write the process as a Workflow, and each
   step that calls a service as an Activity.
-  - Visuals: The card slides left with a WORKFLOW tab; each `await` line
+  - Visuals: The card slides left with a WORKFLOW tab, the logo traveling
+    above it; each `await` line
     links to an ACTIVITY tile on the right (Charge card, Reserve item, Ship
     package, Email receipt), each linked to its service.
 - **1:27** If an Activity fails, Temporal retries it automatically, with
@@ -148,7 +150,8 @@ money is tracked by a CARD CHARGED counter in dollars.
   nothing had happened.
   - Visuals: `shipPackage` and `emailReceipt` run for real, rows 4 and 5
     SAVED below the crash line, row 6 "Workflow completed"; order COMPLETE,
-    counter "CHARGED ONCE", WORKFLOW COMPLETE.
+    counter "CHARGED ONCE", WORKFLOW COMPLETE inside the history, under
+    its rows.
 
 ## 07 What you get
 
@@ -160,9 +163,10 @@ money is tracked by a CARD CHARGED counter in dollars.
     day 30 (TIME IS UP) the next line runs.
 - **2:21** You write the business logic. Temporal handles retries, state
   and recovery, with full visibility.
-  - Visuals: "You write the business logic", Temporal logo + "HANDLES THE
-    REST", then 4 tiles: Automatic retries / Survives crashes / Waits for
-    days / Full visibility.
+  - Visuals: "You write the business logic", Temporal logo + a slate
+    "HANDLES THE REST" sized to its wordmark, then 4 identical tiles:
+    Automatic retries / Survives crashes / Waits for days / Full
+    visibility.
 
 ## Outro
 

@@ -3,9 +3,11 @@
 // card and the services give way to the code card: its highlight walks the 4 calls and runs the matching steps.
 // The block keeps every name declared in this file local to this scene.
 {
-  const ROW = { x0: 480, gap: 320, y: 540, w: 260, h: 140 };
-  const ORDER_Y = 340, SERVICE_Y = 712, CODE_Y = 292, DONE_Y = 673;
-  const SERVICE_LINK = [ROW.y + ROW.h / 2 + 4, SERVICE_Y - 26]; // y range of the link from a step to its service
+  const ROW = { x0: 375, gap: 390, y: 540, w: 290, h: 170 };
+  // order card (136 px tall) and code card (256 px) both 110 px above the row and as wide as the two inner steps
+  // (x 620 to 1300); services 150 px below the row, centered under their steps; ORDER COMPLETE (50 px) 70 px below
+  const ABOVE_W = 680, ORDER_Y = 277, SERVICE_Y = 798, CODE_Y = 217, DONE_Y = 720;
+  const SERVICE_LINK = [ROW.y + ROW.h / 2 + 4, SERVICE_Y - 28]; // y range of the link from a step to its service
   // c[1]: step i runs from RUN0 + i * RUN_GAP for RUN_D seconds, in step with the words of the subtitle
   const RUN0 = 0.2, RUN_GAP = 1.15, RUN_D = 0.9;
   // c[2]: the code highlight sits on line 1 + i (step i) from LINE0 + i * LINE_GAP
@@ -13,27 +15,29 @@
 
   const makeOrderCard = root => {
     const e = E(root,
-      `<div style="display:flex;align-items:center;gap:22px">${ICON('bag', 46, C.ink, 1.6)}`
-      + '<div style="text-align:left"><div class="lbl" style="font-size:16px;padding-left:0">Order #1042</div>'
-      + '<div style="font-size:36px;line-height:1.1;margin-top:4px">Sneakers</div></div>'
-      + '<div style="font-size:44px;margin-left:34px">$42</div>'
-      + '<div class="buy mono" style="margin-left:34px;padding:12px 30px 12px calc(30px + .14em);font-size:22px;'
+      `<div style="flex:1;display:flex;align-items:center;gap:26px">${ICON('bag', 56, C.ink, 1.6)}`
+      + '<div style="text-align:left"><div class="lbl" style="font-size:18px;padding-left:0">Order #1042</div>'
+      + '<div style="font-size:44px;line-height:1.1;margin-top:6px">Sneakers</div></div>'
+      + '<div style="font-size:54px;margin-left:auto">$42</div>'
+      + '<div class="buy mono" style="margin-left:40px;padding:15px 38px 15px calc(38px + .14em);font-size:26px;'
       + `letter-spacing:.14em;border:2px solid ${C.uv};border-radius:var(--rs)">BUY</div></div>`,
-      'tile', { padding: '22px 26px 22px 30px' });
+      'tile', {
+        width: ABOVE_W + 'px', height: '136px', padding: '0 32px 0 24px', display: 'flex', alignItems: 'center',
+      });
     e.buy = e.querySelector('.buy');
     return e;
   };
   const makeService = (root, name) => {
-    const e = tag(root, `${ICON('server', 22, C.slate, 1.8)}${name}`);
-    Object.assign(e.style, { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' });
+    const e = tag(root, `${ICON('server', 24, C.slate, 1.8)}${name}`);
+    Object.assign(e.style, { display: 'flex', alignItems: 'center', gap: '12px', fontSize: '20px' });
     return e;
   };
 
   scene({
     chapter: 1, title: 'A process in many steps',
     // order card + steps, then + services (pans as the first one appears), then code card + steps + ORDER COMPLETE
-    // (pans as the services fade)
-    shift: (t, c) => pan(t, [0, 74], [[c[1], 0, 12], [c[2] + 0.1, 0, 92]], 0.9),
+    // (pans as the services fade; measured compromise: 30 px high before ORDER COMPLETE, 30 px low with it)
+    shift: (t, c) => pan(t, [0, 105], [[c[1], 0, 7], [c[2] + 0.1, 0, 135]], 0.9),
     subs: [
       { text: "Take an online order. Behind the Buy button, four steps run one after the other.", after: 0.4 },
       {
@@ -53,12 +57,15 @@
       const [y0, y1] = SERVICE_LINK;
       s.links = s.steps.xs.map(x => path(s.svg, `M ${x} ${y0} L ${x} ${y1}`, C.line, 2, false));
       s.dots = s.steps.xs.map(() => E(root, '', '', {
-        width: '12px', height: '12px', borderRadius: '50%', background: C.uv, boxShadow: `0 0 12px ${C.uv}`,
+        width: '14px', height: '14px', borderRadius: '50%', background: C.uv, boxShadow: `0 0 14px ${C.uv}`,
       }));
       s.services = ORDER_STEPS.map(step => makeService(root, step.service));
-      s.code = makeCodeCard(root, { w: 600 });
-      s.done = tag(root, `${ICON('check', 26, C.neon, 2.6)}Order complete`, 'neon');
-      Object.assign(s.done.style, { display: 'flex', alignItems: 'center', gap: '12px' });
+      s.code = makeCodeCard(root, { w: ABOVE_W });
+      s.done = tag(root, `${ICON('check', 28, C.neon, 2.6)}Order complete`, 'neon');
+      // whole-pixel size (content: 295.8 x 49), so the centered tag lands on whole pixels
+      Object.assign(s.done.style, {
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', width: '296px', height: '50px',
+      });
     },
     update(t, c, s) {
       // order card: pops in, its BUY button is pressed at `press`
@@ -85,8 +92,8 @@
       s.services.forEach((e, i) => {
         const x = s.steps.xs[i], a = c[1] + RUN0 + i * RUN_GAP;
         draw(s.links[i], P(t, a, 0.3), 1 - out);
-        const sp = P(t, a + 0.15, 0.4, backOut);
-        place(e, x, SERVICE_Y, sp, clamp(sp * 2) * (1 - out));
+        // fades in without a bump: its border lights up 0.3 s later, a change that must happen at native size
+        place(e, x, SERVICE_Y, 1, P(t, a + 0.15, 0.2) * (1 - out));
         // busy while it handles the call, then all four light up together on "Each step calls another service"
         const busy = t >= a + 0.45 && t < a + RUN_D;
         const all = win(t, c[1] + 4.8 + i * 0.12, c[1] + 6.2, 0.3);
@@ -102,8 +109,8 @@
       let line = 1;
       for (let i = 1; i < 4; i++) line += P(t, c[2] + LINE0 + i * LINE_GAP, 0.2);
       setCodeLine(s.code, line, P(t, c[2] + LINE0 - 0.2, 0.3) * (1 - P(t, c[2] + LINE0 + 4 * LINE_GAP, 0.3)));
-      const dp = P(t, c[2] + LINE0 + 4 * LINE_GAP + 0.2, 0.45, backOut);
-      place(s.done, 960, DONE_Y, dp, clamp(dp * 2));
+      const dp = popIn(t, c[2] + LINE0 + 4 * LINE_GAP + 0.2, 0.08);
+      place(s.done, 960, DONE_Y, dp.s, dp.o);
     }
   });
 }

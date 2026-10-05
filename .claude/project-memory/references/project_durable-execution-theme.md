@@ -30,7 +30,13 @@ The script and its example table live in `docs/durable-execution/script.md`.
   after its content changes or it appears. In this theme, tags, counters
   and pills change text at scale 1 on whole-pixel offsets, and their pops
   start 0.1 s after the change (`bumpAt` in the theme's `shared.js`).
-  Render-order checks screenshot every stepped frame, as the renderer does.
+  Small badges, icons, tags and RESULT chips (check badges, bug badges,
+  markers) first appear at scale 1 by fading in, then bump above 1
+  (`popIn`), never growing from a small scale: a layer rasterized near
+  scale 0 loses its icon and shows an empty square. Only large tiles and
+  panels pop in from scale 0.
+  Render-order checks screenshot every stepped frame, as the renderer does,
+  and start before the pop or bump they check.
 
 **Why:** a single concrete example with a money stake makes the mechanism
 easy to follow and matches how Temporal replays Workflow code against

@@ -4,39 +4,48 @@
 // growing delays, until it succeeds.
 // The block keeps every name declared in this file local to this scene.
 {
-  // Layout: the logo on top; below it the code card, then a column of 4 Activity tiles (one row per step)
-  // and their services. The card starts alone in the middle and slides left to make room.
-  const ROW = { y0: 575, pitch: 116 }; // middle of the 4 rows, distance between rows
+  // Layout: the logo sits above the code card, on its vertical axis, and moves with it. Alone, the logo, the card
+  // and the badge stand in the middle, 106 px apart; then the card slides left to make room for a column of
+  // 4 Activity tiles (one row per step, 56 px apart) and, on the right, the services they call, each centered on
+  // its row. Next to the Activities, the card's center is level with the column's center and the logo's top with
+  // the column's top; the composition spans x 120..1800.
+  const ROW = { y0: 522, pitch: 176 }; // middle of the 4 rows, distance between rows
   const rowY = i => ROW.y0 + (i - 1.5) * ROW.pitch;
-  const CARD = { x0: 960, x: 485, y: ROW.y0 };
-  const LOGO_Y = ROW.y0 - 287;
-  const TILE = { x: 1080, w: 260, h: 88 };
-  const SERVICE = { x: 1675, w: 160, h: 44 };
-  // Ship package retry line: attempt markers on its link to the Carrier, the gaps grow with the delays
+  // code card as in chapters 5 and 6 (26 px text on 44 px lines), centered alone at (x0, y0), then at (x, y)
+  const CARD = { w: 630, font: 26, lineH: 44, padY: 22, x0: 960, y0: 530, x: 435, y: ROW.y0 };
+  const CARD_H = CARD.padY * 2 + ORDER_CODE.length * CARD.lineH; // 308
+  const STACK_GAP = 106; // logo to card, card to badge
+  const LOGO_BOX = { h: 64, w: 245 }; // the logo's height and width
+  const LOGO_DY = -(CARD_H / 2 + STACK_GAP + LOGO_BOX.h / 2); // logo center relative to the card center
+  const BADGE_DY = CARD_H / 2 + STACK_GAP + 24.5; // badge (49 px high) center relative to the card center
+  const TILE = { x: 1050, w: 300, h: 120 };
+  const SERVICE = { x: 1695, w: 210, h: 64 };
+  // Ship package retry line: attempt markers on its link to the Carrier, the gaps grow with the delays; the first
+  // and last markers sit 33 px from the tile and the chip
   const SHIP = 2;
-  const ATTEMPT_X = [1265, 1375, 1535];
-  const MARK = 30;
+  const ATTEMPT_X = [1250, 1376, 1540];
+  const MARK = 34;
 
   // Activity tile: icon, ACTIVITY kicker and label, with the makeStep status marks (see stepState)
   const makeActivity = (p, step) => addStatusMarks(E(p,
-    '<div style="display:flex;align-items:center;gap:16px;height:100%;padding-left:20px">'
-    + `${ICON(step.icon, 36, C.ink)}<div style="text-align:left">`
-    + '<div class="lbl" style="font-size:13px;padding-left:0">Activity</div>'
-    + `<div style="font-size:21px;margin-top:4px;white-space:nowrap">${step.label}</div></div></div>`,
+    '<div style="display:flex;align-items:center;gap:20px;height:100%;padding-left:26px">'
+    + `${ICON(step.icon, 42, C.ink)}<div style="text-align:left">`
+    + '<div class="lbl" style="font-size:14px;padding-left:0">Activity</div>'
+    + `<div style="font-size:24px;margin-top:6px;white-space:nowrap">${step.label}</div></div></div>`,
     'tile', { width: TILE.w + 'px', height: TILE.h + 'px' }));
   const makeService = (p, name) => E(p,
-    `${ICON('server', 20, C.slate, 1.8)}<span class="mono" style="font-size:16px;letter-spacing:.1em;`
+    `${ICON('server', 24, C.slate, 1.8)}<span class="mono" style="font-size:18px;letter-spacing:.1em;`
     + `text-transform:uppercase;color:var(--slate)">${name}</span>`,
     '', {
       width: SERVICE.w + 'px', height: SERVICE.h + 'px', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', gap: '10px', border: '1.5px solid #4B5363', borderRadius: 'var(--rs)',
+      justifyContent: 'center', gap: '12px', border: '1.5px solid #4B5363', borderRadius: 'var(--rs)',
     });
   // attempt marker: the attempt number while it runs, then a red x or a neon check
   const makeAttempt = (p, n) => {
     const e = E(p,
-      `<span class="n mono" style="position:absolute;font-size:15px;color:${C.violet}">${n}</span>`
-      + `<span class="ko" style="position:absolute">${ICON('x', 18, C.red, 2.6)}</span>`
-      + `<span class="ok" style="position:absolute">${ICON('check', 18, C.neon, 2.6)}</span>`,
+      `<span class="n mono" style="position:absolute;font-size:17px;color:${C.violet}">${n}</span>`
+      + `<span class="ko" style="position:absolute">${ICON('x', 20, C.red, 2.6)}</span>`
+      + `<span class="ok" style="position:absolute">${ICON('check', 20, C.neon, 2.6)}</span>`,
       '', {
         width: MARK + 'px', height: MARK + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: '#141414', border: '2px solid ' + C.violet, borderRadius: '50%',
@@ -54,7 +63,7 @@
 
   scene({
     chapter: 4, title: 'Durable Execution with Temporal',
-    // laid out around (960, 522): the card-alone phase and the Activities phase both sit within 10 px of it
+    // laid out around (960, 522): the card-alone phase and the Activities phase are both centered on it
     shift: [0, 0],
     subs: [
       {
@@ -73,11 +82,12 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      // native-size logo on whole pixels (never scaled)
-      s.logo = E(root, `<img src="${LOGO}" style="height:58px;display:block">`, '', {
-        left: (960 - 111) + 'px', top: (LOGO_Y - 29) + 'px',
+      // native-size logo on whole pixels (never scaled), laid out at its place above the card alone
+      s.logo = E(root, `<img src="${LOGO}" style="height:${LOGO_BOX.h}px;display:block">`, '', {
+        left: (CARD.x0 - Math.round(LOGO_BOX.w / 2)) + 'px', top: (CARD.y0 + LOGO_DY - LOGO_BOX.h / 2) + 'px',
       });
-      s.card = makeCodeCard(root, { header: 'Workflow' });
+      const { w, font, lineH, padY } = CARD;
+      s.card = makeCodeCard(root, { header: 'Workflow', w, font, lineH, padY });
       s.badge = tag(root, `${ICON('check', 22, C.neon, 2.6)}Runs to completion`, 'neon');
       Object.assign(s.badge.style, { display: 'flex', alignItems: 'center', gap: '10px' });
       // a neon ring around the card when the bolt bounces off it
@@ -103,32 +113,33 @@
       const y = rowY(SHIP), r = MARK / 2 + 2;
       s.waits = [0, 1].map(k => path(s.svg,
         `M ${ATTEMPT_X[k] + r} ${y} L ${ATTEMPT_X[k + 1] - r} ${y}`, C.slate, 3, false));
-      s.waitL = ['Retry in 1s', 'Retry in 2s'].map(txt => E(root, txt, 'lbl', { fontSize: '14px' }));
+      s.waitL = ['Retry in 1s', 'Retry in 2s'].map(txt => E(root, txt, 'lbl', { fontSize: '15px' }));
       s.attempts = ATTEMPT_X.map((_, k) => makeAttempt(root, k + 1));
-      s.timeout = E(root, 'Carrier timeout', 'lbl', { fontSize: '14px', color: C.red });
+      s.timeout = E(root, 'Carrier timeout', 'lbl', { fontSize: '15px', color: C.red });
       s.retries = tag(root, 'Automatic retries', 'uv');
       s.retries.style.fontSize = '18px';
     },
     update(t, c, s) {
-      // ---- c[0]: the logo, then the code card alone, running to completion
+      // ---- c[0]: the logo, then the code card alone, running to completion; at c[1] both slide left together
       const lp = P(t, c[0] + 0.1, 0.6);
+      const slide = P(t, c[1] + 0.2, 0.9);
+      const cardX = lerp(CARD.x0, CARD.x, slide), cardY = lerp(CARD.y0, CARD.y, slide);
       s.logo.style.opacity = lp;
-      s.logo.style.transform = `translateY(${(1 - lp) * 16}px)`;
+      s.logo.style.transform = `translate(${cardX - CARD.x0}px,${cardY - CARD.y0 + (1 - lp) * 16}px)`;
       const cp = P(t, c[0] + 0.5, 0.6, backOut);
-      const cardX = lerp(CARD.x0, CARD.x, P(t, c[1] + 0.2, 0.9));
-      place(s.card, cardX, CARD.y, cp, clamp(cp * 2));
+      place(s.card, cardX, cardY, cp, clamp(cp * 2));
       s.card.hdr.style.opacity = P(t, c[1] + 1.4, 0.4);
-      const bp = P(t, c[0] + 2.9, 0.45, backOut);
-      place(s.badge, CARD.x0, CARD.y + s.card.h / 2 + 50, bp, clamp(bp * 2) * (1 - P(t, c[1], 0.3)));
+      const bp = popIn(t, c[0] + 2.9, 0.08);
+      place(s.badge, CARD.x0, CARD.y0 + BADGE_DY, bp.s, bp.o * (1 - P(t, c[1], 0.3)));
 
       // a failure bolt hits the card and bounces off
       const hit = c[0] + 4.6;
       const cardRight = CARD.x0 + s.card.w / 2;
       const inP = P(t, hit - 0.4, 0.4, easeIn), outP = P(t, hit, 0.6);
       const bx = lerp(lerp(cardRight + 300, cardRight + 34, inP), cardRight + 170, outP);
-      const by = lerp(lerp(CARD.y - 190, CARD.y - 60, inP), CARD.y - 150, outP);
+      const by = lerp(lerp(CARD.y0 - 190, CARD.y0 - 60, inP), CARD.y0 - 150, outP);
       place(s.bolt, bx, by, 1, P(t, hit - 0.4, 0.15) * (1 - P(t, hit + 0.25, 0.35)), outP * 40);
-      place(s.ring, CARD.x0, CARD.y, 1, win(t, hit - 0.05, hit + 0.3, 0.15) * 0.9);
+      place(s.ring, CARD.x0, CARD.y0, 1, win(t, hit - 0.05, hit + 0.3, 0.15) * 0.9);
 
       // ---- c[2]: each Activity runs in turn; Ship package fails twice and is retried after 1s, then 2s
       const run = [c[2] + 0.2, c[2] + 0.75, c[2] + 1.3, c[2] + 5.9]; // when each Activity starts
@@ -172,20 +183,21 @@
       // ---- c[2]: the retry line of Ship package
       const y = rowY(SHIP);
       s.attempts.forEach((e, k) => {
-        const ap = P(t, tries[k][0], 0.35, backOut);
+        // the pop ends before the outcome shows, so the marker changes look at native size
+        const ap = popIn(t, tries[k][0]);
         const outcome = k === tries.length - 1 ? 2 : 3; // only the last attempt succeeds
         attemptState(e, t >= tries[k][1] ? outcome : 1);
-        place(e, ATTEMPT_X[k], y, ap, clamp(ap * 2));
+        place(e, ATTEMPT_X[k], y, ap.s, ap.o);
       });
       s.waits.forEach((w, k) => draw(w, P(t, waits[k][0], waits[k][1], x => x)));
       s.waitL.forEach((e, k) => {
-        place(e, (ATTEMPT_X[k] + ATTEMPT_X[k + 1]) / 2, y - 36, 1, P(t, waits[k][0], 0.3));
+        place(e, (ATTEMPT_X[k] + ATTEMPT_X[k + 1]) / 2, y - 40, 1, P(t, waits[k][0], 0.3));
       });
       const closeAt = shipDone + 0.2;
-      place(s.timeout, (ATTEMPT_X[0] + ATTEMPT_X[1]) / 2, y + 36, 1,
+      place(s.timeout, (ATTEMPT_X[0] + ATTEMPT_X[1]) / 2, y + 40, 1,
         P(t, tries[0][1] + 0.05, 0.3) * (1 - P(t, closeAt, 0.25)));
-      const rp = P(t, closeAt + 0.1, 0.45, backOut);
-      place(s.retries, (ATTEMPT_X[0] + ATTEMPT_X[2]) / 2, y + 56, rp, clamp(rp * 2));
+      const rp = popIn(t, closeAt + 0.1, 0.08);
+      place(s.retries, (ATTEMPT_X[0] + ATTEMPT_X[2]) / 2, y + 64.5, rp.s, rp.o);
     }
   });
 }

@@ -5,8 +5,9 @@
 {
   // the two replayed steps: chargeCard (line 2, row 2) and reserveItem (line 3, row 3)
   const REUSED_LABELS = ['REUSED, NOT RE-CHARGED', 'REUSED, NOT RE-RUN'];
-  // "From the start": arrow beside the Worker panel, from line 4 back to line 1
-  const ARC = { x0: 814, x1: 822, bulge: 905 };
+  // "From the start": arrow in the gap right of the Worker panel, from line 4 back to line 1
+  const workerRight = EH.worker.x + EH.worker.w / 2;
+  const ARC = { x0: workerRight + 14, x1: workerRight + 22, bulge: workerRight + 105 };
   scene({
     chapter: 6, title: 'When a Worker crashes',
     shift: EH.shift,
@@ -32,6 +33,9 @@
       s.reuseChips = [0, 1].map(() => makeResultCard(root));
       s.saveChips = [0, 1].map(() => makeResultCard(root));
       s.done = tag(root, 'Workflow complete', 'neon');
+      // an even height (29 px line + 9 px padding + 1.5 px border, twice), so the centered tag rests on whole
+      // pixels, level with the counter row; dark like the SAVED tags, as it sits on the light history card
+      Object.assign(s.done.style, { height: '50px', lineHeight: '29px', background: '#141414' });
       // oversized so it still covers the whole stage once the scene is shifted
       s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
     },
@@ -111,8 +115,8 @@
       const scans = replay.map((q, i) => win(t, q + 0.15, back[i], 0.15));
       setHistoryScan(hist, scans[1] > 0 ? 2 : 1, Math.max(...scans));
 
-      const dp = P(t, completed + 0.4, 0.45, backOut);
-      place(s.done, EH.temporal.x, EH.temporal.y + EH.temporal.h / 2 + 58, dp, clamp(dp * 2));
+      const dp = popIn(t, completed + 0.4, 0.08);
+      place(s.done, EH.temporal.x, EH.doneY, dp.s, dp.o);
       place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);
     }
   });
