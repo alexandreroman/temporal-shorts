@@ -108,17 +108,21 @@
   scene({
     chapter: 5, title: 'Typed, composable agents',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
-    pre: 1.0, post: 1.2,
+    pre: 1.5, post: 2.0,
     // laid out at final positions on the grid (x 140-1780), so no offset is needed
     shift: [0, 0],
     subs: [
       {
         text: "An agent is more than text in, text out: it exposes typed operations, with their inputs and outputs.",
-        after: 0.6,
+        after: 1.0,
       },
       {
-        text: "Other agents read that interface and call it as a tool: a typed request in, a typed result out.",
-        after: 0.6,
+        text: "Other agents read that interface and add its operations to their own tools.",
+        after: 2.1,
+      },
+      {
+        text: "A typed request goes in, TravelAgent does the work, and a typed result comes back.",
+        after: 0.8,
       },
     ],
     build(root, s) {
@@ -157,49 +161,50 @@
     update(t, c, s) {
       // phase 1: "text in, text out" is struck out in the left column, TravelAgent lists its typed operations
       const pp = P(t, c[0] + 0.1, 0.5, backOut);
-      place(s.pill, PARENT.x, PARENT.y, pp, clamp(pp * 2) * (1 - P(t, c[1], 0.35)));
+      place(s.pill, PARENT.x, PARENT.y, pp, clamp(pp * 2) * (1 - P(t, c[1] + 0.7, 0.35)));
       // the strike is drawn from left to right by clipping its end, so it keeps its centered position
-      const struck = P(t, c[0] + 1.2, 0.35);
+      const struck = P(t, c[0] + 1.6, 0.5);
       s.pill.strike.style.clipPath = `inset(0 ${((1 - struck) * 100).toFixed(2)}% 0 0)`;
       s.pill.txt.style.opacity = lerp(1, 0.5, struck);
 
-      const tp = P(t, c[0] + 1.6, 0.5, backOut);
+      const tp = P(t, c[0] + 3.0, 0.5, backOut);
       place(s.travel, TRAVEL.x, TRAVEL.y, tp, clamp(tp * 2));
-      showRow(s.travel.cols, P(t, c[0] + 2.3, 0.3));
-      s.travel.rows.forEach((row, i) => showRow(row, P(t, c[0] + 2.6 + i * 0.8, 0.35)));
-      const sp = P(t, c[1] + 0.15, 0.45, backOut);
+      showRow(s.travel.cols, P(t, c[0] + 3.7, 0.3));
+      s.travel.rows.forEach((row, i) => showRow(row, P(t, c[0] + 4.4 + i * 1.0, 0.35)));
+      const sp = P(t, c[1] + 0.3, 0.45, backOut);
       s.self.style.opacity = clamp(sp * 2);
       s.self.style.transform = `scale(${sp})`;
 
       // phase 2: the Trip planner takes the pill's place, with its tools
-      const parentIn = P(t, c[1] + 0.3, 0.5, backOut);
+      const parentIn = P(t, c[1] + 0.9, 0.5, backOut);
       place(s.parent, PARENT.x, PARENT.y, parentIn, clamp(parentIn * 2));
-      showRow(s.parent.cols, P(t, c[1] + 0.5, 0.3));
+      showRow(s.parent.cols, P(t, c[1] + 1.2, 0.3));
 
       // step 1: the Trip planner reads TravelAgent's interface and plan_trip joins its tools
-      draw(s.readArrow, P(t, c[1] + 0.6, 0.4));
-      place(s.readLbl, (ARCH_X0 + ARCH_X1) / 2, ARCH_Y - 26, 1, P(t, c[1] + 0.7, 0.35));
-      const copied = c[1] + 1.15;
-      fly(s.chip, t, c[1] + 1.0, TRAVEL_NAME_X, PLAN_Y, copied, 0.7, PARENT_NAME_X, PARENT_NAME_Y,
-        copied + 0.7, PARENT_NAME_X, PARENT_NAME_Y);
+      draw(s.readArrow, P(t, c[1] + 2.0, 0.6));
+      place(s.readLbl, (ARCH_X0 + ARCH_X1) / 2, ARCH_Y - 26, 1, P(t, c[1] + 2.1, 0.35));
+      // the chip pops on TravelAgent's plan_trip, rests there, then travels to the Trip planner's tools
+      const copied = c[1] + 3.5;
+      fly(s.chip, t, c[1] + 3.1, TRAVEL_NAME_X, PLAN_Y, copied, 0.9, PARENT_NAME_X, PARENT_NAME_Y,
+        copied + 1.0, PARENT_NAME_X, PARENT_NAME_Y);
       // search_web sits in the first row, then slides down to make room before the chip lands
-      const inserted = P(t, copied + 0.1, 0.4);
+      const inserted = P(t, copied + 0.3, 0.5);
       const [planRow, searchRow] = s.parent.rows;
-      // the row appears in place once the landed chip has faded (copied + 1.1), so one plan_trip shows at a time
-      showRow(planRow, P(t, copied + 1.1, 0.3), 0);
-      searchRow.style.opacity = P(t, c[1] + 0.6, 0.35);
+      // the row appears in place once the landed chip has faded (copied + 1.4), so one plan_trip shows at a time
+      showRow(planRow, P(t, copied + 1.4, 0.3), 0);
+      searchRow.style.opacity = P(t, c[1] + 1.3, 0.35);
       searchRow.style.transform = `translateY(${(-(CARD.rowH + CARD.rowGap) * (1 - inserted)).toFixed(2)}px)`;
-      const fp = P(t, copied + 1.3, 0.4, backOut);
+      const fp = P(t, copied + 1.8, 0.4, backOut);
       s.parent.from.style.opacity = clamp(fp * 2);
       s.parent.from.style.transform = `scale(${fp})`;
 
       // step 2: the Trip planner calls plan_trip with a typed request; TravelAgent works on it
-      const sent = c[1] + 2.4, landed = sent + 1.05;
-      draw(s.requestArrow, P(t, sent, 0.4));
+      const sent = c[2] + 0.3, landed = sent + 1.5;
+      draw(s.requestArrow, P(t, sent, 0.5));
       place(s.requestLbl, GAP_MID, REQUEST_Y - LBL_DY, 1, P(t, sent + 0.15, 0.35));
-      fly(s.request, t, sent + 0.2, VALUE_X0, REQUEST_CARD_Y, sent + 0.35, 0.7, VALUE_X1, REQUEST_CARD_Y,
+      fly(s.request, t, sent + 0.2, VALUE_X0, REQUEST_CARD_Y, sent + 0.6, 0.9, VALUE_X1, REQUEST_CARD_Y,
         landed, TRAVEL_NAME_X, PLAN_Y);
-      const answered = c[1] + 4.4;
+      const answered = c[2] + 3.6;
       const working = win(t, landed + 0.15, answered + 0.2, 0.2);
       const travelPlan = s.travel.rows[0];
       travelPlan.style.borderColor = working > 0.5 ? C.violet : 'transparent';
@@ -207,10 +212,10 @@
       travelPlan.style.boxShadow = `0 0 ${Math.round(22 * working)}px rgba(182,100,255,${(0.35 * working).toFixed(2)})`;
 
       // step 3: the typed result comes back and the tool row checks
-      const received = answered + 1.05;
-      draw(s.resultArrow, P(t, answered, 0.4));
+      const received = answered + 1.5;
+      draw(s.resultArrow, P(t, answered, 0.5));
       place(s.resultLbl, GAP_MID, RESULT_Y + LBL_DY, 1, P(t, answered + 0.15, 0.35));
-      fly(s.result, t, answered + 0.2, VALUE_X1, RESULT_CARD_Y, answered + 0.35, 0.7, VALUE_X0, RESULT_CARD_Y,
+      fly(s.result, t, answered + 0.2, VALUE_X1, RESULT_CARD_Y, answered + 0.6, 0.9, VALUE_X0, RESULT_CARD_Y,
         received, PARENT_NAME_X, PARENT_NAME_Y);
       const ok = P(t, received + 0.25, 0.45, backOut);
       s.parent.ok.style.opacity = clamp(ok * 2);

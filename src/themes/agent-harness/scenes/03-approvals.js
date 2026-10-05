@@ -44,8 +44,9 @@
     return [x, y];
   };
   // legs from the gate's lane, through the gate, into a tool row; the call crosses the gate GATE_HIT after `at`
-  const through = (at, row) => [[at, 0.8, EXIT_X, LANE], [at + 0.65, 0.55, TOOLS.rowX, TOOLS.rows[row]]];
-  const GATE_HIT = 0.42;
+  // and lands in its row LAND after `at`
+  const through = (at, row) => [[at, 0.8, EXIT_X, LANE], [at + 0.65, 0.7, TOOLS.rowX, TOOLS.rows[row]]];
+  const GATE_HIT = 0.42, LAND = 1.4;
   // 0 -> 1 -> 0 over [at, at + d]
   const bump = (t, at, d) => Math.sin(Math.PI * clamp((t - at) / d));
 
@@ -59,22 +60,20 @@
   scene({
     chapter: 3, title: 'Human approvals',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
-    pre: 1.0, post: 1.2,
+    pre: 1.5, post: 2.0,
     // laid out in final coordinates: the gate column reserves the AUTO MODE space from the start
     shift: [0, 0],
     subs: [
       {
         text: "Some tool calls need a person's OK first, like a payment. The approval policy decides which ones.",
-        after: 0.6,
+        after: 2.3,
       },
       {
         text: "The call pauses inside the Workflow, for minutes or days, then resumes as soon as someone approves.",
-        after: 0.9,
+        after: 2.4,
       },
-      {
-        text: "Auto mode lets code or a model approve routine calls. Anything unclear still goes to a human.",
-        after: 0.6,
-      },
+      { text: 'Auto mode lets code or a model approve routine calls, judged against criteria you define.', after: 1.4 },
+      { text: 'Anything unclear, like a $2,400 hotel, still goes to a human.', after: 1.45 },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
@@ -160,20 +159,28 @@
       s.tags = s.calls.map(() => makeTag(root));
     },
     update(t, c, s) {
-      // decision times
-      const parkFlight = c[0] + 4.8, approve = c[1] + 3.6, approved = c[1] + 3.9, booked = c[1] + 5.6;
-      const autoOk = c[2] + 2.4, escalate = c[2] + 4.4;
+      // c[0]: the two searches pop next to the agent and cross the gate one after the other; book_flight stops
+      const pop = [c[0] + 1.2, c[0] + 3.4, c[0] + 5.6];
+      const parkFlight = pop[2] + 1.1;
+      // c[1]: the durable wait, then the person approves and the flight is booked
+      const approve = c[1] + 4.5, approved = c[1] + 4.8;
+      // c[2]: AUTO MODE docks on the gate and approves the cheap hotel
+      const hotelPop = c[2] + 1.8, hotelParked = hotelPop + 1.1, autoOk = c[2] + 3.6;
+      // c[3]: the expensive hotel stops at the gate, AUTO MODE escalates it and it drops to the person
+      const bigPop = c[3] + 0.5, bigParked = bigPop + 1.1, escalate = c[3] + 2.3, drop = c[3] + 3.3;
+      const atYou = drop + 0.8;
       // when each call heads through the gate: search_flights, search_hotels, book_flight, the cheap book_hotel
-      const cross = [c[0] + 1.3, c[0] + 2.7, c[1] + 4.3, c[2] + 2.9];
-      // the gate flashes neon as a call crosses it, and turns violet while a call waits in front of it
+      const cross = [pop[0] + 0.5, pop[1] + 0.5, c[1] + 6.0, c[2] + 4.4];
+      const booked = cross[2] + LAND, hotelLands = cross[3] + LAND;
+      // the gate flashes neon as a call crosses it, and turns violet while a call waits for a person in front of it
       const crossing = cross.some(at => Math.abs(t - at - GATE_HIT) < 0.22);
       const flightWaits = t >= parkFlight && t < approved;
-      const hotelWaits = t >= escalate && t < c[2] + 5.0;
+      const hotelWaits = t >= escalate && t < drop + 0.4;
 
       // agent, gate, tools, person
       const ap = P(t, c[0], 0.6, backOut);
       place(s.agent.root, AGENT.x, AGENT.y, ap, clamp(ap * 2));
-      const think = win(t, c[0] + 0.6, c[0] + 4.4, 0.3) + win(t, c[2] + 0.9, c[2] + 3.8, 0.3);
+      const think = win(t, c[0] + 0.6, pop[2], 0.3) + win(t, c[2] + 0.9, bigPop, 0.3);
       llmState(s.agent, { think, look: 1 });
       draw(s.lane, P(t, c[0] + 0.6, 0.6));
       const gateColor = crossing ? C.neon : (flightWaits || hotelWaits) ? C.violet : C.line;
@@ -184,8 +191,8 @@
       });
       // the rule a call matches lights up: each search its own ALLOW row, the bookings the ASK row
       const searchLit = i => t >= cross[i] + 0.2 && t < cross[i] + 1.2;
-      const askLit = flightWaits || (t >= c[2] + 2.0 && t < c[2] + 5.0);
-      const ruleLit = [searchLit(0), searchLit(1), askLit];
+      const hotelAsks = (t >= hotelParked && t < autoOk + 0.8) || (t >= bigParked && t < drop + 0.4);
+      const ruleLit = [searchLit(0), searchLit(1), flightWaits || hotelAsks];
       s.ruleRows.forEach((row, i) => {
         const litColor = i < 2 ? 'rgba(219,255,75,.12)' : 'rgba(182,100,255,.18)';
         row.style.background = ruleLit[i] ? litColor : 'transparent';
@@ -194,8 +201,8 @@
       place(s.tools, TOOLS.rowX, (TOOLS.y0 + TOOLS.y1) / 2, tp, clamp(tp * 2));
 
       const yp = P(t, c[0] + 0.6, 0.5, backOut);
-      const youWaits = (t >= c[1] + 1.2 && t < approve + 0.05) || t >= c[2] + 5.3;
-      const youActs = t >= approve + 0.05 && t < c[1] + 4.6;
+      const youWaits = (t >= c[1] + 1.4 && t < approve + 0.05) || t >= atYou;
+      const youActs = t >= approve + 0.05 && t < cross[2];
       s.you.style.borderColor = youActs ? C.neon : youWaits ? C.violet : C.line;
       place(s.you, YOU.x, YOU.y, yp, clamp(yp * 2));
       const pressed = t >= approve + 0.05 && t < c[2] + 0.2;
@@ -206,69 +213,71 @@
 
       // tool calls: pop out next to the agent, then follow their route; tags ride under them
       const placeCall = (i, appear, legs, cls, fade = Infinity) => {
-        const pop = P(t, appear, 0.45, backOut);
+        const popIn = P(t, appear, 0.45, backOut);
         const [x, y] = routeAt(t, FROM, legs);
-        const o = clamp(pop * 2) * (1 - P(t, fade, 0.4));
+        const o = clamp(popIn * 2) * (1 - P(t, fade, 0.4));
         s.calls[i].className = 'abs pill ' + cls;
         s.calls[i].style.background = OPAQUE[cls];
-        place(s.calls[i], x, y, pop, o);
+        place(s.calls[i], x, y, popIn, o);
         return [x, y, o];
       };
       // the tag pops at popAt, swells briefly at swellAt (a status change), and hides from hideAt: it is
       // too wide to follow its call through the gate, so it pops again once the call has landed
       const placeTag = (i, [x, y, o], popAt, label, kind, swellAt = Infinity, hideAt = Infinity) => {
         setStatus(s.tags[i], label, kind);
-        const pop = P(t, popAt, 0.4, backOut);
-        const scale = pop * (1 + 0.12 * bump(t, swellAt, 0.3));
-        place(s.tags[i], x, y + TAG_DY, scale, o * clamp(pop * 2) * (1 - P(t, hideAt, 0.2)));
+        const popIn = P(t, popAt, 0.4, backOut);
+        const scale = popIn * (1 + 0.12 * bump(t, swellAt, 0.3));
+        place(s.tags[i], x, y + TAG_DY, scale, o * clamp(popIn * 2) * (1 - P(t, hideAt, 0.2)));
       };
+      // a call that stops in front of the gate: from the agent to the parking spot, 0.3 s after it pops
+      const toPark = at => [at + 0.3, 0.8, PARK.x, PARK.y];
 
       // c[0]: two searches pass the gate, book_flight stops in front of it; the searches leave in c[2]
-      const f0 = placeCall(0, c[0] + 1.0, through(cross[0], 0), 'uv', c[2]);
-      placeTag(0, f0, c[0] + 2.6, 'ALLOWED', 'ok');
-      const f1 = placeCall(1, c[0] + 2.4, through(cross[1], 1), 'uv', c[2] + 0.1);
-      placeTag(1, f1, c[0] + 4.0, 'ALLOWED', 'ok');
+      const f0 = placeCall(0, pop[0], through(cross[0], 0), 'uv', c[2]);
+      placeTag(0, f0, cross[0] + LAND, 'ALLOWED', 'ok');
+      const f1 = placeCall(1, pop[1], through(cross[1], 1), 'uv', c[2] + 0.1);
+      placeTag(1, f1, cross[1] + LAND, 'ALLOWED', 'ok');
 
       // c[1]: book_flight waits durably, the person approves, the call goes through and runs;
       // in c[2] the booked flight moves up to the first row
-      const flightLegs = [
-        [c[0] + 4.1, 0.8, PARK.x, PARK.y], ...through(cross[2], 2), [c[2] + 0.3, 0.6, TOOLS.rowX, TOOLS.rows[0]],
-      ];
-      const f2 = placeCall(2, c[0] + 3.8, flightLegs, flightWaits ? 'violet' : 'uv');
+      const flightLegs = [toPark(pop[2]), ...through(cross[2], 2), [c[2] + 0.3, 0.6, TOOLS.rowX, TOOLS.rows[0]]];
+      const f2 = placeCall(2, pop[2], flightLegs, flightWaits ? 'violet' : 'uv');
       if (t < approved) placeTag(2, f2, parkFlight + 0.2, 'NEEDS APPROVAL', 'wait');
       else if (t < booked) placeTag(2, f2, parkFlight + 0.2, 'APPROVED', 'ok', approved, cross[2]);
       else placeTag(2, f2, booked, 'BOOKED', 'ok');
 
-      const pp = P(t, c[1] + 0.2, 0.45, backOut);
+      const pp = P(t, c[1] + 0.3, 0.45, backOut);
       // the 44 px pause badge sits 8 px left of the parked call
       place(s.pause, PARK.x - CALL_W / 2 - 30, PARK.y, pp, clamp(pp * 2) * (1 - P(t, approved, 0.3)));
-      const wp = P(t, c[1] + 0.5, 0.45, backOut);
+      const wp = P(t, c[1] + 0.6, 0.45, backOut);
       place(s.wait, PARK.x, (WAIT.y0 + WAIT.y1) / 2, wp, clamp(wp * 2) * (1 - P(t, approved + 0.1, 0.3)));
       // the waiting time races from minutes to days; the clock hands spin with it
-      const race = clamp((t - c[1] - 0.9) / 2.4);
+      const race = clamp((t - c[1] - 1.2) / 2.8);
       s.waitD.textContent = WAITS[Math.min(WAITS.length - 1, Math.floor(race * WAITS.length))];
       s.minute.setAttribute('transform', `rotate(${race * 360 * 12} 12 12)`);
       s.hour.setAttribute('transform', `rotate(${race * 360} 12 12)`);
-      draw(s.ask, P(t, c[1] + 0.7, 0.6), 1 - P(t, approved + 0.1, 0.3));
+      draw(s.ask, P(t, c[1] + 1.0, 0.6), 1 - P(t, approved + 0.1, 0.3));
 
-      // c[2]: the AUTO MODE judge docks on the gate; it approves the cheap hotel and escalates the expensive one
+      // c[2] and c[3]: the AUTO MODE judge docks on the gate; it weighs each hotel parked in front of the gate
+      // (UV), approves the cheap one (neon) and escalates the expensive one (violet)
       const jp = P(t, c[2] + 0.3, 0.5);
-      const judgeOk = t >= autoOk - 0.1 && t < autoOk + 0.9;
-      const judgeUnsure = t >= escalate - 0.1 && t < c[2] + 5.0;
-      s.judge.style.borderColor = judgeOk ? C.neon : judgeUnsure ? C.violet : C.line;
+      const judging = (t >= hotelParked && t < autoOk - 0.1) || (t >= bigParked && t < escalate - 0.1);
+      const judgeOk = t >= autoOk - 0.1 && t < autoOk + 1.2;
+      const judgeUnsure = t >= escalate - 0.1 && t < drop + 0.4;
+      const judgeColor = judgeOk ? C.neon : judgeUnsure ? C.violet : judging ? C.uv : C.line;
+      s.judge.style.borderColor = judgeColor;
       place(s.judge, GATE.x, JUDGE.y0 + JUDGE.h / 2 - 30 * (1 - jp), 1, jp);
       // its rule slides out from under it
-      const rp = P(t, c[2] + 0.7, 0.4);
-      s.rule.style.borderLeftColor = judgeOk ? C.neon : judgeUnsure ? C.violet : C.uv;
+      const rp = P(t, c[2] + 0.8, 0.4);
+      s.rule.style.borderLeftColor = judgeColor === C.line ? C.uv : judgeColor;
       place(s.rule, GATE.x, RULE_CARD.y0 + RULE_CARD.h / 2 - 12 * (1 - rp), 1, rp);
 
-      const h0 = placeCall(3, c[2] + 1.3, [[c[2] + 1.6, 0.7, PARK.x, PARK.y], ...through(cross[3], 1)], 'uv');
-      const hotelLands = c[2] + 4.05;
+      const h0 = placeCall(3, hotelPop, [toPark(hotelPop), ...through(cross[3], 1)], 'uv');
       if (t < hotelLands) placeTag(3, h0, autoOk + 0.1, 'AUTO-APPROVED', 'ok', Infinity, cross[3]);
       else placeTag(3, h0, hotelLands, 'AUTO-APPROVED', 'ok');
       // the escalated call drops from the gate to the person
-      const h1Legs = [[c[2] + 3.6, 0.7, PARK.x, PARK.y], [c[2] + 4.8, 0.7, PARK.x, YOU.y]];
-      const h1 = placeCall(4, c[2] + 3.3, h1Legs, t >= escalate ? 'violet' : 'uv');
+      const h1Legs = [toPark(bigPop), [drop, 0.8, PARK.x, YOU.y]];
+      const h1 = placeCall(4, bigPop, h1Legs, t >= escalate ? 'violet' : 'uv');
       placeTag(4, h1, escalate + 0.1, 'ESCALATED', 'wait');
     }
   });

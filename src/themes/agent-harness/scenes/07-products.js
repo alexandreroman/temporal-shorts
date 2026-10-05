@@ -15,12 +15,12 @@
   const UI = { x: 1290, w: 980, h: 596, tagH: 48 };
   UI.y = TOP + UI.h / 2;
   const LINK = { y: LEFT.appY, from: LEFT.x + LEFT.w / 2 + 4, to: UI.x - UI.w / 2 - 4 };
-  // Recap tiles, in the order of the subtitle: 3 columns x 2 rows across the frame, 40 px gutters
+  // Recap tiles, one chapter each: 3 columns x 2 rows across the frame, 40 px gutters; they land 1 s apart
   const RECAP = [
     ['retry', 'Survives crashes'], ['stream', 'Event stream'], ['layers', 'Typed subagents'],
     ['user', 'Human approvals'], ['code', 'Code Mode'], ['agent', 'Your AI SDK'],
   ];
-  const RECAP_AT = [0.6, 1.2, 1.9, 3.0, 3.9, 4.9];
+  const RECAP_AT = [0.7, 1.7, 2.7, 3.7, 4.7, 5.7];
   const TILE = { w: 520, h: 240, gap: 40 };
   const recapX = i => 140 + TILE.w / 2 + (i % 3) * (TILE.w + TILE.gap);
   const recapY = i => 522 + (Math.floor(i / 3) - 0.5) * (TILE.h + TILE.gap);
@@ -77,13 +77,18 @@
   scene({
     chapter: 7, title: 'Built for real products',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
-    pre: 1.0, post: 1.2,
-    // laid out at final stage coordinates on the grid: both phases are centered near (960, 521)
-    shift: [0, 0],
+    pre: 1.5, post: 2.0,
+    // laid out at final stage coordinates on the grid (centered near (960, 521)); while the callback column
+    // stands alone (c[0]) the camera centers it, then eases back as the UI window enters
+    shift: (t, c) => pan(t, [600, 0], [[c[1], 0, 0]], 1.0),
     subs: [
       {
-        text: "Callback tools run on the user's own device, and typed React and Svelte SDKs power your product UI.",
-        after: 1.0,
+        text: "Callback tools run on the user's own device: the agent asks, the laptop runs the tool and replies.",
+        after: 1.1,
+      },
+      {
+        text: "Typed React and Svelte SDKs turn your agent into a live, typed session inside your product UI.",
+        after: 1.2,
       },
       {
         text: "Durable, observable, composable agents with human approvals, built with the AI SDKs you already use.",
@@ -128,45 +133,45 @@
       s.recap = RECAP.map(([icon, label]) => makeRecapTile(root, icon, label));
     },
     update(t, c, s) {
-      const out = 1 - P(t, c[1], 0.5);
-      const pop = at => P(t, c[0] + at, 0.45, backOut);
+      const out = 1 - P(t, c[2], 0.5);
+      const pop = at => P(t, at, 0.5, backOut);
 
-      // ---- c[0], left: the call travels to the laptop, which runs it and sends the result back
+      // ---- c[0]: the call travels to the laptop, which runs it and sends the result back
       place(s.lblL, LEFT.x, HEADING_Y, 1, P(t, c[0] + 0.1, 0.4) * out);
-      const appIn = pop(0.1);
+      const appIn = pop(c[0] + 0.2);
       place(s.app, LEFT.x, LEFT.appY, appIn, clamp(appIn * 2) * out);
-      const laptopIn = pop(0.3);
+      const laptopIn = pop(c[0] + 0.6);
       place(s.laptop, LEFT.x, LEFT.laptopY, laptopIn, clamp(laptopIn * 2) * out);
-      stepState(s.laptop, t >= c[0] + 2.8 ? 2 : t >= c[0] + 2.0 ? 1 : 0);
-      draw(s.arrow, P(t, c[0] + 0.6, 0.4), out);
-      fly(s.call, t, c[0] + 1.0, LEFT.x, ARROW.top + 30, c[0] + 1.2, 0.7, LEFT.x, ARROW.bottom - 30,
-        c[0] + 1.95, LEFT.x, LEFT.laptopY);
-      fly(s.result, t, c[0] + 2.8, LEFT.x, ARROW.bottom - 30, c[0] + 3.0, 0.6, LEFT.x, ARROW.top + 30,
-        c[0] + 3.65, LEFT.x, LEFT.appY);
+      stepState(s.laptop, t >= c[0] + 4.8 ? 2 : t >= c[0] + 3.3 ? 1 : 0);
+      draw(s.arrow, P(t, c[0] + 1.0, 0.6), out);
+      fly(s.call, t, c[0] + 1.9, LEFT.x, ARROW.top + 30, c[0] + 2.2, 0.8, LEFT.x, ARROW.bottom - 30,
+        c[0] + 3.1, LEFT.x, LEFT.laptopY);
+      fly(s.result, t, c[0] + 4.9, LEFT.x, ARROW.bottom - 30, c[0] + 5.2, 0.8, LEFT.x, ARROW.top + 30,
+        c[0] + 6.1, LEFT.x, LEFT.appY);
 
-      // ---- c[0], right: the trip planner UI, then its typed session with the agent
-      const uiIn = pop(3.4);
-      place(s.lblR, UI.x, HEADING_Y, 1, P(t, c[0] + 3.4, 0.4) * out);
+      // ---- c[1]: the trip planner UI, then its typed session with the agent and the SDKs it is built with
+      const uiIn = pop(c[1] + 0.5);
+      place(s.lblR, UI.x, HEADING_Y, 1, P(t, c[1] + 0.5, 0.5) * out);
       place(s.planner, UI.x, UI.y, uiIn, clamp(uiIn * 2) * out);
-      s.planner.rows.forEach((row, i) => showRow(row, P(t, c[0] + 3.8 + i * 0.2, 0.35), 24));
-      s.planner.foot.style.opacity = P(t, c[0] + 4.4, 0.35);
-      draw(s.link, P(t, c[0] + 4.6, 0.5), out);
-      place(s.linkL, (LINK.from + LINK.to) / 2, LINK.y - 30, 1, P(t, c[0] + 4.9, 0.35) * out);
+      s.planner.rows.forEach((row, i) => showRow(row, P(t, c[1] + 1.2 + i * 0.4, 0.4), 24));
+      s.planner.foot.style.opacity = P(t, c[1] + 2.5, 0.4);
+      draw(s.link, P(t, c[1] + 3.2, 0.6), out);
+      place(s.linkL, (LINK.from + LINK.to) / 2, LINK.y - 30, 1, P(t, c[1] + 3.6, 0.4) * out);
       // session traffic: a pulse runs along the link once it is drawn
-      const pulseStart = c[0] + 5.1;
-      const lap = ((t - pulseStart) % 1.1) / 1.1;
+      const pulseStart = c[1] + 3.9, pulseLap = 1.4;
+      const lap = ((t - pulseStart) % pulseLap) / pulseLap;
       const pulseOn = t >= pulseStart ? Math.sin(Math.PI * lap) : 0;
       place(s.pulse, lerp(LINK.from + 10, LINK.to - 16, lap), LINK.y, 1, pulseOn * out);
-      place(s.sdkRow, UI.x, BOTTOM - UI.tagH / 2, 1, P(t, c[0] + 5.3, 0.35) * out);
+      place(s.sdkRow, UI.x, BOTTOM - UI.tagH / 2, 1, P(t, c[1] + 5.0, 0.4) * out);
       s.sdks.forEach((e, i) => {
-        const p = pop(5.4 + i * 0.2);
+        const p = pop(c[1] + 5.1 + i * 0.3);
         e.style.transform = `scale(${p})`;
         e.style.opacity = clamp(p * 2);
       });
 
-      // ---- c[1]: the recap, one tile per feature, as the subtitle names them; each lights up as it lands
+      // ---- c[2]: the recap, one tile per feature, 1 s apart; each lights up as it lands
       s.recap.forEach((e, i) => {
-        const at = c[1] + RECAP_AT[i];
+        const at = c[2] + RECAP_AT[i];
         const p = P(t, at, 0.45, backOut);
         place(e, recapX(i), recapY(i), p, clamp(p * 2));
         e.style.borderColor = t >= at && t < at + 1.0 ? C.uv : C.line;

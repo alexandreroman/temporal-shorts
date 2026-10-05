@@ -82,15 +82,20 @@
   scene({
     chapter: 2, title: 'Survives crashes',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
-    pre: 1.0, post: 1.2,
+    pre: 1.5, post: 2.0,
     shift: [0, 0],
     subs: [
       {
         text: "Every model call and tool call is saved in the agent's Temporal history as soon as it completes.",
-        after: 1.0,
+        after: 1.3,
       },
-      { text: "If the app crashes mid-turn, another copy picks up the agent exactly where it left off.", after: 1.3 },
-      { text: "Saved results are reused, not redone: no token is paid twice, and no tool runs twice.", after: 0.6 },
+      { text: 'The next step starts only after the previous result is saved, outside the app.', after: 2.2 },
+      { text: "If the app crashes mid-turn, another copy picks up the agent exactly where it left off.", after: 0.6 },
+      {
+        text: 'Instance B replays the history: steps 1 to 4 return their saved results, then step 5 runs for real.',
+        after: 2.5,
+      },
+      { text: "Saved results are reused, not redone: no token is paid twice, and no tool runs twice.", after: 0.5 },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
@@ -98,8 +103,7 @@
       // app side: instance A, then instance B in the same place, showing the step at work
       s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
       s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);
-      // no layer of its own: its text and width change while it shakes with the app (see swell())
-      s.chipLbl = E(root, '', 'lbl', { fontSize: '16px', willChange: 'auto' });
+      s.chipLbl = E(root, '', 'lbl', { fontSize: '16px' });
       s.chips = STEPS.map((st, i) => callCard(root, st.call[0], st.call[1], isModel(i) ? 'uv' : ''));
       s.done = tag(root, 'Turn complete', 'neon');
       s.billed = makeTallCounter(root, 'Model calls billed');
@@ -155,16 +159,19 @@
       s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
     },
     update(t, c, s) {
-      // first run (instance A): each step runs, its result is saved, and only then the next step starts
-      const run = [0, 1, 2, 3].map(i => c[0] + 1.2 + i * 1.3);
-      // step 5 starts, the app crashes, instance B takes over and replays rows 1-4, then step 5 runs for real
-      const firstTry = c[1] + 0.2, crashAt = c[1] + 1.0, bOn = crashAt + 0.9, reset = bOn + 0.2;
-      const replay = [0, 1, 2, 3].map(i => bOn + 0.6 + i * 0.65);
-      run.push(c[1] + 5.2);
-      const rerun = run[4], saved = run.map(r => r + 0.9);
-      // then the tags explain why it matters, the counters glow and the turn completes
-      const told = replay.map((_, i) => c[2] + 0.4 + i * 0.15);
-      const glow = c[2] + 1.4, doneAt = c[2] + 2.6;
+      // first run (instance A), two steps per subtitle: each step runs, its result card leaves at r + CARD_AT,
+      // lands in the history at r + SAVE_AT where its row reads SAVED, and only then the next step starts
+      const CARD_AT = 1.2, SAVE_AT = 2.1;
+      const run = [c[0] + 1.0, c[0] + 4.2, c[1] + 0.6, c[1] + 3.8];
+      // c[2]: step 5 starts, the app crashes, instance B takes over
+      const firstTry = c[2] + 0.4, crashAt = c[2] + 2.0, bOn = c[2] + 3.7, reset = bOn + 0.2;
+      // c[3]: B replays rows 1-4 one by one, then step 5 runs for real
+      const replay = [0, 1, 2, 3].map(i => c[3] + 0.5 + i * 1.2);
+      run.push(c[3] + 5.4);
+      const rerun = run[4], saved = run.map(r => r + SAVE_AT);
+      // c[4]: the tags explain why it matters, the counters glow and the turn completes
+      const told = replay.map((_, i) => c[4] + 0.5 + i * 0.3);
+      const glow = c[4] + 2.2, doneAt = c[4] + 3.9;
       const [sx, sy] = shakeAt(t, crashAt);
       const dead = t >= crashAt, onA = t < bOn;
       // the app side shakes with the crash; Temporal, outside the app, stays still
@@ -177,7 +184,7 @@
           return t >= saved[i] + 0.1 ? 2 : t >= run[i] ? 1 : 0;
         }
         if (i === 4) return t >= saved[4] + 0.1 ? 2 : t >= rerun ? 1 : 0;
-        return t >= replay[i] + 0.35 ? 2 : 0;
+        return t >= replay[i] + 0.7 ? 2 : 0; // checked once its result card is back in the app
       });
       s.steps.tiles.forEach((e, i) => {
         stepState(e, states[i]);
@@ -260,11 +267,11 @@
       s.saveCards.forEach((e, i) => {
         const r = run[i];
         const [x1, y1] = [CARD_X, rowY(i)];
-        fly(e, t, r + 0.45, APP.x + ax, APP.chipY + ay, r + 0.5, 0.4, x1, y1, r + 0.9, x1, y1);
+        fly(e, t, r + CARD_AT, APP.x + ax, APP.chipY + ay, r + CARD_AT + 0.15, 0.7, x1, y1, r + SAVE_AT, x1, y1);
       });
       s.reuseCards.forEach((e, i) => {
         const q = replay[i];
-        fly(e, t, q, CARD_X, rowY(i), q + 0.05, 0.25, APP.x, APP.chipY, q + 0.3, APP.x, APP.chipY);
+        fly(e, t, q, CARD_X, rowY(i), q + 0.1, 0.6, APP.x, APP.chipY, q + 0.7, APP.x, APP.chipY);
       });
 
       // Event History rows and their status tags
@@ -280,7 +287,7 @@
         e.style.opacity = P(t, saved[i], 0.25);
         e.style.transform = `scale(${swell(t, switchedAt, 0.14)})`;
       });
-      const scanning = replay.findIndex(q => t >= q && t < q + 0.5);
+      const scanning = replay.findIndex(q => t >= q && t < q + 1.0);
       s.scan.style.opacity = scanning >= 0 ? 1 : 0;
       s.scan.style.top = (rowTop(Math.max(0, scanning)) - 2) + 'px';
       place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);

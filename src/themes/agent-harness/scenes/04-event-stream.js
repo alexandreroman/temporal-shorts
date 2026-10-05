@@ -28,7 +28,7 @@
   // along it. A pool of CHIP_POOL elements is recycled: chip n uses element n % CHIP_POOL. The pool size is a
   // multiple of the 5 types and the 3 agents, so an element keeps its type and agent, and it outlasts a chip's
   // life (CHIP_POOL * CHIP_EVERY > CHIP_MERGE + CHIP_LANE), so an element is free again when it is reused.
-  const CHIP_EVERY = 0.4, CHIP_MERGE = 0.5, CHIP_LANE = 1.0, CHIP_POOL = 15;
+  const CHIP_EVERY = 0.6, CHIP_MERGE = 0.7, CHIP_LANE = 1.4, CHIP_POOL = 15;
   const CONSOLE = { x: 1460, y: 522, w: 640, h: 590, row0: 88, rowGap: 62, rowH: 46 };
   const BAR_W = 540; // replay track, from the play icon to 32 px before the console's right edge
   const ROWS = [
@@ -63,18 +63,22 @@
   scene({
     chapter: 4, title: 'One event stream',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
-    pre: 1.0, post: 1.2,
+    pre: 1.5, post: 2.0,
     // agents and lane first, centered; then the camera follows the stream to the console as it slides in,
     // and the final layout spans the grid (x 140-1780) with no offset
     shift: (t, c) => pan(t, [370, 0], [[c[1], 0, 0]], 0.9),
     subs: [
       {
         text: "Every agent publishes the same event stream: turns, model calls, tool calls, approvals and token usage.",
-        after: 0.6,
+        after: 1.2,
       },
       {
-        text: "Watch an agent live, or replay exactly what it did, what it cost and where a human stepped in.",
-        after: 0.6,
+        text: "Watch an agent live: each event shows up in the console as soon as it happens.",
+        after: 1.8,
+      },
+      {
+        text: "Or replay it afterward: exactly what it did, what it cost and where a human stepped in.",
+        after: 0.8,
       },
     ],
     build(root, s) {
@@ -165,20 +169,20 @@
       s.bar.fill = s.bar.querySelector('.fill'); s.bar.head = s.bar.querySelector('.head');
     },
     update(t, c, s) {
-      // stream: chips leave the agents in turn and merge into the lane
-      const chipsFrom = c[0] + 1.3;
+      // stream: the agents appear one by one, then the lane, then chips leave the agents in turn and merge into it
+      const chipsFrom = c[0] + 3.0;
       s.agents.forEach((e, i) => {
-        const p = P(t, c[0] + 0.1 + i * 0.15, 0.5, backOut);
+        const p = P(t, c[0] + 0.1 + i * 0.4, 0.5, backOut);
         place(e, AGENT.x, agentY(i), p, clamp(p * 2));
         // the tile lights up as it emits a chip
         const sinceLast = (t - chipsFrom - i * CHIP_EVERY) % (3 * CHIP_EVERY);
-        const emitting = t >= chipsFrom + i * CHIP_EVERY && sinceLast < 0.18;
+        const emitting = t >= chipsFrom + i * CHIP_EVERY && sinceLast < 0.25;
         e.style.borderColor = emitting ? C.uv : C.line;
       });
-      s.guides.forEach((g, i) => draw(g, P(t, c[0] + 0.6 + i * 0.1, 0.5)));
-      place(s.lane, LANE.x, LANE.y, 1, P(t, c[0] + 0.7, 0.5));
-      place(s.laneL, LANE.x, LANE.y - LANE.h / 2 - 34, 1, P(t, c[0] + 0.8, 0.5));
-      const sp = P(t, c[0] + 3.6, 0.45, backOut);
+      s.guides.forEach((g, i) => draw(g, P(t, c[0] + 1.8 + i * 0.1, 0.6)));
+      place(s.lane, LANE.x, LANE.y, 1, P(t, c[0] + 1.9, 0.5));
+      place(s.laneL, LANE.x, LANE.y - LANE.h / 2 - 34, 1, P(t, c[0] + 2.0, 0.5));
+      const sp = P(t, c[0] + 5.0, 0.45, backOut);
       place(s.same, LANE.x, LANE.y + LANE.h / 2 + 46, sp, clamp(sp * 2));
       s.chips.forEach((e, k) => {
         // the latest chip this element carries: k, k + CHIP_POOL, k + 2 * CHIP_POOL...
@@ -199,21 +203,21 @@
         place(e, x, y, 1, o);
       });
 
-      // console: rows arrive live, then the replay rewinds and sweeps them again
-      const rowAt = i => c[1] + 0.8 + i * 0.32;
-      const toReplay = c[1] + 3.0, rewind = c[1] + 3.2, sweep = c[1] + 3.8, sweepD = 1.8;
+      // console: rows arrive live one by one; then it switches to replay, rewinds, and sweeps them again
+      const rowAt = i => c[1] + 1.6 + i * 0.6;
+      const toReplay = c[2] + 0.3, rewind = c[2] + 1.6, sweep = c[2] + 2.9, sweepD = 3.3;
       const cp = P(t, c[1] + 0.3, 0.6);
       place(s.console, lerp(CONSOLE.x + 120, CONSOLE.x, cp), CONSOLE.y, 1, cp);
-      draw(s.feed, P(t, c[1] + 0.7, 0.4));
-      s.live.style.opacity = P(t, c[1] + 0.6, 0.3) * (t < toReplay ? 1 : 0);
+      draw(s.feed, P(t, c[1] + 0.9, 0.5));
+      s.live.style.opacity = P(t, c[1] + 1.0, 0.3) * (t < toReplay ? 1 : 0);
       s.live.dot.style.opacity = 0.35 + 0.65 * (0.5 + 0.5 * Math.cos(G * 6));
       s.replay.style.opacity = t < toReplay ? 0 : 1;
       // the badge lights up instead of swelling: a scale pulse leaves it with a raster that depends on the frames
-      // drawn before, with or without its own layer (see swell())
+      // drawn before
       s.replay.style.background = `rgba(68,76,231,${(0.1 + 0.3 * pulse(t, toReplay)).toFixed(3)})`;
       s.bar.style.opacity = P(t, toReplay, 0.3);
       // playhead: at the end when the replay starts, rewound to the start, then swept forward
-      let head = 1 - P(t, rewind, 0.4);
+      let head = 1 - P(t, rewind, 0.8);
       if (t >= sweep) head = clamp((t - sweep) / sweepD);
       s.bar.fill.style.width = (head * BAR_W) + 'px';
       s.bar.head.style.left = (head * BAR_W) + 'px';

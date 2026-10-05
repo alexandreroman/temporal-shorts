@@ -2,6 +2,11 @@
 <html lang="en"><head><meta charset="utf-8">
 <title>Temporal Agent Harness</title>
 <link rel="stylesheet" href="../../styles.css">
+<style>
+/* No compositing layer per element: a layer keeps the raster of earlier scales and positions, so a frame would
+   depend on the frames its parallel render worker drew before it. */
+#stage .abs { will-change: auto; }
+</style>
 </head>
 <body>
 <div id="stage">

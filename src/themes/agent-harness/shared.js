@@ -29,12 +29,11 @@ function callCard(p, name, arg = '', cls = '') {
 }
 
 // Small status label (e.g. on an Event History row); its text and colors are set by setStatus().
-// The transparent border keeps the same size across kinds. Tags pop, swell and ride along moving calls, so they
-// have no compositing layer of their own (see swell()).
+// The transparent border keeps the same size across kinds.
 function statusTag(p) {
   return E(p, '', 'mono', {
     fontSize: '15px', letterSpacing: '.1em', padding: '4px 10px', borderRadius: '4px', border: '1.5px solid',
-    whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px', willChange: 'auto',
+    whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px',
   });
 }
 // saved: neon on black, for white panels; ok: neon outline, for the dark stage; both carry a check
@@ -74,10 +73,8 @@ function setCounter(e, n, note = '', noteColor = C.neon) {
 // a line (a lane, a frame, a connector) needs a solid background, or the line shows through it.
 const OPAQUE = { uv: '#1D1E3A', violet: '#2B1F35' };
 
-// A list row fades in as it slides into place from dx px to its right (p from 0 to 1); no layer of its own, so
-// its resting raster does not depend on the slide frames rendered before (see swell())
+// A list row fades in as it slides into place from dx px to its right (p from 0 to 1)
 function showRow(e, p, dx = 26) {
-  e.style.willChange = 'auto';
   e.style.opacity = p;
   e.style.transform = `translateX(${(1 - p) * dx}px)`;
 }
@@ -87,12 +84,7 @@ function pulse(t, at) {
   return Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
 }
 
-// Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it.
-// Chromium keeps a compositing layer's raster (every .abs has a layer) across scale and position changes, so a
-// swelled, popped or moved element can rest with a different raster depending on the frames its render worker drew
-// before, and parallel segments start at arbitrary frames. Swelled elements are therefore painted without a layer
-// of their own (willChange: 'auto', as in statusTag()), or flash with pulse() instead. Check each new use: render a
-// frame after the swell directly, then at the end of a 30 fps sequence that starts mid-swell, and compare.
+// Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it
 function swell(t, at, amp) {
   return 1 + amp * pulse(t, at);
 }

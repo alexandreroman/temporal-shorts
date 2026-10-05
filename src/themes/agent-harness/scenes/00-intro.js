@@ -7,12 +7,13 @@
   const RING_SPEED = 40 / RING.r;
   const RING_ICONS = ['retry', 'user', 'eye', 'layers'];
   scene({
-    pre: 1.0,
+    // the title settles before the subtitle; after it, the title page holds about 2 s, then fades (post)
+    pre: 1.5, post: 0.5,
     shift: [39, 52],
     subs: [
       {
         text: "Meet Temporal Agent Harness: an experimental project to build durable AI agents on Temporal.",
-        after: 1.0,
+        after: 2.0,
       },
     ],
     build(root, s) {
@@ -38,15 +39,17 @@
       }));
     },
     update(t, c, s) {
-      place(s.t, 560, 440, 1, P(t, 0.15, 0.9));
-      s.t.style.transform += ` translateY(${(1 - P(t, 0.15, 0.9)) * 24}px)`;
-      const p = P(t, 0.4, 0.9, backOut);
+      // a calm entrance: the title rises, then the model, its ring and the four capabilities, one after another
+      const titleIn = P(t, 0.3, 1.2);
+      place(s.t, 560, 440, 1, titleIn);
+      s.t.style.transform += ` translateY(${(1 - titleIn) * 24}px)`;
+      const p = P(t, 1.0, 0.9, backOut);
       place(s.llm.root, RING.x, RING.y, p, clamp(p * 2));
       llmState(s.llm, { look: Math.sin(G * 0.8) * 0.6 });
-      draw(s.ring, P(t, 0.7, 0.6));
+      draw(s.ring, P(t, 1.6, 1.0));
       s.icons.forEach((e, i) => {
         const a = G * RING_SPEED + i * (Math.PI / 2) - Math.PI / 4;
-        const pp = P(t, 0.9 + i * 0.15, 0.6, backOut);
+        const pp = P(t, 2.4 + i * 0.35, 0.6, backOut);
         place(e, RING.x + Math.cos(a) * RING.r, RING.y + Math.sin(a) * RING.r, pp, clamp(pp * 2));
       });
     }
