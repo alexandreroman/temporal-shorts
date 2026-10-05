@@ -19,7 +19,7 @@ An educational video of 3:00 maximum explains to a **non-technical** audience:
    rebuild the context.
 
 Constraints: no soundtrack, burned-in subtitles, Temporal brand guidelines,
-duration ≤ 3:00 (2:58.97 at last render). Deliverables: MP4 1920x1080
+duration ≤ 3:00 (179.3 s per `make timeline`). Deliverables: MP4 1920x1080
 30 fps + `.srt`.
 
 **Why:** a 7 min 46 cut is too long for this audience; the budget argument is

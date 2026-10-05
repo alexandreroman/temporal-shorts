@@ -7,7 +7,7 @@ type: feedback
 # On-screen vocabulary
 
 - The program running the agent is always **"the app"**: APP MEMORY,
-  APP CRASH, APP INSTANCE A / APP INSTANCE B, "STORED OUTSIDE THE APP".
+  APP CRASH, APP INSTANCE A / APP INSTANCE B, "OUTSIDE THE APP".
   "Server" is reserved for nothing on screen.
 - LLM providers are named by **company**: OpenAI, Anthropic, Google
   ("like those from OpenAI, Anthropic or Google").

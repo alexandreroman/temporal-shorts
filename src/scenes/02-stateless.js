@@ -7,7 +7,7 @@
     subs: [
       { text: "Surprise: the model has no memory. Tell it your name…", after: 1.4 },
       { text: "…then ask again in the next call. It has already forgotten.", after: 0.8 },
-      { text: "That's by design: LLMs are <b>stateless</b>. So the app resends the whole conversation with every call.", after: 1.8 },
+      { text: "That's by design: LLMs are <b>stateless</b>. So the app resends the whole conversation with every call.", after: 0.8 },
     ],
     build(root, s) {
       s.app = makeApp(root); s.llm = makeLLM(root, 220);

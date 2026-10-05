@@ -14,11 +14,12 @@ type: feedback
 - The end card shows the slogan and the Temporal logo, without a URL.
 - "Agent complete" in chapter 7 has clear space above it, below the Event
   History.
-- The chapter 7 Event History shows what is persisted and what is not re-run:
-  each row gets a SAVED tag when written; an "APP CRASHED HERE" line and a
-  tinted block mark the rows that survive the crash; replayed rows turn
-  REUSED, then "REUSED, NOT RE-BILLED" (LLM calls) or "REUSED, NOT RE-RUN"
-  (tool results).
+- Chapter 7 mirrors chapter 6: same step tiles, APP MEMORY panel and
+  LLM CALLS BILLED counter, with a TEMPORAL panel (official logo header,
+  "OUTSIDE THE APP") holding the Event History. Each row gets a SAVED tag
+  when written; an "APP CRASHED HERE" line and a tinted block mark the rows
+  that survive the crash; replayed rows turn REUSED, then "REUSED, NOT
+  RE-BILLED" (LLM calls) or "REUSED, NOT RE-RUN" (tool results).
 
 **Why:** frames are reviewed closely; misaligned icons and unclear durability
 undermine the explainer.
