@@ -60,10 +60,10 @@
       fly(s.card, t, c[1] + 2.4, s.steps.xs[1], ROW_Y, c[1] + 2.45, 0.9, CARD.x, CARD.y);
       place(s.waitL, s.steps.xs[1], ROW_Y + 82, 1, P(t, waitOn, 0.4));
 
-      // days go by: the clock spins up to DAY 3, then ticks on at an idle pace; Maria is busy
+      // days go by: the clock spins up to DAY 3, then rests; Maria is busy
       const cp = P(t, c[2] + 0.2, 0.5, backOut);
       const spinFrom = c[2] + 1.0, spinTo = c[2] + 5.6;
-      const elapsed = waitHours(t, spinFrom, spinTo, DAY3_MORNING / (spinTo - spinFrom));
+      const elapsed = waitHours(t, spinFrom, spinTo, DAY3_MORNING);
       const blur = win(t, spinFrom, spinTo, 0.3);
       setWaitClock(s.clock, elapsed, blur);
       setClock(s.card.clk, REQUEST_HOUR + elapsed, blur);

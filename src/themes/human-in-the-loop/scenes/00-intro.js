@@ -29,8 +29,8 @@
       s.t.style.transform += ` translateY(${(1 - P(t, 0.15, 0.9)) * 24}px)`;
       const p = P(t, 0.4, 0.9, backOut);
       place(s.card, ORBIT.x, ORBIT.y, p, clamp(p * 2));
-      // the mini clock ticks: the minute hand jumps one minute every half second
-      setClock(s.card.clk, 9 + Math.floor(t * 2) / 60);
+      // the mini clock ticks: the minute hand jumps one minute every half second (ambient, driven by G)
+      setClock(s.card.clk, REQUEST_HOUR + Math.floor(G * 2) / 60);
       s.orb.forEach((e, i) => {
         const a = G * 0.4 + i * (Math.PI * 2 / 6), pp = P(t, 0.9 + i * 0.15, 0.6, backOut);
         const depth = 0.45 + 0.55 * (Math.sin(a) + 1) / 2;

@@ -67,12 +67,12 @@
       });
       s.A.vide.style.opacity = P(t, restartAt + 1.1, 0.4);
 
-      // the clock starts with the wait and keeps turning through the deploy and the restart:
-      // days fly by up to DAY 3, then it ticks on at an idle pace
+      // the clock starts with the wait: days fly by to DAY 2, rest, then on to DAY 3 through the deploy and the
+      // restart; at rest only its seconds hand moves
       const cp = P(t, c[1] + 1.2, 0.5, backOut);
-      const fastUntil = c[2] + 5.0;
-      const elapsed = waitHours(t, waitOn, fastUntil, DAY3_MORNING / (fastUntil - waitOn));
-      setWaitClock(s.clock, Math.min(elapsed, DAY3_AFTERNOON), win(t, waitOn, fastUntil, 0.3));
+      const day2 = [waitOn, c[1] + 4.6], day3 = [c[2] + 0.5, c[2] + 5.0];
+      const elapsed = waitHours(t, ...day2, DAY2_HOURS) + waitHours(t, ...day3, DAY3_MORNING - DAY2_HOURS);
+      setWaitClock(s.clock, elapsed, Math.max(win(t, ...day2, 0.3), win(t, ...day3, 0.3)));
       place(s.clock, CLOCK.x, CLOCK.y, cp, clamp(cp * 2));
       s.causes.forEach((e, i) => {
         const p = P(t, c[2] + 2.2 + i * 0.9, 0.45, backOut);

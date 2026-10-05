@@ -75,7 +75,7 @@ function makeAvatar(p, label, size = 110, ring = C.violet) {
     '', { width: size + 'px', height: size + 'px' });
   return e;
 }
-// Face of an analog clock as SVG markup: 12 ticks, hour and minute hands (see setClock)
+// Face of an analog clock as SVG markup: 12 ticks, hour, minute and seconds hands (see setClock)
 function clockFace(size, col = C.ink) {
   const ticks = Array.from({ length: 12 }, (_, i) => {
     const a = i * Math.PI / 6, r0 = i % 3 === 0 ? 33 : 36;
@@ -88,15 +88,20 @@ function clockFace(size, col = C.ink) {
     + `<path d="${ticks}" stroke="${C.slate}" stroke-width="2.5"/>`
     + `<path class="hh" d="M50 50V28" stroke="${col}" stroke-width="5" stroke-linecap="round"/>`
     + `<path class="mh" d="M50 50V16" stroke="${C.violet}" stroke-width="3.5" stroke-linecap="round"/>`
+    + `<path class="sh" d="M50 58V12" stroke="${C.slate}" stroke-width="1.5" stroke-linecap="round"/>`
     + `<circle cx="50" cy="50" r="4" fill="${col}"/></svg>`;
 }
-// hours: clock time in hours; the minute hand turns once per hour, the hour hand once per 12 hours.
-// blur (0 to 1) dims the minute hand while days fly by: at several turns per second it would only flicker.
+// hours: clock time in hours, keyed to the story; the minute hand turns once per hour, the hour hand once per
+// 12 hours. The seconds hand is ambient motion: it sweeps once per minute of G, so a resting clock stays alive.
+// blur (0 to 1) dims the minute and seconds hands while days fly by: at several turns per second they would
+// only flicker.
 function setClock(root, hours, blur = 0) {
   root.querySelector('.hh').setAttribute('transform', `rotate(${(hours * 30) % 360} 50 50)`);
-  const minute = root.querySelector('.mh');
+  const minute = root.querySelector('.mh'), seconds = root.querySelector('.sh');
   minute.setAttribute('transform', `rotate(${(hours * 360) % 360} 50 50)`);
   minute.style.opacity = 1 - 0.85 * blur;
+  seconds.setAttribute('transform', `rotate(${(G * 6) % 360} 50 50)`);
+  seconds.style.opacity = 1 - blur;
 }
 // White approval request card with a ticking mini clock, Approve (brand UV) and Reject (outline) buttons.
 // k scales every size natively (fonts, paddings, width), so a larger card stays sharp at rest.
@@ -156,12 +161,13 @@ function makeWaitClock(p, caption, size = 110) {
 }
 // The request goes out at 09:00 on DAY 1; every clock of the wait shows the hours elapsed since then
 const REQUEST_HOUR = 9;
-// Chapters 1 and 3 fast-forward the wait to DAY 3, 11:00. Chapter 3 never runs past DAY 3, 15:00, where
-// chapter 4 picks it up, so the clock never goes backwards from one chapter to the next.
+// Chapters 1 and 3 fast-forward the wait to DAY 3, 11:00, then the clock rests there. Chapter 4 shows it at
+// DAY 3, 15:00, later than where chapter 3 left it, so the clock never goes backwards between chapters.
 const DAY3_MORNING = 50, DAY3_AFTERNOON = 54; // hours after the request
-// Hours elapsed at time t: `fast` hours per second from a to b (days fly by), then an idle 0.6 h/s
-function waitHours(t, a, b, fast) {
-  return fast * clamp(t - a, 0, b - a) + 0.6 * Math.max(0, t - b);
+const DAY2_HOURS = 20; // DAY 2, 05:00: where chapter 3 pauses between its two fast-forwards
+// Hours elapsed at time t while the wait fast-forwards from 0 at a to `total` at b; at rest before and after
+function waitHours(t, a, b, total) {
+  return total * clamp((t - a) / (b - a));
 }
 // Clock time and DAY counter for `elapsed` hours of waiting; the day turns at midnight
 function setWaitClock(e, elapsed, blur = 0) {

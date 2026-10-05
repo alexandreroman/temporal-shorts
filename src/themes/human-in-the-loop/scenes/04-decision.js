@@ -65,8 +65,8 @@
       const kp = P(t, c[0] + 0.4, 0.5, backOut);
       place(s.card, CARD.x, CARD.y, kp, clamp(kp * 2) * (1 - left));
       tapApprove(s.card, t, tap);
-      // the wait picks up where chapter 3 left it, and the clock stops once the answer is in
-      const elapsed = DAY3_AFTERNOON + 0.6 * clamp(t, 0, signalIn);
+      // the wait picks up a little after where chapter 3 left it; the clock rests, only its seconds hand moves
+      const elapsed = DAY3_AFTERNOON;
       setClock(s.card.clk, REQUEST_HOUR + elapsed);
       // the Signal leaves the Approve button and lands in the history
       fly(s.signal, t, tap + 0.5, CARD.x - 100, CARD.y + 100, tap + 0.8, 0.9, SIGNAL_LANDING.x, SIGNAL_LANDING.y,
