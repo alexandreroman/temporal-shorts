@@ -22,7 +22,7 @@ make preview T="12 40 136"   # contact sheet -> output/preview.png
 make render                  # MP4, only if sources changed (-B to force)
 make srt                     # SRT, only if sources changed
 make html                    # standalone HTML player, only if sources changed
-make serve                   # HTML player on localhost:CASPER_PORT, else 8000
+make serve                   # hot-reload HTML player on CASPER_PORT, else 8000
 ```
 
 In Casper (`.casper.json`), Run (`casper run`) serves the HTML player on
