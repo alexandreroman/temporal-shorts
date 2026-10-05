@@ -117,9 +117,7 @@ function startPlayer() {
   function previousSection() {
     const index = scenes.findLastIndex(sc => sc.start <= time);
     const current = scenes[index];
-    if (time - current.start > RESTART_THRESHOLD) seek(current.start);
-    else if (index > 0) seek(scenes[index - 1].start);
-    else seek(0);
+    seek(time - current.start > RESTART_THRESHOLD ? current.start : scenes[Math.max(0, index - 1)].start);
   }
 
   function togglePlay() {

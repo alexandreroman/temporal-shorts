@@ -12,7 +12,7 @@ PORT ?= $(if $(CASPER_PORT),$(CASPER_PORT),8000)
 # pick up new scripts, stylesheets and scene files. Fonts are downloaded by
 # `make setup`, so $(wildcard) expands to nothing when absent.
 ANIMATION_SOURCES := src/index.html $(wildcard src/*.js src/*.css src/scenes/*.js) \
-                     $(wildcard src/assets/*) $(wildcard src/fonts/*) \
+                     $(wildcard src/assets/*) $(wildcard src/fonts/*.woff2) \
                      scripts/common.py
 
 # Never keep a partial MP4, SRT or HTML from an interrupted or failed run:

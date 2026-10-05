@@ -10,10 +10,11 @@ def ts(t):
     return f"{ms // 3600000:02}:{ms // 60000 % 60:02}:{ms // 1000 % 60:02},{ms % 1000:03}"
 
 with sync_playwright() as pw:
-    browser, page, _ = open_page(pw)
+    browser, page = open_page(pw)
     subs = json.loads(page.evaluate("JSON.stringify(scenes.flatMap(s => s.subs.map(x => [x.start, x.end, x.text])))"))
     browser.close()
 OUTPUT.mkdir(exist_ok=True)
 out = OUTPUT / f"{VIDEO_NAME}.srt"
-out.write_text("".join(f"{i}\n{ts(a)} --> {ts(b)}\n{re.sub('<[^>]+>', '', t)}\n\n" for i, (a, b, t) in enumerate(subs, 1)), encoding="utf-8")
+cues = [f"{i}\n{ts(a)} --> {ts(b)}\n{re.sub('<[^>]+>', '', t)}\n\n" for i, (a, b, t) in enumerate(subs, 1)]
+out.write_text("".join(cues), encoding="utf-8")
 print(out)

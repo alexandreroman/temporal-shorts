@@ -105,6 +105,9 @@ class PlayerHandler(BaseHTTPRequestHandler):
         except FileNotFoundError:
             self.send_error(HTTPStatus.NOT_FOUND, f"{PAGE.name} not found: run `make html`")
             return
+        # The watcher may not have seen this build yet: publish the stamped version now, or /events would
+        # report the older one and reload the tab for nothing.
+        self.server.page_version.set(version)
         body = inject_reload_script(body, version)
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "text/html; charset=utf-8")

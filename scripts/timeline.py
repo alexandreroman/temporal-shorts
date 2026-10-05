@@ -7,13 +7,13 @@ from common import open_page
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as pw:
-    browser, page, errors = open_page(pw)
-    data = json.loads(page.evaluate("""JSON.stringify({total: TOTAL, scenes: scenes.map(s => ({chapter: s.chapter || null,
-        start: s.start, end: s.end, subs: s.subs.map(x => [x.start, x.end, x.text.replace(/<[^>]+>/g, '')])}))})"""))
+    browser, page = open_page(pw)
+    data = json.loads(page.evaluate("""JSON.stringify({total: TOTAL, scenes: scenes.map(s => ({
+        chapter: s.chapter || null, start: s.start, end: s.end,
+        subs: s.subs.map(x => [x.start, x.end, x.text.replace(/<[^>]+>/g, '')])}))})"""))
     browser.close()
 for i, s in enumerate(data["scenes"]):
     print(f"\nScene {i}  chapter={s['chapter']}  {s['start']:.1f}s -> {s['end']:.1f}s")
     for k, (a, b, txt) in enumerate(s["subs"]):
         print(f"  c[{k}] {a:6.1f}-{b:6.1f}  (local {a - s['start']:.1f})  {txt}")
 print(f"\nTOTAL {data['total']:.1f}s ({int(data['total'] // 60)}:{int(data['total'] % 60):02d})")
-if errors: print("JS errors:", errors)

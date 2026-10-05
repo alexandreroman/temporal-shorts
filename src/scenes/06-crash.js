@@ -5,9 +5,20 @@
     chapter: 6, title: 'When the agent crashes',
     shift: [-55, 62],
     subs: [
-      { text: "Now the app running the agent crashes in the middle of the booking. Restarts, deploys, network cuts: it happens every day.", after: 0.4 },
-      { text: "The context lived in the app's memory, not in the LLM. It's gone, so the agent has to start over.", after: 0.4 },
-      { text: "Every LLM call is made, and paid for, a second time, just to rebuild the context. And the table gets booked twice.", after: 1.2 },
+      {
+        text: "Now the app running the agent crashes in the middle of the booking. "
+          + "Restarts, deploys, network cuts: it happens every day.",
+        after: 0.4,
+      },
+      {
+        text: "The context lived in the app's memory, not in the LLM. It's gone, so the agent has to start over.",
+        after: 0.4,
+      },
+      {
+        text: "Every LLM call is made, and paid for, a second time, just to rebuild the context. "
+          + "And the table gets booked twice.",
+        after: 1.2,
+      },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
@@ -49,19 +60,25 @@
       place(s.ticket, 1140 + sx, 435, tp * (1 + 0.2 * win(t, c[2] + 2.6, c[2] + 3.2, 0.2)), clamp(tp * 2));
       // memory
       place(s.mem, 720 + sx, 630 + sy, 1, P(t, 0.3, 0.45));
-      s.mem.style.borderColor = t > crashAt && t < restart ? C.red : '#3A4150';
+      s.mem.style.borderColor = t > crashAt && t < restart ? C.red : C.line;
       s.mem.vide.style.opacity = P(t, c[1] + 1.2, 0.4) * (1 - P(t, restart, 0.3));
       const add1 = [0.8, 1.3, 1.9, 2.4, 3.0].map(x => c[0] + x), add2 = [0.6, 0.9, 1.4, 1.7, 2.3].map(x => c[2] + x);
       s.mblocks.forEach((b, i) => {
         const x = 720 - 300 + i * 150, y = 650;
-        if (t < restart) placeMemBlock(b, x, y, P(t, add1[i], 0.35, backOut), P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn), sx, sy);
-        else placeMemBlock(b, x, y, P(t, add2[i], 0.35, backOut), 0, sx, sy);
+        if (t < restart) {
+          placeMemBlock(b, x, y, P(t, add1[i], 0.35, backOut), P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn), sx, sy);
+        } else {
+          placeMemBlock(b, x, y, P(t, add2[i], 0.35, backOut), 0, sx, sy);
+        }
       });
       place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);
       const bp = P(t, crashAt, 0.35, backOut);
       place(s.bolt, 1290, 190, bp, win(t, crashAt, crashAt + 1.5, 0.2));
       place(s.crash, 1560, 440, bp, win(t, crashAt + 0.1, c[1] + 0.3, 0.25));
-      s.causes.forEach((e, i) => { const p = P(t, c[0] + 4.8 + i * 0.3, 0.4, backOut); place(e, 330 + i * 230, 440, p, clamp(p * 2) * (1 - P(t, c[1], 0.35))); });
+      s.causes.forEach((e, i) => {
+        const p = P(t, c[0] + 4.8 + i * 0.3, 0.4, backOut);
+        place(e, 330 + i * 230, 440, p, clamp(p * 2) * (1 - P(t, c[1], 0.35)));
+      });
       draw(s.redo, P(t, c[1] + 2.4, 0.8), 1 - P(t, c[2] + 3.0, 0.4));
       place(s.redoL, 785, 122, 1, P(t, c[1] + 2.9, 0.35) * (1 - P(t, c[2] + 3.0, 0.4)));
     }

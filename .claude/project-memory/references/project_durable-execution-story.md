@@ -1,10 +1,10 @@
 ---
-name: "How chapter 7 explains Durable Execution"
+name: "Durable Execution story"
 description: "The Event History mechanism the video teaches: who keeps it, when it is written, how replay works"
 type: project
 ---
 
-# How chapter 7 explains Durable Execution
+# Durable Execution story
 
 Chapter 7 teaches the Event History mechanism in three ideas, each with its
 own subtitle beat:
@@ -19,7 +19,7 @@ own subtitle beat:
 
 The budget message rides on the LLM CALLS BILLED counter, which stays put
 during replay, followed by "43% less LLM spend, in this example" (see
-[[project_budget-figure]]).
+[Budget figure](project_budget-figure.md)).
 
 **Why:** a scanning "replays the history" bar told viewers *that* the history
 exists but not how it saves LLM calls; showing the code re-run with answers
@@ -28,4 +28,4 @@ how Temporal really replays Workflow code against recorded Activity results.
 
 **How to apply:** keep these three ideas and their order when editing
 chapter 7; keep the layout mirrored with chapter 6 (see
-[[feedback_visual-design]]).
+[Visual design decisions](feedback_visual-design.md)).

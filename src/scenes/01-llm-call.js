@@ -1,12 +1,21 @@
 // ===================== 1. LLM CALL
 // The block keeps every name declared in this file local to this scene.
 {
+  // type the card's text word by word, p from 0 to 1
+  const typeWords = (card, p) => {
+    const words = card.full.split(' ');
+    const n = Math.round(words.length * clamp(p));
+    card.txt.innerHTML = words.map((w, i) => `<span style="opacity:${i < n ? 1 : 0}">${w}</span>`).join(' ');
+  };
   scene({
     chapter: 1, title: 'LLM calls',
     // pans with the LLM moves: alone with its chips, then app + LLM + cards, then text in / text out
     shift: (t, c) => pan(t, [-2, 29], [[c[1], 40, 30], [c[2], 8, 68]], 0.9),
     subs: [
-      { text: "At the heart of every AI agent is an LLM: a large language model, like those from OpenAI, Anthropic or Google." },
+      {
+        text: "At the heart of every AI agent is an LLM: a large language model, "
+          + "like those from OpenAI, Anthropic or Google.",
+      },
       { text: "An app sends it some text. The model reads it, then writes a reply, word by word.", after: 0.8 },
       { text: "That's an LLM call: text in, text out. Nothing more.", after: 0.4 },
     ],
@@ -27,7 +36,10 @@
       const pop = P(t, c[0], 0.8, backOut);
       place(s.llm.root, 960 + 490 * mv1 - 490 * mv2, 430, pop, clamp(pop * 2));
       llmState(s.llm, { think: win(t, c[1] + 2.3, c[1] + 3.0, 0.2), look: -mv1 * (1 - mv2) });
-      s.chips.forEach((ch, i) => { const p = P(t, c[0] + 2.4 + i * 0.25, 0.45, backOut); place(ch, 960 + (i - 1) * 230, 650, p, clamp(p * 2) * (1 - P(t, c[1], 0.4))); });
+      s.chips.forEach((ch, i) => {
+        const p = P(t, c[0] + 2.4 + i * 0.25, 0.45, backOut);
+        place(ch, 960 + (i - 1) * 230, 650, p, clamp(p * 2) * (1 - P(t, c[1], 0.4)));
+      });
       const out = P(t, c[2], 0.5);
       const ap = P(t, c[1] + 0.2, 0.6, backOut);
       place(s.app, 420, 430, ap, clamp(ap * 2) * (1 - out)); gearSpin(s.app, 0);

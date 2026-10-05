@@ -24,5 +24,6 @@ type: feedback
 **Why:** frames are reviewed closely; misaligned icons and unclear durability
 undermine the explainer.
 
-**How to apply:** check alignment on full-size `make preview --full` frames
+**How to apply:** check alignment on full-size `make preview T="<t> --full"`
+frames
 for every new tile or label.

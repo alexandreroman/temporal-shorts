@@ -6,35 +6,66 @@
     // pans left as the cone fades, to make room for the bill
     shift: (t, c) => pan(t, [-90, 42], [[c[1] + 2.6, -136, 42]]),
     subs: [
-      { text: "Everything sent to the model fits on one page: the <b>context window</b>. Instructions, history, documents, the new question.", after: 0.4 },
-      { text: "It's the only thing the model sees. It has a size limit, and every word on it is billed, at every call.", after: 0.6 },
+      {
+        text: "Everything sent to the model fits on one page: the <b>context window</b>. "
+          + "Instructions, history, documents, the new question.",
+        after: 0.4,
+      },
+      {
+        text: "It's the only thing the model sees. It has a size limit, and every word on it is billed, at every call.",
+        after: 0.6,
+      },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
       s.cone = document.createElementNS(SVGNS, 'polygon');
-      s.cone.setAttribute('points', '1480,445 1085,185 1085,775'); s.cone.setAttribute('fill', 'rgba(182,100,255,0.13)');
+      s.cone.setAttribute('points', '1480,445 1085,185 1085,775');
+      s.cone.setAttribute('fill', 'rgba(182,100,255,0.13)');
       s.svg.appendChild(s.cone);
-      s.sheet = E(root, '', '', { width: '640px', height: '600px', background: '#F8FAFC', overflow: 'hidden', borderRadius: 'var(--r)' });
+      s.sheet = E(root, '', '', {
+        width: '640px', height: '600px', background: '#F8FAFC', overflow: 'hidden', borderRadius: 'var(--r)',
+      });
       s.sheetT = E(root, 'Context window', 'lbl', { color: 'var(--ink)', fontSize: '22px' });
       const mk = (who, html, col, bar) => {
         const b = document.createElement('div');
-        Object.assign(b.style, { position: 'absolute', left: '20px', width: '600px', background: col, borderLeft: `6px solid ${bar}`, padding: '8px 16px', overflow: 'hidden', color: '#141414', borderRadius: 'var(--rs)' });
-        b.innerHTML = `<div class="mono" style="font-size:14px;letter-spacing:.12em;color:#5B6475">${who}</div><div class="mono" style="font-size:21px;line-height:1.45">${html}</div>`;
+        Object.assign(b.style, {
+          position: 'absolute', left: '20px', width: '600px', background: col, borderLeft: `6px solid ${bar}`,
+          padding: '8px 16px', overflow: 'hidden', color: '#141414', borderRadius: 'var(--rs)',
+        });
+        b.innerHTML = `<div class="mono" style="font-size:14px;letter-spacing:.12em;color:#5B6475">${who}</div>`
+          + `<div class="mono" style="font-size:21px;line-height:1.45">${html}</div>`;
         s.sheet.appendChild(b); return b;
       };
       s.blocks = [
         mk('INSTRUCTIONS', "You are the shop's helpful assistant.", '#E6E7FC', C.uv),
-        mk('HISTORY', "You: Hi!<br>Model: Hello, how can I help?<br>You: I need a phone plan.<br>Model: Mostly for calls?<br>You: Yes, and some travel.<br>Model: The Pro plan fits.<br>You: What about roaming?", '#EDEFF3', C.slate),
+        mk('HISTORY', [
+          'You: Hi!', 'Model: Hello, how can I help?', 'You: I need a phone plan.', 'Model: Mostly for calls?',
+          'You: Yes, and some travel.', 'Model: The Pro plan fits.', 'You: What about roaming?',
+        ].join('<br>'), '#EDEFF3', C.slate),
         mk('DOCUMENT', 'price-list.pdf', '#F3FBD2', '#9DB82A'),
         mk('NEW QUESTION', 'How much is the Pro plan?', '#F2E6FF', C.violet),
       ];
-      s.gauge = E(root, '<div class="f" style="position:absolute;left:0;right:0;bottom:0"></div>', '', { width: '22px', height: '600px', background: 'rgba(248,250,252,.08)', border: '1.5px solid #3A4150', overflow: 'hidden', borderRadius: 'var(--rs)' });
+      s.gauge = E(root, '<div class="f" style="position:absolute;left:0;right:0;bottom:0"></div>', '', {
+        width: '22px', height: '600px', background: 'rgba(248,250,252,.08)', border: '1.5px solid ' + C.line,
+        overflow: 'hidden', borderRadius: 'var(--rs)',
+      });
       s.gf = s.gauge.querySelector('.f');
       s.gaugeL = E(root, 'Size', 'lbl');
       s.full = tag(root, 'Full', 'red');
       s.llm = makeLLM(root, 200);
-      s.g1 = E(root, `<div class="mono" style="font-size:22px">Yesterday's email</div><div class="lbl" style="font-size:15px;margin-top:4px">not in context</div>`, '', { border: '1.5px dashed #4B5363', padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)' });
-      s.bill = E(root, `<div style="display:flex;align-items:center;gap:16px">${ICON('coin', 46, C.neon, 1.6)}<div><div class="tok" style="font-size:44px;line-height:1">0 tokens</div><div class="lbl" style="font-size:16px;margin-top:6px;color:var(--neon)">billed at every call</div></div></div>`, '', { padding: '16px 22px', border: '1.5px solid ' + C.neon, background: 'rgba(219,255,75,.06)', borderRadius: 'var(--r)' });
+      s.g1 = E(root,
+        `<div class="mono" style="font-size:22px">Yesterday's email</div>`
+        + '<div class="lbl" style="font-size:15px;margin-top:4px">not in context</div>',
+        '', { border: '1.5px dashed #4B5363', padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)' });
+      s.bill = E(root,
+        `<div style="display:flex;align-items:center;gap:16px">${ICON('coin', 46, C.neon, 1.6)}<div>`
+        + '<div class="tok" style="font-size:44px;line-height:1">0 tokens</div>'
+        + '<div class="lbl" style="font-size:16px;margin-top:6px;color:var(--neon)">billed at every call</div>'
+        + '</div></div>',
+        '', {
+          padding: '16px 22px', border: '1.5px solid ' + C.neon, background: 'rgba(219,255,75,.06)',
+          borderRadius: 'var(--r)',
+        });
       s.tok = s.bill.querySelector('.tok');
     },
     update(t, c, s) {

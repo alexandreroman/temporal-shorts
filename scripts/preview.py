@@ -10,18 +10,19 @@ from common import OUTPUT, open_page
 from playwright.sync_api import sync_playwright
 from PIL import Image
 
-ap = argparse.ArgumentParser(); ap.add_argument("times", nargs="+", type=float); ap.add_argument("--full", action="store_true")
+ap = argparse.ArgumentParser()
+ap.add_argument("times", nargs="+", type=float)
+ap.add_argument("--full", action="store_true")
 a = ap.parse_args()
 OUTPUT.mkdir(exist_ok=True)
 shots = []
 with sync_playwright() as pw:
-    browser, page, errors = open_page(pw)
+    browser, page = open_page(pw)
     for t in a.times:
         page.evaluate(f"renderAt({t})")
         p = OUTPUT / f"frame_{t:07.2f}.png"
         page.screenshot(path=str(p)); shots.append(p)
     browser.close()
-if errors: print("JS errors:", errors)
 if a.full:
     print("\n".join(map(str, shots)))
 else:

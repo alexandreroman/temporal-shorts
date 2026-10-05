@@ -1,27 +1,28 @@
 # Durable AI Agents with Temporal
 
-Explainer video (2 min 59, English, no sound, burned-in subtitles) for a non-technical audience:
-how an AI agent works, and why it needs Durable Execution with Temporal.
+Explainer video (2 min 59, English, no sound, burned-in subtitles) for a
+non-technical audience: how an AI agent works, and why it needs Durable
+Execution with Temporal.
 
-The video is not edited in a video editor: it is an HTML page animated deterministically
-(`renderAt(t)`), captured frame by frame by headless Chromium (Playwright), then encoded to H.264
-by ffmpeg.
+The video is not edited in a video editor: it is an HTML page animated
+deterministically (`renderAt(t)`), captured frame by frame by headless Chromium
+(Playwright), then encoded to H.264 by ffmpeg.
 
 ## Contents
 
-```
-src/index.html        1920x1080 page: starry background, subtitles, header, ordered script list
-src/styles.css        Temporal brand styles and the live player's CSS
-src/engine.js         engine: timeline, easing, placement, SVG icons, components (LLM orb, app, cards)
-src/shared.js         brand helpers shared by the scenes (colors, tiles, steps)
-src/scenes/           the 9 scenes, one file each (subtitle text + animations)
-src/player.js         live player: controls, fit-to-window, shortcuts
-src/assets/           official Temporal logo (white horizontal lockup, cropped viewBox)
-src/fonts/            stand-in fonts, downloaded by make setup (see src/fonts/README.md)
-scripts/              setup, render, preview, timeline, SRT export, HTML build and server
-docs/script.md        full script: subtitles, timings, description of the animations
-output/               generated .srt subtitles, .mp4 video and standalone .html player
-CLAUDE.md             full context to pick the work up in another Claude session
+```text
+src/index.html     1920x1080 page: background, subtitles, header, script list
+src/styles.css     Temporal brand styles and the live player's CSS
+src/engine.js      timeline, easing, placement, SVG icons, components
+src/shared.js      brand helpers shared by the scenes (colors, tiles, steps)
+src/scenes/        the 9 scenes, one file each (subtitle text + animations)
+src/player.js      live player: controls, fit-to-window, shortcuts
+src/assets/        official Temporal logo (white horizontal lockup)
+src/fonts/         stand-in fonts (make setup), see src/fonts/README.md
+scripts/           setup, render, preview, timeline, SRT export, HTML player
+docs/script.md     full script: subtitles, timings, animations
+output/            generated .srt, .mp4 and standalone .html
+CLAUDE.md          conventions for Claude sessions working on the project
 ```
 
 ## Regenerate the video (macOS)
@@ -29,43 +30,47 @@ CLAUDE.md             full context to pick the work up in another Claude session
 Requirements: Python 3.10+ and ffmpeg (`brew install python ffmpeg`).
 
 ```bash
-cd ~/Projects/temporal-agent-101
 make setup                   # venv + Playwright Chromium + fonts (once)
-make timeline                # checks that everything loads and prints the timeline
+make timeline                # checks that everything loads, prints timings
 make preview T="3 140 160"   # contact sheet -> output/preview.png
-make render                  # full video -> output/ai-agents-temporal-en.mp4
+make render                  # video -> output/ai-agents-temporal-en.mp4
 make srt                     # subtitles -> output/ai-agents-temporal-en.srt
-make html                    # standalone player -> output/ai-agents-temporal-en.html
+make html                    # player -> output/ai-agents-temporal-en.html
 make serve                   # hot-reloading player on http://localhost:8000
 ```
 
-`make render`, `make srt` and `make html` only rebuild when a source file (`src/`,
-`scripts/common.py`, the render, export or build script) is newer than the output; use
-`make -B render` to force a full render.
+`make render`, `make srt` and `make html` only rebuild when a source file
+(`src/`, `scripts/common.py`, the render, export or build script) is newer
+than the output; use `make -B render` to force a full render.
 
-Without make: `.venv/bin/python scripts/render_video.py [--start 130 --end 140] [--workers 4] [--fps 30]`.
+Without make:
 
-The full render is 5,370 frames. In the Claude sandbox (1 CPU) it took about 8 min; on a recent Mac
-with several workers, expect a few minutes.
+```bash
+.venv/bin/python scripts/render_video.py \
+  [--start 130 --end 140] [--workers 4] [--fps 30]
+```
 
-To watch the animation live: `make open`, or open `src/index.html?t=140` to freeze the frame at
-140 s.
+The full render takes a few minutes on a recent Mac with several workers.
+
+To check a single frame, open `src/index.html?t=140` to freeze the animation
+at 140 s.
 
 ## Standalone HTML player
 
 `make html` builds `output/ai-agents-temporal-en.html`, a single file with the
 scripts, fonts and logo inlined: send it by email or open it in any browser,
-offline, with nothing else. The animation fits the window and plays once, unless
-loop is enabled (it is off by default); the controls (play/pause, seek bar,
-time, loop, subtitles, fullscreen) hide after a few seconds of playback and come
-back when the mouse moves. Subtitles are shown by default; the CC button hides
-or shows them. Shortcuts: Space = play/pause, Left/Right = previous/next
-section (Left first restarts the current section if more than 2 s in), L = loop
-on/off, C = subtitles on/off, F = fullscreen. `make open` plays `src/index.html`
-with the same player.
+offline, with nothing else. The animation fits the window and plays once,
+unless loop is enabled (it is off by default); the controls (play/pause, seek
+bar, time, loop, subtitles, fullscreen) hide after a few seconds of playback
+and come back when the mouse moves. Subtitles are shown by default; the CC
+button hides or shows them. Shortcuts: Space = play/pause, Left/Right =
+previous/next section (Left first restarts the current section if more than
+2 s in), L = loop on/off, C = subtitles on/off, F = fullscreen. `make open`
+plays `src/index.html` with the same player.
 
-`make serve` serves only that page over HTTP on `127.0.0.1` (rebuilding it first if needed), on
-port 8000 by default; override it with `make serve PORT=9000`.
+`make serve` serves only that page over HTTP on `127.0.0.1` (rebuilding it
+first if needed), on port 8000 by default; override it with
+`make serve PORT=9000`.
 
 `make serve` hot-reloads: edit a file in `src/` and the server rebuilds the
 page, then every open tab reloads by itself and resumes at the same position
@@ -98,4 +103,5 @@ scenes never touch the same file.
 - Colors, fonts, styles: `:root` and the CSS in `src/styles.css`, constant `C`
   in `src/shared.js`.
 
-Architecture details, brand rules and decision history: see `CLAUDE.md`.
+Conventions: see `CLAUDE.md`. Brand rules and decision history: see the
+project memory in `.claude/project-memory/`.

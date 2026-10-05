@@ -16,9 +16,7 @@ from common import OUTPUT, ROOT, VIDEO_NAME
 SRC = ROOT / "src"
 MIME_TYPES = {
     ".woff2": "font/woff2",
-    ".ttf": "font/ttf",
     ".svg": "image/svg+xml",
-    ".png": "image/png",
 }
 
 FONT_FACE_SRC = re.compile(r"(@font-face\s*\{[^}]*?src:)([^;}]+)")

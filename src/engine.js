@@ -1,9 +1,11 @@
 // ---------- helpers
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-const easeOut = p => 1 - Math.pow(1 - p, 3);
 const easeIn = p => p * p * p;
-const backOut = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+const backOut = p => {
+  const c1 = 1.70158, c3 = c1 + 1;
+  return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
+};
 const P = (t, a, d = 0.6, f = ease) => f(clamp((t - a) / d));
 const lerp = (a, b, p) => a + (b - a) * p;
 const win = (t, a, b, f = 0.4) => P(t, a, f) * (1 - P(t, b, f)); // visible between a and b
@@ -38,15 +40,17 @@ function svgLayer(parent) {
   s.setAttribute('viewBox', '0 0 1920 1080');
   s.classList.add('layer');
   s.innerHTML = `<defs>
-   <marker id="ah${parent.dataset.k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>`;
+   <marker id="ah${parent.dataset.k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5"`
+    + ` orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>`;
   parent.appendChild(s);
   return s;
 }
-function path(svg, d, color = '#E9E6FF', w = 4, arrow = true, dash = null) {
+function path(svg, d, color, w, arrow = true, dash = null) {
   const p = document.createElementNS(SVGNS, 'path');
   p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color);
   p.setAttribute('stroke-width', w); p.setAttribute('stroke-linecap', 'round');
-  if (arrow) p.setAttribute('marker-end', `url(#ah${svg.parentNode.dataset.k})`);
+  // draw() shows the arrow head only once the stroke is nearly drawn
+  p._marker = arrow ? `url(#ah${svg.parentNode.dataset.k})` : null;
   svg.appendChild(p);
   const L = p.getTotalLength();
   p._L = L; p._dash = dash;
@@ -64,21 +68,24 @@ function draw(p, prog, o = 1) {
     p.setAttribute('stroke-dashoffset', p._L * (1 - prog));
     p.style.opacity = prog > 0.001 ? o : 0;
   }
-  // hide arrow head until nearly drawn
-  if (p.getAttribute('marker-end')) p.setAttribute('marker-end', prog > 0.92 ? `url(#ah${p.ownerSVGElement.parentNode.dataset.k})` : '');
+  // hide arrow head until nearly drawn; set on every call so the frame never depends on earlier ones
+  if (p._marker) p.setAttribute('marker-end', prog > 0.92 ? p._marker : '');
 }
 
 // ---------- icons (stroke, 24 grid)
 const ICONS = {
-  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  sun: '<circle cx="12" cy="12" r="4"/>'
+    + '<path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
   cal: '<rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   mail: '<rect x="3" y="6" width="18" height="13"/><path d="M3 7l9 6 9-6"/>',
   search: '<circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/>',
   food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
-  server: '<rect x="4" y="4" width="16" height="7"/><rect x="4" y="13" width="16" height="7"/><path d="M8 7.5h.01M8 16.5h.01"/>',
+  server: '<rect x="4" y="4" width="16" height="7"/><rect x="4" y="13" width="16" height="7"/>'
+    + '<path d="M8 7.5h.01M8 16.5h.01"/>',
   book: '<rect x="5" y="3" width="14" height="18"/><path d="M8 8h8M8 12h8M8 16h5"/>',
   ticket: '<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M15 7v10" stroke-dasharray="2 2"/>',
-  coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.9-1.7-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.8 6 1.5 6 4.3 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
+  coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.9-1.7-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.8 6 1.5 6 4.3'
+    + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
   bolt: '<path d="M13 2L4 14h7l-1 8 10-13h-7z"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
@@ -86,10 +93,13 @@ const ICONS = {
   play: '<path d="M7 4l13 8-13 8z"/>',
   retry: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
-  gear: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
-  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  gear: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3'
+    + 'M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
 };
-function ICON(n, size = 48, col = '#F8FAFC', w = 1.8) { return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="square" stroke-linejoin="miter" style="display:block">${ICONS[n]}</svg>`; }
+function ICON(n, size = 48, col = '#F8FAFC', w = 1.8) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${col}"`
+    + ` stroke-width="${w}" stroke-linecap="square" stroke-linejoin="miter" style="display:block">${ICONS[n]}</svg>`;
+}
 
 // ---------- components
 function makeLLM(parent, size = 220, label = 'LLM') {
@@ -102,7 +112,15 @@ function makeLLM(parent, size = 220, label = 'LLM') {
     <div class="llm-q">?</div>
     ${label ? `<div class="llm-label">${label}</div>` : ''}`, 'llm');
   root.style.width = size + 'px'; root.style.height = size + 'px'; root.style.fontSize = (size / 10) + 'px';
-  const o = { root, eyes: root.querySelectorAll('.llm-eye'), pupils: root.querySelectorAll('.pupil'), dots: root.querySelector('.llm-dots'), dotI: root.querySelectorAll('.llm-dots i'), q: root.querySelector('.llm-q'), seed: ((makeLLM.n = (makeLLM.n || 0) + 1) * 1.37) % 3 };
+  const o = {
+    root,
+    eyes: root.querySelectorAll('.llm-eye'),
+    pupils: root.querySelectorAll('.pupil'),
+    dots: root.querySelector('.llm-dots'),
+    dotI: root.querySelectorAll('.llm-dots i'),
+    q: root.querySelector('.llm-q'),
+    seed: ((makeLLM.n = (makeLLM.n || 0) + 1) * 1.37) % 3,
+  };
   return o;
 }
 function llmState(L, { think = 0, q = 0, look = 0, lookY = 0 } = {}) {
@@ -114,34 +132,30 @@ function llmState(L, { think = 0, q = 0, look = 0, lookY = 0 } = {}) {
   L.dotI.forEach((d, i) => d.style.transform = `translateY(${-Math.max(0, Math.sin(G * 6 - i * 0.9)) * 0.35}em)`);
   L.q.style.opacity = q; L.q.style.transform = `scale(${0.6 + 0.4 * q}) rotate(${Math.sin(G * 3) * 8}deg)`;
 }
-function makeApp(parent, label = 'APP') {
+function makeApp(parent) {
   const root = E(parent, `
    <div class="app-win">
      <div class="app-bar"><i></i><i></i><i></i></div>
      <div class="app-lines"><b style="width:70%"></b><b style="width:45%"></b><b style="width:60%"></b></div>
      <div class="app-gear">${ICON('gear', 46, '#F8FAFC')}</div>
    </div>
-   <div class="app-label">${label}</div>`, 'app');
+   <div class="app-label">APP</div>`, 'app');
   root.gear = root.querySelector('.app-gear');
   return root;
 }
-function gearSpin(app, on) { app.gear.style.transform = `rotate(${G * 220 * on}deg)`; app.gear.style.opacity = 0.35 + 0.65 * on; }
+function gearSpin(app, on) {
+  app.gear.style.transform = `rotate(${G * 220 * on}deg)`;
+  app.gear.style.opacity = 0.35 + 0.65 * on;
+}
 
 function makeCard(parent, text, kind = 'user', who = null, width = null) {
-  const labels = { user: 'YOU', llm: 'MODEL', tool: 'TOOL', sys: 'INSTRUCTIONS', ok: 'MODEL', bad: 'MODEL' };
+  const labels = { user: 'YOU', llm: 'MODEL', tool: 'TOOL', ok: 'MODEL', bad: 'MODEL' };
   const w = who === null ? labels[kind] : who;
   const e = E(parent, `${w ? `<div class="who">${w}</div>` : ''}<div class="txt">${text}</div>`, 'card k-' + kind);
   if (width) e.style.width = width + 'px';
   e.txt = e.querySelector('.txt'); e.full = text;
   return e;
 }
-// type word by word
-function typeWords(card, p) {
-  const words = card.full.split(' ');
-  const n = Math.round(words.length * clamp(p));
-  card.txt.innerHTML = words.map((w, i) => `<span style="opacity:${i < n ? 1 : 0}">${w}</span>`).join(' ');
-}
-function makePill(parent, html, cls = '') { return E(parent, html, 'pill ' + cls); }
 
 // ---------- timeline
 const scenes = [];
@@ -164,25 +178,25 @@ function collectChapters() {
 
 function buildAll() {
   collectChapters();
+  // inserted before #hdr so the header, progress segments and subtitles stay on top of every scene
+  const hdr = document.getElementById('hdr');
   let T = 0, k = 0;
   for (const sc of scenes) {
     sc.start = T; let t = T + (sc.pre ?? 0.6);
-    sc.cues = []; sc.cueEnds = [];
+    sc.cues = [];
     for (const s of sc.subs) {
-      const d = s.d ?? autoDur(s.text);
-      s.start = t; s.end = t + d;
-      sc.cues.push(t - sc.start); sc.cueEnds.push(t + d - sc.start);
+      s.start = t; s.end = t + autoDur(s.text);
+      sc.cues.push(t - sc.start);
       t = s.end + 0.25 + (s.after ?? 0);
     }
     sc.end = t + (sc.post ?? 0.35); sc.dur = sc.end - sc.start; T = sc.end;
     sc.root = document.createElement('div'); sc.root.className = 'scene'; sc.root.dataset.k = k++;
-    stage.appendChild(sc.root);
+    stage.insertBefore(sc.root, hdr);
     sc.el = {};
-    sc.build(sc.root, sc.el, sc);
+    sc.build(sc.root, sc.el);
   }
   window.TOTAL = T;
   // header
-  const hd = document.getElementById('hdr');
   const segs = document.getElementById('segs');
   segs.innerHTML = CHAPTERS.map(() => '<i><b></b></i>').join('');
 }
@@ -201,7 +215,7 @@ function renderAt(t) {
     // optional `shift`: [dx, dy] or (t, c) => [dx, dy], centers the composition in the free band
     const sh = typeof sc.shift === 'function' ? sc.shift(lt, sc.cues) : sc.shift;
     sc.root.style.transform = sh ? `translate(${sh[0]}px,${sh[1]}px)` : '';
-    sc.update(lt, sc.cues, sc.el, sc);
+    sc.update(lt, sc.cues, sc.el);
   }
   // subtitles
   const sub = document.getElementById('sub');
@@ -220,14 +234,9 @@ function renderAt(t) {
     hdr.style.opacity = o;
     hdr.querySelector('.num').textContent = String(cur.chapter).padStart(2, '0');
     hdr.querySelector('.ttl').textContent = CHAPTERS[cur.chapter - 1];
-  } else if (cur && cur.label) {
-    const lt = t - cur.start;
-    hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4));
-    hdr.querySelector('.num').textContent = '08';
-    hdr.querySelector('.ttl').textContent = cur.label;
   } else hdr.style.opacity = 0;
   const segs = document.querySelectorAll('#segs i b');
-  const chap = cur ? (cur.chapter || (cur.label ? 8 : 0)) : 0;
+  const chap = cur?.chapter || 0;
   segs.forEach((b, i) => {
     let f = 0;
     if (i + 1 < chap) f = 1;
@@ -239,6 +248,5 @@ function renderAt(t) {
     }
     b.style.width = (f * 100) + '%';
   });
-  document.getElementById('segs').style.opacity = (cur && (cur.chapter || cur.label)) ? 1 : 0;
+  document.getElementById('segs').style.opacity = chap ? 1 : 0;
 }
-window.renderAt = renderAt;

@@ -28,7 +28,7 @@
 - [Budget figure](references/project_budget-figure.md) — 4 vs 7 calls, 43%, always "in this example"
 - [Visual design decisions](references/feedback_visual-design.md) — tile alignment, labels, ch7 mirrors ch6, Event History statuses
 - [Subtitle layout](references/feedback_subtitles.md) — 30 px, 1760 px, one line, no orphan under 3 words
-- [Visual verification workflow](references/feedback_verification.md) — preview at timeline cues before rendering
+- [Visual verification workflow](references/feedback_verification.md) — preview inside subtitle windows; animations fit duration + `after`
 - [Frame capture noise](references/project_frame-noise.md) — row y=65, delta-2 specks, rare re-rasters; native-size resting elements
 - [Scene centering](references/project_scene-centering.md) — compositions centered at (960, 522) via measured `shift` / `pan()`
 - [Durable Execution story](references/project_durable-execution-story.md) — Temporal keeps history, saved before next step, replay
