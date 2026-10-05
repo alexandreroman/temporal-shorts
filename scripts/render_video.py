@@ -1,9 +1,8 @@
 """Render a theme page (src/themes/<theme>/index.html) frame by frame into an MP4 (no audio, subtitles burned in).
 
 Usage:
-  python scripts/render_video.py                  # default theme, full video, 30 fps, parallel workers
-  python scripts/render_video.py --theme durable-execution    # -> output/durable-execution.mp4
-  python scripts/render_video.py --start 130 --end 140 --out output/test.mp4
+  python scripts/render_video.py --theme durable-ai-agents   # full video, 30 fps -> output/durable-ai-agents.mp4
+  python scripts/render_video.py --theme durable-ai-agents --start 130 --end 140 --out output/test.mp4
 """
 import argparse, os, shutil, subprocess, sys, time
 from multiprocessing import Pool

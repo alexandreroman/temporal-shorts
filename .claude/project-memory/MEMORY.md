@@ -33,3 +33,4 @@
 - [Scene centering](references/project_scene-centering.md) — centered at (960, 522), fixed measured `shift`; `pan()` only in ch1, ch5, ch7
 - [Durable Execution story](references/project_durable-execution-story.md) — Temporal keeps history, saved before next step, replay
 - [Home page design](references/feedback_home-page.md) — equal stretched cards, count-agnostic grid, card order, no "silent"
+- [No video durations in docs](references/feedback_no-durations-in-docs.md) — length is never written; `make timeline` is the source

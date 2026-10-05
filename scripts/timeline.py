@@ -1,7 +1,7 @@
 """Print the computed timeline: scenes, chapters, subtitle start/end (absolute seconds) and cue indexes.
 Use it to pick timestamps for preview.py and to see how a text edit shifted the timing.
 
-  python scripts/timeline.py [--theme durable-execution]
+  python scripts/timeline.py --theme <theme>
 """
 import argparse, json, sys
 from pathlib import Path

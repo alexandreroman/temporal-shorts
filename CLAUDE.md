@@ -9,13 +9,15 @@ from a deterministic HTML animation. Each video is a theme:
 - `human-in-the-loop`: Human-in-the-Loop, how a Temporal Workflow waits
   durably for a person's decision, such as an approval, then resumes where
   it left off (placeholder)
-- `durable-ai-agents` (the scripts' default `--theme`): Durable AI Agents, a
-  3-minute video that shows a non-technical audience how AI agents work and
-  why they need Durable Execution with Temporal
+- `durable-ai-agents`: Durable AI Agents, a video that shows a
+  non-technical audience how AI agents work and why they need Durable
+  Execution with Temporal
 - `agent-harness`: Temporal Agent Harness, a presentation of the
   experimental project of the same name (placeholder)
 
-A home page (`src/index.html`) lets viewers pick a theme.
+No theme is the default: make targets cover every theme unless `THEME=<theme>`
+narrows them, and the scripts require `--theme`. A home page
+(`src/index.html`) lets viewers pick a theme.
 
 See [README.md](README.md) for full documentation.
 
@@ -48,9 +50,8 @@ rebuilds that theme alone, editing the home page rebuilds no video. Use
 
 In Casper (`.casper.json`), Run (`casper run`) serves the home page and the
 HTML players on `CASPER_PORT` (8000 in the primary workspace), Render
-(`casper run render`) renders every theme and opens
-`output/durable-ai-agents.mp4`; new workspaces run `make setup`
-automatically.
+(`casper run render`) renders every theme into `output/<theme>.mp4`; new
+workspaces run `make setup` automatically.
 
 ## Modules
 
@@ -76,7 +77,8 @@ automatically.
     (`[dx, dy]` or `(t, c) => [dx, dy]`, see `pan()`) centers the
     composition at (960, 522)
 - `scripts/`: setup, frame preview, parallel render, timeline, SRT export,
-  standalone HTML build and server; `--theme` selects the theme
+  standalone HTML build and server; `--theme` (required, no default)
+  selects the theme
 - `docs/<theme>/script.md`: full script of a theme: subtitles, timings,
   visuals
 - `output/`: generated `<theme>.srt`, `<theme>.mp4`, and the HTML pages

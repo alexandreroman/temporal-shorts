@@ -1,8 +1,7 @@
 """Grab still frames to check the layout without rendering the video.
 
-  python scripts/preview.py 12 40.5 133          # contact sheet -> output/preview.png
-  python scripts/preview.py 133 --full           # one full-size PNG per timestamp
-  python scripts/preview.py 2 --theme durable-execution
+  python scripts/preview.py --theme durable-ai-agents 12 40.5 133   # contact sheet -> output/preview.png
+  python scripts/preview.py --theme durable-ai-agents 133 --full    # one full-size PNG per timestamp
 """
 import argparse, sys
 from pathlib import Path
