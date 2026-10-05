@@ -4,7 +4,7 @@
   const ROW_Y = 380;
   // where the approval request lands, next to Maria
   const CARD = { x: 900, y: 640 };
-  const MARIA = { x: 1220, y: 620 };
+  const MARIA = { x: 1267, y: 620 }; // ~65 px clear between the card and Maria's label
   scene({
     chapter: 1, title: 'A step that needs a person',
     // one fixed offset fits both Sam's request under the steps and the approval phase
@@ -67,10 +67,10 @@
       const blur = win(t, spinFrom, spinTo, 0.3);
       setWaitClock(s.clock, elapsed, blur);
       setClock(s.card.clk, REQUEST_HOUR + elapsed, blur);
-      place(s.clock, 490, 630, cp, clamp(cp * 2));
+      place(s.clock, 466, 630, cp, clamp(cp * 2));
       s.why.forEach((e, i) => {
         const p = P(t, c[2] + 2.0 + i * 1.0, 0.45, backOut);
-        place(e, 1500, 560 + i * 70, p, clamp(p * 2));
+        place(e, 1547, 560 + i * 70, p, clamp(p * 2));
       });
     }
   });

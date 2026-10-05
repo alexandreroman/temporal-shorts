@@ -17,7 +17,7 @@
   scene({
     chapter: 5, title: 'Deadlines and reminders',
     // the timeline and its history, then the use-case tiles as the timeline fades out
-    shift: (t, c) => pan(t, [-19, 24], [[c[1], 0, 62]], 0.6),
+    shift: (t, c) => pan(t, [-19, 12], [[c[1], 0, 62]], 0.6),
     subs: [
       {
         text: "No answer? The Workflow can also wait on a timer: a reminder after two days, escalate after five.",
@@ -86,7 +86,7 @@
         setRowTag(s.jr, i, t, 'SAVED', at, P(t, at, 0.25));
       });
       const dp = P(t, c[0] + 4.5, 0.45, backOut);
-      place(s.durable, 960, CARD.y + CARD.h / 2 + 56, dp, clamp(dp * 2) * (1 - out));
+      place(s.durable, 960, CARD.y + CARD.h / 2 + 81, dp, clamp(dp * 2) * (1 - out));
 
       // the same pattern, wherever a person decides
       s.uses.forEach((e, i) => {

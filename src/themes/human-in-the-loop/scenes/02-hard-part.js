@@ -56,7 +56,7 @@
       s.mem = E(s.app,
         '<div class="lbl" style="position:absolute;left:20px;top:16px;display:flex;gap:10px;align-items:center;'
         + `padding-left:0">${ICON('server', 22, C.slate, 1.8)} App memory</div>`
-        + '<div class="vide mono" style="position:absolute;left:0;right:0;top:58px;text-align:center;font-size:26px;'
+        + '<div class="vide mono" style="position:absolute;left:0;right:0;top:78px;text-align:center;font-size:26px;'
         + 'letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
         'tile', {
           left: '24px', top: '76px', width: (APP.w - 48) + 'px', height: '230px', textAlign: 'left',
@@ -65,7 +65,7 @@
       s.mem.style.opacity = 1;
       s.vide = s.mem.querySelector('.vide');
       s.chips = CHIPS.map((txt, i) => E(s.mem, txt, 'mono', {
-        left: '20px', top: (58 + i * 54) + 'px', fontSize: '20px', color: '#141414', background: '#E6E7FC',
+        left: '20px', top: (60 + i * 54) + 'px', fontSize: '20px', color: '#141414', background: '#E6E7FC',
         padding: '8px 14px', borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
       s.lost = tag(root, 'Request lost', 'red');
@@ -93,7 +93,7 @@
         e.style.transform = `translateY(${fall * 260}px) rotate(${fall * (i % 2 ? 22 : -18)}deg)`;
       });
       s.vide.style.opacity = win(t, crashAt + 1.0, back, 0.4);
-      place(s.lost, APP.x, APP.y + 61, P(t, crashAt + 1.4, 0.45, backOut), win(t, crashAt + 1.4, back, 0.3));
+      place(s.lost, APP.x, APP.y + 81, P(t, crashAt + 1.4, 0.45, backOut), win(t, crashAt + 1.4, back, 0.3));
       place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);
 
       // day timeline: the marker walks from DAY 1 and stops at the restart
