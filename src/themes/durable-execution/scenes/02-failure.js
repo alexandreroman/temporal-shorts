@@ -47,7 +47,7 @@
       // oversized so it still covers the whole stage once the scene is shifted
       s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
       const [x0, x1] = s.steps.xs, top = ROW.y - ROW.h / 2 - 6;
-      s.redo = path(s.svg, `M ${x1 - 30} ${top} Q ${(x0 + x1) / 2} ${top - 90} ${x0 + 30} ${top}`, C.red, 3);
+      s.redo = arrow(s.svg, `M ${x1 - 30} ${top} Q ${(x0 + x1) / 2} ${top - 90} ${x0 + 30} ${top}`, C.red, 3);
       s.redoL = E(root, 'Start over', 'lbl', { color: C.red });
     },
     update(t, c, s) {

@@ -363,3 +363,24 @@ function markEventHistoryCrash(hist, oKept, oCut) {
   hist.kept.style.opacity = clamp(oKept);
   hist.cut.style.opacity = clamp(oCut);
 }
+// Arrow whose head is filled with the stroke color. The engine's shared marker fills its head with
+// `context-stroke`, which WebKit ignores (black heads in Safari): this one gets its own marker per color, with an
+// explicit fill, added once to the svg's <defs> and reused. draw() reads p._marker on every frame.
+function arrow(svg, d, color, w, dash = null) {
+  const p = path(svg, d, color, w, true, dash);
+  const id = `ah${svg.parentNode.dataset.k}-${color.replace(/[^0-9a-z]/gi, '')}`;
+  if (!svg.querySelector(`#${id}`)) {
+    const marker = document.createElementNS(SVGNS, 'marker');
+    marker.id = id;
+    const attrs = { viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 5, markerHeight: 5,
+      orient: 'auto-start-reverse' };
+    for (const [name, value] of Object.entries(attrs)) marker.setAttribute(name, value);
+    const head = document.createElementNS(SVGNS, 'path');
+    head.setAttribute('d', 'M0,0 L10,5 L0,10 z');
+    head.setAttribute('fill', color);
+    marker.appendChild(head);
+    svg.querySelector('defs').appendChild(marker);
+  }
+  p._marker = `url(#${id})`;
+  return p;
+}
