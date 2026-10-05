@@ -142,9 +142,22 @@ const scenes = [];
 function scene(def) { scenes.push(def); }
 function autoDur(text) { return clamp(text.replace(/<[^>]+>/g,'').length / 16 + 0.6, 2.4, 8); }
 
-const CHAPTERS = ['LLM calls', 'Stateless by design', 'The context window', 'Tools', 'The agentic loop', 'When the agent crashes', 'Durable Execution with Temporal'];
+// CHAPTERS[n - 1] is the title of chapter n, filled by buildAll() from the `title` of the chapter's first scene.
+const CHAPTERS = [];
+
+function collectChapters() {
+  for (const sc of scenes) {
+    if (sc.chapter && sc.title) CHAPTERS[sc.chapter - 1] = sc.title;
+  }
+  for (const sc of scenes) {
+    if (sc.chapter && !CHAPTERS[sc.chapter - 1]) {
+      throw new Error(`Chapter ${sc.chapter} has no title: set \`title\` on its first scene`);
+    }
+  }
+}
 
 function buildAll() {
+  collectChapters();
   let T = 0, k = 0;
   for (const sc of scenes) {
     sc.start = T; let t = T + (sc.pre ?? 0.6);

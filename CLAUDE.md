@@ -31,8 +31,17 @@ renders and opens the MP4; new workspaces run `make setup` automatically.
 
 ## Modules
 
-- `src/`: the animation: `index.html` (stage, CSS), `engine.js` (timeline,
-  helpers, components), `scenes.js` (subtitles and animations of 9 scenes)
+- `src/`: the animation, one file per concern so parallel edits rarely
+  conflict:
+  - `index.html`: stage skeleton and the ordered `<link>` / `<script>` list
+  - `styles.css`: brand styles and live-player CSS
+  - `engine.js`: timeline, helpers, components; chapter titles come from
+    the scenes
+  - `shared.js`: brand helpers shared by scenes (`C`, `iconTile`, `STEPS`)
+  - `scenes/`: one file per scene (subtitles and animations), wrapped in a
+    `{ ... }` block so its helpers stay local; the first scene of a chapter
+    sets `chapter` and `title`
+  - `player.js`: live-mode player (`startPlayer()`)
 - `scripts/`: setup, frame preview, parallel render, timeline, SRT export,
   standalone HTML build and server
 - `docs/script.md`: full script: subtitles, timings, visuals
@@ -92,6 +101,10 @@ not shared with the team.
   (subtitle start) so timings follow text changes.
 - Keep rendering deterministic (no `Math.random`): parallel workers render
   segments independently.
+- Use classic `<script src>` tags, not ES modules: Playwright opens
+  `src/index.html` over `file://`, where Chromium blocks `type="module"`.
+- New scene: add a file in `src/scenes/` and one `<script>` line in
+  `src/index.html`, in playing order.
 - Live-mode player code (`startPlayer()`, `.live` CSS) must never affect the
   frozen `?t=` mode: rendered frames must stay pixel-identical.
 - Check frames with `make preview` before `make render`; after a text change,
