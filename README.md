@@ -84,6 +84,10 @@ scenes never touch the same file.
 - Animation: the scene's `update(t, c, s)` function, where `t` is the scene's
   local time and `c[i]` the moment subtitle `i` starts. Every animation is
   keyed to these cues.
+- Centering: the scene's optional `shift`, `[dx, dy]` or `(t, c) => [dx, dy]`,
+  translates the whole scene so its composition is centered at (960, 522),
+  between the header and the subtitles. `pan(t, from, stops)` eases between
+  offsets when the layout changes between phases.
 - Chapter title: `title` next to `chapter` on the first scene of the chapter.
   The header and the progress segments are derived from it.
 - New scene: create a file in `src/scenes/` that calls `scene({...})` inside a

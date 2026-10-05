@@ -3,6 +3,7 @@
 {
   scene({
     pre: 1.0,
+    shift: [-54, 82],
     subs: [{ text: "AI agents search, book and send emails for us. But how do they actually work?", after: 0.3 }],
     build(root, s) {
       s.t = E(root, `<img src="assets/temporal-logo-horizontal-light-cropped.svg" style="height:58px;display:block;margin-bottom:46px"><div class="mono" style="font-size:22px;letter-spacing:.14em;color:var(--slate)">AN EXPLAINER FOR EVERYONE</div>

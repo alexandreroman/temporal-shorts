@@ -3,6 +3,8 @@
 {
   scene({
     chapter: 1, title: 'LLM calls',
+    // pans with the LLM moves: alone with its chips, then app + LLM + cards, then text in / text out
+    shift: (t, c) => pan(t, [-2, 29], [[c[1], 40, 30], [c[2], 8, 68]], 0.9),
     subs: [
       { text: "At the heart of every AI agent is an LLM: a large language model, like those from OpenAI, Anthropic or Google." },
       { text: "An app sends it some text. The model reads it, then writes a reply, word by word.", after: 0.8 },

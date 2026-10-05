@@ -3,6 +3,7 @@
 {
   scene({
     chapter: 2, title: 'Stateless by design',
+    shift: [30, 115],
     subs: [
       { text: "Surprise: the model has no memory. Tell it your name…", after: 1.4 },
       { text: "…then ask again in the next call. It has already forgotten.", after: 0.8 },

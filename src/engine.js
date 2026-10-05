@@ -7,6 +7,12 @@ const backOut = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow
 const P = (t, a, d = 0.6, f = ease) => f(clamp((t - a) / d));
 const lerp = (a, b, p) => a + (b - a) * p;
 const win = (t, a, b, f = 0.4) => P(t, a, f) * (1 - P(t, b, f)); // visible between a and b
+// Scene camera offset for `shift`: starts at `from`, then eases to each [at, dx, dy] stop in turn.
+function pan(t, from, stops, d = 0.8) {
+  let [x, y] = from;
+  for (const [a, dx, dy] of stops) { const p = P(t, a, d); x = lerp(x, dx, p); y = lerp(y, dy, p); }
+  return [x, y];
+}
 let G = 0; // global time
 
 const stage = document.getElementById('stage');
@@ -192,6 +198,9 @@ function renderAt(t) {
     const lt = t - sc.start;
     const o = P(lt, 0, 0.5) * (1 - P(lt, sc.dur - 0.5, 0.5));
     sc.root.style.opacity = o;
+    // optional `shift`: [dx, dy] or (t, c) => [dx, dy], centers the composition in the free band
+    const sh = typeof sc.shift === 'function' ? sc.shift(lt, sc.cues) : sc.shift;
+    sc.root.style.transform = sh ? `translate(${sh[0]}px,${sh[1]}px)` : '';
     sc.update(lt, sc.cues, sc.el, sc);
   }
   // subtitles
