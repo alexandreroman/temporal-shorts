@@ -176,15 +176,42 @@ money is tracked by a CARD CHARGED counter in dollars.
     counter "CHARGED ONCE", WORKFLOW COMPLETE inside the history, under
     its rows.
 
-## 07 What you get
+## 07 Full visibility
 
-- **2:14** A Workflow can even wait for days, for a delivery or a reply,
+- **2:14** Temporal also shows every Workflow in its web UI: which ones are
+  running, completed or failed.
+  - Visuals: A Temporal UI window (official logo, NAMESPACE `default`, a
+    navigation rail with Workflows active): the "Workflows" page, a
+    `WorkflowType = "placeOrder"` filter and a table STATUS / WORKFLOW ID /
+    TYPE / START with order-1045 to order-1040; Running, Completed and
+    Failed badges bump as the subtitle names them; a pointer hovers the
+    order-1042 row.
+- **2:22** Open order #1042: its timeline shows every Activity, how long it
+  took, and the crash it survived.
+  - Visuals: The order-1042 page: breadcrumb, Completed badge, summary
+    (TYPE, START, END, DURATION 14.6s, TASK QUEUE orders) and a TIMELINE
+    card, 0s to 15s: chargeCard 1.2s and reserveItem 0.8s on WORKER A,
+    a red failed shipPackage attempt cut by a dashed "WORKER CRASHED" line,
+    then shipPackage 2.1s and emailReceipt 0.4s on WORKER B; bars grow in
+    time order with their durations.
+- **2:30** While a Workflow runs, you see an Activity retrying, its attempt
+  count and its last error, live.
+  - Visuals: The order-1044 page, Running: in real time, shipPackage fails
+    twice (red attempts, waits of 1s then 2s), attempt 3 runs and
+    completes, then emailReceipt; a PENDING ACTIVITIES card shows
+    shipPackage, ATTEMPT 1 to 3, "LAST FAILURE: Carrier timeout" and the
+    retry policy, then "None"; DURATION counts live, and the badge turns
+    Completed.
+
+## 08 What you get
+
+- **2:41** A Workflow can even wait for days, for a delivery or a reply,
   without tying up a Worker.
   - Visuals: Code card with `await sleep('30 days');` between
     `shipPackage` and `askForReview`; a DURABLE TIMER tile fast-forwards
     from day 1 to day 30 while the Worker shows FREE FOR OTHER WORK; on
     day 30 (TIME IS UP) the next line runs.
-- **2:21** You write the business logic. Temporal handles retries, state
+- **2:48** You write the business logic. Temporal handles retries, state
   and recovery, with full visibility.
   - Visuals: "You write the business logic", Temporal logo + a slate
     "HANDLES THE REST" sized to its wordmark, then 4 identical tiles:
@@ -193,7 +220,7 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 ## Outro
 
-- **2:30** Durable Execution: your code runs to completion, whatever fails
+- **2:57** Durable Execution: your code runs to completion, whatever fails
   along the way.
   - Visuals: The 4 step tiles checked, title "Durable Execution", violet
     line "YOUR CODE RUNS TO COMPLETION", Temporal logo.

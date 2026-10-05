@@ -1,4 +1,4 @@
-// ===================== 7. WHAT YOU GET
+// ===================== 8. WHAT YOU GET
 // The block keeps every name declared in this file local to this scene.
 {
   // Phase 1: the Workflow sleeps 30 days. On the left, the code card and the Worker strip share their left and
@@ -61,7 +61,7 @@
     return e;
   };
   scene({
-    chapter: 7, title: 'What you get',
+    chapter: 8, title: 'What you get',
     // both phases are laid out around the center of the free band (960, 522)
     shift: [0, 0],
     subs: [

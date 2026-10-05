@@ -438,3 +438,9 @@ function arrow(svg, d, color, w, dash = null) {
   p._marker = `url(#${id})`;
   return p;
 }
+
+// ---------- web UI icons (chapter 7): the Workflows list entry of the navigation rail and a dropdown chevron
+Object.assign(ICONS, {
+  list: '<path d="M9 6h12M9 12h12M9 18h12"/><path d="M3.5 6h1M3.5 12h1M3.5 18h1"/>',
+  chevron: '<path d="M6 9l6 6 6-6"/>',
+});
