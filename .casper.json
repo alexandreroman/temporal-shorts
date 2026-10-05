@@ -2,7 +2,7 @@
   "workspace": {
     "scripts": {
       "setup": "make setup",
-      "render": "make render && open output/durable-ai-agents.mp4",
+      "render": "make render",
       "run": "make serve"
     }
   }

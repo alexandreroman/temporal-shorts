@@ -11,7 +11,6 @@ WIDTH, HEIGHT = 1920, 1080
 # home page that links to them. output/ mirrors this layout, so the relative links work in both trees.
 HOME_PAGE = SRC / "index.html"
 THEMES_DIR = SRC / "themes"
-DEFAULT_THEME = "durable-ai-agents"
 
 
 def theme_names():
@@ -45,9 +44,8 @@ PRELOAD_FONTS = """Promise.all(
 
 
 def add_theme_argument(parser):
-    """Add the --theme option to an argparse parser."""
-    parser.add_argument("--theme", choices=THEMES, default=DEFAULT_THEME,
-                        help=f"video to work on (default: {DEFAULT_THEME})")
+    """Add the required --theme option to an argparse parser: no theme is the default."""
+    parser.add_argument("--theme", choices=THEMES, required=True, help="video to work on")
 
 
 def page_url(theme):

@@ -9,13 +9,16 @@ subtitles) about Temporal. Each video is a theme:
 - **Human-in-the-Loop** (`human-in-the-loop`, coming soon): how a Temporal
   Workflow waits durably for a person's decision, such as an approval, for
   minutes or days, then resumes where it left off.
-- **Durable AI Agents** (`durable-ai-agents`, the scripts' default theme;
-  2 min 59): for a non-technical audience, how an AI agent works, and why it
-  needs Durable Execution with Temporal.
+- **Durable AI Agents** (`durable-ai-agents`): for a non-technical
+  audience, how an AI agent works, and why it needs Durable Execution with
+  Temporal.
 - **Temporal Agent Harness** (`agent-harness`, coming soon): the
   experimental project of the same name.
 
 A home page lists the themes and opens their players.
+
+No theme is the default: the make targets cover every theme unless
+`THEME=<theme>` narrows them to one, and the scripts require `--theme`.
 
 The videos are not edited in a video editor: each one is an HTML page
 animated deterministically (`renderAt(t)`), captured frame by frame by
@@ -85,7 +88,7 @@ render leftovers. It leaves the virtualenv and the fonts in place.
 Without make:
 
 ```bash
-.venv/bin/python scripts/render_video.py [--theme durable-execution] \
+.venv/bin/python scripts/render_video.py --theme <theme> \
   [--start 130 --end 140] [--workers 4] [--fps 30]
 ```
 

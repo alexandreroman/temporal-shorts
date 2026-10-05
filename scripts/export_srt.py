@@ -1,6 +1,6 @@
 """Write output/<theme>.srt from the subtitle timings of the theme's scenes (src/themes/<theme>/scenes/).
 
-  python scripts/export_srt.py [--theme durable-execution]
+  python scripts/export_srt.py --theme <theme>
 """
 import argparse, json, re, sys
 from pathlib import Path

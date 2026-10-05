@@ -1,4 +1,4 @@
-# Script and timeline (English, 2:59)
+# Script and timeline: Durable AI Agents
 
 Subtitles are the only narration (no audio). Timings are computed in
 `src/engine.js` from text length (`autoDur`: chars / 16 + 0.6 s, clamped
