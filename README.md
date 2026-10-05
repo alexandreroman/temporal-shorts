@@ -3,9 +3,10 @@
 Temporal Shorts: short explainer videos (English, no sound, burned-in
 subtitles) about Temporal. Each video is a theme:
 
-- **Introduction to Durable Execution** (`durable-execution`, coming soon):
-  the principles of Durable Execution with Temporal Workflows, outside any
-  AI context.
+- **Introduction to Durable Execution** (`durable-execution`): for
+  everyone, the principles of Durable Execution with Temporal Workflows,
+  outside any AI context: Workflows, Activities, retries, the Event
+  History, replay and the Temporal web UI.
 - **Human-in-the-Loop** (`human-in-the-loop`): how a Temporal
   Workflow waits durably for a person's decision, such as an approval, for
   minutes or days, then resumes where it left off.
@@ -176,7 +177,7 @@ editing different scenes never touch the same file.
    wrap and keep the same size, with no CSS change.
 4. Write the script in `docs/<theme>/script.md`.
 
-Keep each video under 3:00 (`make timeline THEME=<theme>`).
+Videos have no maximum length; `make timeline THEME=<theme>` reports it.
 
 Conventions: see `CLAUDE.md`. Brand rules and decision history: see the
 project memory in `.claude/project-memory/`.

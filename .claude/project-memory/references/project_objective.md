@@ -1,15 +1,14 @@
 ---
 name: "Video objective and audience"
-description: "What the Durable AI Agents video must teach, to whom, and its hard constraints"
+description: "What the Durable AI Agents video must teach, to whom, and its constraints"
 type: project
 ---
 
 # Video objective and audience
 
-Scope: the `durable-ai-agents` theme. The 3:00 limit applies to every
-theme.
+Scope: the `durable-ai-agents` theme. Videos have no maximum length.
 
-An educational video of 3:00 maximum explains to a **non-technical** audience:
+An educational video explains to a **non-technical** audience:
 
 1. LLM calls (text in, text out);
 2. an LLM is stateless by design;
@@ -21,12 +20,10 @@ An educational video of 3:00 maximum explains to a **non-technical** audience:
    savings**: previous LLM calls are not lost, so they are not redone to
    rebuild the context.
 
-Constraints: no soundtrack, burned-in subtitles, Temporal brand guidelines,
-duration ≤ 3:00. Deliverables: MP4 1920x1080
-30 fps + `.srt`.
+Constraints: no soundtrack, burned-in subtitles, Temporal brand guidelines.
+Deliverables: MP4 1920x1080 30 fps + `.srt`.
 
-**Why:** a 7 min 46 cut is too long for this audience; the budget argument is
-the key business message for Temporal.
+**Why:** the budget argument is the key business message for Temporal.
 
-**How to apply:** any change must keep the total ≤ 3:00 (`make timeline`) and
-keep the seven topics, including the explicit budget-savings message.
+**How to apply:** any change must keep the seven topics, including the
+explicit budget-savings message.
