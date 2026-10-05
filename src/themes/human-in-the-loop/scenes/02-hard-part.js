@@ -1,30 +1,38 @@
 // ===================== 2. WAITING IS THE HARD PART
 // The block keeps every name declared in this file local to this scene.
 {
-  const APP = { x: 960, y: 400, w: 600, h: 330 };
-  const LINE = { y: 700, x0: 560, x1: 1360 }; // day timeline: DAY 1 at x0, DAY 3 at x1
+  // The app panel in the middle of the content frame, and a band 40 px under it that holds the day timeline, then
+  // two of the plumbing tiles; both phases fill the same box, so the app never moves.
+  const APP = { x: 960, y: 412, w: 800, h: 440 };
+  const BAND_Y = APP.y + APP.h / 2 + FRAME.gap + 90; // middle of the 180 px band under the app
+  // day timeline exactly as wide as the app: DAY 1 on its left edge, DAY 3 on its right edge
+  const LINE = { y: BAND_Y + 18, x0: APP.x - APP.w / 2, x1: APP.x + APP.w / 2 };
   const RESTART_X = 1060, DEPLOY_X = 1260;
   const CHIPS = ['Request #1042', 'Step: approval', 'Waiting for Maria'];
-  // hand-made plumbing around the app (on its sides and under it, where the timeline was), and the tangled
-  // links between all of it; the app itself never moves, so both phases share one centered layout
+  // Hand-made plumbing on a grid: Database and Resume code on the frame's edges, centered on the app; Status flags
+  // and Scheduled jobs in the band, on the app's left and right edges. Tangled links run between all of it.
+  const TILE = { w: 340, h: 180, bandW: 300 };
   const PLUMBING = [
-    ['db', 'Database', 380, 400], ['flag', 'Status flags', 700, 690],
-    ['clock', 'Scheduled jobs', 1220, 690], ['code', 'Resume code', 1540, 400],
+    ['db', 'Database', FRAME.x0 + TILE.w / 2, APP.y, TILE.w],
+    ['flag', 'Status flags', LINE.x0 + TILE.bandW / 2, BAND_Y, TILE.bandW],
+    ['clock', 'Scheduled jobs', LINE.x1 - TILE.bandW / 2, BAND_Y, TILE.bandW],
+    ['code', 'Resume code', FRAME.x1 - TILE.w / 2, APP.y, TILE.w],
   ];
   const LINKS = [
-    'M 505 400 C 590 400, 575 480, 660 480',
-    'M 1415 400 C 1330 400, 1345 320, 1260 320',
-    'M 700 620 C 700 585, 1100 600, 1100 565',
-    'M 1220 620 C 1220 585, 820 600, 820 565',
-    'M 380 330 C 400 160, 1520 160, 1540 330',
-    'M 380 470 C 380 640, 1000 560, 1095 690',
-    'M 1540 470 C 1540 640, 920 560, 825 690',
+    'M 420 412 C 490 412, 490 480, 560 480',
+    'M 1500 412 C 1430 412, 1430 344, 1360 344',
+    'M 710 672 C 710 652, 1110 652, 1110 632',
+    'M 1210 672 C 1210 652, 810 652, 810 632',
+    'M 250 502 C 250 700, 900 680, 1060 762',
+    'M 1670 502 C 1670 700, 1020 680, 860 762',
   ];
-  const BROKEN_LINKS = [2, 5]; // turn red with the failures
+  const BROKEN_LINKS = [2, 4]; // turn red with the failures
+  // red tags 40 px under the side tiles they belong to
+  const TAG_Y = APP.y + TILE.h / 2 + FRAME.gap + 30;
   scene({
     chapter: 2, title: 'Waiting is the hard part',
-    // one fixed offset: the timeline under the app, then the plumbing in its place and around the app
-    shift: [0, 34],
+    // laid out centered at (960, 522) on the content frame
+    shift: [0, 0],
     subs: [
       {
         text: "But the app can't simply pause for three days. Its memory lives on one machine, and machines restart.",
@@ -43,34 +51,35 @@
       s.svg = svgLayer(root);
       s.links = LINKS.map(d => path(s.svg, d, C.slate, 2, false));
       s.line = path(s.svg, `M ${LINE.x0} ${LINE.y} L ${LINE.x1} ${LINE.y}`, C.line, 3, false);
-      s.days = [1, 2, 3].map(n => E(root, 'Day ' + n, 'lbl'));
-      s.ticks = [0, 1, 2].map(() => E(root, '', '', { width: '3px', height: '18px', background: C.slate }));
+      s.days = [1, 2, 3].map(n => E(root, 'Day ' + n, 'lbl', { fontSize: '22px' }));
+      s.ticks = [0, 1, 2].map(() => E(root, '', '', { width: '3px', height: '22px', background: C.slate }));
       s.restartM = E(root, '', '', { width: '2px', height: '40px', background: C.red });
       s.deployM = E(root, '', '', { width: '2px', height: '40px', background: C.slate });
       s.restart = tag(root, 'Restart', 'red'); s.deploy = tag(root, 'Deploy');
       s.marker = E(root, '', '', {
-        width: '20px', height: '20px', background: C.violet, borderRadius: '50%',
+        width: '24px', height: '24px', background: C.violet, borderRadius: '50%',
         boxShadow: '0 0 18px 4px rgba(182,100,255,.45)',
       });
       s.app = makeAppPanel(root, 'APP', APP.w, APP.h);
       s.mem = E(s.app,
         '<div class="lbl" style="position:absolute;left:20px;top:16px;display:flex;gap:10px;align-items:center;'
         + `padding-left:0">${ICON('server', 22, C.slate, 1.8)} App memory</div>`
-        + '<div class="vide mono" style="position:absolute;left:0;right:0;top:78px;text-align:center;font-size:26px;'
+        // EMPTY and REQUEST LOST, like the chips, sit in the middle of the space under the APP MEMORY label
+        + '<div class="vide mono" style="position:absolute;left:0;right:0;top:129px;text-align:center;font-size:30px;'
         + 'letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
         'tile', {
-          left: '24px', top: '76px', width: (APP.w - 48) + 'px', height: '230px', textAlign: 'left',
+          left: '24px', top: '76px', width: (APP.w - 48) + 'px', height: (APP.h - 100) + 'px', textAlign: 'left',
           transform: 'none', background: 'rgba(248,250,252,.03)',
         });
       s.mem.style.opacity = 1;
       s.vide = s.mem.querySelector('.vide');
       s.chips = CHIPS.map((txt, i) => E(s.mem, txt, 'mono', {
-        left: '20px', top: (60 + i * 54) + 'px', fontSize: '20px', color: '#141414', background: '#E6E7FC',
-        padding: '8px 14px', borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
+        left: '24px', top: (99 + i * 66) + 'px', fontSize: '24px', color: '#141414', background: '#E6E7FC',
+        padding: '10px 16px', borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
-      s.lost = tag(root, 'Request lost', 'red');
+      s.lost = tag(root, 'Request lost', 'red big');
       s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
-      s.tiles = PLUMBING.map(([icon, label]) => iconTile(root, icon, label, 250, 140));
+      s.tiles = PLUMBING.map(([icon, label, , , w]) => iconTile(root, icon, label, w, TILE.h));
       s.stuck = tag(root, 'Request stuck', 'red big'); s.twice = tag(root, 'Ordered twice', 'red big');
       // solid fill: the tags sit on the tangled links, which must not show through them
       [s.stuck, s.twice].forEach(e => { e.style.background = '#2A191B'; });
@@ -93,7 +102,7 @@
         e.style.transform = `translateY(${fall * 260}px) rotate(${fall * (i % 2 ? 22 : -18)}deg)`;
       });
       s.vide.style.opacity = win(t, crashAt + 1.0, back, 0.4);
-      place(s.lost, APP.x, APP.y + 81, P(t, crashAt + 1.4, 0.45, backOut), win(t, crashAt + 1.4, back, 0.3));
+      place(s.lost, APP.x, APP.y + 79, P(t, crashAt + 1.4, 0.45, backOut), win(t, crashAt + 1.4, back, 0.3));
       place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);
 
       // day timeline: the marker walks from DAY 1 and stops at the restart
@@ -102,11 +111,11 @@
       [0, 1, 2].forEach(i => {
         const x = lerp(LINE.x0, LINE.x1, i / 2);
         place(s.ticks[i], x, LINE.y, 1, lp * (1 - lineOut));
-        place(s.days[i], x, LINE.y + 40, 1, lp * (1 - lineOut));
+        place(s.days[i], x, LINE.y + 44, 1, lp * (1 - lineOut));
       });
       const mo = P(t, c[0] + 0.6, 0.4) * (1 - lineOut);
-      place(s.restartM, RESTART_X, LINE.y - 22, 1, mo); place(s.deployM, DEPLOY_X, LINE.y - 22, 1, mo);
-      place(s.restart, RESTART_X, LINE.y - 66, 1, mo); place(s.deploy, DEPLOY_X, LINE.y - 66, 1, mo);
+      place(s.restartM, RESTART_X, LINE.y - 24, 1, mo); place(s.deployM, DEPLOY_X, LINE.y - 24, 1, mo);
+      place(s.restart, RESTART_X, LINE.y - 70, 1, mo); place(s.deploy, DEPLOY_X, LINE.y - 70, 1, mo);
       const walk = clamp((t - (c[0] + 0.8)) / (crashAt - (c[0] + 0.8)));
       place(s.marker, lerp(LINE.x0, RESTART_X, walk), LINE.y, 1, P(t, c[0] + 0.8, 0.3) * (1 - lineOut));
 
@@ -122,8 +131,8 @@
         draw(l, P(t, c[1] + 2.6 + i * 0.35, 0.6));
       });
       const p1 = P(t, c[2] + 2.6, 0.45, backOut), p2 = P(t, c[2] + 4.2, 0.45, backOut);
-      place(s.stuck, 380, 545, p1, clamp(p1 * 2));
-      place(s.twice, 1540, 545, p2, clamp(p2 * 2));
+      place(s.stuck, PLUMBING[0][2], TAG_Y, p1, clamp(p1 * 2));
+      place(s.twice, PLUMBING[3][2], TAG_Y, p2, clamp(p2 * 2));
     }
   });
 }

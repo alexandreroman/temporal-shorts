@@ -3,7 +3,7 @@
 {
   scene({
     pre: 0.4, post: 2.6,
-    shift: [0, 51],
+    shift: [0, 60],
     subs: [
       { text: "Temporal Workflows wait for people as long as it takes, and pick up right where they left off." },
     ],
@@ -24,9 +24,10 @@
     update(t, c, s) {
       place(s.t, 960, 560, 1, P(t, 0.3, 0.8));
       const p = P(t, 0.1, 0.7, backOut);
-      place(s.person, 960, 286, p, clamp(p * 2));
+      // the same 76 px from the person to the title as from the tagline to the logo
+      place(s.person, 960, 266, p, clamp(p * 2));
       const bp = P(t, 0.8, 0.45, backOut);
-      place(s.badge, 1003, 329, bp, clamp(bp * 2));
+      place(s.badge, 1003, 309, bp, clamp(bp * 2));
     }
   });
 }

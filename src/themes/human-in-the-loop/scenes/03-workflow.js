@@ -1,10 +1,14 @@
 // ===================== 3. A WORKFLOW THAT WAITS
 // The block keeps every name declared in this file local to this scene.
 {
-  const { rowY: ROW_Y, app: APP, clock: CLOCK, temporal: TEMPORAL } = WF_LAYOUT;
+  const { rowY: ROW_Y, app: APP, strip: STRIP, temporal: TEMPORAL } = WF_LAYOUT;
+  // in the strip: the clock 30 px from its left edge, the deploy and the restart against its right edge
+  const CLOCK = { x: STRIP.x - STRIP.w / 2 + 30 + WAIT_CLOCK_W / 2, y: STRIP.y };
+  const CAUSE_X = [STRIP.x + 136, STRIP.x + 296]; // 20 px apart, the restart 30 px from the right edge
   scene({
     chapter: 3, title: 'A Workflow that waits',
-    shift: [0, 38],
+    // laid out centered at (960, 522) on the content frame
+    shift: [0, 0],
     subs: [
       {
         text: "With Temporal, the whole process is a <b>Workflow</b>: ordinary code that runs the steps in order.",
@@ -23,6 +27,7 @@
       s.svg = svgLayer(root);
       s.steps = makeStepRow(root, s.svg, ROW_Y);
       s.A = makeWorkflowApp(root, 'APP INSTANCE A');
+      s.strip = makeClockStrip(root);
       s.clock = makeWaitClock(root, 'Waiting for Maria');
       s.temporal = makeTemporalPanel(root);
       s.jr = makeOrderHistory(root);
@@ -73,10 +78,12 @@
       const day2 = [waitOn, c[1] + 4.6], day3 = [c[2] + 0.5, c[2] + 5.0];
       const elapsed = waitHours(t, ...day2, DAY2_HOURS) + waitHours(t, ...day3, DAY3_MORNING - DAY2_HOURS);
       setWaitClock(s.clock, elapsed, Math.max(win(t, ...day2, 0.3), win(t, ...day3, 0.3)));
+      // the strip arrives with the clock, so it never shows empty
+      place(s.strip, STRIP.x, STRIP.y, 1, P(t, c[1] + 1.0, 0.45));
       place(s.clock, CLOCK.x, CLOCK.y, cp, clamp(cp * 2));
       s.causes.forEach((e, i) => {
         const p = P(t, c[2] + 2.2 + i * 0.9, 0.45, backOut);
-        place(e, 580 + i * 160 + sx, CLOCK.y + sy, p, clamp(p * 2) * (1 - P(t, restartAt + 1.6, 0.4)));
+        place(e, CAUSE_X[i] + sx, STRIP.y + sy, p, clamp(p * 2) * (1 - P(t, restartAt + 1.6, 0.4)));
       });
       // a softer flash than a crash: a restart is routine
       place(s.flash, 960, 540, 1, flashAt(t, restartAt) * 0.25);

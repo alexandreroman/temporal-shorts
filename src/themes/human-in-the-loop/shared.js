@@ -18,10 +18,16 @@ Object.assign(ICONS, {
   up: '<path d="M12 20V5M6 11l6-6 6 6"/>',
 });
 
+// Content frame of every scene: inside the 80 px header margins, zones 40 px apart
+const FRAME = { x0: 80, x1: 1840, gap: 40 };
+
 // The 4 steps of the laptop order, used by chapters 1, 3 and 4
 const STEPS = [['clipboard', 'Check'], ['user', 'Approval'], ['cart', 'Order'], ['mail', 'Notify']];
-// Shared step row geometry, so the same tiles sit at the same place in every chapter that shows them
-const ROW = { x0: 465, gap: 330, w: 260, h: 104 };
+// Shared step row geometry, so the same tiles sit at the same place in every chapter that shows them:
+// the row spans the content frame, CHECK's left edge and NOTIFY's right edge on its edges
+const ROW = { w: 344, h: 140 };
+ROW.x0 = FRAME.x0 + ROW.w / 2; // center of the first tile
+ROW.gap = (FRAME.x1 - FRAME.x0 - ROW.w) / 3; // from one tile center to the next
 
 // The steps as tiles in a row joined by thin links; each tile also carries an hourglass for the waiting state
 function makeStepRow(root, svg, y) {
@@ -34,7 +40,7 @@ function makeStepRow(root, svg, y) {
     const e = makeStep(root, icon, label, ROW.w, ROW.h);
     e.insertAdjacentHTML('beforeend',
       '<div class="hg" style="position:absolute;right:10px;top:10px;opacity:0">'
-      + `${ICON('hourglass', 28, C.violet, 2)}</div>`);
+      + `${ICON('hourglass', 30, C.violet, 2)}</div>`);
     e.hg = e.querySelector('.hg');
     return e;
   });
@@ -148,14 +154,16 @@ function tapApprove(card, t, at) {
   card.rj.style.opacity = 1 - 0.6 * P(t, at + 0.15, 0.3);
 }
 // Clock face next to a "DAY n" counter and a caption; used wherever the wait goes on for days
-function makeWaitClock(p, caption, size = 110) {
+// The group is WAIT_CLOCK_W wide, so layouts can align its edges.
+const WAIT_CLOCK_W = 370;
+function makeWaitClock(p, caption) {
   const e = E(p,
-    `<div class="clk">${clockFace(size)}</div>`
+    `<div class="clk">${clockFace(120)}</div>`
     // fixed text width: a caption change must not move the clock
-    + '<div style="width:260px"><div class="day mono" style="font-size:46px;line-height:1;letter-spacing:.04em">'
+    + '<div style="width:230px"><div class="day mono" style="font-size:50px;line-height:1;letter-spacing:.04em">'
     + 'DAY 1</div>'
-    + `<div class="cap lbl" style="font-size:18px;margin-top:10px;padding-left:0">${caption}</div></div>`,
-    '', { display: 'flex', alignItems: 'center', gap: '24px' });
+    + `<div class="cap lbl" style="font-size:18px;margin-top:12px;padding-left:0">${caption}</div></div>`,
+    '', { display: 'flex', alignItems: 'center', gap: '20px', width: WAIT_CLOCK_W + 'px' });
   e.clk = e.querySelector('.clk'); e.day = e.querySelector('.day'); e.cap = e.querySelector('.cap');
   return e;
 }
@@ -182,8 +190,8 @@ function makeAppPanel(p, name, w, h) {
   return E(p,
     '<div style="position:absolute;left:24px;top:20px;display:flex;align-items:center;gap:12px">'
     + `<div class="gear">${ICON('gear', 30, C.ink, 1.8)}</div>`
-    + `<span class="mono" style="font-size:20px;letter-spacing:.1em">${name}</span></div>`
-    + '<div class="st mono" style="position:absolute;right:24px;top:26px;font-size:16px;letter-spacing:.08em;'
+    + `<span class="mono" style="font-size:22px;letter-spacing:.1em">${name}</span></div>`
+    + '<div class="st mono" style="position:absolute;right:24px;top:25px;font-size:18px;letter-spacing:.08em;'
     + 'color:var(--slate)"></div>',
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
 }
@@ -197,32 +205,49 @@ function setAppStatus(app, text, state) {
   gear.style.opacity = state === 'running' ? 1 : 0.35;
 }
 
+// Chapters 3 and 4 share one layout on the content frame: the step row on top; under it, the app column (instance
+// panel, then a strip with the clock) on the left and the Temporal panel on the right, both ending on y 922
+const WF_LAYOUT = {
+  rowY: 192,
+  app: { x: 480, y: 517, w: 800, h: 430 },
+  strip: { x: 480, y: 847, w: 800, h: 150 },
+  temporal: { x: 1380, y: 612, w: 920, h: 620 },
+};
+// Tile-styled strip under the app panel, holding the clock (and the deploy, the restart or the order)
+function makeClockStrip(p) {
+  const { w, h } = WF_LAYOUT.strip;
+  return E(p, '', 'tile', { width: w + 'px', height: h + 'px' });
+}
+
 // The Workflow as plain-English lines, shown inside an app instance panel
 const WF_LINES = ['check the request', 'ask Maria', 'wait for the decision', 'place the order', 'notify Sam'];
-const WF = { top: 54, gap: 40 }; // first line and line spacing inside the WORKFLOW card
+const WF = { top: 60, gap: 50, h: 42 }; // first line, line spacing and line height inside the WORKFLOW card
 function makeWorkflowApp(p, name) {
-  const app = makeAppPanel(p, name, 780, 360);
+  const { w, h } = WF_LAYOUT.app;
+  const app = makeAppPanel(p, name, w, h);
+  const cardW = w - 48, cardH = h - 100;
   const card = E(app,
     '<div class="lbl" style="position:absolute;left:20px;top:16px;display:flex;gap:10px;align-items:center;'
     + `padding-left:0">${ICON('code', 22, C.slate, 1.8)} Workflow</div>`
-    + '<div class="cur" style="position:absolute;left:12px;width:706px;height:38px;background:rgba(182,100,255,.2);'
-    + `border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`
-    + '<div class="vide mono" style="position:absolute;left:0;right:0;top:118px;text-align:center;font-size:26px;'
-    + 'letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
+    + `<div class="cur" style="position:absolute;left:12px;width:${cardW - 26}px;height:${WF.h + 2}px;`
+    + `background:rgba(182,100,255,.2);border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`
+    // EMPTY sits in the middle of the space under the WORKFLOW label
+    + `<div class="vide mono" style="position:absolute;left:0;right:0;top:${(44 + cardH) / 2 - 20}px;text-align:center;`
+    + 'font-size:30px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
     '', {
-      left: '24px', top: '76px', width: '732px', height: '260px', background: 'rgba(248,250,252,.03)',
+      left: '24px', top: '76px', width: cardW + 'px', height: cardH + 'px', background: 'rgba(248,250,252,.03)',
       border: '1.5px solid ' + C.line, borderRadius: 'var(--r)', transform: 'none',
     });
   card.style.opacity = 1; // E() creates hidden elements; the card always shows with its panel
   app.cur = card.querySelector('.cur'); app.vide = card.querySelector('.vide');
   app.lines = WF_LINES.map((txt, i) => {
     const line = E(card,
-      `<span style="color:#6B7385;display:inline-block;width:34px">${i + 1}</span><span class="tx">${txt}</span>`
-      + `<div class="ok" style="position:absolute;right:16px;top:5px">${ICON('check', 26, C.neon, 2.6)}</div>`
-      + `<div class="hg" style="position:absolute;right:16px;top:4px">${ICON('hourglass', 26, C.violet, 2)}</div>`,
+      `<span style="color:#6B7385;display:inline-block;width:38px">${i + 1}</span><span class="tx">${txt}</span>`
+      + `<div class="ok" style="position:absolute;right:16px;top:7px">${ICON('check', 28, C.neon, 2.6)}</div>`
+      + `<div class="hg" style="position:absolute;right:16px;top:6px">${ICON('hourglass', 28, C.violet, 2)}</div>`,
       'mono', {
-        left: '20px', top: (WF.top + i * WF.gap) + 'px', width: '692px', height: '36px', lineHeight: '36px',
-        fontSize: '22px', whiteSpace: 'nowrap', paddingLeft: '10px', transform: 'none',
+        left: '20px', top: (WF.top + i * WF.gap) + 'px', width: (cardW - 40) + 'px', height: WF.h + 'px',
+        lineHeight: WF.h + 'px', fontSize: '24px', whiteSpace: 'nowrap', paddingLeft: '10px', transform: 'none',
       });
     line.ok = line.querySelector('.ok'); line.hg = line.querySelector('.hg'); line.tx = line.querySelector('.tx');
     line.tilt = i % 2 ? 24 : -20;
@@ -251,46 +276,45 @@ function setWfCursor(app, pos, o) {
 function makeTemporalPanel(p) {
   const e = E(p,
     `<img src="${LOGO}" style="position:absolute;left:24px;top:20px;height:34px;display:block">`
-    + '<div class="out lbl" style="position:absolute;right:24px;top:26px;font-size:16px">Outside the app</div>',
-    'tile', { width: '920px', height: '530px', borderColor: C.uv });
+    + '<div class="out lbl" style="position:absolute;right:24px;top:25px;font-size:18px">Outside the app</div>',
+    'tile', { width: WF_LAYOUT.temporal.w + 'px', height: WF_LAYOUT.temporal.h + 'px', borderColor: C.uv });
   e.out = e.querySelector('.out');
   return e;
 }
-// Chapters 3 and 4 share one layout: steps on top, the app on the left, Temporal and its history on the right
-const WF_LAYOUT = { rowY: 200, app: { x: 470, y: 470 }, clock: { x: 277, y: 745 }, temporal: { x: 1380, y: 555 } };
 // Event History rows of the laptop order, in the order Temporal writes them; the Signal row is in UV
 const HISTORY = [
   'Workflow started: laptop for Sam', 'Request checked: $2,400', 'Approval requested: Maria',
   'Signal: approved by Maria', 'Order placed: laptop', 'Sam notified',
 ];
-const HROW = { top: 70, gap: 44, h: 36 }; // rows inside an Event History card: first row top, spacing, height
+const HROW = { top: 78, gap: 54, h: 40 }; // rows inside an Event History card: first row top, spacing, height
 const rowTop = i => HROW.top + i * HROW.gap;
-const HIST = { x: 1380, y: 580, w: 880, h: 440 }; // the chapter 3 and 4 Event History card
+// the chapter 3 and 4 Event History card: 20 px inside the Temporal panel, under its 70 px header
+const HIST = { x: 1380, y: 637, w: 880, h: 530 };
 // stage y of the middle of row i in that card, where things flying into the history land
 const rowY = i => HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2;
 // Tag looks: SAVED (neon on black), REPLAYED (white on UV), STILL WAITING (white on violet)
 const ROW_TAGS = {
-  'SAVED': { icon: ICON('check', 16, C.neon, 2.6), bg: '#141414', fg: C.neon },
+  'SAVED': { icon: ICON('check', 18, C.neon, 2.6), bg: '#141414', fg: C.neon },
   'REPLAYED': { icon: '', bg: C.uv, fg: '#FFFFFF' },
-  'STILL WAITING': { icon: ICON('hourglass', 16, '#FFFFFF', 2.2), bg: C.violet, fg: '#FFFFFF' },
+  'STILL WAITING': { icon: ICON('hourglass', 18, '#FFFFFF', 2.2), bg: C.violet, fg: '#FFFFFF' },
 };
 // White Event History card: a header, numbered rows (Signal rows in UV) and one status tag slot per row
 function makeHistory(p, rows, w, h) {
   const jr = E(p,
-    '<div class="mono" style="position:absolute;left:26px;top:20px;font-size:18px;letter-spacing:.14em;'
-    + `color:#141414;display:flex;gap:10px;align-items:center">${ICON('book', 22, '#141414', 1.8)}`
+    '<div class="mono" style="position:absolute;left:26px;top:22px;font-size:20px;letter-spacing:.14em;'
+    + `color:#141414;display:flex;gap:10px;align-items:center">${ICON('book', 24, '#141414', 1.8)}`
     + ' EVENT HISTORY</div>',
     '', { width: w + 'px', height: h + 'px', background: '#F8FAFC', color: '#141414', borderRadius: 'var(--r)' });
   jr.rows = rows.map((txt, i) => E(jr,
     `<span style="color:#8A93A6;display:inline-block;width:34px">${i + 1}</span>`
     + `<span style="color:${txt.startsWith('Signal') ? C.uv : '#141414'}">${txt}</span>`,
     'mono', {
-      left: '26px', top: rowTop(i) + 'px', height: HROW.h + 'px', fontSize: '21px', lineHeight: '28px',
+      left: '26px', top: rowTop(i) + 'px', height: HROW.h + 'px', fontSize: '23px', lineHeight: '32px',
       whiteSpace: 'nowrap', padding: '4px 10px', transform: 'none', width: (w - 52) + 'px',
     }));
   jr.tags = rows.map((_, i) => E(jr, '', 'mono', {
-    left: 'auto', right: '36px', top: (rowTop(i) + 4) + 'px', fontSize: '15px', letterSpacing: '.1em',
-    padding: '4px 10px', borderRadius: '4px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center',
+    left: 'auto', right: '36px', top: (rowTop(i) + 4) + 'px', fontSize: '18px', letterSpacing: '.1em',
+    padding: '4px 12px', borderRadius: '4px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center',
     gap: '6px', transformOrigin: 'right center',
   }));
   return jr;
@@ -310,13 +334,13 @@ function makeOrderHistory(p) {
     `<span class="hg" style="display:inline-block">${ICON('hourglass', 22, C.uv, 2.2)}</span>`
     + '<span>WAITING FOR A SIGNAL</span>',
     'mono', {
-      left: '70px', top: rowTop(3) + 'px', height: HROW.h + 'px', fontSize: '18px', fontWeight: 700,
+      left: '74px', top: rowTop(3) + 'px', height: HROW.h + 'px', fontSize: '20px', fontWeight: 700,
       letterSpacing: '.12em', color: C.uv, padding: '0 10px', display: 'flex', gap: '12px', alignItems: 'center',
       transform: 'none',
     });
   jr.wait.hg = jr.wait.querySelector('.hg');
-  jr.done = E(jr, `${ICON('check', 22, C.neon, 2.6)} WORKFLOW COMPLETE`, 'mono', {
-    left: '50%', top: (rowTop(HISTORY.length) + 36) + 'px', fontSize: '18px', letterSpacing: '.12em', color: C.neon,
+  jr.done = E(jr, `${ICON('check', 24, C.neon, 2.6)} WORKFLOW COMPLETE`, 'mono', {
+    left: '50%', top: (rowTop(HISTORY.length) + 30) + 'px', fontSize: '20px', letterSpacing: '.12em', color: C.neon,
     background: '#141414', padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)', display: 'flex', gap: '10px',
     alignItems: 'center',
   });

@@ -2,13 +2,20 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // same layout as chapter 3, which ends with the Workflow waiting and app instance A gone
-  const { rowY: ROW_Y, app: APP, clock: CLOCK, temporal: TEMPORAL } = WF_LAYOUT;
-  const MARIA = { x: 200, y: 450 }, CARD = { x: 580, y: 470 };
+  const { rowY: ROW_Y, app: APP, strip: STRIP, temporal: TEMPORAL } = WF_LAYOUT;
+  const CLOCK = { x: STRIP.x - STRIP.w / 2 + 30 + WAIT_CLOCK_W / 2, y: STRIP.y };
+  // before app instance B arrives, Maria and the approval card fill the app panel's place: the card against the
+  // column's right edge, Maria (avatar and label) centered in the space on its left
+  const CARD_K = 1.2, CARD_W = 480;
+  const CARD = { x: APP.x + APP.w / 2 - CARD_W / 2, y: APP.y };
+  const MARIA = { x: (APP.x - APP.w / 2 + CARD.x - CARD_W / 2) / 2, y: APP.y - 21 };
+  const TICKET_X = STRIP.x + 265; // 30 px from the strip's right edge, like the clock from its left edge
   // the Signal lands on the left part of the row it becomes, in the slot of the waiting line
   const SIGNAL_LANDING = { x: HIST.x - 180, y: rowY(3) };
   scene({
     chapter: 4, title: 'The decision arrives',
-    shift: [0, 38],
+    // laid out centered at (960, 522) on the content frame
+    shift: [0, 0],
     subs: [
       {
         text: "Three days later, Maria taps Approve. "
@@ -27,17 +34,18 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.steps = makeStepRow(root, s.svg, ROW_Y);
-      s.maria = makeAvatar(root, 'Maria, manager');
-      s.card = makeApprovalCard(root);
+      s.maria = makeAvatar(root, 'Maria, manager', 140);
+      s.card = makeApprovalCard(root, CARD_K);
       s.signal = tag(root, 'Signal: approved', 'neon');
       // solid background: the pill leaves from the white card and must stay readable over it
       s.signal.style.background = '#1B1B1F';
       s.B = makeWorkflowApp(root, 'APP INSTANCE B');
+      s.strip = makeClockStrip(root);
       s.clock = makeWaitClock(root, 'Waiting for Maria');
       s.ticket = E(root,
-        `<div style="display:flex;align-items:center;gap:12px">${ICON('laptop', 34, C.ink, 1.6)}`
-        + '<span class="mono" style="font-size:20px;letter-spacing:.08em">1 ORDER</span></div>',
-        '', { padding: '10px 16px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
+        `<div style="display:flex;align-items:center;gap:14px">${ICON('laptop', 40, C.ink, 1.6)}`
+        + '<span class="mono" style="font-size:24px;letter-spacing:.08em">1 ORDER</span></div>',
+        '', { padding: '12px 20px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
       s.temporal = makeTemporalPanel(root);
       s.jr = makeOrderHistory(root);
     },
@@ -69,12 +77,13 @@
       const elapsed = DAY3_AFTERNOON;
       setClock(s.card.clk, REQUEST_HOUR + elapsed);
       // the Signal leaves the Approve button and lands in the history
-      fly(s.signal, t, tap + 0.5, CARD.x - 100, CARD.y + 100, tap + 0.8, 0.9, SIGNAL_LANDING.x, SIGNAL_LANDING.y,
+      fly(s.signal, t, tap + 0.5, CARD.x - 120, CARD.y + 120, tap + 0.8, 0.9, SIGNAL_LANDING.x, SIGNAL_LANDING.y,
         signalIn - 0.2, SIGNAL_LANDING.x, SIGNAL_LANDING.y);
 
       setWaitClock(s.clock, elapsed);
       s.clock.cap.textContent = t >= signalIn ? 'Answer received' : 'Waiting for Maria';
       s.clock.cap.style.color = t >= signalIn ? C.neon : C.slate;
+      place(s.strip, STRIP.x, STRIP.y, 1, 1);
       place(s.clock, CLOCK.x, CLOCK.y, 1, 1);
 
       // app instance B takes over in the place of A
@@ -96,7 +105,7 @@
 
       // the order is placed once
       const tp = P(t, ordered, 0.45, backOut);
-      place(s.ticket, 660, CLOCK.y, tp, clamp(tp * 2));
+      place(s.ticket, TICKET_X, STRIP.y, tp, clamp(tp * 2));
 
       // Event History: rows 1 to 3 already saved, the Signal replaces the waiting line, then the last steps
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, 1);

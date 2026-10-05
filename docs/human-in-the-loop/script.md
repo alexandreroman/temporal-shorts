@@ -34,7 +34,7 @@ the laptop, NOTIFY Sam.
   $1,000, a manager must approve it.
   - Visuals: The 4 step tiles CHECK / APPROVAL / ORDER / NOTIFY, rule pill
     "OVER $1,000: MANAGER APPROVAL", Sam's avatar and purchase request
-    card "New laptop, $2,400".
+    card ("New laptop for Sam", "$2,400", "SENT BY SAM"), centered.
 - **0:18** The app checks the request, then asks Maria, the manager, to
   approve it. Now it waits for an answer.
   - Visuals: The request card flies into the CHECK tile, which runs and is
@@ -80,7 +80,8 @@ the laptop, NOTIFY Sam.
   it takes. A minute or a month.
   - Visuals: Cursor parked on "wait for the decision" (hourglass), the app
     status reads "WAITING, NOTHING RUNNING" and its gear stops; a pulsing
-    "WAITING FOR A SIGNAL" line in the history; clock and day counter run.
+    "WAITING FOR A SIGNAL" line in the history; a clock strip under the app
+    panel fast-forwards the day counter.
 - **1:18** Temporal keeps its Event History, outside the app. Restarts and
   deploys come and go; the wait survives.
   - Visuals: "OUTSIDE THE APP" brightens and the SAVED tags pulse; DEPLOY
