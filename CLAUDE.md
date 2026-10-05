@@ -150,6 +150,7 @@ not shared with the team.
 - Relative URLs must work from `src/` and `output/` alike: theme pages
   live two folders below the home page. Link to folders
   (`themes/<theme>/`): `make serve` is the only way to view the HTML pages.
+  The one absolute link is the player's home button, `/`.
   Resolve asset URLs built in JS against the script
   (`document.currentScript.src`, see `LOGO`), not the page: Playwright
   opens theme pages over `file://` to render frames.

@@ -31,8 +31,8 @@ function startPlayer() {
   // The overlay lives outside #stage so it keeps its size whatever the stage scale.
   const ctl = document.createElement('div');
   ctl.id = 'ctl';
-  // Page-relative: every theme page is themes/<theme>/index.html under the home page, in src/ and in output/.
-  ctl.innerHTML = '<a id="home" href="../../index.html" aria-label="All videos"></a>'
+  // Absolute: `make serve`, the only way to view the pages, serves the home page on /.
+  ctl.innerHTML = '<a id="home" href="/" aria-label="All videos"></a>'
     + '<button type="button" id="play"></button><div id="seek"><i><b></b></i></div>'
     + '<span id="time"></span><button type="button" id="loop"></button><button type="button" id="subs"></button>'
     + '<button type="button" id="fs"></button>';
