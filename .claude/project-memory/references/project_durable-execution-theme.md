@@ -9,6 +9,9 @@ type: project
 Scope: the `durable-execution` theme (Introduction to Durable Execution).
 The script and its example table live in `docs/durable-execution/script.md`.
 
+- Length: this video runs at most 4:00 (`make timeline
+  THEME=durable-execution`); the extra room serves readability, not
+  padding.
 - One running example: online order #1042, $42, four Activities, each
   calling another service (`chargeCard`, `reserveItem`, `shipPackage`,
   `emailReceipt`).
