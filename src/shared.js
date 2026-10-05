@@ -25,3 +25,62 @@ function fly(e, t, a, x0, y0, b, d, x1, y1, k = null, kx = 0, ky = 0) {
   place(e, lerp(lerp(x0, x1, f), kx, ab), lerp(lerp(y0, y1, f), ky, ab), ap * (1 - 0.65 * ab), clamp(ap * 2) * (1 - ab));
 }
 const STEPS = [['cal', 'Calendar'], ['search', 'Restaurant'], ['food', 'Booking'], ['mail', 'Invite']];
+
+// ===================== shared by chapters 6 and 7 (crash vs Durable Execution)
+// The 4 steps of the lunch booking, as tiles in a row joined by thin links
+function makeStepRow(root, svg, x0, gap, y, w, h) {
+  const xs = STEPS.map((_, i) => x0 + i * gap);
+  const links = [0, 1, 2].map(i => path(svg, `M ${xs[i] + w / 2 + 2} ${y} L ${xs[i + 1] - w / 2 - 2} ${y}`, '#3A4150', 2, false));
+  const tiles = STEPS.map(([icon, label]) => makeStep(root, icon, label, w, h));
+  return { xs, y, tiles, links };
+}
+// states: one stepState value per tile; tiles pop in from a, links draw just after
+function placeStepRow(row, t, a, states, dx = 0, dy = 0, o = 1) {
+  row.tiles.forEach((e, i) => {
+    stepState(e, states[i]);
+    const p = P(t, a + i * 0.12, 0.45, backOut);
+    place(e, row.xs[i] + dx, row.y + dy, p, clamp(p * 2) * o);
+  });
+  row.links.forEach((l, i) => draw(l, P(t, a + 0.4 + i * 0.12, 0.35), o));
+}
+function makeMemory(p, w, h) {
+  const e = E(p, `<div class="lbl" style="position:absolute;left:22px;top:16px;display:flex;gap:10px;align-items:center">${ICON('server', 22, C.slate, 1.8)} App memory</div><div class="vide mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;font-size:26px;letter-spacing:.14em;color:var(--red);opacity:0">EMPTY</div>`, 'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
+  e.vide = e.querySelector('.vide');
+  return e;
+}
+// context blocks held in the app's memory: LLM results and tool results alternate
+function makeMemBlocks(p, n, w, h) {
+  return Array.from({ length: n }, (_, i) => {
+    const b = E(p, '', '', { width: w + 'px', height: h + 'px', background: i % 2 ? '#F3FBD2' : '#E6E7FC', borderRadius: 'var(--rs)' });
+    b.tilt = i % 2 ? 40 : -35;
+    return b;
+  });
+}
+// grow: pop-in progress; fall: crash progress (the block drops, tilts and fades)
+function placeMemBlock(b, x, y, grow, fall, dx = 0, dy = 0, o = 1) {
+  place(b, x + dx, y + fall * 300 + dy, grow, clamp(grow * 2) * (1 - fall) * o, fall * b.tilt);
+}
+function makeBill(p) {
+  const e = E(p, `<div class="lbl" style="font-size:16px">LLM calls billed</div><div style="display:flex;align-items:baseline;gap:14px;margin-top:6px"><div class="n" style="font-size:84px;line-height:1">0</div><div class="w mono" style="font-size:20px;color:var(--red);letter-spacing:.08em"></div></div><div class="sq" style="display:flex;gap:6px;margin-top:10px"></div>`, 'tile', { width: '380px', height: '200px', textAlign: 'left', padding: '18px 24px' });
+  e.n = e.querySelector('.n'); e.w = e.querySelector('.w'); e.sq = e.querySelector('.sq');
+  e.sq.innerHTML = Array.from({ length: 8 }, () => `<i style="display:block;width:30px;height:16px;background:rgba(248,250,252,.08);border-radius:3px"></i>`).join('');
+  e.cells = e.sq.querySelectorAll('i');
+  return e;
+}
+function setBill(b, n, wasted) {
+  b.n.textContent = n; b.n.style.color = wasted ? C.red : C.ink;
+  b.w.textContent = wasted ? `+${wasted} wasted` : '';
+  b.cells.forEach((q, i) => q.style.background = i < n ? (i >= n - wasted ? C.red : C.uv) : 'rgba(248,250,252,.08)');
+}
+function makeTicket(p) {
+  const e = E(p, `<div style="display:flex;align-items:center;gap:12px">${ICON('ticket', 34, C.ink, 1.6)}<span class="n mono" style="font-size:20px;letter-spacing:.08em">1 BOOKING</span></div>`, '', { padding: '10px 16px', border: '1.5px solid ' + C.slate, borderRadius: 'var(--rs)' });
+  e.n = e.querySelector('.n');
+  return e;
+}
+// screen shake around a crash, as [dx, dy]
+function shakeAt(t, crashAt) {
+  const k = Math.max(0, 1 - Math.abs(t - crashAt - 0.2) / 0.4);
+  return [Math.sin(G * 90) * 12 * k, Math.cos(G * 77) * 8 * k];
+}
+// red flash intensity (0 to 1) peaking at the crash
+function flashAt(t, crashAt) { return Math.max(0, 1 - Math.abs(t - crashAt) / 0.28); }
