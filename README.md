@@ -1,91 +1,138 @@
-# Durable AI Agents with Temporal
+# Temporal Shorts
 
-Explainer video (2 min 59, English, no sound, burned-in subtitles) for a
-non-technical audience: how an AI agent works, and why it needs Durable
-Execution with Temporal.
+Temporal Shorts: short explainer videos (English, no sound, burned-in
+subtitles) about Temporal. Each video is a theme:
 
-The video is not edited in a video editor: it is an HTML page animated
-deterministically (`renderAt(t)`), captured frame by frame by headless Chromium
-(Playwright), then encoded to H.264 by ffmpeg.
+- **Introduction to Durable Execution** (`durable-execution`, coming soon):
+  the principles of Durable Execution with Temporal Workflows, outside any
+  AI context.
+- **Human-in-the-Loop** (`human-in-the-loop`, coming soon): how a Temporal
+  Workflow waits durably for a person's decision, such as an approval, for
+  minutes or days, then resumes where it left off.
+- **Durable AI Agents** (`durable-ai-agents`, the scripts' default theme;
+  2 min 59): for a non-technical audience, how an AI agent works, and why it
+  needs Durable Execution with Temporal.
+- **Temporal Agent Harness** (`agent-harness`, coming soon): the
+  experimental project of the same name.
+
+A home page lists the themes and opens their players.
+
+The videos are not edited in a video editor: each one is an HTML page
+animated deterministically (`renderAt(t)`), captured frame by frame by
+headless Chromium (Playwright), then encoded to H.264 by ffmpeg.
 
 ## Contents
 
 ```text
-src/index.html     1920x1080 page: background, subtitles, header, script list
-src/styles.css     Temporal brand styles and the live player's CSS
-src/engine.js      timeline, easing, placement, SVG icons, components
-src/shared.js      brand helpers shared by the scenes (colors, tiles, steps)
-src/scenes/        the 9 scenes, one file each (subtitle text + animations)
-src/player.js      live player: controls, fit-to-window, shortcuts
-src/assets/        official Temporal logo (white horizontal lockup)
-src/fonts/         stand-in fonts (make setup), see src/fonts/README.md
-scripts/           setup, render, preview, timeline, SRT export, HTML player
-docs/script.md     full script: subtitles, timings, animations
-output/            generated .srt, .mp4 and standalone .html
-CLAUDE.md          conventions for Claude sessions working on the project
+src/index.html         home page: one card per theme (styles in home.css)
+src/styles.css         Temporal brand styles and the live player's CSS
+src/engine.js          timeline, easing, placement, SVG icons, components
+src/shared.js          brand helpers shared by every theme (colors, tiles)
+src/player.js          live player: controls, fit-to-window, shortcuts
+src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
+                       theme page (background, subtitles, header, script
+                       list); scenes/ (one file per scene: subtitle text +
+                       animations) and theme-only helpers
+src/assets/            official Temporal logo (white horizontal lockup)
+src/fonts/             stand-in fonts (make setup), see src/fonts/README.md
+scripts/               setup, render, preview, timeline, SRT export, HTML
+docs/<theme>/script.md full script: subtitles, timings, animations
+output/                generated .srt, .mp4 and standalone .html (the HTML
+                       pages mirror src/: index.html, themes/<theme>/)
+CLAUDE.md              conventions for Claude sessions working on the project
 ```
 
-## Regenerate the video (macOS)
+## Regenerate a video (macOS)
 
 Requirements: Python 3.10+ and ffmpeg (`brew install python ffmpeg`).
 
 ```bash
 make setup                   # venv + Playwright Chromium + fonts (once)
 make timeline                # checks that everything loads, prints timings
-make preview T="3 140 160"   # contact sheet -> output/preview.png
-make render                  # video -> output/ai-agents-temporal-en.mp4
-make srt                     # subtitles -> output/ai-agents-temporal-en.srt
-make html                    # player -> output/ai-agents-temporal-en.html
-make serve                   # hot-reloading player on http://localhost:8000
+make preview THEME=durable-ai-agents T="3 140 160"  # -> output/preview.png
+make render                  # videos -> output/<theme>.mp4
+make srt                     # subtitles -> output/<theme>.srt
+make html                    # home page + players -> output/**/index.html
+make serve                   # hot-reloading home page on http://localhost:8000
+make clean                   # delete output/ (every generated file)
 ```
 
-`make render`, `make srt` and `make html` only rebuild when a source file
-(`src/`, `scripts/common.py`, the render, export or build script) is newer
-than the output; use `make -B render` to force a full render.
+`timeline`, `render` and `srt` cover every theme; `timeline` prints each one
+under a `== <theme> ==` header. Set the `THEME` variable to restrict them to
+one theme. `preview` needs a theme, as its timestamps belong to one video.
+Outputs are named after the theme:
+
+```bash
+make timeline THEME=durable-execution
+make render THEME=durable-execution   # -> output/durable-execution.mp4
+make srt THEME=agent-harness          # -> output/agent-harness.srt
+```
+
+An unknown `THEME` stops make with the list of valid themes.
+
+`make render` and `make srt` only rebuild the outputs that are out of date:
+each `output/<theme>.mp4` or `.srt` depends on its theme's own sources
+(`src/themes/<theme>/`: its page and its scripts), the shared sources
+(`src/*.js`, `src/*.css`, assets, fonts, `scripts/common.py`) and the
+render or export script. Editing a scene rebuilds its theme only; editing
+the home page (`src/index.html`, `src/home.css`) rebuilds no video.
+`make html` rebuilds when any page changes. Use `make -B render` to force a
+full render.
+
+`make clean` deletes `output/`: videos, subtitles, HTML pages, previews and
+render leftovers. It leaves the virtualenv and the fonts in place.
 
 Without make:
 
 ```bash
-.venv/bin/python scripts/render_video.py \
+.venv/bin/python scripts/render_video.py [--theme durable-execution] \
   [--start 130 --end 140] [--workers 4] [--fps 30]
 ```
 
 The full render takes a few minutes on a recent Mac with several workers.
 
-To check a single frame, open `src/index.html?t=140` to freeze the animation
-at 140 s.
+To check a single frame, open
+`src/themes/durable-ai-agents/index.html?t=140` to freeze the animation at
+140 s.
 
-## Standalone HTML player
+## Home page and standalone HTML players
 
-`make html` builds `output/ai-agents-temporal-en.html`, a single file with the
-scripts, fonts and logo inlined: send it by email or open it in any browser,
-offline, with nothing else. The animation fits the window and plays once,
-unless loop is enabled (it is off by default); the controls (play/pause, seek
-bar, time, loop, subtitles, fullscreen) hide after a few seconds of playback
-and come back when the mouse moves. Subtitles are shown by default; the CC
-button hides or shows them. Shortcuts: Space = play/pause, Left/Right =
-previous/next section (Left first restarts the current section if more than
-2 s in), L = loop on/off, C = subtitles on/off, F = fullscreen. `make open`
-plays `src/index.html` with the same player.
+`make html` builds `output/index.html`, the home page, and one player per
+theme, `output/themes/<theme>/index.html`: `output/` mirrors `src/`, so the
+links between the pages are the same in both. Each file has its scripts,
+fonts and logo inlined: send a player by email or open it in any browser,
+offline, with nothing else. The home page links to the players below it,
+so keep the `output/` tree together to browse them all. The animation fits
+the window and plays once, unless loop is enabled (it is off by default);
+the controls (home, play/pause, seek bar, time, loop, subtitles,
+fullscreen) hide after a few seconds of playback and come back when the
+mouse moves. The home button goes back to the home page
+(`../../index.html` from the player). Subtitles are shown by default; the
+CC button hides or shows them. Shortcuts: Space = play/pause, Left/Right =
+previous/next section (Left first restarts the current section if more
+than 2 s in), L = loop on/off, C = subtitles on/off, F = fullscreen.
+`make open` opens `src/index.html`, the home page, whose cards play each
+theme live with the same player.
 
-`make serve` serves only that page over HTTP on `127.0.0.1` (rebuilding it
-first if needed), on port 8000 by default; override it with
-`make serve PORT=9000`.
+`make serve` serves the home page on `/` and each player on
+`/themes/<theme>/`, over HTTP on `127.0.0.1` (rebuilding them first if
+needed), on port 8000 by default; override it with `make serve PORT=9000`.
 
 `make serve` hot-reloads: edit a file in `src/` and the server rebuilds the
-page, then every open tab reloads by itself and resumes at the same position
-(a manual reload resumes too). A failed build prints its error and keeps the
-last good page. The reload script is added to the served page only, never to
-the built file.
+pages, then every open tab reloads by itself and a player resumes at the
+same position (a manual reload resumes too; each page keeps its own
+position). A failed build prints its error and keeps the last good pages.
+The reload script is added to the served pages only, never to the built
+files.
 
 ## Editing
 
-Each scene lives in its own file in `src/scenes/`, so people editing different
-scenes never touch the same file.
+Each scene lives in its own file in `src/themes/<theme>/scenes/`, so people
+editing different scenes never touch the same file.
 
-- Subtitle text: `subs` of the relevant scene in `src/scenes/`. The duration
-  adapts to the text length and shifts everything after it; check with
-  `make timeline`, then `make preview`.
+- Subtitle text: `subs` of the relevant scene. The duration adapts to the
+  text length and shifts everything after it; check with
+  `make timeline THEME=<theme>`, then `make preview THEME=<theme>`.
 - Animation: the scene's `update(t, c, s)` function, where `t` is the scene's
   local time and `c[i]` the moment subtitle `i` starts. Every animation is
   keyed to these cues.
@@ -94,14 +141,39 @@ scenes never touch the same file.
   between the header and the subtitles. `pan(t, from, stops)` eases between
   offsets when the layout changes between phases.
 - Chapter title: `title` next to `chapter` on the first scene of the chapter.
-  The header and the progress segments are derived from it.
-- New scene: create a file in `src/scenes/` that calls `scene({...})` inside a
-  `{ ... }` block, so its helpers stay local to the file. Then add one
-  `<script src="scenes/...">` line to `src/index.html`, in playing order.
-  Scripts are classic `<script src>` tags, not ES modules: Chromium blocks
-  modules on `file://`, which the renderer uses.
+  The header and the progress segments are derived from it; a theme without
+  chapters shows neither.
+- New scene: create a file in `src/themes/<theme>/scenes/` that calls
+  `scene({...})` inside a `{ ... }` block, so its helpers stay local to the
+  file. Then add one `<script src="scenes/...">` line to
+  `src/themes/<theme>/index.html`, in playing order. Scripts are classic
+  `<script src>` tags, not ES modules: Chromium blocks modules on
+  `file://`, which the renderer uses.
+- Helpers: brand helpers for every theme go in `src/shared.js`; helpers used
+  by one theme only go in `src/themes/<theme>/` (for example
+  `src/themes/durable-ai-agents/shared.js`), loaded right after
+  `../../shared.js`.
+- Paths: a theme page loads the shared files with explicit relative paths
+  (`../../styles.css`, `../../engine.js`) and its own scripts from its
+  folder (`shared.js`, `scenes/...`). A script that builds an asset URL
+  resolves it against itself, not against the page, like `LOGO` in
+  `src/shared.js`.
 - Colors, fonts, styles: `:root` and the CSS in `src/styles.css`, constant `C`
   in `src/shared.js`.
+
+## Add a theme
+
+1. Copy a theme page, for example `src/themes/durable-execution/index.html`,
+   to `src/themes/<theme>/index.html`; set its `<title>` and its list of
+   scene scripts. The new folder is a theme as soon as its page exists:
+   `--theme` and `THEME=<theme>` accept it, and `make html` builds it.
+2. Create `src/themes/<theme>/scenes/` with the scene files.
+3. Add a card linking to `themes/<theme>/index.html` in `src/index.html`
+   (spell out `index.html`: a folder link does not open it over
+   `file://`); the cards wrap and keep the same size, with no CSS change.
+4. Write the script in `docs/<theme>/script.md`.
+
+Keep each video under 3:00 (`make timeline THEME=<theme>`).
 
 Conventions: see `CLAUDE.md`. Brand rules and decision history: see the
 project memory in `.claude/project-memory/`.

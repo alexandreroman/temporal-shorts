@@ -110,13 +110,13 @@ html,body{margin:0;background:var(--bg)}
   border-radius:var(--rs);color:var(--ink);transition:opacity .3s;
 }
 .idle #ctl{opacity:0;pointer-events:none}
-#ctl button{
+#ctl button,#ctl a{
   display:flex;align-items:center;justify-content:center;flex:none;width:36px;height:36px;padding:0;border:0;
   background:none;color:var(--ink);border-radius:var(--rs);cursor:pointer;
 }
 #ctl button[hidden]{display:none}
-#ctl button:hover{background:rgba(248,250,252,.08)}
-#ctl button:focus-visible{outline:2px solid var(--uv);outline-offset:1px}
+#ctl button:hover,#ctl a:hover{background:rgba(248,250,252,.08)}
+#ctl button:focus-visible,#ctl a:focus-visible{outline:2px solid var(--uv);outline-offset:1px}
 #ctl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #seek{flex:1;height:28px;display:flex;align-items:center;cursor:pointer;touch-action:none}
 #seek i{display:block;width:100%;height:4px;border-radius:2px;background:rgba(248,250,252,.14)}

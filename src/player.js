@@ -7,6 +7,7 @@ function startPlayer() {
   const CC_LETTERS = '<path d="M10.5 10a2.5 2.5 0 1 0 0 4M17 10a2.5 2.5 0 1 0 0 4"/>';
   const LOOP_ARROWS = '<path d="M17 3l3 3-3 3M7 21l-3-3 3-3"/>';
   const ICON_PATHS = {
+    home: '<path d="M3 11l9-7.5 9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>',
     play: '<path d="M7 4.5v15l12-7.5z"/>',
     pause: '<path d="M8 5v14M16 5v14"/>',
     replay: '<path d="M4.6 15a8 8 0 1 0 1.8-8.7L4 8.5"/><path d="M4 3.5v5h5"/>',
@@ -30,10 +31,13 @@ function startPlayer() {
   // The overlay lives outside #stage so it keeps its size whatever the stage scale.
   const ctl = document.createElement('div');
   ctl.id = 'ctl';
-  ctl.innerHTML = '<button type="button" id="play"></button><div id="seek"><i><b></b></i></div>'
+  // Page-relative: every theme page is themes/<theme>/index.html under the home page, in src/ and in output/.
+  ctl.innerHTML = '<a id="home" href="../../index.html" aria-label="All videos"></a>'
+    + '<button type="button" id="play"></button><div id="seek"><i><b></b></i></div>'
     + '<span id="time"></span><button type="button" id="loop"></button><button type="button" id="subs"></button>'
     + '<button type="button" id="fs"></button>';
   document.body.appendChild(ctl);
+  const homeLink = document.getElementById('home');
   const playButton = document.getElementById('play');
   const loopButton = document.getElementById('loop');
   const subtitlesButton = document.getElementById('subs');
@@ -67,7 +71,8 @@ function startPlayer() {
 
   // Resume at the same position after a reload: the `make serve` hot reload, or F5.
   // Browser settings can block sessionStorage; the player then simply starts from the beginning.
-  const STATE_KEY = 'player-state';
+  // One key per page: the session is shared by every theme page of the same origin.
+  const STATE_KEY = 'player-state:' + location.pathname;
   addEventListener('pagehide', () => {
     try { sessionStorage.setItem(STATE_KEY, JSON.stringify({ time, playing })); } catch {}
   });
@@ -222,10 +227,10 @@ function startPlayer() {
   subtitlesButton.addEventListener('click', toggleSubtitles);
   fullscreenButton.addEventListener('click', toggleFullscreen);
   fullscreenButton.hidden = !document.fullscreenEnabled;
-  // Keep mouse clicks from focusing the buttons, so Space stays a global play/pause key.
-  // Keyboard users can still Tab to a button and activate it natively.
-  for (const button of [playButton, loopButton, subtitlesButton, fullscreenButton]) {
-    button.addEventListener('mousedown', event => event.preventDefault());
+  // Keep mouse clicks from focusing the controls, so Space stays a global play/pause key.
+  // Keyboard users can still Tab to a control and activate it natively.
+  for (const control of [homeLink, playButton, loopButton, subtitlesButton, fullscreenButton]) {
+    control.addEventListener('mousedown', event => event.preventDefault());
   }
 
   document.addEventListener('keydown', event => {
@@ -244,6 +249,7 @@ function startPlayer() {
   document.addEventListener('mousemove', wake);
   document.addEventListener('fullscreenchange', updateFullscreenButton);
 
+  setIcon(homeLink, 'home', 'All videos');
   updateLoopButton();
   updateSubtitlesButton();
   updateFullscreenButton();
