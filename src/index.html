@@ -68,6 +68,7 @@ html,body{margin:0;background:var(--bg)}
 /* While the controls are shown, lift the subtitle above them (--sub-lift is in stage pixels, set by fit()). */
 .live #subw{transition:transform .3s}
 .live:not(.idle) #subw{transform:translateY(calc(-1 * var(--sub-lift, 0px)))}
+.live.no-subs #subw{visibility:hidden}
 #ctl{position:fixed;left:50%;bottom:20px;z-index:1;transform:translateX(-50%);width:min(880px,calc(100% - 32px));display:flex;align-items:center;gap:14px;padding:8px 14px;background:rgba(20,20,20,.88);border:1px solid var(--line);border-radius:var(--rs);color:var(--ink);transition:opacity .3s}
 .idle #ctl{opacity:0;pointer-events:none}
 #ctl button{display:flex;align-items:center;justify-content:center;flex:none;width:36px;height:36px;padding:0;border:0;background:none;color:var(--ink);border-radius:var(--rs);cursor:pointer}
@@ -103,12 +104,17 @@ function startPlayer() {
   const stage = document.getElementById('stage');
   root.classList.add('live');
 
+  const CC_LETTERS = '<path d="M10.5 10a2.5 2.5 0 1 0 0 4M17 10a2.5 2.5 0 1 0 0 4"/>';
   const ICON_PATHS = {
     play: '<path d="M7 4.5v15l12-7.5z"/>',
     pause: '<path d="M8 5v14M16 5v14"/>',
     replay: '<path d="M4.6 15a8 8 0 1 0 1.8-8.7L4 8.5"/><path d="M4 3.5v5h5"/>',
     enterFullscreen: '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>',
     exitFullscreen: '<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>',
+    subtitlesOn: '<rect x="2" y="4.5" width="20" height="15" rx="3"/>' + CC_LETTERS,
+    // Same frame, opened where the slash crosses it so the slash stays legible at 20 px.
+    subtitlesOff: '<path d="M8.5 4.5H19a3 3 0 0 1 3 3v8M15.5 19.5H5a3 3 0 0 1-3-3v-9"/><path d="M3 3l18 18"/>'
+      + CC_LETTERS,
   };
   function setIcon(button, name, label) {
     if (button.dataset.icon === name) return;
@@ -121,9 +127,10 @@ function startPlayer() {
   const ctl = document.createElement('div');
   ctl.id = 'ctl';
   ctl.innerHTML = '<button type="button" id="play"></button><div id="seek"><i><b></b></i></div>'
-    + '<span id="time"></span><button type="button" id="fs"></button>';
+    + '<span id="time"></span><button type="button" id="subs"></button><button type="button" id="fs"></button>';
   document.body.appendChild(ctl);
   const playButton = document.getElementById('play');
+  const subtitlesButton = document.getElementById('subs');
   const fullscreenButton = document.getElementById('fs');
   const seekBar = document.getElementById('seek');
   const seekFill = seekBar.querySelector('b');
@@ -149,6 +156,7 @@ function startPlayer() {
   let dragging = false;
   let lastTick = performance.now();
   let hideTimer = 0;
+  let subtitlesShown = true;
 
   function formatTime(seconds) {
     const s = Math.floor(seconds);
@@ -183,6 +191,19 @@ function startPlayer() {
     }
     show();
     wake();
+  }
+
+  // Hidden with a class rather than in renderAt(), which keeps driving the subtitle's text and opacity.
+  function toggleSubtitles() {
+    subtitlesShown = !subtitlesShown;
+    root.classList.toggle('no-subs', !subtitlesShown);
+    updateSubtitlesButton();
+  }
+
+  function updateSubtitlesButton() {
+    // A toggle button keeps one label; aria-pressed tells assistive technologies whether it is on.
+    setIcon(subtitlesButton, subtitlesShown ? 'subtitlesOn' : 'subtitlesOff', 'Subtitles');
+    subtitlesButton.setAttribute('aria-pressed', String(subtitlesShown));
   }
 
   function toggleFullscreen() {
@@ -245,11 +266,12 @@ function startPlayer() {
   seekBar.addEventListener('pointercancel', endDrag);
 
   playButton.addEventListener('click', togglePlay);
+  subtitlesButton.addEventListener('click', toggleSubtitles);
   fullscreenButton.addEventListener('click', toggleFullscreen);
   fullscreenButton.hidden = !document.fullscreenEnabled;
   // Keep mouse clicks from focusing the buttons, so Space stays a global play/pause key.
   // Keyboard users can still Tab to a button and activate it natively.
-  for (const button of [playButton, fullscreenButton]) {
+  for (const button of [playButton, subtitlesButton, fullscreenButton]) {
     button.addEventListener('mousedown', event => event.preventDefault());
   }
 
@@ -259,6 +281,7 @@ function startPlayer() {
     if (event.key === ' ') togglePlay();
     else if (event.key === 'ArrowLeft') seek(time - 5);
     else if (event.key === 'ArrowRight') seek(time + 5);
+    else if (event.key === 'c' || event.key === 'C') toggleSubtitles();
     else if (event.key === 'f' || event.key === 'F') toggleFullscreen();
     else return;
     event.preventDefault();
@@ -267,6 +290,7 @@ function startPlayer() {
   document.addEventListener('mousemove', wake);
   document.addEventListener('fullscreenchange', updateFullscreenButton);
 
+  updateSubtitlesButton();
   updateFullscreenButton();
   show();
   wake();
