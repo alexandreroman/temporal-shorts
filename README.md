@@ -59,7 +59,8 @@ offline, with nothing else. The animation fits the window and plays once, unless
 loop is enabled (it is off by default); the controls (play/pause, seek bar,
 time, loop, subtitles, fullscreen) hide after a few seconds of playback and come
 back when the mouse moves. Subtitles are shown by default; the CC button hides
-or shows them. Shortcuts: Space = play/pause, Left/Right = -5 s/+5 s, L = loop
+or shows them. Shortcuts: Space = play/pause, Left/Right = previous/next
+section (Left first restarts the current section if more than 2 s in), L = loop
 on/off, C = subtitles on/off, F = fullscreen. `make open` plays `src/index.html`
 with the same player.
 
