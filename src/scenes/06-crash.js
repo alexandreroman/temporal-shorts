@@ -25,7 +25,7 @@
       s.steps = makeStepRow(root, s.svg, 420, 360, 290, 280, 140);
       s.ticket = makeTicket(root);
       s.mem = makeMemory(root, 860, 200);
-      s.mblocks = makeMemBlocks(root, 5, 130, 60);
+      s.mblocks = makeMemBlocks(root, 5, 76, 56);
       s.bill = makeBill(root);
       s.bolt = E(root, ICON('bolt', 150, C.red, 1.6));
       // oversized so it still covers the whole stage once the scene is shifted
@@ -63,8 +63,10 @@
       s.mem.style.borderColor = t > crashAt && t < restart ? C.red : C.line;
       s.mem.vide.style.opacity = P(t, c[1] + 1.2, 0.4) * (1 - P(t, restart, 0.3));
       const add1 = [0.8, 1.3, 1.9, 2.4, 3.0].map(x => c[0] + x), add2 = [0.6, 0.9, 1.4, 1.7, 2.3].map(x => c[2] + x);
+      // left-aligned like chapter 7's slots: 20 px panel margin, then 76 px blocks every 88 px (12 px gaps)
+      const slot0 = 720 - 860 / 2 + 20 + 76 / 2;
       s.mblocks.forEach((b, i) => {
-        const x = 720 + (i - 2) * 165, y = 650;
+        const x = slot0 + i * 88, y = 650;
         if (t < restart) {
           placeMemBlock(b, x, y, P(t, add1[i], 0.35, backOut), P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn), sx, sy);
         } else {

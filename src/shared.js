@@ -71,13 +71,17 @@ function makeMemory(p, w, h) {
   e.vide = e.querySelector('.vide');
   return e;
 }
-// context blocks held in the app's memory: LLM results and tool results alternate
+// context blocks held in the app's memory: LLM results and tool results alternate,
+// two per step, each centring the icon of its step (same colours as the Event History rows)
 function makeMemBlocks(p, n, w, h) {
   return Array.from({ length: n }, (_, i) => {
-    const b = E(p, '', '', {
-      width: w + 'px', height: h + 'px', background: i % 2 ? '#F3FBD2' : '#E6E7FC', borderRadius: 'var(--rs)',
+    const isTool = i % 2 === 1;
+    const icon = ICON(STEPS[Math.floor(i / 2)][0], Math.round(h / 2), isTool ? '#141414' : C.uv, 1.8);
+    const b = E(p, icon, '', {
+      width: w + 'px', height: h + 'px', background: isTool ? '#F3FBD2' : '#E6E7FC', borderRadius: 'var(--rs)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
     });
-    b.tilt = i % 2 ? 40 : -35;
+    b.tilt = isTool ? 40 : -35;
     return b;
   });
 }
