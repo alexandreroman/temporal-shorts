@@ -3,9 +3,10 @@
 Temporal Shorts: short explainer videos (English, no sound, burned-in
 subtitles) about Temporal. Each video is a theme:
 
-- **Introduction to Durable Execution** (`durable-execution`, coming soon):
-  the principles of Durable Execution with Temporal Workflows, outside any
-  AI context.
+- **Introduction to Durable Execution** (`durable-execution`): for
+  everyone, the principles of Durable Execution with Temporal Workflows,
+  outside any AI context: Workflows, Activities, retries, the Event
+  History and replay.
 - **Human-in-the-Loop** (`human-in-the-loop`): how a Temporal
   Workflow waits durably for a person's decision, such as an approval, for
   minutes or days, then resumes where it left off.
