@@ -1,10 +1,10 @@
-# Script and timeline: Temporal Agent Harness (English, TBD)
+# Script and timeline: Temporal Agent Harness (English)
 
 Subtitles are the only narration (no audio). Timings are computed in
 `src/engine.js` from text length (`autoDur`: chars / 16 + 0.6 s, clamped
 2.4 to 8 s), plus per-subtitle `after` pauses. Run
 `make timeline THEME=agent-harness` for the live values; the start times
-below are a snapshot.
+below are a snapshot from 2026-10-05.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -40,7 +40,8 @@ The video teaches, in order:
 7. callback tools and typed React and Svelte SDKs, for real products.
 
 The running example is a travel agent, as in the harness's own examples:
-`search_flights`, `search_hotels`, `book_flight`, a trip to Lisbon.
+`search_flights`, `search_hotels`, `book_flight`, `book_hotel`, a trip to
+Lisbon.
 
 ## Intro
 
@@ -49,120 +50,131 @@ The running example is a travel agent, as in the harness's own examples:
   - Visuals: Temporal logo, kicker "AN EXPERIMENTAL PROJECT", title
     "Temporal Agent Harness", violet line "DURABLE AI AGENTS, WITH THE SDKS
     YOU ALREADY USE"; on the right an LLM orb inside a slowly turning dashed
-    UV ring (the harness) carrying four capability icons.
+    UV ring (the harness) carrying four capability icons (retry, person,
+    eye, layers).
 
 ## 01 An agent harness
 
-- **0:08** An AI agent is a model, plus tools, plus a loop. You write that
+- **0:09** An AI agent is a model, plus tools, plus a loop. You write that
   loop with the AI SDK you already know.
-  - Visuals: "YOUR AGENT": LLM orb and two tool tiles (Flights, Hotels)
-    joined by two curved arrows that form a loop, a neon token travelling
-    round it; tags OPENAI AGENTS SDK / GOOGLE GEN AI SDK / PYDANTIC AI.
-- **0:15** The harness doesn't replace your loop, it wraps it: every agent
+  - Visuals: "YOUR AGENTIC LOOP": MODEL orb, Flights and Hotels tiles joined
+    by three curved arrows, a neon token travelling round the loop; tags
+    OPENAI AGENTS SDK / GOOGLE GEN AI SDK / PYDANTIC AI.
+- **0:17** The harness doesn't replace your loop, it wraps it: every agent
   runs as a durable Temporal Workflow.
-  - Visuals: the SDK tags fade; a UV frame draws around the loop, labelled
-    "TEMPORAL AGENT HARNESS", with a "TEMPORAL WORKFLOW" pill; the loop keeps
-    turning inside, labelled "YOUR LOOP".
-- **0:22** It adds what is painful to build yourself: crash recovery,
+  - Visuals: the SDK tags fade; a UV frame draws around the loop, headed by
+    the Temporal logo and "AGENT HARNESS", with a "TEMPORAL WORKFLOW" pill
+    on its bottom edge; the label becomes "YOUR LOOP", the token keeps
+    turning.
+- **0:25** It adds what is painful to build yourself: crash recovery,
   approvals, observability, composition.
-  - Visuals: four capability tiles plug into the frame in subtitle order:
-    Crash recovery / Human approvals / Observability / Composition.
+  - Visuals: four capability tiles plug into the frame in subtitle order,
+    two on each side: Crash recovery / Human approvals / Observability /
+    Composition.
 
 ## 02 Survives crashes
 
-- **0:30** Every model call and tool call is saved in the agent's Temporal
+- **0:33** Every model call and tool call is saved in the agent's Temporal
   history as soon as it completes.
-  - Visuals: a turn of five steps (Model: plan the trip, search_flights,
-    Model: pick a flight, book_flight, Model: write the reply) run by APP
-    INSTANCE A; each finished step sends a RESULT card to the EVENT HISTORY
-    held by Temporal (outside the app), where its row appears with SAVED;
-    MODEL CALLS BILLED counts the model steps; FLIGHTS BOOKED shows 1.
-- **0:37** If the app crashes mid-turn, another copy picks up the agent
+  - Visuals: five step tiles (PLAN, SEARCH FLIGHTS, PICK, BOOK FLIGHT,
+    REPLY); APP INSTANCE A shows the step at work; each finished step sends
+    a RESULT card to the EVENT HISTORY of the TEMPORAL panel (outside the
+    app), where its row appears with SAVED (Model: plan the trip /
+    search_flights: 3 flights found / Model: pick the $480 flight /
+    book_flight: booked, $480); MODEL CALLS BILLED 2, FLIGHTS BOOKED 1.
+- **0:41** If the app crashes mid-turn, another copy picks up the agent
   exactly where it left off.
-  - Visuals: step 5 starts, flash + shake, APP INSTANCE A turns red
-    (CRASHED); APP INSTANCE B takes over; rows 1 to 4 are handed back from
-    the history one by one (REUSED) and the steps re-check without running;
-    step 5 then runs for real.
-- **0:44** Saved results are reused, not redone: no token is paid twice, and
+  - Visuals: step 5 starts, flash + shake, A turns red (CRASHED), "APP
+    CRASHED HERE" under row 4; APP INSTANCE B takes over, rows 1 to 4 are
+    handed back one by one (REUSED, "STEP n: FROM THE HISTORY"), the steps
+    re-check without running, the counters show NOT RE-BILLED / NOT RE-RUN;
+    step 5 then runs for real and is SAVED (Model: write the reply).
+- **0:48** Saved results are reused, not redone: no token is paid twice, and
   no tool runs twice.
-  - Visuals: model rows tagged "REUSED, NOT RE-BILLED", tool rows "REUSED,
-    NOT RE-RUN"; MODEL CALLS BILLED ends at 3 (not 5), FLIGHTS BOOKED stays
-    at 1; TURN COMPLETE.
+  - Visuals: tags "REUSED, NOT RE-BILLED" (model rows) and "REUSED, NOT
+    RE-RUN" (tool rows); counters glow: MODEL CALLS BILLED 3 "NOT 5",
+    FLIGHTS BOOKED 1 "ONLY ONCE"; TURN COMPLETE.
 
 ## 03 Human approvals
 
-- **0:51** Some tool calls need a person's OK first, like a payment. The
+- **0:55** Some tool calls need a person's OK first, like a payment. The
   approval policy decides which ones.
-  - Visuals: the agent sends tool calls to an APPROVAL POLICY gate:
-    `search_flights` and `search_hotels` pass (ALLOWED); `book_flight $480`
+  - Visuals: the AGENT sends tool calls along a lane through the APPROVAL
+    POLICY gate and its RULES (`search_*` ALLOW, `book_*` ASK) to TOOLS:
+    `search_flights` and `search_hotels` are ALLOWED; `book_flight $480`
     stops at the gate: NEEDS APPROVAL.
-- **0:58** The call pauses inside the Workflow, for minutes or days, then
+- **1:03** The call pauses inside the Workflow, for minutes or days, then
   resumes as soon as someone approves.
-  - Visuals: the parked call shows a pause icon and a WAITING clock that
-    races from minutes to "2 DAYS" (DURABLE WAIT); a person tile (YOU) with
-    APPROVE / DENY; APPROVE is pressed, the call goes through and runs:
-    BOOKED.
-- **1:05** Auto mode lets code or a model approve routine calls. Anything
+  - Visuals: pause badge, DURABLE WAIT clock racing from "5 MIN" to "2
+    DAYS", a request line to YOU; APPROVE is pressed, the call becomes
+    APPROVED, passes the gate and runs: BOOKED.
+- **1:10** Auto mode lets code or a model approve routine calls. Anything
   unclear still goes to a human.
-  - Visuals: an AUTO MODE judge joins the gate with its rule "approve: hotel
-    under $500"; `book_hotel $210` is AUTO-APPROVED; `book_hotel $2,400` is
-    ESCALATED and goes to the person.
+  - Visuals: an AUTO MODE judge docks on the gate with its rule "approve:
+    hotel under $500"; `book_hotel $210` is AUTO-APPROVED; `book_hotel
+    $2,400` is ESCALATED and goes to YOU.
 
 ## 04 One event stream
 
-- **1:12** Every agent publishes the same event stream: turns, model calls,
+- **1:19** Every agent publishes the same event stream: turns, model calls,
   tool calls, approvals and token usage.
-  - Visuals: three agents tagged with their SDK (OpenAI Agents SDK, Google
-    Gen AI SDK, Pydantic AI) emit typed event chips (TURN, MODEL, TOOL,
-    APPROVAL, TOKENS) that merge into one stream: "SAME EVENTS FOR EVERY
-    AGENT".
-- **1:19** Watch an agent live, or replay exactly what it did, what it cost
+  - Visuals: three agents (OpenAI Agents SDK, Google Gen AI SDK, Pydantic
+    AI) emit typed event chips (TURN, MODEL, TOOL, APPROVAL, TOKENS) that
+    merge into one AGENT EVENT STREAM lane: "SAME EVENTS FOR EVERY AGENT".
+- **1:26** Watch an agent live, or replay exactly what it did, what it cost
   and where a human stepped in.
-  - Visuals: the stream feeds a console: event rows appear under a LIVE
-    badge, then a replay bar rewinds and its playhead sweeps the rows again;
-    the approval row ("approved by a human") and the token total stand out.
+  - Visuals: the view pans to a CONSOLE fed by the lane; seven event rows
+    appear under a LIVE badge; it switches to REPLAY, the playhead rewinds
+    and sweeps the rows again; "approved by a human" gets a HUMAN tag and
+    "turn ended · 2,140 tokens" a COST tag.
 
 ## 05 Typed, composable agents
 
-- **1:26** An agent is more than text in, text out: it exposes typed
+- **1:35** An agent is more than text in, text out: it exposes typed
   operations, with their inputs and outputs.
-  - Visuals: "TEXT IN, TEXT OUT" crossed out; a TravelAgent card lists its
-    operations with typed inputs and outputs: `plan_trip(destination,
-    nights) → Itinerary`, `set_budget(max_usd) → Ack`.
-- **1:33** It describes itself, so other agents can drive it as a tool:
+  - Visuals: "TEXT IN, TEXT OUT" struck out in red; the TravelAgent card
+    lists its OPERATIONS, INPUT then OUTPUT: `plan_trip(destination: str,
+    nights: int) → Itinerary`, `set_budget(max_usd: float) → Ack`.
+- **1:42** It describes itself, so other agents can drive it as a tool:
   multi-agent systems with real contracts.
-  - Visuals: a Trip planner agent above a Flights agent and a Hotels agent;
-    typed requests travel down the links (`destination: "Lisbon", nights:
-    3`), typed results come back up; label TYPED CONTRACT.
+  - Visuals: SELF-DESCRIBING tag; a Trip planner (PARENT AGENT) above
+    TravelAgent and CalendarAgent, linked by TYPED CONTRACT lines; a request
+    (`plan_trip`, `destination: "Lisbon", nights: 3`) travels down into
+    TravelAgent, a result (`Itinerary`, `total_usd: 1240`) comes back up,
+    the parent checks.
 
 ## 06 Code Mode
 
-- **1:40** With Code Mode, the model writes a short Python script instead of
+- **1:51** With Code Mode, the model writes a short Python script instead of
   calling tools one at a time.
-  - Visuals: on the left, a model and its tools ping-pong one call at a time
-    (6 ROUND TRIPS, then dimmed); on the right a script is typed: parallel
-    `search_flights` and `search_hotels`, `min` by price, `book_flight`.
-- **1:47** Loops, conditions and parallel calls in one turn, and every call
+  - Visuals: ONE CALL AT A TIME: a model and three tool tiles ping-pong six
+    times (ROUND TRIPS 6), then dim; CODE MODE: a SCRIPT WRITTEN BY THE
+    MODEL is typed: `gather(search_flights, search_hotels)`, `min` by price,
+    `book_flight(best)`.
+- **1:58** Loops, conditions and parallel calls in one turn, and every call
   stays durable, approved and visible.
-  - Visuals: the script runs: the two searches fan out at once, the cheapest
-    flight is picked, `book_flight` passes the approval gate; each call gets
-    SAVED; tags DURABLE / APPROVED / VISIBLE, "1 TURN".
+  - Visuals: the script runs: both searches fan out at once and check,
+    "best: $480", `book_flight` passes an APPROVAL gate (APPROVED) and runs;
+    each call SAVED; tags DURABLE / APPROVED / VISIBLE; "6 vs 1 TURN".
 
 ## 07 Built for real products
 
-- **1:54** Callback tools run on the user's own device, and typed React and
+- **2:07** Callback tools run on the user's own device, and typed React and
   Svelte SDKs power your product UI.
-  - Visuals: the agent (on a Temporal worker) asks the user's laptop to read
-    a local file and gets the result back; a browser window with a trip
-    planner UI, tags REACT / SVELTE, linked to the agent by a TYPED SESSION.
-- **2:01** Durable, observable, composable agents with human approvals,
+  - Visuals: CALLBACK TOOLS: THE APP (agent on a Temporal worker) sends
+    `read_file "trip.md"` to the USER'S LAPTOP, which runs it and sends the
+    result back; YOUR UI: a trip planner in a browser window ("Lisbon, 3
+    nights", flight, hotel, tour, TOTAL $895, Book), linked by a TYPED
+    SESSION; tags REACT / SVELTE.
+- **2:15** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
-  - Visuals: six recap tiles: Survives crashes / Human approvals / Event
-    stream / Typed subagents / Code Mode / Your AI SDK.
+  - Visuals: six recap tiles in subtitle order: Survives crashes / Event
+    stream / Typed subagents / Human approvals / Code Mode / Your AI SDK.
 
 ## Outro
 
-- **2:08** Temporal Agent Harness is experimental and open source. Try the
+- **2:23** Temporal Agent Harness is experimental and open source. Try the
   examples and build your own agents.
-  - Visuals: LLM orb, title "Temporal Agent Harness", violet line "DURABLE AI
-    AGENTS, WITH THE SDKS YOU ALREADY USE", EXPERIMENTAL tag, Temporal logo.
+  - Visuals: LLM orb, takeaway title "Build durable AI agents", violet line
+    "WITH TEMPORAL AGENT HARNESS AND THE SDKS YOU ALREADY USE", EXPERIMENTAL
+    tag, Temporal logo.

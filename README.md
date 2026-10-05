@@ -13,8 +13,10 @@ subtitles) about Temporal. Each video is a theme:
 - **Durable AI Agents** (`durable-ai-agents`): for a non-technical
   audience, how an AI agent works, and why it needs Durable Execution with
   Temporal.
-- **Temporal Agent Harness** (`agent-harness`, coming soon): the
-  experimental project of the same name.
+- **Temporal Agent Harness** (`agent-harness`): for developers, the
+  experimental project of the same name: AI agents that run as durable
+  Temporal Workflows while you keep your AI SDK, with human approvals, one
+  event stream, typed subagents and Code Mode.
 
 A home page lists the themes and opens their players.
 
