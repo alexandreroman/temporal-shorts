@@ -43,7 +43,7 @@
       place(s.app, 250, 430, ap, clamp(ap * 2)); gearSpin(s.app, 0);
       place(s.llm.root, 1650, 430, P(t, c[0] + 0.3, 0.6, backOut), P(t, c[0] + 0.3, 0.4));
       const think = win(t, c[0] + 1.8, c[0] + 2.5, 0.2) + win(t, c[1] + 1.6, c[1] + 2.4, 0.2)
-        + win(t, c[2] + 3.6, c[2] + 4.8, 0.2);
+        + win(t, c[2] + 4.3, c[2] + 5.3, 0.2);
       llmState(s.llm, { think, q: win(t, c[1] + 2.6, c[2], 0.3), look: -1 });
       const chatOut = P(t, c[2], 0.5);
       slideIn(s.u1, t, c[0] + 1.0, 520, 820, 240, chatOut);
@@ -58,8 +58,8 @@
       slideIn(s.r2, t, c[1] + 2.3, 1420, 1150, 610, chatOut);
       const sp = P(t, c[2] + 0.4, 0.5, backOut);
       place(s.sl, 960, 210, sp, clamp(sp * 2));
-      fly(s.hist, t, c[2] + 1.6, 600, 450, c[2] + 2.4, 1.0, 1180, 450, c[2] + 3.4, 1650, 430);
-      const rp = P(t, c[2] + 5.0, 0.5, backOut), rf = P(t, c[2] + 5.3, 0.9);
+      fly(s.hist, t, c[2] + 0.8, 600, 450, c[2] + 1.2, 0.8, 1180, 450, c[2] + 4.2, 1650, 430);
+      const rp = P(t, c[2] + 5.3, 0.5, backOut), rf = P(t, c[2] + 5.6, 0.9);
       place(s.r3, lerp(1420, 900, rf), 620, rp, clamp(rp * 2));
     }
   });
