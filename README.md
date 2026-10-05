@@ -50,12 +50,14 @@ To watch the animation live: `make open`, or open `src/index.html?t=140` to free
 
 ## Standalone HTML player
 
-`make html` builds `output/ai-agents-temporal-en.html`, a single file with the scripts, fonts and
-logo inlined: send it by email or open it in any browser, offline, with nothing else. The
-animation fits the window and plays once; the controls (play/pause, seek bar, time, subtitles,
-fullscreen) hide after a few seconds of playback and come back when the mouse moves. Subtitles
-are shown by default; the CC button hides or shows them. Shortcuts: Space = play/pause,
-Left/Right = -5 s/+5 s, C = subtitles on/off, F = fullscreen. `make open` plays `src/index.html`
+`make html` builds `output/ai-agents-temporal-en.html`, a single file with the
+scripts, fonts and logo inlined: send it by email or open it in any browser,
+offline, with nothing else. The animation fits the window and plays once, unless
+loop is enabled (it is off by default); the controls (play/pause, seek bar,
+time, loop, subtitles, fullscreen) hide after a few seconds of playback and come
+back when the mouse moves. Subtitles are shown by default; the CC button hides
+or shows them. Shortcuts: Space = play/pause, Left/Right = -5 s/+5 s, L = loop
+on/off, C = subtitles on/off, F = fullscreen. `make open` plays `src/index.html`
 with the same player.
 
 `make serve` serves only that page over HTTP on `127.0.0.1` (rebuilding it first if needed). The

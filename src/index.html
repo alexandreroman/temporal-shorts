@@ -105,6 +105,7 @@ function startPlayer() {
   root.classList.add('live');
 
   const CC_LETTERS = '<path d="M10.5 10a2.5 2.5 0 1 0 0 4M17 10a2.5 2.5 0 1 0 0 4"/>';
+  const LOOP_ARROWS = '<path d="M17 3l3 3-3 3M7 21l-3-3 3-3"/>';
   const ICON_PATHS = {
     play: '<path d="M7 4.5v15l12-7.5z"/>',
     pause: '<path d="M8 5v14M16 5v14"/>',
@@ -115,6 +116,9 @@ function startPlayer() {
     // Same frame, opened where the slash crosses it so the slash stays legible at 20 px.
     subtitlesOff: '<path d="M8.5 4.5H19a3 3 0 0 1 3 3v8M15.5 19.5H5a3 3 0 0 1-3-3v-9"/><path d="M3 3l18 18"/>'
       + CC_LETTERS,
+    loopOn: '<path d="M4 12V9a3 3 0 0 1 3-3h13M20 12v3a3 3 0 0 1-3 3H4"/>' + LOOP_ARROWS,
+    // Same cycle without the two corners the slash crosses, so the slash stays legible at 20 px.
+    loopOff: '<path d="M4 12V9M10 6h10M20 12v3M14 18H4"/><path d="M3 3l18 18"/>' + LOOP_ARROWS,
   };
   function setIcon(button, name, label) {
     if (button.dataset.icon === name) return;
@@ -127,9 +131,11 @@ function startPlayer() {
   const ctl = document.createElement('div');
   ctl.id = 'ctl';
   ctl.innerHTML = '<button type="button" id="play"></button><div id="seek"><i><b></b></i></div>'
-    + '<span id="time"></span><button type="button" id="subs"></button><button type="button" id="fs"></button>';
+    + '<span id="time"></span><button type="button" id="loop"></button><button type="button" id="subs"></button>'
+    + '<button type="button" id="fs"></button>';
   document.body.appendChild(ctl);
   const playButton = document.getElementById('play');
+  const loopButton = document.getElementById('loop');
   const subtitlesButton = document.getElementById('subs');
   const fullscreenButton = document.getElementById('fs');
   const seekBar = document.getElementById('seek');
@@ -157,6 +163,7 @@ function startPlayer() {
   let lastTick = performance.now();
   let hideTimer = 0;
   let subtitlesShown = true;
+  let looping = false;
 
   // Resume at the same position after a reload: the `make serve` hot reload, or F5.
   // Browser settings can block sessionStorage; the player then simply starts from the beginning.
@@ -209,6 +216,16 @@ function startPlayer() {
     wake();
   }
 
+  function toggleLoop() {
+    looping = !looping;
+    updateLoopButton();
+  }
+
+  function updateLoopButton() {
+    setIcon(loopButton, looping ? 'loopOn' : 'loopOff', 'Loop');
+    loopButton.setAttribute('aria-pressed', String(looping));
+  }
+
   // Hidden with a class rather than in renderAt(), which keeps driving the subtitle's text and opacity.
   function toggleSubtitles() {
     subtitlesShown = !subtitlesShown;
@@ -250,8 +267,12 @@ function startPlayer() {
     if (playing && !dragging) {
       time += dt;
       if (time >= TOTAL) {
-        time = TOTAL; // stop on the last frame instead of looping
-        playing = false;
+        if (looping) {
+          time -= TOTAL; // wrap to the start and keep playing
+        } else {
+          time = TOTAL; // stop on the last frame
+          playing = false;
+        }
       }
       show();
     }
@@ -282,12 +303,13 @@ function startPlayer() {
   seekBar.addEventListener('pointercancel', endDrag);
 
   playButton.addEventListener('click', togglePlay);
+  loopButton.addEventListener('click', toggleLoop);
   subtitlesButton.addEventListener('click', toggleSubtitles);
   fullscreenButton.addEventListener('click', toggleFullscreen);
   fullscreenButton.hidden = !document.fullscreenEnabled;
   // Keep mouse clicks from focusing the buttons, so Space stays a global play/pause key.
   // Keyboard users can still Tab to a button and activate it natively.
-  for (const button of [playButton, subtitlesButton, fullscreenButton]) {
+  for (const button of [playButton, loopButton, subtitlesButton, fullscreenButton]) {
     button.addEventListener('mousedown', event => event.preventDefault());
   }
 
@@ -297,6 +319,7 @@ function startPlayer() {
     if (event.key === ' ') togglePlay();
     else if (event.key === 'ArrowLeft') seek(time - 5);
     else if (event.key === 'ArrowRight') seek(time + 5);
+    else if (event.key === 'l' || event.key === 'L') toggleLoop();
     else if (event.key === 'c' || event.key === 'C') toggleSubtitles();
     else if (event.key === 'f' || event.key === 'F') toggleFullscreen();
     else return;
@@ -306,6 +329,7 @@ function startPlayer() {
   document.addEventListener('mousemove', wake);
   document.addEventListener('fullscreenchange', updateFullscreenButton);
 
+  updateLoopButton();
   updateSubtitlesButton();
   updateFullscreenButton();
   show();
