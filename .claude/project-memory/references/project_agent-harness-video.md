@@ -7,9 +7,8 @@ type: project
 # Agent Harness video: audience and story
 
 Scope: the `agent-harness` theme. Its seven topics, their order and every
-subtitle live in `docs/agent-harness/script.md`. This theme runs up to 5:00
-(an exception to the 3:00 limit of the other themes), so that every scene
-takes its time.
+subtitle live in `docs/agent-harness/script.md`. The user's target
+for this theme is at most 5:00, so that every scene takes its time.
 
 - Audience: **developers and technical leads** who know what an AI agent is
   (a model, tools and a loop) but not necessarily Temporal.
