@@ -21,6 +21,9 @@ takes its time.
   subtitle, each animation state readable for at least ~1.5 s, each
   subtitle's result held at least 2 s before the next one, and about 2 s on
   the final composition before the fade.
+- Chapter 5 shows subagents as the harness runs them: the parent starts a
+  child workflow instance (`start_travel`), sends it typed messages, then
+  closes it (`stop_travel`); a child never outlives its parent.
 - Running example: a travel agent planning a 3-night trip to Lisbon, with
   the harness's real example tool names in code font (`search_flights`,
   `search_hotels`, `book_flight`, `book_hotel`) and one set of figures

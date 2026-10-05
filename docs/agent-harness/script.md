@@ -184,28 +184,36 @@ Lisbon.
   - Visuals: SELF-DESCRIBING tag; the struck pill gives way to a Trip
     planner agent with its TOOLS (`search_web`); a dashed arrow "READS ITS
     INTERFACE" arches from TravelAgent to the Trip planner, and `plan_trip`
-    joins its tools, tagged "FROM TravelAgent"; TravelAgent is tagged CHILD
-    WORKFLOW of the Trip planner (PARENT AGENT): subagents run as Temporal
-    child workflows.
-- **3:20** A typed request goes in, TravelAgent does the work, and a typed
+    joins its tools, tagged "FROM TravelAgent"; the Trip planner is the
+    PARENT AGENT.
+- **3:20** To use it, the parent starts TravelAgent as a child workflow: a
+  new instance with its own history.
+  - Visuals: a `start_travel` call travels from the parent to TravelAgent,
+    which lights up and gets a CHILD WORKFLOW tag; under it, "INSTANCE
+    travel-1" with a STARTED tag.
+- **3:27** A typed request goes in, TravelAgent does the work, and a typed
   result comes back.
   - Visuals: a TYPED REQUEST (`plan_trip`, `destination: "Lisbon"`,
     `nights: 3`) travels to TravelAgent, whose row works, and a TYPED
     RESULT (`Itinerary`, `total_usd: 895`) comes back: the tool row checks.
+- **3:36** When its work is done, the parent closes the instance: a subagent
+  never outlives its parent.
+  - Visuals: a `stop_travel` call travels to TravelAgent; its tag turns
+    CLOSED and the card dims, while the parent keeps its checked tool row.
 
 ## 06 Code Mode
 
-- **3:30** With Code Mode, the model writes a short Python script instead of
+- **3:46** With Code Mode, the model writes a short Python script instead of
   calling tools one at a time.
   - Visuals: ONE CALL AT A TIME: a model and three tool tiles ping-pong six
     times (6 ROUND TRIPS), then dim; CODE MODE: a SCRIPT WRITTEN BY THE
     MODEL is typed: `asyncio.gather(search_flights, search_hotels)`, `min`
     by price, `book_flight(best)`.
-- **3:40** Loops, conditions and parallel calls all run inside the script,
+- **3:55** Loops, conditions and parallel calls all run inside the script,
   in one turn.
   - Visuals: the script runs: both searches run at once and are SAVED;
     "best: $480" on the `min` line.
-- **3:46** Every call stays durable, approved and visible, and the whole
+- **4:02** Every call stays durable, approved and visible, and the whole
   script takes one round trip, not six.
   - Visuals: `book_flight` passes an APPROVAL gate (APPROVED), runs and is
     SAVED; under the dimmed side, "6 ROUND TRIPS vs 1 ROUND TRIP"; EVERY
@@ -213,17 +221,17 @@ Lisbon.
 
 ## 07 Built for real products
 
-- **3:58** Callback tools run on the user's own device: the agent asks, the
+- **4:14** Callback tools run on the user's own device: the agent asks, the
   laptop runs the tool and replies.
   - Visuals: CALLBACK TOOLS: THE APP (agent on a Temporal worker) sends
     `read_file "trip.md"` to the USER'S LAPTOP, which runs it and sends the
     result back.
-- **4:06** Typed React and Svelte SDKs turn your agent into a live, typed
+- **4:22** Typed React and Svelte SDKs turn your agent into a live, typed
   session inside your product UI.
   - Visuals: the view pans; YOUR UI: a trip planner in a browser window
     ("Lisbon, 3 nights", flight, hotel, tour, TOTAL $895, Book), linked by
     a TYPED SESSION; a TYPED SDKS row: REACT / SVELTE.
-- **4:14** Durable, observable, composable agents with human approvals,
+- **4:30** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
   - Visuals: six recap tiles land one by one, one per topic: Survives
     crashes / Event stream / Typed subagents / Human approvals / Code Mode /
@@ -231,7 +239,7 @@ Lisbon.
 
 ## Outro
 
-- **4:25** Temporal Agent Harness is experimental and open source. Try the
+- **4:41** Temporal Agent Harness is experimental and open source. Try the
   examples and build your own agents.
   - Visuals: LLM orb, takeaway title "Your agent, harnessed", violet line
     "YOUR LOOP AND YOUR SDKS, RUN DURABLY BY TEMPORAL", EXPERIMENTAL tag,

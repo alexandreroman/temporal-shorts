@@ -45,6 +45,22 @@
   const VALUE_X0 = GAP.x0 + 18 + VALUE.w / 2, VALUE_X1 = GAP.x1 - 18 - VALUE.w / 2;
   // where the plan_trip names sit in each card (chip and value cards leave and land there)
   const TRAVEL_NAME_X = GAP.x1 + 107, PARENT_NAME_X = GAP.x0 - PARENT.w + 107, PARENT_NAME_Y = PLAN_Y - 15;
+  // start_travel and stop_travel ride above the request arrow, 20 px over its label's slot, and are absorbed by
+  // TravelAgent's header (its name)
+  const CALL_H = 44, CALL_W = 196; // callCard height; width of the longer chip, start_travel
+  const CALL_Y = REQUEST_Y - LBL_DY - 8 - 20 - CALL_H / 2; // 8: half the label's height
+  const CALL_X0 = GAP.x0 + 18 + CALL_W / 2, CALL_X1 = GAP.x1 - 18 - CALL_W / 2;
+  const TRAVEL_HEAD = { x: GAP.x1 + 185, y: CARDS_TOP + CARD.pad + CARD.head / 2 };
+  // the instance line sits under TravelAgent, on its left edge: handle and status of the running child workflow
+  const INSTANCE_Y = CARDS_Y + CARD_H / 2 + 24 + 17;
+  const INSTANCE_STATES = {
+    started: { text: 'STARTED', color: C.violet, background: 'rgba(182,100,255,.14)' },
+    closed: { text: 'CLOSED', color: C.slate, background: 'transparent' },
+  };
+
+  // hex color between a and b (p from 0 to 1), for borders that change with the instance's state
+  const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const mix = (a, b, p) => `rgb(${rgb(a).map((v, i) => Math.round(lerp(v, rgb(b)[i], p))).join(',')})`;
 
   // agent card: icon, name and a small label, a column header, then the rows (typed operations or tools)
   const makeAgentCard = (p, name, label, colsHtml, rowsHtml, w) => {
@@ -59,6 +75,7 @@
       + `letter-spacing:.12em;color:var(--slate);padding:0 17.5px">${colsHtml}</div>`
       + rowsHtml,
       'tile', { width: w + 'px', height: CARD_H + 'px', padding: `${CARD.pad}px 28px`, textAlign: 'left' });
+    [e.head, e.rule] = e.children;
     e.cols = e.querySelector('.cols');
     e.rows = [...e.querySelectorAll('.row')];
     e.tagSlot = e.querySelector('.tagSlot');
@@ -121,8 +138,16 @@
         after: 2.1,
       },
       {
+        text: "To use it, the parent starts TravelAgent as a child workflow: a new instance with its own history.",
+        after: 0.6,
+      },
+      {
         text: "A typed request goes in, TravelAgent does the work, and a typed result comes back.",
-        after: 0.8,
+        after: 2.1,
+      },
+      {
+        text: "When its work is done, the parent closes the instance: a subagent never outlives its parent.",
+        after: 0.3,
       },
     ],
     build(root, s) {
@@ -151,19 +176,35 @@
       const r = 18;
       const arch = `M ${ARCH_X1} ${CARDS_TOP - 10} V ${ARCH_Y + r} Q ${ARCH_X1} ${ARCH_Y} ${ARCH_X1 - r} ${ARCH_Y}`
         + ` H ${ARCH_X0 + r} Q ${ARCH_X0} ${ARCH_Y} ${ARCH_X0} ${ARCH_Y + r} V ${CARDS_TOP - 12}`;
-      s.readArrow = arrowPath(s.svg, arch, C.slate, 3, '9 9');
-      s.requestArrow = arrowPath(s.svg, `M ${GAP.x0 + 16} ${REQUEST_Y} L ${GAP.x1 - 16} ${REQUEST_Y}`, C.uv, 3);
-      s.resultArrow = arrowPath(s.svg, `M ${GAP.x1 - 16} ${RESULT_Y} L ${GAP.x0 + 16} ${RESULT_Y}`, C.violet, 3);
+      s.readArrow = path(s.svg, arch, C.slate, 3, true, '9 9');
+      s.requestArrow = path(s.svg, `M ${GAP.x0 + 16} ${REQUEST_Y} L ${GAP.x1 - 16} ${REQUEST_Y}`, C.uv, 3, true);
+      s.resultArrow = path(s.svg, `M ${GAP.x1 - 16} ${RESULT_Y} L ${GAP.x0 + 16} ${RESULT_Y}`, C.violet, 3, true);
       s.readLbl = E(root, 'Reads its interface', 'lbl', { fontSize: '16px' });
       s.requestLbl = E(root, 'Typed request', 'lbl', { fontSize: '16px' });
       s.resultLbl = E(root, 'Typed result', 'lbl', { fontSize: '16px' });
       s.chip = callCard(root, 'plan_trip', '', 'uv');
       s.chip.style.background = OPAQUE.uv;
+      // the parent's calls that start and close the TravelAgent instance
+      s.start = callCard(root, 'start_travel', '', 'uv');
+      s.stop = callCard(root, 'stop_travel', '', 'uv');
+      // opaque, so the card's border and rule do not show through a chip being absorbed by the header
+      s.start.style.background = OPAQUE.uv;
+      s.stop.style.background = OPAQUE.uv;
+      s.instance = E(root,
+        '<span class="lbl" style="font-size:16px;padding-left:0">Instance</span>'
+        + '<span class="mono" style="font-size:20px">travel-1</span>', '', {
+          width: TRAVEL.w + 'px', display: 'flex', alignItems: 'center', gap: '20px',
+        });
+      s.instance.status = statusTag(s.instance);
+      Object.assign(s.instance.status.style, { position: 'static', opacity: 1 });
       s.request = makeValueCard(root, 'REQUEST', 'plan_trip',
         field('destination', '"Lisbon"') + '<br>' + field('nights', '3'), C.uv);
       s.result = makeValueCard(root, 'RESULT', 'Itinerary', field('total_usd', '895'), C.violet);
     },
     update(t, c, s) {
+      // the moment stop_travel reaches TravelAgent (step 5), and the closing that follows
+      const closedAt = c[4] + 3.2, closed = P(t, closedAt + 0.3, 0.6);
+
       // phase 1: "text in, text out" is struck out in the left column, TravelAgent lists its typed operations
       const pp = P(t, c[0] + 0.1, 0.5, backOut);
       place(s.pill, PARENT.x, PARENT.y, pp, clamp(pp * 2) * (1 - P(t, c[1] + 0.7, 0.35)));
@@ -174,8 +215,18 @@
 
       const tp = P(t, c[0] + 3.0, 0.5, backOut);
       place(s.travel, TRAVEL.x, TRAVEL.y, tp, clamp(tp * 2));
-      showRow(s.travel.cols, P(t, c[0] + 3.7, 0.3));
-      s.travel.rows.forEach((row, i) => showRow(row, P(t, c[0] + 4.4 + i * 1.0, 0.35)));
+      // a closed instance dims its content; the card itself stays opaque, so the stage never shows through
+      const dim = lerp(1, 0.5, closed);
+      s.travel.head.style.opacity = dim;
+      s.travel.rule.style.opacity = dim;
+      const colsIn = P(t, c[0] + 3.7, 0.3);
+      showRow(s.travel.cols, colsIn);
+      s.travel.cols.style.opacity = colsIn * dim;
+      s.travel.rows.forEach((row, i) => {
+        const rowIn = P(t, c[0] + 4.4 + i * 1.0, 0.35);
+        showRow(row, rowIn);
+        row.style.opacity = rowIn * dim;
+      });
       const sp = P(t, c[1] + 0.3, 0.45, backOut);
       s.self.style.opacity = clamp(sp * 2);
       s.self.style.transform = `scale(${sp})`;
@@ -184,10 +235,6 @@
       const parentIn = P(t, c[1] + 0.9, 0.5, backOut);
       place(s.parent, PARENT.x, PARENT.y, parentIn, clamp(parentIn * 2));
       showRow(s.parent.cols, P(t, c[1] + 1.2, 0.3));
-      // once the parent is in, TravelAgent is tagged as its child workflow
-      const cp = P(t, c[1] + 1.5, 0.45, backOut);
-      s.child.style.opacity = clamp(cp * 2);
-      s.child.style.transform = `scale(${cp})`;
 
       // step 1: the Trip planner reads TravelAgent's interface and plan_trip joins its tools
       draw(s.readArrow, P(t, c[1] + 2.0, 0.6));
@@ -207,20 +254,31 @@
       s.parent.from.style.opacity = clamp(fp * 2);
       s.parent.from.style.transform = `scale(${fp})`;
 
-      // step 2: the Trip planner calls plan_trip with a typed request; TravelAgent works on it
-      const sent = c[2] + 0.3, landed = sent + 1.5;
-      draw(s.requestArrow, P(t, sent, 0.5));
+      // step 2: the Trip planner starts TravelAgent as its child workflow: start_travel travels along the request
+      // arrow into TravelAgent's header, which turns UV and gets its CHILD WORKFLOW tag, then the instance shows up
+      const startSent = c[2] + 0.5, started = c[2] + 3.0;
+      draw(s.requestArrow, P(t, c[2] + 0.3, 0.5));
+      fly(s.start, t, startSent, CALL_X0, CALL_Y, startSent + 1.3, 0.9, CALL_X1, CALL_Y,
+        started, TRAVEL_HEAD.x, TRAVEL_HEAD.y);
+      const cp = P(t, started + 0.3, 0.45, backOut);
+      s.child.style.opacity = clamp(cp * 2);
+      s.child.style.transform = `scale(${cp})`;
+      const ip = P(t, started + 1.5, 0.4);
+      place(s.instance, TRAVEL.x, INSTANCE_Y + 12 * (1 - ip), 1, ip);
+
+      // step 3: the Trip planner calls plan_trip with a typed request; TravelAgent works on it
+      const sent = c[3] + 0.3, landed = sent + 1.5;
       place(s.requestLbl, GAP_MID, REQUEST_Y - LBL_DY, 1, P(t, sent + 0.15, 0.35));
       fly(s.request, t, sent + 0.2, VALUE_X0, REQUEST_CARD_Y, sent + 0.6, 0.9, VALUE_X1, REQUEST_CARD_Y,
         landed, TRAVEL_NAME_X, PLAN_Y);
-      const answered = c[2] + 3.6;
+      const answered = c[3] + 3.6;
       const working = win(t, landed + 0.15, answered + 0.2, 0.2);
       const travelPlan = s.travel.rows[0];
       travelPlan.style.borderColor = working > 0.5 ? C.violet : 'transparent';
       travelPlan.style.background = working > 0 ? `rgba(182,100,255,${(0.16 * working).toFixed(3)})` : ROW_BG;
       travelPlan.style.boxShadow = `0 0 ${Math.round(22 * working)}px rgba(182,100,255,${(0.35 * working).toFixed(2)})`;
 
-      // step 3: the typed result comes back and the tool row checks
+      // step 4: the typed result comes back and the tool row checks
       const received = answered + 1.5;
       draw(s.resultArrow, P(t, answered, 0.5));
       place(s.resultLbl, GAP_MID, RESULT_Y + LBL_DY, 1, P(t, answered + 0.15, 0.35));
@@ -229,6 +287,22 @@
       const ok = P(t, received + 0.25, 0.45, backOut);
       s.parent.ok.style.opacity = clamp(ok * 2);
       s.parent.ok.style.transform = `scale(${ok})`;
+
+      // step 5: when the work is done, stop_travel closes the instance: CLOSED, and TravelAgent dims
+      const stopSent = c[4] + 0.8;
+      fly(s.stop, t, stopSent, CALL_X0, CALL_Y, stopSent + 1.3, 0.9, CALL_X1, CALL_Y,
+        closedAt, TRAVEL_HEAD.x, TRAVEL_HEAD.y);
+      const state = t >= closedAt + 0.3 ? INSTANCE_STATES.closed : INSTANCE_STATES.started;
+      const status = s.instance.status;
+      if (status.textContent !== state.text) status.textContent = state.text;
+      Object.assign(status.style, {
+        color: state.color, borderColor: state.color, background: state.background,
+        transform: `scale(${swell(t, closedAt + 0.3, 0.12).toFixed(3)})`,
+      });
+      // the card is live (UV border and glow) from the start until it is closed (its content dims, see phase 1)
+      const live = P(t, started + 0.3, 0.4) * (1 - closed);
+      s.travel.style.borderColor = mix(C.line, C.uv, live);
+      s.travel.style.boxShadow = `0 0 ${Math.round(28 * live)}px rgba(68,76,231,${(0.35 * live).toFixed(2)})`;
     }
   });
 }
