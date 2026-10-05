@@ -107,6 +107,8 @@
 
   scene({
     chapter: 5, title: 'Typed, composable agents',
+    // the chapter header reads before the first subtitle; the final composition holds before the fade
+    pre: 1.0, post: 1.2,
     // laid out at final positions on the grid (x 140-1780), so no offset is needed
     shift: [0, 0],
     subs: [

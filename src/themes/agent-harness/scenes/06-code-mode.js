@@ -99,12 +99,14 @@
 
   scene({
     chapter: 6, title: 'Code Mode',
+    // the chapter header reads before the first subtitle; the final composition holds before the fade
+    pre: 1.0, post: 1.2,
     // laid out at final stage coordinates on the grid (content y 150-880, centered at y 515)
     shift: [0, 0],
     subs: [
       {
         text: "With Code Mode, the model writes a short Python script instead of calling tools one at a time.",
-        after: 0.6,
+        after: 0.9,
       },
       {
         text: "Loops, conditions and parallel calls in one turn, and every call stays durable, approved and visible.",

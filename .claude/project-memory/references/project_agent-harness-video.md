@@ -12,6 +12,13 @@ for every theme.
 
 - Audience: **developers and technical leads** who know what an AI agent is
   (a model, tools and a loop) but not necessarily Temporal.
+- The turn is a core concept: the harness runs the outer turn loop (a
+  message starts a turn, the developer's agentic loop runs inside it, the
+  reply streams back, the harness waits for the next message). Chapter 1
+  introduces it; later chapters build on it ("mid-turn", "in one turn").
+- Pacing: chapter scenes leave time to understand: a beat before the first
+  subtitle, ~1 s of rest after each dense animation, and a hold on the
+  final composition before the fade; the video still stays ≤ 3:00.
 - Running example: a travel agent planning a 3-night trip to Lisbon, with
   the harness's real example tool names in code font (`search_flights`,
   `search_hotels`, `book_flight`, `book_hotel`) and one set of figures

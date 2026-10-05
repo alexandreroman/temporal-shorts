@@ -62,6 +62,8 @@
 
   scene({
     chapter: 4, title: 'One event stream',
+    // the chapter header reads before the first subtitle; the final composition holds before the fade
+    pre: 1.0, post: 1.2,
     // agents and lane first, centered; then the camera follows the stream to the console as it slides in,
     // and the final layout spans the grid (x 140-1780) with no offset
     shift: (t, c) => pan(t, [370, 0], [[c[1], 0, 0]], 0.9),

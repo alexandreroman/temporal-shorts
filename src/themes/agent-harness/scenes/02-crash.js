@@ -81,13 +81,15 @@
 
   scene({
     chapter: 2, title: 'Survives crashes',
+    // the chapter header reads before the first subtitle; the final composition holds before the fade
+    pre: 1.0, post: 1.2,
     shift: [0, 0],
     subs: [
       {
         text: "Every model call and tool call is saved in the agent's Temporal history as soon as it completes.",
-        after: 0.6,
+        after: 1.0,
       },
-      { text: "If the app crashes mid-turn, another copy picks up the agent exactly where it left off.", after: 0.6 },
+      { text: "If the app crashes mid-turn, another copy picks up the agent exactly where it left off.", after: 1.3 },
       { text: "Saved results are reused, not redone: no token is paid twice, and no tool runs twice.", after: 0.6 },
     ],
     build(root, s) {

@@ -76,12 +76,14 @@
 
   scene({
     chapter: 7, title: 'Built for real products',
+    // the chapter header reads before the first subtitle; the final composition holds before the fade
+    pre: 1.0, post: 1.2,
     // laid out at final stage coordinates on the grid: both phases are centered near (960, 521)
     shift: [0, 0],
     subs: [
       {
         text: "Callback tools run on the user's own device, and typed React and Svelte SDKs power your product UI.",
-        after: 0.6,
+        after: 1.0,
       },
       {
         text: "Durable, observable, composable agents with human approvals, built with the AI SDKs you already use.",

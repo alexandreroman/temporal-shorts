@@ -58,6 +58,8 @@
 
   scene({
     chapter: 3, title: 'Human approvals',
+    // the chapter header reads before the first subtitle; the final composition holds before the fade
+    pre: 1.0, post: 1.2,
     // laid out in final coordinates: the gate column reserves the AUTO MODE space from the start
     shift: [0, 0],
     subs: [
@@ -67,7 +69,7 @@
       },
       {
         text: "The call pauses inside the Workflow, for minutes or days, then resumes as soon as someone approves.",
-        after: 0.6,
+        after: 0.9,
       },
       {
         text: "Auto mode lets code or a model approve routine calls. Anything unclear still goes to a human.",

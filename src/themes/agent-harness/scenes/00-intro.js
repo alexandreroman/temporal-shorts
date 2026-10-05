@@ -12,7 +12,7 @@
     subs: [
       {
         text: "Meet Temporal Agent Harness: an experimental project to build durable AI agents on Temporal.",
-        after: 0.6,
+        after: 1.0,
       },
     ],
     build(root, s) {
