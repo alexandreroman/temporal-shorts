@@ -166,7 +166,7 @@
       s.fromGate = down(STEP.x[2], RIGHT.gateY + GATE_HALF + 2, STEP_TOP);
       s.steps = [['plane', 'search_flights'], ['bed', 'search_hotels'], ['ticket', 'book_flight']]
         .map(([icon, name]) => makeToolStep(root, icon, name));
-      s.gate = E(root, '', 'pill');
+      s.gate = E(root, '', 'pill', { willChange: 'auto' }); // no layer of its own: it swells (see swell())
       s.saved = s.steps.map(() => statusTag(root));
       // what every call keeps: one row spanning the card's width, its label on the card's left edge
       s.tagRow = E(root,

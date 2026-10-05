@@ -14,10 +14,11 @@
       s.t = E(root,
         '<div style="font-size:104px;letter-spacing:-3px;line-height:108px">Your agent, harnessed</div>'
         + '<div class="mono" style="font-size:24px;letter-spacing:.14em;padding-left:.14em;color:var(--violet);'
-        + 'margin-top:30px">DURABLE, OBSERVABLE, COMPOSABLE, WITH THE AI SDK YOU ALREADY USE</div>'
+        + 'margin-top:30px">YOUR LOOP AND YOUR SDKS, RUN DURABLY BY TEMPORAL</div>'
         + '<span class="pill violet" style="display:inline-block;margin-top:30px;font-size:18px">Experimental</span>'
         + `<img src="${LOGO}" style="height:70px;display:block;margin:84px auto 0">`,
-        '', { textAlign: 'center' });
+        // a fixed, even width keeps the centered block on whole pixels whatever the text widths
+        '', { textAlign: 'center', width: '1140px' });
       s.llm = makeLLM(root, 120, '');
     },
     update(t, c, s) {

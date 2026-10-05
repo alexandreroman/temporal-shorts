@@ -98,7 +98,8 @@
       // app side: instance A, then instance B in the same place, showing the step at work
       s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
       s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);
-      s.chipLbl = E(root, '', 'lbl', { fontSize: '16px' });
+      // no layer of its own: its text and width change while it shakes with the app (see swell())
+      s.chipLbl = E(root, '', 'lbl', { fontSize: '16px', willChange: 'auto' });
       s.chips = STEPS.map((st, i) => callCard(root, st.call[0], st.call[1], isModel(i) ? 'uv' : ''));
       s.done = tag(root, 'Turn complete', 'neon');
       s.billed = makeTallCounter(root, 'Model calls billed');

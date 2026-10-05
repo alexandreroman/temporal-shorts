@@ -208,7 +208,9 @@
       s.live.style.opacity = P(t, c[1] + 0.6, 0.3) * (t < toReplay ? 1 : 0);
       s.live.dot.style.opacity = 0.35 + 0.65 * (0.5 + 0.5 * Math.cos(G * 6));
       s.replay.style.opacity = t < toReplay ? 0 : 1;
-      s.replay.style.transform = `scale(${swell(t, toReplay, 0.15)})`;
+      // the badge lights up instead of swelling: a scale pulse leaves it with a raster that depends on the frames
+      // drawn before, with or without its own layer (see swell())
+      s.replay.style.background = `rgba(68,76,231,${(0.1 + 0.3 * pulse(t, toReplay)).toFixed(3)})`;
       s.bar.style.opacity = P(t, toReplay, 0.3);
       // playhead: at the end when the replay starts, rewound to the start, then swept forward
       let head = 1 - P(t, rewind, 0.4);

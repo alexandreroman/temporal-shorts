@@ -4,7 +4,7 @@ Subtitles are the only narration (no audio). Timings are computed in
 `src/engine.js` from text length (`autoDur`: chars / 16 + 0.6 s, clamped
 2.4 to 8 s), plus per-subtitle `after` pauses. Run
 `make timeline THEME=agent-harness` for the live values; the start times
-below are a snapshot from 2026-10-05.
+below are a snapshot from 2026-10-06.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -68,18 +68,34 @@ Lisbon.
     the Temporal logo and "AGENT HARNESS", with a "TEMPORAL WORKFLOW" pill
     on its bottom edge; the label becomes "YOUR LOOP", the token keeps
     turning.
-- **0:26** A message starts a turn: the harness runs your loop, streams the
+- **0:00** A message starts a turn: the harness runs your loop, streams the
   reply, then waits for the next message.
   - Visuals: MESSAGES on the left, REPLIES on the right of the frame; "Plan
     a trip to Lisbon, 3 nights" enters the frame and opens TURN 1 (RUNNING,
-    "RUN BY THE HARNESS"); the loop makes a lap; the reply streams out word
-    by word and TURN 1 ENDS; the loop dims, "WAITING FOR THE NEXT MESSAGE",
-    then "Make it 4 nights" opens TURN 2.
+    "RUN BY THE HARNESS"); the loop makes a lap; the AGENT reply "Your
+    trip: flight $480, hotel $390, tour $25." is typed word by word and
+    TURN 1 shows ENDED; the loop dims: "WAITING FOR THE NEXT MESSAGE".
+- **0:00** The next message opens turn 2. The agent stays alive between
+  turns, with its state intact.
+  - Visuals: "Make it 4 nights" opens TURN 2, the loop laps again, "Updated:
+    4 nights, hotel $520." is typed under the first reply and TURN 2 shows
+    ENDED.
+- **0:00** An LLM call is one step. A turn is the whole job behind one
+  message: often many model and tool calls.
+  - Visuals: the frame gives way to a comparison: AN LLM CALL, ONE STEP
+    (`text in` → Model → `text out`) above A TURN, THE WHOLE JOB BEHIND ONE
+    MESSAGE: from the user message to the reply, Model, `search_flights`,
+    Model, `search_hotels`, Model appear one by one, linked in a wave.
+- **0:00** The harness saves each call as it completes, and streams the
+  whole turn as one unit.
+  - Visuals: each call gets SAVED in turn; violet arrows retrace the whole
+    turn and a bracket under it reads STREAMED AS ONE TURN.
 - **0:34** It adds what is painful to build yourself: crash recovery,
   approvals, observability, composition.
-  - Visuals: the turn cards fade; four capability tiles plug into the
-    frame in subtitle order, at its four corners: Crash recovery / Human
-    approvals / Observability / Composition.
+  - Visuals: the harness frame returns; four capability tiles plug into the
+    frame in subtitle order, two on each side, aligned with the frame's top
+    and bottom edges: Crash recovery / Human approvals / Observability /
+    Composition.
 
 ## 02 Survives crashes
 
@@ -191,5 +207,5 @@ Lisbon.
 - **2:43** Temporal Agent Harness is experimental and open source. Try the
   examples and build your own agents.
   - Visuals: LLM orb, takeaway title "Your agent, harnessed", violet line
-    "DURABLE, OBSERVABLE, COMPOSABLE, WITH THE AI SDK YOU ALREADY USE",
+    "YOUR LOOP AND YOUR SDKS, RUN DURABLY BY TEMPORAL",
     EXPERIMENTAL tag, Temporal logo.

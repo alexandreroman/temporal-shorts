@@ -7,8 +7,9 @@ type: project
 # Agent Harness video: audience and story
 
 Scope: the `agent-harness` theme. Its seven topics, their order and every
-subtitle live in `docs/agent-harness/script.md`; the 3:00 limit applies, as
-for every theme.
+subtitle live in `docs/agent-harness/script.md`. This theme runs up to 5:00
+(an exception to the 3:00 limit of the other themes), so that every scene
+takes its time.
 
 - Audience: **developers and technical leads** who know what an AI agent is
   (a model, tools and a loop) but not necessarily Temporal.
@@ -16,9 +17,10 @@ for every theme.
   message starts a turn, the developer's agentic loop runs inside it, the
   reply streams back, the harness waits for the next message). Chapter 1
   introduces it; later chapters build on it ("mid-turn", "in one turn").
-- Pacing: chapter scenes leave time to understand: a beat before the first
-  subtitle, ~1 s of rest after each dense animation, and a hold on the
-  final composition before the fade; the video still stays ≤ 3:00.
+- Pacing: every scene takes its time: about 1.5 s before the first
+  subtitle, each animation state readable for at least ~1.5 s, each
+  subtitle's result held at least 2 s before the next one, and about 2 s on
+  the final composition before the fade.
 - Running example: a travel agent planning a 3-night trip to Lisbon, with
   the harness's real example tool names in code font (`search_flights`,
   `search_hotels`, `book_flight`, `book_hotel`) and one set of figures
