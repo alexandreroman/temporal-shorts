@@ -178,30 +178,36 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 ## 07 Full visibility
 
+The window reproduces the Temporal Web UI (2.54.1) in dark mode: a text
+sidebar (Namespaces, Workflows, Schedules, Batch, Workers, Nexus, Archive,
+Docs), the `default` namespace box and the real page layouts, trimmed for
+readability.
+
 - **2:14** Temporal also shows every Workflow in its web UI: which ones are
   running, completed or failed.
-  - Visuals: A Temporal UI window (official logo, NAMESPACE `default`, a
-    navigation rail with Workflows active): the "Workflows" page, a
-    `WorkflowType = "placeOrder"` filter and a table STATUS / WORKFLOW ID /
-    TYPE / START with order-1045 to order-1040; Running, Completed and
-    Failed badges bump as the subtitle names them; a pointer hovers the
-    order-1042 row.
+  - Visuals: The "6 Workflows" page: count pills 1 RUNNING, 4 COMPLETED,
+    1 FAILED, a Start Workflow button, filter tabs and a table Status /
+    Workflow ID / Run ID / Type / Start with order-1045 (Running) to
+    order-1041 (Failed); the pills and badges bump as the subtitle names
+    each status; a pointer clicks order-1042.
 - **2:22** Open order #1042: its timeline shows every Activity, how long it
   took, and the crash it survived.
-  - Visuals: The order-1042 page: breadcrumb, Completed badge, summary
-    (TYPE, START, END, DURATION 14.6s, TASK QUEUE orders) and a TIMELINE
-    card, 0s to 15s: chargeCard 1.2s and reserveItem 0.8s on WORKER A,
-    a red failed shipPackage attempt cut by a dashed "WORKER CRASHED" line,
-    then shipPackage 2.1s and emailReceipt 0.4s on WORKER B; bars grow in
-    time order with their durations.
+  - Visuals: The order-1042 page: COMPLETED badge before the title, the
+    summary grid (Start, End, Duration 14s 612ms, Run ID, Workflow Type,
+    Task Queue, Workflow SDK TypeScript), the Timeline tab: a Workflow bar
+    over Activity lanes stacked bottom-up (chargeCard, reserveItem,
+    "2 • shipPackage" with a red-to-green retried bar, emailReceipt),
+    growing in time order with their durations; a video annotation, outside
+    the UI style, points at the failed attempt: "WORKER A CRASHED ·
+    RETRIED ON WORKER B".
 - **2:30** While a Workflow runs, you see an Activity retrying, its attempt
   count and its last error, live.
-  - Visuals: The order-1044 page, Running: in real time, shipPackage fails
-    twice (red attempts, waits of 1s then 2s), attempt 3 runs and
-    completes, then emailReceipt; a PENDING ACTIVITIES card shows
-    shipPackage, ATTEMPT 1 to 3, "LAST FAILURE: Carrier timeout" and the
-    retry policy, then "None"; DURATION counts live, and the badge turns
-    Completed.
+  - Visuals: The order-1045 page, RUNNING, Duration counting live, the
+    Pending Activities tab: a shipPackage card (STARTED, then SCHEDULED
+    during each wait) with Attempt "1 / UNLIMITED" to "3 / UNLIMITED",
+    Last Worker Identity worker-b and a Last Failure JSON box ("Carrier
+    timeout"); attempt 3 succeeds, "No pending activities", the badge
+    turns COMPLETED.
 
 ## 08 Durable timers
 
