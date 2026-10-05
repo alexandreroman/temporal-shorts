@@ -8,7 +8,7 @@ from a deterministic HTML animation. Each video is a theme:
   (placeholder)
 - `human-in-the-loop`: Human-in-the-Loop, how a Temporal Workflow waits
   durably for a person's decision, such as an approval, then resumes where
-  it left off (placeholder)
+  it left off
 - `durable-ai-agents`: Durable AI Agents, a video that shows a
   non-technical audience how AI agents work and why they need Durable
   Execution with Temporal

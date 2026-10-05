@@ -36,3 +36,4 @@
 - [HTML links and viewing](references/project_html-links.md) — cards link to `themes/<theme>/`, home button to `/`; view pages with `make serve` only
 - [No video durations in docs](references/feedback_no-durations-in-docs.md) — length is never written; `make timeline` is the source
 - [Player 0.5x speed](references/project_player-speed.md) — 0.5x stretches still moments only; ambient loops read G
+- [Human-in-the-Loop story](references/project_hitl-story.md) — Sam's laptop, Maria approves; ch3/ch4 mirror ch7; Signal, replay, timers
