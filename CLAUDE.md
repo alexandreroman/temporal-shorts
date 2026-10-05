@@ -13,7 +13,9 @@ from a deterministic HTML animation. Each video is a theme:
   non-technical audience how AI agents work and why they need Durable
   Execution with Temporal
 - `agent-harness`: Temporal Agent Harness, a presentation of the
-  experimental project of the same name (placeholder)
+  experimental project of the same name for developers: durable agents
+  built with the AI SDKs they already use, human approvals, one event
+  stream, typed subagents and Code Mode
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the scripts require `--theme`. A home page

@@ -1,12 +1,12 @@
-// ===================== INTRO
+// ===================== OUTRO
 // The block keeps every name declared in this file local to this scene.
 {
   scene({
-    pre: 1.0,
+    pre: 0.4, post: 2.6,
     shift: [0, 0],
     subs: [
       {
-        text: "Meet Temporal Agent Harness: an experimental project to build durable AI agents on Temporal.",
+        text: "Temporal Agent Harness is experimental and open source. Try the examples and build your own agents.",
         after: 0.6,
       },
     ],
