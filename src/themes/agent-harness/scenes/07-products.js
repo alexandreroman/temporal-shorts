@@ -2,16 +2,17 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // Layout grid: the callback column spans x 140-580, the UI window x 800-1780 (same right zone as chapter 6);
-  // the typed session link crosses the gap between them. Both headings share one baseline; both zones start at
-  // y 196 and end at y 890 (the laptop tile, the SDK row).
-  const TOP = 196, BOTTOM = 890, HEADING_Y = 163;
+  // the typed session link crosses the gap between them. That 220 px gap is wider than the 80-120 px zone
+  // gutter on purpose: it holds the TYPED SESSION label above the link. Both headings share one baseline; both
+  // zones start at y 196 and end at y 880 (the laptop tile, the SDK row).
+  const TOP = 196, BOTTOM = 880, HEADING_Y = 163;
   // Left: the app (agent on a Temporal worker) calls a tool that runs on the user's laptop
   const LEFT = { x: 360, w: 440, appH: 260, laptopH: 170 };
   LEFT.appY = TOP + LEFT.appH / 2;
   LEFT.laptopY = BOTTOM - LEFT.laptopH / 2;
   const ARROW = { top: TOP + LEFT.appH + 10, bottom: BOTTOM - LEFT.laptopH - 10 };
-  // Right: the product UI, linked to the agent by a typed session, and the SDKs it is built with
-  const UI = { x: 1290, w: 980, h: 606, tagH: 48 };
+  // Right: the product UI, linked to the agent by a typed session, and the SDKs it is built with, 40 px below it
+  const UI = { x: 1290, w: 980, h: 596, tagH: 48 };
   UI.y = TOP + UI.h / 2;
   const LINK = { y: LEFT.appY, from: LEFT.x + LEFT.w / 2 + 4, to: UI.x - UI.w / 2 - 4 };
   // Recap tiles, in the order of the subtitle: 3 columns x 2 rows across the frame, 40 px gutters
@@ -37,7 +38,7 @@
 
   // one itinerary row of the trip planner: icon, item and price
   const planRow = (icon, item, price) => '<div class="row" style="display:flex;align-items:center;gap:22px;'
-    + `height:84px;padding:0 26px;border:1.5px solid ${C.line};border-radius:var(--rs);margin-top:18px;opacity:0">`
+    + `height:84px;padding:0 26px;border:1.5px solid ${C.line};border-radius:var(--rs);margin-top:16px;opacity:0">`
     + `${ICON(icon, 34, C.ink, 1.7)}<span style="flex:1;font-size:30px">${item}</span>`
     + `<span class="mono" style="font-size:28px;color:var(--slate)">${price}</span></div>`;
   // browser window holding a small trip planner (top bar with three dots, as makeApp)
@@ -45,7 +46,7 @@
     const e = E(p,
       `<div style="height:48px;border-bottom:1.5px solid ${C.line};display:flex;gap:10px;align-items:center;`
       + 'padding-left:20px"><i></i><i></i><i></i></div>'
-      + '<div style="padding:34px 44px">'
+      + '<div style="padding:30px 44px">'
       + '<div style="font-size:52px;line-height:1.15">Lisbon, 3 nights</div>'
       + '<div class="lbl" style="font-size:18px;padding-left:0;margin-top:8px">Trip planner</div>'
       + planRow('plane', 'Flight to Lisbon', '$480')
@@ -110,11 +111,15 @@
         width: '14px', height: '14px', background: C.uv, borderRadius: '3px',
         boxShadow: '0 0 14px 4px rgba(68,76,231,.6)',
       });
-      // the typed SDKs: one row centered under the window
+      // the typed SDKs: one row centered under the window, in a box of fixed even width so it rests on whole
+      // pixels (its content is about 428 px wide)
       s.sdkRow = E(root,
         '<span class="lbl" style="font-size:18px;padding-left:0">Typed SDKs</span>'
         + '<span class="pill uv">React</span><span class="pill uv">Svelte</span>',
-        '', { height: UI.tagH + 'px', display: 'flex', alignItems: 'center', gap: '24px' });
+        '', {
+          width: '440px', height: UI.tagH + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: '24px',
+        });
       s.sdks = [...s.sdkRow.querySelectorAll('.pill')];
 
       // recap

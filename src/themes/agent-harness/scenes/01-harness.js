@@ -2,7 +2,7 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // the agentic loop: the model on top, the two tools below, all on one circle
-  const LOOP = { cx: 960, cy: 558, r: 230 };
+  const LOOP = { cx: 960, cy: 551, r: 230 };
   const ORB = 140, TILE = { w: 180, h: 150 };
   const loopPos = deg => {
     const a = deg * Math.PI / 180;
@@ -35,7 +35,8 @@
   // the token goes round the loop from TOKEN_AT (after c[0]), one leg of LEG seconds per node
   const TOKEN_AT = 1.6, LEG = 1.1;
   // the harness frame around the loop, with its header row above the model; it leaves 60 px or more around
-  // the loop, and 50 px between the bottom arc and the Workflow pill on its bottom edge
+  // the loop, and 50 px between the bottom arc and the Workflow pill on its bottom edge. The frame spans
+  // y 151-855, so the pill's bottom stays inside the content frame (y 880)
   const FRAME = { x0: LOOP.cx - 360, x1: LOOP.cx + 360, y0: LOOP.cy - 400, y1: LOOP.cy + 304, r: 10 };
   // capabilities plugged into the frame: [icon, label, side (-1 left, 1 right), row (0 top, 1 bottom)]
   const CAPS = [
@@ -54,7 +55,7 @@
   scene({
     chapter: 1, title: 'An agent harness',
     // the loop with its SDK tags sits higher than the taller framed loop: pan while the tags fade out
-    shift: (t, c) => pan(t, [0, -63], [[c[1], 0, 0]], 0.9),
+    shift: (t, c) => pan(t, [0, -56], [[c[1], 0, 0]], 0.9),
     subs: [
       {
         text: "An AI agent is a model, plus tools, plus a loop. You write that loop with the AI SDK you already know.",
@@ -150,7 +151,8 @@
       place(s.llm.root, mx, my, pM, clamp(pM * 2));
       llmState(s.llm, { think: near === 0 ? 1 : 0, lookY: 0.4 });
       [pF, pH].forEach((p, i) => {
-        const [x, y] = loopPos(NODES[i + 1].deg);
+        // rounded, so the tiles rest on whole pixels
+        const [x, y] = loopPos(NODES[i + 1].deg).map(Math.round);
         place(s.tools[i], x, y, p, clamp(p * 2));
         s.tools[i].style.borderColor = near === i + 1 ? C.violet : C.line;
       });
@@ -169,8 +171,9 @@
       s.frame.forEach(f => draw(f, P(t, c[1] + 1.4, 1.0)));
       s.frameBg.style.opacity = P(t, c[1] + 2.0, 0.6);
       s.header.style.opacity = P(t, c[1] + 2.4, 0.5);
+      // half a pixel low, so the 49 px pill rests on whole pixels
       const pW = P(t, c[1] + 4.0, 0.45, backOut);
-      place(s.workflow, LOOP.cx, FRAME.y1, pW, clamp(pW * 2));
+      place(s.workflow, LOOP.cx, FRAME.y1 + 0.5, pW, clamp(pW * 2));
       // c[2]: each capability pops beside the frame as the subtitle names it, and plugs in with a short link
       CAPS.forEach(([, , side, row], i) => {
         const a = c[2] + 2.4 + i * 0.8;

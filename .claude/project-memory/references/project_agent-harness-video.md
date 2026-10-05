@@ -25,8 +25,9 @@ for every theme.
   (no wildcards) and on-screen Python is valid as written. Source of truth:
   https://github.com/temporal-community/temporal-agent-harness (`README.md`,
   `docs/internal/what-the-harness-adds.md`, `docs/internal/core-concepts.md`).
-- Centering: scenes are laid out in final coordinates with `shift: [0, 0]`
-  (see [Agent Harness layout grid](feedback_agent-harness-layout-grid.md));
+- Centering: chapter scenes are laid out in final coordinates with
+  `shift: [0, 0]` (see
+  [Agent Harness layout grid](feedback_agent-harness-layout-grid.md));
   chapter 1 eases with `pan()` while its SDK tags fade, and chapter 4 while
   its console slides in.
 

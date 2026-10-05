@@ -152,12 +152,12 @@ Lisbon.
 - **1:51** With Code Mode, the model writes a short Python script instead of
   calling tools one at a time.
   - Visuals: ONE CALL AT A TIME: a model and three tool tiles ping-pong six
-    times (ROUND TRIPS 6), then dim; CODE MODE: a SCRIPT WRITTEN BY THE
+    times (6 ROUND TRIPS), then dim; CODE MODE: a SCRIPT WRITTEN BY THE
     MODEL is typed: `asyncio.gather(search_flights, search_hotels)`, `min`
     by price, `book_flight(best)`.
 - **1:58** Loops, conditions and parallel calls in one turn, and every call
   stays durable, approved and visible.
-  - Visuals: the script runs: both searches fan out at once and check,
+  - Visuals: the script runs: both searches run at once and check,
     "best: $480", `book_flight` passes an APPROVAL gate (APPROVED) and runs;
     each call SAVED; EVERY CALL: DURABLE / APPROVED / VISIBLE; under the
     dimmed side, "6 ROUND TRIPS vs 1 ROUND TRIP".
@@ -170,7 +170,7 @@ Lisbon.
     `read_file "trip.md"` to the USER'S LAPTOP, which runs it and sends the
     result back; YOUR UI: a trip planner in a browser window ("Lisbon, 3
     nights", flight, hotel, tour, TOTAL $895, Book), linked by a TYPED
-    SESSION; tags REACT / SVELTE.
+    SESSION; a TYPED SDKS row: REACT / SVELTE.
 - **2:14** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
   - Visuals: six recap tiles, one per chapter, as the subtitle names them:

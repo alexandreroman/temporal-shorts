@@ -17,9 +17,11 @@
   // the lane runs between the policy block and its rules, with 20 px on each side of a passing call
   const LANE = POLICY.y0 + POLICY.h + 20 + CALL_H / 2;
   const RULES = { y0: LANE + CALL_H / 2 + 20, h: 164 };
-  // the person and the two buttons span the column width; their bottom is the content bottom
-  const YOU = { w: 190, h: 140, buttonW: 170 };
+  // the person and the two buttons span the column width, GUTTER apart; their bottom is the content bottom.
+  // The buttons have an even height and an even gap, so they rest on whole pixels.
+  const YOU = { w: 170, h: 140, buttonW: 170, buttonH: 48, buttonGap: 12 };
   YOU.y = BOTTOM - YOU.h / 2; YOU.x = GATE.x0 + YOU.w / 2; YOU.buttonX = GATE.x1 - YOU.buttonW / 2;
+  YOU.buttonDy = (YOU.buttonH + YOU.buttonGap) / 2; // from the person's center to each button's center
   // the agent's orb touches the left edge, centered on the lane
   const ORB = 200;
   const AGENT = { x: LEFT + ORB / 2, y: LANE };
@@ -118,7 +120,8 @@
       // the person who approves, with the two buttons
       s.you = iconTile(root, 'user', 'You', YOU.w, YOU.h);
       const button = label => E(root, label, 'pill', {
-        width: YOU.buttonW + 'px', textAlign: 'center', padding: '9px 0',
+        width: YOU.buttonW + 'px', height: YOU.buttonH + 'px', padding: '0 0 0 .1em',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
       });
       s.approve = button('Approve'); s.deny = button('Deny');
 
@@ -196,8 +199,8 @@
       const pressed = t >= approve + 0.05 && t < c[2] + 0.2;
       s.approve.className = 'abs pill' + (pressed ? ' neon' : '');
       const bp = P(t, c[0] + 0.75, 0.45, backOut), dp = P(t, c[0] + 0.85, 0.45, backOut);
-      place(s.approve, YOU.buttonX, YOU.y - 28, bp * (1 - 0.08 * bump(t, approve, 0.25)), clamp(bp * 2));
-      place(s.deny, YOU.buttonX, YOU.y + 28, dp, clamp(dp * 2));
+      place(s.approve, YOU.buttonX, YOU.y - YOU.buttonDy, bp * (1 - 0.08 * bump(t, approve, 0.25)), clamp(bp * 2));
+      place(s.deny, YOU.buttonX, YOU.y + YOU.buttonDy, dp, clamp(dp * 2));
 
       // tool calls: pop out next to the agent, then follow their route; tags ride under them
       const placeCall = (i, appear, legs, cls, fade = Infinity) => {

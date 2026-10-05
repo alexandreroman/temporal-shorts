@@ -11,14 +11,18 @@
   };
   const TYPE_ORDER = ['TURN', 'MODEL', 'TOOL', 'APPROVAL', 'TOKENS'];
   const SDKS = ['OpenAI Agents SDK', 'Google Gen AI SDK', 'Pydantic AI'];
-  // Layout grid, final positions: the agents column on the left (x 140-500), the lane in the middle, the console
-  // on the right (x 1140-1780). The agents column and the console share their top (y 227) and bottom (y 817).
+  // Layout grid, final positions: the agents column on the left (x 140-500), the lane in the middle (x 600-1040),
+  // the console on the right (x 1140-1780), 100 px apart. The agents column and the console share their top
+  // (y 227) and bottom (y 817).
   const AGENT = { x: 320, y0: 302, gap: 220, w: 360, h: 150 }; // three equal tiles, 70 px apart
   const agentY = i => AGENT.y0 + i * AGENT.gap;
-  const LANE = { x: 850, y: 522, w: 460, h: 76, entry: 690, exit: 1020 }; // the lane and where chips enter and leave it
+  const LANE = { x: 820, y: 522, w: 440, h: 76 };
+  // where chips enter and leave the lane: the widest chip (APPROVAL, about 113 px) stays inside it
+  LANE.entry = LANE.x - LANE.w / 2 + 70; LANE.exit = LANE.x + LANE.w / 2 - 62;
   // guide curve from agent i into the lane: chips ride it from MERGE_FROM on, emerging from under the tile.
-  // The curves turn early enough that a chip rising from the lowest agent passes clear of the SAME EVENTS tag.
-  const guide = i => [[AGENT.x + AGENT.w / 2 + 8, agentY(i)], [550, agentY(i)], [530, LANE.y], [LANE.entry, LANE.y]];
+  // The curves turn early enough that a chip rising from the lowest agent passes clear of the SAME EVENTS tag
+  // (6 px for the widest chip).
+  const guide = i => [[AGENT.x + AGENT.w / 2 + 8, agentY(i)], [540, agentY(i)], [490, LANE.y], [LANE.entry, LANE.y]];
   const MERGE_FROM = 0.1;
   // chip n leaves agent n % 3 every CHIP_EVERY seconds, until the scene ends; it curves into the lane, then runs
   // along it. A pool of CHIP_POOL elements is recycled: chip n uses element n % CHIP_POOL. The pool size is a
@@ -60,7 +64,7 @@
     chapter: 4, title: 'One event stream',
     // agents and lane first, centered; then the camera follows the stream to the console as it slides in,
     // and the final layout spans the grid (x 140-1780) with no offset
-    shift: (t, c) => pan(t, [350, 0], [[c[1], 0, 0]], 0.9),
+    shift: (t, c) => pan(t, [370, 0], [[c[1], 0, 0]], 0.9),
     subs: [
       {
         text: "Every agent publishes the same event stream: turns, model calls, tool calls, approvals and token usage.",

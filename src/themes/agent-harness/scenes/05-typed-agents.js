@@ -121,13 +121,14 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      // the strike sits on the pill's center line and overhangs its 1.5 px border by 8 px on each side.
-      // A tighter letter spacing fits the big pill in the Trip planner's column.
+      // the strike sits on the pill's center line and overhangs its edges by about 4 px, so its ends stay just
+      // inside the column's edges (x 140 and 520). A tighter letter spacing fits the big pill in the column.
       s.pill = E(root,
         '<span class="txt">Text in, text out</span>'
-        + '<div class="strike" style="position:absolute;left:-9.5px;right:-9.5px;top:50%;height:4px;margin-top:-2px;'
+        + '<div class="strike" style="position:absolute;left:-5px;right:-5px;top:50%;height:4px;margin-top:-2px;'
         + `background:${C.red};border-radius:2px;transform:rotate(-4deg)"></div>`, 'pill big', {
-          letterSpacing: '.05em', padding: '12px 22px 12px calc(22px + .05em)',
+          width: (PARENT.w - 8) + 'px', height: '56px', letterSpacing: '.05em', padding: '0 0 0 .05em',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         });
       s.pill.txt = s.pill.querySelector('.txt'); s.pill.strike = s.pill.querySelector('.strike');
       s.parent = makeParentCard(root);

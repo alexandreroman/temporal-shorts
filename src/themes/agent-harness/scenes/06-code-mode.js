@@ -2,8 +2,8 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // Layout grid: the left zone spans x 140-700, the right zone x 800-1780 (100 px gutter). Both headings share
-  // one baseline; both zones start at y 196 and end at y 890 (the round-trip counts, the EVERY CALL row).
-  const TOP = 196, BOTTOM = 890, HEADING_Y = 163;
+  // one baseline; both zones start at y 196 and end at y 880 (the round-trip counts, the EVERY CALL row).
+  const TOP = 196, BOTTOM = 880, HEADING_Y = 163;
   // Left: the model orb and its three tools (one column, 40 px gutters), then the round-trip counts
   const LEFT = { x: 420, orbX: 220, orbSize: 160, toolX: 610, toolW: 180, toolH: 158, toolGap: 40 };
   const toolY = i => TOP + LEFT.toolH / 2 + i * (LEFT.toolH + LEFT.toolGap);
@@ -12,13 +12,13 @@
   // the 6 round trips (tool index of each call) and their timing, from c[0] + TRIPS.at
   const TRIPS = { at: 0.8, gap: 0.5, out: 0.22, targets: [0, 1, 0, 1, 0, 2] };
   // "6 round trips vs 1 round trip": two equal count tiles at the zone's edges, "vs" in the gutter between them
-  const COUNT = { w: 240, h: 100, y: BOTTOM - 50, x: [140 + 120, 700 - 120] };
+  const COUNT = { w: 240, h: 90, y: BOTTOM - 45, x: [140 + 120, 700 - 120] };
   // Right: the script card; its three tools below, equal and spread across its width; SAVED; the closing row
   const CODE = { x: 1290, w: 980, h: 330, lineTop: 92, lineH: 40, textX: 28, numW: 44 };
   CODE.y = TOP + CODE.h / 2;
-  const STEP = { w: 300, h: 120, y: 710 };
+  const STEP = { w: 300, h: 120, y: 700 };
   STEP.x = [0, 1, 2].map(i => CODE.x - CODE.w / 2 + STEP.w / 2 + i * (CODE.w - STEP.w) / 2);
-  const RIGHT = { gateY: 588, savedY: 804, tagH: 48 };
+  const RIGHT = { gateY: 583, savedY: 794, tagH: 48 }; // the gate midway between the card and the steps
   const CARD_BOTTOM = CODE.y + CODE.h / 2 + 4, STEP_TOP = STEP.y - STEP.h / 2 - 6; // where the fan-out arrows run
   const GATE_HALF = 24; // half the height of the approval pill, which sits on the book_flight arrow
   // the run highlight: the gather block (lines 1-4), then the min line, then the book_flight line
@@ -63,8 +63,9 @@
   });
   const lineY = i => CODE.lineTop + i * CODE.lineH;
   const CHAR_W = 14.4; // advance of a 24 px JetBrains Mono character
-  // left edge of the best: $480 pill, on line 5 (the min line), 28 px right of the end of its code
-  const BEST_LEFT = CODE.textX + CODE.numW + lineLength(SCRIPT[4]) * CHAR_W + 28;
+  // left edge of the best: $480 pill, on line 5 (the min line), about 28 px right of the end of its code;
+  // rounded, with an even pill height, so the pill rests on whole pixels
+  const BEST_LEFT = Math.round(CODE.textX + CODE.numW + lineLength(SCRIPT[4]) * CHAR_W + 28), BEST_H = 42;
 
   // place() anchored on the element's left edge, so a pill keeps its gap to the code it follows
   const placeLeft = (e, x, y, scale, o) => {
@@ -98,7 +99,7 @@
 
   scene({
     chapter: 6, title: 'Code Mode',
-    // laid out at final stage coordinates on the grid (content y 151-890, centered at y 521)
+    // laid out at final stage coordinates on the grid (content y 150-880, centered at y 515)
     shift: [0, 0],
     subs: [
       {
@@ -150,9 +151,9 @@
         return e;
       });
       s.cursor = E(s.code, '', '', { width: '13px', height: '28px', background: C.violet, borderRadius: '2px' });
-      s.best = E(s.code, 'best: <span style="color:var(--ink)">$480</span>', 'pill violet', {
-        textTransform: 'none', letterSpacing: '.02em', fontSize: '22px', padding: '5px 14px', color: C.violet,
-        transformOrigin: '0 50%',
+      s.best = E(s.code, '<span>best: <span style="color:var(--ink)">$480</span></span>', 'pill violet', {
+        textTransform: 'none', letterSpacing: '.02em', fontSize: '22px', padding: '0 14px', color: C.violet,
+        height: BEST_H + 'px', display: 'flex', alignItems: 'center', transformOrigin: '0 50%',
       });
 
       // right: the calls made by the script, straight down from the card to each tool; book_flight via the gate
