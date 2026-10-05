@@ -51,7 +51,7 @@
     // both phases are laid out around (960, 540), lifted to the center of the free band (960, 522)
     shift: [0, -18],
     subs: [
-      { text: "A Workflow can even wait for days, for a delivery or a reply, without tying up a server.", after: 1.0 },
+      { text: "A Workflow can even wait for days, for a delivery or a reply, without tying up a Worker.", after: 1.0 },
       {
         text: "You write the business logic. Temporal handles retries, state and recovery, with full visibility.",
         after: 0.8,
@@ -115,7 +115,8 @@
       place(s.headline, 960, 358, 1, hp);
       s.headline.style.transform += ` translateY(${(1 - hp) * 20}px)`;
       place(s.handles, 960, 462, 1, P(t, c[1] + 1.9, 0.5));
-      // each tile pops in on its words in the subtitle
+      // the tiles pop in one by one while the subtitle lists what Temporal handles: the first on "retries",
+      // the last on "visibility"
       const at = [c[1] + 3.0, c[1] + 3.8, c[1] + 4.5, c[1] + 5.4];
       s.ben.forEach((e, i) => {
         const p = P(t, at[i], 0.45, backOut);

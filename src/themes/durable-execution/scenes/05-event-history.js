@@ -3,8 +3,6 @@
 // continues. Each Activity result travels to the history and is saved before the highlight moves on.
 // The block keeps every name declared in this file local to this scene.
 {
-  // brief bump (0 to 1 and back) peaking `lag` s after `at`, for pops on changes
-  const bumpAt = (t, at, lag = 0.1) => Math.max(0, 1 - Math.abs(t - at - lag) / 0.25);
   scene({
     chapter: 5, title: 'The Event History',
     shift: EH.shift,
@@ -29,7 +27,8 @@
       // first run: chargeCard (line 2, row 2) and reserveItem (line 3, row 3) are saved, then shipPackage runs
       const go = c[1] + 0.2, started = c[1] + 0.5;
       const run = [0, 1, 2].map(i => c[1] + 1.0 + i * 1.3);
-      const res = run.map(r => r + 0.5), saved = res.map(r => r + 0.6);
+      // only the first two finish before the crash of chapter 6
+      const res = run.slice(0, 2).map(r => r + RESULT_LAG), saved = res.map(r => r + SAVE_LAG);
 
       // Worker first, then Temporal and its Event History
       const wp = P(t, c[0] + 1.1, 0.5, backOut);
@@ -47,16 +46,11 @@
       let line = 0;
       run.forEach((r, i) => { line = lerp(line, i + 1, P(t, r, 0.25)); });
       setCodeLine(shot.code, line, P(t, go, 0.3));
-      const spinning = win(t, run[0] + 0.2, res[0], 0.15) + win(t, run[1] + 0.2, res[1], 0.15)
-        + P(t, run[2] + 0.2, 0.15);
+      const spinning = runningSpin(t, run[0]) + runningSpin(t, run[1]) + P(t, run[2] + 0.2, 0.15);
       setCodeSpinner(shot, line, spinning);
 
       // RESULT chips: from the line end to the history row, absorbed as the row is written
-      s.chips.forEach((e, i) => {
-        const r = res[i];
-        fly(e, t, r, EH.lineEndX, ehLineY(i + 1), r + 0.1, 0.45, EH.rowStartX, ehRowY(i + 1),
-          r + 0.55, EH.rowStartX, ehRowY(i + 1));
-      });
+      s.chips.forEach((e, i) => flyResultToHistory(e, t, res[i], i + 1));
 
       // Event History: "Workflow started", then one row per saved result, each tagged SAVED
       const written = [started, saved[0], saved[1]];

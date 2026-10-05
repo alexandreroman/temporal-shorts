@@ -5,7 +5,8 @@
 {
   const ROW = { x0: 480, gap: 320, y: 470, w: 260, h: 140 };
   const TOP_Y = 330, BOTTOM_Y = 690; // band above the row (tags, bolt, arrow) and below it (status, counter)
-  const STATUS_X = 640, CHARGE_X = 1280;
+  // the status pill grows to the right from a fixed left edge, mirroring the counter's right edge (1450) about x=960
+  const STATUS_LEFT = 470, CHARGE_X = 1280;
   // c[0]: each cause pops in on its word; the link under it flashes red and the tiles on each side jolt
   const CAUSES = [
     { label: 'Network cut', icon: 'plug', at: 2.0 },
@@ -34,6 +35,7 @@
       s.svg = svgLayer(root);
       s.steps = makeStepRow(root, s.svg, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       s.status = makeOrderStatus(root);
+      s.status.style.transformOrigin = 'left center';
       s.charge = makeCharge(root);
       s.causes = CAUSES.map(cause => {
         const e = tag(root, `${ICON(cause.icon, 24, C.red, 2)}${cause.label}`, 'red');
@@ -79,14 +81,16 @@
       // order status: PENDING, stuck after the crash, PENDING again once restarted
       const isStuck = t >= stuck && t < restart;
       setOrderStatus(s.status, isStuck ? 'PAID, NOT SHIPPED' : 'PENDING', isStuck ? C.red : C.slate);
-      const stp = P(t, 0.3, 0.45, backOut), stuckPop = win(t, stuck, stuck + 0.35, 0.15);
-      place(s.status, STATUS_X + sx, BOTTOM_Y + sy, stp * (1 + 0.12 * stuckPop), clamp(stp * 2));
+      const stp = P(t, 0.3, 0.45, backOut), stuckPop = bumpAt(t, stuck);
+      place(s.status, 0, 0, 1, clamp(stp * 2));
+      s.status.style.transform = `translate(${STATUS_LEFT + sx}px,${BOTTOM_Y + sy}px) translate(0,-50%) `
+        + `scale(${stp * (1 + 0.12 * stuckPop)})`;
       // card charged: $42 when Charge card completes, $84 when it completes a second time
       const paid1 = r1[0][1], paid2 = r2[0][1], twice = t >= paid2;
       if (twice) setCharge(s.charge, 84, 'CHARGED TWICE!', C.red, C.red);
       else setCharge(s.charge, t >= paid1 ? 42 : 0);
       s.charge.style.borderColor = twice ? C.red : C.line;
-      const bump = Math.max(win(t, paid1, paid1 + 0.3, 0.15), win(t, paid2, paid2 + 0.35, 0.15));
+      const bump = bumpAt(t, paid1) + bumpAt(t, paid2);
       const cp = P(t, 0.4, 0.45, backOut);
       place(s.charge, CHARGE_X + sx, BOTTOM_Y + sy, cp * (1 + 0.1 * bump), clamp(cp * 2));
       // crash: red flash, bolt over the running step, SERVER CRASH until the restart

@@ -91,7 +91,7 @@ money is tracked by a CARD CHARGED counter in dollars.
   tables, queues, timers, cleanup jobs.
   - Visuals: The code card ("BUSINESS LOGIC") in the middle; plumbing tiles
     pop in left and right, each wired to it: RETRY LOOPS, STATUS TABLE,
-    MESSAGE QUEUE, TIMERS, CLEANUP JOBS, IDEMPOTENCY KEYS.
+    MESSAGE QUEUE, TIMERS, CLEANUP JOBS, RECOVERY SCRIPTS.
 - **1:03** Soon the plumbing outweighs the business logic, and every corner
   case is a new bug to chase.
   - Visuals: LINES OF CODE bar: BUSINESS LOGIC (neon) stays thin while
@@ -153,7 +153,7 @@ money is tracked by a CARD CHARGED counter in dollars.
 ## 07 What you get
 
 - **2:14** A Workflow can even wait for days, for a delivery or a reply,
-  without tying up a server.
+  without tying up a Worker.
   - Visuals: Code card with `await sleep('30 days');` between
     `shipPackage` and `askForReview`; a DURABLE TIMER tile fast-forwards
     from day 1 to day 30 while the Worker shows FREE FOR OTHER WORK; on

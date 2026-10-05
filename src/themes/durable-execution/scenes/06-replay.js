@@ -7,8 +7,6 @@
   const REUSED_LABELS = ['REUSED, NOT RE-CHARGED', 'REUSED, NOT RE-RUN'];
   // "From the start": arrow beside the Worker panel, from line 4 back to line 1
   const ARC = { x0: 814, x1: 822, bulge: 905 };
-  // brief bump (0 to 1 and back) peaking `lag` s after `at`, for pops on changes
-  const bumpAt = (t, at, lag = 0.1) => Math.max(0, 1 - Math.abs(t - at - lag) / 0.25);
   scene({
     chapter: 6, title: 'When a Worker crashes',
     shift: EH.shift,
@@ -47,7 +45,7 @@
       const handed = replay.map(q => q + 0.3), back = handed.map(h => h + 0.6), told = back.map(b => b + 0.15);
       // carry on: shipPackage (line 4, row 4), emailReceipt (line 5, row 5), then "}" and "Workflow completed"
       const run = [0, 1].map(i => c[2] + 0.3 + i * 1.3);
-      const res = run.map(r => r + 0.5), saved = res.map(r => r + 0.6);
+      const res = run.map(r => r + RESULT_LAG), saved = res.map(r => r + SAVE_LAG);
       const finish = run[1] + 1.3, completed = finish + 0.3;
       const [sx, sy] = shakeAt(t, crashAt);
       const dead = t >= crashAt;
@@ -66,12 +64,9 @@
       workerA.st.style.opacity = 1 - P(t, bOn - 0.45, 0.25);
       workerB.st.style.opacity = P(t, bOn + 0.2, 0.25);
 
-      // CARD CHARGED: $42 all along; the replay charges nothing, the order completes with one charge
-      const kept = bumpAt(t, back[0]);
-      const once = bumpAt(t, completed, 0.2);
-      placeEventHistoryShot(shot, {
-        code: 1, charge: 1, order: 1, temporal: 1, hist: 1, chargePop: Math.max(kept, once),
-      }, sx, sy);
+      // CARD CHARGED: $42 all along; the replay charges nothing, the order completes with one charge (each note pops)
+      const chargePop = bumpAt(t, back[0]) + bumpAt(t, completed);
+      placeEventHistoryShot(shot, { code: 1, charge: 1, order: 1, temporal: 1, hist: 1, chargePop }, sx, sy);
       const note = t >= completed ? 'CHARGED ONCE' : t >= back[0] ? 'NOT RE-CHARGED' : '';
       setCharge(shot.charge, 42, note, C.neon);
       shot.charge.style.borderColor = note ? C.neon : C.line;
@@ -87,8 +82,7 @@
       const barOn = dead ? P(t, jump, 0.2) * (1 - P(t, completed + 0.3, 0.4)) : 1;
       const lineSx = dead ? 0 : sx, lineSy = dead ? 0 : sy;
       setCodeLine(shot.code, line, barOn);
-      const spinning = (1 - P(t, crashAt, 0.05)) + win(t, run[0] + 0.2, res[0], 0.15)
-        + win(t, run[1] + 0.2, res[1], 0.15);
+      const spinning = (1 - P(t, crashAt, 0.05)) + runningSpin(t, run[0]) + runningSpin(t, run[1]);
       setCodeSpinner(shot, line, spinning, lineSx, lineSy);
       // "From the start": drawn as the highlight jumps back, gone once the replay starts
       const arcOut = 1 - P(t, replay[0] - 0.3, 0.3);
@@ -96,16 +90,8 @@
       place(s.restartL, ARC.x1 + 85, ehLineY(0) - 44, 1, P(t, jump + 0.4, 0.35) * arcOut);
 
       // RESULT chips: back from the history to the code when replaying, to the history when running for real
-      s.reuseChips.forEach((e, i) => {
-        const h = handed[i];
-        fly(e, t, h, EH.rowStartX, ehRowY(i + 1), h + 0.1, 0.45, EH.lineEndX, ehLineY(i + 1),
-          h + 0.55, EH.lineEndX, ehLineY(i + 1));
-      });
-      s.saveChips.forEach((e, i) => {
-        const r = res[i];
-        fly(e, t, r, EH.lineEndX, ehLineY(i + 3), r + 0.1, 0.45, EH.rowStartX, ehRowY(i + 3),
-          r + 0.55, EH.rowStartX, ehRowY(i + 3));
-      });
+      s.reuseChips.forEach((e, i) => flyResultToCode(e, t, handed[i], i + 1));
+      s.saveChips.forEach((e, i) => flyResultToHistory(e, t, res[i], i + 3));
 
       // Event History: rows 1-3 kept through the crash, replayed rows lit and re-tagged, then rows 4-6 written
       const hist = shot.hist;

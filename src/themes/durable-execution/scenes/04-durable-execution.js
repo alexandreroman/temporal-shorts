@@ -18,20 +18,12 @@
   const MARK = 30;
 
   // Activity tile: icon, ACTIVITY kicker and label, with the makeStep status marks (see stepState)
-  const makeActivity = (p, step) => {
-    const e = E(p,
-      '<div style="display:flex;align-items:center;gap:16px;height:100%;padding-left:20px">'
-      + `${ICON(step.icon, 36, C.ink)}<div style="text-align:left">`
-      + '<div class="lbl" style="font-size:13px;padding-left:0">Activity</div>'
-      + `<div style="font-size:21px;margin-top:4px;white-space:nowrap">${step.label}</div></div></div>`
-      + '<div class="spin" style="position:absolute;right:12px;top:12px;width:26px;height:26px;'
-      + `border:3px solid rgba(182,100,255,.25);border-top-color:${C.violet};border-radius:50%;opacity:0"></div>`
-      + `<div class="ok" style="position:absolute;right:8px;top:8px;opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`
-      + `<div class="ko" style="position:absolute;right:8px;top:8px;opacity:0">${ICON('x', 32, C.red, 2.6)}</div>`,
-      'tile', { width: TILE.w + 'px', height: TILE.h + 'px' });
-    e.spin = e.querySelector('.spin'); e.ok = e.querySelector('.ok'); e.ko = e.querySelector('.ko');
-    return e;
-  };
+  const makeActivity = (p, step) => addStatusMarks(E(p,
+    '<div style="display:flex;align-items:center;gap:16px;height:100%;padding-left:20px">'
+    + `${ICON(step.icon, 36, C.ink)}<div style="text-align:left">`
+    + '<div class="lbl" style="font-size:13px;padding-left:0">Activity</div>'
+    + `<div style="font-size:21px;margin-top:4px;white-space:nowrap">${step.label}</div></div></div>`,
+    'tile', { width: TILE.w + 'px', height: TILE.h + 'px' }));
   const makeService = (p, name) => E(p,
     `${ICON('server', 20, C.slate, 1.8)}<span class="mono" style="font-size:16px;letter-spacing:.1em;`
     + `text-transform:uppercase;color:var(--slate)">${name}</span>`,

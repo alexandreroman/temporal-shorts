@@ -8,18 +8,19 @@
   const Y0 = 540;
   const CARD = { x: 960, y: Y0 - 50 };
   const TILE = { w: 250, h: 120, leftX: 405, rightX: 1515, pitch: 150 };
-  // the tiles in popping order, alternating sides; wireY: where the wire meets the card edge
+  // the tiles in popping order, alternating sides; at: when the tile pops in (s after c[0]), on its word in the
+  // subtitle; the last one, never named, closes the list right after "cleanup jobs"
   const PLUMBING = [
-    { icon: 'retry', label: 'Retry loops', side: -1, row: 0 },
-    { icon: 'table', label: 'Status table', side: 1, row: 0 },
-    { icon: 'queue', label: 'Message queue', side: -1, row: 1 },
-    { icon: 'clock', label: 'Timers', side: 1, row: 1 },
-    { icon: 'trash', label: 'Cleanup jobs', side: -1, row: 2 },
-    { icon: 'key', label: 'Idempotency keys', side: 1, row: 2 },
+    { icon: 'retry', label: 'Retry loops', side: -1, row: 0, at: 2.75 },
+    { icon: 'table', label: 'Status table', side: 1, row: 0, at: 3.3 },
+    { icon: 'queue', label: 'Message queue', side: -1, row: 1, at: 4.25 },
+    { icon: 'clock', label: 'Timers', side: 1, row: 1, at: 4.75 },
+    { icon: 'trash', label: 'Cleanup jobs', side: -1, row: 2, at: 5.25 },
+    { icon: 'code', label: 'Recovery scripts', side: 1, row: 2, at: 5.8 },
   ];
   const tileX = p => (p.side < 0 ? TILE.leftX : TILE.rightX);
   const tileY = p => Y0 + (p.row - 1) * TILE.pitch;
-  const wireY = p => CARD.y + (p.row - 1) * 80;
+  const wireY = p => CARD.y + (p.row - 1) * 80; // where the wire meets the card edge
   // LINES OF CODE bar: business logic stays thin, plumbing grows to fill the rest (whole pixels at rest)
   const BAR = { w: 640, h: 40, biz: 96, gap: 4 };
   const plumbingWidth = BAR.w - BAR.biz - BAR.gap;
@@ -75,10 +76,10 @@
       place(s.card, CARD.x, CARD.y, cp, clamp(cp * 2));
       place(s.cardL, CARD.x, CARD.y - s.card.h / 2 - 26, 1, P(t, c[0] + 0.5, 0.4));
 
-      // plumbing tiles pop in as the subtitle names them, each wired to the card
+      // plumbing tiles pop in on their words, each wired to the card
       const bugAt = BUGGY.map((_, k) => c[1] + 3.6 + k * 0.35);
       PLUMBING.forEach((p, i) => {
-        const at = c[0] + 1.4 + i * 0.7;
+        const at = c[0] + p.at;
         const tp = P(t, at, 0.45, backOut);
         const k = BUGGY.indexOf(i);
         const buggy = k >= 0 && t >= bugAt[k];
@@ -94,7 +95,7 @@
       s.biz.style.width = Math.round(BAR.biz * P(t, c[1] + 0.5, 0.5)) + 'px';
       s.bizL.style.opacity = P(t, c[1] + 0.7, 0.4);
       const grow = P(t, c[1] + 1.2, 2.2);
-      s.plumb.style.width = (grow < 1 ? plumbingWidth * grow : plumbingWidth) + 'px';
+      s.plumb.style.width = Math.round(plumbingWidth * grow) + 'px';
       s.plumbL.style.opacity = P(t, c[1] + 1.4, 0.4);
 
       // bugs pop on the corner of several plumbing tiles
