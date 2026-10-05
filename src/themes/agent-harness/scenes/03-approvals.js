@@ -8,11 +8,12 @@
   // the gate blocks are wide enough for the rules' full tool names; their left edge keeps 20 px from the parked call
   const GATE = { x: 860, w: 300, topY: 320, rulesY: 572, rulesH: 184, judgeY: 197 };
   const PARK = { x: 550, y: LANE }; // where a gated call stops, in front of the gate
-  const TOOLS = { x: 1460, y: 440, rowX: 1460, rows: [335, 445, 555] };
+  // rows 120 px apart, so a status tag stays twice as close to its own call as to the next row
+  const TOOLS = { x: 1460, y: 460, h: 440, rowX: 1460, rows: [345, 465, 585] };
   const YOU = { x: 860, y: 770 };
   const FROM = [470, LANE]; // where a call pops out, next to the agent
   const EXIT_X = 1100; // past the gate, where a call turns toward its tool row
-  const TAG_DY = 46; // a status tag sits under its call
+  const TAG_DY = 54; // a status tag sits under its call, 13 px clear of it
   const WAITS = ['5 MIN', '30 MIN', '3 H', '9 H', '1 DAY', '2 DAYS'];
 
   // position along a route: starts at `from`, then eases to each [at, d, x, y] leg in turn (legs may overlap)
@@ -61,8 +62,8 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.lane = path(s.svg, `M 300 ${LANE} L 1170 ${LANE}`, C.line, 2, false, '6,12');
-      const askD = `M ${PARK.x} 505 C ${PARK.x} 680 600 ${YOU.y} ${YOU.x - 112} ${YOU.y}`;
-      s.ask = path(s.svg, askD, C.violet, 2.5, true, '8,8');
+      const askD = `M ${PARK.x} 520 C ${PARK.x} 680 600 ${YOU.y} ${YOU.x - 112} ${YOU.y}`;
+      s.ask = arrowPath(s.svg, askD, C.violet, 2.5, '8,8');
       s.agent = makeLLM(root, 160, 'AGENT');
 
       // the gate: policy block above the lane, its rules below it, by tool name (the catch-all row in slate)
@@ -95,7 +96,7 @@
       s.tools = E(root,
         '<div class="lbl" style="position:absolute;left:22px;top:16px;display:flex;gap:10px;align-items:center">'
         + `${ICON('gear', 22, C.slate, 1.8)} Tools</div>`,
-        'tile', { width: '560px', height: '400px', textAlign: 'left' });
+        'tile', { width: '560px', height: TOOLS.h + 'px', textAlign: 'left' });
 
       // the person who approves, with the two buttons
       s.you = iconTile(root, 'user', 'You', 200, 150);

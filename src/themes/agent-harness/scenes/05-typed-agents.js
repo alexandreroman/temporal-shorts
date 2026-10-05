@@ -10,143 +10,204 @@
     [sig('plan_trip', [['destination', 'str'], ['nights', 'int']]), 'Itinerary'],
     [sig('set_budget', [['max_usd', 'float']]), 'Ack'],
   ];
-  const CALENDAR_OPS = [
-    [sig('free_days', [['month', 'str']]), 'Dates'],
-    [sig('add_event', [['day', 'date'], ['title', 'str']]), 'Ack'],
-  ];
-  const CARD_H = 280;
-  // phase 1: the crossed-out pill on the left, TravelAgent in the middle
-  const PILL = { x: 490, y: 522 };
-  const TRAVEL_SOLO = { x: 1205, y: 522 };
-  // phase 2: the parent agent on top, its two subagents below, linked from the parent's sides
-  const PARENT = { x: 960, y: 215, w: 460, h: 100 };
-  const TRAVEL = { x: 580, y: 730, w: 840 };
-  const CALENDAR = { x: 1400, y: 730, w: 680 };
-  const CHILD_TOP = TRAVEL.y - CARD_H / 2;
-  // typed request and result cards ride down and up just right of the TravelAgent link
-  const CARD_X = TRAVEL.x + 20 + 165, CARD_HIGH = 340, CARD_LOW = 500;
-  const PLAN_ROW_Y = CHILD_TOP + 176; // plan_trip row, where the request lands and the result leaves
 
-  // agent card: icon and name, OPERATIONS label, INPUT / OUTPUT column labels, one row per typed operation
-  const makeAgentCard = (p, name, ops, w, outW) => {
+  // Agent card layout, in explicit heights so the rows of both cards line up across the gap
+  const CARD = { pad: 28, head: 72, rule: 44, cols: 20, rowH: 70, rowGap: 20 };
+  const CARD_H = 2 * CARD.pad + CARD.head + CARD.rule + CARD.cols + 2 * (CARD.rowGap + CARD.rowH);
+  // center of row i, measured from the card's center
+  const rowDy = i => CARD.pad + CARD.head + CARD.rule + CARD.cols + CARD.rowGap
+    + i * (CARD.rowH + CARD.rowGap) + CARD.rowH / 2 - CARD_H / 2;
+  const ROW_BG = 'rgba(248,250,252,.04)';
+  const ROW_CSS = `display:flex;align-items:center;height:${CARD.rowH}px;margin-top:${CARD.rowGap}px;padding:0 16px;`
+    + `border:1.5px solid transparent;border-radius:var(--rs);background:${ROW_BG}`;
+
+  // phase 1: the crossed-out pill on the left, TravelAgent on the right
+  const PILL = { x: 500, y: 522 };
+  const TRAVEL_SOLO = { x: 1215, y: 522 };
+  // phase 2: the Trip planner on the left, TravelAgent on the right, a 500 px gap between them for the calls.
+  // The cards sit lower than in phase 1: the READS ITS INTERFACE link arches over them.
+  const CARDS_Y = 568, CARDS_TOP = CARDS_Y - CARD_H / 2;
+  const PARENT = { x: 290, y: CARDS_Y, w: 380 };
+  const TRAVEL = { x: 1400, y: CARDS_Y, w: 840 };
+  const GAP = { x0: PARENT.x + PARENT.w / 2, x1: TRAVEL.x - TRAVEL.w / 2 };
+  const GAP_MID = (GAP.x0 + GAP.x1) / 2;
+  // the interface link leaves TravelAgent's top, runs at ARCH_Y and drops onto the Trip planner's top
+  const ARCH_Y = CARDS_TOP - 64, ARCH_X0 = PARENT.x, ARCH_X1 = GAP.x1 + 140;
+  // plan_trip is the first row of both cards: the request runs along its top edge, the result along its bottom
+  // edge. Each label sits just outside its arrow, and each value card rides outside its label, so a card in
+  // transit never covers an arrow, a label or a card's text.
+  const PLAN_Y = CARDS_Y + rowDy(0);
+  const REQUEST_Y = PLAN_Y - 30, RESULT_Y = PLAN_Y + 30;
+  const LBL_DY = 22; // label center from its arrow
+  const VALUE = { w: 310, requestH: 116, resultH: 88, clear: 24 }; // clear: from the label's center to the card
+  const REQUEST_CARD_Y = REQUEST_Y - LBL_DY - VALUE.clear - VALUE.requestH / 2;
+  const RESULT_CARD_Y = RESULT_Y + LBL_DY + VALUE.clear + VALUE.resultH / 2;
+  // value cards travel inside the gap, 18 px from each card (room for the pop-in overshoot)
+  const VALUE_X0 = GAP.x0 + 18 + VALUE.w / 2, VALUE_X1 = GAP.x1 - 18 - VALUE.w / 2;
+  // where the plan_trip names sit in each card (chip and value cards leave and land there)
+  const TRAVEL_NAME_X = GAP.x1 + 107, PARENT_NAME_X = GAP.x0 - PARENT.w + 107, PARENT_NAME_Y = PLAN_Y - 15;
+
+  // agent card: icon, name and a small label, a column header, then the rows (typed operations or tools)
+  const makeAgentCard = (p, name, label, colsHtml, rowsHtml, w) => {
     const e = E(p,
-      `<div style="display:flex;align-items:center;gap:16px"><div style="flex:none">${ICON('agent', 46, C.ink)}</div>`
-      + `<div><div style="font-size:32px;line-height:1.1">${name}</div>`
-      + '<div class="lbl" style="font-size:15px;padding-left:0;margin-top:4px">Operations</div></div>'
+      `<div style="display:flex;align-items:center;gap:16px;height:${CARD.head}px">`
+      + `<div style="flex:none">${ICON('agent', 46, C.ink)}</div>`
+      + `<div><div style="font-size:34px;line-height:1.1">${name}</div>`
+      + `<div class="lbl" style="font-size:15px;padding-left:0;margin-top:4px">${label}</div></div>`
       + '<div class="tagSlot" style="margin-left:auto"></div></div>'
-      + '<div style="height:1.5px;background:var(--line);margin:16px 0 12px"></div>'
-      + '<div class="cols mono" style="display:flex;font-size:14px;letter-spacing:.12em;color:var(--slate);'
-      + 'padding:0 17.5px"><span style="flex:1">INPUT</span>'
-      + `<span style="width:${outW + 40}px;padding-left:40px">OUTPUT</span></div>`
-      + ops.map(([signature, out]) => '<div class="op" style="display:flex;align-items:center;margin-top:10px;'
-        + 'padding:9px 16px;border:1.5px solid transparent;border-radius:var(--rs);background:rgba(248,250,252,.04)">'
-        + `<span class="mono" style="flex:1;font-size:22px;white-space:nowrap">${signature}</span>`
-        + '<span class="mono" style="width:40px;font-size:22px;color:var(--slate)">→</span>'
-        + `<span style="width:${outW}px"><span class="mono" style="font-size:22px;padding:2px 10px;border-radius:4px;`
-        + `border:1.5px solid ${C.uv};background:rgba(68,76,231,.18)">${out}</span></span></div>`).join(''),
-      'tile', { width: w + 'px', height: CARD_H + 'px', padding: '22px 28px', textAlign: 'left' });
+      + '<div style="height:2px;background:var(--line);margin:20px 0 22px"></div>' // CARD.rule in total
+      + `<div class="cols mono" style="display:flex;height:${CARD.cols}px;line-height:${CARD.cols}px;font-size:14px;`
+      + `letter-spacing:.12em;color:var(--slate);padding:0 17.5px">${colsHtml}</div>`
+      + rowsHtml,
+      'tile', { width: w + 'px', height: CARD_H + 'px', padding: `${CARD.pad}px 28px`, textAlign: 'left' });
     e.cols = e.querySelector('.cols');
-    e.ops = [...e.querySelectorAll('.op')];
+    e.rows = [...e.querySelectorAll('.row')];
     e.tagSlot = e.querySelector('.tagSlot');
     return e;
   };
-  // light card carrying a typed value along a link: a label, the operation or type, then the fields
+  // TravelAgent: one row per typed operation, signature then output type
+  const makeTravelCard = p => {
+    const outW = 150;
+    const rows = TRAVEL_OPS.map(([signature, out]) => `<div class="row" style="${ROW_CSS}">`
+      + `<span class="mono" style="flex:1;font-size:22px;white-space:nowrap">${signature}</span>`
+      + '<span class="mono" style="width:40px;font-size:22px;color:var(--slate)">→</span>'
+      + `<span style="width:${outW}px"><span class="mono" style="font-size:22px;padding:2px 10px;border-radius:4px;`
+      + `border:1.5px solid ${C.uv};background:rgba(68,76,231,.18)">${out}</span></span></div>`).join('');
+    const cols = `<span style="flex:1">INPUT</span><span style="width:${outW + 40}px;padding-left:40px">OUTPUT</span>`;
+    return makeAgentCard(p, 'TravelAgent', 'Operations', cols, rows, TRAVEL.w);
+  };
+  // Trip planner: its tools as rows; plan_trip (copied from TravelAgent) is inserted above search_web.
+  // The plan_trip row carries where it comes from, under its name, and a check slot for the result.
+  const makeParentCard = p => {
+    const rows = `<div class="row" style="${ROW_CSS}">`
+      + '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px">'
+      + '<b class="mono" style="font-size:22px;line-height:26px">plan_trip</b>'
+      + '<span class="from mono" style="display:inline-block;font-size:16px;line-height:20px;letter-spacing:.06em;'
+      + `padding:2px 8px;border-radius:4px;border:1.5px solid ${C.uv};background:rgba(68,76,231,.16);`
+      + 'color:var(--slate);transform-origin:left center">'
+      + 'FROM <span style="color:var(--ink)">TravelAgent</span></span></div>'
+      + `<span class="ok" style="margin-left:auto;display:flex">${ICON('check', 28, C.neon, 2.6)}</span></div>`
+      + `<div class="row" style="${ROW_CSS}"><b class="mono" style="font-size:22px">search_web</b></div>`;
+    const e = makeAgentCard(p, 'Trip planner', 'Agent', '<span>TOOLS</span>', rows, PARENT.w);
+    e.from = e.querySelector('.from');
+    e.ok = e.querySelector('.ok');
+    return e;
+  };
+  // light card carrying a typed value along an arrow: a label and the operation or type, then the fields.
+  // Its height is 12 + 28 + 6 + 28 per field + 14 px (VALUE.requestH, VALUE.resultH).
   const makeValueCard = (p, label, title, fields, accent) => E(p,
-    `<div class="mono" style="font-size:15px;letter-spacing:.12em;color:#5B6475">${label} `
-    + `<b style="color:#141414;font-size:18px;letter-spacing:0">${title}</b></div>`
-    + `<div class="mono" style="font-size:22px;line-height:1.35;margin-top:4px">${fields}</div>`,
+    '<div style="display:flex;align-items:baseline;gap:12px;line-height:28px">'
+    + `<span class="mono" style="font-size:16px;letter-spacing:.12em;color:#5B6475">${label}</span>`
+    + `<b class="mono" style="font-size:22px">${title}</b></div>`
+    + `<div class="mono" style="font-size:20px;line-height:28px;margin-top:6px">${fields}</div>`,
     '', {
-      width: '330px', background: '#F8FAFC', color: '#141414', padding: '10px 18px 12px',
-      borderLeft: `6px solid ${accent}`, borderRadius: 'var(--r)',
+      width: VALUE.w + 'px', background: '#F8FAFC', color: '#141414', padding: '12px 20px 14px', whiteSpace: 'nowrap',
+      borderLeft: `6px solid ${accent}`, borderRadius: 'var(--r)', boxShadow: '0 10px 30px rgba(0,0,0,.45)',
     });
+  const field = (name, value) => `<span style="color:#5B6475">${name}:</span> ${value}`;
 
   scene({
     chapter: 5, title: 'Typed, composable agents',
-    // both phases are centered on the same point, so one fixed offset fits
-    shift: [10, 4],
+    // both phases are laid out around the stage center (the cards move down at c[1]), so no offset is needed
+    shift: [0, 0],
     subs: [
       {
         text: "An agent is more than text in, text out: it exposes typed operations, with their inputs and outputs.",
         after: 0.6,
       },
       {
-        text: "It describes itself, so other agents can drive it as a tool: multi-agent systems with real contracts.",
+        text: "Other agents read that interface and call it as a tool: a typed request in, a typed result out.",
         after: 0.6,
       },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
+      // the strike sits on the pill's center line and overhangs its 1.5 px border by 8 px on each side
       s.pill = E(root,
         '<span class="txt">Text in, text out</span>'
-        + '<div class="strike" style="position:absolute;left:-10px;right:-10px;top:50%;height:4px;margin-top:-2px;'
-        + `background:${C.red};border-radius:2px;transform-origin:left center"></div>`, 'pill big');
+        + '<div class="strike" style="position:absolute;left:-9.5px;right:-9.5px;top:50%;height:4px;margin-top:-2px;'
+        + `background:${C.red};border-radius:2px;transform:rotate(-4deg)"></div>`, 'pill big');
       s.pill.txt = s.pill.querySelector('.txt'); s.pill.strike = s.pill.querySelector('.strike');
-      s.travel = makeAgentCard(root, 'TravelAgent', TRAVEL_OPS, TRAVEL.w, 150);
+      s.parent = makeParentCard(root);
+      s.travel = makeTravelCard(root);
       s.self = E(s.travel.tagSlot, 'Self-describing', 'pill uv', {
         position: 'static', display: 'inline-block', fontSize: '16px', padding: '6px 12px 6px calc(12px + .1em)',
       });
-      s.parent = E(root,
-        `<div style="flex:none">${ICON('agent', 46, C.ink)}</div><div style="margin-left:16px">`
-        + '<div style="font-size:30px;line-height:1.1">Trip planner</div>'
-        + '<div class="lbl" style="font-size:15px;padding-left:0;margin-top:4px">Parent agent</div></div>'
-        + `<div class="ok" style="margin-left:auto;flex:none">${ICON('check', 34, C.neon, 2.6)}</div>`,
-        'tile', {
-          width: PARENT.w + 'px', height: PARENT.h + 'px', display: 'flex', alignItems: 'center', padding: '0 26px',
-          textAlign: 'left',
-        });
-      s.parent.ok = s.parent.querySelector('.ok');
-      s.calendar = makeAgentCard(root, 'CalendarAgent', CALENDAR_OPS, CALENDAR.w, 100);
-      // links leave the parent's sides and drop onto each subagent
-      const linkTo = (fromX, x) => {
-        const dir = Math.sign(x - fromX);
-        return `M ${fromX} ${PARENT.y} H ${x - dir * 20} Q ${x} ${PARENT.y} ${x} ${PARENT.y + 20} V ${CHILD_TOP - 8}`;
-      };
-      s.links = [
-        path(s.svg, linkTo(PARENT.x - PARENT.w / 2, TRAVEL.x), C.uv, 3),
-        path(s.svg, linkTo(PARENT.x + PARENT.w / 2, CALENDAR.x), C.uv, 3),
-      ];
-      s.contracts = [0, 1].map(() => E(root, 'Typed contract', 'lbl', { color: 'var(--ink)' }));
-      s.request = makeValueCard(root, 'REQUEST', 'plan_trip', 'destination: "Lisbon"<br>nights: 3', C.uv);
-      s.result = makeValueCard(root, 'RESULT', 'Itinerary', 'total_usd: 895', C.violet);
+      // the three exchanges between the cards, each with its label on its outer side
+      const r = 18;
+      const arch = `M ${ARCH_X1} ${CARDS_TOP - 10} V ${ARCH_Y + r} Q ${ARCH_X1} ${ARCH_Y} ${ARCH_X1 - r} ${ARCH_Y}`
+        + ` H ${ARCH_X0 + r} Q ${ARCH_X0} ${ARCH_Y} ${ARCH_X0} ${ARCH_Y + r} V ${CARDS_TOP - 12}`;
+      s.readArrow = arrowPath(s.svg, arch, C.slate, 3, '9 9');
+      s.requestArrow = arrowPath(s.svg, `M ${GAP.x0 + 16} ${REQUEST_Y} L ${GAP.x1 - 16} ${REQUEST_Y}`, C.uv, 3);
+      s.resultArrow = arrowPath(s.svg, `M ${GAP.x1 - 16} ${RESULT_Y} L ${GAP.x0 + 16} ${RESULT_Y}`, C.violet, 3);
+      s.readLbl = E(root, 'Reads its interface', 'lbl', { fontSize: '16px' });
+      s.requestLbl = E(root, 'Typed request', 'lbl', { fontSize: '16px' });
+      s.resultLbl = E(root, 'Typed result', 'lbl', { fontSize: '16px' });
+      s.chip = callCard(root, 'plan_trip', '', 'uv');
+      s.chip.style.background = OPAQUE.uv;
+      s.request = makeValueCard(root, 'REQUEST', 'plan_trip',
+        field('destination', '"Lisbon"') + '<br>' + field('nights', '3'), C.uv);
+      s.result = makeValueCard(root, 'RESULT', 'Itinerary', field('total_usd', '895'), C.violet);
     },
     update(t, c, s) {
       // phase 1: "text in, text out" is struck out, TravelAgent lists its typed operations
       const pp = P(t, c[0] + 0.1, 0.5, backOut);
-      place(s.pill, PILL.x, PILL.y, pp, clamp(pp * 2) * (1 - P(t, c[1], 0.4)));
+      place(s.pill, PILL.x, PILL.y, pp, clamp(pp * 2) * (1 - P(t, c[1], 0.35)));
+      // the strike is drawn from left to right by clipping its end, so it keeps its centered position
       const struck = P(t, c[0] + 1.2, 0.35);
-      s.pill.strike.style.transform = `rotate(-5deg) scaleX(${struck})`;
+      s.pill.strike.style.clipPath = `inset(0 ${((1 - struck) * 100).toFixed(2)}% 0 0)`;
       s.pill.txt.style.opacity = lerp(1, 0.5, struck);
 
-      // phase 2: TravelAgent moves under the parent; the request goes down, the result comes back up
-      const move = P(t, c[1] + 0.4, 0.9);
       const tp = P(t, c[0] + 1.6, 0.5, backOut);
+      const move = P(t, c[1] + 0.05, 0.7);
       place(s.travel, lerp(TRAVEL_SOLO.x, TRAVEL.x, move), lerp(TRAVEL_SOLO.y, TRAVEL.y, move), tp, clamp(tp * 2));
       showRow(s.travel.cols, P(t, c[0] + 2.3, 0.3));
-      s.travel.ops.forEach((row, i) => showRow(row, P(t, c[0] + 2.6 + i * 0.8, 0.35)));
+      s.travel.rows.forEach((row, i) => showRow(row, P(t, c[0] + 2.6 + i * 0.8, 0.35)));
       const sp = P(t, c[1] + 0.15, 0.45, backOut);
       s.self.style.opacity = clamp(sp * 2);
       s.self.style.transform = `scale(${sp})`;
 
-      const parentIn = P(t, c[1] + 1.2, 0.5, backOut);
+      // phase 2: the Trip planner appears with its tools
+      const parentIn = P(t, c[1] + 0.3, 0.5, backOut);
       place(s.parent, PARENT.x, PARENT.y, parentIn, clamp(parentIn * 2));
-      const calIn = P(t, c[1] + 1.4, 0.5, backOut);
-      place(s.calendar, CALENDAR.x, CALENDAR.y, calIn, clamp(calIn * 2));
-      showRow(s.calendar.cols, P(t, c[1] + 1.5, 0.3));
-      s.calendar.ops.forEach(row => showRow(row, P(t, c[1] + 1.6, 0.35)));
-      s.links.forEach((link, i) => draw(link, P(t, c[1] + 1.9 + i * 0.15, 0.5)));
-      place(s.contracts[0], TRAVEL.x - 122, 420, 1, P(t, c[1] + 2.3, 0.4));
-      place(s.contracts[1], CALENDAR.x + 122, 420, 1, P(t, c[1] + 2.45, 0.4));
+      showRow(s.parent.cols, P(t, c[1] + 0.5, 0.3));
 
-      const sent = c[1] + 2.8, landed = c[1] + 4.0, answered = c[1] + 4.8, received = c[1] + 6.1;
-      fly(s.request, t, sent, CARD_X, CARD_HIGH, sent + 0.2, 0.9, CARD_X, CARD_LOW, landed, TRAVEL.x, PLAN_ROW_Y);
-      fly(s.result, t, answered, CARD_X, CARD_LOW, answered + 0.2, 0.9, CARD_X, CARD_HIGH,
-        received, PARENT.x, PARENT.y);
-      // TravelAgent works on plan_trip between the request landing and the result leaving
-      const working = win(t, landed + 0.2, answered + 0.1, 0.2);
-      const planRow = s.travel.ops[0];
-      planRow.style.borderColor = working > 0.5 ? C.uv : 'transparent';
-      planRow.style.background = `rgba(68,76,231,${lerp(0.04, 0.22, working)})`;
-      const ok = P(t, received + 0.3, 0.4, backOut);
+      // step 1: the Trip planner reads TravelAgent's interface and plan_trip joins its tools
+      draw(s.readArrow, P(t, c[1] + 0.6, 0.4));
+      place(s.readLbl, (ARCH_X0 + ARCH_X1) / 2, ARCH_Y - 26, 1, P(t, c[1] + 0.7, 0.35));
+      const copied = c[1] + 1.15;
+      fly(s.chip, t, c[1] + 1.0, TRAVEL_NAME_X, PLAN_Y, copied, 0.7, PARENT_NAME_X, PARENT_NAME_Y,
+        copied + 0.7, PARENT_NAME_X, PARENT_NAME_Y);
+      // search_web sits in the first row, then slides down to make room before the chip lands
+      const inserted = P(t, copied + 0.1, 0.4);
+      const [planRow, searchRow] = s.parent.rows;
+      showRow(planRow, P(t, copied + 0.7, 0.35));
+      searchRow.style.opacity = P(t, c[1] + 0.6, 0.35);
+      searchRow.style.transform = `translateY(${(-(CARD.rowH + CARD.rowGap) * (1 - inserted)).toFixed(2)}px)`;
+      const fp = P(t, copied + 0.95, 0.4, backOut);
+      s.parent.from.style.opacity = clamp(fp * 2);
+      s.parent.from.style.transform = `scale(${fp})`;
+
+      // step 2: the Trip planner calls plan_trip with a typed request; TravelAgent works on it
+      const sent = c[1] + 2.4, landed = sent + 1.05;
+      draw(s.requestArrow, P(t, sent, 0.4));
+      place(s.requestLbl, GAP_MID, REQUEST_Y - LBL_DY, 1, P(t, sent + 0.15, 0.35));
+      fly(s.request, t, sent + 0.2, VALUE_X0, REQUEST_CARD_Y, sent + 0.35, 0.7, VALUE_X1, REQUEST_CARD_Y,
+        landed, TRAVEL_NAME_X, PLAN_Y);
+      const answered = c[1] + 4.4;
+      const working = win(t, landed + 0.15, answered + 0.2, 0.2);
+      const travelPlan = s.travel.rows[0];
+      travelPlan.style.borderColor = working > 0.5 ? C.violet : 'transparent';
+      travelPlan.style.background = working > 0 ? `rgba(182,100,255,${(0.16 * working).toFixed(3)})` : ROW_BG;
+      travelPlan.style.boxShadow = `0 0 ${Math.round(22 * working)}px rgba(182,100,255,${(0.35 * working).toFixed(2)})`;
+
+      // step 3: the typed result comes back and the tool row checks
+      const received = answered + 1.05;
+      draw(s.resultArrow, P(t, answered, 0.4));
+      place(s.resultLbl, GAP_MID, RESULT_Y + LBL_DY, 1, P(t, answered + 0.15, 0.35));
+      fly(s.result, t, answered + 0.2, VALUE_X1, RESULT_CARD_Y, answered + 0.35, 0.7, VALUE_X0, RESULT_CARD_Y,
+        received, PARENT_NAME_X, PARENT_NAME_Y);
+      const ok = P(t, received + 0.25, 0.45, backOut);
       s.parent.ok.style.opacity = clamp(ok * 2);
       s.parent.ok.style.transform = `scale(${ok})`;
     }

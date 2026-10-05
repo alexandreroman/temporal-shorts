@@ -124,12 +124,12 @@
       });
 
       // right: the calls made by the script, fanning out from the card
-      s.fanFlights = path(s.svg, `M ${CODE.x} ${CARD_BOTTOM} C ${CODE.x} 610, ${RIGHT.toolX[0]} 600, `
+      s.fanFlights = arrowPath(s.svg, `M ${CODE.x} ${CARD_BOTTOM} C ${CODE.x} 610, ${RIGHT.toolX[0]} 600, `
         + `${RIGHT.toolX[0]} 680`, C.uv, 3);
-      s.fanHotels = path(s.svg, `M ${CODE.x} ${CARD_BOTTOM} L ${CODE.x} 680`, C.uv, 3);
-      s.toGate = path(s.svg, `M ${CODE.x} ${CARD_BOTTOM} C ${CODE.x} 580, ${RIGHT.toolX[2]} 560, `
+      s.fanHotels = arrowPath(s.svg, `M ${CODE.x} ${CARD_BOTTOM} L ${CODE.x} 680`, C.uv, 3);
+      s.toGate = arrowPath(s.svg, `M ${CODE.x} ${CARD_BOTTOM} C ${CODE.x} 580, ${RIGHT.toolX[2]} 560, `
         + `${RIGHT.toolX[2]} ${RIGHT.gateY - 30}`, C.uv, 3);
-      s.fromGate = path(s.svg, `M ${RIGHT.toolX[2]} ${RIGHT.gateY + 24} L ${RIGHT.toolX[2]} 680`, C.uv, 3);
+      s.fromGate = arrowPath(s.svg, `M ${RIGHT.toolX[2]} ${RIGHT.gateY + 24} L ${RIGHT.toolX[2]} 680`, C.uv, 3);
       s.steps = [['plane', 'search_flights'], ['bed', 'search_hotels'], ['ticket', 'book_flight']]
         .map(([icon, name]) => makeToolStep(root, icon, name));
       s.gate = E(root, '', 'pill');

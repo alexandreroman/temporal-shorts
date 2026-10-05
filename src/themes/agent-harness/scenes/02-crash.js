@@ -13,18 +13,22 @@
     { icon: 'agent', label: 'Reply', call: ['Model:', 'write the reply'], row: 'Model: write the reply' },
   ];
   const isModel = i => STEPS[i].icon === 'agent';
-  // Layout: step tiles on top; the app and its counters on the left, Temporal and its Event History on the right
-  const ROW = { x0: 300, gap: 330, y: 190, w: 230, h: 110 };
-  const APP = { x: 480, y: 435, w: 640, h: 260, lblY: 437, chipY: 487 };
-  const COUNTER = { y: 670, w: 310, h: 170 };
-  const TEMPORAL = { x: 1320, y: 530, w: 880, h: 450 };
-  const HIST = { x: 1320, y: 560, w: 840, h: 350, row0: 66, rowGap: 52, cardX: 1010 };
+  // Layout: step tiles on top; the app and its counters on the left, Temporal and its Event History on the right.
+  // The step row spans exactly the width of the components below it, from LEFT to RIGHT.
+  const LEFT = 140, RIGHT = 1780;
+  const ROW = { w: 240, h: 110, y: 215 };
+  const ROW_GAP = (RIGHT - LEFT - ROW.w) / 4; // center to center: five tiles, equal gaps
+  const APP = { x: 465, y: 503, w: 650, h: 306, lblY: 497, chipY: 553 };
+  const COUNTER = { y: 794, w: 305, h: 180 };
+  const TEMPORAL = { x: 1340, y: 617, w: 880, h: 534 };
+  const HIST = { x: 1340, y: 652, w: 824, h: 404, row0: 80, rowGap: 62 };
+  const CARD_X = HIST.x - HIST.w / 2 + 110; // where result cards land, on the left part of the rows
   const rowTop = i => HIST.row0 + i * HIST.rowGap; // inside the Event History card
   const rowY = i => HIST.y - HIST.h / 2 + rowTop(i) + 18; // on the stage, where result cards land
 
   // the step tiles in a row joined by thin links (durable-ai-agents `makeStepRow`, with this turn's five steps)
   const makeTurnRow = (root, svg) => {
-    const xs = STEPS.map((_, i) => ROW.x0 + i * ROW.gap);
+    const xs = STEPS.map((_, i) => LEFT + ROW.w / 2 + i * ROW_GAP);
     const links = xs.slice(1).map((x, i) => {
       const d = `M ${xs[i] + ROW.w / 2 + 2} ${ROW.y} L ${x - ROW.w / 2 - 2} ${ROW.y}`;
       return path(svg, d, C.line, 2, false);
@@ -77,7 +81,7 @@
 
   scene({
     chapter: 2, title: 'Survives crashes',
-    shift: [0, 77],
+    shift: [0, 0],
     subs: [
       {
         text: "Every model call and tool call is saved in the agent's Temporal history as soon as it completes.",
@@ -99,8 +103,8 @@
       s.booked = makeTallCounter(root, 'Flights booked');
       // Temporal side, outside the app: native-size logo header (whole pixels, never scaled) and the Event History
       s.temporal = E(root,
-        `<img src="${LOGO}" style="position:absolute;left:26px;top:24px;height:34px;display:block">`
-        + '<div class="lbl" style="position:absolute;right:24px;top:30px;font-size:16px">Outside the app</div>',
+        `<img src="${LOGO}" style="position:absolute;left:28px;top:30px;height:34px;display:block">`
+        + '<div class="lbl" style="position:absolute;right:28px;top:36px;font-size:16px">Outside the app</div>',
         'tile', { width: TEMPORAL.w + 'px', height: TEMPORAL.h + 'px', borderColor: C.uv });
       s.jr = E(root,
         '<div class="mono" style="position:absolute;left:26px;top:20px;font-size:18px;letter-spacing:.14em;'
@@ -112,7 +116,7 @@
         });
       // rows 1-4 survive the crash: tinted block + crash line under them
       s.kept = E(s.jr, '', '', {
-        left: '14px', top: (rowTop(0) - 6) + 'px', width: (HIST.w - 28) + 'px', height: (3 * HIST.rowGap + 50) + 'px',
+        left: '14px', top: (rowTop(0) - 8) + 'px', width: (HIST.w - 28) + 'px', height: (3 * HIST.rowGap + 54) + 'px',
         background: 'rgba(68,76,231,.08)', borderLeft: '4px solid ' + C.uv, borderRadius: 'var(--rs)',
         transform: 'none',
       });
@@ -121,7 +125,7 @@
         + `padding:0 10px;font-size:13px;line-height:18px;letter-spacing:.12em;color:${C.red};white-space:nowrap">`
         + 'APP CRASHED HERE</span>',
         '', {
-          left: '26px', top: (rowTop(4) - 7) + 'px', width: (HIST.w - 52) + 'px', height: '0',
+          left: '26px', top: (rowTop(4) - 8) + 'px', width: (HIST.w - 52) + 'px', height: '0',
           borderTop: '2px dashed ' + C.red, transform: 'none',
         });
       s.scan = E(s.jr, '', '', {
@@ -219,7 +223,7 @@
       const lblOn = Math.max(win(t, run[0], bOn, 0.15) * (1 - fall), win(t, replay[0], doneAt - 0.45, 0.15));
       place(s.chipLbl, APP.x + ax, APP.lblY + ay, 1, lblOn);
       const dp = P(t, doneAt, 0.45, backOut);
-      place(s.done, APP.x, APP.chipY - 25, dp, clamp(dp * 2));
+      place(s.done, APP.x, (APP.lblY + APP.chipY) / 2, dp, clamp(dp * 2));
 
       // counters: only the 3 real model calls are billed and the flight is booked once; the replay costs nothing
       const calls = [0, 2, 4].filter(i => t >= saved[i]).length;
@@ -252,12 +256,12 @@
       // result cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {
         const r = run[i];
-        const [x1, y1] = [HIST.cardX, rowY(i)];
+        const [x1, y1] = [CARD_X, rowY(i)];
         fly(e, t, r + 0.45, APP.x + ax, APP.chipY + ay, r + 0.5, 0.4, x1, y1, r + 0.9, x1, y1);
       });
       s.reuseCards.forEach((e, i) => {
         const q = replay[i];
-        fly(e, t, q, HIST.cardX, rowY(i), q + 0.05, 0.25, APP.x, APP.chipY, q + 0.3, APP.x, APP.chipY);
+        fly(e, t, q, CARD_X, rowY(i), q + 0.05, 0.25, APP.x, APP.chipY, q + 0.3, APP.x, APP.chipY);
       });
 
       // Event History rows and their status tags

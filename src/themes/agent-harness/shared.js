@@ -83,3 +83,23 @@ function showRow(e, p, dx = 26) {
 function swell(t, at, amp) {
   return 1 + amp * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
 }
+
+// Arrow path (engine path() with arrow = true) whose head has an explicit fill: the engine's head uses
+// fill="context-stroke", which WebKit (Safari) does not render. One marker per SVG layer and color.
+function arrowPath(svg, d, color, w, dash = null) {
+  const p = path(svg, d, color, w, true, dash);
+  const id = `ah${svg.parentNode.dataset.k}-${color.replace('#', '')}`;
+  if (!svg.querySelector('#' + id)) {
+    const marker = document.createElementNS(SVGNS, 'marker');
+    const attrs = { id, viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 5, markerHeight: 5,
+      orient: 'auto-start-reverse' };
+    for (const [name, value] of Object.entries(attrs)) marker.setAttribute(name, value);
+    const head = document.createElementNS(SVGNS, 'path');
+    head.setAttribute('d', 'M0,0 L10,5 L0,10 z');
+    head.setAttribute('fill', color);
+    marker.appendChild(head);
+    svg.querySelector('defs').appendChild(marker);
+  }
+  p._marker = `url(#${id})`;
+  return p;
+}

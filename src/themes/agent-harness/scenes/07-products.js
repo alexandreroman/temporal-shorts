@@ -76,7 +76,7 @@
       // callback tool: the agent asks the user's laptop to read a local file
       s.lblL = E(root, 'Callback tools', 'lbl');
       s.app = makeAppTile(root);
-      s.arrow = path(s.svg, `M ${LEFT.x} ${ARROW.top} L ${LEFT.x} ${ARROW.bottom}`, C.slate, 2.5, true, '8,8');
+      s.arrow = arrowPath(s.svg, `M ${LEFT.x} ${ARROW.top} L ${LEFT.x} ${ARROW.bottom}`, C.slate, 2.5, '8,8');
       s.laptop = makeStep(root, 'laptop', "User's laptop", 300, 150);
       // opaque pill colors, so the dashed arrow does not show through the cards traveling on it
       s.call = callCard(root, 'read_file', '"trip.md"', 'violet');
@@ -87,7 +87,7 @@
       // the product UI, built with the typed React or Svelte SDK
       s.lblR = E(root, 'Your UI', 'lbl');
       s.planner = makePlanner(root);
-      s.link = path(s.svg, `M ${LINK.from} ${LINK.y} L ${LINK.to} ${LINK.y}`, C.uv, 3);
+      s.link = arrowPath(s.svg, `M ${LINK.from} ${LINK.y} L ${LINK.to} ${LINK.y}`, C.uv, 3);
       s.linkL = E(root, 'Typed session', 'lbl', { fontSize: '18px', color: C.ink });
       s.pulse = E(root, '', '', {
         width: '14px', height: '14px', background: C.uv, borderRadius: '3px',

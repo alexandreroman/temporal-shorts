@@ -34,7 +34,7 @@ The video teaches, in order:
    code or a model approve routine calls and escalates the rest;
 4. one standardized event stream for every agent, whatever its SDK, to watch
    live or replay;
-5. typed, self-describing agents that other agents drive as tools;
+5. typed, self-describing agents that other agents call as tools;
 6. Code Mode: the model writes a script over its tools, and every call inside
    stays durable, approved and visible;
 7. callback tools and typed React and Svelte SDKs, for real products.
@@ -136,13 +136,15 @@ Lisbon.
   - Visuals: "TEXT IN, TEXT OUT" struck out in red; the TravelAgent card
     lists its OPERATIONS, INPUT then OUTPUT: `plan_trip(destination: str,
     nights: int) → Itinerary`, `set_budget(max_usd: float) → Ack`.
-- **1:42** It describes itself, so other agents can drive it as a tool:
-  multi-agent systems with real contracts.
-  - Visuals: SELF-DESCRIBING tag; a Trip planner (PARENT AGENT) above
-    TravelAgent and CalendarAgent, linked by TYPED CONTRACT lines; a request
-    (`plan_trip`, `destination: "Lisbon", nights: 3`) travels down into
-    TravelAgent, a result (`Itinerary`, `total_usd: 895`) comes back up,
-    the parent checks.
+- **1:42** Other agents read that interface and call it as a tool: a typed
+  request in, a typed result out.
+  - Visuals: SELF-DESCRIBING tag; a Trip planner agent appears on the left
+    with its TOOLS; TravelAgent moves right; a dashed arrow "READS ITS
+    INTERFACE" arches from TravelAgent to the Trip planner, and `plan_trip`
+    joins its tools, tagged "FROM TravelAgent"; a TYPED REQUEST
+    (`plan_trip`, `destination: "Lisbon"`, `nights: 3`) travels to
+    TravelAgent, which works, and a TYPED RESULT (`Itinerary`, `total_usd:
+    895`) comes back: the tool row checks.
 
 ## 06 Code Mode
 
@@ -168,7 +170,7 @@ Lisbon.
     result back; YOUR UI: a trip planner in a browser window ("Lisbon, 3
     nights", flight, hotel, tour, TOTAL $895, Book), linked by a TYPED
     SESSION; tags REACT / SVELTE.
-- **2:15** Durable, observable, composable agents with human approvals,
+- **2:14** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
   - Visuals: six recap tiles, one per chapter, as the subtitle names them:
     Survives crashes / Event stream / Typed subagents / Human approvals /

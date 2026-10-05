@@ -2,16 +2,17 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // the agentic loop: the model on top, the two tools below, all on one circle
-  const LOOP = { cx: 960, cy: 560, r: 200 };
+  const LOOP = { cx: 960, cy: 558, r: 230 };
+  const ORB = 140, TILE = { w: 180, h: 150 };
   const loopPos = deg => {
     const a = deg * Math.PI / 180;
     return [LOOP.cx + Math.cos(a) * LOOP.r, LOOP.cy + Math.sin(a) * LOOP.r];
   };
   // loop nodes and the zone each one covers (its size plus a margin), which the arcs stop short of
   const NODES = [
-    { deg: -90, covers: (dx, dy) => Math.hypot(dx, dy) < 76 }, // model orb, 120 px
-    { deg: 30, covers: (dx, dy) => Math.abs(dx) < 89 && Math.abs(dy) < 79 }, // Flights tile, 150 x 130
-    { deg: 150, covers: (dx, dy) => Math.abs(dx) < 89 && Math.abs(dy) < 79 }, // Hotels tile, 150 x 130
+    { deg: -90, covers: (dx, dy) => Math.hypot(dx, dy) < ORB / 2 + 16 }, // model orb
+    { deg: 30, covers: (dx, dy) => Math.abs(dx) < TILE.w / 2 + 14 && Math.abs(dy) < TILE.h / 2 + 14 }, // Flights
+    { deg: 150, covers: (dx, dy) => Math.abs(dx) < TILE.w / 2 + 14 && Math.abs(dy) < TILE.h / 2 + 14 }, // Hotels
   ];
   // angle where the circle leaves a node's zone, walking from the node's center in direction dir (+1 or -1)
   const exitDeg = (deg, covers, dir) => {
@@ -33,19 +34,22 @@
   };
   // the token goes round the loop from TOKEN_AT (after c[0]), one leg of LEG seconds per node
   const TOKEN_AT = 1.6, LEG = 1.1;
-  // the harness frame around the loop, with its header row above the model
-  const FRAME = { x0: LOOP.cx - 310, x1: LOOP.cx + 310, y0: LOOP.cy - 350, y1: LOOP.cy + 250, r: 10 };
+  // the harness frame around the loop, with its header row above the model; it leaves 60 px or more around
+  // the loop, and 50 px between the bottom arc and the Workflow pill on its bottom edge
+  const FRAME = { x0: LOOP.cx - 360, x1: LOOP.cx + 360, y0: LOOP.cy - 400, y1: LOOP.cy + 304, r: 10 };
   const FRAME_MID = (FRAME.y0 + FRAME.y1) / 2;
   // capabilities plugged into the frame: [icon, label, side (-1 left, 1 right), row (0 top, 1 bottom)]
   const CAPS = [
     ['retry', 'Crash recovery', -1, 0], ['user', 'Human approvals', -1, 1],
     ['eye', 'Observability', 1, 0], ['layers', 'Composition', 1, 1],
   ];
-  const CAP = { w: 270, h: 130, dx: 505, dy: 90 }; // tile size, distance from the loop center, row offset
+  const CAP = { w: 290, h: 150, dx: 575, dy: 100 }; // tile size, distance from the loop center, row offset
+  // the SDK tags sit well below the loop, where the frame's bottom edge comes later
+  const SDK_Y = LOOP.cy + 330;
   scene({
     chapter: 1, title: 'An agent harness',
-    // one fixed offset fits the loop with its SDK tags and the taller framed loop
-    shift: [0, -22],
+    // the loop with its SDK tags sits higher than the taller framed loop: pan while the tags fade out
+    shift: (t, c) => pan(t, [0, -63], [[c[1], 0, 0]], 0.9),
     subs: [
       {
         text: "An AI agent is a model, plus tools, plus a loop. You write that loop with the AI SDK you already know.",
@@ -68,7 +72,7 @@
         background: 'rgba(68,76,231,.07)', borderRadius: 'var(--r)',
       });
       s.svg = svgLayer(root);
-      s.arcs = NODES.map((_, i) => path(s.svg, arcD(i), C.slate, 2.5));
+      s.arcs = NODES.map((_, i) => arrowPath(s.svg, arcD(i), C.slate, 2.5));
       // the frame draws in two halves, from the top center down both sides, meeting at the bottom center
       const cx = LOOP.cx;
       // side 1 runs clockwise down the right edge, side -1 counterclockwise down the left edge
@@ -87,14 +91,14 @@
         width: '22px', height: '22px', background: C.neon, boxShadow: '0 0 22px 6px rgba(219,255,75,.45)',
         borderRadius: '5px',
       });
-      s.llm = makeLLM(root, 120, 'MODEL');
-      s.tools = [iconTile(root, 'plane', 'Flights', 150, 130), iconTile(root, 'bed', 'Hotels', 150, 130)];
+      s.llm = makeLLM(root, ORB, 'MODEL');
+      s.tools = [iconTile(root, 'plane', 'Flights', TILE.w, TILE.h), iconTile(root, 'bed', 'Hotels', TILE.w, TILE.h)];
       s.loopL = E(root, 'Your agentic loop', 'lbl', { color: 'var(--ink)' });
       s.yourL = E(root, 'Your loop', 'lbl', { color: 'var(--ink)' });
       // the SDKs your loop is written with
       const sdks = ['OpenAI Agents SDK', 'Google Gen AI SDK', 'Pydantic AI'];
       s.sdkRow = E(root, sdks.map(n => '<span class="pill" style="display:flex;align-items:center;gap:10px">'
-        + `${ICON('code', 22, C.slate, 1.8)}${n}</span>`).join(''), '', { display: 'flex', gap: '24px' });
+        + `${ICON('code', 22, C.slate, 1.8)}${n}</span>`).join(''), '', { display: 'flex', gap: '28px' });
       s.sdks = [...s.sdkRow.children];
       // header on whole pixels at native size: official logo, a thin rule, then the label
       s.header = E(root,
@@ -148,10 +152,10 @@
       });
       // the label names the loop, then becomes YOUR LOOP once the harness wraps it
       const rename = P(t, c[1] + 1.6, 0.5);
-      place(s.loopL, LOOP.cx, LOOP.cy - 8, 1, P(t, c[0] + 1.6, 0.5) * (1 - rename));
-      place(s.yourL, LOOP.cx, LOOP.cy - 8, 1, rename);
+      place(s.loopL, LOOP.cx, LOOP.cy - 20, 1, P(t, c[0] + 1.6, 0.5) * (1 - rename));
+      place(s.yourL, LOOP.cx, LOOP.cy - 20, 1, rename);
       const sdkOut = P(t, c[1], 0.4);
-      place(s.sdkRow, LOOP.cx, FRAME.y1, 1, 1 - sdkOut);
+      place(s.sdkRow, LOOP.cx, SDK_Y, 1, 1 - sdkOut);
       s.sdks.forEach((e, i) => {
         const p = P(t, c[0] + 3.6 + i * 0.2, 0.45, backOut);
         e.style.transform = `scale(${p})`;
