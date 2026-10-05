@@ -1,37 +1,88 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Temporal explainer videos</title>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="home.css">
 </head>
-<body>
-<div id="stage">
-  <div id="sky"></div><div id="band"></div>
-  <div id="hdr"><span class="num">01</span><span class="ttl"></span></div>
-  <div id="segs"></div>
-  <div id="subw"><div id="sub"></div></div>
-</div>
+<body class="home">
+<div class="sky" aria-hidden="true"></div>
+<div class="glow" aria-hidden="true"></div>
+<main>
+  <header>
+    <img class="logo" src="assets/temporal-logo-horizontal-light-cropped.svg" alt="Temporal">
+    <p class="kicker">Explainer videos</p>
+    <h1>Choose a video</h1>
+    <p class="lead">Short explainers with subtitles, for everyone.</p>
+  </header>
+  <nav class="themes" aria-label="Videos">
+    <a class="theme" href="themes/durable-execution/index.html">
+      <span class="theme-top">
+        <span class="theme-icon" aria-hidden="true">
+          <!-- event history: steps recorded one after the other -->
+          <svg viewBox="0 0 24 24"><rect x="3" y="3.5" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/>
+            <rect x="3" y="16.5" width="4" height="4"/>
+            <path d="M5 7.5V10M5 14v2.5M10.5 5.5H21M10.5 12H21M10.5 18.5H17"/></svg>
+        </span>
+        <span class="status">Coming soon</span>
+      </span>
+      <span class="theme-title">Introduction to Durable Execution</span>
+      <span class="theme-text">The principles of Durable Execution with Temporal Workflows, outside any AI
+        context.</span>
+    </a>
+    <a class="theme" href="themes/human-in-the-loop/index.html">
+      <span class="theme-top">
+        <span class="theme-icon" aria-hidden="true">
+          <!-- person with a check mark: a human approves -->
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="7.5" r="3.5"/><path d="M2.5 20.5v-1a6.5 6.5 0 0 1 13 0v1"/>
+            <path d="M15.5 11l2.5 2.5L22 9"/></svg>
+        </span>
+        <span class="status">Coming soon</span>
+      </span>
+      <span class="theme-title">Human-in-the-Loop</span>
+      <span class="theme-text">How a workflow waits for a person's approval, for minutes or days, then picks up
+        where it left off.</span>
+    </a>
+    <a class="theme" href="themes/durable-ai-agents/index.html">
+      <span class="theme-top">
+        <span class="theme-icon" aria-hidden="true">
+          <!-- sparkle: AI -->
+          <svg viewBox="0 0 24 24"><path d="M10 3l1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9z"/>
+            <path d="M18 14v6M15 17h6"/></svg>
+        </span>
+      </span>
+      <span class="theme-title">Durable AI Agents</span>
+      <span class="theme-text">How an AI agent works, and why it needs Durable Execution to never lose its
+        progress.</span>
+    </a>
+    <a class="theme" href="themes/agent-harness/index.html">
+      <span class="theme-top">
+        <span class="theme-icon" aria-hidden="true">
+          <!-- shield holding a plug: a harness that keeps the agent safe -->
+          <svg viewBox="0 0 24 24"><path d="M12 2.5l8 3v6.5c0 4.6-3.3 8.1-8 9.5-4.7-1.4-8-4.9-8-9.5V5.5z"/>
+            <path d="M10 7.5V10M14 7.5V10M8.5 10h7v2a3.5 3.5 0 0 1-7 0zM12 15.5V18"/></svg>
+        </span>
+        <span class="status">Coming soon</span>
+      </span>
+      <span class="theme-title">Temporal Agent Harness</span>
+      <span class="theme-text">A tour of the experimental Temporal Agent Harness project.</span>
+    </a>
+  </nav>
+</main>
 <script>
-// deterministic star field
-(function(){let s=7;const r=()=>{s=(s*16807)%2147483647;return s/2147483647};const sky=document.getElementById('sky');
-for(let i=0;i<110;i++){const e=document.createElement('i');e.style.left=(r()*1920)+'px';e.style.top=(r()*1080)+'px';
-e.style.opacity=(0.08+r()*0.35).toFixed(2);if(r()>.85){e.style.width=e.style.height='3px'}sky.appendChild(e);}})();
-</script>
-<script src="engine.js"></script>
-<script src="shared.js"></script>
-<!-- Scenes play in the order they are listed. -->
-<script src="scenes/00-intro.js"></script>
-<script src="scenes/01-llm-call.js"></script>
-<script src="scenes/02-stateless.js"></script>
-<script src="scenes/03-context-window.js"></script>
-<script src="scenes/04-tools.js"></script>
-<script src="scenes/05-agentic-loop.js"></script>
-<script src="scenes/06-crash.js"></script>
-<script src="scenes/07-temporal.js"></script>
-<script src="scenes/99-outro.js"></script>
-<script src="player.js"></script>
-<script>
-buildAll();
-const q=new URLSearchParams(location.search);
-if(q.has('t')) renderAt(parseFloat(q.get('t')));
-else startPlayer();
+// Deterministic star field, as on the video stage; positions are percentages so it fills any window.
+(function () {
+  let seed = 7;
+  const random = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const sky = document.querySelector('.sky');
+  for (let i = 0; i < 110; i++) {
+    const star = document.createElement('i');
+    star.style.left = (random() * 100) + '%';
+    star.style.top = (random() * 100) + '%';
+    star.style.opacity = (0.08 + random() * 0.35).toFixed(2);
+    if (random() > .85) star.style.width = star.style.height = '3px';
+    sky.appendChild(star);
+  }
+})();
 </script>
 </body></html>

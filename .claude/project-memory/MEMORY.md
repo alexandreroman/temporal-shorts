@@ -21,7 +21,7 @@
 > only makes sense knowing the prior state,
 > rewrite it.
 
-- [Video objective and audience](references/project_objective.md) — 7 topics, non-technical audience, ≤ 3:00, deliverables
+- [Video objective and audience](references/project_objective.md) — durable-ai-agents: 7 topics, non-technical audience, ≤ 3:00
 - [Temporal brand rules](references/project_brand.md) — colors, style, fonts, icons and their source
 - [Official Temporal logo](references/reference_logo.md) — official lockup only, cropped viewBox
 - [On-screen vocabulary](references/feedback_vocabulary.md) — "the app" for the runtime, company names for LLMs
@@ -32,3 +32,4 @@
 - [Frame capture noise](references/project_frame-noise.md) — row y=65, delta-2 specks, rare re-rasters; native-size resting elements
 - [Scene centering](references/project_scene-centering.md) — centered at (960, 522), fixed measured `shift`; `pan()` only in ch1, ch5, ch7
 - [Durable Execution story](references/project_durable-execution-story.md) — Temporal keeps history, saved before next step, replay
+- [Home page design](references/feedback_home-page.md) — equal stretched cards, count-agnostic grid, card order, no "silent"

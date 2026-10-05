@@ -2,22 +2,24 @@
 
   python scripts/preview.py 12 40.5 133          # contact sheet -> output/preview.png
   python scripts/preview.py 133 --full           # one full-size PNG per timestamp
+  python scripts/preview.py 2 --theme durable-execution
 """
 import argparse, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import OUTPUT, open_page
+from common import OUTPUT, add_theme_argument, open_page
 from playwright.sync_api import sync_playwright
 from PIL import Image
 
 ap = argparse.ArgumentParser()
 ap.add_argument("times", nargs="+", type=float)
 ap.add_argument("--full", action="store_true")
+add_theme_argument(ap)
 a = ap.parse_args()
 OUTPUT.mkdir(exist_ok=True)
 shots = []
 with sync_playwright() as pw:
-    browser, page = open_page(pw)
+    browser, page = open_page(pw, a.theme)
     for t in a.times:
         page.evaluate(f"renderAt({t})")
         p = OUTPUT / f"frame_{t:07.2f}.png"

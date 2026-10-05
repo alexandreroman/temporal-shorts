@@ -1,0 +1,69 @@
+/* Home page: theme picker. Loaded after styles.css, which provides the fonts and the :root brand variables.
+   Every rule is scoped to .home or to classes the video stage never uses, so neither page affects the other. */
+.home{
+  min-height:100vh;font-family:'Brand',sans-serif;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+}
+.home .sky,.home .glow{position:fixed;pointer-events:none}
+.home .sky{inset:0}
+.home .sky i{position:absolute;width:2px;height:2px;background:var(--ink);border-radius:50%}
+/* Same glow as the stage band: anchored to the bottom edge, fading out with no hard edge. */
+.home .glow{
+  left:-10%;right:-10%;bottom:0;height:min(520px,60vh);
+  background:radial-gradient(ellipse at 50% 100%,rgba(182,100,255,.20), rgba(68,76,231,.12) 40%, rgba(20,20,20,0) 70%);
+}
+.home main{position:relative;width:100%;max-width:1720px;padding:72px clamp(20px,4vw,60px) 96px}
+.home header{text-align:center;margin-bottom:64px}
+.home .logo{display:block;height:48px;margin:0 auto 48px}
+.home .kicker{
+  margin:0;font-family:'Mono',monospace;font-size:16px;letter-spacing:.14em;padding-left:.14em;
+  text-transform:uppercase;color:var(--slate);
+}
+.home h1{margin:18px 0 0;font-size:clamp(44px,6vw,76px);font-weight:400;line-height:1.04;letter-spacing:-2px}
+.home .lead{margin:20px 0 0;font-size:20px;line-height:1.4;color:var(--slate)}
+/* Every card gets the same width and height, whatever its text and however many cards there are: as many
+   equal columns as fit (376 px at least), stretched to share the width, and every row as tall as the tallest
+   one. With 4 cards: 4 columns from a ~1700 px window (1600 px of content), 2 columns from ~850 px (2x2 at
+   1280 px), 1 column on phones. The 376 px minimum is what keeps 1280 px at 2 columns and 1920 px at 4. */
+.home .themes{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,376px),1fr));grid-auto-rows:1fr;
+  gap:28px;
+}
+.home .theme{
+  --pad:clamp(24px,2vw,32px);
+  display:flex;flex-direction:column;gap:10px;padding:var(--pad) var(--pad) calc(var(--pad) + 4px);
+  background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);color:var(--ink);
+  text-decoration:none;transition:border-color .2s,transform .2s,box-shadow .2s;
+}
+.home .theme:hover,.home .theme:focus-visible{
+  border-color:var(--violet);transform:translateY(-4px);
+  box-shadow:0 18px 48px -12px rgba(68,76,231,.45),0 0 0 1px rgba(182,100,255,.25);
+}
+.home .theme:focus-visible{outline:2px solid var(--uv);outline-offset:4px}
+.home .theme-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.home .theme-icon{
+  display:flex;align-items:center;justify-content:center;width:clamp(88px,7vw,112px);aspect-ratio:1;
+  background:rgba(68,76,231,.14);border:1.5px solid rgba(68,76,231,.55);border-radius:var(--r);
+  transition:background .2s,border-color .2s;
+}
+.home .theme:hover .theme-icon,.home .theme:focus-visible .theme-icon{
+  background:rgba(182,100,255,.16);border-color:var(--violet);
+}
+/* Same stroke style as the ICONS set of engine.js: 24 px grid, square caps, mitered joins. */
+.home .theme-icon svg{
+  width:57%;height:57%;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:square;stroke-linejoin:miter;
+}
+.home .status{
+  white-space:nowrap;padding:6px 12px 6px calc(12px + .12em);border:1.5px solid var(--line);border-radius:var(--rs);
+  font-family:'Mono',monospace;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate);
+}
+.home .theme-title{font-size:24px;line-height:1.2;letter-spacing:-.2px}
+.home .theme-text{font-size:16px;line-height:1.5;color:var(--slate)}
+@media (max-width:600px){
+  .home main{padding:48px 20px 64px}
+  .home header{margin-bottom:40px}
+}
+@media (prefers-reduced-motion:reduce){
+  .home .theme,.home .theme-icon{transition:none}
+  .home .theme:hover,.home .theme:focus-visible{transform:none}
+}

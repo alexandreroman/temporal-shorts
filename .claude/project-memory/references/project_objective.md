@@ -1,10 +1,13 @@
 ---
 name: "Video objective and audience"
-description: "What the explainer video must teach, to whom, and its hard constraints"
+description: "What the Durable AI Agents video must teach, to whom, and its hard constraints"
 type: project
 ---
 
 # Video objective and audience
+
+Scope: the `durable-ai-agents` theme. The 3:00 limit applies to every
+theme.
 
 An educational video of 3:00 maximum explains to a **non-technical** audience:
 
