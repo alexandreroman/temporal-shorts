@@ -30,3 +30,4 @@
 - [Subtitle layout](references/feedback_subtitles.md) — 30 px, 1760 px, one line, no orphan under 3 words
 - [Visual verification workflow](references/feedback_verification.md) — preview at timeline cues before rendering
 - [Frame capture noise](references/project_frame-noise.md) — row y=65 (#segs edge) varies by 1-2 levels between runs
+- [Scene centering](references/project_scene-centering.md) — compositions centered at (960, 522) via measured `shift` / `pan()`

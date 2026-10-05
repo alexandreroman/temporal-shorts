@@ -8,6 +8,8 @@
   };
   scene({
     chapter: 7, title: 'Durable Execution with Temporal',
+    // logo, then workers + Event History as the logo fades, then the budget and benefits as they fade
+    shift: (t, c) => pan(t, [0, -18], [[c[0] + 1.8, 45, 45], [c[2] + 3.4, -1, 46]], 0.7),
     subs: [
       { text: "<b>Durable Execution</b> with Temporal fixes this. Every completed step is recorded in an Event History.", after: 1.6 },
       { text: "If the app crashes, another copy of it takes over, replays the history, and resumes exactly where it stopped.", after: 1.2 },
@@ -32,7 +34,8 @@
       s.wA = path(s.svg, 'M 370 330 L 650 430', C.violet, 2.5, true, '10,8');
       s.wB = path(s.svg, 'M 650 690 L 370 655', C.neon, 2.5, true, '10,8');
       s.wAL = E(root, 'writes', 'lbl'); s.wBL = E(root, 'replays', 'lbl');
-      s.flash = E(root, '', '', { width: '1920px', height: '1080px', background: C.red });
+      // oversized so it still covers the whole stage once the scene is shifted
+      s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
       s.done = tag(root, 'Agent complete', 'neon');
       // budget comparison
       const bar = (n, wasted, col) => Array.from({ length: n }, (_, i) => `<i style="display:block;width:86px;height:46px;background:${i >= n - wasted ? C.red : col};border-radius:var(--rs)"></i>`).join('');

@@ -3,6 +3,8 @@
 {
   scene({
     chapter: 3, title: 'The context window',
+    // pans left as the cone fades, to make room for the bill
+    shift: (t, c) => pan(t, [-90, 42], [[c[1] + 2.6, -136, 42]]),
     subs: [
       { text: "Everything sent to the model fits on one page: the <b>context window</b>. Instructions, history, documents, the new question.", after: 0.4 },
       { text: "It's the only thing the model sees. It has a size limit, and every word on it is billed, at every call.", after: 1.2 },

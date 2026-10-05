@@ -15,6 +15,7 @@
   };
   scene({
     chapter: 6, title: 'When the agent crashes',
+    shift: [-55, 62],
     subs: [
       { text: "Now the app running the agent crashes in the middle of the booking. Restarts, deploys, network cuts: it happens every day.", after: 0.4 },
       { text: "The context lived in the app's memory, not in the LLM. It's gone, so the agent has to start over.", after: 0.4 },
@@ -31,7 +32,8 @@
       s.mblocks = ['#E6E7FC', '#F3FBD2', '#E6E7FC', '#F3FBD2', '#E6E7FC'].map(col => E(root, '', '', { width: '130px', height: '60px', background: col, borderRadius: 'var(--rs)' }));
       s.bill = makeBill(root);
       s.bolt = E(root, ICON('bolt', 150, C.red, 1.6));
-      s.flash = E(root, '', '', { width: '1920px', height: '1080px', background: C.red });
+      // oversized so it still covers the whole stage once the scene is shifted
+      s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
       s.crash = tag(root, 'App crash', 'red big');
       s.causes = ['Restart', 'Deploy', 'Network cut'].map(l => tag(root, l));
       s.redo = path(s.svg, 'M 1140 210 Q 780 80 430 205', C.red, 3);

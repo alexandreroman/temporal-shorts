@@ -3,6 +3,7 @@
 {
   scene({
     pre: 0.4, post: 2.6,
+    shift: [0, 99],
     subs: [{ text: "Durable AI agents never lose their progress, or your budget." }],
     build(root, s) {
       s.t = E(root, `<div style="font-size:104px;letter-spacing:-3px;line-height:1.04">Durable AI agents</div><div class="mono" style="font-size:24px;letter-spacing:.14em;color:var(--violet);margin-top:30px">NEVER LOSE THEIR PROGRESS, OR YOUR BUDGET</div><img src="assets/temporal-logo-horizontal-light-cropped.svg" style="height:70px;display:block;margin:76px auto 0">`, '', { textAlign: 'center' });

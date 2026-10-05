@@ -40,7 +40,8 @@ renders and opens the MP4; new workspaces run `make setup` automatically.
   - `shared.js`: brand helpers shared by scenes (`C`, `iconTile`, `STEPS`)
   - `scenes/`: one file per scene (subtitles and animations), wrapped in a
     `{ ... }` block so its helpers stay local; the first scene of a chapter
-    sets `chapter` and `title`
+    sets `chapter` and `title`; `shift` (`[dx, dy]` or `(t, c) => [dx, dy]`,
+    see `pan()`) centers the composition at (960, 522)
   - `player.js`: live-mode player (`startPlayer()`)
 - `scripts/`: setup, frame preview, parallel render, timeline, SRT export,
   standalone HTML build and server

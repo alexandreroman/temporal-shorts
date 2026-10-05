@@ -6,6 +6,8 @@
   const arcD = (d0, d1) => { const [x0, y0] = loopPos(d0), [x1, y1] = loopPos(d1); return `M ${x0} ${y0} A ${LOOP.r} ${LOOP.r} 0 0 1 ${x1} ${y1}`; };
   scene({
     chapter: 5, title: 'The agentic loop',
+    // loop + steps (the loop waits on the left for its steps), then the formula as the loop fades
+    shift: (t, c) => pan(t, [-76, 66], [[c[2], 0, 63]], 0.6),
     subs: [
       { text: "Repeat until the goal is reached: think, act, observe. That's the <b>agentic loop</b>.", after: 0.6 },
       { text: "“Book lunch with Marie on Thursday”: check the calendar, find a restaurant, book a table, send the invite.", after: 1.0 },
