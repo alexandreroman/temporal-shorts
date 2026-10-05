@@ -1,7 +1,7 @@
-# Temporal explainer videos
+# Temporal Shorts
 
-Short silent explainer videos about Temporal, each rendered from a
-deterministic HTML animation. Each video is a theme:
+Temporal Shorts: short silent explainer videos about Temporal, each rendered
+from a deterministic HTML animation. Each video is a theme:
 
 - `durable-execution`: Introduction to Durable Execution, the principles of
   Durable Execution with Temporal Workflows, outside any AI context

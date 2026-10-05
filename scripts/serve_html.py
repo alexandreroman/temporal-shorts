@@ -228,7 +228,7 @@ def run_casper(*args):
 
 def publish_info_panel(url):
     document = (
-        f"# Temporal explainer videos\n\nTheme picker: <{url}>\n\n"
+        f"# Temporal Shorts\n\nTheme picker: <{url}>\n\n"
         "Edits in `src/` rebuild the pages and reload open tabs.\n\nRestart with `casper run`.\n"
     )
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as info_file:

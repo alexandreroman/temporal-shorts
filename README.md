@@ -1,7 +1,7 @@
-# Temporal explainer videos
+# Temporal Shorts
 
-Short explainer videos (English, no sound, burned-in subtitles) about
-Temporal. Each video is a theme:
+Temporal Shorts: short explainer videos (English, no sound, burned-in
+subtitles) about Temporal. Each video is a theme:
 
 - **Introduction to Durable Execution** (`durable-execution`, coming soon):
   the principles of Durable Execution with Temporal Workflows, outside any
