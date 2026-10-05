@@ -18,6 +18,11 @@ subtitle box (top near y=960). Intro and outro use the same target.
   differences under about 25 px use a single offset.
 - Build-ups keep the offset of the completed composition; brief one-off
   elements do not drive the offset.
+- Clearance above the subtitle box beats exact centering: chapter 7's panel
+  phase sits at y 516 (shift 32) so AGENT COMPLETE keeps about 30 px above
+  the subtitles.
+- Resting offsets are whole numbers, so native-size elements (the chapter 7
+  header logo) stay pixel-aligned; fractional offsets exist only mid-pan.
 - Full-screen flashes are oversized (2400x1400) so they cover the stage under
   any shift.
 
