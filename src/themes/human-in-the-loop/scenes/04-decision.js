@@ -2,10 +2,10 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // same layout as chapter 3, which ends with the Workflow waiting and app instance A gone
-  const ROW_Y = 200;
-  const APP = { x: 470, y: 470 };
-  const CLOCK = { x: 277, y: 745 };
+  const { rowY: ROW_Y, app: APP, clock: CLOCK, temporal: TEMPORAL } = WF_LAYOUT;
   const MARIA = { x: 200, y: 450 }, CARD = { x: 580, y: 470 };
+  // the Signal lands on the left part of the row it becomes, in the slot of the waiting line
+  const SIGNAL_LANDING = { x: HIST.x - 180, y: rowY(3) };
   scene({
     chapter: 4, title: 'The decision arrives',
     shift: [0, 38],
@@ -34,9 +34,12 @@
       s.signal.style.background = '#1B1B1F';
       s.B = makeWorkflowApp(root, 'APP INSTANCE B');
       s.clock = makeWaitClock(root, 'Waiting for Maria');
-      s.ticket = makeTicket(root, '1 ORDER');
+      s.ticket = E(root,
+        `<div style="display:flex;align-items:center;gap:12px">${ICON('laptop', 34, C.ink, 1.6)}`
+        + '<span class="mono" style="font-size:20px;letter-spacing:.08em">1 ORDER</span></div>',
+        '', { padding: '10px 16px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
       s.temporal = makeTemporalPanel(root);
-      s.jr = makeHistory(root);
+      s.jr = makeOrderHistory(root);
     },
     update(t, c, s) {
       const tap = c[0] + 1.6, signalIn = c[0] + 3.5;
@@ -55,20 +58,21 @@
       ];
       placeStepRow(s.steps, t, -1, states);
 
-      // Maria approves on her card, three days later
+      // Maria approves on the approval card, three days later
       const left = P(t, c[1], 0.4);
       const mp = P(t, c[0] + 0.2, 0.5, backOut);
       place(s.maria, MARIA.x, MARIA.y, mp, clamp(mp * 2) * (1 - left));
       const kp = P(t, c[0] + 0.4, 0.5, backOut);
       place(s.card, CARD.x, CARD.y, kp, clamp(kp * 2) * (1 - left));
       tapApprove(s.card, t, tap);
-      setClock(s.card.clk, 9 + Math.min(t, signalIn) * 0.6);
-      // the Signal leaves the Approve button and lands in the history, in the slot of the waiting line
-      fly(s.signal, t, tap + 0.5, CARD.x - 100, CARD.y + 100, tap + 0.8, 0.9, HIST.cardX + 150, rowY(3),
-        signalIn - 0.2, HIST.cardX + 150, rowY(3));
+      // the wait picks up where chapter 3 left it, and the clock stops once the answer is in
+      const elapsed = DAY3_AFTERNOON + 0.6 * clamp(t, 0, signalIn);
+      setClock(s.card.clk, REQUEST_HOUR + elapsed);
+      // the Signal leaves the Approve button and lands in the history
+      fly(s.signal, t, tap + 0.5, CARD.x - 100, CARD.y + 100, tap + 0.8, 0.9, SIGNAL_LANDING.x, SIGNAL_LANDING.y,
+        signalIn - 0.2, SIGNAL_LANDING.x, SIGNAL_LANDING.y);
 
-      // the clock stops once the answer is in
-      setWaitClock(s.clock, 9 + Math.min(t, signalIn) * 0.6, 3);
+      setWaitClock(s.clock, elapsed);
       s.clock.cap.textContent = t >= signalIn ? 'Answer received' : 'Waiting for Maria';
       s.clock.cap.style.color = t >= signalIn ? C.neon : C.slate;
       place(s.clock, CLOCK.x, CLOCK.y, 1, 1);
@@ -93,10 +97,9 @@
       // the order is placed once
       const tp = P(t, ordered, 0.45, backOut);
       place(s.ticket, 660, CLOCK.y, tp, clamp(tp * 2));
-      s.ticket.style.borderColor = C.neon;
 
       // Event History: rows 1 to 3 already saved, the Signal replaces the waiting line, then the last steps
-      place(s.temporal, 1380, 555, 1, 1);
+      place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, 1);
       place(s.jr, HIST.x, HIST.y, 1, 1);
       s.jr.rows.forEach((_, i) => {
         showRow(s.jr, i, i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
@@ -106,8 +109,7 @@
       });
       setWaitLine(s.jr, 1 - P(t, signalIn - 0.2, 0.3));
       const scanning = replay.findIndex(q => t >= q && t < q + 0.5);
-      s.jr.scan.style.opacity = scanning >= 0 ? 1 : 0;
-      s.jr.scan.style.top = (68 + Math.max(0, scanning) * 44) + 'px';
+      scanRow(s.jr, scanning >= 0 ? scanning : null);
       const dp = P(t, complete, 0.45, backOut);
       s.jr.done.style.opacity = clamp(dp * 2);
       s.jr.done.style.transform = `translateX(-50%) scale(${dp})`;

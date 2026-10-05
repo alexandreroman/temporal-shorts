@@ -27,8 +27,12 @@ Scope: the `human-in-the-loop` theme.
   a WORKFLOW card on the left, TEMPORAL panel with the Event History on the
   right. Replayed rows get a REPLAYED tag; "WAITING FOR A SIGNAL" is an
   un-numbered line, since waiting itself is not an event.
-- **Vocabulary:** "the app" for the program running the Workflow, as in the
-  other themes.
+- **Shared notes:** the vocabulary of
+  [On-screen vocabulary](feedback_vocabulary.md) applies ("the app" runs
+  the Workflow). Chapter numbers in the other memory notes (scene
+  centering, visual design, Durable Execution story, budget figure) refer
+  to `durable-ai-agents`; this theme measures its own shifts by the same
+  centering rules.
 
 **Why:** one concrete, relatable example carries a non-technical audience
 from the problem to Temporal's answer, and matches how Temporal really

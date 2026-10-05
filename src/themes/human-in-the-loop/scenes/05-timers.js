@@ -7,16 +7,17 @@
   const EVENTS = [
     [0, 'user', 'Approval requested'], [2, 'bell', 'Reminder sent'], [5, 'up', 'Escalated to a director'],
   ];
-  // the Event History rows written by the timers: one when they start, one when each fires
+  // the Event History rows of the timers: both start at DAY 0, then each fires on its day
   const TIMER_ROWS = [
-    'Timer started: reminder in 2 days', 'Timer fired: reminder sent to Maria', 'Timer fired: escalated to a director',
+    'Timer started: reminder in 2 days', 'Timer started: escalation in 5 days',
+    'Timer fired: reminder due', 'Timer fired: escalation due',
   ];
-  const CARD = { y: 640, w: 1100, h: 230 };
+  const CARD = { y: 656, w: 1100, h: rowTop(TIMER_ROWS.length) - HROW.gap + HROW.h + 24 };
   const USES = [['check', 'Approvals'], ['eye', 'Reviews'], ['pen', 'Signatures'], ['bot', 'AI agent checks']];
   scene({
     chapter: 5, title: 'Deadlines and reminders',
     // the timeline and its history, then the use-case tiles as the timeline fades out
-    shift: (t, c) => pan(t, [-19, 36], [[c[1], 0, 62]], 0.6),
+    shift: (t, c) => pan(t, [-19, 24], [[c[1], 0, 62]], 0.6),
     subs: [
       {
         text: "No answer? The Workflow can also wait on a timer: a reminder after two days, escalate after five.",
@@ -79,14 +80,13 @@
 
       // Temporal writes each timer to the Event History, so the timers survive restarts like the wait itself
       place(s.jr, 960, CARD.y, 1, P(t, c[0] + 0.2, 0.4) * (1 - out));
-      const saved = [c[0] + 0.7, dayAt(2) + 0.2, dayAt(5) + 0.2];
+      const saved = [c[0] + 0.7, c[0] + 0.9, dayAt(2) + 0.2, dayAt(5) + 0.2];
       saved.forEach((at, i) => {
         showRow(s.jr, i, P(t, at - 0.1, 0.3));
         setRowTag(s.jr, i, t, 'SAVED', at, P(t, at, 0.25));
       });
-      s.jr.scan.style.opacity = 0;
       const dp = P(t, c[0] + 4.5, 0.45, backOut);
-      place(s.durable, 960, CARD.y + CARD.h / 2 + 64, dp, clamp(dp * 2) * (1 - out));
+      place(s.durable, 960, CARD.y + CARD.h / 2 + 56, dp, clamp(dp * 2) * (1 - out));
 
       // the same pattern, wherever a person decides
       s.uses.forEach((e, i) => {

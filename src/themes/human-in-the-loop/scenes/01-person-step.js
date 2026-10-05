@@ -60,12 +60,13 @@
       fly(s.card, t, c[1] + 2.4, s.steps.xs[1], ROW_Y, c[1] + 2.45, 0.9, CARD.x, CARD.y);
       place(s.waitL, s.steps.xs[1], ROW_Y + 82, 1, P(t, waitOn, 0.4));
 
-      // days go by: the clock spins, the day counter climbs, Maria is busy
+      // days go by: the clock spins up to DAY 3, then ticks on at an idle pace; Maria is busy
       const cp = P(t, c[2] + 0.2, 0.5, backOut);
-      const hours = 9 + Math.max(0, t - (c[2] + 0.4)) * 1.3;
-      const day = t < c[2] + 2.5 ? 1 : t < c[2] + 4.6 ? 2 : 3;
-      setWaitClock(s.clock, hours, day);
-      setClock(s.card.clk, hours);
+      const spinFrom = c[2] + 1.0, spinTo = c[2] + 5.6;
+      const elapsed = waitHours(t, spinFrom, spinTo, DAY3_MORNING / (spinTo - spinFrom));
+      const blur = win(t, spinFrom, spinTo, 0.3);
+      setWaitClock(s.clock, elapsed, blur);
+      setClock(s.card.clk, REQUEST_HOUR + elapsed, blur);
       place(s.clock, 490, 630, cp, clamp(cp * 2));
       s.why.forEach((e, i) => {
         const p = P(t, c[2] + 2.0 + i * 1.0, 0.45, backOut);

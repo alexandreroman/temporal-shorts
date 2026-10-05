@@ -5,24 +5,26 @@
   const LINE = { y: 700, x0: 560, x1: 1360 }; // day timeline: DAY 1 at x0, DAY 3 at x1
   const RESTART_X = 1060, DEPLOY_X = 1260;
   const CHIPS = ['Request #1042', 'Step: approval', 'Waiting for Maria'];
-  // hand-made plumbing around the app, and the tangled links between all of it
+  // hand-made plumbing around the app (on its sides and under it, where the timeline was), and the tangled
+  // links between all of it; the app itself never moves, so both phases share one centered layout
   const PLUMBING = [
-    ['db', 'Database', 400, 300], ['flag', 'Status flags', 400, 560],
-    ['clock', 'Scheduled jobs', 1520, 300], ['code', 'Resume code', 1520, 560],
+    ['db', 'Database', 380, 400], ['flag', 'Status flags', 700, 690],
+    ['clock', 'Scheduled jobs', 1220, 690], ['code', 'Resume code', 1540, 400],
   ];
   const LINKS = [
-    'M 525 300 C 620 300, 560 470, 660 470',
-    'M 525 560 C 610 560, 570 330, 660 330',
-    'M 1395 300 C 1300 300, 1360 470, 1260 470',
-    'M 1395 560 C 1310 560, 1350 330, 1260 330',
-    'M 400 230 C 420 150, 1500 150, 1520 230',
-    'M 525 590 C 900 690, 1060 160, 1395 270',
-    'M 1395 590 C 1020 690, 860 160, 525 270',
+    'M 505 400 C 590 400, 575 480, 660 480',
+    'M 1415 400 C 1330 400, 1345 320, 1260 320',
+    'M 700 620 C 700 585, 1100 600, 1100 565',
+    'M 1220 620 C 1220 585, 820 600, 820 565',
+    'M 380 330 C 400 160, 1520 160, 1540 330',
+    'M 380 470 C 380 640, 1000 560, 1095 690',
+    'M 1540 470 C 1540 640, 920 560, 825 690',
   ];
+  const BROKEN_LINKS = [2, 5]; // turn red with the failures
   scene({
     chapter: 2, title: 'Waiting is the hard part',
-    // the timeline under the app, then the plumbing around it: pans as the timeline fades out
-    shift: (t, c) => pan(t, [0, 28], [[c[1], 0, 100]]),
+    // one fixed offset: the timeline under the app, then the plumbing in its place and around the app
+    shift: [0, 34],
     subs: [
       {
         text: "But the app can't simply pause for three days. Its memory lives on one machine, and machines restart.",
@@ -70,6 +72,8 @@
       s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
       s.tiles = PLUMBING.map(([icon, label]) => iconTile(root, icon, label, 250, 140));
       s.stuck = tag(root, 'Request stuck', 'red big'); s.twice = tag(root, 'Ordered twice', 'red big');
+      // solid fill: the tags sit on the tangled links, which must not show through them
+      [s.stuck, s.twice].forEach(e => { e.style.background = '#2A191B'; });
     },
     update(t, c, s) {
       const crashAt = c[0] + 4.8, back = c[1] + 0.2;
@@ -114,12 +118,12 @@
       });
       const bad = t >= c[2] + 2.6;
       s.links.forEach((l, i) => {
-        l.setAttribute('stroke', bad && (i === 1 || i === 5) ? C.red : C.slate);
+        l.setAttribute('stroke', bad && BROKEN_LINKS.includes(i) ? C.red : C.slate);
         draw(l, P(t, c[1] + 2.6 + i * 0.35, 0.6));
       });
       const p1 = P(t, c[2] + 2.6, 0.45, backOut), p2 = P(t, c[2] + 4.2, 0.45, backOut);
-      place(s.stuck, 740, 690, p1, clamp(p1 * 2));
-      place(s.twice, 1180, 690, p2, clamp(p2 * 2));
+      place(s.stuck, 380, 545, p1, clamp(p1 * 2));
+      place(s.twice, 1540, 545, p2, clamp(p2 * 2));
     }
   });
 }

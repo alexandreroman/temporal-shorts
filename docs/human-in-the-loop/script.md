@@ -34,11 +34,12 @@ the laptop, NOTIFY Sam.
   $1,000, a manager must approve it.
   - Visuals: The 4 step tiles CHECK / APPROVAL / ORDER / NOTIFY, rule pill
     "OVER $1,000: MANAGER APPROVAL", Sam's avatar and purchase request
-    card "New laptop, $2,400", which then flies into the CHECK tile.
+    card "New laptop, $2,400".
 - **0:18** The app checks the request, then asks Maria, the manager, to
   approve it. Now it waits for an answer.
-  - Visuals: CHECK runs and is checked; APPROVAL runs; the approval request
-    card pops in next to Maria ("MARIA, MANAGER"); the APPROVAL tile turns
+  - Visuals: The request card flies into the CHECK tile, which runs and is
+    checked; APPROVAL runs; the approval request card flies from the
+    APPROVAL tile to Maria ("MARIA, MANAGER"); the APPROVAL tile turns
     WAITING (flipping hourglass).
 - **0:26** Maria may answer in two minutes, or in three days: busy in
   meetings, traveling, or on vacation.
@@ -56,12 +57,14 @@ the laptop, NOTIFY Sam.
     memory chips fall, EMPTY, "REQUEST LOST".
 - **0:44** So teams build the waiting by hand: a database, status flags,
   scheduled jobs, code to resume later.
-  - Visuals: The timeline fades; tiles DATABASE / STATUS FLAGS / SCHEDULED
-    JOBS / RESUME CODE pop in around the app, joined by tangled links.
+  - Visuals: The timeline fades; DATABASE and RESUME CODE pop in beside the
+    app, STATUS FLAGS and SCHEDULED JOBS under it, joined by tangled links;
+    the memory chips come back, saved by hand, and the app status returns
+    to WAITING FOR MARIA.
 - **0:53** That's a lot of plumbing to get right. One missed case, and a
   request is stuck, or ordered twice.
-  - Visuals: Two links turn red, red tags "REQUEST STUCK" and "ORDERED
-    TWICE".
+  - Visuals: Two links turn red; red tags "REQUEST STUCK" and "ORDERED
+    TWICE" under the side tiles.
 
 ## 03 A Workflow that waits
 
@@ -81,8 +84,8 @@ the laptop, NOTIFY Sam.
 - **1:18** Temporal keeps its Event History, outside the app. Restarts and
   deploys come and go; the wait survives.
   - Visuals: "OUTSIDE THE APP" brightens and the SAVED tags pulse; DEPLOY
-    and RESTART pills pop next to the clock, red flash and shake: APP
-    INSTANCE A CRASHED, its WORKFLOW lines fall out, EMPTY; the history
+    and RESTART pills pop next to the clock, a soft flash and shake: APP
+    INSTANCE A STOPPED, its WORKFLOW lines fall out, EMPTY; the history
     stays, with a "STILL WAITING" tag on the waiting line.
 
 ## 04 The decision arrives
@@ -111,9 +114,9 @@ the laptop, NOTIFY Sam.
   - Visuals: Day timeline DAY 0 to DAY 5 with a moving hourglass marker:
     APPROVAL REQUESTED at DAY 0, a bell and "REMINDER SENT" at DAY 2,
     "ESCALATED TO A DIRECTOR" at DAY 5; below, an EVENT HISTORY writes
-    "Timer started: reminder in 2 days", "Timer fired: reminder sent to
-    Maria", "Timer fired: escalated to a director", each SAVED; pill
-    "TIMERS ARE DURABLE TOO".
+    "Timer started: reminder in 2 days" and "Timer started: escalation in 5
+    days" at DAY 0, "Timer fired: reminder due" at DAY 2, "Timer fired:
+    escalation due" at DAY 5, each SAVED; pill "TIMERS ARE DURABLE TOO".
 - **2:03** Approvals, reviews, signatures, an AI agent asking before it acts:
   the same pattern fits them all.
   - Visuals: 4 tiles: Approvals / Reviews / Signatures / AI agent checks.
