@@ -1,6 +1,6 @@
 ---
 name: "Durable Execution theme story"
-description: "durable-execution theme: order #1042 example, server/Worker vocabulary, money stake, crash point, idempotency accuracy"
+description: "durable-execution: order #1042, server then Worker, money stake, crash point, idempotency, rasters"
 type: project
 ---
 
@@ -37,5 +37,5 @@ easy to follow and matches how Temporal replays Workflow code against
 recorded Activity results; the idempotency rule keeps the claims true.
 
 **How to apply:** keep the example, the vocabulary split, the crash point,
-the idempotency rule and the raster rule consistent across scenes, subtitles and the
-script when editing this theme.
+the idempotency rule and the raster rule consistent across scenes,
+subtitles and the script when editing this theme.
