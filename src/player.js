@@ -105,6 +105,23 @@ function startPlayer() {
     show();
   }
 
+  // A section is a scene. Left acts like a media player's "previous" button: it restarts the current
+  // section, or goes back to the previous one when pressed within its first seconds.
+  const RESTART_THRESHOLD = 2;
+
+  function nextSection() {
+    const next = scenes.find(sc => sc.start > time);
+    seek(next ? next.start : TOTAL);
+  }
+
+  function previousSection() {
+    const index = scenes.findLastIndex(sc => sc.start <= time);
+    const current = scenes[index];
+    if (time - current.start > RESTART_THRESHOLD) seek(current.start);
+    else if (index > 0) seek(scenes[index - 1].start);
+    else seek(0);
+  }
+
   function togglePlay() {
     if (playing) {
       playing = false;
@@ -217,8 +234,8 @@ function startPlayer() {
     if (event.metaKey || event.ctrlKey || event.altKey) return;
     if (event.key === ' ' && event.target instanceof HTMLButtonElement) return;
     if (event.key === ' ') togglePlay();
-    else if (event.key === 'ArrowLeft') seek(time - 5);
-    else if (event.key === 'ArrowRight') seek(time + 5);
+    else if (event.key === 'ArrowLeft') previousSection();
+    else if (event.key === 'ArrowRight') nextSection();
     else if (event.key === 'l' || event.key === 'L') toggleLoop();
     else if (event.key === 'c' || event.key === 'C') toggleSubtitles();
     else if (event.key === 'f' || event.key === 'F') toggleFullscreen();
