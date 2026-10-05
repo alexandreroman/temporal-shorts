@@ -26,9 +26,9 @@
 - [Official Temporal logo](references/reference_logo.md) — official lockup only, cropped viewBox
 - [On-screen vocabulary](references/feedback_vocabulary.md) — "the app" for the runtime, company names for LLMs
 - [Budget figure](references/project_budget-figure.md) — 4 vs 7 calls, 43%, always "in this example"
-- [Visual design decisions](references/feedback_visual-design.md) — tile alignment, labels, ch7 mirrors ch6, Event History statuses
+- [Visual design decisions](references/feedback_visual-design.md) — tile alignment, even spacing, 20 px clearance, ch7 mirrors ch6
 - [Subtitle layout](references/feedback_subtitles.md) — 30 px, 1760 px, one line, no orphan under 3 words
 - [Visual verification workflow](references/feedback_verification.md) — preview inside subtitle windows; animations fit duration + `after`
 - [Frame capture noise](references/project_frame-noise.md) — row y=65, delta-2 specks, rare re-rasters; native-size resting elements
-- [Scene centering](references/project_scene-centering.md) — compositions centered at (960, 522) via measured `shift` / `pan()`
+- [Scene centering](references/project_scene-centering.md) — centered at (960, 522), fixed measured `shift`; `pan()` only in ch1, ch5, ch7
 - [Durable Execution story](references/project_durable-execution-story.md) — Temporal keeps history, saved before next step, replay

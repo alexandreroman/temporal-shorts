@@ -11,7 +11,13 @@ type: feedback
 - Centered letter-spaced labels get a `padding-left` equal to their
   `letter-spacing`, so the trailing spacing does not shift them left.
 - Temperatures are written without a space: "18°C".
-- The end card shows the slogan and the Temporal logo, without a URL.
+- Blocks in a row inside a panel (chapter 6 APP MEMORY) are spread evenly:
+  the side margins equal the gaps between blocks.
+- Tags and labels keep about 20 px of clear space from neighboring
+  components (the chapter 3 FULL tag above the size gauge).
+- The end card shows the slogan and the Temporal logo, without a URL. The
+  mascot sits above the title with the same gap as the slogan to the logo
+  (about 86 px).
 - "Agent complete" in chapter 7 has clear space above it, below the Event
   History.
 - Chapter 7 mirrors chapter 6: same step tiles, APP MEMORY panel and
