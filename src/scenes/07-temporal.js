@@ -62,6 +62,9 @@
       s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
       s.done = tag(root, 'Agent complete', 'neon');
       s.logo = E(root, `<img src="assets/temporal-logo-horizontal-light-cropped.svg" style="height:150px;display:block">`);
+      // native-size copy of the landed logo, on whole pixels where the flying logo lands (centered on 1005, 325)
+      s.headerLogo = E(root, `<img src="assets/temporal-logo-horizontal-light-cropped.svg" style="height:34px;display:block">`,
+        '', { left: '940px', top: '308px', transform: 'none' });
       // payoff: budget line, then the other benefits
       s.budget = E(root, `<div style="display:flex;align-items:center;gap:22px">${ICON('coin', 64, C.neon, 1.6)}<div><div style="font-size:52px;line-height:1.1">43% less LLM spend <span class="lbl" style="font-size:18px">in this example</span></div><div class="mono" style="font-size:26px;letter-spacing:.06em;color:var(--slate);margin-top:8px"><span style="color:var(--neon)">4</span> vs 7 LLM calls</div></div></div>`);
       s.ben = [['ticket', 'One booking only'], ['retry', 'Automatic retries'], ['user', 'Waits for humans'], ['eye', 'Full visibility']].map(([i, l]) => iconTile(root, i, l, 330, 230, i === 'ticket' ? C.neon : C.ink));
@@ -79,9 +82,14 @@
       const [sx, sy] = shakeAt(t, crashAt);
       const dead = t >= crashAt;
 
-      // Temporal logo: big intro, then it flies into the header of the Temporal panel
+      // Temporal logo: big intro, then it flies into the header of the Temporal panel.
+      // Once landed, the native-size header logo takes over (hard swap, never both): Chromium rasterizes a
+      // scaled-down image differently depending on the frames rendered before, which breaks parallel rendering.
       const lp = P(t, c[0] + 0.1, 0.7, backOut), fl = P(t, c[0] + 1.9, 0.8);
-      place(s.logo, lerp(960, 1005, fl), lerp(540, 325, fl), lp * lerp(1 + 0.06 * P(t, c[0] + 1.2, 0.6), 34 / 150, fl), clamp(lp * 2) * (1 - out));
+      const landed = fl >= 1;
+      const logoOpacity = landed ? 0 : clamp(lp * 2) * (1 - out);
+      place(s.logo, lerp(960, 1005, fl), lerp(540, 325, fl), lp * lerp(1 + 0.06 * P(t, c[0] + 1.2, 0.6), 34 / 150, fl), logoOpacity);
+      s.headerLogo.style.opacity = landed ? 1 - out : 0;
       place(s.temporal, 1380, 555, 1, P(t, c[0] + 2.4, 0.5) * (1 - out));
       place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 2.6, 0.5) * (1 - out));
 
