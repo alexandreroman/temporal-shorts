@@ -58,8 +58,10 @@
     update(t, c, s) {
       place(s.t, TITLE_X, CHAIN.y, 1, P(t, 0.15, 0.9));
       s.t.style.transform += ` translateY(${(1 - P(t, 0.15, 0.9)) * 24}px)`;
-      // time inside the current pass of the pulse (negative before the first pass)
-      const u = t < LOOP.start ? -1 : (t - LOOP.start) % LOOP.period;
+      // time inside the current pass of the pulse (negative before the first pass). The pulse is an ambient loop,
+      // so it runs on G: the live player sees the scene as still once the tiles are in. The intro starts at 0, so
+      // in frozen mode (G = t) it plays exactly as on the timeline. Any negative u leaves the chain unlit.
+      const u = t < LOOP.start ? -1 : (G - LOOP.start) % LOOP.period;
       const fade = 1 - P(u, LOOP.reset, 0.4); // checks and neon links fade out before the next pass
       const hitAt = i => (i === LOOP.fail ? LOOP.pass : LOOP.arrive[i]); // when step i passes
       s.tiles.forEach((e, i) => {
