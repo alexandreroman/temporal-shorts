@@ -105,7 +105,7 @@ html,body{margin:0;background:var(--bg)}
 /* white card on the dark stage (Event History, code, console) */
 .paper{background:var(--ink);color:var(--bg);border-radius:var(--r)}
 /* Live player (page opened without ?t=): fit-to-window stage and playback controls.
-   Every rule targets .live or the #ctl overlay, both created by startPlayer() only, so the frozen
+   Every rule targets .live or the #ctl and #hold overlays, all created by startPlayer() only, so the frozen
    ?t= frames used by the renderer stay pixel-identical. */
 .live,.live body{height:100%;overflow:hidden}
 .live #stage{position:absolute;left:50%;top:50%;transform-origin:50% 50%}
@@ -156,3 +156,20 @@ html,body{margin:0;background:var(--bg)}
 #time{flex:none;font-family:'Mono',monospace;font-size:14px;letter-spacing:.06em;color:var(--slate);white-space:nowrap}
 /* Fixed width, wide enough for "0.5x", so the bar does not shift when the speed changes. */
 #ctl #speed{width:52px;font-family:'Mono',monospace;font-size:14px;letter-spacing:.06em}
+/* Hold mark: a muted pause glyph that fades in while held at a presenter stop (.held) and breathes slowly,
+   clear for the presenter, faint for the audience. It sits in the top-right corner, away from the controls,
+   and stays whether they show or hide. The breathing pauses rather than stops outside a hold, so the
+   fade-out starts from the current opacity instead of jumping. */
+#hold{
+  position:fixed;top:24px;right:24px;z-index:1;display:flex;gap:4px;pointer-events:none;opacity:0;
+  transition:opacity .4s;
+}
+.held #hold{opacity:.7}
+#hold i{
+  display:block;width:4px;height:12px;border-radius:2px;background:var(--slate);
+  animation:hold-breathe 1.4s ease-in-out infinite alternate paused;
+}
+.held #hold i{animation-play-state:running}
+@keyframes hold-breathe{to{opacity:.55}}
+/* No breathing: a steady opacity close to its average. */
+@media (prefers-reduced-motion:reduce){#hold i{animation:none}.held #hold{opacity:.55}}

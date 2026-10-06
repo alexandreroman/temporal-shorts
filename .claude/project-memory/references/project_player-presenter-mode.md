@@ -1,23 +1,54 @@
 ---
 name: "Player presenter mode"
-description: "Live player presenter mode: no subtitles, 0.5x, holds each scene before its fade-out"
+description: "Live player presenter mode: no subtitles, 0.5x, holds at each cue after a scene's first and before each fade-out"
 type: project
 ---
 
 # Player presenter mode
 
 The live player has a presenter mode (button and P key, off by default).
-It hides the subtitles, plays at 0.5x and holds each scene, the last one
-included, 0.5 s before its end, where the scene fade-out starts. Space,
-Right, PageDown or the play button resumes; PageUp/PageDown are aliases of
-Left/Right in every mode, for slide clickers. While held, `playing` stays
-true and the ambient clock G keeps running.
+It hides the subtitles and plays at 0.5x. It holds at the start of each
+subtitle cue after a scene's first, and 0.5 s before the end of each
+scene, the last one included, where the scene fade-out starts. A cue with
+`stopLead` (seconds) holds that much earlier. With the subtitles hidden,
+once the scene roots stay unchanged until the next stop, the player jumps
+to that stop at once, at any speed, so the pause mark shows as soon as the
+picture freezes. Space, Right, PageDown or
+the play button resumes; PageUp/PageDown are aliases of Left/Right in
+every mode, for slide clickers. While held, `playing` stays true and the
+ambient clock G keeps running.
 
-**Why:** a presenter talks over each scene at their own pace. Holding
-before the fade-out keeps the scene fully visible, never black; keeping
-`playing` true lets the controls and cursor hide, so the audience sees a
-clean screen, while ambient loops stay alive.
+Outside presenter mode, Left and Right move between sections (scenes),
+Left restarting the current one when more than 2 s in. In presenter mode,
+they move between steps, a step running from one stop to the next. Right
+while held releases the hold, so the transition plays up to the next stop;
+otherwise it jumps to the next stop after the current time and holds there
+(`playing` and `held` true, even from a pause), or to the end past the
+last stop. Left applies the section rule to steps, with S the last stop at
+or before the current time: more than 2 s (`RESTART_THRESHOLD`) after S,
+it seeks to S; otherwise to the stop before S, or to 0 when there is none.
+Held at S, Left therefore replays the step that leads to S, and two quick
+presses go back two steps. Left always lands playing, unheld, even from a
+pause, so the step plays and the player holds again at its end stop. In
+presenter mode, Left, Right, PageUp and PageDown leave the controls as
+they are: hidden controls stay hidden, and shown controls keep their hide
+timer; after a pause, a jump starts that timer.
 
-**How to apply:** scene fade-outs stay at the last 0.5 s of each scene
-(`SCENE_FADE` in `player.js` mirrors `renderAt`); a change to the fade
-length in `engine.js` needs the same change there.
+A faint, slowly breathing pause glyph (`#hold`, muted slate) sits in the
+top-right corner of the window during a hold, for the presenter, clear of
+the control bar at the bottom; it stays whether the controls show or hide.
+
+**Why:** a presenter talks over each step at their own pace. Animations
+are keyed to `c[i]` and at rest there, so a hold at a cue start shows the
+frame before the transition; holding before the fade-out keeps the scene
+fully visible, never black. Keeping `playing` true lets the controls and
+cursor hide, so the audience sees a clean screen, while ambient loops stay
+alive. A hold that freezes a continuous motion crossing a cue (the
+agent-harness token loop in scene 1, the durable-execution timer clock at
+day 30) is acceptable: a pause in mid-motion still reads well.
+
+**How to apply:** an animation keyed before its cue (`c[i] - x`) needs a
+`stopLead` on that cue that puts the stop strictly before it. Scene
+fade-outs stay at the last 0.5 s of each scene (`SCENE_FADE` in
+`player.js` mirrors `renderAt`); a change to the fade length in
+`engine.js` needs the same change there.

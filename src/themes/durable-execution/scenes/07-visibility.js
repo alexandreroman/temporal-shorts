@@ -561,6 +561,7 @@
       {
         text: "Open order #1042: its timeline shows every Activity, how long it took, and the retry after the crash.",
         after: 1.2,
+        stopLead: 0.4, // just before the click on order #1042, at c[1] - 0.35
       },
       {
         text: "While a Workflow runs, you see an Activity retrying, its attempt count and its last error, live.",

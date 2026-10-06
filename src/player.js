@@ -64,6 +64,14 @@ function startPlayer() {
   const seekFill = seekBar.querySelector('b');
   const timeLabel = document.getElementById('time');
 
+  // Hold mark: a discreet pause glyph in the top-right corner while held at a presenter stop, for the
+  // presenter's eyes. Hidden from assistive technologies, which get the play button's "Play" label instead.
+  const holdMark = document.createElement('div');
+  holdMark.id = 'hold';
+  holdMark.setAttribute('aria-hidden', 'true');
+  holdMark.innerHTML = '<i></i><i></i>';
+  document.body.appendChild(holdMark);
+
   // Scale the 1920x1080 stage to fit the window, centered; the body background letterboxes it.
   function fit() {
     const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
@@ -89,7 +97,8 @@ function startPlayer() {
   let subtitlesShown = true;
   let looping = false;
   let speed = 1;
-  // Presenter mode: no subtitles, 0.5x, and a hold before each scene fades out, until the presenter resumes.
+  // Presenter mode: no subtitles, 0.5x, and holds at each subtitle cue after a scene's first and before each
+  // scene fades out, until the presenter resumes.
   let presenter = false;
   // Held at a presenter stop: `playing` stays true, so the controls keep hiding, but the story time stands still.
   let held = false;
@@ -127,6 +136,8 @@ function startPlayer() {
     else setIcon(playButton, 'play', 'Play');
     seekFill.style.width = (time / TOTAL * 100) + '%';
     timeLabel.textContent = `${formatTime(time)} / ${formatTime(TOTAL)}`;
+    // Every change to `held` ends up here, so the hold mark follows it from one place.
+    root.classList.toggle('held', held);
     if (!playing) root.classList.remove('idle');
   }
 
@@ -157,8 +168,9 @@ function startPlayer() {
     return sceneSnapshot(time) !== sceneSnapshot(Math.min(time + PROBE_STEP, TOTAL));
   }
 
-  // A section is a scene. Left acts like a media player's "previous" button: it restarts the current
-  // section, or goes back to the previous one when pressed within its first seconds.
+  // A section is a scene. Outside presenter mode, Left acts like a media player's "previous" button: it restarts
+  // the current section, or goes back to the previous one when pressed within its first seconds. Presenter mode
+  // applies the same rule to its steps: see previousStop().
   const RESTART_THRESHOLD = 2;
 
   function nextSection() {
@@ -172,15 +184,9 @@ function startPlayer() {
     seek(time - current.start > RESTART_THRESHOLD ? current.start : scenes[Math.max(0, index - 1)].start);
   }
 
-  // Right acts like a slide clicker's "next": it releases a presenter hold, or jumps to the next section.
-  function forward() {
-    if (held) togglePlay();
-    else nextSection();
-  }
-
   function togglePlay() {
     if (held) {
-      held = false; // keep playing: the scene fades out and the next one starts
+      held = false; // keep playing: the next cue's animations start, or the scene fades out
     } else if (playing) {
       playing = false;
     } else {
@@ -242,6 +248,7 @@ function startPlayer() {
     setSubtitles(!presenter);
     setSpeed(presenter ? 0.5 : 1);
     updatePresenterButton();
+    updateControls(); // reflect the released hold at once, without waiting for the next frame
   }
 
   function updatePresenterButton() {
@@ -249,13 +256,111 @@ function startPlayer() {
     presenterButton.setAttribute('aria-pressed', String(presenter));
   }
 
-  // A presenter stop sits just before a scene's fade-out (see renderAt), so the hold shows the scene fully
-  // visible. Every scene has one, including the last.
+  // Presenter stops, sorted. Inside a scene, the player holds at the start of each subtitle cue but the
+  // first: animations are keyed to c[i] and still at rest there, so the hold shows the frame before the cue's
+  // animations begin. A cue whose animation starts a little before it sets `stopLead` (seconds) to move its
+  // stop that much earlier, strictly before that animation: a step such as `t >= at` already shows at `at`.
+  // Each scene, the last included, then holds just before its fade-out (see renderAt), so the hold shows it
+  // fully visible. When the scene stops changing well before a stop, the player jumps to it as soon as the
+  // picture freezes (see skipStillToStop()).
   const SCENE_FADE = 0.5;
+  const presenterStops = [];
+  for (const sc of scenes) {
+    for (const sub of sc.subs.slice(1)) presenterStops.push(sub.start - (sub.stopLead ?? 0));
+    presenterStops.push(sc.end - SCENE_FADE);
+  }
+  presenterStops.sort((a, b) => a - b);
 
   // The first stop in (from, to]: resuming from exactly a stop point moves on.
   function presenterStop(from, to) {
-    return scenes.map(sc => sc.end - SCENE_FADE).find(stop => from < stop && stop <= to);
+    return presenterStops.find(stop => from < stop && stop <= to);
+  }
+
+  // A presenter jump lands playing, even from a pause: either held at a stop, as if playback had just reached it,
+  // so Space or Right resume as for any hold, or running, so the step plays up to the next stop.
+  // seek() releases any hold, so `held` is set after it.
+  function seekAndPlay(t, hold) {
+    const wasPaused = !playing;
+    seek(t);
+    playing = true;
+    held = hold;
+    updateControls();
+    // A pause shows the controls and leaves no hide timer running: start one, so they hide as during playback.
+    if (wasPaused) wake();
+  }
+
+  function nextStop() {
+    const stop = presenterStops.find(s => s > time);
+    if (stop === undefined) seek(TOTAL);
+    else seekAndPlay(stop, true);
+  }
+
+  // A step runs from one stop to the next. Left acts like a media player's "previous" button on steps: it
+  // restarts the current step, or goes back to the previous one when pressed within its first seconds. Held at
+  // stop S, the time is S itself, so Left replays the step that leads to S. Either way, it lands playing, so
+  // the step plays and the player holds again at its end. Before the first stop, the step starts at 0.
+  function previousStop() {
+    const index = presenterStops.findLastIndex(s => s <= time);
+    if (index === -1) {
+      seekAndPlay(0, false);
+      return;
+    }
+    const current = presenterStops[index];
+    const previous = index > 0 ? presenterStops[index - 1] : 0;
+    seekAndPlay(time - current > RESTART_THRESHOLD ? current : previous, false);
+  }
+
+  // Right acts like a slide clicker's "next". In presenter mode, it releases a hold, so the transition plays up
+  // to the next stop, or else jumps to the next stop; otherwise it jumps to the next section. It releases the
+  // hold itself rather than through togglePlay(), which wakes the controls: see the keydown handler.
+  function forward() {
+    if (!presenter) {
+      nextSection();
+    } else if (held) {
+      held = false;
+      show();
+    } else {
+      nextStop();
+    }
+  }
+
+  // Left acts like a slide clicker's "previous": the previous presenter step, or the previous section.
+  function backward() {
+    if (presenter) previousStop();
+    else previousSection();
+  }
+
+  // The first probe time in (from, to) at which the scene roots differ from `from`; undefined when they stay
+  // still until `to`. Ambient G stays at its current value, as in isAnimating(). `to` itself is left out: a
+  // change right at a stop belongs to the frame the hold shows anyway (an invisible element moving at a cue).
+  function firstChange(from, to) {
+    const still = sceneSnapshot(from);
+    for (let probe = from + PROBE_STEP; probe < to; probe += PROBE_STEP) {
+      if (sceneSnapshot(probe) !== still) return probe;
+    }
+    return undefined;
+  }
+
+  // The last change found ahead of a still picture: scene roots unchanged from `from` until `at`, before the next
+  // stop. The scenes are a function of the story time alone, so this stays true across seeks; it only spares
+  // probing the same still span again on every frame.
+  let changeAhead = { from: 0, at: 0 };
+
+  // Once the scene stands still until the next stop, the frozen picture would run for the subtitle's reading
+  // time, stretched at 0.5x, before the hold: jump to the stop and hold there at once. Only with the subtitles
+  // hidden, as presenter mode starts, since the reading time is for them.
+  function skipStillToStop() {
+    const stop = presenterStops.find(s => s > time);
+    if (stop === undefined || subtitlesShown) return false;
+    if (changeAhead.from <= time && time < changeAhead.at) return false;
+    const change = firstChange(time, stop);
+    if (change !== undefined) {
+      changeAhead = { from: time, at: change };
+      return false;
+    }
+    time = stop;
+    held = true;
+    return true;
   }
 
   function toggleFullscreen() {
@@ -294,8 +399,11 @@ function startPlayer() {
 
   function advance(dt) {
     // Below 1x, only the still moments stretch, leaving time to explain the screen; animations keep
-    // their normal speed. At 1x the probe is skipped entirely.
-    const rate = speed < 1 && !isAnimating() ? speed : 1;
+    // their normal speed. Presenter mode skips still moments that last until its next stop, at any speed.
+    // At 1x outside presenter mode the probe is skipped entirely.
+    const still = (speed < 1 || presenter) && !isAnimating();
+    if (presenter && still && skipStillToStop()) return;
+    const rate = still && speed < 1 ? speed : 1;
     let next = time + dt * rate;
     const stop = presenter ? presenterStop(time, next) : undefined;
     if (stop !== undefined) {
@@ -356,7 +464,7 @@ function startPlayer() {
     if (event.key === ' ' && event.target instanceof HTMLButtonElement) return;
     if (event.key === ' ') togglePlay();
     // Slide clickers send PageUp and PageDown.
-    else if (event.key === 'ArrowLeft' || event.key === 'PageUp') previousSection();
+    else if (event.key === 'ArrowLeft' || event.key === 'PageUp') backward();
     else if (event.key === 'ArrowRight' || event.key === 'PageDown') forward();
     else if (event.key === 's' || event.key === 'S') toggleSpeed();
     else if (event.key === 'l' || event.key === 'L') toggleLoop();
@@ -365,7 +473,10 @@ function startPlayer() {
     else if (event.key === 'f' || event.key === 'F') toggleFullscreen();
     else return;
     event.preventDefault();
-    wake();
+    // In presenter mode, the navigation keys leave the controls as they are, so a transition triggered from the
+    // keyboard or a slide clicker keeps the audience's screen clean; controls already shown keep their timer.
+    const navigationKey = ['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'].includes(event.key);
+    if (!(presenter && navigationKey)) wake();
   });
   document.addEventListener('mousemove', wake);
   document.addEventListener('fullscreenchange', updateFullscreenButton);
