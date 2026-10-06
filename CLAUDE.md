@@ -77,10 +77,10 @@ workspaces run `make setup` automatically.
     the first scene of a chapter sets `chapter` and `title`; `shift`
     (`[dx, dy]` or `(t, c) => [dx, dy]`, see `pan()`) centers the
     composition at (960, 522)
-- `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh` and
-  CI), frame preview, parallel render, timeline, SRT export, standalone
-  HTML build and server; the per-theme scripts require `--theme` (no
-  default)
+- `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh`, CI
+  and any make target when the fonts are missing), frame preview, parallel
+  render, timeline, SRT export, standalone HTML build and server; the
+  per-theme scripts require `--theme` (no default)
 - `.github/workflows/pages.yml`: on push to `main`, downloads the fonts,
   runs `make html` and deploys `output/` to GitHub Pages (no video, no
   SRT); served at a domain root, as the player's home button links to `/`.

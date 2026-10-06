@@ -21,4 +21,7 @@ for spec in "instrument-sans 400" "instrument-sans 700" "noto-sans-mono 400" "no
     mv "$F/$f.part" "$F/$f"
   fi
 done
-echo "$FONT_VERSION" > "$F/.version"
+# Rewrite the stamp only when the version changes: the Makefile rebuilds every output when the stamp is newer.
+if $stale; then
+  echo "$FONT_VERSION" > "$F/.version"
+fi

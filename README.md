@@ -1,15 +1,19 @@
 # Temporal Shorts
 
-[![CI](https://github.com/alexandreroman/temporal-shorts/actions/workflows/pages.yml/badge.svg)](https://github.com/alexandreroman/temporal-shorts/actions/workflows/pages.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/alexandreroman/temporal-shorts/pages.yml?branch=main&label=ci)](https://github.com/alexandreroman/temporal-shorts/actions/workflows/pages.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 Temporal Shorts: short explainer videos (English, no sound, burned-in
-subtitles) about Temporal. Each video is a theme:
+subtitles) about [Temporal](https://temporal.io).
+
+Each video is a theme:
 
 - **Introduction to Durable Execution** (`durable-execution`): for
   everyone, the principles of Durable Execution with Temporal Workflows,
-  outside any AI context: Workflows, Activities, retries, the Event
-  History, replay and the Temporal web UI.
+  outside any AI context: [Workflows](https://docs.temporal.io/workflows),
+  [Activities](https://docs.temporal.io/activities), retries, the
+  [Event History](https://docs.temporal.io/encyclopedia/event-history),
+  replay and the Temporal web UI.
 - **Human-in-the-Loop** (`human-in-the-loop`): how a Temporal
   Workflow waits durably for a person's decision, such as an approval, for
   minutes or days, then resumes where it left off.
@@ -17,21 +21,38 @@ subtitles) about Temporal. Each video is a theme:
   audience, how an AI agent works, and why it needs Durable Execution with
   Temporal.
 - **Temporal Agent Harness** (`agent-harness`): for developers, the
-  experimental project of the same name: AI agents that run as durable
-  Temporal Workflows while you keep your AI SDK, with human approvals, one
-  event stream, typed subagents and Code Mode.
+  experimental
+  [project of the same name](https://github.com/temporal-community/temporal-agent-harness):
+  AI agents that run as durable Temporal Workflows while you keep your AI
+  SDK, with human approvals, one event stream, typed subagents and Code
+  Mode.
 
-A home page lists the themes and opens their players.
+![Durable AI Agents at 2:40: after a crash, the agent resumes on another
+app instance and Temporal hands back the saved results from the Event
+History](preview.png)
 
-No theme is the default: the make targets cover every theme unless
-`THEME=<theme>` narrows them to one, and the per-theme scripts require
-`--theme`.
+## Getting started
 
-The videos are not edited in a video editor: each one is an HTML page
-animated deterministically (`renderAt(t)`), captured frame by frame by
-headless Chromium (Playwright), then encoded to H.264 by ffmpeg.
+To watch the videos in a browser, you only need Python 3.10+:
 
-## Contents
+```bash
+git clone https://github.com/alexandreroman/temporal-shorts.git
+cd temporal-shorts
+make serve                   # home page on http://localhost:8000
+```
+
+Open <http://localhost:8000> and pick a theme. The first run downloads the
+brand fonts. The pages need only the Python standard library, so no
+virtualenv is required. To render the MP4 files, run `make setup` first
+(see the [Developer guide](#developer-guide)).
+
+## Developer guide
+
+This guide explains how the project is organized, how to render the
+videos and subtitles, how to edit a scene, add a theme and deploy the
+HTML pages.
+
+### Project layout
 
 ```text
 src/index.html         home page: one card per theme (styles in home.css)
@@ -48,7 +69,8 @@ src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        list); scenes/ (one file per scene: subtitle text +
                        animations) and theme-only helpers
 src/assets/            official Temporal logo (white horizontal lockup)
-src/fonts/             brand fonts (make setup), see src/fonts/README.md
+src/fonts/             brand fonts (downloaded by make), see
+                       src/fonts/README.md
 scripts/               setup, fonts, render, preview, timeline, SRT
                        export, HTML build and server
 docs/<theme>/script.md full script: subtitles, timings, animations
@@ -56,11 +78,15 @@ output/                generated .srt, .mp4 and standalone .html (the HTML
                        pages mirror src/: index.html, themes/<theme>/)
 .github/workflows/     pages.yml: deploys the HTML pages to GitHub Pages
 CLAUDE.md              conventions for Claude sessions working on the project
+preview.png            README screenshot (Durable AI Agents at 2:40)
 ```
 
-## Regenerate a video (macOS)
+### Regenerate a video (macOS)
 
-Requirements: Python 3.10+ and ffmpeg (`brew install python ffmpeg`).
+Requirements: Python 3.10+ and [ffmpeg](https://ffmpeg.org/)
+(`brew install python ffmpeg` with [Homebrew](https://brew.sh/)).
+`make setup` installs [Playwright](https://playwright.dev/python/) and its
+Chromium.
 
 ```bash
 make setup                   # venv + Playwright Chromium + fonts (once)
@@ -72,6 +98,13 @@ make html                    # home page + players -> output/**/index.html
 make serve                   # hot-reloading home page on http://localhost:8000
 make clean                   # delete output/ (every generated file)
 ```
+
+The targets run on `.venv/bin/python` once `make setup` has created it,
+otherwise on the system `python3`: enough for `html` and `serve`, which need
+only the standard library. `timeline`, `preview`, `render` and `srt` need
+Playwright and stop with a hint to run `make setup` when it is missing.
+Override the interpreter with `PY`, for example `make html PY=python`. Every
+target downloads the brand fonts first when they are missing.
 
 `timeline`, `render` and `srt` cover every theme; `timeline` prints each one
 under a `== <theme> ==` header. Set the `THEME` variable to restrict them to
@@ -111,7 +144,7 @@ The full render takes a few minutes on a recent Mac with several workers.
 To check a single frame, run `make preview THEME=durable-ai-agents T=140`:
 it writes the frame at 140 s to `output/preview.png`.
 
-## Home page and standalone HTML players
+### Home page and standalone HTML players
 
 `make html` builds `output/index.html`, the home page, and one player per
 theme, `output/themes/<theme>/index.html`: `output/` mirrors `src/`, so the
@@ -144,27 +177,7 @@ position). A failed build prints its error and keeps the last good pages.
 The reload script is added to the served pages only, never to the built
 files.
 
-## Deployment
-
-The `.github/workflows/pages.yml` workflow publishes the home page and the
-players to GitHub Pages on every push to `main`, or on demand from the
-Actions tab (`workflow_dispatch`). It downloads the fonts
-(`scripts/fonts.sh`, the font step of `make setup`), runs `make html` with
-the runner's Python, then deploys `output/`. It builds no video and no
-subtitle file, so it needs neither Playwright nor ffmpeg.
-
-Pull requests to `main` run the same build without deploying: the pages are
-attached to the run as the `github-pages` artifact, a tar archive of
-`output/` that reviewers can download from the run's summary page.
-
-Before the first run, set the repository's Pages source to "GitHub
-Actions" in Settings > Pages.
-
-The site must be served at the root of a domain, a custom domain or a
-`<user>.github.io` repository: the player's home button links to `/`,
-which a project site under `<user>.github.io/<repository>/` breaks.
-
-## Editing
+### Editing
 
 Each scene lives in its own file in `src/themes/<theme>/scenes/`, so people
 editing different scenes never touch the same file.
@@ -200,7 +213,7 @@ editing different scenes never touch the same file.
 - Colors, fonts, styles: `:root` and the CSS in `src/styles.css`, constant `C`
   in `src/shared.js`.
 
-## Add a theme
+### Add a theme
 
 1. Copy a theme page, for example `src/themes/durable-execution/index.html`,
    to `src/themes/<theme>/index.html`; set its `<title>` and its list of
@@ -215,3 +228,36 @@ Videos have no maximum length; `make timeline THEME=<theme>` reports it.
 
 Conventions: see `CLAUDE.md`. Brand rules and decision history: see the
 project memory in `.claude/project-memory/`.
+
+### Deployment
+
+The `.github/workflows/pages.yml` workflow publishes the home page and the
+players to [GitHub Pages](https://docs.github.com/en/pages) on every push to
+`main`, or on demand from the Actions tab (`workflow_dispatch`). It
+downloads the fonts (`scripts/fonts.sh`, the font step of `make setup`),
+runs `make html` with the runner's Python, then deploys `output/`. It
+builds no video and no subtitle file, so it needs neither Playwright nor
+ffmpeg.
+
+Pull requests to `main` run the same build without deploying: the pages are
+attached to the run as the `github-pages` artifact, a tar archive of
+`output/` that reviewers can download from the run's summary page.
+
+Before the first run, set the repository's Pages source to "GitHub
+Actions" in Settings > Pages.
+
+The site must be served at the root of a domain, a custom domain or a
+`<user>.github.io` repository: the player's home button links to `/`,
+which a project site under `<user>.github.io/<repository>/` breaks.
+
+## Contributing
+
+Contributions are welcome: a fix, a clearer subtitle, a new scene or a
+whole new theme. Open an
+[issue](https://github.com/alexandreroman/temporal-shorts/issues) to
+report a problem or discuss an idea, or send a pull request to `main`.
+Each pull request builds the HTML pages and attaches them to the run (see
+[Deployment](#deployment)), so reviewers can watch the change.
+
+By contributing, you agree that your work is licensed under the
+[Apache License 2.0](LICENSE).

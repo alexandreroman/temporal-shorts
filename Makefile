@@ -1,4 +1,12 @@
-PY := .venv/bin/python
+# The HTML pages need only the standard library: `make html` and `make serve` run on the system python3 right after a
+# clone. Frames need Playwright, which `make setup` installs in the virtualenv: used as soon as it exists.
+# Override with: make html PY=python
+PY := $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
+
+# Recipe line that stops with a hint, not a Python traceback, when $(PY) cannot import the modules $(1) (before
+# `make setup`). Inside a recipe, it runs only when the target is rebuilt: an up-to-date MP4 or SRT stays so.
+require = @$(PY) -c "$(foreach module,$(1),import $(module);)" 2>/dev/null || \
+	{ echo "$(PY) cannot import $(1): run make setup first, or pass PY=<python with $(1)>" >&2; exit 1; }
 
 # One video per theme: src/themes/<theme>/index.html plays the scenes of its folder; src/index.html is the home page.
 ALL_THEMES := $(patsubst src/themes/%/index.html,%,$(wildcard src/themes/*/index.html))
@@ -24,11 +32,12 @@ PORT ?= $(if $(CASPER_PORT),$(CASPER_PORT),8000)
 
 # The home page is not part of any video: editing it must not invalidate an MP4 or an SRT.
 HOME_SOURCES := src/index.html src/home.css
-# Inputs shared by every theme. The wildcards pick up new scripts, stylesheets
-# and assets. Fonts are downloaded by `make setup`, so $(wildcard) expands to
-# nothing when absent.
+# The fonts are git-ignored: their version stamp, written by fonts.sh, stands for them. As a prerequisite, it
+# downloads them on the first build after a clone, even without `make setup`, and again when fonts.sh pins a new one.
+FONTS := src/fonts/.version
+# Inputs shared by every theme. The wildcards pick up new scripts, stylesheets and assets.
 SHARED_SOURCES := $(filter-out $(HOME_SOURCES),$(wildcard src/*.js src/*.css src/assets/*)) \
-                  $(wildcard src/fonts/*.woff2) scripts/common.py
+                  $(FONTS) scripts/common.py
 # The live player never changes a frame or a subtitle: editing it must not invalidate an MP4 or an SRT.
 VIDEO_SOURCES := $(filter-out src/player.js,$(SHARED_SOURCES))
 # Inputs of one theme: its page and every script of its folder (helpers and scenes).
@@ -45,15 +54,17 @@ ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$
 setup:            ## venv + Playwright Chromium + fonts
 	bash scripts/setup.sh
 
-timeline:         ## print scenes and subtitle timings of every theme [THEME=<theme>]
+timeline: $(FONTS)  ## print scenes and subtitle timings of every theme [THEME=<theme>]
+	$(call require,playwright)
 	@for theme in $(THEMES); do \
 		echo "== $$theme =="; \
 		$(PY) scripts/timeline.py --theme $$theme || exit 1; \
 		echo; \
 	done
 
-preview:          ## contact sheet of one theme: make preview THEME=<theme> T="12 40 136"
+preview: $(FONTS)   ## contact sheet of one theme: make preview THEME=<theme> T="12 40 136"
 	$(if $(THEME),,$(error preview needs a theme: make preview THEME=<theme> T="...". Themes: $(ALL_THEMES)))
+	$(call require,playwright PIL)
 	$(PY) scripts/preview.py --theme $(THEME) $(T)
 
 render: $(VIDEOS)       ## one MP4 per theme -> output/<theme>.mp4 [THEME=<theme>]
@@ -75,10 +86,18 @@ clean:            ## delete every generated file: output/ (MP4, SRT, HTML, previ
 .SECONDEXPANSION:
 
 $(ALL_THEMES:%=output/%.mp4): output/%.mp4: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/render_video.py
+	$(call require,playwright)
 	$(PY) scripts/render_video.py --theme $*
 
 $(ALL_THEMES:%=output/%.srt): output/%.srt: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/export_srt.py
+	$(call require,playwright)
 	$(PY) scripts/export_srt.py --theme $*
 
 $(HTML): $(ALL_SOURCES) scripts/build_html.py
 	$(PY) scripts/build_html.py
+
+# fonts.sh rewrites the stamp only when the pinned version changes; touch it anyway, or any other edit of fonts.sh
+# would leave the stamp older than the script and rerun this rule on every make.
+$(FONTS): scripts/fonts.sh
+	bash scripts/fonts.sh
+	touch $@
