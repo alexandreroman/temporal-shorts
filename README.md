@@ -148,6 +148,9 @@ Without make:
 ```
 
 The full render takes a few minutes on a recent Mac with several workers.
+The MP4 is H.264 ready for web streaming: its index sits at the start of the
+file (faststart), with a keyframe every 2 seconds and a bitrate capped at
+8 Mbit/s.
 
 To check a single frame, run `make preview THEME=durable-ai-agents T=140`:
 it writes the frame at 140 s to `output/preview.png`.

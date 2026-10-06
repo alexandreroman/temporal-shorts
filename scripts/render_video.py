@@ -18,9 +18,14 @@ def render_chunk(job):
     with sync_playwright() as pw:
         browser, page = open_page(pw, theme)
         warm_up(page)
+        # Web streaming: a keyframe every 2 s for fast seeking, High@4.1 for broad player support,
+        # CRF capped at 8 Mbit/s (YouTube's 1080p30 rate) so bitrate peaks stay streamable.
+        gop = str(2 * fps)
         ff = subprocess.Popen(
             ["ffmpeg", "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(fps), "-c:v", "mjpeg",
              "-i", "-", "-c:v", "libx264", "-preset", "medium", "-crf", str(crf), "-pix_fmt", "yuv420p",
+             "-profile:v", "high", "-level:v", "4.1", "-maxrate", "8M", "-bufsize", "16M",
+             "-g", gop, "-keyint_min", gop, "-sc_threshold", "0",
              "-r", str(fps), str(seg_path)],
             stdin=subprocess.PIPE)
         t0 = time.time()
@@ -65,8 +70,9 @@ def main():
         segs = pool.map(render_chunk, jobs)
     lst = segdir / "list.txt"
     lst.write_text("".join(f"file '{s.name}'\n" for s in segs))
+    # faststart moves the index (moov atom) to the front, so playback starts before the download ends.
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst),
-                    "-c", "copy", out], check=True)
+                    "-c", "copy", "-movflags", "+faststart", out], check=True)
     shutil.rmtree(segdir)
     print(f"Done in {time.time() - t0:.0f}s -> {out}")
 
