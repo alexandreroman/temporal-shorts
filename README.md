@@ -172,7 +172,8 @@ Subtitles are shown by default; the CC button hides or shows them. Presenter
 mode hides the subtitles, plays at 0.5x and holds at each subtitle cue after
 the first of a scene, before that cue's animations begin, and again just
 before each scene fades out, with a faint pause mark in the top-right
-corner while it holds; Space, Right, PageDown or the play button resumes.
+corner while it holds; once the picture stands still until the next hold,
+it jumps straight to it. Space, Right, PageDown or the play button resumes.
 In presenter mode, the section keys (Left, Right, PageUp, PageDown) leave
 the controls hidden, so a clicker keeps the screen clean. Shortcuts:
 Space = play/pause, Left/Right or PageUp/PageDown = previous/next section

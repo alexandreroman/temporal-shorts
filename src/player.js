@@ -272,7 +272,8 @@ function startPlayer() {
   // animations begin. A cue whose animation starts a little before it sets `stopLead` (seconds) to move its
   // stop that much earlier, strictly before that animation: a step such as `t >= at` already shows at `at`.
   // Each scene, the last included, then holds just before its fade-out (see renderAt), so the hold shows it
-  // fully visible.
+  // fully visible. When the scene stops changing well before a stop, the player jumps to it as soon as the
+  // picture freezes (see skipStillToStop()).
   const SCENE_FADE = 0.5;
   const presenterStops = [];
   for (const sc of scenes) {
@@ -284,6 +285,39 @@ function startPlayer() {
   // The first stop in (from, to]: resuming from exactly a stop point moves on.
   function presenterStop(from, to) {
     return presenterStops.find(stop => from < stop && stop <= to);
+  }
+
+  // The first probe time in (from, to) at which the scene roots differ from `from`; undefined when they stay
+  // still until `to`. Ambient G stays at its current value, as in isAnimating(). `to` itself is left out: a
+  // change right at a stop belongs to the frame the hold shows anyway (an invisible element moving at a cue).
+  function firstChange(from, to) {
+    const still = sceneSnapshot(from);
+    for (let probe = from + PROBE_STEP; probe < to; probe += PROBE_STEP) {
+      if (sceneSnapshot(probe) !== still) return probe;
+    }
+    return undefined;
+  }
+
+  // The last change found ahead of a still picture: scene roots unchanged from `from` until `at`, before the next
+  // stop. The scenes are a function of the story time alone, so this stays true across seeks; it only spares
+  // probing the same still span again on every frame.
+  let changeAhead = { from: 0, at: 0 };
+
+  // Once the scene stands still until the next stop, the frozen picture would run for the subtitle's reading
+  // time, stretched at 0.5x, before the hold: jump to the stop and hold there at once. Only with the subtitles
+  // hidden, as presenter mode starts, since the reading time is for them.
+  function skipStillToStop() {
+    const stop = presenterStops.find(s => s > time);
+    if (stop === undefined || subtitlesShown) return false;
+    if (changeAhead.from <= time && time < changeAhead.at) return false;
+    const change = firstChange(time, stop);
+    if (change !== undefined) {
+      changeAhead = { from: time, at: change };
+      return false;
+    }
+    time = stop;
+    held = true;
+    return true;
   }
 
   function toggleFullscreen() {
@@ -322,8 +356,11 @@ function startPlayer() {
 
   function advance(dt) {
     // Below 1x, only the still moments stretch, leaving time to explain the screen; animations keep
-    // their normal speed. At 1x the probe is skipped entirely.
-    const rate = speed < 1 && !isAnimating() ? speed : 1;
+    // their normal speed. Presenter mode skips still moments that last until its next stop, at any speed.
+    // At 1x outside presenter mode the probe is skipped entirely.
+    const still = (speed < 1 || presenter) && !isAnimating();
+    if (presenter && still && skipStillToStop()) return;
+    const rate = still && speed < 1 ? speed : 1;
     let next = time + dt * rate;
     const stop = presenter ? presenterStop(time, next) : undefined;
     if (stop !== undefined) {

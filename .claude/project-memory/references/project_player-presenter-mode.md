@@ -10,7 +10,10 @@ The live player has a presenter mode (button and P key, off by default).
 It hides the subtitles and plays at 0.5x. It holds at the start of each
 subtitle cue after a scene's first, and 0.5 s before the end of each
 scene, the last one included, where the scene fade-out starts. A cue with
-`stopLead` (seconds) holds that much earlier. Space, Right, PageDown or
+`stopLead` (seconds) holds that much earlier. With the subtitles hidden,
+once the scene roots stay unchanged until the next stop, the player jumps
+to that stop at once, at any speed, so the pause mark shows as soon as the
+picture freezes. Space, Right, PageDown or
 the play button resumes; PageUp/PageDown are aliases of Left/Right in
 every mode, for slide clickers. While held, `playing` stays true and the
 ambient clock G keeps running. In presenter mode, Left, Right, PageUp and
