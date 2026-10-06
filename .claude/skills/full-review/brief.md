@@ -88,13 +88,16 @@ listed below.
 committed, write the completion file:
 
 ```bash
-cat > {{DONE_FILE}} <<'DONE'
+cat > {{DONE_FILE}} <<'END_OF_REPORT'
 DONE
 <report: findings per rule and how each was fixed, accuracy corrections
  per theme with their source, lines of code removed, frames that changed
  on purpose, recommendations not applied and why, commits>
-DONE
+END_OF_REPORT
 ```
+
+The first line of the file is `DONE`; the heredoc ends at `END_OF_REPORT`,
+so never use that word alone on a line of the report.
 
 Then run `casper notify --message "The full code review is done"`.
 
