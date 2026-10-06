@@ -1,9 +1,9 @@
 // ===================== 7. FULL VISIBILITY
 // The Temporal Web UI in dark mode, as it shows the placeOrder Workflows: the Workflows list (running, completed,
-// failed), the order-1042 page and its Timeline (every Activity, how long it took and, as a video annotation, the
-// crash it survived), then the order-1045 page, running, whose Pending Activities tab shows shipPackage retrying
-// live until it completes. Structure, wording and colors follow the real Web UI (2.54.1), with fewer columns,
-// fields and menu items so the text stays readable on video.
+// failed), the order-1042 page and its Timeline (every Activity, how long it took, the retry and, as a video
+// annotation, the crash before it), then the order-1045 page, running, whose Pending Activities tab shows
+// shipPackage retrying live until it completes. Structure, wording and colors follow the real Web UI (2.54.1), with
+// fewer columns, fields and menu items so the text stays readable on video.
 // The block keeps every name declared in this file local to this scene.
 {
   // Window: 1560 x 770, centered at (960, 522) (x 180..1740, y 137..907). As in the real UI, a full-height sidebar
@@ -97,15 +97,17 @@
     return `${Math.floor(ms / 1000)}s ${ms % 1000}ms`;
   };
 
-  // Order #1042, as in chapter 6: Worker A crashes while shipPackage runs; once that attempt times out, attempt 2
-  // runs on worker-b. Seconds from the Workflow start; the Activities in step order (chargeCard first).
+  // Order #1042, as in chapter 6: Worker A crashes while shipPackage runs; attempt 1 times out after the
+  // 10 seconds of its startToCloseTimeout (chapter 4) and attempt 2 starts on worker-b after the 1 s retry
+  // interval, then emailReceipt runs. Seconds from the Workflow start; the Activities in step order (chargeCard
+  // first).
   const ORDER_1042 = {
-    ...workflow('order-1042'), runtime: 14.612, historySize: '3.01 KB', transitions: 17,
+    ...workflow('order-1042'), runtime: 16.112, historySize: '3.01 KB', transitions: 17,
     activities: [
       { from: 0.2, to: 1.4 },
       { from: 1.5, to: 2.3 },
-      { from: 2.4, retryAt: 11.9, to: 14.0, attempts: 2 },
-      { from: 14.1, to: 14.5 },
+      { from: 2.4, retryAt: 13.4, to: 15.5, attempts: 2 },
+      { from: 15.6, to: 16.0 },
     ],
   };
   // Order #1045, running: shipPackage times out against the carrier twice and is retried after 1s, then 2s (the
@@ -335,7 +337,7 @@
   const laneTop = step => CHART.laneTop + (ORDER_STEPS.length - 1 - step) * CHART.lanePitch;
   const SQUARE = 22;
   const LABEL_ROOM = 220; // room right of a bar for its label, else the label goes left of the bar
-  const CRASH_MARK = 6.4; // second of the retried band where the crash leader ends, just past the band's label
+  const CRASH_MARK = 6.8; // second of the retried band where the crash leader ends, just past the band's label
   // the small square at a bar end: blue at a start, green at a completion, white at a retried start
   const SQUARES = {
     start: { bg: UI.startIcon, edge: UI.startEdge, glyph: '#141924' },
@@ -558,7 +560,7 @@
         after: 1.0,
       },
       {
-        text: "Open order #1042: its timeline shows every Activity, how long it took, and the crash it survived.",
+        text: "Open order #1042: its timeline shows every Activity, how long it took, and the retry after the crash.",
         after: 1.2,
       },
       {
@@ -569,6 +571,7 @@
     build(root, s) {
       s.win = makeWindow(root);
       s.list = makeListPage(s.win);
+      // 29 events, as for order-1045: the retried shipPackage writes one ActivityTaskStarted, for its last attempt
       s.order1042 = makeDetailsPage(s.win, ORDER_1042, 'Timeline',
         { 'Event History': 29, Workers: 1, 'Pending Activities': 0 });
       s.order1045 = makeDetailsPage(s.win, ORDER_1045, 'Pending Activities',
@@ -626,7 +629,7 @@
       s.ring.style.opacity = t >= clickAt ? 0.9 * (1 - ring) : 0;
 
       // ---- c[1]: order-1042: the chart sweeps through the run in time order on "every Activity" (each label,
-      // with its duration, shows as its bar ends), then the crash annotation on "the crash it survived"
+      // with its duration, shows as its bar ends), then the crash annotation on "the retry after the crash"
       const tl = s.timeline;
       setTimeline(tl, ORDER_1042.runtime * P(t, c[1] + 1.8, 2.2, x => x));
       s.order1042.end.textContent = dateTime(ORDER_1042.start + ORDER_1042.runtime);
@@ -654,8 +657,10 @@
       p45.duration.textContent = duration(now);
       p45.end.textContent = finished ? dateTime(o45.start + o45.finishedAt) : '–';
       p45.end.style.color = finished ? UI.text : UI.dim;
-      // the tab counts follow the history: shipPackage done (+5 events), then the Workflow complete (29)
-      p45.tabCount('Event History').textContent = finished ? 29 : shipped ? 22 : 17;
+      // the tab counts follow the history: 17 while shipPackage retries (a retry writes no event), 23 once it
+      // completes (ActivityTaskStarted, ActivityTaskCompleted, a Workflow Task, emailReceipt scheduled), then the
+      // Workflow complete (29)
+      p45.tabCount('Event History').textContent = finished ? 29 : shipped ? 23 : 17;
       p45.tabCount('Pending Activities').textContent = shipped ? 0 : 1;
       // pending card: each failure raises the attempt count (it bumps) and shows the last failure; between attempts
       // the Activity waits, SCHEDULED, for its retry

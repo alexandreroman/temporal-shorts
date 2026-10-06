@@ -8,7 +8,7 @@
     shift: EH.shift,
     subs: [
       {
-        text: "Your code runs on your own servers, called <b>Workers</b>. "
+        text: "Your code runs in <b>Workers</b>, programs on your own servers. "
           + "Temporal keeps an <b>Event History</b>, outside the Workers.",
         after: 0.3,
       },

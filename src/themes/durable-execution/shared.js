@@ -43,7 +43,7 @@ const WORKFLOW_CODE = ['export async function placeOrder(order: Order) {', ...OR
 const WORKFLOWS_TS = [
   'const { chargeCard, reserveItem, shipPackage, emailReceipt } =',
   '  proxyActivities<typeof activities>({',
-  "    startToCloseTimeout: '1 minute',",
+  "    startToCloseTimeout: '10 seconds',",
   '  });',
   '',
   ...WORKFLOW_CODE,
@@ -164,10 +164,11 @@ const HISTORY_ROWS = [
 ];
 // rows: HTML of each row; the rows from crashRow on sit crashGap px lower, leaving room for the
 // "WORKER CRASHED HERE" line; w x h: card size (the room under the last row stays free). Returns the
-// makeHistoryCard card: its tags are centered on their rows (see setHistoryTag).
+// makeHistoryCard card: its tags are centered on their rows (see setHistoryTag); card.rowTop(i) is the top of
+// row i.
 function makeHistory(p, rows, w, h, crashRow, crashGap) {
   const rowTop = i => HIST.row0 + i * HIST.rowGap + (i >= crashRow ? crashGap : 0);
-  return makeHistoryCard(p, rows, {
+  const card = makeHistoryCard(p, rows, {
     w, h, rowTop, rowH: HIST.rowGap, padY: 0, tagTop: i => rowTop(i) + HIST.rowGap / 2, tagRight: 28,
     tag: { border: false },
     crash: {
@@ -177,6 +178,8 @@ function makeHistory(p, rows, w, h, crashRow, crashGap) {
     },
     scanH: HIST.rowGap,
   });
+  card.rowTop = rowTop;
+  return card;
 }
 // Row i slides in from the right with progress p, on whole pixels
 const showHistoryRow = (hist, i, p) => showRow(hist.rows[i], p, 26, true);
@@ -188,8 +191,8 @@ function setHistoryTag(hist, i, label, kind, o, pop = 0) {
   e.style.opacity = clamp(o);
   e.style.transform = `translateY(-50%) scale(${1 + 0.14 * pop})`;
 }
-// Highlight row i (a fractional i slides between rows) with opacity o
-const setHistoryScan = (hist, i, o) => setScan(hist, HIST.row0 + i * HIST.rowGap, o);
+// Highlight row i with opacity o, below the crash line for the rows under it
+const setHistoryScan = (hist, i, o) => setScan(hist, hist.rowTop(i), o);
 
 // ---------- small animation helpers
 // Brief bump (0 to 1 and back to 0) for a pop on a change or an appearance at `at`

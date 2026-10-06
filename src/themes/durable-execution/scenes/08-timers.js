@@ -126,7 +126,7 @@
         after: 0.4,
       },
       {
-        text: "The timer is saved in the Event History, so Worker restarts and deploys during the wait change nothing.",
+        text: "The timer is saved in the Event History, so Worker restarts and deploys during the wait don't lose it.",
         after: 0.3,
       },
       {
