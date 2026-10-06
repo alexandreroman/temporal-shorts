@@ -57,11 +57,14 @@ The video explains to a non-technical audience, in seven topics:
 
 - **0:47** Everything sent to the model fits on one page: the context window.
   Instructions, history, documents, the new question.
-  - Visuals: Page fills with 4 blocks, size gauge.
+  - Visuals: Page fills with an instructions block, then the history: chat
+    lines, a "price-list.pdf" message and the new question, tagged NEW; size
+    gauge.
 - **0:56** It's the only thing the model sees. It has a size limit, and every
   word on it is billed, at every call.
-  - Visuals: Vision cone, "Yesterday's email: not in context", gauge FULL, token
-    counter "billed at every call".
+  - Visuals: Vision cone, "Yesterday's email: not in context"; the history
+    grows as new messages are appended one by one, NEW moving to the latest
+    question, until the gauge is FULL; token counter "billed at every call".
 
 ## 04 Tools
 
