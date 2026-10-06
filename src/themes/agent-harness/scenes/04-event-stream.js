@@ -41,16 +41,22 @@
     ['TOKENS', 'turn ended · 2,140 tokens'],
   ];
   const HUMAN_ROW = 4, TOTAL_ROW = 6;
+  // status tags of the HUMAN_ROW and TOTAL_ROW marks, as [label, statusTag kind]
+  const MARK_TAGS = [['HUMAN', 'wait'], ['COST', 'reused']];
   const LAST_ROW = ROWS.length - 1;
 
   const chipCss = (type, fontSize) => ({
     ...EVENT_TYPES[type], fontSize, letterSpacing: '.1em', padding: '4px 10px 4px calc(10px + .1em)',
     border: '1.5px solid', borderRadius: '4px', whiteSpace: 'nowrap',
   });
+  // Console row chip and tag text: a 22 px line makes them 32 px tall with their padding and border (the 1.5 px
+  // border is drawn 1 px wide at this scale), an even height, so they center on whole pixels in their 46 px row
+  const CONSOLE_LINE = 22, CONSOLE_TAG_H = 32;
   // the same chip, as inline HTML for the console rows (fixed width so the row texts line up)
   const chipHtml = type => {
     const css = EVENT_TYPES[type];
     return `<span class="mono" style="display:inline-block;width:132px;text-align:center;font-size:16px;`
+      + `line-height:${CONSOLE_LINE}px;`
       + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
       + `background:${css.background};color:${type === 'TOKENS' ? '#5B6475' : css.color}">${type}</span>`;
   };
@@ -89,7 +95,7 @@
         + '<span>Agent event stream</span></div>', 'lbl', { color: 'var(--ink)' });
       // 18 px so the tag stays narrower than the lane, clear of the chips curving in from the lowest agent
       s.same = tag(root, 'Same events for every agent', 'uv');
-      s.same.style.fontSize = '18px';
+      Object.assign(s.same.style, { fontSize: '18px', lineHeight: '24px' });
       s.chips = Array.from({ length: CHIP_POOL }, (_, k) => {
         const type = TYPE_ORDER[k % TYPE_ORDER.length];
         return E(root, type, 'mono', chipCss(type, '16px'));
@@ -114,12 +120,9 @@
       s.console = E(root,
         '<div class="mono" style="position:absolute;left:28px;top:26px;font-size:20px;letter-spacing:.14em;'
         + `display:flex;gap:12px;align-items:center">${ICON('eye', 24, '#141414', 1.8)} CONSOLE</div>`,
-        '', {
-          width: CONSOLE.w + 'px', height: CONSOLE.h + 'px', background: '#F8FAFC', color: '#141414',
-          borderRadius: 'var(--r)',
-        });
+        'paper', { width: CONSOLE.w + 'px', height: CONSOLE.h + 'px' });
       const badgeCss = color => ({
-        left: 'auto', right: '24px', top: '22px', transform: 'none', display: 'flex', alignItems: 'center', gap: '8px',
+        left: 'auto', right: '24px', top: '22px', display: 'flex', alignItems: 'center', gap: '8px',
         fontSize: '16px', letterSpacing: '.12em', padding: '4px 10px 4px calc(10px + .12em)', borderRadius: '4px',
         border: `1.5px solid ${color}`, color, transformOrigin: 'right center',
       });
@@ -131,31 +134,30 @@
         { ...badgeCss(C.uv), background: 'rgba(68,76,231,.1)' });
       s.marks = [HUMAN_ROW, TOTAL_ROW].map(i => E(s.console, '', '', {
         left: '14px', top: (CONSOLE.row0 - 4 + i * CONSOLE.rowGap) + 'px', width: (CONSOLE.w - 28) + 'px',
-        height: (CONSOLE.rowH + 8) + 'px', borderRadius: 'var(--rs)', transform: 'none',
+        height: (CONSOLE.rowH + 8) + 'px', borderRadius: 'var(--rs)',
         background: i === HUMAN_ROW ? 'rgba(182,100,255,.16)' : 'rgba(68,76,231,.12)',
         borderLeft: `4px solid ${i === HUMAN_ROW ? C.violet : C.uv}`,
       }));
       s.scan = E(s.console, '', '', {
         left: '14px', width: (CONSOLE.w - 28) + 'px', height: (CONSOLE.rowH + 8) + 'px',
-        background: 'rgba(68,76,231,.2)', borderRadius: 'var(--rs)', transform: 'none',
+        background: 'rgba(68,76,231,.2)', borderRadius: 'var(--rs)',
       });
       s.rows = ROWS.map(([type, text], i) => E(s.console,
         `${chipHtml(type)}<span style="margin-left:20px;${i === TOTAL_ROW ? 'font-weight:700' : ''}">${text}</span>`,
         'mono', {
           left: '28px', top: (CONSOLE.row0 + i * CONSOLE.rowGap) + 'px', fontSize: '22px', whiteSpace: 'nowrap',
-          display: 'flex', alignItems: 'center', height: CONSOLE.rowH + 'px', transform: 'none',
+          display: 'flex', alignItems: 'center', height: CONSOLE.rowH + 'px',
         }));
       s.tags = [HUMAN_ROW, TOTAL_ROW].map(i => {
         const e = statusTag(s.console);
-        // centered on its row: the tag is 31 px tall at 16 px
+        // centered on its row
         Object.assign(e.style, {
-          left: 'auto', right: '28px', top: (CONSOLE.row0 + (CONSOLE.rowH - 31) / 2 + i * CONSOLE.rowGap) + 'px',
-          fontSize: '16px', transformOrigin: 'right center',
+          left: 'auto', right: '28px',
+          top: (CONSOLE.row0 + (CONSOLE.rowH - CONSOLE_TAG_H) / 2 + i * CONSOLE.rowGap) + 'px',
+          fontSize: '16px', lineHeight: CONSOLE_LINE + 'px', transformOrigin: 'right center',
         });
         return e;
       });
-      setStatus(s.tags[0], 'HUMAN', 'wait');
-      setStatus(s.tags[1], 'COST', 'reused');
       // replay bar: play icon, track, filled part up to the playhead, playhead
       s.bar = E(s.console,
         `${ICON('play', 24, C.uv, 2.2)}<div class="track" style="position:relative;margin-left:16px;width:${BAR_W}px;`
@@ -164,7 +166,7 @@
         + `width:12px;height:22px;margin-left:-6px;border-radius:3px;background:${C.uv}"></div></div>`,
         '', {
           left: '28px', top: (CONSOLE.row0 + LAST_ROW * CONSOLE.rowGap + CONSOLE.rowH + 30) + 'px', display: 'flex',
-          alignItems: 'center', transform: 'none',
+          alignItems: 'center',
         });
       s.bar.fill = s.bar.querySelector('.fill'); s.bar.head = s.bar.querySelector('.head');
     },
@@ -238,6 +240,8 @@
       [HUMAN_ROW, TOTAL_ROW].forEach((row, j) => {
         const at = sweep + sweepD * row / LAST_ROW;
         s.marks[j].style.opacity = P(t, at, 0.3);
+        const [label, kind] = MARK_TAGS[j];
+        setStatus(s.tags[j], label, kind);
         s.tags[j].style.opacity = P(t, at, 0.25);
         s.tags[j].style.transform = `scale(${swell(t, at, 0.14)})`;
       });

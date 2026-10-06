@@ -6,7 +6,7 @@
 import argparse, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import OUTPUT, add_theme_argument, open_page
+from common import OUTPUT, add_theme_argument, open_page, warm_up
 from playwright.sync_api import sync_playwright
 from PIL import Image
 
@@ -19,6 +19,7 @@ OUTPUT.mkdir(exist_ok=True)
 shots = []
 with sync_playwright() as pw:
     browser, page = open_page(pw, a.theme)
+    warm_up(page)
     for t in a.times:
         page.evaluate(f"renderAt({t})")
         p = OUTPUT / f"frame_{t:07.2f}.png"

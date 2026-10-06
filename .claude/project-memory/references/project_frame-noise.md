@@ -1,37 +1,34 @@
 ---
 name: "Frame capture noise"
-description: "Pixel comparisons show run-to-run noise on row y=65, small specks, and rare layer re-rasters"
+description: "Pixel comparisons show tiny run-to-run specks and small render-order differences on anti-aliased curves"
 type: project
 ---
 
 # Frame capture noise
 
 Two headless captures of the same sources are not always pixel-identical.
-Three kinds of differences are capture noise, not source changes:
+Two kinds of differences are capture noise, not source changes:
 
-- **Progress bar edge:** the anti-aliased edge of the filled `#segs`
-  segment (row y=65, x between 1300 and 1841) varies by 1 to 2 levels per
-  channel from one run to the next.
 - **Specks:** isolated pixels on tile edges and corners vary by 1 to 2
-  levels, a few dozen pixels per frame at most. In chapter 7 they sit on
-  the step tiles, the memory panel corner (around x 827-835, y 596-605)
-  and the LLM bill corner. They vary between pages that render the exact
-  same sequence of frames.
-- **Rare layer re-raster:** about one page in fifteen draws some moving or
-  scaled elements (row slide-ins, step tiles, panel labels) with a
-  different sub-pixel raster: deltas up to about 140 on their text, over
-  a few hundred to a few thousand pixels, and every later frame of that
-  page carries the same difference.
+  levels (rarely up to 6), a few pixels per frame at most.
+- **Render order:** a frame rendered in a fresh page and the same frame
+  reached after other frames can differ on anti-aliased curves and
+  rotations (SVG arcs and connectors, rounded corners, the orb's eyes and
+  edge, clock and dial hands): a few dozen pixels, delta up to about 60.
+  Chromium re-rasterizes only the changed area, and edges that cannot sit
+  on whole pixels come out slightly differently.
 
-**Why:** Chromium rasterizes fractional-width fills, tile edges and
-composited layers (`.abs` sets `will-change`) slightly differently between
-runs, even with `--disable-gpu`, and the raster tasks run asynchronously.
+**Why:** the renderer splits a video into segments drawn by parallel
+workers that start at arbitrary frames, so a frame must look the same
+whichever frames came before it. Elements carry no per-element
+compositing layer (`.abs` sets no `will-change`), and resting elements sit
+on whole pixels (pill line heights in px, status tags rounded to even
+widths, whole-number shifts), which keeps the remaining differences to
+these curves.
 
-**How to apply:** when checking that a change keeps frames identical,
-treat row y=65 and specks with a delta of 2 or less as noise. For any
-larger difference, capture the same sequence again in a few fresh pages:
-a difference that shows up in only one page is a re-raster; a difference
-that repeats every time is a real change. A resting element that differs
-depending on which frames were rendered before it in the same page is a
-real defect: a scaled-down element keeps the raster of an earlier scale,
-so resting elements are drawn at their native size.
+**How to apply:** when checking that a change keeps frames identical, treat
+specks with a delta of 2 or less as noise, and capture the same sequence
+of times before and after. To check render-order independence, render
+sample frames in fresh pages and compare them with a sequential capture:
+anything beyond the curves above (a straight edge, a text block, a tag
+shifted by a pixel) is a half-pixel geometry to fix.

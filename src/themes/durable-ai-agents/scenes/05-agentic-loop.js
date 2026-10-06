@@ -36,19 +36,13 @@
       s.center = E(root, 'Agentic<br>loop', 'lbl', {
         textAlign: 'center', color: 'var(--ink)', fontSize: '24px', lineHeight: 1.4,
       });
-      s.token = E(root, '', '', {
-        width: '22px', height: '22px', background: C.neon, boxShadow: '0 0 22px 6px rgba(219,255,75,.45)',
-        borderRadius: '5px',
-      });
+      s.token = makeToken(root);
       s.goal = makeCard(root, "Book lunch with Marie on Thursday.", 'user', null, 640);
-      const steps = [
-        ['cal', 'Check the calendar', 'Thu 12:30 is free'], ['search', 'Find a restaurant', 'Chez Paulette'],
-        ['food', 'Book a table', 'table for 2, confirmed'], ['mail', 'Invite Marie', 'invite sent'],
-      ];
-      s.rows = steps.map(([i, a, r]) => {
+      s.rows = STEPS.map(step => {
         const row = E(root,
-          `${ICON(i, 36, C.ink, 1.6)}<div style="flex:1;margin-left:18px"><div style="font-size:27px">${a}</div>`
-          + `<div class="res mono" style="font-size:18px;color:var(--neon);opacity:0">${r}</div></div>`
+          `${ICON(step.icon, 36, C.ink, 1.6)}<div style="flex:1;margin-left:18px">`
+          + `<div style="font-size:27px">${step.action}</div>`
+          + `<div class="res mono" style="font-size:18px;color:var(--neon);opacity:0">${step.result}</div></div>`
           + `<div class="ck" style="opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`,
           'tile', {
             width: '640px', height: '88px', display: 'flex', alignItems: 'center', padding: '0 22px', textAlign: 'left',

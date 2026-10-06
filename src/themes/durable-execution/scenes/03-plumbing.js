@@ -32,7 +32,6 @@
   scene({
     chapter: 3, title: 'The usual fix: plumbing',
     // laid out around the center of the free band (960, 522)
-    shift: [0, 0],
     subs: [
       {
         text: "So developers add plumbing around the code: retries, status tables, queues, timers, cleanup jobs.",

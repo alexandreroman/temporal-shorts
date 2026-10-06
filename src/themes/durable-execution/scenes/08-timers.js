@@ -43,29 +43,27 @@
   // Worker status shown in the block: label, icon (spin: a running spinner) and colors
   const STATUS = {
     running: { text: 'RUNNING', icon: 'spin', color: C.ink },
-    free: { text: 'FREE FOR OTHER WORK', icon: 'pause', color: C.ink },
+    free: { text: 'FREE FOR OTHER WORK', icon: 'pauseLines', color: C.ink },
     restarting: { text: 'RESTARTING…', icon: 'power', color: C.slate },
     deploying: { text: 'DEPLOYING V2…', icon: 'upload', color: C.slate },
     deployed: { text: 'V2 DEPLOYED', icon: 'upload', color: C.ink },
     replaying: { text: 'REPLAYING…', icon: 'retry', color: C.ink },
   };
-  const ICON_COLOR = { pause: C.slate, power: C.slate, upload: C.violet, retry: C.violet };
+  const ICON_COLOR = { pauseLines: C.slate, power: C.slate, upload: C.violet, retry: C.violet };
 
   // badge (28 x 28) at the right end of code line i, inside the card
   const makeLineBadge = (card, i, html, background) => E(card, html, '', {
     left: (card.w - 48) + 'px', top: (card.padY + i * card.lineH + (card.lineH - 28) / 2) + 'px',
     width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background, borderRadius: 'var(--rs)', transform: 'none',
+    background, borderRadius: 'var(--rs)',
   });
-  const spinnerRing = size => `<div style="width:${size}px;height:${size}px;border:3px solid rgba(182,100,255,.3);`
-    + `border-top-color:${C.violet};border-radius:50%"></div>`;
   // RESULT-style chip with another label
   const makeChip = (p, label) => {
     const chip = makeResultCard(p);
     chip.firstChild.textContent = label;
     return chip;
   };
-  // Worker status block: a label, then one icon and one text, swapped by setStatus
+  // Worker status block: a label, then one icon and one text, swapped by setStatusBlock
   const makeStatusBlock = p => {
     const icons = Object.keys(ICON_COLOR)
       .map(name => `<div data-icon="${name}" style="position:absolute;inset:0;opacity:0">`
@@ -83,7 +81,7 @@
     e.tx = e.querySelector('.tx');
     return e;
   };
-  const setStatus = (block, key) => {
+  const setStatusBlock = (block, key) => {
     const st = STATUS[key];
     if (block._key !== key) {
       block._key = key;
@@ -99,11 +97,10 @@
       '<div class="lbl" style="position:absolute;left:26px;top:24px;font-size:18px">Durable timer</div>'
       + '<div class="st lbl" style="position:absolute;right:26px;top:24px;font-size:18px"></div>'
       + '<div style="position:absolute;left:26px;top:70px;display:flex;align-items:center;gap:26px">'
-      // the hand turns on its own layer, so its turns never re-raster the dial under it
       + '<div style="position:relative;width:80px;height:80px">'
       + '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="square"'
       + ` style="display:block"><circle cx="12" cy="12" r="9" stroke="${C.ink}"/></svg>`
-      + '<div class="hand" style="position:absolute;inset:0;will-change:transform">'
+      + '<div class="hand" style="position:absolute;inset:0">'
       + '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="square"'
       + ` style="display:block"><path d="M12 12V6.5" stroke="${C.violet}"/></svg></div></div>`
       // tabular digits: the line only shifts once, from day 9 to day 10
@@ -122,14 +119,13 @@
   scene({
     chapter: 8, title: 'Durable timers',
     // the two panels span x 120..1800 and y 152..892, centered on (960, 522)
-    shift: [0, 0],
     subs: [
       {
         text: "A Workflow can even <b>wait for days</b>, for a delivery or a reply, without tying up a Worker.",
         after: 0.4,
       },
       {
-        text: "The timer is saved in the Event History, so Worker restarts and deploys during the wait change nothing.",
+        text: "The timer is saved in the Event History, so Worker restarts and deploys during the wait don't lose it.",
         after: 0.3,
       },
       {
@@ -138,7 +134,7 @@
       },
     ],
     build(root, s) {
-      s.workers = ['WORKER A', 'WORKER B'].map(name => makeWorkerPanel(root, name, WK.w, WK.h));
+      s.workers = ['WORKER A', 'WORKER B'].map(name => makeAppPanel(root, name, WK.w, WK.h));
       const { w, font, lineH, padY } = CODE_CARD;
       s.code = makeCodeCard(root, { lines: WAIT_CODE, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY });
       s.code.hdr.style.opacity = 1;
@@ -148,8 +144,8 @@
       s.sleeping = makeLineBadge(s.code, SLEEP_LINE, ICON('clock', 20, '#FFFFFF', 2.2), C.uv);
       s.spin = makeLineBadge(s.code, 0, spinnerRing(26), 'none');
       s.status = makeStatusBlock(root);
-      s.temporal = makeTemporalPanel(root, TP.w, TP.h);
-      s.hist = makeHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h, ROWS.length, 0);
+      s.temporal = makeTemporalPanel(root, TP.w, TP.h, TEMPORAL_HEADER);
+      s.hist = makeHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h);
       s.timer = makeTimerBlock(root);
       s.chips = {
         ship: makeResultCard(root), start: makeChip(root, 'START TIMER'), wake: makeChip(root, 'WAKE UP'),
@@ -187,9 +183,9 @@
       if (t >= runAt) status = 'running';
       if (t >= doneAt) status = 'free';
       const busy = status === 'running' || status === 'replaying';
-      setWorkerStatus(workerA, 'VERSION 1', busy ? 'running' : 'idle');
-      setWorkerStatus(workerB, 'VERSION 2', busy ? 'running' : 'idle');
-      setStatus(s.status, status);
+      setAppStatus(workerA, 'VERSION 1', busy ? 'running' : 'stopped');
+      setAppStatus(workerB, 'VERSION 2', busy ? 'running' : 'stopped');
+      setStatusBlock(s.status, status);
       place(s.status, WK.x, BLOCK.y, 1, P(t, c[0] + 0.6, 0.4));
 
       // the code card dims while no Worker runs it (restart, deploy)
@@ -228,9 +224,8 @@
         showHistoryRow(s.hist, i, P(t, at - 0.1, 0.3));
         // TimerStarted bumps again as the Worker restarts: it stays in the history
         const bump = i === STARTED_ROW ? bumpAt(t, at) + bumpAt(t, restartAt) + bumpAt(t, deployAt) : bumpAt(t, at);
-        setHistoryTag(s.hist, i, 'SAVED', P(t, at, 0.25), bump);
+        setHistoryTag(s.hist, i, 'SAVED', 'saved', P(t, at, 0.25), bump);
       });
-      markEventHistoryCrash(s.hist, 0, 0);
       // the TimerStarted row stays lit while the Worker comes and goes; then the replay reads the history: the
       // shipPackage row, then TimerFired (the sleep returns at once)
       const replayRow = t < replaySleep ? SHIP_ROW : FIRED_ROW;

@@ -2,23 +2,20 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // same layout as chapter 3, which ends with the Workflow waiting and app instance A gone
-  const { rowY: ROW_Y, app: APP, strip: STRIP, temporal: TEMPORAL } = WF_LAYOUT;
-  const CLOCK = { x: STRIP.x - STRIP.w / 2 + 30 + WAIT_CLOCK_W / 2, y: STRIP.y };
+  const { rowY: ROW_Y, app: APP, strip: STRIP, temporal: TEMPORAL, clock: CLOCK } = WF_LAYOUT;
   // before app instance B arrives, Maria and the approval card fill the app panel's place: the card against the
   // column's right edge, Maria (avatar and label) centered in the space on its left
-  const CARD_K = 1.2, CARD_W = 480;
-  const CARD = { x: APP.x + APP.w / 2 - CARD_W / 2, y: APP.y };
-  const MARIA = { x: (APP.x - APP.w / 2 + CARD.x - CARD_W / 2) / 2, y: APP.y - 21 };
+  const CARD = { x: APP.x + APP.w / 2 - APPROVAL_CARD.w / 2, y: APP.y };
+  const MARIA = { x: (APP.x - APP.w / 2 + CARD.x - APPROVAL_CARD.w / 2) / 2, y: APP.y - AVATAR.dy };
   const TICKET_X = STRIP.x + 265; // 30 px from the strip's right edge, like the clock from its left edge
   // the Signal lands on the left part of the row it becomes, in the slot of the waiting line
-  const SIGNAL_LANDING = { x: HIST.x - 180, y: rowY(3) };
+  const SIGNAL_LANDING = { x: HIST.x - 180, y: historyRowY(3) };
   scene({
     chapter: 4, title: 'The decision arrives',
     // laid out centered at (960, 522) on the content frame
-    shift: [0, 0],
     subs: [
       {
-        text: "Three days later, Maria taps Approve. "
+        text: "On day three, Maria taps Approve. "
           + "Temporal delivers the decision to the Workflow as a <b>Signal</b>.",
         after: 1.4,
       },
@@ -33,25 +30,25 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, ROW_Y);
-      s.maria = makeAvatar(root, 'Maria, manager', 140);
-      s.card = makeApprovalCard(root, CARD_K);
-      s.signal = tag(root, 'Signal: approved', 'neon');
+      s.steps = makeLaptopRow(root, s.svg, ROW_Y);
+      s.maria = makeAvatar(root, 'Maria, manager', AVATAR.size);
+      s.card = makeApprovalCard(root, APPROVAL_CARD.k);
       // solid background: the pill leaves from the white card and must stay readable over it
-      s.signal.style.background = '#1B1B1F';
+      s.signal = tag(root, 'Signal: approved', 'neon solid');
       s.B = makeWorkflowApp(root, 'APP INSTANCE B');
       s.strip = makeClockStrip(root);
       s.clock = makeWaitClock(root, 'Waiting for Maria');
       s.ticket = E(root,
-        `<div style="display:flex;align-items:center;gap:14px">${ICON('laptop', 40, C.ink, 1.6)}`
+        `<div style="display:flex;align-items:center;gap:14px">${ICON('laptopFlat', 40, C.ink, 1.6)}`
         + '<span class="mono" style="font-size:24px;letter-spacing:.08em">1 ORDER</span></div>',
         '', { padding: '12px 20px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
-      s.temporal = makeTemporalPanel(root);
+      s.temporal = makeWfTemporalPanel(root);
       s.jr = makeOrderHistory(root);
     },
     update(t, c, s) {
       const tap = c[0] + 1.6, signalIn = c[0] + 3.5;
-      // replay: rows 1 to 4 are read back one by one, the cursor follows without redoing the steps
+      // replay: rows 1 to 3 are replayed one by one, then the Signal (row 4) is read; the cursor follows without
+      // redoing the steps
       const replay = [0, 1, 2, 3].map(i => c[1] + 1.3 + i * 0.5);
       const resumed = replay[3] + 0.5;
       const orderOn = c[2] + 0.3, ordered = c[2] + 1.3, notifyOn = c[2] + 1.7, notified = c[2] + 2.7;
@@ -64,9 +61,9 @@
         t >= ordered ? 2 : t >= orderOn ? 1 : 0,
         t >= notified ? 2 : t >= notifyOn ? 1 : 0,
       ];
-      placeStepRow(s.steps, t, -1, states);
+      placeLaptopRow(s.steps, t, -1, states);
 
-      // Maria approves on the approval card, three days later
+      // Maria approves on the approval card, on day three
       const left = P(t, c[1], 0.4);
       const mp = P(t, c[0] + 0.2, 0.5, backOut);
       place(s.maria, MARIA.x, MARIA.y, mp, clamp(mp * 2) * (1 - left));
@@ -107,13 +104,16 @@
       const tp = P(t, ordered, 0.45, backOut);
       place(s.ticket, TICKET_X, STRIP.y, tp, clamp(tp * 2));
 
-      // Event History: rows 1 to 3 already saved, the Signal replaces the waiting line, then the last steps
+      // Event History: rows 1 to 3 already saved, the Signal replaces the waiting line, then the last steps.
+      // Rows 1 to 3 are replayed; the Signal arrived after them, so it is new to the Workflow: it keeps its SAVED
+      // tag, which still pops when the row is read.
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, 1);
       place(s.jr, HIST.x, HIST.y, 1, 1);
       s.jr.rows.forEach((_, i) => {
-        showRow(s.jr, i, i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
-        const isReplayed = i < 4 && t >= replay[i];
-        const at = isReplayed ? replay[i] : saved[i];
+        showRow(s.jr.rows[i], i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
+        const isRead = i < 4 && t >= replay[i];
+        const isReplayed = isRead && i < 3;
+        const at = isRead ? replay[i] : saved[i];
         setRowTag(s.jr, i, t, isReplayed ? 'REPLAYED' : 'SAVED', at, i < 3 ? 1 : P(t, saved[i], 0.25));
       });
       setWaitLine(s.jr, 1 - P(t, signalIn - 0.2, 0.3));

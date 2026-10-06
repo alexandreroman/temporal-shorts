@@ -1,12 +1,23 @@
-/* Fonts: Fontsource woff2 stand-ins for Temporal's Aeonik / Noto Sans Mono (not available here).
-   Fetched by scripts/setup.sh. */
+/* Fonts: Fontsource woff2 files fetched by scripts/setup.sh. Mono is Temporal's brand Noto Sans Mono;
+   Brand is Instrument Sans, a stand-in for the proprietary Aeonik.
+   The Mono overrides give a 1.32 em content box (1.02 em above the baseline, .30 below) instead of Noto's
+   1.069 + .293: caps sit centered in it, and line-height:normal boxes keep the heights the layout is built on,
+   whose centers land on whole pixels. */
 @font-face{font-family:'Brand';src:url(fonts/instrument-sans-latin-400-normal.woff2) format('woff2');font-weight:400}
 @font-face{font-family:'Brand';src:url(fonts/instrument-sans-latin-700-normal.woff2) format('woff2');font-weight:700}
-@font-face{font-family:'Mono';src:url(fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2');font-weight:400}
-@font-face{font-family:'Mono';src:url(fonts/jetbrains-mono-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{
+  font-family:'Mono';src:url(fonts/noto-sans-mono-latin-400-normal.woff2) format('woff2');font-weight:400;
+  ascent-override:102%;descent-override:30%;line-gap-override:0%;
+}
+@font-face{
+  font-family:'Mono';src:url(fonts/noto-sans-mono-latin-700-normal.woff2) format('woff2');font-weight:700;
+  ascent-override:102%;descent-override:30%;line-gap-override:0%;
+}
 :root{
   --bg:#141414;--ink:#F8FAFC;--slate:#94A3B8;--line:#3A4150;--uv:#444CE7;--violet:#B664FF;--neon:#DBFF4B;--red:#FF5A5F;
   --surface:#1B1B1F;--r:10px;--rs:6px;
+  /* the .pill tints composited over --bg: solid fills for what sits on a line, which must not show through */
+  --uv-solid:#1D1E3A;--violet-solid:#2B1F35;--red-solid:#2B1B1C;--neon-solid:#242718;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg)}
@@ -21,7 +32,7 @@ html,body{margin:0;background:var(--bg)}
   background:radial-gradient(ellipse at 50% 100%,rgba(182,100,255,.20), rgba(68,76,231,.12) 40%, rgba(20,20,20,0) 70%);
 }
 .scene{position:absolute;inset:0;display:none}
-.abs{position:absolute;left:0;top:0;will-change:transform,opacity}
+.abs{position:absolute;left:0;top:0}
 .layer{position:absolute;left:0;top:0;pointer-events:none}
 .mono{font-family:'Mono',monospace}
 #hdr{
@@ -56,20 +67,10 @@ html,body{margin:0;background:var(--bg)}
 }
 .llm-dots i{display:block;width:.55em;height:.55em;background:var(--uv);border-radius:2px}
 .llm-q{position:absolute;left:-1.2em;top:-1.6em;font-size:2.6em;font-weight:700;color:var(--neon);opacity:0}
-.llm-label,.app-label{
+.llm-label{
   position:absolute;left:50%;top:calc(100% + 18px);transform:translateX(-50%);white-space:nowrap;
   font-family:'Mono';font-size:22px;letter-spacing:.12em;padding-left:.12em;color:var(--slate);
 }
-/* app */
-.app{width:300px;height:220px}
-.app-win{
-  position:absolute;inset:0;background:var(--surface);border:1.5px solid #4B5363;border-radius:var(--r);overflow:hidden;
-}
-.app-bar{height:32px;border-bottom:1.5px solid #4B5363;display:flex;gap:8px;align-items:center;padding-left:14px}
-.app-bar i{width:9px;height:9px;background:var(--slate);opacity:.6;border-radius:2px}
-.app-lines{padding:24px 22px;display:flex;flex-direction:column;gap:16px}
-.app-lines b{display:block;height:10px;background:rgba(248,250,252,.18);border-radius:3px}
-.app-gear{position:absolute;right:18px;bottom:14px;opacity:.35}
 /* text cards */
 .card{
   max-width:640px;background:var(--ink);color:var(--bg);padding:12px 22px 14px;border-left:6px solid var(--violet);
@@ -78,22 +79,31 @@ html,body{margin:0;background:var(--bg)}
 .card .who{font-family:'Mono';font-size:16px;letter-spacing:.12em;color:#5B6475;margin-bottom:4px}
 .card .txt{font-family:'Mono';font-size:27px;line-height:1.35}
 .k-llm{border-left-color:var(--uv)} .k-tool{border-left-color:var(--neon)}
-.k-ok{border-left-color:var(--uv)} .k-bad{border-left-color:var(--red)}
+.k-bad{border-left-color:var(--red)}
+/* px line heights keep pill heights font-independent and even (borders snap to 1 px): 30 + 18 + 2 = 50 px,
+   big 40 + 24 + 2 = 66 px, so a pill centered on a whole pixel rests on whole pixels */
 .pill{
-  white-space:nowrap;padding:9px 18px 9px calc(18px + .1em);background:rgba(248,250,252,.04);border:1.5px solid #4B5363;
+  white-space:nowrap;line-height:30px;padding:9px 18px 9px calc(18px + .1em);background:rgba(248,250,252,.04);
+  border:1.5px solid #4B5363;
   font-family:'Mono';font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
   border-radius:var(--rs);
 }
-.pill.big{font-size:30px;padding:12px 26px 12px calc(26px + .1em)}
+.pill.big{font-size:30px;line-height:40px;padding:12px 26px 12px calc(26px + .1em)}
 .pill.uv{border-color:var(--uv);background:rgba(68,76,231,.18)}
 .pill.violet{border-color:var(--violet);background:rgba(182,100,255,.14)}
 .pill.neon{border-color:var(--neon);color:var(--neon);background:rgba(219,255,75,.08)}
 .pill.red{border-color:var(--red);color:var(--red);background:rgba(255,90,95,.1)}
+.pill.uv.solid{background:var(--uv-solid)}
+.pill.violet.solid{background:var(--violet-solid)}
+.pill.red.solid{background:var(--red-solid)}
+.pill.neon.solid{background:var(--neon-solid)}
 .lbl{
   white-space:nowrap;font-family:'Mono';font-size:20px;letter-spacing:.12em;padding-left:.12em;text-transform:uppercase;
   color:var(--slate);
 }
 .tile{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);text-align:center}
+/* white card on the dark stage (Event History, code, console) */
+.paper{background:var(--ink);color:var(--bg);border-radius:var(--r)}
 /* Live player (page opened without ?t=): fit-to-window stage and playback controls.
    Every rule targets .live or the #ctl overlay, both created by startPlayer() only, so the frozen
    ?t= frames used by the renderer stay pixel-identical. */

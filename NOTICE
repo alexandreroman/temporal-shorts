@@ -7,6 +7,6 @@ The Temporal name and logo (src/assets/) are trademarks of Temporal
 Technologies Inc. They are not covered by the Apache License and are used
 here under the Temporal brand guidelines (https://temporal.io/brand).
 
-The fonts downloaded by `make setup` (Instrument Sans, JetBrains Mono) are
+The fonts downloaded by `make setup` (Instrument Sans, Noto Sans Mono) are
 distributed under the SIL Open Font License 1.1 and are not part of this
 repository.

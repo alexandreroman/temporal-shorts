@@ -35,10 +35,10 @@
       s.bundle = E(root,
         '<div class="mono" style="font-size:15px;letter-spacing:.12em;color:#5B6475;margin-bottom:8px">'
         + 'FULL CONTEXT</div>'
-        + bar('#E6E7FC', 260) + bar('#F2E6FF', 200) + bar('#E4F78F', 230),
-        '', { background: '#F8FAFC', padding: '12px 20px', borderLeft: '6px solid ' + C.uv, borderRadius: 'var(--r)' });
+        + bar(C.uvTint, 260) + bar('#F2E6FF', 200) + bar('#E4F78F', 230),
+        'paper', { padding: '12px 20px', borderLeft: '6px solid ' + C.uv });
       s.tag = tag(root, 'Call 2');
-      s.ans = makeCard(root, "It's 18°C and sunny in Paris!", 'ok');
+      s.ans = makeCard(root, "It's 18°C and sunny in Paris!", 'llm');
     },
     update(t, c, s) {
       place(s.app, 280, 330, P(t, c[0], 0.6, backOut), P(t, c[0], 0.4));

@@ -1,12 +1,6 @@
 // ===================== 1. LLM CALL
 // The block keeps every name declared in this file local to this scene.
 {
-  // type the card's text word by word, p from 0 to 1
-  const typeWords = (card, p) => {
-    const words = card.full.split(' ');
-    const n = Math.round(words.length * clamp(p));
-    card.txt.innerHTML = words.map((w, i) => `<span style="opacity:${i < n ? 1 : 0}">${w}</span>`).join(' ');
-  };
   scene({
     chapter: 1, title: 'LLM calls',
     // pans with the LLM moves: alone with its chips, then app + LLM + cards, then text in / text out
@@ -42,7 +36,7 @@
       });
       const out = P(t, c[2], 0.5);
       const ap = P(t, c[1] + 0.2, 0.6, backOut);
-      place(s.app, 420, 430, ap, clamp(ap * 2) * (1 - out)); gearSpin(s.app, 0);
+      place(s.app, 420, 430, ap, clamp(ap * 2) * (1 - out));
       draw(s.arrow, P(t, c[1] + 0.5, 0.6), 1 - out);
       place(s.arrowL, 955, 398, 1, P(t, c[1] + 0.8, 0.4) * (1 - out));
       fly(s.q, t, c[1] + 0.6, 420, 260, c[1] + 1.0, 1.0, 1180, 260, c[1] + 2.0, 1450, 430);

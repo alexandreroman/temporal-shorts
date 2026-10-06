@@ -1,10 +1,9 @@
 # Script and timeline: Human-in-the-Loop
 
-Subtitles are the only narration (no audio). Timings are computed in
-`src/engine.js` from text length (`autoDur`: chars / 16 + 0.6 s, clamped
-2.4 to 8 s), plus per-subtitle `after` pauses. Run
-`make timeline THEME=human-in-the-loop` for the live values; the start times
-below are a snapshot from 2026-10-05.
+Subtitles are the only narration (no audio). Each subtitle lasts as long
+as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
+Run `make timeline THEME=human-in-the-loop` for the live values; the start
+times below are a snapshot from 2026-10-06.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -79,7 +78,7 @@ the laptop, NOTIFY Sam.
 - **1:10** When it reaches the approval, the Workflow just waits, as long as
   it takes. A minute or a month.
   - Visuals: Cursor parked on "wait for the decision" (hourglass), the app
-    status reads "WAITING, NOTHING RUNNING" and its gear stops; a pulsing
+    status reads "WAITING, NO CODE RUNNING" and its gear stops; a pulsing
     "WAITING FOR A SIGNAL" line in the history; a clock strip under the app
     panel fast-forwards the day counter.
 - **1:18** Temporal keeps its Event History, outside the app. Restarts and
@@ -91,8 +90,8 @@ the laptop, NOTIFY Sam.
 
 ## 04 The decision arrives
 
-- **1:29** Three days later, Maria taps Approve. Temporal delivers the
-  decision to the Workflow as a Signal.
+- **1:29** On day three, Maria taps Approve. Temporal delivers the decision
+  to the Workflow as a Signal.
   - Visuals: Day counter DAY 3; Maria and the approval card in the left
     column, tap on Approve (it turns "Approved"); a "SIGNAL: APPROVED" pill
     flies into the Event History; row 4 "Signal: approved by Maria" SAVED,
@@ -100,9 +99,10 @@ the laptop, NOTIFY Sam.
 - **1:37** Any running copy of the app picks it up, replays the history, and
   resumes right after the wait.
   - Visuals: APP INSTANCE B takes over (TAKING OVER, REPLAYING…); rows 1 to
-    4 are highlighted in turn and tagged REPLAYED while the WORKFLOW cursor
-    runs the first lines again without redoing the steps; it lands after
-    the wait ("RESUMED AFTER THE WAIT") and APPROVAL is checked.
+    3 are highlighted in turn and tagged REPLAYED, then row 4, the Signal,
+    is read and keeps SAVED (it is new to the Workflow); the WORKFLOW cursor
+    runs the first lines again without redoing the steps, passes the wait
+    and lands after it ("RESUMED AFTER THE WAIT"); APPROVAL is checked.
 - **1:45** The order is placed and Sam is notified. No step was redone, and
   nothing was lost along the way.
   - Visuals: ORDER and NOTIFY run and check; rows 5 "Order placed: laptop"
@@ -111,7 +111,7 @@ the laptop, NOTIFY Sam.
 ## 05 Deadlines and reminders
 
 - **1:55** No answer? The Workflow can also wait on a timer: a reminder after
-  two days, escalate after five.
+  two days, escalation after five.
   - Visuals: Day timeline DAY 0 to DAY 5 with a moving hourglass marker:
     APPROVAL REQUESTED at DAY 0, a bell and "REMINDER SENT" at DAY 2,
     "ESCALATED TO A DIRECTOR" at DAY 5; below, an EVENT HISTORY writes

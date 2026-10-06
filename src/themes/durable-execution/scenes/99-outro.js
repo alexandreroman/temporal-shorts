@@ -12,11 +12,6 @@
     e.ok = e.querySelector('.ok');
     return e;
   };
-  // Centers e on (x, y) like place() at scale 1, but on whole pixels, so the native-size logo inside stays sharp
-  const placeOnWholePixels = (e, x, y, o) => {
-    place(e, x, y, 1, o);
-    e.style.transform = `translate(${Math.round(x - e.offsetWidth / 2)}px,${Math.round(y - e.offsetHeight / 2)}px)`;
-  };
   scene({
     pre: 0.4, post: 2.6,
     shift: [0, 35],
@@ -25,9 +20,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      const xs = ORDER_STEPS.map((_, i) => ROW.x0 + i * ROW.gap);
-      s.links = [0, 1, 2].map(i => path(s.svg,
-        `M ${xs[i] + ROW.size / 2 + 2} ${ROW.y} L ${xs[i + 1] - ROW.size / 2 - 2} ${ROW.y}`, C.line, 2, false));
+      s.links = stepLinks(s.svg, ORDER_STEPS.map((_, i) => ROW.x0 + i * ROW.gap), ROW.y, ROW.size);
       s.tiles = ORDER_STEPS.map(step => makeDoneTile(root, step.icon));
       s.t = E(root,
         '<div style="font-size:124px;letter-spacing:-3.5px;line-height:128px">Durable Execution</div>'
@@ -38,7 +31,7 @@
         '', { width: '1040px', textAlign: 'center' });
     },
     update(t, c, s) {
-      placeOnWholePixels(s.t, 960, 600, P(t, 0.3, 0.8));
+      place(s.t, 960, 600, 1, P(t, 0.3, 0.8));
       // tiles pop in one after the other, then each step gets its check
       s.tiles.forEach((e, i) => {
         const p = P(t, 0.1 + i * 0.12, 0.45, backOut);

@@ -36,7 +36,7 @@
   box-shadow:0 18px 48px -12px rgba(68,76,231,.45),0 0 0 1px rgba(182,100,255,.25);
 }
 .home .theme:focus-visible{outline:2px solid var(--uv);outline-offset:4px}
-.home .theme-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.home .theme-top{display:flex;margin-bottom:18px}
 .home .theme-icon{
   display:flex;align-items:center;justify-content:center;width:clamp(88px,7vw,112px);aspect-ratio:1;
   background:rgba(68,76,231,.14);border:1.5px solid rgba(68,76,231,.55);border-radius:var(--r);
@@ -48,10 +48,6 @@
 /* Same stroke style as the ICONS set of engine.js: 24 px grid, square caps, mitered joins. */
 .home .theme-icon svg{
   width:57%;height:57%;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:square;stroke-linejoin:miter;
-}
-.home .status{
-  white-space:nowrap;padding:6px 12px 6px calc(12px + .12em);border:1.5px solid var(--line);border-radius:var(--rs);
-  font-family:'Mono',monospace;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate);
 }
 .home .theme-title{font-size:24px;line-height:1.2;letter-spacing:-.2px}
 .home .theme-text{font-size:16px;line-height:1.5;color:var(--slate)}

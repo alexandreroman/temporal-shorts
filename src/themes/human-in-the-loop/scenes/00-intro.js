@@ -12,21 +12,14 @@
       },
     ],
     build(root, s) {
-      s.t = E(root,
-        `<img src="${LOGO}" style="height:58px;display:block;margin-bottom:46px">`
-        + '<div class="mono" style="font-size:22px;letter-spacing:.14em;color:var(--slate)">'
-        + 'AN EXPLAINER FOR EVERYONE</div>'
-        + '<div style="font-size:100px;line-height:1.04;letter-spacing:-3px;margin-top:22px">'
-        + 'How does an app<br>wait for a person?</div>'
-        + '<div class="mono" style="font-size:24px;letter-spacing:.12em;color:var(--violet);margin-top:34px">'
-        + 'HUMAN-IN-THE-LOOP WITH TEMPORAL</div>');
+      s.t = makeTitleBlock(root, 'AN EXPLAINER FOR EVERYONE', 'How does an app<br>wait for a person?',
+        'HUMAN-IN-THE-LOOP WITH TEMPORAL', { titleFont: 100, titleLineHeight: 1.04 });
       // built before the card, so an orbiting icon passing a corner goes behind it
       s.orb = ['user', 'mail', 'bell', 'hourglass', 'check', 'cal'].map(n => E(root, ICON(n, 50, C.ink, 1.6)));
       s.card = makeApprovalCard(root, 1.4);
     },
     update(t, c, s) {
-      place(s.t, 640, 440, 1, P(t, 0.15, 0.9));
-      s.t.style.transform += ` translateY(${(1 - P(t, 0.15, 0.9)) * 24}px)`;
+      rise(s.t, 640, 440, P(t, 0.15, 0.9));
       const p = P(t, 0.4, 0.9, backOut);
       place(s.card, ORBIT.x, ORBIT.y, p, clamp(p * 2));
       // the mini clock ticks: the minute hand jumps one minute every half second (ambient, driven by G)

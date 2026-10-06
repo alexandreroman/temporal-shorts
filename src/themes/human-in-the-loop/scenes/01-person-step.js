@@ -7,16 +7,15 @@
   // halfway between the card and the reasons.
   const ROW_Y = 299, LABEL_Y = 431, BAND_Y = 654;
   const APPROVAL_X = ROW.x0 + ROW.gap;
-  const CARD_K = 1.2, CARD_W = 480;
   const CLOCK_X = FRAME.x0 + WAIT_CLOCK_W / 2;
   const WHY_W = 230, WHY_X = FRAME.x1 - WHY_W / 2;
-  const MARIA_X = (APPROVAL_X + CARD_W / 2 + FRAME.x1 - WHY_W) / 2;
-  const AVATAR = 140, AVATAR_Y = BAND_Y - 21; // the avatar and its label, centered on the band
+  const MARIA_X = (APPROVAL_X + APPROVAL_CARD.w / 2 + FRAME.x1 - WHY_W) / 2;
+  const AVATAR_Y = BAND_Y - AVATAR.dy; // the avatar and its label, centered on the band
   // Sam and the request card, 40 px apart, form one group centered on the frame; the request card has the size of
   // the approval card that later takes its band, so both phases fill the same box
   const CARD_H = 322;
-  const SAM_LEFT = 960 - (AVATAR + FRAME.gap + CARD_W) / 2;
-  const SAM_X = SAM_LEFT + AVATAR / 2, REQ_X = SAM_LEFT + AVATAR + FRAME.gap + CARD_W / 2;
+  const SAM_LEFT = 960 - (AVATAR.size + FRAME.gap + APPROVAL_CARD.w) / 2;
+  const SAM_X = SAM_LEFT + AVATAR.size / 2, REQ_X = SAM_LEFT + AVATAR.size + FRAME.gap + APPROVAL_CARD.w / 2;
   // White purchase request card, in the style of the approval card, without buttons
   const makeRequestCard = p => E(p,
     '<div class="mono" style="font-size:19px;letter-spacing:.12em;color:#5B6475">PURCHASE REQUEST</div>'
@@ -24,15 +23,13 @@
     + '<div style="font-size:65px;line-height:1.1;font-weight:700;letter-spacing:-1px">$2,400</div></div>'
     + `<div class="mono" style="display:flex;align-items:center;gap:12px;font-size:19px;`
     + `letter-spacing:.1em;color:#5B6475">${ICON('user', 24, '#5B6475', 1.8)} SENT BY SAM</div>`,
-    '', {
-      width: CARD_W + 'px', height: CARD_H + 'px', background: C.ink, color: '#141414', padding: '24px 31px 28px',
-      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-      borderLeft: '7px solid ' + C.violet, borderRadius: 'var(--r)',
+    'paper', {
+      width: APPROVAL_CARD.w + 'px', height: CARD_H + 'px', padding: '24px 31px 28px',
+      display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderLeft: '7px solid ' + C.violet,
     });
   scene({
     chapter: 1, title: 'A step that needs a person',
     // laid out centered at (960, 522) on the content frame
-    shift: [0, 0],
     subs: [
       {
         text: "Take a simple process: Sam orders a new laptop for $2,400. Above $1,000, a manager must approve it.",
@@ -49,15 +46,15 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, ROW_Y);
+      s.steps = makeLaptopRow(root, s.svg, ROW_Y);
       const linkD = `M ${APPROVAL_X} ${ROW_Y + ROW.h / 2 + 2} L ${APPROVAL_X} ${LABEL_Y - 24}`;
       s.ruleLink = path(s.svg, linkD, C.violet, 2, false);
       s.rule = tag(root, 'Over $1,000: manager approval', 'violet');
-      s.sam = makeAvatar(root, 'Sam', AVATAR, C.slate);
+      s.sam = makeAvatar(root, 'Sam', AVATAR.size, C.slate);
       s.req = makeRequestCard(root);
       s.waitL = E(root, 'Waiting', 'lbl', { color: C.violet, fontSize: '22px' });
-      s.maria = makeAvatar(root, 'Maria, manager', AVATAR);
-      s.card = makeApprovalCard(root, CARD_K);
+      s.maria = makeAvatar(root, 'Maria, manager', AVATAR.size);
+      s.card = makeApprovalCard(root, APPROVAL_CARD.k);
       s.clock = makeWaitClock(root, 'Waiting for Maria');
       // equal widths, so the column of reasons has straight edges
       s.why = ['In meetings', 'Traveling', 'On vacation'].map(l => tag(root, l));
@@ -70,7 +67,7 @@
         t >= waitOn ? 4 : t >= askOn ? 1 : 0,
         0, 0,
       ];
-      placeStepRow(s.steps, t, c[0] + 0.1, states);
+      placeLaptopRow(s.steps, t, c[0] + 0.1, states);
 
       // Sam's request: avatar and card under the steps, then the card enters the process at CHECK
       const out1 = P(t, c[1], 0.4);

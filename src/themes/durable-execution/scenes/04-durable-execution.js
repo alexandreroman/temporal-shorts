@@ -19,7 +19,7 @@
   };
   const CARD_H = CARD.padY * 2 + WORKFLOWS_TS.length * CARD.lineH; // 458
   const LOGO_BOX = { h: 64, w: 245, top: 142 }; // the logo's height, width and top edge
-  const BADGE_Y = CARD.y0 + CARD_H / 2 + 95 + 24.5; // badge (49 px high) center, 95 px under the card alone
+  const BADGE_Y = CARD.y0 + CARD_H / 2 + 95 + 25; // badge (50 px high) center, 95 px under the card alone
   // lines of the card: the Activities declaration on top, then the Workflow function
   const DECLARATION_LINES = WORKFLOWS_TS.indexOf('');
   const FUNCTION_LINE = WORKFLOWS_TS.indexOf(WORKFLOW_CODE[0]);
@@ -31,7 +31,7 @@
   const SHIP = 2;
   const ATTEMPT_X = [1278, 1398, 1568];
   const MARK = 34;
-  const RUNNING = 'rgba(182,100,255,.28)'; // the code highlight, as in setCodeLine
+  const RUNNING = C.highlight; // the code highlight, as in setCodeLine
 
   // Activity tile: icon, ACTIVITY kicker and label stacked in the middle, with the makeStep status marks
   // (see stepState)
@@ -62,7 +62,7 @@
   };
   // state: 1 running, 2 succeeded, 3 failed (as in stepState)
   const attemptState = (e, st) => {
-    e.style.borderColor = [C.line, C.violet, C.neon, C.red][st];
+    e.style.borderColor = STEP_COLORS[st];
     e.n.style.opacity = st === 1 ? 1 : 0;
     e.ok.style.opacity = st === 2 ? 1 : 0;
     e.ko.style.opacity = st === 3 ? 1 : 0;
@@ -71,7 +71,6 @@
   scene({
     chapter: 4, title: 'Durable Execution with Temporal',
     // laid out around (960, 522): the card-alone phase and the Activities phase are both centered on it
-    shift: [0, 0],
     subs: [
       {
         text: "<b>Durable Execution</b> takes another path: your code runs to completion, even when servers fail.",
@@ -98,7 +97,7 @@
         lines: WORKFLOWS_TS, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY, padX, gutter,
       });
       s.badge = tag(root, `${ICON('check', 22, C.neon, 2.6)}Runs to completion`, 'neon');
-      // whole-pixel size (content: 349.4 x 49), so the badge centered under the card rests on whole pixels
+      // whole-pixel size (content: 349.4 x 50), so the badge centered under the card rests on whole pixels
       Object.assign(s.badge.style, {
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '350px',
       });
@@ -129,7 +128,7 @@
       s.attempts = ATTEMPT_X.map((_, k) => makeAttempt(root, k + 1));
       s.timeout = E(root, 'Carrier timeout', 'lbl', { fontSize: '15px', color: C.red });
       s.retries = tag(root, 'Automatic retries', 'uv');
-      s.retries.style.fontSize = '18px';
+      Object.assign(s.retries.style, { fontSize: '18px', lineHeight: '23px' });
     },
     update(t, c, s) {
       // ---- c[0]: the logo, then the code card alone, running to completion; at c[1] the card and its badge slide
@@ -201,7 +200,7 @@
       // ---- c[2]: the retry line of Ship package
       const y = rowY(SHIP);
       s.attempts.forEach((e, k) => {
-        // the pop ends before the outcome shows, so the marker changes look at native size
+        // the pop ends before the outcome shows
         const ap = popIn(t, tries[k][0]);
         const outcome = k === tries.length - 1 ? 2 : 3; // only the last attempt succeeds
         attemptState(e, t >= tries[k][1] ? outcome : 1);

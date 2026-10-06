@@ -20,7 +20,6 @@
     ['retry', 'Survives crashes'], ['stream', 'Event stream'], ['layers', 'Typed subagents'],
     ['user', 'Human approvals'], ['code', 'Code Mode'], ['agent', 'Your AI SDK'],
   ];
-  const RECAP_AT = [0.7, 1.7, 2.7, 3.7, 4.7, 5.7];
   const TILE = { w: 520, h: 240, gap: 40 };
   const recapX = i => 140 + TILE.w / 2 + (i % 3) * (TILE.w + TILE.gap);
   const recapY = i => 522 + (Math.floor(i / 3) - 0.5) * (TILE.h + TILE.gap);
@@ -64,15 +63,9 @@
     e.foot = e.querySelector('.foot');
     return e;
   };
-  // recap tile: a large icon over its label, centered (iconTile, at the size of this grid)
-  const makeRecapTile = (p, icon, label) => E(p,
-    ICON(icon, 76, C.ink)
-    + '<div class="mono" style="font-size:26px;letter-spacing:.1em;padding-left:.1em;text-transform:uppercase;'
-    + `margin-top:20px">${label}</div>`,
-    'tile', {
-      width: TILE.w + 'px', height: TILE.h + 'px', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-    });
+  // recap tile: a large icon over its label, at the size of this grid
+  const makeRecapTile = (p, icon, label) => iconTile(p, icon, label, TILE.w, TILE.h, C.ink,
+    { size: 76, font: 26, gap: 20 });
 
   scene({
     chapter: 7, title: 'Built for real products',
@@ -104,10 +97,8 @@
       s.arrow = path(s.svg, `M ${LEFT.x} ${ARROW.top} L ${LEFT.x} ${ARROW.bottom}`, C.slate, 2.5, true, '8,8');
       s.laptop = makeStep(root, 'laptop', "User's laptop", LEFT.w, LEFT.laptopH);
       // opaque pill colors, so the dashed arrow does not show through the cards traveling on it
-      s.call = callCard(root, 'read_file', '"trip.md"', 'violet');
-      s.call.style.background = OPAQUE.violet;
-      s.result = callCard(root, 'result', '"Lisbon, 3 nights"', 'uv');
-      s.result.style.background = OPAQUE.uv;
+      s.call = callCard(root, 'read_file', '"trip.md"', 'violet solid');
+      s.result = callCard(root, 'result', '"Lisbon, 3 nights"', 'uv solid');
 
       // the product UI, built with the typed React or Svelte SDK
       s.lblR = E(root, 'Your UI', 'lbl');
@@ -172,7 +163,7 @@
 
       // ---- c[2]: the recap, one tile per feature, 1 s apart; each lights up as it lands
       s.recap.forEach((e, i) => {
-        const at = c[2] + RECAP_AT[i];
+        const at = c[2] + 0.7 + i;
         const p = P(t, at, 0.45, backOut);
         place(e, recapX(i), recapY(i), p, clamp(p * 2));
         e.style.borderColor = t >= at && t < at + 1.0 ? C.uv : C.line;

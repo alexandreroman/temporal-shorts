@@ -69,8 +69,11 @@ def open_page(pw, theme):
         sys.exit("ERROR: JavaScript errors while loading the page:\n" + "\n".join(errors))
     if loaded < 4:
         sys.exit(f"ERROR: only {loaded}/4 brand fonts loaded. Run `make setup` (fonts go in src/fonts/).")
-    # warm up every scene once so images and fonts are decoded before capture
+    return browser, page
+
+
+def warm_up(page):
+    """Render every scene once so that images and fonts are decoded before the first capture."""
     total = page.evaluate("TOTAL")
     for t in range(0, int(total) + 1, 4):
         page.evaluate(f"renderAt({t})")
-    return browser, page

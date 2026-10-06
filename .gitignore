@@ -3,3 +3,5 @@ __pycache__/
 output
 .DS_Store
 src/fonts/*.woff2
+src/fonts/*.part
+src/fonts/.version

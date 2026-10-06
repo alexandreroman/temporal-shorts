@@ -26,22 +26,10 @@
   const rowTop = i => HIST.row0 + i * HIST.rowGap; // inside the Event History card
   const rowY = i => HIST.y - HIST.h / 2 + rowTop(i) + 18; // on the stage, where result cards land
 
-  // the step tiles in a row joined by thin links (durable-ai-agents `makeStepRow`, with this turn's five steps)
+  // the step tiles in a row joined by thin links, with this turn's five steps
   const makeTurnRow = (root, svg) => {
-    const xs = STEPS.map((_, i) => LEFT + ROW.w / 2 + i * ROW_GAP);
-    const links = xs.slice(1).map((x, i) => {
-      const d = `M ${xs[i] + ROW.w / 2 + 2} ${ROW.y} L ${x - ROW.w / 2 - 2} ${ROW.y}`;
-      return path(svg, d, C.line, 2, false);
-    });
-    const tiles = STEPS.map(st => makeStep(root, st.icon, st.label, ROW.w, ROW.h));
-    return { xs, tiles, links };
-  };
-  // small card carrying one step result between the app and Temporal (model results in UV, tool results in green)
-  const makeResultCard = (p, model) => {
-    return E(p, '<span class="mono" style="font-size:15px;letter-spacing:.12em;padding-left:.12em">RESULT</span>', '', {
-      background: model ? '#E6E7FC' : '#F3FBD2', color: '#141414', padding: '6px 14px',
-      borderLeft: `5px solid ${model ? C.uv : '#9DB82A'}`, borderRadius: 'var(--rs)',
-    });
+    const steps = STEPS.map(st => [st.icon, st.label]);
+    return makeStepRow(root, svg, steps, LEFT + ROW.w / 2, ROW_GAP, ROW.y, ROW.w, ROW.h);
   };
   // counter tile at a fixed height, its content centered vertically, so both columns end on the same line
   const makeTallCounter = (p, label) => {
@@ -51,39 +39,11 @@
     });
     return e;
   };
-  // app instance panel: spinning gear and name at the top left, status text at the top right
-  const makeAppPanel = (p, name, w, h) => {
-    const e = E(p,
-      '<div style="position:absolute;left:24px;top:20px;display:flex;align-items:center;gap:12px">'
-      + `<div class="gear">${ICON('gear', 30, C.ink, 1.8)}</div>`
-      + `<span class="mono" style="font-size:20px;letter-spacing:.1em">${name}</span></div>`
-      + '<div class="st mono" style="position:absolute;right:24px;top:26px;font-size:16px;letter-spacing:.08em;'
-      + 'color:var(--slate)"></div>',
-      'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
-    e.gear = e.querySelector('.gear'); e.st = e.querySelector('.st');
-    return e;
-  };
-  // state: 'idle', 'running' (the gear spins) or 'crashed' (red)
-  const setAppStatus = (app, text, state) => {
-    const crashed = state === 'crashed';
-    app.st.textContent = text;
-    app.st.style.color = crashed ? C.red : C.slate;
-    app.style.borderColor = crashed ? C.red : C.violet;
-    gearSpin(app, state === 'running' ? 1 : 0);
-  };
-  // screen shake around a crash, as [dx, dy]
-  const shakeAt = (t, crashAt) => {
-    const k = Math.max(0, 1 - Math.abs(t - crashAt - 0.2) / 0.4);
-    return [Math.sin(G * 90) * 12 * k, Math.cos(G * 77) * 8 * k];
-  };
-  // red flash intensity (0 to 1) peaking at the crash
-  const flashAt = (t, crashAt) => Math.max(0, 1 - Math.abs(t - crashAt) / 0.28);
 
   scene({
     chapter: 2, title: 'Survives crashes',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
     pre: 1.5, post: 2.0,
-    shift: [0, 0],
     subs: [
       {
         text: "Every model call and tool call is saved in the agent's Temporal history as soon as it completes.",
@@ -95,7 +55,10 @@
         text: 'Instance B replays the history: steps 1 to 4 return their saved results, then step 5 runs for real.',
         after: 2.5,
       },
-      { text: "Saved results are reused, not redone: no token is paid twice, and no tool runs twice.", after: 0.5 },
+      {
+        text: 'Saved results are reused, not redone: no finished model call is paid again, no finished tool reruns.',
+        after: 0.5,
+      },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
@@ -109,54 +72,20 @@
       s.billed = makeTallCounter(root, 'Model calls billed');
       s.booked = makeTallCounter(root, 'Flights booked');
       // Temporal side, outside the app: native-size logo header (whole pixels, never scaled) and the Event History
-      s.temporal = E(root,
-        `<img src="${LOGO}" style="position:absolute;left:28px;top:30px;height:34px;display:block">`
-        + '<div class="lbl" style="position:absolute;right:28px;top:36px;font-size:16px">Outside the app</div>',
-        'tile', { width: TEMPORAL.w + 'px', height: TEMPORAL.h + 'px', borderColor: C.uv });
-      s.jr = E(root,
-        '<div class="mono" style="position:absolute;left:26px;top:20px;font-size:18px;letter-spacing:.14em;'
-        + `color:#141414;display:flex;gap:10px;align-items:center">${ICON('book', 22, '#141414', 1.8)}`
-        + ' EVENT HISTORY</div>',
-        '', {
-          width: HIST.w + 'px', height: HIST.h + 'px', background: '#F8FAFC', color: '#141414',
-          borderRadius: 'var(--r)',
-        });
+      s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { logoAt: [28, 30], noteAt: [28, 36] });
       // rows 1-4 survive the crash: tinted block + crash line under them
-      s.kept = E(s.jr, '', '', {
-        left: '14px', top: (rowTop(0) - 8) + 'px', width: (HIST.w - 28) + 'px', height: (3 * HIST.rowGap + 54) + 'px',
-        background: 'rgba(68,76,231,.08)', borderLeft: '4px solid ' + C.uv, borderRadius: 'var(--rs)',
-        transform: 'none',
-      });
-      s.cut = E(s.jr,
-        '<span class="mono" style="position:absolute;left:56%;top:-10px;transform:translateX(-50%);background:#F8FAFC;'
-        + `padding:0 10px;font-size:13px;line-height:18px;letter-spacing:.12em;color:${C.red};white-space:nowrap">`
-        + 'APP CRASHED HERE</span>',
-        '', {
-          left: '26px', top: (rowTop(4) - 8) + 'px', width: (HIST.w - 52) + 'px', height: '0',
-          borderTop: '2px dashed ' + C.red, transform: 'none',
-        });
-      s.scan = E(s.jr, '', '', {
-        left: '18px', width: (HIST.w - 36) + 'px', height: '42px', background: 'rgba(182,100,255,.28)',
-        transform: 'none', borderRadius: 'var(--rs)',
-      });
-      s.rows = STEPS.map((st, i) => E(s.jr,
-        `<span style="color:#8A93A6;display:inline-block;width:34px">${i + 1}</span>`
-        + `<span style="color:${isModel(i) ? C.uv : '#141414'}">${st.row}</span>`,
-        'mono', {
-          left: '26px', top: rowTop(i) + 'px', fontSize: '22px', whiteSpace: 'nowrap', padding: '4px 10px',
-          transform: 'none', width: (HIST.w - 52) + 'px',
-        }));
-      s.tags = STEPS.map((_, i) => {
-        const e = statusTag(s.jr);
-        Object.assign(e.style, {
-          left: 'auto', right: '36px', top: (rowTop(i) + 5) + 'px', transformOrigin: 'right center',
-        });
-        return e;
+      const rowsHtml = STEPS.map((st, i) => `<span style="color:${isModel(i) ? C.uv : '#141414'}">${st.row}</span>`);
+      s.jr = makeHistoryCard(root, rowsHtml, {
+        w: HIST.w, h: HIST.h, rowTop, tagTop: i => rowTop(i) + 5,
+        crash: {
+          keptTop: rowTop(0) - 8, keptH: 3 * HIST.rowGap + 54, cutTop: rowTop(4) - 8,
+          label: 'APP CRASHED HERE', labelX: '56%', labelFont: 13,
+        },
+        scanH: 42,
       });
       s.saveCards = STEPS.map((_, i) => makeResultCard(root, isModel(i)));
       s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeResultCard(root, isModel(i)));
-      // oversized so it still covers the whole stage once the scene is shifted
-      s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
+      s.flash = makeFlash(root);
     },
     update(t, c, s) {
       // first run (instance A), two steps per subtitle: each step runs, its result card leaves at r + CARD_AT,
@@ -186,12 +115,7 @@
         if (i === 4) return t >= saved[4] + 0.1 ? 2 : t >= rerun ? 1 : 0;
         return t >= replay[i] + 0.7 ? 2 : 0; // checked once its result card is back in the app
       });
-      s.steps.tiles.forEach((e, i) => {
-        stepState(e, states[i]);
-        const p = P(t, c[0] + 0.2 + i * 0.12, 0.45, backOut);
-        place(e, s.steps.xs[i] + ax, ROW.y + ay, p, clamp(p * 2));
-      });
-      s.steps.links.forEach((l, i) => draw(l, P(t, c[0] + 0.6 + i * 0.12, 0.35)));
+      placeStepRow(s.steps, t, c[0] + 0.2, states, ax, ay);
 
       // app instances: A runs then crashes, B takes over in the same place
       const aIn = P(t, c[0] + 0.1, 0.5, backOut);
@@ -275,10 +199,9 @@
       });
 
       // Event History rows and their status tags
-      s.kept.style.opacity = P(t, crashAt + 0.7, 0.4);
-      s.cut.style.opacity = P(t, crashAt + 0.3, 0.3);
-      s.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
-      s.tags.forEach((e, i) => {
+      markCrash(s.jr, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
+      s.jr.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
+      s.jr.tags.forEach((e, i) => {
         const isReused = i < 4 && t >= replay[i] + 0.05, isTold = i < 4 && t >= told[i];
         if (isTold) setStatus(e, isModel(i) ? 'REUSED, NOT RE-BILLED' : 'REUSED, NOT RE-RUN', 'reused');
         else if (isReused) setStatus(e, 'REUSED', 'reused');
@@ -288,9 +211,8 @@
         e.style.transform = `scale(${swell(t, switchedAt, 0.14)})`;
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 1.0);
-      s.scan.style.opacity = scanning >= 0 ? 1 : 0;
-      s.scan.style.top = (rowTop(Math.max(0, scanning)) - 2) + 'px';
-      place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);
+      setScan(s.jr, rowTop(Math.max(0, scanning)) - 2, scanning >= 0 ? 1 : 0);
+      placeFlash(s.flash, t, crashAt);
     }
   });
 }

@@ -59,7 +59,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
+      s.steps = makeStepRow(root, s.svg, ORDER_TILES, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       s.status = makeStatusTile(root);
       s.charge = makeCharge(root);
       // same size and centered contents as the status tile
@@ -78,10 +78,9 @@
       s.bolt = E(root, ICON('bolt', 100, C.red, 1.6));
       s.crash = tag(root, 'Server crash', 'red big');
       Object.assign(s.crash.style, { width: '310px', height: '66px', textAlign: 'center' });
-      // oversized so it still covers the whole stage once the scene is shifted
-      s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
+      s.flash = makeFlash(root);
       const [x0, x1] = s.steps.xs, top = ROW.y - ROW.h / 2 - 6;
-      s.redo = arrow(s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`, C.red, 3);
+      s.redo = path(s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`, C.red, 3);
       s.redoL = E(root, 'Start over', 'lbl', { color: C.red, width: '148px', height: '26px', textAlign: 'center' });
     },
     update(t, c, s) {
@@ -126,7 +125,7 @@
       const cp = P(t, 0.4, 0.45, backOut);
       place(s.charge, BOTTOM.chargeX + sx, BOTTOM_Y + sy, cp * (1 + 0.06 * bump), clamp(cp * 2));
       // crash: red flash, bolt over the running step, SERVER CRASH until the restart
-      place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);
+      placeFlash(s.flash, t, crashAt);
       place(s.bolt, s.steps.xs[1], TOP_Y, popIn(t, crashAt).s, win(t, crashAt, crashAt + 1.5, 0.2));
       place(s.crash, CRASH_X, TOP_Y, popIn(t, crashAt + 0.1, 0.08).s, win(t, crashAt + 0.1, c[2] + 0.3, 0.25));
       // restart: "Start over" arrow back to the first step, kept until the end

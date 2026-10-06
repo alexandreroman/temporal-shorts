@@ -85,19 +85,13 @@
   const reply2Y = COL.top + CARD_H.reply1 + COL.gap + CARD_H.reply2 / 2;
   // the turn badge sits on the header's center line, right-aligned on the header's margin inside the frame
   const BADGE_RIGHT = FRAME.x1 - 26;
-  // type the card's text word by word, p from 0 to 1 (as in durable-ai-agents chapter 1)
-  const typeWords = (card, p) => {
-    const words = card.full.split(' ');
-    const n = Math.round(words.length * clamp(p));
-    card.txt.innerHTML = words.map((w, i) => `<span style="opacity:${i < n ? 1 : 0}">${w}</span>`).join(' ');
-  };
   // c[4] compares one LLM call (top row) with one turn (bottom row), on the content frame (x 140 to 1780,
   // y 150 to 880). Headings on the left edge; the turn runs from the message card to the reply card, its model
-  // calls on one line and its tool calls on a lower one, a bracket under the whole turn. Chips are 49 px tall,
-  // so their centers sit half a pixel off to rest on whole pixels; the cards' even heights need whole centers
+  // calls on one line and its tool calls on a lower one, a bracket under the whole turn. Chips and cards have
+  // even heights, so their whole-pixel centers rest on whole pixels
   const CMP = {
     left: 140, right: 1780, head1Top: 150, stripTop: 242, stripH: 50, head2Top: 411,
-    cardW: 340, cardY: 584, modelY: 583.5, toolY: 742.5, chipH: 49, statusH: 30, statusGap: 10,
+    cardW: 340, cardY: 584, modelY: 584, toolY: 742, chipH: 50, statusH: 30, statusGap: 10,
     xs: [660, 810, 960, 1110, 1260], bracketY: 855, tick: 16,
   };
   // the calls of one turn: [tool or Model, chip class]; model calls on even indexes
@@ -143,7 +137,7 @@
   const makeHeading = (p, title, sub, top) => E(p,
     `<div class="lbl" style="color:var(--ink)">${title}</div>`
     + `<div class="lbl" style="font-size:16px;margin-top:8px">${sub}</div>`,
-    '', { left: CMP.left + 'px', top: top + 'px', transform: 'none' });
+    '', { left: CMP.left + 'px', top: top + 'px' });
   scene({
     chapter: 1, title: 'An agent harness',
     // the loop with its SDK tags sits higher than the taller framed loop: pan while the tags fade out
@@ -186,7 +180,7 @@
       const { x0, x1, y0, y1, r } = FRAME;
       // created first, so the frame tint stays under the arcs and the loop
       s.frameBg = E(root, '', '', {
-        left: x0 + 'px', top: y0 + 'px', width: (x1 - x0) + 'px', height: (y1 - y0) + 'px', transform: 'none',
+        left: x0 + 'px', top: y0 + 'px', width: (x1 - x0) + 'px', height: (y1 - y0) + 'px',
         background: 'rgba(68,76,231,.07)', borderRadius: 'var(--r)',
       });
       s.svg = svgLayer(root);
@@ -204,10 +198,7 @@
       s.links = CAPS.map(([, , side, row]) =>
         path(s.svg, `M ${capX(side) - side * CAP.w / 2} ${capY(row)} H ${frameX(side)}`, C.uv, 2.5, false));
       // under the nodes, so it slips behind each node it reaches
-      s.token = E(root, '', '', {
-        width: '22px', height: '22px', background: C.neon, boxShadow: '0 0 22px 6px rgba(219,255,75,.45)',
-        borderRadius: '5px',
-      });
+      s.token = makeToken(root);
       s.llm = makeLLM(root, ORB, 'MODEL');
       s.tools = [iconTile(root, 'plane', 'Flights', TILE.w, TILE.h), iconTile(root, 'bed', 'Hotels', TILE.w, TILE.h)];
       s.loopL = E(root, 'Your agentic loop', 'lbl', { color: 'var(--ink)' });
@@ -223,12 +214,11 @@
         + '<div style="width:1.5px;height:26px;background:#4B5363"></div>'
         + '<span class="lbl" style="color:var(--ink)">Agent harness</span>',
         '', {
-          left: (x0 + 26) + 'px', top: (y0 + 22) + 'px', transform: 'none',
+          left: (x0 + 26) + 'px', top: (y0 + 22) + 'px',
           display: 'flex', alignItems: 'center', gap: '16px',
         });
       // opaque UV tint so the frame line does not show through the pill
-      s.workflow = tag(root, 'Temporal Workflow', 'uv');
-      s.workflow.style.background = OPAQUE.uv;
+      s.workflow = tag(root, 'Temporal Workflow', 'uv solid');
       s.caps = CAPS.map(([icon, label]) => {
         const e = iconTile(root, icon, label, CAP.w, CAP.h);
         e.style.borderColor = C.uv;
@@ -283,7 +273,7 @@
       s.callHead = makeHeading(root, 'An LLM call', 'One step', CMP.head1Top);
       const codeText = text => `<span class="mono" style="font-size:22px;color:var(--slate)">${text}</span>`;
       s.callStrip = E(root, codeText('text in') + inlineArrow(64, C.slate), '', {
-        left: CMP.left + 'px', top: CMP.stripTop + 'px', height: CMP.stripH + 'px', transform: 'none',
+        left: CMP.left + 'px', top: CMP.stripTop + 'px', height: CMP.stripH + 'px',
         display: 'flex', alignItems: 'center', gap: '16px',
       });
       const model = callCard(s.callStrip, 'Model', '', 'uv');
@@ -303,12 +293,10 @@
       s.saved = TURN_CALLS.map(() => {
         const e = statusTag(root);
         Object.assign(e.style, { fontSize: '16px', height: CMP.statusH + 'px' });
-        setStatus(e, 'SAVED', 'ok');
         return e;
       });
       // opaque violet tint, so the bracket line does not show through the pill
-      s.streamed = tag(root, 'Streamed live, replayable', 'violet');
-      s.streamed.style.background = OPAQUE.violet;
+      s.streamed = tag(root, 'Streamed live, replayable', 'violet solid');
     },
     update(t, c, s) {
       // c[0]: the model, then the tools, then the arcs of the loop; its label and the token, then the SDK tags
@@ -364,9 +352,8 @@
       s.frame.forEach(f => draw(f, P(t, c[1] + 2.4, 1.2), harnessO));
       s.frameBg.style.opacity = P(t, c[1] + 3.9, 0.6) * harnessO;
       s.header.style.opacity = P(t, c[1] + 3.9, 0.5) * harnessO;
-      // half a pixel low, so the 49 px pill rests on whole pixels
       const pW = P(t, c[1] + 5.4, 0.45, backOut);
-      place(s.workflow, LOOP.cx, FRAME.y1 + 0.5, pW, clamp(pW * 2) * harnessO);
+      place(s.workflow, LOOP.cx, FRAME.y1, pW, clamp(pW * 2) * harnessO);
       // c[2]: a message comes in and opens turn 1, the token runs a lap of your loop, the reply streams out and
       // the turn ends; the harness waits. c[3]: the second message runs turn 2 the same way. All of it fades out
       // at c[4], and the side columns stay free for the capability tiles of c[6]
@@ -434,15 +421,15 @@
         place(e, CMP.xs[i], callY(i), p * swell(t, litAt, 0.08), clamp(p * 2) * cmpO);
         e.style.borderColor = t >= litAt ? C.violet : (isModelCall(i) ? C.uv : '');
         const pS = P(t, b5 + savedAt(i), 0.3, backOut);
+        setStatus(s.saved[i], 'SAVED', 'ok');
         place(s.saved[i], CMP.xs[i], statusY(i), pS, clamp(pS * 2) * cmpO);
       });
       const pReply = P(t, b4 + CMP_AT.reply, 0.45, backOut);
       place(s.turnReply, CMP.right - CMP.cardW / 2, CMP.cardY, pReply, clamp(pReply * 2) * cmpO);
-      // the bracket draws under the turn as the reply streams, then the pill pops on it (half a pixel low, so
-      // the 49 px pill rests on whole pixels)
+      // the bracket draws under the turn as the reply streams, then the pill pops on it
       draw(s.bracket, P(t, b5 + SAVE_AT.reply, SAVE_AT.streamed - SAVE_AT.reply, x => x), cmpO);
       const pSt = P(t, b5 + SAVE_AT.streamed, 0.45, backOut);
-      place(s.streamed, 960, CMP.bracketY + 0.5, pSt, clamp(pSt * 2) * cmpO);
+      place(s.streamed, 960, CMP.bracketY, pSt, clamp(pSt * 2) * cmpO);
       // c[6]: each capability pops beside the frame as the subtitle names it, and plugs in with a short link
       CAPS.forEach(([, , side, row], i) => {
         const a = c[6] + 1.6 + i * 1.2;

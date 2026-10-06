@@ -6,18 +6,39 @@ const backOut = p => {
   const c1 = 1.70158, c3 = c1 + 1;
   return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
 };
-const P = (t, a, d = 0.6, f = ease) => f(clamp((t - a) / d));
+const P = (t, a, d, f = ease) => f(clamp((t - a) / d));
 const lerp = (a, b, p) => a + (b - a) * p;
 const win = (t, a, b, f = 0.4) => P(t, a, f) * (1 - P(t, b, f)); // visible between a and b
-// Scene camera offset for `shift`: starts at `from`, then eases to each [at, dx, dy] stop in turn.
-function pan(t, from, stops, d = 0.8) {
+// Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it
+const swell = (t, at, amp) => 1 + amp * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
+// Position that starts at `from`, then eases to each [at, x, y] stop in turn, over d seconds or the stop's own
+// duration ([at, x, y, d]); stops may overlap. Used for a scene camera offset (`shift`) or a route.
+function pan(t, from, stops, d) {
   let [x, y] = from;
-  for (const [a, dx, dy] of stops) { const p = P(t, a, d); x = lerp(x, dx, p); y = lerp(y, dy, p); }
+  for (const [a, sx, sy, sd = d] of stops) { const p = P(t, a, sd); x = lerp(x, sx, p); y = lerp(y, sy, p); }
   return [x, y];
 }
 let G = 0; // global time
 
 const stage = document.getElementById('stage');
+
+// Deterministic star field: a fixed-seed generator, so every page and every render worker draws the same sky.
+(function () {
+  let seed = 7;
+  const random = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  const sky = document.getElementById('sky');
+  for (let i = 0; i < 110; i++) {
+    const star = document.createElement('i');
+    star.style.left = (random() * 1920) + 'px';
+    star.style.top = (random() * 1080) + 'px';
+    star.style.opacity = (0.08 + random() * 0.35).toFixed(2);
+    if (random() > .85) star.style.width = star.style.height = '3px';
+    sky.appendChild(star);
+  }
+})();
 
 function E(parent, html = '', cls = '', css = {}) {
   const e = document.createElement('div');
@@ -94,35 +115,34 @@ function draw(p, prog, o = 1) {
 
 // ---------- icons (stroke, 24 grid)
 const ICONS = {
-  sun: '<circle cx="12" cy="12" r="4"/>'
-    + '<path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
   cal: '<rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   mail: '<rect x="3" y="6" width="18" height="13"/><path d="M3 7l9 6 9-6"/>',
   search: '<circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/>',
-  food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
   server: '<rect x="4" y="4" width="16" height="7"/><rect x="4" y="13" width="16" height="7"/>'
     + '<path d="M8 7.5h.01M8 16.5h.01"/>',
   book: '<rect x="5" y="3" width="14" height="18"/><path d="M8 8h8M8 12h8M8 16h5"/>',
   ticket: '<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M15 7v10" stroke-dasharray="2 2"/>',
-  coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.9-1.7-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.8 6 1.5 6 4.3'
-    + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
   bolt: '<path d="M13 2L4 14h7l-1 8 10-13h-7z"/>',
+  code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   eye: '<path d="M2 12c3-6 17-6 20 0-3 6-17 6-20 0z"/><circle cx="12" cy="12" r="3"/>',
   play: '<path d="M7 4l13 8-13 8z"/>',
   retry: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+  hourglass: '<path d="M6 3h12M6 21h12"/><path d="M8 3v3.5l4 5.5-4 5.5V21M16 3v3.5L12 12l4 5.5V21"/>'
+    + '<path d="M10 18.5h4"/>',
   gear: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3'
     + 'M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
 };
-function ICON(n, size = 48, col = '#F8FAFC', w = 1.8) {
+function ICON(n, size, col, w = 1.8) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${col}"`
     + ` stroke-width="${w}" stroke-linecap="square" stroke-linejoin="miter" style="display:block">${ICONS[n]}</svg>`;
 }
 
 // ---------- components
-function makeLLM(parent, size = 220, label = 'LLM') {
+function makeLLM(parent, size, label = 'LLM') {
   const root = E(parent, `
     <div class="llm-glow"></div>
     <div class="llm-body"></div>
@@ -152,29 +172,26 @@ function llmState(L, { think = 0, q = 0, look = 0, lookY = 0 } = {}) {
   L.dotI.forEach((d, i) => d.style.transform = `translateY(${-Math.max(0, Math.sin(G * 6 - i * 0.9)) * 0.35}em)`);
   L.q.style.opacity = q; L.q.style.transform = `scale(${0.6 + 0.4 * q}) rotate(${Math.sin(G * 3) * 8}deg)`;
 }
-function makeApp(parent) {
-  const root = E(parent, `
-   <div class="app-win">
-     <div class="app-bar"><i></i><i></i><i></i></div>
-     <div class="app-lines"><b style="width:70%"></b><b style="width:45%"></b><b style="width:60%"></b></div>
-     <div class="app-gear">${ICON('gear', 46, '#F8FAFC')}</div>
-   </div>
-   <div class="app-label">APP</div>`, 'app');
-  root.gear = root.querySelector('.app-gear');
-  return root;
-}
 function gearSpin(app, on) {
-  app.gear.style.transform = `rotate(${G * 220 * on}deg)`;
+  // the gear turns with the clock whenever it shows as on, so it never races while `on` fades
+  app.gear.style.transform = `rotate(${on > 0 ? G * 220 : 0}deg)`;
   app.gear.style.opacity = 0.35 + 0.65 * on;
 }
 
-function makeCard(parent, text, kind = 'user', who = null, width = null) {
-  const labels = { user: 'YOU', llm: 'MODEL', tool: 'TOOL', ok: 'MODEL', bad: 'MODEL' };
+// kind: 'user', 'llm', 'tool' or 'bad'; a 'tool' card has no default label, pass `who`
+function makeCard(parent, text, kind, who = null, width = null) {
+  const labels = { user: 'YOU', llm: 'MODEL', bad: 'MODEL' };
   const w = who === null ? labels[kind] : who;
   const e = E(parent, `${w ? `<div class="who">${w}</div>` : ''}<div class="txt">${text}</div>`, 'card k-' + kind);
   if (width) e.style.width = width + 'px';
   e.txt = e.querySelector('.txt'); e.full = text;
   return e;
+}
+// Types a makeCard's text word by word, p from 0 to 1
+function typeWords(card, p) {
+  const words = card.full.split(' ');
+  const n = Math.round(words.length * clamp(p));
+  card.txt.innerHTML = words.map((w, i) => `<span style="opacity:${i < n ? 1 : 0}">${w}</span>`).join(' ');
 }
 
 // ---------- timeline
@@ -267,7 +284,17 @@ function renderAt(t, g = t) {
       const a = cs[0].start, z = cs[cs.length - 1].end;
       f = clamp((t - a) / (z - a));
     }
-    b.style.width = (f * 100) + '%';
+    // whole pixels of the 56 px segment (#segs i in styles.css): a fractional edge varies from run to run
+    b.style.width = Math.round(f * 56) + 'px';
   });
   document.getElementById('segs').style.opacity = chap ? 1 : 0;
+}
+
+// Start a theme page, called by its last script: build every scene, then freeze on ?t=<seconds> (frame capture)
+// or start the live player (startPlayer() comes from player.js, loaded after the scenes).
+function boot() {
+  buildAll();
+  const query = new URLSearchParams(location.search);
+  if (query.has('t')) renderAt(parseFloat(query.get('t')));
+  else startPlayer();
 }

@@ -23,26 +23,19 @@
       const seg = Math.PI * r / 48;
       s.ring = path(s.svg, `M ${x + r} ${y} A ${r} ${r} 0 1 1 ${x - r} ${y} A ${r} ${r} 0 1 1 ${x + r} ${y}`,
         C.uv, 3, false, `${seg},${seg}`);
-      s.t = E(root,
-        `<img src="${LOGO}" style="height:58px;display:block;margin-bottom:46px">`
-        + '<div class="mono" style="font-size:22px;letter-spacing:.14em;color:var(--slate)">'
-        + 'AN EXPERIMENTAL PROJECT</div>'
-        + '<div style="font-size:116px;line-height:1.02;letter-spacing:-3px;margin-top:22px">'
-        + 'Temporal<br>Agent Harness</div>'
-        + '<div class="mono" style="font-size:24px;letter-spacing:.12em;color:var(--violet);margin-top:34px">'
-        + 'DURABLE AI AGENTS, WITH THE SDKS YOU ALREADY USE</div>');
+      s.t = makeTitleBlock(root, 'AN EXPERIMENTAL PROJECT', 'Temporal<br>Agent Harness',
+        'DURABLE AI AGENTS, WITH THE SDKS YOU ALREADY USE');
       s.llm = makeLLM(root, 230, '');
       // opaque tiles: the ring passes behind the icons
-      s.icons = RING_ICONS.map(n => E(root, ICON(n, 38, C.ink, 1.7), 'tile', {
-        width: '76px', height: '76px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        borderColor: C.uv,
-      }));
+      s.icons = RING_ICONS.map(n => {
+        const e = iconTile(root, n, null, 76, 76, C.ink, { size: 38, stroke: 1.7 });
+        e.style.borderColor = C.uv;
+        return e;
+      });
     },
     update(t, c, s) {
       // a calm entrance: the title rises, then the model; its ring and the four capabilities follow the subtitle
-      const titleIn = P(t, 0.3, 1.2);
-      place(s.t, 560, 440, 1, titleIn);
-      s.t.style.transform += ` translateY(${(1 - titleIn) * 24}px)`;
+      rise(s.t, 560, 440, P(t, 0.3, 1.2));
       const p = P(t, 1.0, 0.9, backOut);
       place(s.llm.root, RING.x, RING.y, p, clamp(p * 2));
       llmState(s.llm, { look: Math.sin(G * 0.8) * 0.6 });

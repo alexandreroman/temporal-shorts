@@ -1,10 +1,9 @@
 # Script and timeline: Introduction to Durable Execution
 
-Subtitles are the only narration (no audio). Timings are computed in
-`src/engine.js` from text length (`autoDur`: chars / 16 + 0.6 s, clamped
-2.4 to 8 s), plus per-subtitle `after` pauses. Run
-`make timeline THEME=durable-execution` for the live values; the start times
-below are a snapshot from 2026-10-05.
+Subtitles are the only narration (no audio). Each subtitle lasts as long
+as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
+Run `make timeline THEME=durable-execution` for the live values; the start
+times below are a snapshot from 2026-10-06.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -46,7 +45,7 @@ label. Chapter 4 shows the excerpt: the Activities obtained with
 ```ts
 const { chargeCard, reserveItem, shipPackage, emailReceipt } =
   proxyActivities<typeof activities>({
-    startToCloseTimeout: '1 minute',
+    startToCloseTimeout: '10 seconds',
   });
 
 export async function placeOrder(order: Order) {
@@ -57,7 +56,7 @@ export async function placeOrder(order: Order) {
 }
 ```
 
-Chapter 7 adds a durable timer, `await sleep('30 days');`.
+Chapter 8 adds a durable timer, `await sleep('30 days');`.
 
 Vocabulary: before Temporal enters (chapters 1 to 3) the machine running the
 code is "the server"; from chapter 5 on it is "the Worker". The order's
@@ -142,13 +141,13 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 ## 05 The Event History
 
-- **1:36** Your code runs on your own servers, called Workers. Temporal
+- **1:36** Your code runs in Workers, programs on your own servers. Temporal
   keeps an Event History, outside the Workers.
   - Visuals: Left, WORKER A panel holding the code card (WORKFLOW tab),
     CARD CHARGED counter ($0) and order status (PENDING); right, a TEMPORAL
     panel (official logo, "OUTSIDE THE WORKERS") holding an empty EVENT
     HISTORY.
-- **1:43** Each Activity result is saved in the history before the
+- **1:44** Each Activity result is saved in the history before the
   Workflow moves on to the next step.
   - Visuals: Row 1 "Workflow started" SAVED; for each line the highlight
     sits on it with a spinner, a RESULT chip flies from the Worker to the
@@ -157,24 +156,30 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 ## 06 When a Worker crashes
 
-- **1:51** Now the Worker crashes mid-order. Another Worker picks up the
-  Workflow and runs its code from the start.
+- **1:52** Now the Worker crashes mid-order, during shipPackage. Temporal
+  retries that Activity on another Worker.
   - Visuals: Same layout, `shipPackage` running; red flash + shake, WORKER
     A CRASHED, "WORKER CRASHED HERE" line under row 3 and tinted kept rows;
-    WORKER B takes over, a violet "FROM THE START" arrow and the highlight
-    go back to line 1.
-- **1:59** For every step already in the history, Temporal hands back the
-  saved result: no second charge.
-  - Visuals: Replay (REPLAYING…): for lines 2 and 3 the history row lights
-    up, a RESULT chip flies back to the Worker, tags REUSED, then "REUSED,
-    NOT RE-CHARGED" / "REUSED, NOT RE-RUN"; counter stays $42 with NOT
-    RE-CHARGED.
-- **2:06** Then the Workflow carries on exactly where it stopped, as if
+    WORKER B appears (IDLE). A RETRY chip flies from the history, under the
+    crash line, to the end of the `shipPackage` line: WORKER B shows
+    RETRYING ACTIVITY and a spinner turns at the line end, the line itself
+    not highlighted (only the Activity runs); its RESULT chip flies to the
+    history and row 4 "shipPackage: tracking 1Z-48" slides in SAVED, below
+    the crash line.
+    (In a real run, Temporal detects the lost attempt through the
+    Activity's Start-To-Close timeout; the video does not show it.)
+- **1:59** Then that Worker runs the Workflow from the start, and Temporal
+  hands back every saved result: no second charge.
+  - Visuals: WORKER B shows REPLAYING…, a violet "FROM THE START" arrow and
+    the highlight go back to line 1; for lines 2, 3 and 4 the history row
+    lights up, a RESULT chip flies back to the Worker, tags REUSED, then
+    "REUSED, NOT RE-CHARGED" / "REUSED, NOT RE-RUN" / "REUSED, NOT RE-RUN";
+    counter stays $42 with NOT RE-CHARGED.
+- **2:08** Then the Workflow carries on exactly where it stopped, as if
   nothing had happened.
-  - Visuals: `shipPackage` and `emailReceipt` run for real, rows 4 and 5
-    SAVED below the crash line, row 6 "Workflow completed"; order COMPLETE,
-    counter "CHARGED ONCE", WORKFLOW COMPLETE inside the history, under
-    its rows.
+  - Visuals: `emailReceipt` runs for real, row 5 SAVED, row 6 "Workflow
+    completed"; order COMPLETE, counter "CHARGED ONCE", WORKFLOW COMPLETE
+    inside the history, under its rows.
 
 ## 07 Full visibility
 
@@ -183,35 +188,43 @@ sidebar (Namespaces, Workflows, Schedules, Batch, Workers, Nexus, Archive,
 Docs), the `default` namespace box and the real page layouts, trimmed for
 readability.
 
-- **2:14** Temporal also shows every Workflow in its web UI: which ones are
+- **2:16** Temporal also shows every Workflow in its web UI: which ones are
   running, completed or failed.
   - Visuals: The "6 Workflows" page: count pills 1 RUNNING, 4 COMPLETED,
     1 FAILED, a Start Workflow button, filter tabs and a table Status /
     Workflow ID / Run ID / Type / Start with order-1045 (Running) to
     order-1041 (Failed); the pills and badges bump as the subtitle names
     each status; a pointer clicks order-1042.
-- **2:22** Open order #1042: its timeline shows every Activity, how long it
-  took, and the crash it survived.
+- **2:23** Open order #1042: its timeline shows every Activity, how long it
+  took, and the retry after the crash.
   - Visuals: The order-1042 page: COMPLETED badge before the title, the
-    summary grid (Start, End, Duration 14s 612ms, Run ID, Workflow Type,
+    summary grid (Start, End, Duration 16s 112ms, Run ID, Workflow Type,
     Task Queue, Workflow SDK TypeScript), the Timeline tab: a Workflow bar
     over Activity lanes stacked bottom-up (chargeCard, reserveItem,
     "2 • shipPackage" with a red-to-green retried bar, emailReceipt),
     growing in time order with their durations; a video annotation, outside
     the UI style, points at the failed attempt: "WORKER A CRASHED ·
-    RETRIED ON WORKER B".
-- **2:30** While a Workflow runs, you see an Activity retrying, its attempt
+    RETRIED ON WORKER B". The numbers follow the 10-second
+    `startToCloseTimeout`: `shipPackage` attempt 1 starts at 2.4 s and is
+    lost with Worker A, attempt 2 starts at 13.4 s (timeout at 12.4 s plus
+    the 1 s retry interval) and ends at 15.5 s, then `emailReceipt` runs
+    from 15.6 s to 16.0 s. Event History (29): the retried Activity writes
+    one ActivityTaskStarted, when its last attempt completes.
+- **2:32** While a Workflow runs, you see an Activity retrying, its attempt
   count and its last error, live.
   - Visuals: The order-1045 page, RUNNING, Duration counting live, the
     Pending Activities tab: a shipPackage card (STARTED, then SCHEDULED
     during each wait) with Attempt "1 / UNLIMITED" to "3 / UNLIMITED",
     Last Worker Identity worker-b and a Last Failure JSON box ("Carrier
     timeout"); attempt 3 succeeds, "No pending activities", the badge
-    turns COMPLETED.
+    turns COMPLETED. The Event History count reads 17 while `shipPackage`
+    retries (no event per failed attempt), 23 once it completes (its
+    ActivityTaskStarted and ActivityTaskCompleted, a Workflow Task, then
+    `emailReceipt` scheduled) and 29 once the Workflow completes.
 
 ## 08 Durable timers
 
-- **2:41** A Workflow can even wait for days, for a delivery or a reply,
+- **2:42** A Workflow can even wait for days, for a delivery or a reply,
   without tying up a Worker.
   - Visuals: Left, a WORKER A panel (VERSION 1) with the `workflows.ts`
     card: `shipPackage`, a comment, `await sleep('30 days');`,
@@ -220,12 +233,12 @@ readability.
     row "shipPackage: tracking 1Z-48" SAVED; a START TIMER chip saves row
     "TimerStarted: 30 days"; DAY 1 / 30, SLEEPING; the Worker shows FREE
     FOR OTHER WORK.
-- **2:48** The timer is saved in the Event History, so Worker restarts and
-  deploys during the wait change nothing.
+- **2:49** The timer is saved in the Event History, so Worker restarts and
+  deploys during the wait don't lose it.
   - Visuals: The timer ticks day by day to day 30 while the TimerStarted
     row stays lit; the Worker shows RESTARTING…, then DEPLOYING V2…, and
     WORKER A gives way to WORKER B (VERSION 2).
-- **2:56** On day 30, Temporal wakes the Workflow up: a Worker replays its
+- **2:57** On day 30, Temporal wakes the Workflow up: a Worker replays its
   history and runs the next line.
   - Visuals: TIME IS UP, row "TimerFired" SAVED; a WAKE UP chip flies to
     the sleep line; Worker B shows REPLAYING… as the highlight walks the
@@ -234,7 +247,7 @@ readability.
 
 ## 09 What you get
 
-- **3:04** You write the business logic. Temporal handles retries, state
+- **3:05** You write the business logic. Temporal handles retries, state
   and recovery, with full visibility.
   - Visuals: "You write the business logic", Temporal logo + a slate
     "HANDLES THE REST" sized to its wordmark, then 4 identical tiles:
@@ -243,7 +256,7 @@ readability.
 
 ## Outro
 
-- **3:13** Durable Execution: your code runs to completion, whatever fails
+- **3:14** Durable Execution: your code runs to completion, whatever fails
   along the way.
   - Visuals: The 4 step tiles checked, title "Durable Execution", violet
     line "YOUR CODE RUNS TO COMPLETION", Temporal logo.

@@ -32,7 +32,6 @@
   scene({
     chapter: 2, title: 'Waiting is the hard part',
     // laid out centered at (960, 522) on the content frame
-    shift: [0, 0],
     subs: [
       {
         text: "But the app can't simply pause for three days. Its memory lives on one machine, and machines restart.",
@@ -60,29 +59,26 @@
         width: '24px', height: '24px', background: C.violet, borderRadius: '50%',
         boxShadow: '0 0 18px 4px rgba(182,100,255,.45)',
       });
-      s.app = makeAppPanel(root, 'APP', APP.w, APP.h);
-      s.mem = E(s.app,
-        '<div class="lbl" style="position:absolute;left:20px;top:16px;display:flex;gap:10px;align-items:center;'
-        + `padding-left:0">${ICON('server', 22, C.slate, 1.8)} App memory</div>`
+      s.app = makeAppPanel(root, 'APP', APP.w, APP.h, APP_TEXT);
+      // the memory card never moves: it is part of the panel's HTML, and only its chips are animated elements
+      s.app.insertAdjacentHTML('beforeend',
+        `<div class="tile" style="position:absolute;left:24px;top:76px;width:${APP.w - 48}px;height:${APP.h - 100}px;`
+        + 'text-align:left;background:rgba(248,250,252,.03)">'
+        + panelLabel('server', 'App memory', 'left:20px;top:16px;padding-left:0')
         // EMPTY and REQUEST LOST, like the chips, sit in the middle of the space under the APP MEMORY label
-        + '<div class="vide mono" style="position:absolute;left:0;right:0;top:129px;text-align:center;font-size:30px;'
-        + 'letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
-        'tile', {
-          left: '24px', top: '76px', width: (APP.w - 48) + 'px', height: (APP.h - 100) + 'px', textAlign: 'left',
-          transform: 'none', background: 'rgba(248,250,252,.03)',
-        });
-      s.mem.style.opacity = 1;
-      s.vide = s.mem.querySelector('.vide');
+        + '<div class="empty mono" style="position:absolute;left:0;right:0;top:129px;text-align:center;font-size:30px;'
+        + 'letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div></div>');
+      s.mem = s.app.lastElementChild;
+      s.empty = s.mem.querySelector('.empty');
       s.chips = CHIPS.map((txt, i) => E(s.mem, txt, 'mono', {
-        left: '24px', top: (99 + i * 66) + 'px', fontSize: '24px', color: '#141414', background: '#E6E7FC',
+        left: '24px', top: (99 + i * 66) + 'px', fontSize: '24px', color: '#141414', background: C.uvTint,
         padding: '10px 16px', borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
       s.lost = tag(root, 'Request lost', 'red big');
-      s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
+      s.flash = makeFlash(root);
       s.tiles = PLUMBING.map(([icon, label, , , w]) => iconTile(root, icon, label, w, TILE.h));
-      s.stuck = tag(root, 'Request stuck', 'red big'); s.twice = tag(root, 'Ordered twice', 'red big');
       // solid fill: the tags sit on the tangled links, which must not show through them
-      [s.stuck, s.twice].forEach(e => { e.style.background = '#2A191B'; });
+      s.stuck = tag(root, 'Request stuck', 'red big solid'); s.twice = tag(root, 'Ordered twice', 'red big solid');
     },
     update(t, c, s) {
       const crashAt = c[0] + 4.8, back = c[1] + 0.2;
@@ -101,9 +97,9 @@
         e.style.opacity = grow * (1 - fall);
         e.style.transform = `translateY(${fall * 260}px) rotate(${fall * (i % 2 ? 22 : -18)}deg)`;
       });
-      s.vide.style.opacity = win(t, crashAt + 1.0, back, 0.4);
+      s.empty.style.opacity = win(t, crashAt + 1.0, back, 0.4);
       place(s.lost, APP.x, APP.y + 79, P(t, crashAt + 1.4, 0.45, backOut), win(t, crashAt + 1.4, back, 0.3));
-      place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);
+      placeFlash(s.flash, t, crashAt);
 
       // day timeline: the marker walks from DAY 1 and stops at the restart
       const lp = P(t, c[0] + 0.3, 0.5);

@@ -16,7 +16,7 @@ Scope: the `human-in-the-loop` theme.
 - **Ideas, in order:** a step needs a person who may answer in minutes or
   days (ch1); a plain app cannot wait that long, and hand-built waiting
   plumbing is fragile (ch2); the Workflow waits on one line of code, with
-  nothing running, while Temporal keeps its Event History outside the app
+  no code running, while Temporal keeps its Event History outside the app
   and survives restarts and deploys (ch3); the decision arrives as a
   Signal, any copy of the app replays the history and resumes right after
   the wait, with no step redone (ch4); durable timers drive reminders and
@@ -25,14 +25,12 @@ Scope: the `human-in-the-loop` theme.
 - **Layout continuity:** chapters 3 and 4 share one layout that mirrors
   `durable-ai-agents` chapter 7: step row on top, app instance panel with
   a WORKFLOW card on the left, TEMPORAL panel with the Event History on the
-  right. Replayed rows get a REPLAYED tag; "WAITING FOR A SIGNAL" is an
+  right. Replayed rows get a REPLAYED tag, except the Signal row, which is
+  new to the Workflow and keeps SAVED; "WAITING FOR A SIGNAL" is an
   un-numbered line, since waiting itself is not an event.
 - **Shared notes:** the vocabulary of
   [On-screen vocabulary](feedback_vocabulary.md) applies ("the app" runs
-  the Workflow). Chapter numbers in the other memory notes (scene
-  centering, visual design, Durable Execution story, budget figure) refer
-  to `durable-ai-agents`; this theme measures its own shifts by the same
-  centering rules.
+  the Workflow); shifts follow [Scene centering](project_scene-centering.md).
 
 **Why:** one concrete, relatable example carries a non-technical audience
 from the problem to Temporal's answer, and matches how Temporal really

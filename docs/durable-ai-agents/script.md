@@ -1,12 +1,26 @@
 # Script and timeline: Durable AI Agents
 
-Subtitles are the only narration (no audio). Timings are computed in
-`src/engine.js` from text length (`autoDur`: chars / 16 + 0.6 s, clamped
-2.4 to 8 s), plus per-subtitle `after` pauses. Run `make timeline` for the
-live values; the start times below are a snapshot from 2026-10-05.
+Subtitles are the only narration (no audio). Each subtitle lasts as long
+as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
+Run `make timeline THEME=durable-ai-agents` for the live values; the start
+times below are a snapshot from 2026-10-06.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
+
+## Audience and goal
+
+The video explains to a non-technical audience, in seven topics:
+
+1. LLM calls (text in, text out);
+2. an LLM is stateless by design;
+3. the context window;
+4. tools;
+5. the agentic loop and the definition of an agent;
+6. what happens when the agent crashes midway;
+7. the benefits of Temporal and Durable Execution, including budget
+   savings: previous LLM calls are not lost, so they are not redone to
+   rebuild the context.
 
 ## Intro
 
@@ -33,7 +47,8 @@ animation shows.
   - Visuals: Call 1: "Hi, I'm Alex." / "Nice to meet you, Alex!", "Alex" bubble
     above orb.
 - **0:33** …then ask again in the next call. It has already forgotten.
-  - Visuals: Bubble wiped, Call 2: "What's my name?" / "I don't know…" (red).
+  - Visuals: Bubble wiped, NOT KEPT label above the orb, Call 2: "What's my
+    name?" / "I don't know…" (red).
 - **0:39** That's by design: LLMs are stateless. So the app resends the whole
   conversation with every call.
   - Visuals: STATELESS tag, "Full history" card sent, "You're Alex!".
@@ -54,8 +69,8 @@ animation shows.
   tools.
   - Visuals: Crossed-out icons, toolbox: Weather / Calendar / Email / Web
     search.
-- **1:11** When it needs one, the model writes a request: “use the Weather tool,
-  for Paris”. The app runs it…
+- **1:11** When it needs one, the model writes a request: “use the Weather
+  tool, for Paris”. The app runs it…
   - Visuals: Request card (tool: weather, city: Paris) goes to the app, app
     calls the tool, "18°C, sunny".
 - **1:19** …adds the result to the context, and calls the model again.
@@ -75,17 +90,22 @@ animation shows.
 
 ## 06 When the agent crashes
 
-- **1:47** Now the app running the agent crashes in the middle of the booking.
-  Restarts, deploys, network cuts: it happens every day.
-  - Visuals: 4 steps, APP MEMORY blocks (each with its step icon, LLM blocks in
-    UV, tool blocks in black), LLM CALLS BILLED counter (3), ticket
-    "1 booking", flash + APP CRASH.
+- **1:47** Now the app running the agent crashes just before the invite goes
+  out. Restarts, deploys, outages: it happens every day.
+  - Visuals: 4 steps; steps 1 to 3 complete, each adding 2 APP MEMORY blocks
+    (each with its step icon, LLM blocks in UV, tool blocks in black), LLM
+    CALLS BILLED counter (3), ticket "1 booking" once the booking result is
+    in memory (6 blocks); step 4 (Invite) starts, then flash + bolt +
+    APP CRASH before its LLM call, Invite crossed out; tags RESTART / DEPLOY
+    / OUTAGE.
 - **1:56** The context lived in the app's memory, not in the LLM. It's gone, so
   the agent has to start over.
-  - Visuals: Memory blocks fall, EMPTY, "Start over" arrow.
+  - Visuals: The 6 memory blocks fall (booking result included), EMPTY,
+    "Start over" arrow from Invite back to Calendar.
 - **2:03** Every LLM call is made, and paid for, a second time, just to rebuild
   the context. And the table gets booked twice.
-  - Visuals: Steps re-run, counter 6 with "+3 wasted", "2 BOOKINGS!".
+  - Visuals: Steps 1 to 3 re-run and refill the memory, counter 6 with
+    "+3 wasted", the booking runs again: "2 BOOKINGS!".
 
 ## 07 Durable Execution with Temporal
 
@@ -112,19 +132,26 @@ animation shows.
     travel back and refill APP MEMORY, steps re-check, counter stays 3 with "NOT
     RE-BILLED"; tags "REUSED, NOT RE-BILLED" / "REUSED, NOT RE-RUN"; step 4 runs
     for real: counter 4, rows 7 and 8 SAVED, AGENT COMPLETE.
-- **2:43** No token is paid twice, and the booking happens only once. Plus
-  retries, human waits and full visibility.
+- **2:43** No saved LLM call is paid for twice, and no saved step runs again.
+  Plus retries, human waits and full visibility.
   - Visuals: "43% less LLM spend in this example", "4 vs 7 LLM calls", then 4
-    tiles: One booking only / Automatic retries / Waits for humans / Full
+    tiles: Saved steps reused / Automatic retries / Waits for humans / Full
     visibility.
 
 ## Outro
 
-- **2:52** Durable AI agents never lose their progress, or your budget.
-  - Visuals: "Durable AI agents", Temporal logo.
+- **2:53** Durable AI agents keep their progress and your budget.
+  - Visuals: "Durable AI agents", KEEP THEIR PROGRESS AND YOUR BUDGET, Temporal
+    logo.
 
 ## Budget figure
 
 The budget numbers are deliberately illustrative ("in this example"):
-4 steps = 4 LLM calls; a crash after 3 steps without durable execution
-re-runs those 3, so 7 calls in total (3/7 ≈ 43% wasted).
+4 steps = 4 LLM calls. Chapters 6 and 7 crash at the same point: after
+step 3's result (the booking) is in APP MEMORY, before step 4's LLM call.
+Without durable execution the restart re-runs those 3 steps, booking
+included, so 7 calls in total (3/7 ≈ 43% wasted); with Temporal the 3 saved
+steps are reused, so 4 calls and 1 booking.
+
+The "in this example" label stays next to the percentage on screen, and
+the figures follow the step count if the scenario changes.

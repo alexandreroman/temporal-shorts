@@ -19,8 +19,11 @@ Schedules, Batch, Workers, Nexus, Archive, Docs) with the active item on
 #113264 with #77ADDC text, Completed #193B2D with green text, Failed
 #641723 with light red text); primary button #3A5BC7. The details page puts
 the status badge before the Workflow ID, then a summary grid and the tabs
-Timeline, Event History, Pending Activities. The Timeline stacks Activity
-bars (#30A46C) bottom-up under a full-width Workflow bar; a retried
+Timeline, Event History, Relationships, Workers, Pending Activities, Call
+Stack, Queries, User Metadata, Search Attributes, Memo (the video shows
+Timeline, Event History, Workers and Pending Activities, in that order).
+The Timeline stacks Activity bars (#30A46C) bottom-up under a full-width
+Workflow bar; a retried
 Activity shows "2 • name" and a red-to-green bar. Pending Activities shows
 the attempt as "3 / UNLIMITED", the last Worker identity and the Last
 Failure as JSON. The UI shows no Worker crash marker: the video adds it as

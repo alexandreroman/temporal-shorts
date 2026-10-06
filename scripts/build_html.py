@@ -20,7 +20,6 @@ MIME_TYPES = {
     ".svg": "image/svg+xml",
 }
 
-FONT_FACE_SRC = re.compile(r"(@font-face\s*\{[^}]*?src:)([^;}]+)")
 # Relative to the stylesheet, as the browser resolves them.
 FONT_URL = re.compile(r"url\((fonts/[^)]+)\)")
 # Paths are relative to the page, e.g. ../../engine.js or scenes/01-llm-call.js in a theme page.
@@ -58,24 +57,14 @@ def source_path(base_dir, relative_path):
 
 
 def inline_fonts(css, css_dir):
-    """Turn each @font-face src entry into a data URI; drop the entries whose file is absent."""
-    def replace_src(match):
-        prefix, src_list = match.groups()
-        kept = []
-        # Split before any data URI is inserted: their base64 payload contains commas.
-        for entry in src_list.split(","):
-            font = FONT_URL.search(entry)
-            if font is None:
-                kept.append(entry)
-                continue
-            path = source_path(css_dir, font.group(1))
-            if path.is_file():
-                kept.append(FONT_URL.sub(f"url({data_uri(path)})", entry))
-        if not kept:
-            sys.exit(f"ERROR: no font file found for: {src_list.strip()}\nRun `make setup` to download the fonts.")
-        return prefix + ",".join(kept)
+    """Replace each fonts/<file> URL with a data URI."""
+    def replace(match):
+        path = source_path(css_dir, match.group(1))
+        if not path.is_file():
+            sys.exit(f"ERROR: missing font file {path}\nRun `make setup` to download the fonts.")
+        return f"url({data_uri(path)})"
 
-    return FONT_FACE_SRC.sub(replace_src, css)
+    return FONT_URL.sub(replace, css)
 
 
 def read_source(path):
