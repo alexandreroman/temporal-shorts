@@ -75,7 +75,7 @@
     shift: (t, c) => pan(t, [370, 0], [[c[1], 0, 0]], 0.9),
     subs: [
       {
-        text: "Every agent publishes the same event stream: turns, model calls, tool calls, approvals and token usage.",
+        text: "Every agent publishes the same <b>event stream</b>: turns, model calls, tool calls, approvals and token usage.",
         after: 1.2,
       },
       {

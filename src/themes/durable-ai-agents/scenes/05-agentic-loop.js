@@ -1,4 +1,4 @@
-// ===================== 5. AGENTIC LOOP
+// ===================== 5. THE AGENTIC LOOP
 // The block keeps every name declared in this file local to this scene.
 {
   const LOOP = { cx: 560, cy: 500, r: 220 };
@@ -17,8 +17,8 @@
     subs: [
       { text: "Repeat until the goal is reached: think, act, observe. That's the <b>agentic loop</b>.", after: 0.6 },
       {
-        text: "“Book lunch with Marie on Thursday”: "
-          + "check the calendar, find a restaurant, book a table, send the invite.",
+        text: '"Book lunch with Marie on Thursday": '
+          + 'check the calendar, find a restaurant, book a table, send the invite.',
         after: 1.0,
       },
       { text: "An AI agent is a model, plus tools, plus a loop, working toward a goal.", after: 0.5 },

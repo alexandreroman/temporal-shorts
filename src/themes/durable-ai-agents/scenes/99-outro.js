@@ -6,7 +6,7 @@
     shift: [0, 51],
     subs: [{ text: "Durable AI agents keep their progress and your budget." }],
     build(root, s) {
-      s.t = makeEndCard(root, 'Durable AI agents', 'KEEP THEIR PROGRESS AND YOUR BUDGET');
+      s.t = makeEndCard(root, 'Durable AI Agents', 'KEEP THEIR PROGRESS AND YOUR BUDGET');
       s.llm = makeLLM(root, 120, '');
     },
     update(t, c, s) {

@@ -1,4 +1,4 @@
-// ===================== 2. STATELESS
+// ===================== 2. STATELESS BY DESIGN
 // The block keeps every name declared in this file local to this scene.
 {
   // slide horizontally from x0 to x1 at height y, starting at a; `out` fades it away
@@ -10,8 +10,8 @@
     chapter: 2, title: 'Stateless by design',
     shift: [30, 115],
     subs: [
-      { text: "Surprise: the model has no memory. Tell it your name…", after: 1.4 },
-      { text: "…then ask again in the next call. It has already forgotten.", after: 0.8 },
+      { text: "Surprise: the model has no memory. Tell it your name.", after: 1.4 },
+      { text: "Then ask again in the next call: it has already forgotten.", after: 0.8 },
       {
         text: "That's by design: LLMs are <b>stateless</b>. So the app resends the whole conversation with every call.",
         after: 0.8,

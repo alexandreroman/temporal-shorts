@@ -1,4 +1,4 @@
-// ===================== 6. CRASH
+// ===================== 6. WHEN THE AGENT CRASHES
 // The block keeps every name declared in this file local to this scene.
 {
   scene({

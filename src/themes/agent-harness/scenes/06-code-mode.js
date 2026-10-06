@@ -110,7 +110,7 @@
     // laid out at final stage coordinates on the grid (content y 150-880, centered at y 515)
     subs: [
       {
-        text: "With Code Mode, the model writes a short Python script instead of calling tools one at a time.",
+        text: "With <b>Code Mode</b>, the model writes a short Python script instead of calling tools one at a time.",
         // the script is typed until c[0] + 8.7, then reads complete for about 2 s
         after: 4.2,
       },

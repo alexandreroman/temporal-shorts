@@ -1,4 +1,4 @@
-// ===================== 7. TEMPORAL
+// ===================== 7. DURABLE EXECUTION WITH TEMPORAL
 // The block keeps every name declared in this file local to this scene.
 {
   // Event History rows: the LLM call of each step (its action, lowercase), then its tool result
@@ -30,9 +30,9 @@
         text: "After each LLM call or tool call, Temporal saves the result in the history before the agent moves on.",
         after: 0.2,
       },
-      { text: "If the app crashes, another copy runs the agent again from the start. For every step already saved…" },
+      { text: "If the app crashes, another copy runs the agent again from the start." },
       {
-        text: "…Temporal hands back the result from the history. "
+        text: "For each saved step, Temporal returns the result from the history. "
           + "The LLM isn't called again: the context is rebuilt for free.",
         after: 0.3,
       },

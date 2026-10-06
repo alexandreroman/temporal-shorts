@@ -8,10 +8,10 @@
     subs: [
       { text: "The model can't check the weather or send an email. So we give it <b>tools</b>.", after: 0.6 },
       {
-        text: "When it needs one, the model writes a request: “use the Weather tool, for Paris”. The app runs it…",
+        text: 'When it needs one, the model writes a request: "use the Weather tool, for Paris". The app runs it.',
         after: 1.2,
       },
-      { text: "…adds the result to the context, and calls the model again.", after: 1.0 },
+      { text: "The app adds the result to the context, then calls the model again.", after: 1.0 },
     ],
     build(root, s) {
       s.svg = svgLayer(root);

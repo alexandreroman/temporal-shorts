@@ -59,7 +59,7 @@
     // laid out in final coordinates: the gate column reserves the AUTO MODE space from the start
     subs: [
       {
-        text: "Some tool calls need a person's OK first, like a payment. The approval policy decides which ones.",
+        text: "Some tool calls need a person's OK first, like a payment. The <b>approval policy</b> decides which ones.",
         after: 2.3,
       },
       {
@@ -67,7 +67,7 @@
         after: 2.85,
       },
       {
-        text: 'Auto mode lets code or a model approve routine calls, judged against criteria you define.',
+        text: '<b>Auto mode</b> lets code or a model approve routine calls, judged against criteria you define.',
         after: 1.85,
       },
       // auto mode can also deny a call outright; only the calls it escalates wait for a person

@@ -65,7 +65,7 @@
     shift: (t, c) => pan(t, [600, 0], [[c[1], 0, 0]], 1.0),
     subs: [
       {
-        text: "Callback tools run on the user's own device: the agent asks, the laptop runs the tool and replies.",
+        text: "<b>Callback tools</b> run on the user's own device: the agent asks, the laptop runs the tool and replies.",
         after: 1.55,
       },
       {
