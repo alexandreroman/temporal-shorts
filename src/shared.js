@@ -296,9 +296,10 @@ function markCrash(card, oKept, oCut) {
   card.cut.style.opacity = clamp(oCut);
 }
 // Small card carrying one step result between the app and Temporal: UV for a model call or an Activity, green
-// for a tool result
-function makeResultCard(p, uv = true) {
-  return E(p, '<span class="mono" style="font-size:15px;letter-spacing:.12em;padding-left:.12em">RESULT</span>', '', {
+// for a tool result; label: the card text, e.g. the kind of call the result comes from
+function makeResultCard(p, uv = true, label = 'RESULT') {
+  const text = `<span class="mono" style="font-size:15px;letter-spacing:.12em;padding-left:.12em">${label}</span>`;
+  return E(p, text, '', {
     background: uv ? C.uvTint : C.neonTint, color: '#141414', padding: '6px 14px',
     borderLeft: `5px solid ${uv ? C.uv : C.neonDark}`, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
   });

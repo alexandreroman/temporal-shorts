@@ -106,10 +106,10 @@ Lisbon.
   history as soon as it completes.
   - Visuals: five step tiles (PLAN, SEARCH FLIGHTS, PICK, BOOK FLIGHT,
     REPLY); APP INSTANCE A works on step 1, then step 2: each finished step
-    sends a RESULT card to the EVENT HISTORY of the TEMPORAL panel (outside
-    the app), where its row appears with SAVED (Model: plan the trip /
-    search_flights: 3 flights found); MODEL CALLS BILLED counts the model
-    steps.
+    sends a MODEL CALL or TOOL CALL card to the EVENT HISTORY of the
+    TEMPORAL panel (outside the app), where its row appears with SAVED
+    (Model: plan the trip / search_flights: 3 flights found); MODEL CALLS
+    BILLED counts the model steps.
 - **1:26** The next step starts only after the previous result is saved,
   outside the app.
   - Visuals: steps 3 and 4 run the same way (Model: pick the $480 flight /

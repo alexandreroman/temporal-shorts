@@ -13,6 +13,8 @@
     { icon: 'agent', label: 'Reply', call: ['Model:', 'write the reply'], row: 'Model: write the reply' },
   ];
   const isModel = i => STEPS[i].icon === 'agent';
+  // result card of step i, labeled with the kind of call it comes from, as in the subtitle
+  const makeCallCard = (root, i) => makeResultCard(root, isModel(i), isModel(i) ? 'MODEL CALL' : 'TOOL CALL');
   // Layout: step tiles on top; the app and its counters on the left, Temporal and its Event History on the right.
   // The step row spans exactly the width of the components below it, from LEFT to RIGHT.
   const LEFT = 140, RIGHT = 1780;
@@ -83,8 +85,8 @@
         },
         scanH: 42,
       });
-      s.saveCards = STEPS.map((_, i) => makeResultCard(root, isModel(i)));
-      s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeResultCard(root, isModel(i)));
+      s.saveCards = STEPS.map((_, i) => makeCallCard(root, i));
+      s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeCallCard(root, i));
       s.flash = makeFlash(root);
     },
     update(t, c, s) {
@@ -187,7 +189,7 @@
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 0.3, 0.5));
       place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 0.45, 0.5));
 
-      // result cards: app -> Temporal when saving, Temporal -> app when replaying
+      // MODEL CALL and TOOL CALL cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {
         const r = run[i];
         const [x1, y1] = [CARD_X, rowY(i)];
