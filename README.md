@@ -32,7 +32,8 @@ headless Chromium (Playwright), then encoded to H.264 by ffmpeg.
 ```text
 src/index.html         home page: one card per theme (styles in home.css)
 src/styles.css         Temporal brand styles and the live player's CSS
-src/engine.js          timeline, easing, placement, SVG icons, components
+src/engine.js          timeline, easing, placement, SVG icons, components,
+                       page start (boot)
 src/shared.js          brand helpers shared by every theme (colors, tiles)
 src/player.js          live player: controls, fit-to-window, shortcuts
 src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
@@ -81,8 +82,9 @@ each `output/<theme>.mp4` or `.srt` depends on its theme's own sources
 (`src/themes/<theme>/`: its page and its scripts), the shared sources
 (`src/*.js`, `src/*.css`, assets, fonts, `scripts/common.py`) and the
 render or export script. Editing a scene rebuilds its theme only; editing
-the home page (`src/index.html`, `src/home.css`) rebuilds no video.
-`make html` rebuilds when any page changes. Use `make -B render` to force a
+the home page (`src/index.html`, `src/home.css`) or the live player
+(`src/player.js`) rebuilds no video. `make html` rebuilds when any page or
+the player changes. Use `make -B render` to force a
 full render.
 
 `make clean` deletes `output/`: videos, subtitles, HTML pages, previews and

@@ -47,8 +47,8 @@ make clean                   # delete output/ (every generated file)
 them to one, e.g. `make render THEME=durable-execution`. `preview` requires
 `THEME`. An unknown `THEME` fails with the list of themes. Each MP4 or SRT
 depends on the shared sources and its own theme only: editing a scene
-rebuilds that theme alone, editing the home page rebuilds no video. Use
-`-B` to force a rebuild.
+rebuilds that theme alone, editing the home page or `player.js` rebuilds no
+video. Use `-B` to force a rebuild.
 
 In Casper (`.casper.json`), Run (`casper run`) serves the home page and the
 HTML players on `CASPER_PORT` (8000 in the primary workspace), Render
@@ -62,17 +62,18 @@ workspaces run `make setup` automatically.
   - `index.html`, `home.css`: home page, one card per theme, linking to
     `themes/<theme>/`
   - `styles.css`: brand styles and live-player CSS
-  - `engine.js`: timeline, helpers, components; chapter titles come from
-    the scenes
+  - `engine.js`: timeline, helpers, components, star field and `boot()`,
+    called last by every theme page (builds the scenes, then freezes on
+    `?t=` or starts the player); chapter titles come from the scenes
   - `shared.js`: brand helpers shared by every theme (`C`, `LOGO`,
     `iconTile`, `makeStep`, `fly`)
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
     ordered `<link>` / `<script>` list: shared files as `../../<file>`,
-    the theme's own scripts relative to its folder
+    the theme's own scripts relative to its folder, then `boot()`
   - `themes/<theme>/`: the theme's own scripts, e.g.
-    `themes/durable-ai-agents/shared.js` (`STEPS`, memory, bill)
+    `themes/durable-ai-agents/shared.js` (`STEPS`, `makeApp`, memory, bill)
   - `themes/<theme>/scenes/`: one file per scene (subtitles and
     animations), wrapped in a `{ ... }` block so its helpers stay local;
     the first scene of a chapter sets `chapter` and `title`; `shift`

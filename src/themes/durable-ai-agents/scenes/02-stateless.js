@@ -36,11 +36,11 @@
         + `${who('YOU')}&nbsp;&nbsp;&nbsp;What's my name?`;
       s.hist = makeCard(root, history, 'user', 'FULL HISTORY', 560);
       s.hist.querySelector('.txt').style.fontSize = '23px';
-      s.r3 = makeCard(root, "You're Alex!", 'ok');
+      s.r3 = makeCard(root, "You're Alex!", 'llm');
     },
     update(t, c, s) {
       const ap = P(t, c[0] + 0.1, 0.6, backOut);
-      place(s.app, 250, 430, ap, clamp(ap * 2)); gearSpin(s.app, 0);
+      place(s.app, 250, 430, ap, clamp(ap * 2));
       place(s.llm.root, 1650, 430, P(t, c[0] + 0.3, 0.6, backOut), P(t, c[0] + 0.3, 0.4));
       const think = win(t, c[0] + 1.8, c[0] + 2.5, 0.2) + win(t, c[1] + 1.6, c[1] + 2.4, 0.2)
         + win(t, c[2] + 4.3, c[2] + 5.3, 0.2);

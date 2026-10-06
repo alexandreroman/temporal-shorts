@@ -38,7 +38,7 @@
         + bar('#E6E7FC', 260) + bar('#F2E6FF', 200) + bar('#E4F78F', 230),
         '', { background: '#F8FAFC', padding: '12px 20px', borderLeft: '6px solid ' + C.uv, borderRadius: 'var(--r)' });
       s.tag = tag(root, 'Call 2');
-      s.ans = makeCard(root, "It's 18°C and sunny in Paris!", 'ok');
+      s.ans = makeCard(root, "It's 18°C and sunny in Paris!", 'llm');
     },
     update(t, c, s) {
       place(s.app, 280, 330, P(t, c[0], 0.6, backOut), P(t, c[0], 0.4));

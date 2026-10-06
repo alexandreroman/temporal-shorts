@@ -56,20 +56,10 @@ html,body{margin:0;background:var(--bg)}
 }
 .llm-dots i{display:block;width:.55em;height:.55em;background:var(--uv);border-radius:2px}
 .llm-q{position:absolute;left:-1.2em;top:-1.6em;font-size:2.6em;font-weight:700;color:var(--neon);opacity:0}
-.llm-label,.app-label{
+.llm-label{
   position:absolute;left:50%;top:calc(100% + 18px);transform:translateX(-50%);white-space:nowrap;
   font-family:'Mono';font-size:22px;letter-spacing:.12em;padding-left:.12em;color:var(--slate);
 }
-/* app */
-.app{width:300px;height:220px}
-.app-win{
-  position:absolute;inset:0;background:var(--surface);border:1.5px solid #4B5363;border-radius:var(--r);overflow:hidden;
-}
-.app-bar{height:32px;border-bottom:1.5px solid #4B5363;display:flex;gap:8px;align-items:center;padding-left:14px}
-.app-bar i{width:9px;height:9px;background:var(--slate);opacity:.6;border-radius:2px}
-.app-lines{padding:24px 22px;display:flex;flex-direction:column;gap:16px}
-.app-lines b{display:block;height:10px;background:rgba(248,250,252,.18);border-radius:3px}
-.app-gear{position:absolute;right:18px;bottom:14px;opacity:.35}
 /* text cards */
 .card{
   max-width:640px;background:var(--ink);color:var(--bg);padding:12px 22px 14px;border-left:6px solid var(--violet);
@@ -78,7 +68,7 @@ html,body{margin:0;background:var(--bg)}
 .card .who{font-family:'Mono';font-size:16px;letter-spacing:.12em;color:#5B6475;margin-bottom:4px}
 .card .txt{font-family:'Mono';font-size:27px;line-height:1.35}
 .k-llm{border-left-color:var(--uv)} .k-tool{border-left-color:var(--neon)}
-.k-ok{border-left-color:var(--uv)} .k-bad{border-left-color:var(--red)}
+.k-bad{border-left-color:var(--red)}
 .pill{
   white-space:nowrap;padding:9px 18px 9px calc(18px + .1em);background:rgba(248,250,252,.04);border:1.5px solid #4B5363;
   font-family:'Mono';font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);

@@ -1,7 +1,6 @@
 // Live player: started only when the page is opened without ?t=. Frozen mode never runs this code.
 function startPlayer() {
   const root = document.documentElement;
-  const stage = document.getElementById('stage');
   root.classList.add('live');
 
   const CC_LETTERS = '<path d="M10.5 10a2.5 2.5 0 1 0 0 4M17 10a2.5 2.5 0 1 0 0 4"/>';

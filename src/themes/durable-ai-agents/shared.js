@@ -1,5 +1,27 @@
 // ===================== Durable AI Agents helpers (shared by the scenes of this theme)
+// Extra icons, same style as the engine set: 24 grid, stroke only, square caps.
+Object.assign(ICONS, {
+  sun: '<circle cx="12" cy="12" r="4"/>'
+    + '<path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
+  coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.9-1.7-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.8 6 1.5 6 4.3'
+    + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
+});
 const STEPS = [['cal', 'Calendar'], ['search', 'Restaurant'], ['food', 'Booking'], ['mail', 'Invite']];
+
+// The app of chapters 1, 2 and 4: a window with a gear that gearSpin() turns while the app works.
+// Its .app* styles are in this theme's index.html.
+function makeApp(parent) {
+  const root = E(parent, `
+   <div class="app-win">
+     <div class="app-bar"><i></i><i></i><i></i></div>
+     <div class="app-lines"><b style="width:70%"></b><b style="width:45%"></b><b style="width:60%"></b></div>
+     <div class="app-gear">${ICON('gear', 46, '#F8FAFC')}</div>
+   </div>
+   <div class="app-label">APP</div>`, 'app');
+  root.gear = root.querySelector('.app-gear');
+  return root;
+}
 
 // ===================== shared by chapters 6 and 7 (crash vs Durable Execution)
 // The 4 steps of the lunch booking, as tiles in a row joined by thin links

@@ -10,12 +10,6 @@
   <div id="segs"></div>
   <div id="subw"><div id="sub"></div></div>
 </div>
-<script>
-// deterministic star field
-(function(){let s=7;const r=()=>{s=(s*16807)%2147483647;return s/2147483647};const sky=document.getElementById('sky');
-for(let i=0;i<110;i++){const e=document.createElement('i');e.style.left=(r()*1920)+'px';e.style.top=(r()*1080)+'px';
-e.style.opacity=(0.08+r()*0.35).toFixed(2);if(r()>.85){e.style.width=e.style.height='3px'}sky.appendChild(e);}})();
-</script>
 <script src="../../engine.js"></script>
 <script src="../../shared.js"></script>
 <script src="shared.js"></script>
@@ -32,10 +26,5 @@ e.style.opacity=(0.08+r()*0.35).toFixed(2);if(r()>.85){e.style.width=e.style.hei
 <script src="scenes/09-benefits.js"></script>
 <script src="scenes/99-outro.js"></script>
 <script src="../../player.js"></script>
-<script>
-buildAll();
-const q=new URLSearchParams(location.search);
-if(q.has('t')) renderAt(parseFloat(q.get('t')));
-else startPlayer();
-</script>
+<script>boot();</script>
 </body></html>
