@@ -56,7 +56,10 @@
         text: 'Instance B replays the history: steps 1 to 4 return their saved results, then step 5 runs for real.',
         after: 2.5,
       },
-      { text: "Saved results are reused, not redone: no token is paid twice, and no tool runs twice.", after: 0.5 },
+      {
+        text: 'Saved results are reused, not redone: no finished model call is paid again, no finished tool reruns.',
+        after: 0.5,
+      },
     ],
     build(root, s) {
       s.svg = svgLayer(root);

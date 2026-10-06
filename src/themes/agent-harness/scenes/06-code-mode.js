@@ -9,13 +9,15 @@
   const toolY = i => TOP + LEFT.toolH / 2 + i * (LEFT.toolH + LEFT.toolGap);
   const ORB_Y = toolY(1);
   const ORB_EDGE = LEFT.orbX + LEFT.orbSize / 2 + 4, TOOL_EDGE = LEFT.toolX - LEFT.toolW / 2 - 4; // connector ends
-  // the 6 round trips (tool index of each call) and their timing, from c[0] + TRIPS.at: the call travels for
-  // `out` seconds, waits `stay` seconds at the tool, and the result travels back for `out` seconds
-  const TRIPS = { at: 0.9, gap: 1.1, out: 0.4, stay: 0.1, targets: [0, 1, 0, 1, 0, 2] };
-  // "6 round trips vs 1 round trip": two equal count tiles at the zone's edges, "vs" in the gutter between them
+  // the 3 round trips, one per tool the script calls (tool index of each call), and their timing, from
+  // c[0] + TRIPS.at: the call travels for `out` seconds, waits `stay` seconds at the tool, and the result travels
+  // back for `out` seconds. The last result is back at c[0] + 6.2, before the side dims at c[0] + 7.6.
+  const TRIPS = { at: 0.9, gap: 2.2, out: 0.4, stay: 0.1, targets: [0, 1, 2] };
+  // "3 round trips vs 1 round trip": two equal count tiles at the zone's edges, "vs" in the gutter between them
   const COUNT = { w: 240, h: 90, y: BOTTOM - 45, x: [140 + 120, 700 - 120] };
   // Right: the script card; its three tools below, equal and spread across its width; SAVED; the closing row
-  const CODE = { x: 1290, w: 980, h: 330, lineTop: 92, lineH: 40, textX: 28, numW: 44 };
+  // 8 script lines of 30 px fit the card with the paddings of the header rule (16 px above, 18 px below)
+  const CODE = { x: 1290, w: 980, h: 330, lineTop: 87, lineH: 30, textX: 28, numW: 44 };
   CODE.y = TOP + CODE.h / 2;
   const STEP = { w: 300, h: 120, y: 700 };
   STEP.x = [0, 1, 2].map(i => CODE.x - CODE.w / 2 + STEP.w / 2 + i * (CODE.w - STEP.w) / 2);
@@ -26,20 +28,26 @@
   // Script tokens with simple syntax colors: keywords violet, tool names light UV, the rest ink or slate
   const kw = s => [s, C.violet], tool = s => [s, '#A5ABFF'], str = s => [s, C.ink];
   const id = s => [s, C.ink], pun = s => [s, C.slate];
+  // The script follows the harness's Code Mode contract: host functions are async, so the script awaits them in
+  // an async main() run by asyncio.run(), and their results are plain dicts (f["price_usd"], as in the harness's
+  // travel example)
   const SCRIPT = [
+    [kw('import'), pun(' '), id('asyncio')],
+    [kw('async'), pun(' '), kw('def'), pun(' '), id('main'), pun('():')],
     [
-      id('flights'), pun(', '), id('hotels'), pun(' = '), kw('await'), pun(' '), id('asyncio'), pun('.'),
-      id('gather'), pun('('),
+      pun('    '), id('flights'), pun(', '), id('hotels'), pun(' = '), kw('await'), pun(' '), id('asyncio'),
+      pun('.'), id('gather'), pun('('),
     ],
-    [pun('    '), tool('search_flights'), pun('('), id('to'), pun('='), str('"LIS"'), pun('),')],
-    [pun('    '), tool('search_hotels'), pun('('), id('city'), pun('='), str('"Lisbon"'), pun('),')],
-    [pun(')')],
+    [pun('        '), tool('search_flights'), pun('('), id('destination'), pun('='), str('"LIS"'), pun('),')],
+    [pun('        '), tool('search_hotels'), pun('('), id('city'), pun('='), str('"Lisbon"'), pun('))')],
     [
-      id('best'), pun(' = '), id('min'), pun('('), id('flights'), pun(', '), id('key'), pun('='), kw('lambda'),
-      pun(' '), id('f'), pun(': '), id('f'), pun('.'), id('price'), pun(')'),
+      pun('    '), id('best'), pun(' = '), id('min'), pun('('), id('flights'), pun(', '), id('key'), pun('='),
+      kw('lambda'), pun(' '), id('f'), pun(': '), id('f'), pun('['), str('"price_usd"'), pun('])'),
     ],
-    [kw('await'), pun(' '), tool('book_flight'), pun('('), id('best'), pun(')')],
+    [pun('    '), kw('return'), pun(' '), kw('await'), pun(' '), tool('book_flight'), pun('('), id('best'), pun(')')],
+    [id('asyncio'), pun('.'), id('run'), pun('('), id('main'), pun('())')],
   ];
+  const MIN_LINE = 5; // the line that picks the best flight
   const lineLength = line => line.reduce((n, [s]) => n + s.length, 0);
   const TOTAL_CHARS = SCRIPT.reduce((n, line) => n + lineLength(line), 0);
 
@@ -60,10 +68,10 @@
     return shown;
   });
   const lineY = i => CODE.lineTop + i * CODE.lineH;
-  const CHAR_W = 14.4; // advance of a 24 px Noto Sans Mono character (0.6 em)
-  // left edge of the best: $480 pill, on line 5 (the min line), about 28 px right of the end of its code;
+  const CHAR_W = 13.2; // advance of a 22 px Noto Sans Mono character (0.6 em)
+  // left edge of the best: $480 pill, on line 6 (the min line), about 28 px right of the end of its code;
   // rounded, with an even pill height, so the pill rests on whole pixels
-  const BEST_LEFT = Math.round(CODE.textX + CODE.numW + lineLength(SCRIPT[4]) * CHAR_W + 28), BEST_H = 42;
+  const BEST_LEFT = Math.round(CODE.textX + CODE.numW + lineLength(SCRIPT[MIN_LINE]) * CHAR_W + 28), BEST_H = 34;
 
   // place() anchored on the element's left edge, so a pill keeps its gap to the code it follows
   const placeLeft = (e, x, y, scale, o) => {
@@ -104,14 +112,15 @@
     subs: [
       {
         text: "With Code Mode, the model writes a short Python script instead of calling tools one at a time.",
-        after: 2.8,
+        // the script is typed until c[0] + 8.7, then reads complete for about 2 s
+        after: 4.2,
       },
       {
         text: "Loops, conditions and parallel calls all run inside the script, in one turn.",
         after: 1.1,
       },
       {
-        text: "Every call stays durable, approved and visible, and the whole script takes one round trip, not six.",
+        text: "Every call stays durable, gated and visible, and the whole script takes one round trip, not three.",
         // the tag row settles at c[2] + 6.65, about 1 s before the window ends; post then holds the final composition
         after: 1.0,
       },
@@ -126,7 +135,7 @@
       s.tools = [['plane', 'Flights'], ['bed', 'Hotels'], ['ticket', 'Booking']]
         .map(([icon, label]) => iconTile(root, icon, label, LEFT.toolW, LEFT.toolH));
       s.trip = E(root, '', 'pill', { fontSize: '16px', lineHeight: '21px', padding: '5px 12px 5px calc(12px + .1em)' });
-      // 6 round trips one call at a time, vs 1 for the whole script
+      // 3 round trips one call at a time, vs 1 for the whole script
       s.counter = makeTripCount(root, 0, 'Round trips');
       s.vs = E(root, 'vs', 'lbl', { fontSize: '22px' });
       s.oneTrip = makeTripCount(root, 1, 'Round trip');
@@ -150,14 +159,14 @@
           + '<span class="src"></span>',
           'mono', {
             left: CODE.textX + 'px', top: (lineY(i) - CODE.lineH / 2) + 'px', height: CODE.lineH + 'px',
-            lineHeight: CODE.lineH + 'px', fontSize: '24px', whiteSpace: 'pre', transform: 'none',
+            lineHeight: CODE.lineH + 'px', fontSize: '22px', whiteSpace: 'pre', transform: 'none',
           });
         e.src = e.querySelector('.src');
         return e;
       });
-      s.cursor = E(s.code, '', '', { width: '13px', height: '28px', background: C.violet, borderRadius: '2px' });
+      s.cursor = E(s.code, '', '', { width: '12px', height: '26px', background: C.violet, borderRadius: '2px' });
       s.best = E(s.code, '<span>best: <span style="color:var(--ink)">$480</span></span>', 'pill violet', {
-        textTransform: 'none', letterSpacing: '.02em', fontSize: '22px', padding: '0 14px', color: C.violet,
+        textTransform: 'none', letterSpacing: '.02em', fontSize: '20px', padding: '0 14px', color: C.violet,
         height: BEST_H + 'px', display: 'flex', alignItems: 'center', transformOrigin: '0 50%',
       });
 
@@ -174,14 +183,14 @@
       // what every call keeps: one row spanning the card's width, its label on the card's left edge
       s.tagRow = E(root,
         '<span class="lbl" style="font-size:18px;padding-left:0">Every call</span>'
-        + iconPillHtml('retry', 'Durable') + iconPillHtml('shield', 'Approved') + iconPillHtml('eye', 'Visible'),
+        + iconPillHtml('retry', 'Durable') + iconPillHtml('shield', 'Gated') + iconPillHtml('eye', 'Visible'),
         '', {
           width: CODE.w + 'px', height: RIGHT.tagH + 'px', display: 'flex', alignItems: 'center', gap: '24px',
         });
       s.tags = [...s.tagRow.querySelectorAll('.pill')];
     },
     update(t, c, s) {
-      // ---- c[0], left: six round trips, then the whole side dims
+      // ---- c[0], left: three round trips, then the whole side dims
       const dim = lerp(1, 0.35, P(t, c[0] + 7.6, 0.5));
       const leftIn = at => P(t, c[0] + at, 0.5, backOut);
       place(s.lblL, LEFT.x, HEADING_Y, 1, P(t, c[0] + 0.1, 0.4) * dim);
@@ -227,11 +236,12 @@
       const compare = P(t, c[2] + 5.2, 0.4);
       place(s.counter, COUNT.x[0], COUNT.y, counterIn, clamp(counterIn * 2) * lerp(dim, 1, compare));
 
-      // ---- c[0], right: the model writes the script instead, at a readable pace (about 36 characters a second)
+      // ---- c[0], right: the model writes the script instead, at a brisk but readable pace (about 45 characters a
+      // second)
       const codeIn = P(t, c[0] + 2.2, 0.6, backOut);
       place(s.lblR, CODE.x, HEADING_Y, 1, P(t, c[0] + 2.2, 0.5));
       place(s.code, CODE.x, CODE.y, codeIn, clamp(codeIn * 2));
-      const typeStart = c[0] + 2.9, typeEnd = c[0] + 7.5;
+      const typeStart = c[0] + 2.9, typeEnd = c[0] + 8.7;
       const shownPerLine = typedPerLine(Math.floor(TOTAL_CHARS * clamp((t - typeStart) / (typeEnd - typeStart))));
       shownPerLine.forEach((shown, i) => {
         const e = s.lines[i];
@@ -248,9 +258,11 @@
       place(s.cursor, cursorX, lineY(cursorLine), 1, cursorOn * (t < typeEnd ? 1 : blink));
 
       // ---- c[1]: the script runs, its line highlight slides down from block to block: the gather block
-      // (lines 1-4), the min line, then (c[2]) the book_flight line
+      // (lines 3-5), the min line, then (c[2]) the book_flight line
       const highlight = [
-        { at: c[1] + 0.5, from: 0, to: 3 }, { at: c[1] + 4.0, from: 4, to: 4 }, { at: c[2] + 0.3, from: 5, to: 5 },
+        { at: c[1] + 0.5, from: 2, to: 4 },
+        { at: c[1] + 4.0, from: MIN_LINE, to: MIN_LINE },
+        { at: c[2] + 0.3, from: MIN_LINE + 1, to: MIN_LINE + 1 },
       ];
       let top = lineY(highlight[0].from), bottom = lineY(highlight[0].to);
       for (const h of highlight.slice(1)) {
@@ -275,7 +287,7 @@
       stepState(s.steps[1], searchState);
       // the cheapest flight is picked
       const bestIn = P(t, c[1] + 4.2, 0.45, backOut);
-      placeLeft(s.best, BEST_LEFT, lineY(4), bestIn, clamp(bestIn * 2));
+      placeLeft(s.best, BEST_LEFT, lineY(MIN_LINE), bestIn, clamp(bestIn * 2));
 
       // ---- c[2]: book_flight passes the approval gate first
       draw(s.toGate, P(t, c[2] + 0.5, 0.4));
@@ -300,7 +312,7 @@
         place(e, STEP.x[i], RIGHT.savedY, p, clamp(p * 2));
       });
 
-      // ---- c[2], payoff: the whole script ran in one round trip, against six one call at a time
+      // ---- c[2], payoff: the whole script ran in one round trip, against three one call at a time
       place(s.vs, (COUNT.x[0] + COUNT.x[1]) / 2, COUNT.y, 1, compare);
       const oneTripIn = P(t, c[2] + 5.3, 0.45, backOut);
       place(s.oneTrip, COUNT.x[1], COUNT.y, oneTripIn, clamp(oneTripIn * 2));

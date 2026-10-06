@@ -71,7 +71,8 @@
         text: 'Auto mode lets code or a model approve routine calls, judged against criteria you define.',
         after: 1.85,
       },
-      { text: "Anything it won't approve, like a $2,400 hotel, still goes to a human.", after: 1.45 },
+      // auto mode can also deny a call outright; only the calls it escalates wait for a person
+      { text: 'Calls it escalates, like a $2,400 hotel, still go to a human.', after: 2.0 },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
@@ -146,7 +147,7 @@
       // tool calls, in order of appearance; created last so they travel over the gate
       const calls = [
         ['search_flights', ''], ['search_hotels', ''], ['book_flight', '$480'],
-        ['book_hotel', '$210'], ['book_hotel', '$2,400'],
+        ['book_hotel', '$390'], ['book_hotel', '$2,400'],
       ];
       s.calls = calls.map(([name, arg]) => {
         const e = callCard(root, name, arg, 'uv');
