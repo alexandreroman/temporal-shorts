@@ -4,12 +4,16 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 Temporal Shorts: short explainer videos (English, no sound, burned-in
-subtitles) about Temporal. Each video is a theme:
+subtitles) about [Temporal](https://temporal.io).
+
+Each video is a theme:
 
 - **Introduction to Durable Execution** (`durable-execution`): for
   everyone, the principles of Durable Execution with Temporal Workflows,
-  outside any AI context: Workflows, Activities, retries, the Event
-  History, replay and the Temporal web UI.
+  outside any AI context: [Workflows](https://docs.temporal.io/workflows),
+  [Activities](https://docs.temporal.io/activities), retries, the
+  [Event History](https://docs.temporal.io/encyclopedia/event-history),
+  replay and the Temporal web UI.
 - **Human-in-the-Loop** (`human-in-the-loop`): how a Temporal
   Workflow waits durably for a person's decision, such as an approval, for
   minutes or days, then resumes where it left off.
@@ -17,9 +21,15 @@ subtitles) about Temporal. Each video is a theme:
   audience, how an AI agent works, and why it needs Durable Execution with
   Temporal.
 - **Temporal Agent Harness** (`agent-harness`): for developers, the
-  experimental project of the same name: AI agents that run as durable
-  Temporal Workflows while you keep your AI SDK, with human approvals, one
-  event stream, typed subagents and Code Mode.
+  experimental
+  [project of the same name](https://github.com/temporal-community/temporal-agent-harness):
+  AI agents that run as durable Temporal Workflows while you keep your AI
+  SDK, with human approvals, one event stream, typed subagents and Code
+  Mode.
+
+![Durable AI Agents at 2:40: after a crash, the agent resumes on another
+app instance and Temporal hands back the saved results from the Event
+History](preview.png)
 
 ## Getting started
 
@@ -68,11 +78,15 @@ output/                generated .srt, .mp4 and standalone .html (the HTML
                        pages mirror src/: index.html, themes/<theme>/)
 .github/workflows/     pages.yml: deploys the HTML pages to GitHub Pages
 CLAUDE.md              conventions for Claude sessions working on the project
+preview.png            README screenshot (Durable AI Agents at 2:40)
 ```
 
 ### Regenerate a video (macOS)
 
-Requirements: Python 3.10+ and ffmpeg (`brew install python ffmpeg`).
+Requirements: Python 3.10+ and [ffmpeg](https://ffmpeg.org/)
+(`brew install python ffmpeg` with [Homebrew](https://brew.sh/)).
+`make setup` installs [Playwright](https://playwright.dev/python/) and its
+Chromium.
 
 ```bash
 make setup                   # venv + Playwright Chromium + fonts (once)
@@ -218,11 +232,12 @@ project memory in `.claude/project-memory/`.
 ### Deployment
 
 The `.github/workflows/pages.yml` workflow publishes the home page and the
-players to GitHub Pages on every push to `main`, or on demand from the
-Actions tab (`workflow_dispatch`). It downloads the fonts
-(`scripts/fonts.sh`, the font step of `make setup`), runs `make html` with
-the runner's Python, then deploys `output/`. It builds no video and no
-subtitle file, so it needs neither Playwright nor ffmpeg.
+players to [GitHub Pages](https://docs.github.com/en/pages) on every push to
+`main`, or on demand from the Actions tab (`workflow_dispatch`). It
+downloads the fonts (`scripts/fonts.sh`, the font step of `make setup`),
+runs `make html` with the runner's Python, then deploys `output/`. It
+builds no video and no subtitle file, so it needs neither Playwright nor
+ffmpeg.
 
 Pull requests to `main` run the same build without deploying: the pages are
 attached to the run as the `github-pages` artifact, a tar archive of
