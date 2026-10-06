@@ -1,9 +1,15 @@
 # Task: full code review of Temporal Shorts, with every fix applied
 
-You run in a dedicated Git worktree of `temporal-shorts`, on your own branch,
-created from `{{BASE}}`. Work autonomously: nobody watches this session in
-real time. Do NOT merge into `main` and do NOT delete the worktree: the user
-reviews and merges.
+Two modes, set by whoever launched you:
+
+- **Delegated**, when the `cat >` command under "Final signal" targets a
+  real file under `/tmp`: you run in a dedicated Casper workspace, a Git
+  worktree of `temporal-shorts` on your own branch created from `{{BASE}}`.
+  Work autonomously: nobody watches this session in real time. Do NOT merge
+  into `main` and do NOT delete the workspace: the user reviews and merges.
+- **Foreground**, when that command still shows a placeholder in double
+  braces: you run in the user's own checkout, on its current branch, while
+  the user follows along. Commit there.
 
 ## Scope
 
@@ -59,7 +65,7 @@ every theme and scene), `scripts/`, `Makefile`, `.casper.json`, `docs/`,
 
 ## Process
 
-1. Run `make setup` if the worktree is not set up yet, then capture the
+1. Run `make setup` if the checkout is not set up yet, then capture the
    reference frames.
 2. Review with **skillbox:code-reviewer** agents in parallel: one for the
    shared code (engine, shared helpers, player, styles, home page, scripts,
@@ -73,10 +79,13 @@ every theme and scene), `scripts/`, `Makefile`, `.casper.json`, `docs/`,
 5. Run a last **skillbox:code-reviewer** pass on the whole branch diff and
    apply what it finds.
 
-## Final signal (mandatory)
+## Final signal
 
-When everything is applied, verified and committed, write the completion
-file:
+**Foreground**: report to the user in the conversation, with the content
+listed below.
+
+**Delegated** (mandatory): when everything is applied, verified and
+committed, write the completion file:
 
 ```bash
 cat > {{DONE_FILE}} <<'DONE'
@@ -87,12 +96,10 @@ DONE
 DONE
 ```
 
-Then, only if the `casper` command exists and `$CASPER_WORKSPACE_ID` is set,
-run `casper notify --message "The full code review is done"`.
+Then run `casper notify --message "The full code review is done"`.
 
 If you hit a blocker you cannot resolve on your own (a decision only the
 user can make, a broken tool), still write that file, with `BLOCKED` on its
-first line followed by the reason, and ask your question in this session
-(with Casper available, also run `casper notify` and
-`casper status set blocked`). Another session waits on that file: never end
-without writing it.
+first line followed by the reason, run `casper notify` and
+`casper status set blocked`, and ask your question in this session. Another
+session waits on that file: never end without writing it.
