@@ -105,10 +105,16 @@ html,body{margin:0;background:var(--bg)}
 /* white card on the dark stage (Event History, code, console) */
 .paper{background:var(--ink);color:var(--bg);border-radius:var(--r)}
 /* Live player (page opened without ?t=): fit-to-window stage and playback controls.
-   Every rule targets .live or the #ctl and #hold overlays, all created by startPlayer() only, so the frozen
-   ?t= frames used by the renderer stay pixel-identical. */
+   Every rule targets .live or the #backdrop, #ctl and #hold elements, all created by startPlayer() only, so the
+   frozen ?t= frames used by the renderer stay pixel-identical. */
 .live,.live body{height:100%;overflow:hidden}
-.live #stage{position:absolute;left:50%;top:50%;transform-origin:50% 50%}
+.live #stage{position:absolute;left:50%;top:50%;transform-origin:50% 50%;background:none}
+/* The backdrop holds the stage's #sky and #band under the transparent stage, with the stage's size, position and
+   scale (set by fit()) but no clipping, so the background fills the whole window whatever its shape. */
+#backdrop{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:50% 50%;pointer-events:none}
+#backdrop .sky-tile{position:absolute;width:1920px;height:1080px}
+/* The glow sits on the window bottom: --bleed-y is the letterbox height below the stage, in stage px. */
+.live #band{bottom:calc(-1 * var(--bleed-y, 0px))}
 .live.idle body{cursor:none}
 /* While the controls are shown, lift the subtitle above them (--sub-lift is in stage pixels, set by fit()). */
 .live #subw{transition:transform .3s}

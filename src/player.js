@@ -72,10 +72,48 @@ function startPlayer() {
   holdMark.innerHTML = '<i></i><i></i>';
   document.body.appendChild(holdMark);
 
-  // Scale the 1920x1080 stage to fit the window, centered; the body background letterboxes it.
+  // Backdrop: the stage's sky and glow move under the transparent stage, into a layer with the stage's
+  // coordinates but no clipping, so they also fill the letterbox areas of a window that is not 16:9.
+  // They are the stage's first children, so the paint order of everything else stays the same.
+  const backdrop = document.createElement('div');
+  backdrop.id = 'backdrop';
+  backdrop.setAttribute('aria-hidden', 'true');
+  const sky = document.getElementById('sky');
+  backdrop.append(sky, document.getElementById('band'));
+  document.body.insertBefore(backdrop, stage);
+  // Extra 1920x1080 star tiles around the stage's own sky, keyed by "i,j", the tile's column and row.
+  const skyTiles = new Map();
+  function addSkyTile(i, j) {
+    const key = `${i},${j}`;
+    if (skyTiles.has(key)) return;
+    const tile = document.createElement('div');
+    tile.className = 'sky-tile';
+    tile.style.left = `${1920 * i}px`;
+    tile.style.top = `${1080 * j}px`;
+    // A distinct seed per tile while |i| and |j| stay below 1000, far from the stage's seed 7.
+    drawStars(tile, 1e6 + (i + 1000) * 2000 + (j + 1000));
+    // Inside #sky, so the #sky i rule styles the tile's stars.
+    sky.appendChild(tile);
+    skyTiles.set(key, tile);
+  }
+
+  // Scale the 1920x1080 stage to fit the window, centered. The backdrop follows it and reaches out to the
+  // window edges: star tiles cover the letterbox areas, and the glow sits on the window bottom.
   function fit() {
     const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
     stage.style.transform = `translate(-50%,-50%) scale(${scale})`;
+    backdrop.style.transform = stage.style.transform;
+    // Letterbox size on each side, in stage px.
+    const bleedX = (innerWidth / scale - 1920) / 2;
+    const bleedY = (innerHeight / scale - 1080) / 2;
+    const columns = Math.ceil(bleedX / 1920);
+    const rows = Math.ceil(bleedY / 1080);
+    for (let i = -columns; i <= columns; i++) {
+      for (let j = -rows; j <= rows; j++) {
+        if (i !== 0 || j !== 0) addSkyTile(i, j);
+      }
+    }
+    backdrop.style.setProperty('--bleed-y', `${bleedY}px`);
     // The subtitle sits 50 stage px above the stage bottom. If the controls cover it, compute how far
     // to lift it (in stage px) so it clears them with a 12 px screen margin.
     const letterboxBelow = (innerHeight - 1080 * scale) / 2;

@@ -160,7 +160,8 @@ links between the pages are the same in both. The home page links to each
 theme folder, `themes/<theme>/`, which only an HTTP server resolves to its
 `index.html`: `make serve` is the only way to view the home page and the
 players. Each player has its scripts, fonts and logo inlined, so it needs no
-other file. The animation fits the window and plays once, unless loop is
+other file. The animation fits the window, its starry background and glow
+filling the window whatever its shape, and plays once, unless loop is
 enabled (it is off by default); the controls (home, play/pause, seek bar,
 time, speed, loop, subtitles, presenter mode, fullscreen) hide after a few
 seconds of playback and come back when the mouse moves. Each control shows
