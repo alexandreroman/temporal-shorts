@@ -1,15 +1,17 @@
 // ===================== 6. WHEN A WORKER CRASHES
-// Opens on the last frame of chapter 5 (same shot): Worker A crashes while shipPackage runs, and Temporal retries
-// that Activity on Worker B (in a real run, once the attempt's Start-To-Close timeout fires); its result is saved.
-// Then Worker B runs the Workflow code from the start, Temporal hands back the three saved results (no second
-// charge), and the Workflow carries on with emailReceipt.
+// Opens on the last frame of chapter 5 (same shot): Worker A crashes while shipPackage runs, and Worker B takes
+// over the Workflow. Worker B first runs the Workflow code from the start, and Temporal hands back the two saved
+// results, chargeCard and reserveItem (no second charge). Then the Workflow carries on: shipPackage runs again
+// (its second attempt; in a real run, once the first attempt's Start-To-Close timeout fires), its result is saved,
+// then emailReceipt runs and the Workflow completes.
 // The block keeps every name declared in this file local to this scene.
 {
-  // the three replayed steps: chargeCard, reserveItem and shipPackage (steps 0 to 2)
-  const REUSED_LABELS = ['REUSED, NOT RE-CHARGED', 'REUSED, NOT RE-RUN', 'REUSED, NOT RE-RUN'];
-  const SHIP = 2; // the step running when Worker A crashes, retried on Worker B
-  const EMAIL = 3; // the step left to run once the replay is done
-  // the retried shipPackage runs longer than RESULT_LAG, so its spinner has time to read
+  // the two replayed steps, saved before the crash: chargeCard and reserveItem (steps 0 and 1)
+  const REUSED_LABELS = ['REUSED, NOT RE-CHARGED', 'REUSED, NOT RE-RUN'];
+  const SHIP = 2; // the step running when Worker A crashes, run again on Worker B once the replay is done
+  const EMAIL = 3; // the last step, run on Worker B once shipPackage is saved
+  // the second attempt of shipPackage runs longer than a plain Activity (RESULT_LAG), so its spinner has time to
+  // read
   const RETRY_LAG = 1.0;
   // "From the start": arrow in the gap right of the Worker panel, from the shipPackage line back to line 1, under
   // its label (two lines, centered in the gap)
@@ -21,15 +23,18 @@
     subs: [
       {
         text: "Now the Worker crashes mid-order, during <b>shipPackage</b>. "
-          + "Temporal retries that Activity on another Worker.",
+          + "Another Worker takes over the Workflow.",
         after: 0.4,
       },
       {
-        text: "Then that Worker runs the Workflow from the start, "
+        text: "It first runs the Workflow from the start, "
           + "and Temporal hands back every saved result: no second charge.",
         after: 0.4,
       },
-      { text: "Then the Workflow carries on exactly where it stopped, as if nothing had happened.", after: 1.0 },
+      {
+        text: "Then the Workflow carries on where it stopped: shipPackage runs again, and the order completes.",
+        after: 1.0,
+      },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
@@ -43,7 +48,7 @@
       // the retry travels like a RESULT chip, from Temporal to the Worker, labelled RETRY
       s.retryChip = makeResultCard(root);
       s.retryChip.firstChild.textContent = 'RETRY';
-      s.reuseChips = [0, 1, 2].map(() => makeResultCard(root));
+      s.reuseChips = REUSED_LABELS.map(() => makeResultCard(root));
       s.saveChips = [SHIP, EMAIL].map(() => makeResultCard(root));
       s.done = tag(root, 'Workflow complete', 'neon');
       // dark like the SAVED tags, as it sits on the light history card
@@ -53,18 +58,20 @@
     update(t, c, s) {
       const { shot } = s;
       const [workerA, workerB] = shot.workers;
-      // c[0]: the crash, Worker B appears, then Temporal sends it the shipPackage retry (the RETRY chip leaves the
-      // history at retryAt), which runs from retryRun; its RESULT leaves at retryRes and is saved at retrySaved
-      const crashAt = c[0] + 1.2, bOn = crashAt + 1.6;
-      const retryAt = bOn + 0.8, retryRun = retryAt + 0.6;
-      const retryRes = retryRun + RETRY_LAG, retrySaved = retryRes + SAVE_LAG;
-      // c[1]: the highlight jumps back to line 1, then each await line gets its saved result back from its history
-      // row (handed: the chip leaves the history; back: it reaches the code line; told: the tag says why it matters)
+      // c[0]: the crash, then Worker B appears and takes over the Workflow
+      const crashAt = c[0] + 1.2, bOn = crashAt + 1.6, takeOver = bOn + 0.9;
+      // c[1]: the highlight jumps back to line 1, then each replayed await line gets its saved result back from its
+      // history row (handed: the chip leaves the history; back: it reaches the code line; told: the tag says why it
+      // matters)
       const jump = c[1] + 0.3;
-      const replay = [0, 1, 2].map(i => c[1] + 2.0 + i * 1.3);
+      const replay = REUSED_LABELS.map((_, i) => c[1] + 2.0 + i * 1.3);
       const handed = replay.map(q => q + 0.3), back = handed.map(h => h + 0.6), told = back.map(b => b + 0.15);
-      // c[2]: emailReceipt runs for real, then "}" and "Workflow completed"
-      const run = c[2] + 0.3, res = run + RESULT_LAG, saved = res + SAVE_LAG;
+      // c[2]: the highlight reaches the shipPackage line at shipLine, Temporal sends its second attempt (the RETRY
+      // chip leaves the history at retryAt), which runs from retryRun; its RESULT leaves at retryRes and is saved at
+      // retrySaved. Then emailReceipt runs for real, then "}" and "Workflow completed".
+      const shipLine = c[2] + 0.3, retryAt = shipLine + 0.3, retryRun = retryAt + 0.6;
+      const retryRes = retryRun + RETRY_LAG, retrySaved = retryRes + SAVE_LAG;
+      const run = retrySaved + 0.2, res = run + RESULT_LAG, saved = res + SAVE_LAG;
       const finish = run + 1.3, completed = finish + 0.3;
       const [sx, sy] = shakeAt(t, crashAt);
       const dead = t >= crashAt;
@@ -75,8 +82,8 @@
       if (dead) setAppStatus(workerA, 'CRASHED', 'crashed');
       else setAppStatus(workerA, 'RUNNING', 'running');
       place(workerB, EH.worker.x, EH.worker.y, 1, P(t, bOn - 0.2, 0.4));
-      if (t < retryRun - 0.2) setAppStatus(workerB, 'IDLE', 'stopped');
-      else if (t < jump) setAppStatus(workerB, 'RETRYING ACTIVITY', 'running');
+      if (t < takeOver) setAppStatus(workerB, 'IDLE', 'stopped');
+      else if (t < c[1] + 0.2) setAppStatus(workerB, 'TAKING OVER', 'running');
       else if (t < c[2] + 0.2) setAppStatus(workerB, 'REPLAYING…', 'running');
       else if (t < completed) setAppStatus(workerB, 'RUNNING', 'running');
       else setAppStatus(workerB, 'DONE', 'stopped');
@@ -93,12 +100,12 @@
       if (t >= completed) setOrderStatus(shot.order, 'COMPLETE', C.neon);
       else setOrderStatus(shot.order, 'PENDING');
 
-      // code highlight: the shipPackage line until the crash, then off during the retry, as Worker B runs only the
-      // Activity, not Workflow code (the spinner and the RETRY chip mark the line end); back on at the jump to
-      // line 1, then each replayed await line, the emailReceipt line and the closing brace
+      // code highlight: the shipPackage line until the crash, then off until Worker B jumps back to line 1; then
+      // each replayed await line, the shipPackage line again, the emailReceipt line and the closing brace
       let line = ehStepLine(SHIP);
       line = lerp(line, 0, P(t, jump + 0.2, 0.6));
       replay.forEach((q, i) => { line = lerp(line, ehStepLine(i), P(t, q, 0.25)); });
+      line = lerp(line, ehStepLine(SHIP), P(t, shipLine, 0.25));
       line = lerp(line, ehStepLine(EMAIL), P(t, run, 0.25));
       line = lerp(line, WORKFLOW_CODE.length - 1, P(t, finish, 0.25));
       const barOn = dead ? P(t, jump, 0.2) * (1 - P(t, completed + 0.3, 0.4)) : 1;
@@ -120,8 +127,8 @@
       flyResultToHistory(s.saveChips[0], t, retryRes, SHIP);
       flyResultToHistory(s.saveChips[1], t, res, EMAIL);
 
-      // Event History: rows 1-3 kept through the crash, row 4 written by the retry below the crash line, replayed
-      // rows lit and re-tagged, then rows 5 and 6 written
+      // Event History: rows 1-3 kept through the crash, replayed rows 2 and 3 lit and re-tagged, then row 4 written
+      // by the second attempt below the crash line, then rows 5 and 6
       const hist = shot.hist;
       markCrash(hist, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
       const written = [-Infinity, -Infinity, -Infinity, retrySaved, saved, completed];
@@ -129,7 +136,7 @@
       hist.tags.forEach((_, i) => {
         let label = 'SAVED', kind = 'saved', at = written[i];
         const step = i - 1;
-        if (step >= 0 && step <= SHIP) {
+        if (step >= 0 && step < REUSED_LABELS.length) {
           if (t >= told[step]) { label = REUSED_LABELS[step]; kind = 'reused'; at = told[step]; }
           else if (t >= handed[step]) { label = 'REUSED'; kind = 'reused'; at = handed[step]; }
         }

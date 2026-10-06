@@ -1,9 +1,10 @@
 // ===================== 7. FULL VISIBILITY
 // The Temporal Web UI in dark mode, as it shows the placeOrder Workflows: the Workflows list (running, completed,
 // failed), the order-1042 page and its Timeline (every Activity, how long it took, the retry and, as a video
-// annotation, the crash before it), then the order-1045 page, running, whose Pending Activities tab shows
-// shipPackage retrying live until it completes. Structure, wording and colors follow the real Web UI (2.54.1), with
-// fewer columns, fields and menu items so the text stays readable on video.
+// annotation, the crash before it), then, back on the list, the order-1045 page, running, whose Pending Activities
+// tab shows shipPackage retrying live until it completes, and its Timeline tab, as the Workflow completes.
+// Structure, wording and colors follow the real Web UI (2.54.1), with fewer columns, fields and menu items so the
+// text stays readable on video.
 // The block keeps every name declared in this file local to this scene.
 {
   // Window: 1560 x 770, centered at (960, 522) (x 180..1740, y 137..907). As in the real UI, a full-height sidebar
@@ -62,8 +63,6 @@
     download: '<path d="M12 4v11M7 10l5 5 5-5M4 20h16"/>',
     pause: '<path d="M9 5v14M15 5v14"/>',
     pencil: '<path d="M4 20l4-1 11-11-3-3L5 16z"/>',
-    // glyph of the small squares at the ends of the timeline bars
-    activity: '<path d="M6 17c0-5 4-5 6-5s6 0 6-5"/><circle cx="6" cy="17" r="1.5"/><circle cx="18" cy="7" r="1.5"/>',
   };
   const uiIcon = (name, size, color, width = 1.8) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" `
     + `fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" `
@@ -79,7 +78,8 @@
     { id: 'order-1041', status: 'failed', run: '01a10e5d-a545-7f0b…', start: 13 * 3600 + 59 * 60 + 20 },
   ];
   const workflow = id => WORKFLOWS.find(row => row.id === id);
-  const OPENED_ROW = WORKFLOWS.findIndex(row => row.id === 'order-1042');
+  const rowOf = id => WORKFLOWS.findIndex(row => row.id === id);
+  const ROW_1042 = rowOf('order-1042'), ROW_1045 = rowOf('order-1045'); // the rows the pointer clicks
   const COUNTED = ['running', 'completed', 'failed']; // order of the count pills next to the heading
 
   // "Oct 5, 2026, 2:06:48 PM" for a second of the day
@@ -112,10 +112,22 @@
   };
   // Order #1045, running: shipPackage times out against the carrier twice and is retried after 1s, then 2s (the
   // default retry policy of chapter 4); attempt 3 succeeds, then emailReceipt runs and the Workflow completes
+  const ATTEMPTS_1045 = [{ from: 2.3, to: 3.3 }, { from: 4.3, to: 5.3 }, { from: 7.3, to: 9.4 }]; // the last succeeds
+  // a retried Activity on the Timeline chart: from its first start to the end of its last attempt, retried at the
+  // start of the last attempt
+  const retriedActivity = attempts => {
+    const last = attempts[attempts.length - 1];
+    return { from: attempts[0].from, retryAt: last.from, to: last.to, attempts: attempts.length };
+  };
   const ORDER_1045 = {
-    ...workflow('order-1045'), historySize: '1.79 KB', transitions: 19,
-    attempts: [{ from: 2.3, to: 3.3 }, { from: 4.3, to: 5.3 }, { from: 7.3, to: 9.4 }], // the last one succeeds
-    finishedAt: 10.04,
+    ...workflow('order-1045'), runtime: 10.04, historySize: '1.79 KB', transitions: 19,
+    attempts: ATTEMPTS_1045,
+    activities: [
+      { from: 0.2, to: 1.3 },
+      { from: 1.4, to: 2.2 },
+      retriedActivity(ATTEMPTS_1045),
+      { from: 9.5, to: 9.9 },
+    ],
   };
   // c[2] plays order #1045 live, in real time, from second 2.3 of its run (chargeCard and reserveItem done)
   const LIVE_FROM = 2.3;
@@ -297,15 +309,13 @@
     };
     const mono = text => `<span class="mono">${text}</span>`;
     const tabs = TABS.map(name => {
-      const active = name === activeTab;
       const count = name in counts ? countChip(counts[name]) : '';
-      return `<div class="tab" style="position:relative;height:44px;display:flex;align-items:center;gap:10px;`
-        + `color:${active ? UI.text : UI.dim};${active ? `box-shadow:inset 0 -3px 0 ${UI.tabLine}` : ''}">`
+      return `<div class="tab" style="position:relative;height:44px;display:flex;align-items:center;gap:10px">`
         + `${name}${count}</div>`;
     }).join('');
     page.innerHTML =
-      `<div style="${at(PAGE.pad, DETAILS.backTop)}height:26px;display:flex;align-items:center;gap:10px;`
-      + `font-size:18px">${uiIcon('chevronLeft', 18, UI.text, 2)}${link('Back to Workflows')}</div>`
+      `<div class="back" style="${at(PAGE.pad, DETAILS.backTop)}height:26px;display:flex;align-items:center;`
+      + `gap:10px;font-size:18px">${uiIcon('chevronLeft', 18, UI.text, 2)}${link('Back to Workflows')}</div>`
       + `<div class="title" style="${at(PAGE.pad, DETAILS.titleTop)}height:52px;display:flex;align-items:center;`
       + `gap:18px"><span style="font-size:36px;font-weight:700">${order.id}</span></div>`
       + `<div class="actions" style="position:absolute;right:${PAGE.pad}px;top:${DETAILS.titleTop + 3}px;`
@@ -320,59 +330,100 @@
       + `<div style="${at(PAGE.pad, DETAILS.tabsTop)}width:${CONTENT_W}px;height:46px;display:flex;gap:34px;`
       + `font-size:20px;box-shadow:inset 0 -1px 0 ${UI.cardEdge}">${tabs}</div>`;
     page.badge = makeBadge(page.querySelector('.title'), order.status, TITLE_BADGE_W, { order: '-1' });
+    page.back = page.querySelector('.back');
+    page.backIcon = page.back.querySelector('svg');
     page.action = page.querySelector('.actions span');
     page.end = page.querySelector('.end');
     page.duration = page.querySelector('.duration');
-    page.tabCount = name => page.querySelectorAll('.tab')[TABS.indexOf(name)].querySelector('.n');
+    page.tabs = [...page.querySelectorAll('.tab')];
+    page.tabCount = name => page.tabs[TABS.indexOf(name)].querySelector('.n');
+    setActiveTab(page, activeTab);
     return page;
   };
+  // the active tab is white and underlined, the others dim; a hovered tab turns white
+  const setActiveTab = (page, active, hovered = null) => {
+    page.tabs.forEach((tab, i) => {
+      const name = TABS[i];
+      tab.style.color = name === active || name === hovered ? UI.text : UI.dim;
+      tab.style.boxShadow = name === active ? `inset 0 -3px 0 ${UI.tabLine}` : 'none';
+    });
+  };
 
-  // ---------- Timeline tab of order #1042: heading and buttons, then the chart card. As in the real chart: a
+  // ---------- Timeline tab of a Workflow page: heading and buttons, then the chart card. As in the real chart: a
   // white start line and end line (with their date, vertical), a time axis, the Workflow bar on top, then one lane
   // per Activity, the latest on top; each bar has a small square at each end and its name beside it.
   const CHART = { top: DETAILS.contentTop + 56, h: 300, line: 52, wfTop: 22, barH: 22, laneTop: 72, lanePitch: 42,
     axisY: 240, tickTop: 254, tick: 2 };
   const chartX0 = CHART.line + 4, chartX1 = CONTENT_W - CHART.line - 4;
-  const secX = s => Math.round(chartX0 + s * (chartX1 - chartX0) / ORDER_1042.runtime);
+  // the x of second `s` of a run that lasts `runtime` seconds: the chart spans the whole run
+  const timeScale = runtime => s => Math.round(chartX0 + s * (chartX1 - chartX0) / runtime);
   const laneTop = step => CHART.laneTop + (ORDER_STEPS.length - 1 - step) * CHART.lanePitch;
-  const SQUARE = 22;
-  const LABEL_ROOM = 220; // room right of a bar for its label, else the label goes left of the bar
-  const CRASH_MARK = 6.8; // second of the retried band where the crash leader ends, just past the band's label
-  // the small square at a bar end: blue at a start, green at a completion, white at a retried start
-  const SQUARES = {
-    start: { bg: UI.startIcon, edge: UI.startEdge, glyph: '#141924' },
-    end: { bg: UI.green, edge: UI.greenEdge, glyph: '#0E2A1C' },
-    retry: { bg: UI.retryIcon, edge: '#83858B', glyph: '#141924' },
+  // the squares centered on the bar ends, a little taller than the bars, as in the real chart (20 px on 18 px bars)
+  const SQUARE = 24;
+  const LABEL_ROOM = 160; // room right of a bar for its label, else the label goes left of the bar
+  const LABEL_GAP = 4; // between a square and the label beside it
+  // Glyphs of the Timeline chart, filled, from the Temporal Web UI (temporalio/ui, MIT license), on a 16 grid: the
+  // activity and workflow icons in the squares, the retry icon before a retried Activity's name
+  const TL_ICONS = {
+    activity: 'M8 0a8 8 0 0 1 7.975 7.396H16v1.5h-.05a8 8 0 0 1-15.9 0H0v-1.5h.025A8 8 0 0 1 8 0M6.219 5.524a.25.25'
+      + ' 0 0 0-.462.011l-.86 2.238a1.75 1.75 0 0 1-1.633 1.123h-1.7a6.5 6.5 0 0 0 12.873 0h-1.335c-.099 0-.1'
+      + '9.06-.229.15l-.94 2.161c-.61 1.398-2.591 1.402-3.206.007zM8 1.5a6.5 6.5 0 0 0-6.472 5.896h1.736a.25.'
+      + '25 0 0 0 .233-.16l.86-2.238c.56-1.458 2.605-1.508 3.235-.08l2.507 5.69a.25.25 0 0 0 .458 0l.941-2.16'
+      + 'a1.75 1.75 0 0 1 1.604-1.052h1.37A6.5 6.5 0 0 0 8 1.5',
+    workflow: 'M5.208 16H0v-5.208h5.208zm8.188-5.208a2.604 2.604 0 1 1 0 5.208 2.604 2.604 0 0 1 0-5.208M1.455 14.5'
+      + '45h2.299v-2.299h-2.3zm11.94-2.299a1.15 1.15 0 1 0 .001 2.3 1.15 1.15 0 0 0 0-2.3M9.94 14.123H6.061V1'
+      + '2.67h3.878zM3.331 9.94H1.877V6.061H3.33zM2.604 0a2.604 2.604 0 1 1 0 5.209 2.604 2.604 0 0 1 0-5.209'
+      + 'M16 5.208h-5.208V0H16zM2.604 1.455a1.15 1.15 0 1 0 0 2.299 1.15 1.15 0 0 0 0-2.3m9.642 2.299h2.3v-2.'
+      + '3h-2.3zM9.94 3.33H6.061V1.877h3.878z',
+    retry: 'M15.172 6.897H16V.276h-1.655v3.59l-.69-.81a7.7 7.7 0 0 0-5.93-2.78 7.725 7.725 0 1 0 4.634 13.903l-.'
+      + '993-1.324a6.07 6.07 0 1 1 1.02-8.738l.004.007.951 1.117H9.38v1.656h5.793',
   };
-  const makeSquare = (chart, kind, left, top, glyph = 'activity') => part(chart,
-    uiIcon(glyph, 14, SQUARES[kind].glyph, 2), {
-    left: left + 'px', top: top + 'px', width: SQUARE + 'px', height: SQUARE + 'px', display: 'flex',
-    alignItems: 'center', justifyContent: 'center', borderRadius: '4px', background: SQUARES[kind].bg,
-    boxShadow: `inset 0 0 0 1.5px ${SQUARES[kind].edge}`,
+
+  const tlIcon = (name, size, color) => `<svg width="${size}" height="${size}" viewBox="0 0 16 16" `
+    + `style="display:block;flex:none"><path fill="${color}" d="${TL_ICONS[name]}"/></svg>`;
+  // the small square at a bar end: blue at a start, green at a completion, white at a retried Activity's first
+  // start; a 2 px border, the chart's color around a start, and a black glyph at 55% of the square
+  const SQUARES = {
+    start: { bg: UI.startIcon, edge: UI.panel },
+    end: { bg: UI.green, edge: UI.greenEdge },
+    retry: { bg: UI.retryIcon, edge: UI.panel },
+  };
+  const makeSquare = (chart, kind, centerX, barTop, glyph = 'activity') => part(chart,
+    tlIcon(glyph, Math.round(SQUARE * 0.55), '#000000'), {
+    left: centerX - SQUARE / 2 + 'px', top: barTop - (SQUARE - CHART.barH) / 2 + 'px', width: SQUARE + 'px',
+    height: SQUARE + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px',
+    background: SQUARES[kind].bg, boxShadow: `inset 0 0 0 2px ${SQUARES[kind].edge}`,
   });
-  // a bar from second `from`, grown by setBar; its background keeps its full width, so a gradient never stretches
-  const makeBar = (chart, top, from, to, background) => {
-    const full = secX(to) - secX(from);
+  // a rounded bar from x `left` to x `right`, grown by setBar; its background keeps its full width, so a gradient
+  // never stretches
+  const makeBar = (chart, top, left, right, background, opacity = 1) => {
+    const full = right - left;
     const e = part(chart, '', {
-      left: secX(from) + 'px', top: top + 'px', height: CHART.barH + 'px', width: '0', background,
-      backgroundSize: `${full}px 100%`, backgroundRepeat: 'no-repeat',
+      left: left + 'px', top: top + 'px', height: CHART.barH + 'px', width: '0', background,
+      backgroundSize: `${full}px 100%`, backgroundRepeat: 'no-repeat', borderRadius: CHART.barH / 2 + 'px',
     });
     e.full = full;
+    e.shownOpacity = opacity;
     return e;
   };
   const setBar = (bar, p) => {
     bar.style.width = Math.round(clamp(p) * bar.full) + 'px';
-    bar.style.opacity = p > 0 ? 1 : 0;
+    bar.style.opacity = p > 0 ? bar.shownOpacity : 0;
   };
-  const activityLabel = (name, seconds) => `<span>${name}</span><span class="mono" style="font-size:17px;`
-    + `color:${UI.dim}">${seconds.toFixed(1)}s</span>`;
-  const labelCss = (left, top) => ({
-    left: left + 'px', top: top + 'px', height: CHART.barH + 'px', display: 'flex', alignItems: 'center', gap: '10px',
-    fontSize: '20px', whiteSpace: 'nowrap',
+  // A retried Activity, a crash or failures alike: a band at 35% from the first start to the start of the last
+  // attempt, then the last attempt; both carry the real UI's gradient, red at their start, green at their end
+  const RETRY_GRADIENT = `linear-gradient(255deg,${UI.green} 0,#E5484D 100%)`;
+  const BAND_OPACITY = 0.35;
+  // a name on a pill of the chart's color, so that it reads over a bar or a grid line
+  const namePill = name => `<span style="height:${SQUARE}px;display:inline-flex;align-items:center;padding:0 9px;`
+    + `border-radius:${SQUARE / 2}px;background:${UI.panel}">${name}</span>`;
+  const labelCss = top => ({
+    top: top + CHART.barH / 2 - SQUARE / 2 + 'px', height: SQUARE + 'px', display: 'flex', alignItems: 'center',
+    gap: '6px', fontSize: '20px', whiteSpace: 'nowrap',
   });
 
-  const makeTimelineTab = page => {
-    const order = ORDER_1042;
+  const makeTimelineTab = (page, order) => {
+    const secX = timeScale(order.runtime);
     const head = `<div style="${at(PAGE.pad, DETAILS.contentTop)}height:40px;display:flex;align-items:center;`
       + `gap:12px"><span style="font-size:28px;font-weight:700">Timeline</span>${uiIcon('info', 22, UI.dim)}</div>`
       + `<div style="position:absolute;right:${PAGE.pad}px;top:${DETAILS.contentTop - 2}px;height:44px;display:flex;`
@@ -381,9 +432,11 @@
         `<div style="display:flex;align-items:center;gap:10px;padding:0 18px;`
         + `${i ? `box-shadow:inset 1px 0 0 ${UI.fieldEdge}` : ''}">${uiIcon(icon, 20, UI.text)}${text}</div>`).join('')
       + '</div>';
-    page.insertAdjacentHTML('beforeend', head);
+    // the tab's content, page-sized so that its parts sit as on the page, and apart so that a page opened on
+    // another tab can switch to it
+    const root = part(page, head, { width: PAGE.w + 'px', height: PAGE.h + 'px' });
 
-    // static frame of the chart: grid lines and tick labels, start and end lines with their date, the axis
+    // static frame of the chart: grid lines and tick labels, the start line with its date, the axis
     let html = '';
     for (let s = CHART.tick; s < order.runtime; s += CHART.tick) {
       html += `<div style="${at(secX(s), 12)}width:1px;height:${CHART.axisY - 12}px;background:${UI.head}"></div>`
@@ -394,60 +447,62 @@
       + `background:${UI.text}"></div>`
       + `<div style="${at(left < CONTENT_W / 2 ? 14 : CONTENT_W - 38, 16)}writing-mode:vertical-rl;font-size:15px;`
       + `line-height:24px;white-space:nowrap">${shortDateTime(daySeconds)}</div>`;
-    html += endLine(CHART.line, order.start) + endLine(chartX1, order.start + order.runtime)
+    html += endLine(CHART.line, order.start)
       + `<div style="${at(CHART.line, CHART.axisY)}width:${chartX1 + 4 - CHART.line}px;height:4px;`
       + `background:${UI.text}"></div>`;
-    const chart = part(page, html, {
+    const chart = part(root, html, {
       left: PAGE.pad + 'px', top: CHART.top + 'px', width: CONTENT_W + 'px', height: CHART.h + 'px',
       background: UI.panel, borderRadius: '6px', boxShadow: `inset 0 0 0 1px ${UI.rule}`,
     });
 
-    // the Workflow bar, then each Activity: bar, squares, label
-    const tl = { chart };
+    // the end line with its date, apart, as a running Workflow has no end yet; then the Workflow bar, then each
+    // Activity: bar, squares, label
+    const tl = { root, chart, order, secX };
+    tl.endLine = part(chart, endLine(chartX1, order.start + order.runtime));
     tl.workflow = {
-      bar: makeBar(chart, CHART.wfTop, 0, order.runtime, UI.green),
-      start: makeSquare(chart, 'end', chartX0 - SQUARE / 2, CHART.wfTop, 'workflows'),
-      end: makeSquare(chart, 'end', chartX1 - SQUARE / 2, CHART.wfTop, 'workflows'),
+      bar: makeBar(chart, CHART.wfTop, secX(0), secX(order.runtime), UI.green),
+      start: makeSquare(chart, 'end', chartX0, CHART.wfTop, 'workflow'),
+      end: makeSquare(chart, 'end', chartX1, CHART.wfTop, 'workflow'),
     };
     tl.activities = order.activities.map((act, step) => {
       const top = laneTop(step);
       const fn = ORDER_STEPS[step].fn;
       const lane = { act };
-      // bars first, then their squares over them
-      const endSquare = () => makeSquare(chart, 'end', secX(act.to) - SQUARE, top);
+      // bars first, then their squares over them, then the label beside the squares
+      const endSquare = () => makeSquare(chart, 'end', secX(act.to), top);
       if (act.retryAt === undefined) {
-        lane.bar = makeBar(chart, top, act.from, act.to, UI.green);
+        lane.bar = makeBar(chart, top, secX(act.from), secX(act.to), UI.green);
         lane.start = makeSquare(chart, 'start', secX(act.from), top);
         lane.end = endSquare();
         // the label sits right of the bar, or left of it near the end line (emailReceipt)
         const fits = secX(act.to) + LABEL_ROOM < chartX1;
-        const side = fits ? { left: secX(act.to) + 14 + 'px' }
-          : { left: 'auto', right: CONTENT_W - secX(act.from) + 14 + 'px' };
-        lane.label = part(chart, activityLabel(fn, act.to - act.from), { ...labelCss(0, top), ...side });
+        const side = fits ? { left: secX(act.to) + SQUARE / 2 + LABEL_GAP + 'px' }
+          : { left: 'auto', right: CONTENT_W - secX(act.from) + SQUARE / 2 + LABEL_GAP + 'px' };
+        lane.label = part(chart, namePill(fn), { ...labelCss(top), ...side });
         return lane;
       }
-      // a retried Activity: a faded band from the first start (red where the failed attempt ran) to the start of
-      // the last attempt, then that attempt, bright, from red to green; the label sits on the band's start
-      lane.band = makeBar(chart, top, act.from, act.retryAt,
-        'linear-gradient(90deg,#6E2E2E,#62302E 45%,#3A3C31 78%,#254735)');
-      lane.bar = makeBar(chart, top, act.retryAt, act.to, 'linear-gradient(90deg,#CA5551,#87785D 40%,#449A68 75%,'
-        + `${UI.green})`);
+      // a retried Activity: the faded band, then the last attempt; the label sits on the band's start, after the
+      // white square: the retry icon over the band, then the attempt count and the name on their pill
+      lane.band = makeBar(chart, top, secX(act.from), secX(act.retryAt), RETRY_GRADIENT, BAND_OPACITY);
+      lane.bar = makeBar(chart, top, secX(act.retryAt), secX(act.to), RETRY_GRADIENT);
       lane.start = makeSquare(chart, 'retry', secX(act.from), top);
       lane.restart = makeSquare(chart, 'start', secX(act.retryAt), top);
       lane.end = endSquare();
-      lane.label = part(chart,
-        `${uiIcon('refresh', 18, UI.text, 2.2)}<span>${act.attempts} • ${fn}</span>`
-        + `<span class="mono" style="font-size:17px;color:${UI.dim}">${(act.to - act.from).toFixed(1)}s</span>`,
-        { ...labelCss(secX(act.from) + SQUARE + 4, top), gap: '8px', padding: '0 10px 0 6px',
-          background: UI.panel, borderRadius: CHART.barH / 2 + 'px' });
+      lane.label = part(chart, tlIcon('retry', 20, UI.text) + namePill(`${act.attempts} • ${fn}`),
+        { ...labelCss(top), left: secX(act.from) + SQUARE / 2 + LABEL_GAP + 'px' });
       return lane;
     });
-
-    // the crash, a video annotation outside the UI style: a brand red pill in the free room under the band, its
-    // leader line ending on the band's red start, just past the label
-    const target = { x: secX(CRASH_MARK), y: laneTop(2) + CHART.barH };
-    const pill = { left: target.x + 64, top: laneTop(1) + 12 };
-    tl.crashPill = part(chart, 'Worker A crashed · retried on Worker B', {
+    return tl;
+  };
+  // A video annotation on a chart, outside the UI style: a brand red pill in the free room under the retried
+  // band, its leader line ending on the band at second `mark`, just past the band's label, then running `dx` px
+  // right to the pill. Shown by showAnnotation().
+  const addAnnotation = (tl, text, { mark, dx }) => {
+    const { chart, secX } = tl;
+    const target = { x: secX(mark), y: laneTop(2) + CHART.barH };
+    const pill = { left: target.x + dx, top: laneTop(1) + 12 };
+    const note = {};
+    note.pill = part(chart, text, {
       left: pill.left + 'px', top: pill.top + 'px', height: '40px', display: 'flex', alignItems: 'center',
       padding: '0 16px 0 calc(16px + .1em)', fontSize: '17px', letterSpacing: '.1em', textTransform: 'uppercase',
       color: C.red, background: '#331D1E', boxShadow: `inset 0 0 0 1.5px ${C.red}`, borderRadius: 'var(--rs)',
@@ -461,21 +516,29 @@
     svg.innerHTML = `<circle cx="${target.x}" cy="${target.y}" r="4" fill="${C.red}"/>`
       + `<path d="M ${target.x} ${target.y} L ${target.x} ${lineY} L ${pill.left} ${lineY}" fill="none" `
       + `stroke="${C.red}" stroke-width="2"/>`;
-    tl.leader = part(chart, '', { width: CONTENT_W + 'px', height: CHART.h + 'px' });
-    tl.leader.appendChild(svg);
-    tl.leaderPath = svg.querySelector('path');
-    tl.leaderLen = (lineY - target.y) + (pill.left - target.x);
-    tl.leaderPath.setAttribute('stroke-dasharray', `${tl.leaderLen} ${tl.leaderLen}`);
-    return tl;
+    note.leader = part(chart, '', { width: CONTENT_W + 'px', height: CHART.h + 'px' });
+    note.leader.appendChild(svg);
+    note.path = svg.querySelector('path');
+    note.length = (lineY - target.y) + (pill.left - target.x);
+    note.path.setAttribute('stroke-dasharray', `${note.length} ${note.length}`);
+    return note;
   };
-  // Draws the chart once its sweep reaches second `now` of the run: each bar shows its part before `now`, its
-  // squares and label show as it starts and ends
+  // the leader draws from its dot from `at`, then the pill pops in
+  const showAnnotation = (note, t, at) => {
+    note.leader.style.opacity = t >= at ? 1 : 0;
+    note.path.setAttribute('stroke-dashoffset', String(note.length * (1 - P(t, at, 0.35))));
+    const pop = popIn(t, at + 0.3);
+    note.pill.style.opacity = pop.o;
+    note.pill.style.transform = `scale(${pop.s})`;
+  };
+  // Draws the chart at second `now` of the run: each bar shows its part before `now`, its squares and label show as
+  // it starts and ends
   const setTimeline = (tl, now) => {
     const shown = (e, on) => { e.style.opacity = on ? 1 : 0; };
     const wf = tl.workflow;
-    setBar(wf.bar, now / ORDER_1042.runtime);
+    setBar(wf.bar, now / tl.order.runtime);
     shown(wf.start, now > 0);
-    shown(wf.end, now >= ORDER_1042.runtime);
+    shown(wf.end, now >= tl.order.runtime);
     tl.activities.forEach(lane => {
       const { act } = lane;
       if (lane.band) {
@@ -492,7 +555,8 @@
   };
 
   // ---------- Pending Activities tab of order #1045: the pending shipPackage card (state, Activity ID, attempt,
-  // last started time, last worker, Last Failure), then "No pending activities" once it completes
+  // last started time, last worker, Last Failure), until the pointer switches to the Timeline tab as it completes.
+  // Its last worker is worker-c, not order-1042's worker-b, so that viewers don't take this page for order #1042
   const PENDING = { h: 362, fieldTop: 86, fieldPitch: 44, valueX: 300, failureX: 640 };
   const FAILURE_JSON = [
     ['{', 0], ['"message": "Carrier timeout",', 1], ['"source": "TypeScriptSDK",', 1],
@@ -518,7 +582,7 @@
       + `<div style="${at(PENDING.valueX, PENDING.fieldTop)}height:32px;display:flex;align-items:center;`
       + 'font-size:20px">3</div>'
       + `<div style="${at(PENDING.valueX, PENDING.fieldTop + 3 * PENDING.fieldPitch)}height:32px;display:flex;`
-      + 'align-items:center;font-size:20px">worker-b</div>',
+      + 'align-items:center;font-size:20px">worker-c</div>',
       { left: PAGE.pad + 'px', top: DETAILS.contentTop + 'px', width: w + 'px', height: PENDING.h + 'px',
         background: UI.panel, boxShadow: `inset 0 -1px 0 ${UI.rule}` });
     card.badge = makeBadge(card, 'started', 124, { position: 'absolute', left: '24px', top: '22px' });
@@ -536,11 +600,6 @@
       + `background:${UI.json};border-radius:4px;box-shadow:inset 0 0 0 1px ${UI.jsonEdge}">`
       + FAILURE_JSON.map(jsonLine).join('') + '</div>',
       { left: PENDING.failureX + 'px', top: PENDING.fieldTop + 4 + 'px', width: (w - PENDING.failureX - 24) + 'px' });
-    page.none = part(page, 'No pending activities', {
-      left: PAGE.pad + 'px', top: DETAILS.contentTop + 'px', width: w + 'px', height: '120px', display: 'flex',
-      alignItems: 'center', justifyContent: 'center', fontSize: '22px', color: UI.dim,
-      background: UI.panel, boxShadow: `inset 0 -1px 0 ${UI.rule}`,
-    });
     return card;
   };
 
@@ -549,6 +608,14 @@
     '<svg width="30" height="36" viewBox="0 0 20 24" style="display:block"><path d="M2 2v17l4.5-4 3 7 3-1.3-2.9-6.7'
     + `h5.9z" fill="${C.ink}" stroke="#141414" stroke-width="1.4" stroke-linejoin="round"/></svg>`);
   const makeClickRing = win => part(win, '', { border: `2px solid ${C.ink}`, borderRadius: '50%' });
+  // where the pointer tip clicks, in window pixels: just below the middle of a row's Workflow ID on the list, on
+  // the Back to Workflows link or on the Timeline tab of a Workflow page
+  const rowIdTip = row => [
+    WIN.side + PAGE.pad + COL.id + 44,
+    WIN.bar + LIST.cardTop + ROWS_TOP + (row + 0.5) * LIST.rowH + 6,
+  ];
+  const BACK_TIP = [WIN.side + PAGE.pad + 90, WIN.bar + DETAILS.backTop + 19];
+  const TIMELINE_TAB_TIP = [WIN.side + PAGE.pad + 40, WIN.bar + DETAILS.tabsTop + 28];
 
   scene({
     chapter: 7, title: 'Full visibility',
@@ -560,12 +627,15 @@
       },
       {
         text: "Open order #1042: its timeline shows every Activity, how long it took, and the retry after the crash.",
-        after: 1.2,
+        after: 1.4, // the crash annotation stays about 1.5 s before the pointer heads back to the list
         stopLead: 0.4, // just before the click on order #1042, at c[1] - 0.35
       },
       {
-        text: "While a Workflow runs, you see an Activity retrying, its attempt count and its last error, live.",
-        after: 3.0,
+        text: "Order #1045 is running: you see shipPackage retrying, its attempt count and its last error, live.",
+        // the click on order #1045, the live run and the switch to its Timeline tab (to c[2] + 9.5), then the
+        // annotation of the completed chart, in full from c[2] + 10.1, readable for over 2 s
+        after: 5.2,
+        stopLead: 1.55, // just before the pointer heads back to the list, at c[2] - 1.5
       },
     ],
     build(root, s) {
@@ -579,8 +649,14 @@
       s.frame = makeFrame(s.win);
       s.pointer = makePointer(s.win);
       s.ring = makeClickRing(s.win);
-      s.timeline = makeTimelineTab(s.order1042);
+      s.timeline = makeTimelineTab(s.order1042, ORDER_1042);
+      // marks just past each band's label: on the lost attempt (order-1042), on attempt 2 (order-1045)
+      s.crashNote = addAnnotation(s.timeline, 'Worker A crashed · retried on Worker B', { mark: 5.9, dx: 64 });
       s.pending = makePendingTab(s.order1045);
+      s.timeline45 = makeTimelineTab(s.order1045, ORDER_1045);
+      // a shorter run to the pill keeps the longer text clear of the end line
+      const retryText = 'Carrier timed out twice · attempt 3 succeeded';
+      s.retryNote = addAnnotation(s.timeline45, retryText, { mark: 4.5, dx: 24 });
     },
     update(t, c, s) {
       // the window fades in and rises onto whole pixels
@@ -593,40 +669,74 @@
         page.style.transform = `translateY(${Math.round((1 - p) * 12)}px)`;
         page.style.visibility = page.style.opacity > 0.001 ? 'visible' : 'hidden';
       };
+      // the four clicks of the chapter: order-1042 on the list (c[0]); Back to Workflows on its page, at the end of
+      // c[1], so that the list comes back as c[2] begins; order-1045 on the list, back in full about 1 s before
+      // that click; the Timeline tab of order-1045, as its shipPackage completes
       const clickAt = c[1] - 0.35;
-      showPage(s.list, -Infinity, clickAt + 0.2);
-      showPage(s.order1042, clickAt + 0.4, c[2]);
-      showPage(s.order1045, c[2] + 0.25, Infinity);
+      const backAt = c[2] - 0.5;
+      const open45At = backAt + 1.9;
+      // order-1045 plays in real time from second LIVE_FROM of its run, and its Duration counts, from the moment
+      // its page opens
+      const liveAt = open45At + 0.4;
+      const videoAt = sec => liveAt + (sec - LIVE_FROM); // video time of second `sec` of the run
+      const shippedAt = videoAt(ORDER_1045.attempts[ORDER_1045.attempts.length - 1].to);
+      const timelineAt = shippedAt + 0.1;
+      const listVisit = t < backAt ? [-Infinity, clickAt + 0.2] : [backAt + 0.4, open45At + 0.2];
+      showPage(s.list, ...listVisit);
+      showPage(s.order1042, clickAt + 0.4, backAt + 0.2);
+      showPage(s.order1045, liveAt, Infinity);
+      // The pointer shows three times: it fades in, glides onto each target in turn in 0.6 s, clicks it and fades
+      // out after its last click. A target takes its hover look just after the glide onto it.
+      const tip1042 = rowIdTip(ROW_1042), tip1045 = rowIdTip(ROW_1045);
+      const lowerRight = ([x, y], dx, dy) => [x + dx, y + dy]; // where the pointer comes in from
+      const to1042At = c[0] + 5.7, toBackAt = backAt - 0.9, to1045At = backAt + 0.8, toTimelineAt = timelineAt - 0.9;
+      const pointerVisits = [
+        { inAt: c[0] + 5.6, outAt: clickAt + 0.3,
+          glides: [{ from: lowerRight(tip1042, 560, 144), to: tip1042, at: to1042At }] },
+        { inAt: backAt - 1.0, outAt: open45At + 0.3,
+          glides: [{ from: lowerRight(BACK_TIP, 420, 160), to: BACK_TIP, at: toBackAt },
+            { from: BACK_TIP, to: tip1045, at: to1045At }] },
+        { inAt: timelineAt - 1.0, outAt: timelineAt + 0.3,
+          glides: [{ from: lowerRight(TIMELINE_TAB_TIP, 420, 200), to: TIMELINE_TAB_TIP, at: toTimelineAt }] },
+      ];
+      const hoverFrom = glideAt => glideAt + 0.7;
 
       // ---- c[0]: the rows come in quickly; the count pill and the badges of each status bump as the subtitle
-      // names it, then the pointer hovers order-1042 and clicks it
+      // names it, then the pointer hovers order-1042 and clicks it (back on the list, it clicks order-1045)
       const named = { running: c[0] + 4.06, completed: c[0] + 4.63, failed: c[0] + 5.44 };
       COUNTED.forEach(status => {
         s.list.counts[status].style.transform = `scale(${1 + 0.12 * bumpAt(t, named[status])})`;
       });
-      const hover = P(t, c[0] + 6.3, 0.2);
+      let hoveredRow = -1;
+      if (t < pointerVisits[1].inAt && t >= hoverFrom(to1042At)) hoveredRow = ROW_1042;
+      if (t >= hoverFrom(to1045At)) hoveredRow = ROW_1045;
       s.list.rows.forEach((row, i) => {
         const p = P(t, c[0] + 0.4 + i * 0.08, 0.35);
         row.style.opacity = p;
         row.style.transform = `translateY(${Math.round((1 - p) * 10)}px)`;
         setBadge(row.badge, row.status, bumpAt(t, named[row.status]));
-        const hovered = i === OPENED_ROW && hover > 0.5;
+        const hovered = i === hoveredRow;
         row.style.background = hovered ? UI.hover : row.base;
         row.idCell.style.color = hovered ? UI.link : UI.text;
       });
-      // pointer: glides from the lower right of the table onto the order-1042 ID, clicks it
-      const rowY = WIN.bar + LIST.cardTop + ROWS_TOP + (OPENED_ROW + 0.5) * LIST.rowH;
-      const idX = WIN.side + PAGE.pad + COL.id + 44;
-      const glide = P(t, c[0] + 5.7, 0.6);
-      const px = Math.round(lerp(idX + 560, idX, glide)), py = Math.round(lerp(rowY + 150, rowY + 6, glide));
+      // Back to Workflows turns link blue on hover; else its text keeps the page's color and its chevron white
+      const backHovered = t >= hoverFrom(toBackAt);
+      s.order1042.back.style.color = backHovered ? UI.link : '';
+      s.order1042.backIcon.setAttribute('stroke', backHovered ? UI.link : UI.text);
+      // pointer: the visit and the glide begun last set its position
+      const visit = pointerVisits.filter(v => t >= v.inAt).pop() ?? pointerVisits[0];
+      const move = visit.glides.filter(g => t >= g.at).pop() ?? visit.glides[0];
+      const g = P(t, move.at, 0.6);
+      const px = Math.round(lerp(move.from[0], move.to[0], g)), py = Math.round(lerp(move.from[1], move.to[1], g));
       s.pointer.style.transform = `translate(${px - 3}px,${py - 3}px)`;
-      s.pointer.style.opacity = P(t, c[0] + 5.6, 0.2) * (1 - P(t, clickAt + 0.3, 0.25));
-      // click ring: grows from the pointer tip by its size (never by scale) and fades
-      const ring = P(t, clickAt, 0.4);
+      s.pointer.style.opacity = P(t, visit.inAt, 0.2) * (1 - P(t, visit.outAt, 0.25));
+      // click ring of the last click: grows from the pointer tip by its size (never by scale) and fades
+      const ringAt = [clickAt, backAt, open45At, timelineAt].filter(at => t >= at).pop() ?? clickAt;
+      const ring = P(t, ringAt, 0.4);
       const ringSize = Math.round(lerp(8, 44, ring));
       s.ring.style.width = s.ring.style.height = ringSize + 'px';
       s.ring.style.transform = `translate(${px - ringSize / 2}px,${py - ringSize / 2}px)`;
-      s.ring.style.opacity = t >= clickAt ? 0.9 * (1 - ring) : 0;
+      s.ring.style.opacity = t >= ringAt ? 0.9 * (1 - ring) : 0;
 
       // ---- c[1]: order-1042: the chart sweeps through the run in time order on "every Activity" (each label,
       // with its duration, shows as its bar ends), then the crash annotation on "the retry after the crash"
@@ -634,28 +744,21 @@
       setTimeline(tl, ORDER_1042.runtime * P(t, c[1] + 1.8, 2.2, x => x));
       s.order1042.end.textContent = dateTime(ORDER_1042.start + ORDER_1042.runtime);
       s.order1042.duration.textContent = duration(ORDER_1042.runtime);
-      const crashAt = c[1] + 4.9;
-      const lead = P(t, crashAt, 0.35);
-      tl.leader.style.opacity = t >= crashAt ? 1 : 0;
-      tl.leaderPath.setAttribute('stroke-dashoffset', String(tl.leaderLen * (1 - lead)));
-      const crashPill = popIn(t, crashAt + 0.3);
-      tl.crashPill.style.opacity = crashPill.o;
-      tl.crashPill.style.transform = `scale(${crashPill.s})`;
+      showAnnotation(s.crashNote, t, c[1] + 4.9);
 
-      // ---- c[2]: order-1045 live: shipPackage fails twice, waits 1s then 2s, attempt 3 succeeds, then the Workflow
-      // completes
+      // ---- c[2], once the pointer has opened it from the list: order-1045 live: shipPackage fails twice, waits 1s
+      // then 2s, attempt 3 succeeds and the pointer switches to the Timeline tab, which keeps growing as
+      // emailReceipt runs, until the Workflow completes
       const o45 = ORDER_1045, p45 = s.order1045, card = s.pending;
-      const liveAt = c[2] + 0.7;
-      const videoAt = sec => liveAt + (sec - LIVE_FROM); // video time of second `sec` of the run
-      const now = clamp(LIVE_FROM + t - liveAt, LIVE_FROM, o45.finishedAt);
-      const finished = now >= o45.finishedAt;
+      const now = clamp(LIVE_FROM + t - liveAt, LIVE_FROM, o45.runtime);
+      const finished = now >= o45.runtime;
       const last = o45.attempts[o45.attempts.length - 1];
       const shipped = now >= last.to;
       const status45 = finished ? 'completed' : 'running';
-      setBadge(p45.badge, status45, bumpAt(t, videoAt(o45.finishedAt)));
+      setBadge(p45.badge, status45, bumpAt(t, videoAt(o45.runtime)));
       p45.action.textContent = ACTION[status45];
       p45.duration.textContent = duration(now);
-      p45.end.textContent = finished ? dateTime(o45.start + o45.finishedAt) : '–';
+      p45.end.textContent = finished ? dateTime(o45.start + o45.runtime) : '–';
       p45.end.style.color = finished ? UI.text : UI.dim;
       // the tab counts follow the history: 17 while shipPackage retries (a retry writes no event), 23 once it
       // completes (ActivityTaskStarted, ActivityTaskCompleted, a Workflow Task, emailReceipt scheduled), then the
@@ -674,8 +777,17 @@
       card.attempt.style.transform = `scale(${1 + 0.14 * (lastFailure ? bumpAt(t, videoAt(lastFailure.to)) : 0)})`;
       card.started.textContent = dateTime(o45.start + lastStart.from);
       card.failure.style.opacity = P(t, videoAt(o45.attempts[0].to), 0.25);
-      card.style.opacity = 1 - P(t, videoAt(last.to) + 0.1, 0.3);
-      p45.none.style.opacity = P(t, videoAt(last.to) + 0.4, 0.3);
+      // the Timeline tab: hovered, then clicked; the card gives way to the chart, drawn at the current run time,
+      // its end line showing once the Workflow completes
+      const timelineHovered = t >= hoverFrom(toTimelineAt) ? 'Timeline' : null;
+      setActiveTab(p45, t >= timelineAt ? 'Timeline' : 'Pending Activities', timelineHovered);
+      card.style.opacity = 1 - P(t, timelineAt, 0.3);
+      const tl45 = s.timeline45;
+      tl45.root.style.opacity = P(t, timelineAt + 0.1, 0.3);
+      setTimeline(tl45, now);
+      tl45.endLine.style.opacity = finished ? 1 : 0;
+      // the annotation, as the Workflow completes
+      showAnnotation(s.retryNote, t, videoAt(o45.runtime));
     }
   });
 }

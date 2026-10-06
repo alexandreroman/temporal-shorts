@@ -160,10 +160,17 @@ CLAUDE.md; a section below and the card order in
   Durable Execution, stays $42 ("NOT RE-CHARGED", "CHARGED ONCE") with
   Temporal.
 - Worker A crashes while `shipPackage` runs, after `chargeCard` and
-  `reserveItem` are saved; Temporal retries `shipPackage` on Worker B (the
-  Start-To-Close timeout, 10 s in the code, detects the loss); Worker B
-  then runs the Workflow from the start, gets the three saved results back,
-  and `emailReceipt` runs.
+  `reserveItem` are saved; Worker B takes over the Workflow, first replays
+  it from the start and gets those two saved results back, then carries on
+  where it stopped: `shipPackage` runs again (attempt 2, a RETRY chip from
+  Temporal), then `emailReceipt`: the replay-then-resume order shared by
+  the series.
+- Ch7 counts attempts story-true: order-1042 shows "2 • shipPackage" (the
+  crash, then Worker B). The live retry up to attempt 3 is order-1045,
+  another order on worker-c, named in its subtitle and reached on screen
+  through "Back to Workflows" and a click in the list, never by a cut.
+  Once attempt 3 succeeds, a click on its Timeline tab ends the chapter on
+  the "3 • shipPackage" chart rather than an empty Pending Activities tab.
 - On-screen code is real Temporal TypeScript SDK code. Activities run at
   least once and stay idempotent: idempotency keys are never shown as
   plumbing Temporal removes (ch3 tiles: retry loops, status table, message
@@ -205,6 +212,13 @@ CLAUDE.md; a section below and the card order in
   NOT RE-RUN" (tools). APP MEMORY blocks: 76x56 px, left-aligned 20 px
   from the panel edge, 12 px apart, two per step in Event History colors
   (UV icon for LLM, black icon for tool).
+- Ch3 context window: messages slide in one by one; the Size gauge moves
+  with each row but fills as the square of the page fill, since every call
+  resends the whole history plus instructions; FULL pops as the page fills.
+  A fixed-width token counter, "billed so far", bottom aligned with the
+  page, shows with the gauge and follows it (12,400 at FULL); each step
+  plays a money-spent effect (coin bump, a coin flying off in a direction
+  that changes at each step, from a fixed list, "+N").
 - Pans: ch1, ch5, ch7.
 
 ### agent-harness
