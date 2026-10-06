@@ -36,8 +36,8 @@ subtitle live in `docs/agent-harness/script.md`.
   (no wildcards) and on-screen Python is valid as written. Source of truth:
   https://github.com/temporal-community/temporal-agent-harness (`README.md`,
   `docs/internal/what-the-harness-adds.md`, `docs/internal/core-concepts.md`).
-- Centering: chapter scenes are laid out in final coordinates with
-  `shift: [0, 0]` (see
+- Centering: chapter scenes are laid out in final coordinates, with no
+  `shift` (see
   [Agent Harness layout grid](feedback_agent-harness-layout-grid.md));
   chapter 1 eases with `pan()` while its SDK tags fade, chapter 4 while its
   console slides in, and chapter 7 while its UI window enters.
