@@ -114,10 +114,7 @@
       s.console = E(root,
         '<div class="mono" style="position:absolute;left:28px;top:26px;font-size:20px;letter-spacing:.14em;'
         + `display:flex;gap:12px;align-items:center">${ICON('eye', 24, '#141414', 1.8)} CONSOLE</div>`,
-        '', {
-          width: CONSOLE.w + 'px', height: CONSOLE.h + 'px', background: '#F8FAFC', color: '#141414',
-          borderRadius: 'var(--r)',
-        });
+        'paper', { width: CONSOLE.w + 'px', height: CONSOLE.h + 'px' });
       const badgeCss = color => ({
         left: 'auto', right: '24px', top: '22px', transform: 'none', display: 'flex', alignItems: 'center', gap: '8px',
         fontSize: '16px', letterSpacing: '.12em', padding: '4px 10px 4px calc(10px + .12em)', borderRadius: '4px',

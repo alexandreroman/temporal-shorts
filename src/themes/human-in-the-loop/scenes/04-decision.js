@@ -2,20 +2,17 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // same layout as chapter 3, which ends with the Workflow waiting and app instance A gone
-  const { rowY: ROW_Y, app: APP, strip: STRIP, temporal: TEMPORAL } = WF_LAYOUT;
-  const CLOCK = { x: STRIP.x - STRIP.w / 2 + 30 + WAIT_CLOCK_W / 2, y: STRIP.y };
+  const { rowY: ROW_Y, app: APP, strip: STRIP, temporal: TEMPORAL, clock: CLOCK } = WF_LAYOUT;
   // before app instance B arrives, Maria and the approval card fill the app panel's place: the card against the
   // column's right edge, Maria (avatar and label) centered in the space on its left
-  const CARD_K = 1.2, CARD_W = 480;
-  const CARD = { x: APP.x + APP.w / 2 - CARD_W / 2, y: APP.y };
-  const MARIA = { x: (APP.x - APP.w / 2 + CARD.x - CARD_W / 2) / 2, y: APP.y - 21 };
+  const CARD = { x: APP.x + APP.w / 2 - APPROVAL_CARD.w / 2, y: APP.y };
+  const MARIA = { x: (APP.x - APP.w / 2 + CARD.x - APPROVAL_CARD.w / 2) / 2, y: APP.y - AVATAR.dy };
   const TICKET_X = STRIP.x + 265; // 30 px from the strip's right edge, like the clock from its left edge
   // the Signal lands on the left part of the row it becomes, in the slot of the waiting line
-  const SIGNAL_LANDING = { x: HIST.x - 180, y: rowY(3) };
+  const SIGNAL_LANDING = { x: HIST.x - 180, y: historyRowY(3) };
   scene({
     chapter: 4, title: 'The decision arrives',
     // laid out centered at (960, 522) on the content frame
-    shift: [0, 0],
     subs: [
       {
         text: "Three days later, Maria taps Approve. "
@@ -34,8 +31,8 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.steps = makeLaptopRow(root, s.svg, ROW_Y);
-      s.maria = makeAvatar(root, 'Maria, manager', 140);
-      s.card = makeApprovalCard(root, CARD_K);
+      s.maria = makeAvatar(root, 'Maria, manager', AVATAR.size);
+      s.card = makeApprovalCard(root, APPROVAL_CARD.k);
       s.signal = tag(root, 'Signal: approved', 'neon');
       // solid background: the pill leaves from the white card and must stay readable over it
       s.signal.style.background = '#1B1B1F';
@@ -43,7 +40,7 @@
       s.strip = makeClockStrip(root);
       s.clock = makeWaitClock(root, 'Waiting for Maria');
       s.ticket = E(root,
-        `<div style="display:flex;align-items:center;gap:14px">${ICON('laptop', 40, C.ink, 1.6)}`
+        `<div style="display:flex;align-items:center;gap:14px">${ICON('laptopFlat', 40, C.ink, 1.6)}`
         + '<span class="mono" style="font-size:24px;letter-spacing:.08em">1 ORDER</span></div>',
         '', { padding: '12px 20px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
       s.temporal = makeWfTemporalPanel(root);

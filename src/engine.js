@@ -11,10 +11,11 @@ const lerp = (a, b, p) => a + (b - a) * p;
 const win = (t, a, b, f = 0.4) => P(t, a, f) * (1 - P(t, b, f)); // visible between a and b
 // Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it
 const swell = (t, at, amp) => 1 + amp * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
-// Scene camera offset for `shift`: starts at `from`, then eases to each [at, dx, dy] stop in turn.
+// Position that starts at `from`, then eases to each [at, x, y] stop in turn, over d seconds or the stop's own
+// duration ([at, x, y, d]); stops may overlap. Used for a scene camera offset (`shift`) or a route.
 function pan(t, from, stops, d) {
   let [x, y] = from;
-  for (const [a, dx, dy] of stops) { const p = P(t, a, d); x = lerp(x, dx, p); y = lerp(y, dy, p); }
+  for (const [a, sx, sy, sd = d] of stops) { const p = P(t, a, sd); x = lerp(x, sx, p); y = lerp(y, sy, p); }
   return [x, y];
 }
 let G = 0; // global time
@@ -122,6 +123,7 @@ const ICONS = {
   book: '<rect x="5" y="3" width="14" height="18"/><path d="M8 8h8M8 12h8M8 16h5"/>',
   ticket: '<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M15 7v10" stroke-dasharray="2 2"/>',
   bolt: '<path d="M13 2L4 14h7l-1 8 10-13h-7z"/>',
+  code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   eye: '<path d="M2 12c3-6 17-6 20 0-3 6-17 6-20 0z"/><circle cx="12" cy="12" r="3"/>',
@@ -182,6 +184,12 @@ function makeCard(parent, text, kind, who = null, width = null) {
   if (width) e.style.width = width + 'px';
   e.txt = e.querySelector('.txt'); e.full = text;
   return e;
+}
+// Types a makeCard's text word by word, p from 0 to 1
+function typeWords(card, p) {
+  const words = card.full.split(' ');
+  const n = Math.round(words.length * clamp(p));
+  card.txt.innerHTML = words.map((w, i) => `<span style="opacity:${i < n ? 1 : 0}">${w}</span>`).join(' ');
 }
 
 // ---------- timeline

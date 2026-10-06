@@ -8,12 +8,7 @@
       { text: "Temporal Workflows wait for people as long as it takes, and pick up right where they left off." },
     ],
     build(root, s) {
-      s.t = E(root,
-        '<div style="font-size:104px;letter-spacing:-3px;line-height:1.04">Human-in-the-Loop</div>'
-        + '<div class="mono" style="font-size:24px;letter-spacing:.14em;color:var(--violet);margin-top:30px">'
-        + 'WAITS AS LONG AS IT TAKES</div>'
-        + `<img src="${LOGO}" style="height:70px;display:block;margin:76px auto 0">`,
-        '', { textAlign: 'center' });
+      s.t = makeEndCard(root, 'Human-in-the-Loop', 'WAITS AS LONG AS IT TAKES');
       s.person = makeAvatar(root, '', 120);
       // neon check badge on the person: the decision is in
       s.badge = E(root, ICON('check', 26, '#141414', 3), '', {

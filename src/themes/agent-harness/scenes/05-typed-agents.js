@@ -112,9 +112,9 @@
     + `<span class="mono" style="font-size:16px;letter-spacing:.12em;color:#5B6475">${label}</span>`
     + `<b class="mono" style="font-size:22px">${title}</b></div>`
     + `<div class="mono" style="font-size:20px;line-height:28px;margin-top:6px">${fields}</div>`,
-    '', {
-      width: VALUE.w + 'px', background: '#F8FAFC', color: '#141414', padding: '12px 20px 14px', whiteSpace: 'nowrap',
-      borderLeft: `6px solid ${accent}`, borderRadius: 'var(--r)', boxShadow: '0 10px 30px rgba(0,0,0,.45)',
+    'paper', {
+      width: VALUE.w + 'px', padding: '12px 20px 14px', whiteSpace: 'nowrap', borderLeft: `6px solid ${accent}`,
+      boxShadow: '0 10px 30px rgba(0,0,0,.45)',
     });
   const field = (name, value) => `<span style="color:#5B6475">${name}:</span> ${value}`;
 

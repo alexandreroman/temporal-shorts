@@ -31,7 +31,7 @@
   const SHIP = 2;
   const ATTEMPT_X = [1278, 1398, 1568];
   const MARK = 34;
-  const RUNNING = 'rgba(182,100,255,.28)'; // the code highlight, as in setCodeLine
+  const RUNNING = C.highlight; // the code highlight, as in setCodeLine
 
   // Activity tile: icon, ACTIVITY kicker and label stacked in the middle, with the makeStep status marks
   // (see stepState)

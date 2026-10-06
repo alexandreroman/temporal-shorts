@@ -22,9 +22,7 @@
       s.cone.setAttribute('points', '1480,445 1085,185 1085,775');
       s.cone.setAttribute('fill', 'rgba(182,100,255,0.13)');
       s.svg.appendChild(s.cone);
-      s.sheet = E(root, '', '', {
-        width: '640px', height: '600px', background: '#F8FAFC', overflow: 'hidden', borderRadius: 'var(--r)',
-      });
+      s.sheet = E(root, '', 'paper', { width: '640px', height: '600px', overflow: 'hidden' });
       s.sheetT = E(root, 'Context window', 'lbl', { color: 'var(--ink)', fontSize: '22px' });
       const mk = (who, html, col, bar) => {
         const b = document.createElement('div');
@@ -37,12 +35,12 @@
         s.sheet.appendChild(b); return b;
       };
       s.blocks = [
-        mk('INSTRUCTIONS', "You are the shop's helpful assistant.", '#E6E7FC', C.uv),
+        mk('INSTRUCTIONS', "You are the shop's helpful assistant.", C.uvTint, C.uv),
         mk('HISTORY', [
           'You: Hi!', 'Model: Hello, how can I help?', 'You: I need a phone plan.', 'Model: Mostly for calls?',
           'You: Yes, and some travel.', 'Model: The Pro plan fits.', 'You: What about roaming?',
         ].join('<br>'), '#EDEFF3', C.slate),
-        mk('DOCUMENT', 'price-list.pdf', '#F3FBD2', '#9DB82A'),
+        mk('DOCUMENT', 'price-list.pdf', C.neonTint, C.neonDark),
         mk('NEW QUESTION', 'How much is the Pro plan?', '#F2E6FF', C.violet),
       ];
       s.gauge = E(root, '<div class="f" style="position:absolute;left:0;right:0;bottom:0"></div>', '', {

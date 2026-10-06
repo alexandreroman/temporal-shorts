@@ -22,7 +22,6 @@
   scene({
     chapter: 5, title: 'Deadlines and reminders',
     // laid out centered at (960, 522) on the content frame, in both phases
-    shift: [0, 0],
     subs: [
       {
         text: "No answer? The Workflow can also wait on a timer: a reminder after two days, escalate after five.",
@@ -44,21 +43,14 @@
         alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 22px 6px rgba(182,100,255,.4)',
       });
       s.events = EVENTS.map(([, icon, label]) => ({
-        tile: E(root, ICON(icon, 58, C.ink, 1.6), 'tile', {
-          width: '124px', height: '124px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }),
+        tile: iconTile(root, icon, null, 124, 124, C.ink, { size: 58, stroke: 1.6 }),
         tag: tag(root, label, 'violet'),
         stem: E(root, '', '', { width: '2px', height: '50px' }),
       }));
       s.jr = makeHistory(root, TIMER_ROWS, CARD.w, CARD.h);
       s.durable = tag(root, 'Timers are durable too', 'uv big');
-      s.uses = USES.map(([icon, label]) => E(root,
-        `${ICON(icon, 64, C.ink, 1.6)}<div class="mono" style="font-size:22px;letter-spacing:.1em;padding-left:.1em;`
-        + `text-transform:uppercase;margin-top:22px">${label}</div>`,
-        'tile', {
-          width: USE.w + 'px', height: USE.h + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'center',
-        }));
+      s.uses = USES.map(([icon, label]) => iconTile(root, icon, label, USE.w, USE.h, C.ink,
+        { size: 64, stroke: 1.6, font: 22, gap: 22 }));
     },
     update(t, c, s) {
       const out = P(t, c[1], 0.5);

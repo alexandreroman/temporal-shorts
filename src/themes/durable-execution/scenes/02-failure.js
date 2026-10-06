@@ -80,7 +80,7 @@
       Object.assign(s.crash.style, { width: '310px', height: '66px', textAlign: 'center' });
       s.flash = makeFlash(root);
       const [x0, x1] = s.steps.xs, top = ROW.y - ROW.h / 2 - 6;
-      s.redo = arrow(s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`, C.red, 3);
+      s.redo = path(s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`, C.red, 3);
       s.redoL = E(root, 'Start over', 'lbl', { color: C.red, width: '148px', height: '26px', textAlign: 'center' });
     },
     update(t, c, s) {

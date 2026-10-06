@@ -84,6 +84,8 @@ html,body{margin:0;background:var(--bg)}
   color:var(--slate);
 }
 .tile{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);text-align:center}
+/* white card on the dark stage (Event History, code, console) */
+.paper{background:var(--ink);color:var(--bg);border-radius:var(--r)}
 /* Live player (page opened without ?t=): fit-to-window stage and playback controls.
    Every rule targets .live or the #ctl overlay, both created by startPlayer() only, so the frozen
    ?t= frames used by the renderer stay pixel-identical. */

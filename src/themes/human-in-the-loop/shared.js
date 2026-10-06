@@ -1,14 +1,15 @@
 // ===================== Human-in-the-Loop helpers (shared by the scenes of this theme)
 // Extra stroke icons (24 grid), in the hand-drawn style of engine.js
 Object.assign(ICONS, {
-  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.2"/>',
+  // a clock whose hand ends a little higher than durable-execution's `clock`
+  clockFlat: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.2"/>',
   bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.8 1.8H4.2z"/><path d="M10 21.2h4"/>',
   db: '<ellipse cx="12" cy="5.5" rx="7.5" ry="2.5"/><path d="M4.5 5.5v13c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-13'
     + 'M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/>',
   flag: '<path d="M5 21V3M5 4h13l-3 4.5 3 4.5H5"/>',
-  code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
   cart: '<path d="M2 4h3l2.5 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
-  laptop: '<rect x="5" y="5" width="14" height="10"/><path d="M2.5 19h19"/>',
+  // a screen over a flat base line (agent-harness's `laptop` has a keyboard)
+  laptopFlat: '<rect x="5" y="5" width="14" height="10"/><path d="M2.5 19h19"/>',
   clipboard: '<rect x="5" y="4.5" width="14" height="16.5"/><path d="M9 3h6v3H9zM8.5 13.5l2.5 2.5 4.5-5"/>',
   pen: '<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3M13 20.5h8"/>',
   bot: '<rect x="4" y="8" width="16" height="12"/><path d="M12 4.5V8M9 13h.01M15 13h.01M9.5 16.5h5"/>'
@@ -58,16 +59,17 @@ function placeLaptopRow(row, t, a, states, dx = 0, dy = 0) {
 }
 
 // ===================== people and the approval request
+// Avatar of a person in the scenes: its size, and how far the circle sits above the line its label is centered on
+const AVATAR = { size: 140, dy: 21 };
 // Round avatar with a person icon and a label under it; place() centers the circle
-function makeAvatar(p, label, size = 110, ring = C.violet) {
-  const e = E(p,
+function makeAvatar(p, label, size, ring = C.violet) {
+  return E(p,
     `<div style="width:${size}px;height:${size}px;border-radius:50%;border:2px solid ${ring};`
     + 'background:var(--surface);display:flex;align-items:center;justify-content:center">'
     + `${ICON('user', Math.round(size / 2), C.ink, 1.6)}</div>`
     + (label ? `<div class="lbl" style="position:absolute;left:50%;top:calc(100% + 16px);transform:translateX(-50%);`
       + `color:var(--ink)">${label}</div>` : ''),
     '', { width: size + 'px', height: size + 'px' });
-  return e;
 }
 // Face of an analog clock as SVG markup: 12 ticks, hour, minute and seconds hands (see setClock)
 function clockFace(size, col = C.ink) {
@@ -97,9 +99,11 @@ function setClock(root, hours, blur = 0) {
   seconds.setAttribute('transform', `rotate(${(G * 6) % 360} 50 50)`);
   seconds.style.opacity = 1 - blur;
 }
+// The approval card in the scenes: its scale k (see makeApprovalCard) and its width at that scale
+const APPROVAL_CARD = { k: 1.2, w: 480 };
 // White approval request card with a ticking mini clock, Approve (brand UV) and Reject (outline) buttons.
-// k scales every size natively (fonts, paddings, width), so a larger card stays sharp at rest.
-function makeApprovalCard(p, k = 1) {
+// k scales every size natively (fonts, paddings, width; 400 px wide at 1), so a larger card stays sharp at rest.
+function makeApprovalCard(p, k) {
   const px = v => Math.round(v * k) + 'px';
   const button = `flex:1;position:relative;overflow:hidden;font-size:${px(24)};text-align:center;`
     + `padding:${px(12)} 0 ${px(13)};border-radius:var(--rs)`;
@@ -115,9 +119,8 @@ function makeApprovalCard(p, k = 1) {
     + 'border-radius:50%;background:rgba(248,250,252,.55);opacity:0"></div>'
     + '<span class="apt" style="position:relative;display:inline-flex;align-items:center;gap:8px">Approve</span></div>'
     + `<div class="rj" style="${button};border:1.5px solid #9AA3B5;color:#141414">Reject</div></div>`,
-    '', {
-      width: px(400), background: C.ink, color: '#141414', padding: `${px(20)} ${px(26)} ${px(26)}`,
-      borderLeft: `${px(6)} solid ${C.violet}`, borderRadius: 'var(--r)',
+    'paper', {
+      width: px(400), padding: `${px(20)} ${px(26)} ${px(26)}`, borderLeft: `${px(6)} solid ${C.violet}`,
     });
   e.clk = e.querySelector('.clk'); e.ap = e.querySelector('.ap'); e.apt = e.querySelector('.apt');
   e.ring = e.querySelector('.ring'); e.rj = e.querySelector('.rj');
@@ -184,6 +187,10 @@ const WF_LAYOUT = {
   strip: { x: 480, y: 847, w: 800, h: 150 },
   temporal: { x: 1380, y: 612, w: 920, h: 620 },
 };
+// the wait clock in the strip, 30 px from its left edge
+WF_LAYOUT.clock = {
+  x: WF_LAYOUT.strip.x - WF_LAYOUT.strip.w / 2 + 30 + WAIT_CLOCK_W / 2, y: WF_LAYOUT.strip.y,
+};
 // Tile-styled strip under the app panel, holding the clock (and the deploy, the restart or the order)
 function makeClockStrip(p) {
   const { w, h } = WF_LAYOUT.strip;
@@ -198,19 +205,18 @@ function makeWorkflowApp(p, name) {
   const app = makeAppPanel(p, name, w, h, APP_TEXT);
   const cardW = w - 48, cardH = h - 100;
   const card = E(app,
-    '<div class="lbl" style="position:absolute;left:20px;top:16px;display:flex;gap:10px;align-items:center;'
-    + `padding-left:0">${ICON('code', 22, C.slate, 1.8)} Workflow</div>`
+    panelLabel('code', 'Workflow', 'left:20px;top:16px;padding-left:0')
     + `<div class="cur" style="position:absolute;left:12px;width:${cardW - 26}px;height:${WF.h + 2}px;`
     + `background:rgba(182,100,255,.2);border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`
     // EMPTY sits in the middle of the space under the WORKFLOW label
-    + `<div class="vide mono" style="position:absolute;left:0;right:0;top:${(44 + cardH) / 2 - 20}px;text-align:center;`
+    + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${(44 + cardH) / 2 - 20}px;text-align:center;`
     + 'font-size:30px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
     '', {
       left: '24px', top: '76px', width: cardW + 'px', height: cardH + 'px', background: 'rgba(248,250,252,.03)',
       border: '1.5px solid ' + C.line, borderRadius: 'var(--r)', transform: 'none',
     });
   card.style.opacity = 1; // E() creates hidden elements; the card always shows with its panel
-  app.cur = card.querySelector('.cur'); app.vide = card.querySelector('.vide');
+  app.cur = card.querySelector('.cur'); app.empty = card.querySelector('.empty');
   app.lines = WF_LINES.map((txt, i) => {
     const line = E(card,
       `<span style="color:#6B7385;display:inline-block;width:38px">${i + 1}</span><span class="tx">${txt}</span>`
@@ -218,7 +224,7 @@ function makeWorkflowApp(p, name) {
       + `<div class="hg" style="position:absolute;right:16px;top:6px">${ICON('hourglass', 28, C.violet, 2)}</div>`,
       'mono', {
         left: '20px', top: (WF.top + i * WF.gap) + 'px', width: (cardW - 40) + 'px', height: WF.h + 'px',
-        lineHeight: WF.h + 'px', fontSize: '24px', whiteSpace: 'nowrap', paddingLeft: '10px', transform: 'none',
+        lineHeight: WF.h + 'px', fontSize: '24px', whiteSpace: 'nowrap', paddingLeft: '10px',
       });
     line.ok = line.querySelector('.ok'); line.hg = line.querySelector('.hg'); line.tx = line.querySelector('.tx');
     line.tilt = i % 2 ? 24 : -20;
@@ -257,9 +263,11 @@ const HISTORY = [
 const HROW = { top: 78, gap: 54, h: 40 }; // rows inside an Event History card: first row top, spacing, height
 const rowTop = i => HROW.top + i * HROW.gap;
 // the chapter 3 and 4 Event History card: 20 px inside the Temporal panel, under its 70 px header
-const HIST = { x: 1380, y: 637, w: 880, h: 530 };
+const HIST = {
+  x: WF_LAYOUT.temporal.x, y: WF_LAYOUT.temporal.y + 25, w: WF_LAYOUT.temporal.w - 40, h: WF_LAYOUT.temporal.h - 90,
+};
 // stage y of the middle of row i in that card, where things flying into the history land
-const rowY = i => HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2;
+const historyRowY = i => HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2;
 // Kinds of the row tags (see setRowTag): SAVED (neon on black), REPLAYED (white on UV), STILL WAITING (white on
 // violet)
 const ROW_TAG_KINDS = { 'SAVED': 'saved', 'REPLAYED': 'replayed', 'STILL WAITING': 'waiting' };
@@ -283,7 +291,6 @@ function makeOrderHistory(p) {
     'mono', {
       left: '74px', top: rowTop(3) + 'px', height: HROW.h + 'px', fontSize: '20px', fontWeight: 700,
       letterSpacing: '.12em', color: C.uv, padding: '0 10px', display: 'flex', gap: '12px', alignItems: 'center',
-      transform: 'none',
     });
   jr.wait.hg = jr.wait.querySelector('.hg');
   jr.done = E(jr, `${ICON('check', 24, C.neon, 2.6)} WORKFLOW COMPLETE`, 'mono', {

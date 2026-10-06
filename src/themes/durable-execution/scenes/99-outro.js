@@ -12,11 +12,6 @@
     e.ok = e.querySelector('.ok');
     return e;
   };
-  // Centers e on (x, y) like place() at scale 1, but on whole pixels, so the native-size logo inside stays sharp
-  const placeOnWholePixels = (e, x, y, o) => {
-    place(e, x, y, 1, o);
-    e.style.transform = `translate(${Math.round(x - e.offsetWidth / 2)}px,${Math.round(y - e.offsetHeight / 2)}px)`;
-  };
   scene({
     pre: 0.4, post: 2.6,
     shift: [0, 35],

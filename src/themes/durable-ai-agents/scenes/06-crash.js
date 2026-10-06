@@ -22,7 +22,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, STEPS, 420, 360, 290, 280, 140);
+      s.steps = makeStepRow(root, s.svg, STEP_TILES, 420, 360, 290, 280, 140);
       s.ticket = makeTicket(root);
       s.mem = makeMemory(root, 860, 200);
       s.mblocks = makeMemBlocks(root, 5, 76, 56);
@@ -60,7 +60,7 @@
       // memory
       place(s.mem, 720 + sx, 630 + sy, 1, P(t, 0.3, 0.45));
       s.mem.style.borderColor = t > crashAt && t < restart ? C.red : C.line;
-      s.mem.vide.style.opacity = P(t, c[1] + 1.2, 0.4) * (1 - P(t, restart, 0.3));
+      s.mem.empty.style.opacity = P(t, c[1] + 1.2, 0.4) * (1 - P(t, restart, 0.3));
       const add1 = [0.8, 1.3, 1.9, 2.4, 3.0].map(x => c[0] + x), add2 = [0.6, 0.9, 1.4, 1.7, 2.3].map(x => c[2] + x);
       // left-aligned like chapter 7's slots: 20 px panel margin, then 76 px blocks every 88 px (12 px gaps)
       const slot0 = 720 - 860 / 2 + 20 + 76 / 2;

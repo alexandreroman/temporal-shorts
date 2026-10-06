@@ -62,12 +62,14 @@ workspaces run `make setup` automatically.
   - `index.html`, `home.css`: home page, one card per theme, linking to
     `themes/<theme>/`
   - `styles.css`: brand styles and live-player CSS
-  - `engine.js`: timeline, helpers, components, star field and `boot()`,
+  - `engine.js`: timeline, helpers (`pan`, `swell`), components (`makeCard`,
+    `typeWords`), star field and `boot()`,
     called last by every theme page (builds the scenes, then freezes on
     `?t=` or starts the player); chapter titles come from the scenes
   - `shared.js`: brand helpers shared by every theme (`C`, `LOGO`,
-    `iconTile`, `makeStep`, `makeStepRow`, `fly`, `showRow`, crash shake
-    and flash, `statusTag`, `makeAppPanel`, `makeTemporalPanel`,
+    `iconTile`, `panelLabel`, `spinnerRing`, `makeTitleBlock`, `makeEndCard`,
+    `rise`, `makeStep`, `makeStepRow`, `fly`, `showRow`, `makeToken`, crash
+    shake and flash, `statusTag`, `makeAppPanel`, `makeTemporalPanel`,
     `makeHistoryCard`, `makeResultCard`, `makeCounter`)
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page

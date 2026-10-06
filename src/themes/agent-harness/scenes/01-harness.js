@@ -85,12 +85,6 @@
   const reply2Y = COL.top + CARD_H.reply1 + COL.gap + CARD_H.reply2 / 2;
   // the turn badge sits on the header's center line, right-aligned on the header's margin inside the frame
   const BADGE_RIGHT = FRAME.x1 - 26;
-  // type the card's text word by word, p from 0 to 1 (as in durable-ai-agents chapter 1)
-  const typeWords = (card, p) => {
-    const words = card.full.split(' ');
-    const n = Math.round(words.length * clamp(p));
-    card.txt.innerHTML = words.map((w, i) => `<span style="opacity:${i < n ? 1 : 0}">${w}</span>`).join(' ');
-  };
   // c[4] compares one LLM call (top row) with one turn (bottom row), on the content frame (x 140 to 1780,
   // y 150 to 880). Headings on the left edge; the turn runs from the message card to the reply card, its model
   // calls on one line and its tool calls on a lower one, a bracket under the whole turn. Chips are 49 px tall,
@@ -204,10 +198,7 @@
       s.links = CAPS.map(([, , side, row]) =>
         path(s.svg, `M ${capX(side) - side * CAP.w / 2} ${capY(row)} H ${frameX(side)}`, C.uv, 2.5, false));
       // under the nodes, so it slips behind each node it reaches
-      s.token = E(root, '', '', {
-        width: '22px', height: '22px', background: C.neon, boxShadow: '0 0 22px 6px rgba(219,255,75,.45)',
-        borderRadius: '5px',
-      });
+      s.token = makeToken(root);
       s.llm = makeLLM(root, ORB, 'MODEL');
       s.tools = [iconTile(root, 'plane', 'Flights', TILE.w, TILE.h), iconTile(root, 'bed', 'Hotels', TILE.w, TILE.h)];
       s.loopL = E(root, 'Your agentic loop', 'lbl', { color: 'var(--ink)' });

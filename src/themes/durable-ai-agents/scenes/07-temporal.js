@@ -1,13 +1,11 @@
 // ===================== 7. TEMPORAL
 // The block keeps every name declared in this file local to this scene.
 {
-  const JR = [
-    'LLM call: check the calendar', 'Calendar: Thu 12:30 is free',
-    'LLM call: find a restaurant', 'Search: Chez Paulette',
-    'LLM call: book a table', 'Booking: table for 2, confirmed',
-    'LLM call: invite Marie', 'Email: invite sent',
-  ];
-  const isLLM = i => JR[i].startsWith('LLM');
+  // Event History rows: the LLM call of each step (its action, lowercase), then its tool result
+  const JR = STEPS.flatMap(step => [
+    `LLM call: ${step.action[0].toLowerCase()}${step.action.slice(1)}`, `${step.tool}: ${step.result}`,
+  ]);
+  const isLLM = i => i % 2 === 0;
   // Chapter 7 layout: app on the left, Temporal on the right, both under the step tiles
   const APP = { x: 470, y: 445 };
   const MEM = { x: 470, y: 469, slot0: 162, slotGap: 88, slotY: 484 }; // memory panel and its block slots
@@ -46,7 +44,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, STEPS, 465, 330, 200, 260, 104);
+      s.steps = makeStepRow(root, s.svg, STEP_TILES, 465, 330, 200, 260, 104);
       s.restart = path(s.svg, 'M 1440 140 Q 960 40 480 140', C.violet, 3);
       s.restartL = E(root, 'From the start', 'lbl', { color: C.violet });
       // app side, mirroring chapter 6: instance panel, its memory, the LLM bill and the booking
@@ -72,7 +70,7 @@
       s.logo = E(root, `<img src="${LOGO}" style="height:150px;display:block">`);
       // native-size copy of the landed logo, on whole pixels where the flying logo lands (centered on 1005, 325)
       s.headerLogo = E(root, `<img src="${LOGO}" style="height:34px;display:block">`,
-        '', { left: '940px', top: '308px', transform: 'none' });
+        '', { left: '940px', top: '308px' });
       // payoff: budget line, then the other benefits
       s.budget = E(root,
         `<div style="display:flex;align-items:center;gap:22px">${ICON('coin', 64, C.neon, 1.6)}<div>`
@@ -85,6 +83,7 @@
         ['user', 'Waits for humans'], ['eye', 'Full visibility'],
       ];
       s.ben = benefits.map(([i, l]) => iconTile(root, i, l, 330, 230, i === 'ticket' ? C.neon : C.ink));
+      s.ben[0].style.borderColor = C.neon;
     },
     update(t, c, s) {
       // first run: each row is worked on, then saved, and only then the agent moves on
@@ -138,7 +137,7 @@
       // app memory: filled as results are saved, emptied by the crash, refilled from the history
       place(s.mem, MEM.x + sx, MEM.y + sy, 1, P(t, c[0] + 2.5, 0.45) * (1 - out));
       s.mem.style.borderColor = t > crashAt && t < bOn ? C.red : C.line;
-      s.mem.vide.style.opacity = P(t, crashAt + 1.1, 0.4) * (1 - P(t, bOn, 0.3));
+      s.mem.empty.style.opacity = P(t, crashAt + 1.1, 0.4) * (1 - P(t, bOn, 0.3));
       s.mblocks.forEach((b, i) => {
         if (t < bOn) {
           const grow = i < 6 ? P(t, saved[i], 0.35, backOut) : 0;
@@ -151,9 +150,9 @@
 
       // LLM call counter: only the 4 real calls are billed; the replay costs nothing
       const calls = [0, 2, 4, 6].filter(i => t >= write[i]).length;
-      setBill(s.bill, calls, 0);
+      setBill(s.bill, calls, 0, 'NOT RE-BILLED');
       const notBilled = win(t, replay[0], c[3] + 2.8, 0.3);
-      s.bill.note.textContent = 'NOT RE-BILLED'; s.bill.note.style.opacity = notBilled;
+      s.bill.note.style.opacity = notBilled;
       s.bill.style.borderColor = notBilled > 0.5 ? C.neon : C.line;
       place(s.bill, 270 + sx, 720 + sy, P(t, c[0] + 2.7, 0.45, backOut), P(t, c[0] + 2.7, 0.4) * (1 - out));
       // the booking is made once and never repeated
@@ -189,13 +188,11 @@
 
       // payoff
       const bp = P(t, c[4] + 0.5, 0.6);
-      place(s.budget, 960, 360, 1, bp);
-      s.budget.style.transform += ` translateY(${(1 - bp) * 20}px)`;
+      rise(s.budget, 960, 360, bp, 20);
       const at = [c[4] + 2.2, c[4] + 3.4, c[4] + 4.3, c[4] + 5.2];
       s.ben.forEach((e, i) => {
         const p = P(t, at[i], 0.45, backOut);
         place(e, 435 + i * 350, 630, p, clamp(p * 2));
-        e.style.borderColor = i === 0 ? C.neon : C.line;
       });
     }
   });

@@ -170,7 +170,11 @@
       s.steps = [['plane', 'search_flights'], ['bed', 'search_hotels'], ['ticket', 'book_flight']]
         .map(([icon, name]) => makeToolStep(root, icon, name));
       s.gate = E(root, '', 'pill');
-      s.saved = s.steps.map(() => statusTag(root));
+      s.saved = s.steps.map(() => {
+        const e = statusTag(root);
+        setStatus(e, 'SAVED', 'saved');
+        return e;
+      });
       // what every call keeps: one row spanning the card's width, its label on the card's left edge
       s.tagRow = E(root,
         '<span class="lbl" style="font-size:18px;padding-left:0">Every call</span>'
@@ -295,7 +299,6 @@
       // every call is saved as soon as it completes
       const savedAt = [c[1] + 2.8, c[1] + 2.8, c[2] + 4.0];
       s.saved.forEach((e, i) => {
-        setStatus(e, 'SAVED', 'saved');
         const p = P(t, savedAt[i], 0.4, backOut);
         place(e, STEP.x[i], RIGHT.savedY, p, clamp(p * 2));
       });

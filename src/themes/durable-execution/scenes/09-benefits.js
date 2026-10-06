@@ -9,14 +9,9 @@
   // logo height on the "handles the rest" line: the label's size and top margin are measured to match its wordmark
   const HANDLES_LOGO_H = 72;
   const BENEFITS = [
-    ['retry', 'Automatic retries'], ['shield', 'Survives crashes'],
+    ['retry', 'Automatic retries'], ['shieldTall', 'Survives crashes'],
     ['clock', 'Waits for days'], ['eye', 'Full visibility'],
   ];
-  // Centers e on (x, y) like place() at scale 1, but on whole pixels, so the native-size logo inside stays sharp
-  const placeOnWholePixels = (e, x, y, o) => {
-    place(e, x, y, 1, o);
-    e.style.transform = `translate(${Math.round(x - e.offsetWidth / 2)}px,${Math.round(y - e.offsetHeight / 2)}px)`;
-  };
   scene({
     chapter: 9, title: 'What you get',
     // laid out around the center of the free band (960, 522)
@@ -29,7 +24,7 @@
     ],
     build(root, s) {
       s.headline = E(root,
-        `<div style="display:flex;align-items:center;gap:24px">${ICON('code', 66, C.uv, 1.8)}`
+        `<div style="display:flex;align-items:center;gap:24px">${ICON('codeSteep', 66, C.uv, 1.8)}`
         + '<div style="font-size:62px;line-height:1.1;white-space:nowrap">You write the business logic</div></div>');
       // the label stays lighter than the logo: slate caps as tall as the wordmark's x-height, on its baseline
       // (both measured on rendered frames)

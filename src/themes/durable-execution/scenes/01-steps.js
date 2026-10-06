@@ -104,8 +104,7 @@
       });
       // code card: the highlight walks the 4 calls, each lighting its step, then ORDER COMPLETE
       const cp = P(t, codeIn, 0.5);
-      place(s.code, 960, CODE_Y, 1, cp);
-      s.code.style.transform += ` translateY(${(1 - cp) * 20}px)`;
+      rise(s.code, 960, CODE_Y, cp, 20);
       let line = awaitLine(ORDER_CODE, 0);
       for (let i = 1; i < 4; i++) line += P(t, c[2] + LINE0 + i * LINE_GAP, 0.2);
       setCodeLine(s.code, line, P(t, c[2] + LINE0 - 0.2, 0.3) * (1 - P(t, c[2] + LINE0 + 4 * LINE_GAP, 0.3)));

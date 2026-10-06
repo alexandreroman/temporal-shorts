@@ -7,7 +7,15 @@ Object.assign(ICONS, {
   coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.9-1.7-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.8 6 1.5 6 4.3'
     + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
 });
-const STEPS = [['cal', 'Calendar'], ['search', 'Restaurant'], ['food', 'Booking'], ['mail', 'Invite']];
+// The 4 steps of the lunch booking: tile icon and label, the action of chapter 5, then the tool and its result
+const STEPS = [
+  { icon: 'cal', label: 'Calendar', action: 'Check the calendar', tool: 'Calendar', result: 'Thu 12:30 is free' },
+  { icon: 'search', label: 'Restaurant', action: 'Find a restaurant', tool: 'Search', result: 'Chez Paulette' },
+  { icon: 'food', label: 'Booking', action: 'Book a table', tool: 'Booking', result: 'table for 2, confirmed' },
+  { icon: 'mail', label: 'Invite', action: 'Invite Marie', tool: 'Email', result: 'invite sent' },
+];
+// The steps as [icon, label], for makeStepRow
+const STEP_TILES = STEPS.map(step => [step.icon, step.label]);
 
 // The app of chapters 1, 2 and 4: a window with a gear that gearSpin() turns while the app works.
 // Its .app* styles are in this theme's index.html.
@@ -26,12 +34,11 @@ function makeApp(parent) {
 // ===================== shared by chapters 6 and 7 (crash vs Durable Execution)
 function makeMemory(p, w, h) {
   const e = E(p,
-    '<div class="lbl" style="position:absolute;left:22px;top:16px;display:flex;gap:10px;align-items:center">'
-    + `${ICON('server', 22, C.slate, 1.8)} App memory</div>`
-    + `<div class="vide mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;`
+    panelLabel('server', 'App memory', 'left:22px;top:16px')
+    + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;`
     + 'font-size:26px;letter-spacing:.14em;color:var(--red);opacity:0">EMPTY</div>',
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
-  e.vide = e.querySelector('.vide');
+  e.empty = e.querySelector('.empty');
   return e;
 }
 // context blocks held in the app's memory: LLM results and tool results alternate,
@@ -39,9 +46,9 @@ function makeMemory(p, w, h) {
 function makeMemBlocks(p, n, w, h) {
   return Array.from({ length: n }, (_, i) => {
     const isTool = i % 2 === 1;
-    const icon = ICON(STEPS[Math.floor(i / 2)][0], Math.round(h / 2), isTool ? '#141414' : C.uv, 1.8);
+    const icon = ICON(STEPS[Math.floor(i / 2)].icon, Math.round(h / 2), isTool ? '#141414' : C.uv, 1.8);
     const b = E(p, icon, '', {
-      width: w + 'px', height: h + 'px', background: isTool ? '#F3FBD2' : '#E6E7FC', borderRadius: 'var(--rs)',
+      width: w + 'px', height: h + 'px', background: isTool ? C.neonTint : C.uvTint, borderRadius: 'var(--rs)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     });
     b.tilt = isTool ? 40 : -35;
@@ -64,10 +71,10 @@ function makeBill(p) {
   e.cells = e.querySelectorAll('.sq i');
   return e;
 }
-// n calls billed, the last `wasted` of them in red
-function setBill(b, n, wasted) {
+// n calls billed, the last `wasted` of them in red; note: the text next to the number
+function setBill(b, n, wasted, note = wasted ? `+${wasted} wasted` : '') {
   b.n.textContent = n; b.n.style.color = wasted ? C.red : C.ink;
-  b.note.textContent = wasted ? `+${wasted} wasted` : '';
+  b.note.textContent = note;
   b.cells.forEach((q, i) => q.style.background = i < n ? (i >= n - wasted ? C.red : C.uv) : 'rgba(248,250,252,.08)');
 }
 function makeTicket(p) {

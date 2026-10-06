@@ -37,15 +37,10 @@
   const EXIT_X = GATE.x1 + 90; // past the gate, where a call turns toward its tool row
   const WAITS = ['5 MIN', '30 MIN', '3 H', '9 H', '1 DAY', '2 DAYS'];
 
-  // position along a route: starts at `from`, then eases to each [at, d, x, y] leg in turn (legs may overlap)
-  const routeAt = (t, from, legs) => {
-    let [x, y] = from;
-    for (const [a, d, lx, ly] of legs) { const p = P(t, a, d); x = lerp(x, lx, p); y = lerp(y, ly, p); }
-    return [x, y];
-  };
-  // legs from the gate's lane, through the gate, into a tool row; the call crosses the gate GATE_HIT after `at`
+  // A call's route is a list of [at, x, y, d] legs for pan(), from FROM (legs may overlap).
+  // Legs from the gate's lane, through the gate, into a tool row; the call crosses the gate GATE_HIT after `at`
   // and lands in its row LAND after `at`
-  const through = (at, row) => [[at, 0.8, EXIT_X, LANE], [at + 0.65, 0.7, TOOLS.rowX, TOOLS.rows[row]]];
+  const through = (at, row) => [[at, EXIT_X, LANE, 0.8], [at + 0.65, TOOLS.rowX, TOOLS.rows[row], 0.7]];
   const GATE_HIT = 0.42, LAND = 1.4;
   // 0 -> 1 -> 0 over [at, at + d]
   const bump = (t, at, d) => Math.sin(Math.PI * clamp((t - at) / d));
@@ -117,8 +112,7 @@
         });
 
       s.tools = E(root,
-        '<div class="lbl" style="position:absolute;left:22px;top:16px;display:flex;gap:10px;align-items:center">'
-        + `${ICON('gear', 22, C.slate, 1.8)} Tools</div>`,
+        panelLabel('gear', 'Tools', 'left:22px;top:16px'),
         'tile', { width: (TOOLS.x1 - TOOLS.x0) + 'px', height: (TOOLS.y1 - TOOLS.y0) + 'px', textAlign: 'left' });
 
       // the person who approves, with the two buttons
@@ -217,7 +211,7 @@
       // tool calls: pop out next to the agent, then follow their route; tags ride under them
       const placeCall = (i, appear, legs, cls, fade = Infinity) => {
         const popIn = P(t, appear, 0.45, backOut);
-        const [x, y] = routeAt(t, FROM, legs);
+        const [x, y] = pan(t, FROM, legs);
         const o = clamp(popIn * 2) * (1 - P(t, fade, 0.4));
         s.calls[i].className = 'abs pill ' + cls;
         s.calls[i].style.background = OPAQUE[cls];
@@ -233,7 +227,7 @@
         place(s.tags[i], x, y + TAG_DY, scale, o * clamp(popIn * 2) * (1 - P(t, hideAt, 0.2)));
       };
       // a call that stops in front of the gate: from the agent to the parking spot, 0.3 s after it pops
-      const toPark = at => [at + 0.3, 0.8, PARK.x, PARK.y];
+      const toPark = at => [at + 0.3, PARK.x, PARK.y, 0.8];
 
       // c[0]: two searches pass the gate, book_flight stops in front of it; the searches leave in c[2]
       const f0 = placeCall(0, pop[0], through(cross[0], 0), 'uv', c[2]);
@@ -243,7 +237,7 @@
 
       // c[1]: book_flight waits durably, the person approves, the call goes through and runs;
       // in c[2] the booked flight moves up to the first row
-      const flightLegs = [toPark(pop[2]), ...through(cross[2], 2), [c[2] + 0.3, 0.6, TOOLS.rowX, TOOLS.rows[0]]];
+      const flightLegs = [toPark(pop[2]), ...through(cross[2], 2), [c[2] + 0.3, TOOLS.rowX, TOOLS.rows[0], 0.6]];
       const f2 = placeCall(2, pop[2], flightLegs, flightWaits ? 'violet' : 'uv');
       if (t < approved) placeTag(2, f2, parkFlight + 0.2, 'NEEDS APPROVAL', 'wait');
       else if (t < booked) placeTag(2, f2, parkFlight + 0.2, 'APPROVED', 'ok', approved, cross[2]);
@@ -279,7 +273,7 @@
       if (t < hotelLands) placeTag(3, h0, autoOk + 0.1, 'AUTO-APPROVED', 'ok', Infinity, cross[3]);
       else placeTag(3, h0, hotelLands, 'AUTO-APPROVED', 'ok');
       // the escalated call drops from the gate to the person
-      const h1Legs = [toPark(bigPop), [drop, 0.8, PARK.x, YOU.y]];
+      const h1Legs = [toPark(bigPop), [drop, PARK.x, YOU.y, 0.8]];
       const h1 = placeCall(4, bigPop, h1Legs, t >= escalate ? 'violet' : 'uv');
       placeTag(4, h1, escalate + 0.1, 'ESCALATED', 'wait');
     }

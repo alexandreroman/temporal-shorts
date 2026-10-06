@@ -25,22 +25,16 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.t = E(root,
-        `<img src="${LOGO}" style="height:64px;display:block;margin-bottom:52px">`
-        + '<div class="mono" style="font-size:24px;letter-spacing:.14em;color:var(--slate)">'
-        + 'AN INTRODUCTION FOR EVERYONE</div>'
-        + '<div style="font-size:128px;line-height:1.02;letter-spacing:-3px;margin-top:26px">'
-        + 'What is Durable<br>Execution?</div>'
-        + '<div class="mono" style="font-size:26px;letter-spacing:.12em;color:var(--violet);margin-top:40px">'
-        + 'WITH TEMPORAL WORKFLOWS</div>',
-        // whole-pixel box (measured content: 893.8 x 509), so the centered block lands on whole pixels
-        '', { width: '894px', height: '510px' });
+      s.t = makeTitleBlock(root, 'AN INTRODUCTION FOR EVERYONE', 'What is Durable<br>Execution?',
+        'WITH TEMPORAL WORKFLOWS', {
+          logoH: 64, logoGap: 52, kickerFont: 24, titleFont: 128, titleGap: 26, taglineFont: 26, taglineGap: 40,
+        });
+      // whole-pixel box (measured content: 893.8 x 509), so the centered block lands on whole pixels
+      Object.assign(s.t.style, { width: '894px', height: '510px' });
       s.links = [0, 1, 2].map(i => path(s.svg, linkPath(i), C.line, 2, false));
       s.lit = [0, 1, 2].map(i => path(s.svg, linkPath(i), C.neon, 2.5, false)); // neon trail of the pulse
-      s.tiles = ORDER_STEPS.map(step => E(root, ICON(step.icon, 58, C.ink, 1.7), 'tile', {
-        width: CHAIN.tile + 'px', height: CHAIN.tile + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center',
-      }));
+      s.tiles = ORDER_STEPS.map(step => iconTile(root, step.icon, null, CHAIN.tile, CHAIN.tile, C.ink,
+        { size: 58, stroke: 1.7 }));
       // status badge to the right of each tile: check, failure cross or retry arrow
       s.badges = ORDER_STEPS.map(() => {
         const b = E(root,
@@ -56,8 +50,7 @@
       });
     },
     update(t, c, s) {
-      place(s.t, TITLE_X, CHAIN.y, 1, P(t, 0.15, 0.9));
-      s.t.style.transform += ` translateY(${(1 - P(t, 0.15, 0.9)) * 24}px)`;
+      rise(s.t, TITLE_X, CHAIN.y, P(t, 0.15, 0.9));
       // time inside the current pass of the pulse (negative before the first pass). The pulse is an ambient loop,
       // so it runs on G: the live player sees the scene as still once the tiles are in. The intro starts at 0, so
       // in frozen mode (G = t) it plays exactly as on the timeline. Any negative u leaves the chain unlit.

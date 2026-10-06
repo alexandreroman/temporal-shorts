@@ -29,7 +29,7 @@
     build(root, s) {
       s.svg = svgLayer(root);
       const y1 = ehLineY(0), yShip = ehLineY(ehStepLine(SHIP));
-      s.restart = arrow(s.svg, `M ${ARC.x0} ${yShip} C ${ARC.bulge} ${yShip}, ${ARC.bulge} ${y1}, ${ARC.x1} ${y1}`,
+      s.restart = path(s.svg, `M ${ARC.x0} ${yShip} C ${ARC.bulge} ${yShip}, ${ARC.bulge} ${y1}, ${ARC.x1} ${y1}`,
         C.violet, 3);
       s.restartL = E(root, 'From the<br>start', 'lbl', {
         color: C.violet, fontSize: '16px', lineHeight: '22px', textAlign: 'center',

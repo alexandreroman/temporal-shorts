@@ -59,8 +59,6 @@
         const at = i < 3 ? written[i] : Infinity;
         setHistoryTag(shot.hist, i, 'SAVED', 'saved', P(t, at, 0.25), bumpAt(t, at));
       });
-      markCrash(shot.hist, 0, 0);
-      setHistoryScan(shot.hist, 0, 0);
     }
   });
 }

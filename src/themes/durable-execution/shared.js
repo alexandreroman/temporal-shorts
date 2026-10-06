@@ -10,13 +10,15 @@ Object.assign(ICONS, {
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/>',
   bug: '<path d="M8 10h8v5a4 4 0 0 1-8 0z"/><path d="M9.5 10V9a2.5 2.5 0 0 1 5 0v1M12 13v6"/>'
     + '<path d="M3 14h5M16 14h5M4 9l4 2M20 9l-4 2M4.5 20l3.8-2.2M19.5 20l-3.8-2.2"/>',
-  code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/>',
+  // brackets with a steeper slash than the engine's `code`
+  codeSteep: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/>',
   plug: '<path d="M9 3v4M15 3v4M6 7h12v3a6 6 0 0 1-12 0zM12 16v5"/>',
   table: '<rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M3 14.5h18M9 9v11"/>',
   queue: '<rect x="2.5" y="5" width="5" height="9"/><rect x="9.5" y="5" width="5" height="9"/>'
     + '<rect x="16.5" y="5" width="5" height="9"/><path d="M3 18.5h17M17.5 16l2.5 2.5-2.5 2.5"/>',
   trash: '<path d="M4 6h16M9 6V3.5h6V6M6 6l1 15h10l1-15M10 10v7M14 10v7"/>',
-  shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9.5C7.5 20 4 17 4 12V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  // a shield with a check, its point lower than agent-harness's `shield`
+  shieldTall: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9.5C7.5 20 4 17 4 12V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
 });
 
 // ---------- the running example: order #1042, four steps, each calling another service
@@ -71,9 +73,7 @@ function makeCodeCard(parent, opts = {}) {
     padY = CODE.padY, padX = CODE.padX, gutter = CODE.gutter,
   } = opts;
   const h = padY * 2 + lines.length * lineH;
-  const card = E(parent, '', '', {
-    width: w + 'px', height: h + 'px', background: '#F8FAFC', color: '#141414', borderRadius: 'var(--r)',
-  });
+  const card = E(parent, '', 'paper', { width: w + 'px', height: h + 'px' });
   card.w = w; card.h = h; card.lineH = lineH; card.padY = padY;
   // the highlight sits under the text, so it is created first
   card.bar = E(card, '', '', {
@@ -97,7 +97,7 @@ function makeCodeCard(parent, opts = {}) {
     card.hdr = E(card,
       `<div style="height:${CODE.tabH}px;padding:0 14px 0 12px;display:flex;align-items:center;gap:8px;`
       + `background:${C.uv};color:#FFFFFF;font-size:15px;letter-spacing:.12em;text-transform:uppercase;`
-      + `border-radius:var(--rs) var(--rs) 0 0">${ICON('code', 18, '#FFFFFF', 2)}<span>${header}</span></div>`
+      + `border-radius:var(--rs) var(--rs) 0 0">${ICON('codeSteep', 18, '#FFFFFF', 2)}<span>${header}</span></div>`
       + fileLabel,
       'mono', {
         left: '18px', top: -CODE.tabH + 'px', height: CODE.tabH + 'px', display: 'flex', alignItems: 'center',
@@ -108,7 +108,7 @@ function makeCodeCard(parent, opts = {}) {
   return card;
 }
 // Highlight n lines from line i (0-based; a fractional i slides between lines) with opacity o
-function setCodeLine(card, i, o, color = 'rgba(182,100,255,.28)', n = 1) {
+function setCodeLine(card, i, o, color = C.highlight, n = 1) {
   card.bar.style.top = (card.padY + i * card.lineH) + 'px';
   card.bar.style.height = (n * card.lineH) + 'px';
   card.bar.style.background = color;
@@ -200,6 +200,11 @@ const bumpAt = (t, at) => win(t, at + 0.1, at + 0.25, 0.15);
 // size, then bumps briefly above it (k: height of the bump, 0 for none). A small element never grows from a small
 // scale: its layer could keep the raster of that first tiny frame (a neon check vanishes from its dark badge).
 const popIn = (t, at, k = 0.14) => ({ o: P(t, at, 0.2), s: 1 + k * bumpAt(t, at) });
+// Centers e on (x, y) like place() at scale 1, but on whole pixels, so the native-size logo inside stays sharp
+function placeOnWholePixels(e, x, y, o) {
+  place(e, x, y, 1, o);
+  e.style.transform = `translate(${Math.round(x - e.offsetWidth / 2)}px,${Math.round(y - e.offsetHeight / 2)}px)`;
+}
 
 // ---------- one shot for chapters 5 and 6: Worker panel with the code card on the left, CARD CHARGED counter
 // and order status under it, TEMPORAL panel with the Event History on the right, with room under its rows for the
@@ -257,9 +262,7 @@ function makeEventHistoryShot(root, workerNames) {
     lines: WORKFLOW_CODE, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY, padX, gutter,
   });
   shot.code.hdr.style.opacity = 1;
-  shot.spin = E(root,
-    '<div style="width:26px;height:26px;border:3px solid rgba(182,100,255,.3);'
-    + `border-top-color:${C.violet};border-radius:50%"></div>`);
+  shot.spin = E(root, spinnerRing(26));
   shot.spin.ring = shot.spin.firstChild;
   shot.charge = makeCharge(root);
   shot.charge.style.width = EH.charge.w + 'px';
@@ -299,37 +302,10 @@ function flyResultToHistory(chip, t, at, i) {
 function flyResultToCode(chip, t, at, i) {
   flyChip(chip, t, at, EH.rowStartX, ehRowY(ehStepRow(i)), EH.lineEndX, ehLineY(ehStepLine(i)));
 }
-// Arrow whose head is filled with the stroke color. The engine's shared marker fills its head with
-// `context-stroke`, which WebKit ignores (black heads in Safari): this one gets its own marker per color, with an
-// explicit fill, added once to the svg's <defs> and reused. draw() reads p._marker on every frame.
-function arrow(svg, d, color, w, dash = null) {
-  const p = path(svg, d, color, w, true, dash);
-  const id = `ah${svg.parentNode.dataset.k}-${color.replace(/[^0-9a-z]/gi, '')}`;
-  if (!svg.querySelector(`#${id}`)) {
-    const marker = document.createElementNS(SVGNS, 'marker');
-    marker.id = id;
-    const attrs = { viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 5, markerHeight: 5,
-      orient: 'auto-start-reverse' };
-    for (const [name, value] of Object.entries(attrs)) marker.setAttribute(name, value);
-    const head = document.createElementNS(SVGNS, 'path');
-    head.setAttribute('d', 'M0,0 L10,5 L0,10 z');
-    head.setAttribute('fill', color);
-    marker.appendChild(head);
-    svg.querySelector('defs').appendChild(marker);
-  }
-  p._marker = `url(#${id})`;
-  return p;
-}
-
-// ---------- web UI icons (chapter 7): the Workflows list entry of the navigation rail and a dropdown chevron
+// ---------- Worker status icons (chapter 8): free (pauseLines), restarting (power), deploying a new version
+// (upload); pauseLines is drawn with two lines, agent-harness's `pause` with two bars
 Object.assign(ICONS, {
-  list: '<path d="M9 6h12M9 12h12M9 18h12"/><path d="M3.5 6h1M3.5 12h1M3.5 18h1"/>',
-  chevron: '<path d="M6 9l6 6 6-6"/>',
-});
-
-// ---------- Worker status icons (chapter 8): free (pause), restarting (power), deploying a new version (upload)
-Object.assign(ICONS, {
-  pause: '<path d="M8.5 5v14M15.5 5v14"/>',
+  pauseLines: '<path d="M8.5 5v14M15.5 5v14"/>',
   power: '<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
   upload: '<path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 14v6h16v-6"/>',
 });

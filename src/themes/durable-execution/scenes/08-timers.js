@@ -43,13 +43,13 @@
   // Worker status shown in the block: label, icon (spin: a running spinner) and colors
   const STATUS = {
     running: { text: 'RUNNING', icon: 'spin', color: C.ink },
-    free: { text: 'FREE FOR OTHER WORK', icon: 'pause', color: C.ink },
+    free: { text: 'FREE FOR OTHER WORK', icon: 'pauseLines', color: C.ink },
     restarting: { text: 'RESTARTING…', icon: 'power', color: C.slate },
     deploying: { text: 'DEPLOYING V2…', icon: 'upload', color: C.slate },
     deployed: { text: 'V2 DEPLOYED', icon: 'upload', color: C.ink },
     replaying: { text: 'REPLAYING…', icon: 'retry', color: C.ink },
   };
-  const ICON_COLOR = { pause: C.slate, power: C.slate, upload: C.violet, retry: C.violet };
+  const ICON_COLOR = { pauseLines: C.slate, power: C.slate, upload: C.violet, retry: C.violet };
 
   // badge (28 x 28) at the right end of code line i, inside the card
   const makeLineBadge = (card, i, html, background) => E(card, html, '', {
@@ -57,8 +57,6 @@
     width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
     background, borderRadius: 'var(--rs)', transform: 'none',
   });
-  const spinnerRing = size => `<div style="width:${size}px;height:${size}px;border:3px solid rgba(182,100,255,.3);`
-    + `border-top-color:${C.violet};border-radius:50%"></div>`;
   // RESULT-style chip with another label
   const makeChip = (p, label) => {
     const chip = makeResultCard(p);
@@ -230,7 +228,6 @@
         const bump = i === STARTED_ROW ? bumpAt(t, at) + bumpAt(t, restartAt) + bumpAt(t, deployAt) : bumpAt(t, at);
         setHistoryTag(s.hist, i, 'SAVED', 'saved', P(t, at, 0.25), bump);
       });
-      markCrash(s.hist, 0, 0);
       // the TimerStarted row stays lit while the Worker comes and goes; then the replay reads the history: the
       // shipPackage row, then TimerFired (the sleep returns at once)
       const replayRow = t < replaySleep ? SHIP_ROW : FIRED_ROW;

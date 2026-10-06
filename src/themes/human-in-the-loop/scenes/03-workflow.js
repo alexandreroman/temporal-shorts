@@ -1,14 +1,12 @@
 // ===================== 3. A WORKFLOW THAT WAITS
 // The block keeps every name declared in this file local to this scene.
 {
-  const { rowY: ROW_Y, app: APP, strip: STRIP, temporal: TEMPORAL } = WF_LAYOUT;
-  // in the strip: the clock 30 px from its left edge, the deploy and the restart against its right edge
-  const CLOCK = { x: STRIP.x - STRIP.w / 2 + 30 + WAIT_CLOCK_W / 2, y: STRIP.y };
+  const { rowY: ROW_Y, app: APP, strip: STRIP, temporal: TEMPORAL, clock: CLOCK } = WF_LAYOUT;
+  // in the strip, right of the clock: the deploy and the restart against its right edge
   const CAUSE_X = [STRIP.x + 136, STRIP.x + 296]; // 20 px apart, the restart 30 px from the right edge
   scene({
     chapter: 3, title: 'A Workflow that waits',
     // laid out centered at (960, 522) on the content frame
-    shift: [0, 0],
     subs: [
       {
         text: "With Temporal, the whole process is a <b>Workflow</b>: ordinary code that runs the steps in order.",
@@ -69,7 +67,7 @@
         const current = st === 0 && cursorOn && Math.round(pos) === i;
         setWfLine(s.A, i, current ? 3 : st, P(t, restartAt + 0.2 + i * 0.1, 0.8, easeIn));
       });
-      s.A.vide.style.opacity = P(t, restartAt + 1.1, 0.4);
+      s.A.empty.style.opacity = P(t, restartAt + 1.1, 0.4);
 
       // the clock starts with the wait: days fly by to DAY 2, rest, then on to DAY 3 through the deploy and the
       // restart; at rest only its seconds hand moves

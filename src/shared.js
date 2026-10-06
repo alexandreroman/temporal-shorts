@@ -1,31 +1,74 @@
 // ===================== shared helpers (brand style, used by every theme)
 const C = {
   uv: '#444CE7', violet: '#B664FF', neon: '#DBFF4B', red: '#FF5A5F', ink: '#F8FAFC', slate: '#94A3B8', line: '#3A4150',
+  // on white cards: light UV and neon tints (model and tool results), a darker neon for lines, the violet highlight
+  uvTint: '#E6E7FC', neonTint: '#F3FBD2', neonDark: '#9DB82A', highlight: 'rgba(182,100,255,.28)',
 };
 // Official Temporal logo (white horizontal lockup). Resolved against this script, not the page: theme pages
 // live in subfolders. Inlined in a built page, the script has no src and the path is already a data: URI.
 const LOGO = new URL('assets/temporal-logo-horizontal-light-cropped.svg',
   document.currentScript.src || document.baseURI).href;
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
-// icon + label centred in the tile; padding-left offsets the trailing letter-spacing
-function iconTile(p, icon, label, w, h, col = C.ink) {
+// icon + label centred in the tile (label null for an icon alone); padding-left offsets the trailing
+// letter-spacing. Options: size and stroke of the icon, font of the label and gap above it; a tile over 130 px
+// high gets a larger icon and label by default.
+function iconTile(p, icon, label, w, h, col = C.ink, opts = {}) {
   const big = h > 130;
+  const { size = big ? 52 : 42, stroke = 1.8, font = big ? 20 : 18, gap = 12 } = opts;
   const labelHtml = label
-    ? `<div class="mono" style="font-size:${big ? 20 : 18}px;letter-spacing:.1em;padding-left:.1em;`
-      + `text-transform:uppercase;margin-top:12px">${label}</div>`
+    ? `<div class="mono" style="font-size:${font}px;letter-spacing:.1em;padding-left:.1em;`
+      + `text-transform:uppercase;margin-top:${gap}px">${label}</div>`
     : '';
-  return E(p, `${ICON(icon, big ? 52 : 42, col)}${labelHtml}`, 'tile', {
+  return E(p, `${ICON(icon, size, col, stroke)}${labelHtml}`, 'tile', {
     width: w + 'px', height: h + 'px', display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
   });
+}
+// Mono label with a 22 px slate icon, at the top left corner of a panel; css: its position (left, top, ...)
+const panelLabel = (icon, text, css) => '<div class="lbl" style="position:absolute;display:flex;gap:10px;'
+  + `align-items:center;${css}">${ICON(icon, 22, C.slate, 1.8)} ${text}</div>`;
+// Violet spinner ring of size px, its track at alpha; css: extra styles (position, opacity). Spin it with a
+// rotate() transform.
+const spinnerRing = (size, alpha = 0.3, css = '') => `<div class="spin" style="${css}width:${size}px;`
+  + `height:${size}px;border:3px solid rgba(182,100,255,${alpha});border-top-color:${C.violet};border-radius:50%">`
+  + '</div>';
+
+// ---------- title and end cards
+// Intro title block: the official logo, a slate kicker, the big title (HTML) and a violet tagline, left-aligned.
+// sizes: logo height, font sizes and gaps in px, defaulting to the intro of most themes.
+function makeTitleBlock(root, kicker, titleHtml, tagline, sizes = {}) {
+  const {
+    logoH = 58, logoGap = 46, kickerFont = 22, titleFont = 116, titleLineHeight = 1.02, titleGap = 22,
+    taglineFont = 24, taglineGap = 34,
+  } = sizes;
+  return E(root,
+    `<img src="${LOGO}" style="height:${logoH}px;display:block;margin-bottom:${logoGap}px">`
+    + `<div class="mono" style="font-size:${kickerFont}px;letter-spacing:.14em;color:var(--slate)">${kicker}</div>`
+    + `<div style="font-size:${titleFont}px;line-height:${titleLineHeight};letter-spacing:-3px;`
+    + `margin-top:${titleGap}px">${titleHtml}</div>`
+    + `<div class="mono" style="font-size:${taglineFont}px;letter-spacing:.12em;color:var(--violet);`
+    + `margin-top:${taglineGap}px">${tagline}</div>`);
+}
+// End card: the title, a violet tagline and the official logo, centered
+function makeEndCard(root, title, tagline) {
+  return E(root,
+    `<div style="font-size:104px;letter-spacing:-3px;line-height:1.04">${title}</div>`
+    + '<div class="mono" style="font-size:24px;letter-spacing:.14em;color:var(--violet);margin-top:30px">'
+    + `${tagline}</div>`
+    + `<img src="${LOGO}" style="height:70px;display:block;margin:76px auto 0">`,
+    '', { textAlign: 'center' });
+}
+// Fades e in at (x, y) with p (0 to 1) as it rises d px into place
+function rise(e, x, y, p, d = 24) {
+  place(e, x, y, 1, p);
+  e.style.transform += ` translateY(${(1 - p) * d}px)`;
 }
 
 // ---------- step tiles
 // Spinner, tick and cross of a status tile, on its top right corner (see stepState)
 function addStatusMarks(e) {
   e.insertAdjacentHTML('beforeend',
-    '<div class="spin" style="position:absolute;right:12px;top:12px;width:26px;height:26px;'
-    + `border:3px solid rgba(182,100,255,.25);border-top-color:${C.violet};border-radius:50%;opacity:0"></div>`
+    spinnerRing(26, 0.25, 'position:absolute;right:12px;top:12px;opacity:0;')
     + `<div class="ok" style="position:absolute;right:8px;top:8px;opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`
     + `<div class="ko" style="position:absolute;right:8px;top:8px;opacity:0">${ICON('x', 32, C.red, 2.6)}</div>`);
   e.spin = e.querySelector('.spin'); e.ok = e.querySelector('.ok'); e.ko = e.querySelector('.ko');
@@ -73,6 +116,11 @@ function showRow(e, p, dx = 26, round = false) {
   e.style.opacity = clamp(p);
   e.style.transform = `translateX(${round ? Math.round(x) : x}px)`;
 }
+// Neon token that runs round an agentic loop
+const makeToken = root => E(root, '', '', {
+  width: '22px', height: '22px', background: C.neon, boxShadow: '0 0 22px 6px rgba(219,255,75,.45)',
+  borderRadius: '5px',
+});
 
 // ---------- crash effects
 // screen shake around a crash, as [dx, dy]
@@ -178,13 +226,11 @@ function makeHistoryCard(p, rowsHtml, opts) {
     `<div class="mono" style="position:absolute;left:26px;top:${headerFont + 2}px;font-size:${headerFont}px;`
     + 'letter-spacing:.14em;color:#141414;display:flex;gap:10px;align-items:center">'
     + `${ICON('book', headerFont + 4, '#141414', 1.8)} EVENT HISTORY</div>`,
-    '', { width: w + 'px', height: h + 'px', background: '#F8FAFC', color: '#141414', borderRadius: 'var(--r)' });
-  card.h = h;
+    'paper', { width: w + 'px', height: h + 'px' });
   if (crash) {
     card.kept = E(card, '', '', {
       left: '14px', top: crash.keptTop + 'px', width: (w - 28) + 'px', height: crash.keptH + 'px',
       background: 'rgba(68,76,231,.08)', borderLeft: '4px solid ' + C.uv, borderRadius: 'var(--rs)',
-      transform: 'none',
     });
     card.cut = E(card,
       `<span class="mono" style="position:absolute;left:${crash.labelX};top:-10px;transform:translateX(-50%);`
@@ -192,21 +238,20 @@ function makeHistoryCard(p, rowsHtml, opts) {
       + `color:${C.red};white-space:nowrap">${crash.label}</span>`,
       '', {
         left: '26px', top: crash.cutTop + 'px', width: (w - 52) + 'px', height: '0',
-        borderTop: '2px dashed ' + C.red, transform: 'none',
+        borderTop: '2px dashed ' + C.red,
       });
   }
   // under the rows, so the highlighted row stays sharp
   if (scanH) {
     card.scan = E(card, '', '', {
-      left: '18px', width: (w - 36) + 'px', height: scanH + 'px', background: 'rgba(182,100,255,.28)',
-      borderRadius: 'var(--rs)', transform: 'none',
+      left: '18px', width: (w - 36) + 'px', height: scanH + 'px', background: C.highlight, borderRadius: 'var(--rs)',
     });
   }
   card.rows = rowsHtml.map((html, i) => {
     const row = E(card, `<span style="color:#8A93A6;display:inline-block;width:34px">${i + 1}</span>${html}`,
       'mono', {
         left: '26px', top: rowTop(i) + 'px', width: (w - 52) + 'px', fontSize: font + 'px', whiteSpace: 'nowrap',
-        padding: `${padY}px 10px`, transform: 'none',
+        padding: `${padY}px 10px`,
       });
     if (rowH) Object.assign(row.style, { height: rowH + 'px', lineHeight: (rowH - 2 * padY) + 'px' });
     return row;
@@ -234,8 +279,8 @@ function markCrash(card, oKept, oCut) {
 // for a tool result
 function makeResultCard(p, uv = true) {
   return E(p, '<span class="mono" style="font-size:15px;letter-spacing:.12em;padding-left:.12em">RESULT</span>', '', {
-    background: uv ? '#E6E7FC' : '#F3FBD2', color: '#141414', padding: '6px 14px',
-    borderLeft: `5px solid ${uv ? C.uv : '#9DB82A'}`, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
+    background: uv ? C.uvTint : C.neonTint, color: '#141414', padding: '6px 14px',
+    borderLeft: `5px solid ${uv ? C.uv : C.neonDark}`, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
   });
 }
 
