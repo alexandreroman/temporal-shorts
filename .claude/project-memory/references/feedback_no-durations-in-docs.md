@@ -14,6 +14,5 @@ video", "(2:59)").
 goes stale silently.
 
 **How to apply:** describe a theme by its topic and audience only; point to
-`make timeline` for the live length. Videos have no maximum length. The
-per-subtitle start times in `docs/<theme>/script.md` are a dated
-snapshot and stay too.
+`make timeline` for the live length. The per-subtitle start times in
+`docs/<theme>/script.md` are allowed: each script dates them as a snapshot.

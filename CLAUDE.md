@@ -18,7 +18,7 @@ from a deterministic HTML animation. Each video is a theme:
   event stream, typed subagents and Code Mode
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
-narrows them, and the scripts require `--theme`. A home page
+narrows them, and the per-theme scripts require `--theme`. A home page
 (`src/index.html`) lets viewers pick a theme.
 
 See [README.md](README.md) for full documentation.
@@ -43,12 +43,8 @@ make serve                   # hot-reload home page on CASPER_PORT, else 8000
 make clean                   # delete output/ (every generated file)
 ```
 
-`timeline`, `render` and `srt` cover every theme; `THEME=<theme>` restricts
-them to one, e.g. `make render THEME=durable-execution`. `preview` requires
-`THEME`. An unknown `THEME` fails with the list of themes. Each MP4 or SRT
-depends on the shared sources and its own theme only: editing a scene
-rebuilds that theme alone, editing the home page or `player.js` rebuilds no
-video. Use `-B` to force a rebuild.
+`preview` requires `THEME`. Each MP4 or SRT rebuilds only when the shared
+sources or its own theme change (see README.md); `-B` forces a rebuild.
 
 In Casper (`.casper.json`), Run (`casper run`) serves the home page and the
 HTML players on `CASPER_PORT` (8000 in the primary workspace), Render
@@ -62,15 +58,13 @@ workspaces run `make setup` automatically.
   - `index.html`, `home.css`: home page, one card per theme, linking to
     `themes/<theme>/`
   - `styles.css`: brand styles and live-player CSS
-  - `engine.js`: timeline, helpers (`pan`, `swell`), components (`makeCard`,
-    `typeWords`), star field and `boot()`,
-    called last by every theme page (builds the scenes, then freezes on
-    `?t=` or starts the player); chapter titles come from the scenes
-  - `shared.js`: brand helpers shared by every theme (`C`, `LOGO`,
-    `iconTile`, `panelLabel`, `spinnerRing`, `makeTitleBlock`, `makeEndCard`,
-    `rise`, `makeStep`, `makeStepRow`, `fly`, `showRow`, `makeToken`, crash
-    shake and flash, `statusTag`, `makeAppPanel`, `makeTemporalPanel`,
-    `makeHistoryCard`, `makeResultCard`, `makeCounter`)
+  - `engine.js`: timeline, easing and layout helpers, icons, components,
+    star field and `boot()`, called last by every theme page (builds the
+    scenes, then freezes on `?t=` or starts the player); chapter titles come
+    from the scenes
+  - `shared.js`: brand constants and components used by two or more
+    themes (`C`, `LOGO`, tiles, step rows, app and TEMPORAL panels, the
+    Event History card, status tags, crash effects, title and end cards)
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
@@ -84,8 +78,8 @@ workspaces run `make setup` automatically.
     (`[dx, dy]` or `(t, c) => [dx, dy]`, see `pan()`) centers the
     composition at (960, 522)
 - `scripts/`: setup, frame preview, parallel render, timeline, SRT export,
-  standalone HTML build and server; `--theme` (required, no default)
-  selects the theme
+  standalone HTML build and server; the per-theme scripts require
+  `--theme` (no default)
 - `docs/<theme>/script.md`: full script of a theme: subtitles, timings,
   visuals
 - `output/`: generated `<theme>.srt`, `<theme>.mp4`, and the HTML pages
@@ -143,7 +137,8 @@ not shared with the team.
 - Everything in this repository is in English: video text, docs, code
   comments, commit messages. No em dash in subtitles or on-screen labels.
 - Videos have no maximum length (`make timeline THEME=<theme>` reports
-  it). Key every animation to `c[i]` (subtitle start) so timings follow text changes.
+  it). Key every animation to `c[i]` (subtitle start) so timings follow
+  text changes.
 - Keep rendering deterministic (no `Math.random`): parallel workers render
   segments independently.
 - Use classic `<script src>` tags, not ES modules: Playwright opens

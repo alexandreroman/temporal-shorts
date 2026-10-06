@@ -6,6 +6,9 @@ type: feedback
 
 # Visual design decisions
 
+Scope: the `durable-ai-agents` theme; the first two rules apply to every
+theme.
+
 - Icon + label tiles are centered horizontally and vertically (`iconTile`,
   centered flex), never positioned with fixed margins.
 - Centered letter-spaced labels get a `padding-left` equal to their
@@ -21,7 +24,7 @@ type: feedback
 - Tags and labels keep about 20 px of clear space from neighboring
   components (the chapter 3 FULL tag above the size gauge).
 - The end card shows the slogan and the Temporal logo, without a URL. The
-  mascot sits above the title with the same gap as the slogan to the logo
+  LLM orb sits above the title with the same gap as the slogan to the logo
   (about 86 px).
 - "Agent complete" in chapter 7 has clear space above it, below the Event
   History.
@@ -35,6 +38,5 @@ type: feedback
 **Why:** frames are reviewed closely; misaligned icons and unclear durability
 undermine the explainer.
 
-**How to apply:** check alignment on full-size `make preview T="<t> --full"`
-frames
-for every new tile or label.
+**How to apply:** check alignment on full-size frames
+(`make preview THEME=<theme> T="<t> --full"`) for every new tile or label.

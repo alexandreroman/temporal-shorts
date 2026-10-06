@@ -1,22 +1,17 @@
 ---
 name: "HTML links and viewing"
-description: "Home page links to theme folders (themes/<theme>/), the home button to /; make serve is the only way to view the HTML pages"
+description: "make serve is the only way to view the HTML pages: no make open, no file:// fallback"
 type: project
 ---
 
 # HTML links and viewing
 
-The home page links to each theme as a folder, `themes/<theme>/`, with no
-`index.html` in the URL; the player's home button links to `/`, the one
-absolute link. `make serve` is the only way to view the HTML version (home
-page and players): folder links need an HTTP server, so the pages are not
-browsed over `file://`.
+The HTML pages (home page and players) are viewed only through
+`make serve`: the project has no `make open` target and no `file://`
+fallback for the pages. The link rules live in `CLAUDE.md` (Conventions).
 
-**Why:** clean folder URLs on the home page; serving over HTTP is the one
-supported way to view the HTML pages.
+**Why:** serving over HTTP is the one supported way to view the pages and
+keeps clean folder URLs (`themes/<theme>/`) on the home page.
 
-**How to apply:** new theme cards link to `themes/<theme>/`; other links
-between pages stay relative; do not add a `make open` target or `file://`
-fallbacks for the pages. Rendering is separate: Playwright opens theme pages
-directly over `file://` for `?t=` frames, so asset URLs built in JS still
-resolve against the script.
+**How to apply:** reject `make open` targets, `index.html` suffixes in
+links and `file://` workarounds for the pages.

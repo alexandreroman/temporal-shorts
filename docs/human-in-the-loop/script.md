@@ -1,10 +1,9 @@
 # Script and timeline: Human-in-the-Loop
 
-Subtitles are the only narration (no audio). Timings are computed in
-`src/engine.js` from text length (`autoDur`: chars / 16 + 0.6 s, clamped
-2.4 to 8 s), plus per-subtitle `after` pauses. Run
-`make timeline THEME=human-in-the-loop` for the live values; the start times
-below are a snapshot from 2026-10-05.
+Subtitles are the only narration (no audio). Each subtitle lasts as long
+as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
+Run `make timeline THEME=human-in-the-loop` for the live values; the start
+times below are a snapshot from 2026-10-06.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.

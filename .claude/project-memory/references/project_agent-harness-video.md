@@ -7,8 +7,7 @@ type: project
 # Agent Harness video: audience and story
 
 Scope: the `agent-harness` theme. Its seven topics, their order and every
-subtitle live in `docs/agent-harness/script.md`. The user's target
-for this theme is at most 5:00, so that every scene takes its time.
+subtitle live in `docs/agent-harness/script.md`.
 
 - Audience: **developers and technical leads** who know what an AI agent is
   (a model, tools and a loop) but not necessarily Temporal.
@@ -22,7 +21,8 @@ for this theme is at most 5:00, so that every scene takes its time.
   the final composition before the fade.
 - Chapter 5 shows subagents as the harness runs them: the parent starts a
   child workflow instance (`start_travel`), sends it typed messages, then
-  closes it (`stop_travel`); a child never outlives its parent.
+  closes it (`stop_travel`); the parent messages it through its generated
+  `travel_plan_trip` tool; a child never outlives its parent.
 - Running example: a travel agent planning a 3-night trip to Lisbon, with
   the harness's real example tool names in code font (`search_flights`,
   `search_hotels`, `book_flight`, `book_hotel`) and one set of figures

@@ -16,8 +16,7 @@ The theme picker (`src/index.html`, `src/home.css`) follows these rules:
   4 cards); padding and icon scale with `clamp()`.
 - Card order: Introduction to Durable Execution, Human-in-the-Loop, Durable
   AI Agents, Temporal Agent Harness.
-- Cards show no video duration; a "COMING SOON" label marks placeholder
-  themes.
+- Cards show no video duration.
 - The page text never calls the videos "silent" and never mentions sound or
   audio.
 - Card titles and descriptions use small text (24 px titles, 16 px

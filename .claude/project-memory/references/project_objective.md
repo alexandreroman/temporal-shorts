@@ -1,24 +1,14 @@
 ---
-name: "Video objective and audience"
-description: "What the Durable AI Agents video must teach, to whom, and its constraints"
+name: "Durable AI Agents: objective and audience"
+description: "durable-ai-agents keeps its seven topics for a non-technical audience, budget savings included"
 type: project
 ---
 
-# Video objective and audience
+# Durable AI Agents: objective and audience
 
-Scope: the `durable-ai-agents` theme. Videos have no maximum length.
-
-An educational video explains to a **non-technical** audience:
-
-1. LLM calls (text in, text out);
-2. an LLM is stateless by design;
-3. the context window;
-4. tools;
-5. the agentic loop and the definition of an agent;
-6. what happens when the agent crashes midway;
-7. the benefits of Temporal / Durable Execution, **including budget
-   savings**: previous LLM calls are not lost, so they are not redone to
-   rebuild the context.
+Scope: the `durable-ai-agents` theme. Its seven topics live in
+`docs/durable-ai-agents/script.md` (Audience and goal); the budget-savings
+topic is mandatory.
 
 Constraints: no soundtrack, burned-in subtitles, Temporal brand guidelines.
 Deliverables: MP4 1920x1080 30 fps + `.srt`.

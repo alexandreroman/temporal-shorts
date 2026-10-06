@@ -1,12 +1,26 @@
 # Script and timeline: Durable AI Agents
 
-Subtitles are the only narration (no audio). Timings are computed in
-`src/engine.js` from text length (`autoDur`: chars / 16 + 0.6 s, clamped
-2.4 to 8 s), plus per-subtitle `after` pauses. Run `make timeline` for the
-live values; the start times below are a snapshot from 2026-10-06.
+Subtitles are the only narration (no audio). Each subtitle lasts as long
+as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
+Run `make timeline THEME=durable-ai-agents` for the live values; the start
+times below are a snapshot from 2026-10-06.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
+
+## Audience and goal
+
+The video explains to a non-technical audience, in seven topics:
+
+1. LLM calls (text in, text out);
+2. an LLM is stateless by design;
+3. the context window;
+4. tools;
+5. the agentic loop and the definition of an agent;
+6. what happens when the agent crashes midway;
+7. the benefits of Temporal and Durable Execution, including budget
+   savings: previous LLM calls are not lost, so they are not redone to
+   rebuild the context.
 
 ## Intro
 
@@ -55,8 +69,8 @@ animation shows.
   tools.
   - Visuals: Crossed-out icons, toolbox: Weather / Calendar / Email / Web
     search.
-- **1:11** When it needs one, the model writes a request: “use the Weather tool,
-  for Paris”. The app runs it…
+- **1:11** When it needs one, the model writes a request: “use the Weather
+  tool, for Paris”. The app runs it…
   - Visuals: Request card (tool: weather, city: Paris) goes to the app, app
     calls the tool, "18°C, sunny".
 - **1:19** …adds the result to the context, and calls the model again.
@@ -138,3 +152,6 @@ step 3's result (the booking) is in APP MEMORY, before step 4's LLM call.
 Without durable execution the restart re-runs those 3 steps, booking
 included, so 7 calls in total (3/7 ≈ 43% wasted); with Temporal the 3 saved
 steps are reused, so 4 calls and 1 booking.
+
+The "in this example" label stays next to the percentage on screen, and
+the figures follow the step count if the scenario changes.

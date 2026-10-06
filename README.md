@@ -21,7 +21,8 @@ subtitles) about Temporal. Each video is a theme:
 A home page lists the themes and opens their players.
 
 No theme is the default: the make targets cover every theme unless
-`THEME=<theme>` narrows them to one, and the scripts require `--theme`.
+`THEME=<theme>` narrows them to one, and the per-theme scripts require
+`--theme`.
 
 The videos are not edited in a video editor: each one is an HTML page
 animated deterministically (`renderAt(t)`), captured frame by frame by
@@ -34,7 +35,7 @@ src/index.html         home page: one card per theme (styles in home.css)
 src/styles.css         Temporal brand styles and the live player's CSS
 src/engine.js          timeline, easing, placement, SVG icons, components,
                        page start (boot)
-src/shared.js          brand helpers shared by every theme (colors, tiles,
+src/shared.js          brand helpers shared by the themes (colors, tiles,
                        title and end cards, step rows, crash effects,
                        status tags, app and Temporal panels, Event History
                        card, counters)
@@ -46,6 +47,7 @@ src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
 src/assets/            official Temporal logo (white horizontal lockup)
 src/fonts/             brand fonts (make setup), see src/fonts/README.md
 scripts/               setup, render, preview, timeline, SRT export, HTML
+                       build and server
 docs/<theme>/script.md full script: subtitles, timings, animations
 output/                generated .srt, .mp4 and standalone .html (the HTML
                        pages mirror src/: index.html, themes/<theme>/)
@@ -86,9 +88,9 @@ each `output/<theme>.mp4` or `.srt` depends on its theme's own sources
 (`src/*.js`, `src/*.css`, assets, fonts, `scripts/common.py`) and the
 render or export script. Editing a scene rebuilds its theme only; editing
 the home page (`src/index.html`, `src/home.css`) or the live player
-(`src/player.js`) rebuilds no video. `make html` rebuilds when any page or
-the player changes. Use `make -B render` to force a
-full render.
+(`src/player.js`) rebuilds no video. `make html` rebuilds when any source
+of any page or `scripts/build_html.py` changes. Use `make -B render` to
+force a full render.
 
 `make clean` deletes `output/`: videos, subtitles, HTML pages, previews and
 render leftovers. It leaves the virtualenv and the fonts in place.
@@ -128,7 +130,8 @@ F = fullscreen.
 
 `make serve` serves the home page on `/` and each player on
 `/themes/<theme>/`, over HTTP on `127.0.0.1` (rebuilding them first if
-needed), on port 8000 by default; override it with `make serve PORT=9000`.
+needed), on port 8000 by default (`CASPER_PORT` in a Casper workspace);
+override it with `make serve PORT=9000`.
 
 `make serve` hot-reloads: edit a file in `src/` and the server rebuilds the
 pages, then every open tab reloads by itself and a player resumes at the

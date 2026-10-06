@@ -19,11 +19,12 @@ Source: https://temporal.io/brand (official colors) plus the temporal.io site.
   monospace labels, subtle starry sky, gradient glow anchored to the bottom
   edge with no hard edge (the background runs continuously behind the
   subtitles).
-- Fonts: Aeonik and Noto Sans Mono are unavailable; Instrument Sans (`Brand`)
-  and JetBrains Mono (`Mono`) stand in for them.
+- Fonts: Noto Sans Mono (`Mono`, open source, from Fontsource) is the brand
+  mono; Aeonik is unavailable, so Instrument Sans (`Brand`) stands in for
+  it.
 - Icons: hand-drawn stroke SVG set in `engine.js`; no emoji (off-brand).
 
 **Why:** the video is published under the Temporal brand.
 
 **How to apply:** reuse the CSS variables and `C` constants; use neon only as
-a status signal; swap in Aeonik if official fonts become available.
+a status signal; swap in Aeonik if it becomes available.
