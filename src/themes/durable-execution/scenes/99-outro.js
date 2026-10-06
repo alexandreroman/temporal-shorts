@@ -25,9 +25,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      const xs = ORDER_STEPS.map((_, i) => ROW.x0 + i * ROW.gap);
-      s.links = [0, 1, 2].map(i => path(s.svg,
-        `M ${xs[i] + ROW.size / 2 + 2} ${ROW.y} L ${xs[i + 1] - ROW.size / 2 - 2} ${ROW.y}`, C.line, 2, false));
+      s.links = stepLinks(s.svg, ORDER_STEPS.map((_, i) => ROW.x0 + i * ROW.gap), ROW.y, ROW.size);
       s.tiles = ORDER_STEPS.map(step => makeDoneTile(root, step.icon));
       s.t = E(root,
         '<div style="font-size:124px;letter-spacing:-3.5px;line-height:128px">Durable Execution</div>'

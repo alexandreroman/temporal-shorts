@@ -66,7 +66,9 @@ workspaces run `make setup` automatically.
     called last by every theme page (builds the scenes, then freezes on
     `?t=` or starts the player); chapter titles come from the scenes
   - `shared.js`: brand helpers shared by every theme (`C`, `LOGO`,
-    `iconTile`, `makeStep`, `fly`)
+    `iconTile`, `makeStep`, `makeStepRow`, `fly`, `showRow`, crash shake
+    and flash, `statusTag`, `makeAppPanel`, `makeTemporalPanel`,
+    `makeHistoryCard`, `makeResultCard`, `makeCounter`)
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page
   - `themes/<theme>/index.html`: theme page, stage skeleton and the

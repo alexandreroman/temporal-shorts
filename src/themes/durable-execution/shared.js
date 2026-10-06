@@ -26,26 +26,8 @@ const ORDER_STEPS = [
   { icon: 'truck', label: 'Ship package', fn: 'shipPackage', service: 'Carrier', result: 'tracking 1Z-48' },
   { icon: 'mail', label: 'Email receipt', fn: 'emailReceipt', service: 'Email', result: 'receipt sent' },
 ];
-
-// The 4 steps of the order, as tiles in a row joined by thin links
-function makeStepRow(root, svg, x0, gap, y, w, h) {
-  const xs = ORDER_STEPS.map((_, i) => x0 + i * gap);
-  const links = [0, 1, 2].map(i => {
-    const d = `M ${xs[i] + w / 2 + 2} ${y} L ${xs[i + 1] - w / 2 - 2} ${y}`;
-    return path(svg, d, C.line, 2, false);
-  });
-  const tiles = ORDER_STEPS.map(step => makeStep(root, step.icon, step.label, w, h));
-  return { xs, y, tiles, links };
-}
-// states: one stepState value per tile; tiles pop in from a, links draw just after
-function placeStepRow(row, t, a, states) {
-  row.tiles.forEach((e, i) => {
-    stepState(e, states[i]);
-    const p = P(t, a + i * 0.12, 0.45, backOut);
-    place(e, row.xs[i], row.y, p, clamp(p * 2));
-  });
-  row.links.forEach((l, i) => draw(l, P(t, a + 0.4 + i * 0.12, 0.35)));
-}
+// The 4 steps of the order as [icon, label], for makeStepRow
+const ORDER_TILES = ORDER_STEPS.map(step => [step.icon, step.label]);
 
 // ---------- code card: white card showing a few lines of TypeScript, one div per line
 // Card height = 2 * padY + lines * lineH (256 px for the 6 lines of the order code).
@@ -167,46 +149,8 @@ function setOrderStatus(e, text, color = C.slate) {
   e.style.borderColor = color;
 }
 
-// ---------- RESULT chip carrying an Activity result between the Worker and the history (UV, like the
-// Activity names in the history rows)
-function makeResultCard(p) {
-  return E(p, '<span class="mono" style="font-size:15px;letter-spacing:.12em;padding-left:.12em">RESULT</span>', '', {
-    background: '#E6E7FC', color: '#141414', padding: '6px 14px', borderLeft: `5px solid ${C.uv}`,
-    borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
-  });
-}
-
-// ---------- Worker panel: gear + name on the left, status on the right (700 x 400 holds a code card,
-// centered 42 px below the panel center, with room for its header tab)
-const WORKER = { w: 700, h: 400, codeDy: 42 };
-function makeWorkerPanel(p, name, w = WORKER.w, h = WORKER.h) {
-  const e = E(p,
-    '<div style="position:absolute;left:24px;top:20px;display:flex;align-items:center;gap:12px">'
-    + `<div class="gear">${ICON('gear', 30, C.ink, 1.8)}</div>`
-    + `<span class="mono" style="font-size:20px;letter-spacing:.1em">${name}</span></div>`
-    + '<div class="st mono" style="position:absolute;right:24px;top:26px;font-size:16px;letter-spacing:.08em;'
-    + 'color:var(--slate)"></div>',
-    'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
-  e.gear = e.querySelector('.gear'); e.st = e.querySelector('.st');
-  return e;
-}
-// state: 'idle', 'running' (the gear spins, violet border) or 'crashed' (red)
-function setWorkerStatus(panel, text, state) {
-  const crashed = state === 'crashed';
-  panel.st.textContent = text;
-  panel.st.style.color = crashed ? C.red : C.slate;
-  panel.style.borderColor = crashed ? C.red : state === 'running' ? C.violet : C.line;
-  gearSpin(panel, state === 'running' ? 1 : 0);
-}
-
-// ---------- TEMPORAL panel: official logo header and an "outside the Workers" note, UV border (holds the Event
-// History card)
-function makeTemporalPanel(p, w, h) {
-  return E(p,
-    `<img src="${LOGO}" style="position:absolute;left:26px;top:22px;height:34px;display:block">`
-    + '<div class="lbl" style="position:absolute;right:24px;top:30px;font-size:16px">Outside the Workers</div>',
-    'tile', { width: w + 'px', height: h + 'px', borderColor: C.uv });
-}
+// ---------- TEMPORAL panel header (makeTemporalPanel options): the logo and an "outside the Workers" note
+const TEMPORAL_HEADER = { logoAt: [26, 22], noteAt: [24, 30], note: 'Outside the Workers' };
 
 // ---------- Event History card
 // Row i spans HIST.row0 + i * HIST.rowGap (from the card top) over HIST.rowGap px; the rows below a crash line
@@ -219,71 +163,33 @@ const HISTORY_ROWS = [
   'Workflow completed',
 ];
 // rows: HTML of each row; the rows from crashRow on sit crashGap px lower, leaving room for the
-// "WORKER CRASHED HERE" line; w x h: card size (the room under the last row stays free). Returns the card element
-// with: h, rows, tags (one per row, see setHistoryTag), kept + cut (crash marks, see markEventHistoryCrash) and scan
-// (row highlight, see setHistoryScan).
+// "WORKER CRASHED HERE" line; w x h: card size (the room under the last row stays free). Returns the
+// makeHistoryCard card: its tags are centered on their rows (see setHistoryTag).
 function makeHistory(p, rows, w, h, crashRow, crashGap) {
   const rowTop = i => HIST.row0 + i * HIST.rowGap + (i >= crashRow ? crashGap : 0);
-  const card = E(p,
-    '<div class="mono" style="position:absolute;left:26px;top:20px;font-size:18px;letter-spacing:.14em;'
-    + `color:#141414;display:flex;gap:10px;align-items:center">${ICON('book', 22, '#141414', 1.8)}`
-    + ' EVENT HISTORY</div>',
-    '', { width: w + 'px', height: h + 'px', background: '#F8FAFC', color: '#141414', borderRadius: 'var(--r)' });
-  card.h = h;
-  // kept rows: tinted block over the rows that survive the crash, and a dashed line in the room under them
-  card.kept = E(card, '', '', {
-    left: '14px', top: (HIST.row0 - 2) + 'px', width: (w - 28) + 'px', height: (crashRow * HIST.rowGap + 4) + 'px',
-    background: 'rgba(68,76,231,.08)', borderLeft: '4px solid ' + C.uv, borderRadius: 'var(--rs)', transform: 'none',
+  return makeHistoryCard(p, rows, {
+    w, h, rowTop, rowH: HIST.rowGap, padY: 0, tagTop: i => rowTop(i) + HIST.rowGap / 2, tagRight: 28,
+    tag: { border: false },
+    crash: {
+      keptTop: HIST.row0 - 2, keptH: crashRow * HIST.rowGap + 4,
+      cutTop: HIST.row0 + crashRow * HIST.rowGap + crashGap / 2 - 1,
+      label: 'WORKER CRASHED HERE', labelX: '58%', labelFont: 14,
+    },
+    scanH: HIST.rowGap,
   });
-  card.cut = E(card,
-    '<span class="mono" style="position:absolute;left:58%;top:-10px;transform:translateX(-50%);background:#F8FAFC;'
-    + `padding:0 10px;font-size:14px;line-height:18px;letter-spacing:.12em;color:${C.red};white-space:nowrap">`
-    + 'WORKER CRASHED HERE</span>',
-    '', {
-      left: '26px', top: (HIST.row0 + crashRow * HIST.rowGap + crashGap / 2 - 1) + 'px', width: (w - 52) + 'px',
-      height: '0', borderTop: '2px dashed ' + C.red, transform: 'none',
-    });
-  card.scan = E(card, '', '', {
-    left: '18px', width: (w - 36) + 'px', height: HIST.rowGap + 'px', background: 'rgba(182,100,255,.28)',
-    borderRadius: 'var(--rs)', transform: 'none',
-  });
-  card.rows = rows.map((html, i) => E(card,
-    `<span style="color:#8A93A6;display:inline-block;width:34px">${i + 1}</span>${html}`,
-    'mono', {
-      left: '26px', top: rowTop(i) + 'px', height: HIST.rowGap + 'px',
-      lineHeight: HIST.rowGap + 'px', fontSize: '22px', whiteSpace: 'nowrap', padding: '0 10px', transform: 'none',
-    }));
-  card.tags = rows.map((_, i) => E(card, '', 'mono', {
-    left: 'auto', right: '28px', top: (rowTop(i) + HIST.rowGap / 2) + 'px', fontSize: '15px',
-    letterSpacing: '.1em', padding: '4px 10px', borderRadius: '4px', whiteSpace: 'nowrap', display: 'flex',
-    alignItems: 'center', gap: '6px', transformOrigin: 'right center', transform: 'translateY(-50%)',
-  }));
-  return card;
 }
-// Row i slides in from the right with progress p (on whole pixels, so its text always rasters the same way)
-function showHistoryRow(hist, i, p) {
-  hist.rows[i].style.opacity = clamp(p);
-  hist.rows[i].style.transform = `translateX(${Math.round((1 - clamp(p)) * 26)}px)`;
-}
-// Status tag of row i: 'SAVED' (neon check on black) or any 'REUSED…' label (white on UV).
+// Row i slides in from the right with progress p, on whole pixels
+const showHistoryRow = (hist, i, p) => showRow(hist.rows[i], p, 26, true);
+// Status tag of row i (label and statusTag kind), centered on its row with opacity o.
 // pop: 0 to 1, a brief scale bump; use bumpAt(t, switchTime) so the label switches and shows at native size.
-// innerHTML only changes with the label.
-function setHistoryTag(hist, i, label, o, pop = 0) {
+function setHistoryTag(hist, i, label, kind, o, pop = 0) {
   const e = hist.tags[i];
-  if (e._l !== label) {
-    e._l = label;
-    const reused = label.startsWith('REUSED');
-    e.innerHTML = reused ? label : ICON('check', 16, C.neon, 2.6) + label;
-    e.style.background = reused ? C.uv : '#141414'; e.style.color = reused ? '#FFFFFF' : C.neon;
-  }
+  setStatus(e, label, kind);
   e.style.opacity = clamp(o);
   e.style.transform = `translateY(-50%) scale(${1 + 0.14 * pop})`;
 }
 // Highlight row i (a fractional i slides between rows) with opacity o
-function setHistoryScan(hist, i, o) {
-  hist.scan.style.top = (HIST.row0 + i * HIST.rowGap) + 'px';
-  hist.scan.style.opacity = clamp(o);
-}
+const setHistoryScan = (hist, i, o) => setScan(hist, HIST.row0 + i * HIST.rowGap, o);
 
 // ---------- small animation helpers
 // Brief bump (0 to 1 and back to 0) for a pop on a change or an appearance at `at`. It stays exactly 0 until
@@ -294,25 +200,6 @@ const bumpAt = (t, at) => win(t, at + 0.1, at + 0.25, 0.15);
 // size, then bumps briefly above it (k: height of the bump, 0 for none). A small element never grows from a small
 // scale: its layer could keep the raster of that first tiny frame (a neon check vanishes from its dark badge).
 const popIn = (t, at, k = 0.14) => ({ o: P(t, at, 0.2), s: 1 + k * bumpAt(t, at) });
-// Tick, spinner and cross of a status tile, on its top right corner (the markup of makeStep, see stepState)
-function addStatusMarks(e) {
-  e.insertAdjacentHTML('beforeend',
-    '<div class="spin" style="position:absolute;right:12px;top:12px;width:26px;height:26px;'
-    + `border:3px solid rgba(182,100,255,.25);border-top-color:${C.violet};border-radius:50%;opacity:0"></div>`
-    + `<div class="ok" style="position:absolute;right:8px;top:8px;opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`
-    + `<div class="ko" style="position:absolute;right:8px;top:8px;opacity:0">${ICON('x', 32, C.red, 2.6)}</div>`);
-  e.spin = e.querySelector('.spin'); e.ok = e.querySelector('.ok'); e.ko = e.querySelector('.ko');
-  return e;
-}
-
-// ---------- crash effects
-// screen shake around a crash, as [dx, dy]
-function shakeAt(t, crashAt) {
-  const k = Math.max(0, 1 - Math.abs(t - crashAt - 0.2) / 0.4);
-  return [Math.sin(G * 90) * 12 * k, Math.cos(G * 77) * 8 * k];
-}
-// red flash intensity (0 to 1) peaking at the crash
-function flashAt(t, crashAt) { return Math.max(0, 1 - Math.abs(t - crashAt) / 0.28); }
 
 // ---------- one shot for chapters 5 and 6: Worker panel with the code card on the left, CARD CHARGED counter
 // and order status under it, TEMPORAL panel with the Event History on the right, with room under its rows for the
@@ -364,7 +251,7 @@ const RESULT_LAG = 0.5, SAVE_LAG = 0.6;
 // the crash line
 function makeEventHistoryShot(root, workerNames) {
   const shot = {};
-  shot.workers = workerNames.map(name => makeWorkerPanel(root, name, EH.worker.w, EH.worker.h));
+  shot.workers = workerNames.map(name => makeAppPanel(root, name, EH.worker.w, EH.worker.h));
   const { w, font, lineH, padY, padX, gutter } = EH.code;
   shot.code = makeCodeCard(root, {
     lines: WORKFLOW_CODE, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY, padX, gutter,
@@ -378,7 +265,7 @@ function makeEventHistoryShot(root, workerNames) {
   shot.charge.style.width = EH.charge.w + 'px';
   shot.order = makeOrderStatus(root);
   shot.order.style.width = EH.order.w + 'px';
-  shot.temporal = makeTemporalPanel(root, EH.temporal.w, EH.temporal.h);
+  shot.temporal = makeTemporalPanel(root, EH.temporal.w, EH.temporal.h, TEMPORAL_HEADER);
   shot.hist = makeHistory(root, HISTORY_ROWS, EH.hist.w, EH.hist.h, EH.crashRow, EH.crashGap);
   return shot;
 }
@@ -411,11 +298,6 @@ function flyResultToHistory(chip, t, at, i) {
 // The way back when replaying: from the start of the history row of step i to the end of its await line
 function flyResultToCode(chip, t, at, i) {
   flyChip(chip, t, at, EH.rowStartX, ehRowY(ehStepRow(i)), EH.lineEndX, ehLineY(ehStepLine(i)));
-}
-// Crash marks of the shot: rows 1-3 tinted (oKept), "WORKER CRASHED HERE" in the room above row 4 (oCut)
-function markEventHistoryCrash(hist, oKept, oCut) {
-  hist.kept.style.opacity = clamp(oKept);
-  hist.cut.style.opacity = clamp(oCut);
 }
 // Arrow whose head is filled with the stroke color. The engine's shared marker fills its head with
 // `context-stroke`, which WebKit ignores (black heads in Safari): this one gets its own marker per color, with an

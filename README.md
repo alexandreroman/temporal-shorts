@@ -34,7 +34,9 @@ src/index.html         home page: one card per theme (styles in home.css)
 src/styles.css         Temporal brand styles and the live player's CSS
 src/engine.js          timeline, easing, placement, SVG icons, components,
                        page start (boot)
-src/shared.js          brand helpers shared by every theme (colors, tiles)
+src/shared.js          brand helpers shared by every theme (colors, tiles,
+                       step rows, crash effects, status tags, app and
+                       Temporal panels, Event History card, counters)
 src/player.js          live player: controls, fit-to-window, shortcuts
 src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        theme page (background, subtitles, header, script

@@ -9,6 +9,8 @@ const backOut = p => {
 const P = (t, a, d, f = ease) => f(clamp((t - a) / d));
 const lerp = (a, b, p) => a + (b - a) * p;
 const win = (t, a, b, f = 0.4) => P(t, a, f) * (1 - P(t, b, f)); // visible between a and b
+// Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it
+const swell = (t, at, amp) => 1 + amp * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
 // Scene camera offset for `shift`: starts at `from`, then eases to each [at, dx, dy] stop in turn.
 function pan(t, from, stops, d) {
   let [x, y] = from;
@@ -126,6 +128,8 @@ const ICONS = {
   play: '<path d="M7 4l13 8-13 8z"/>',
   retry: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+  hourglass: '<path d="M6 3h12M6 21h12"/><path d="M8 3v3.5l4 5.5-4 5.5V21M16 3v3.5L12 12l4 5.5V21"/>'
+    + '<path d="M10 18.5h4"/>',
   gear: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3'
     + 'M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
 };

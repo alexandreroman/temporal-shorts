@@ -33,7 +33,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, ROW_Y);
+      s.steps = makeLaptopRow(root, s.svg, ROW_Y);
       s.maria = makeAvatar(root, 'Maria, manager', 140);
       s.card = makeApprovalCard(root, CARD_K);
       s.signal = tag(root, 'Signal: approved', 'neon');
@@ -46,7 +46,7 @@
         `<div style="display:flex;align-items:center;gap:14px">${ICON('laptop', 40, C.ink, 1.6)}`
         + '<span class="mono" style="font-size:24px;letter-spacing:.08em">1 ORDER</span></div>',
         '', { padding: '12px 20px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
-      s.temporal = makeTemporalPanel(root);
+      s.temporal = makeWfTemporalPanel(root);
       s.jr = makeOrderHistory(root);
     },
     update(t, c, s) {
@@ -64,7 +64,7 @@
         t >= ordered ? 2 : t >= orderOn ? 1 : 0,
         t >= notified ? 2 : t >= notifyOn ? 1 : 0,
       ];
-      placeStepRow(s.steps, t, -1, states);
+      placeLaptopRow(s.steps, t, -1, states);
 
       // Maria approves on the approval card, three days later
       const left = P(t, c[1], 0.4);
@@ -111,7 +111,7 @@
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, 1);
       place(s.jr, HIST.x, HIST.y, 1, 1);
       s.jr.rows.forEach((_, i) => {
-        showRow(s.jr, i, i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
+        showRow(s.jr.rows[i], i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
         const isReplayed = i < 4 && t >= replay[i];
         const at = isReplayed ? replay[i] : saved[i];
         setRowTag(s.jr, i, t, isReplayed ? 'REPLAYED' : 'SAVED', at, i < 3 ? 1 : P(t, saved[i], 0.25));

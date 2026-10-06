@@ -28,56 +28,9 @@ function callCard(p, name, arg = '', cls = '') {
   return e;
 }
 
-// Small status label (e.g. on an Event History row); its text and colors are set by setStatus().
-// The transparent border keeps the same size across kinds.
-function statusTag(p) {
-  return E(p, '', 'mono', {
-    fontSize: '15px', letterSpacing: '.1em', padding: '4px 10px', borderRadius: '4px', border: '1.5px solid',
-    whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px',
-  });
-}
-// saved: neon on black, for white panels; ok: neon outline, for the dark stage; both carry a check
-const STATUS_KINDS = {
-  saved: { background: '#141414', color: C.neon, borderColor: 'transparent' },
-  ok: { background: 'rgba(219,255,75,.08)', color: C.neon, borderColor: C.neon },
-  reused: { background: C.uv, color: '#FFFFFF', borderColor: 'transparent' },
-  wait: { background: 'rgba(182,100,255,.14)', color: C.violet, borderColor: C.violet },
-};
-const CHECKED_KINDS = ['saved', 'ok'];
-// kind: 'saved', 'ok', 'reused' or 'wait'; the DOM is only rewritten when label or kind changes
-function setStatus(e, label, kind) {
-  const key = kind + ':' + label;
-  if (e._l === key) return;
-  e._l = key;
-  e.innerHTML = CHECKED_KINDS.includes(kind) ? ICON('check', 16, C.neon, 2.6) + label : label;
-  Object.assign(e.style, STATUS_KINDS[kind]);
-}
-
-// Counter tile: small label, big number and a short mono note next to it (e.g. MODEL CALLS BILLED: 3)
-function makeCounter(p, label, w = 300) {
-  const e = E(p,
-    `<div class="lbl" style="font-size:16px">${label}</div>`
-    + '<div style="display:flex;align-items:baseline;gap:14px;margin-top:6px">'
-    + '<div class="n" style="font-size:84px;line-height:1">0</div>'
-    + '<div class="note mono" style="font-size:20px;letter-spacing:.08em;white-space:nowrap"></div></div>',
-    'tile', { width: w + 'px', textAlign: 'left', padding: '18px 24px' });
-  e.n = e.querySelector('.n'); e.note = e.querySelector('.note');
-  return e;
-}
-function setCounter(e, n, note = '', noteColor = C.neon) {
-  e.n.textContent = n;
-  e.note.textContent = note; e.note.style.color = noteColor;
-}
-
 // Opaque equivalents of the .pill.uv and .pill.violet tints on the Space Black stage: a pill that sits on
 // a line (a lane, a frame, a connector) needs a solid background, or the line shows through it.
 const OPAQUE = { uv: '#1D1E3A', violet: '#2B1F35' };
-
-// A list row fades in as it slides into place from dx px to its right (p from 0 to 1)
-function showRow(e, p, dx = 26) {
-  e.style.opacity = p;
-  e.style.transform = `translateX(${(1 - p) * dx}px)`;
-}
 
 // Ambient clock of a scene: G counted from the scene's start, so it equals the scene time t in frozen frames.
 // Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G keeps real time while t
@@ -85,9 +38,4 @@ function showRow(e, p, dx = 26) {
 // as ambientTime(this). Story animations stay on t.
 function ambientTime(sc) {
   return G - sc.start;
-}
-
-// Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it
-function swell(t, at, amp) {
-  return 1 + amp * Math.max(0, 1 - Math.abs(t - at - 0.1) / 0.25);
 }

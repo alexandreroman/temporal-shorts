@@ -22,14 +22,13 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, 420, 360, 290, 280, 140);
+      s.steps = makeStepRow(root, s.svg, STEPS, 420, 360, 290, 280, 140);
       s.ticket = makeTicket(root);
       s.mem = makeMemory(root, 860, 200);
       s.mblocks = makeMemBlocks(root, 5, 76, 56);
       s.bill = makeBill(root);
       s.bolt = E(root, ICON('bolt', 150, C.red, 1.6));
-      // oversized so it still covers the whole stage once the scene is shifted
-      s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
+      s.flash = makeFlash(root);
       s.crash = tag(root, 'App crash', 'red big');
       s.causes = ['Restart', 'Deploy', 'Network cut'].map(l => tag(root, l));
       s.redo = path(s.svg, 'M 1140 210 Q 780 80 430 205', C.red, 3);
@@ -73,7 +72,7 @@
           placeMemBlock(b, x, y, P(t, add2[i], 0.35, backOut), 0, sx, sy);
         }
       });
-      place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);
+      placeFlash(s.flash, t, crashAt);
       const bp = P(t, crashAt, 0.35, backOut);
       place(s.bolt, 1290, 190, bp, win(t, crashAt, crashAt + 1.5, 0.2));
       place(s.crash, 1560, 440, bp, win(t, crashAt + 0.1, c[1] + 0.3, 0.25));

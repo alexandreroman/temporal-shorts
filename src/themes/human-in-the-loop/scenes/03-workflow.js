@@ -25,15 +25,14 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, ROW_Y);
+      s.steps = makeLaptopRow(root, s.svg, ROW_Y);
       s.A = makeWorkflowApp(root, 'APP INSTANCE A');
       s.strip = makeClockStrip(root);
       s.clock = makeWaitClock(root, 'Waiting for Maria');
-      s.temporal = makeTemporalPanel(root);
+      s.temporal = makeWfTemporalPanel(root);
       s.jr = makeOrderHistory(root);
       s.causes = ['Deploy', 'Restart'].map(l => tag(root, l));
-      // oversized so it still covers the whole stage once the scene is shifted
-      s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
+      s.flash = makeFlash(root);
     },
     update(t, c, s) {
       // the Workflow runs its first lines, each step saved in the history before the next one starts
@@ -49,7 +48,7 @@
         t >= waitOn ? 4 : t >= askOn ? 1 : 0,
         0, 0,
       ];
-      placeStepRow(s.steps, t, c[0] + 0.1, states, sx, sy);
+      placeLaptopRow(s.steps, t, c[0] + 0.1, states, sx, sy);
 
       // app instance A: runs the Workflow, then waits with nothing running, then the restart stops it
       const aIn = P(t, c[0] + 0.3, 0.5, backOut);
@@ -86,7 +85,7 @@
         place(e, CAUSE_X[i] + sx, STRIP.y + sy, p, clamp(p * 2) * (1 - P(t, restartAt + 1.6, 0.4)));
       });
       // a softer flash than a crash: a restart is routine
-      place(s.flash, 960, 540, 1, flashAt(t, restartAt) * 0.25);
+      placeFlash(s.flash, t, restartAt, 0.25);
 
       // Temporal and its Event History, outside the app: untouched by the restart
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 0.6, 0.5));
@@ -94,7 +93,7 @@
       place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 0.8, 0.5));
       // the saved rows pulse once when the subtitle points at the history
       saved.forEach((at, i) => {
-        showRow(s.jr, i, P(t, at - 0.1, 0.3));
+        showRow(s.jr.rows[i], P(t, at - 0.1, 0.3));
         const pulse = c[2] + 0.6 + i * 0.15;
         setRowTag(s.jr, i, t, 'SAVED', t >= pulse ? pulse : at, P(t, at, 0.25));
       });

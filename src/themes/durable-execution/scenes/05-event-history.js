@@ -33,7 +33,7 @@
       // Worker first, then Temporal and its Event History
       const wp = P(t, c[0] + 1.1, 0.5, backOut);
       place(worker, EH.worker.x, EH.worker.y, wp, clamp(wp * 2));
-      setWorkerStatus(worker, t >= go ? 'RUNNING' : 'IDLE', t >= go ? 'running' : 'idle');
+      setAppStatus(worker, t >= go ? 'RUNNING' : 'IDLE', t >= go ? 'running' : 'stopped');
       const chargePop = bumpAt(t, saved[0]);
       placeEventHistoryShot(shot, {
         code: P(t, c[0] + 1.4, 0.45), charge: P(t, c[0] + 1.7, 0.45), order: P(t, c[0] + 1.9, 0.45),
@@ -57,9 +57,9 @@
       shot.hist.rows.forEach((_, i) => showHistoryRow(shot.hist, i, i < 3 ? P(t, written[i] - 0.1, 0.3) : 0));
       shot.hist.tags.forEach((_, i) => {
         const at = i < 3 ? written[i] : Infinity;
-        setHistoryTag(shot.hist, i, 'SAVED', P(t, at, 0.25), bumpAt(t, at));
+        setHistoryTag(shot.hist, i, 'SAVED', 'saved', P(t, at, 0.25), bumpAt(t, at));
       });
-      markEventHistoryCrash(shot.hist, 0, 0);
+      markCrash(shot.hist, 0, 0);
       setHistoryScan(shot.hist, 0, 0);
     }
   });

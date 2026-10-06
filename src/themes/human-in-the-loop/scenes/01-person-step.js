@@ -49,7 +49,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, ROW_Y);
+      s.steps = makeLaptopRow(root, s.svg, ROW_Y);
       const linkD = `M ${APPROVAL_X} ${ROW_Y + ROW.h / 2 + 2} L ${APPROVAL_X} ${LABEL_Y - 24}`;
       s.ruleLink = path(s.svg, linkD, C.violet, 2, false);
       s.rule = tag(root, 'Over $1,000: manager approval', 'violet');
@@ -70,7 +70,7 @@
         t >= waitOn ? 4 : t >= askOn ? 1 : 0,
         0, 0,
       ];
-      placeStepRow(s.steps, t, c[0] + 0.1, states);
+      placeLaptopRow(s.steps, t, c[0] + 0.1, states);
 
       // Sam's request: avatar and card under the steps, then the card enters the process at CHECK
       const out1 = P(t, c[1], 0.4);

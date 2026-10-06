@@ -65,7 +65,7 @@
     chip.firstChild.textContent = label;
     return chip;
   };
-  // Worker status block: a label, then one icon and one text, swapped by setStatus
+  // Worker status block: a label, then one icon and one text, swapped by setStatusBlock
   const makeStatusBlock = p => {
     const icons = Object.keys(ICON_COLOR)
       .map(name => `<div data-icon="${name}" style="position:absolute;inset:0;opacity:0">`
@@ -83,7 +83,7 @@
     e.tx = e.querySelector('.tx');
     return e;
   };
-  const setStatus = (block, key) => {
+  const setStatusBlock = (block, key) => {
     const st = STATUS[key];
     if (block._key !== key) {
       block._key = key;
@@ -138,7 +138,7 @@
       },
     ],
     build(root, s) {
-      s.workers = ['WORKER A', 'WORKER B'].map(name => makeWorkerPanel(root, name, WK.w, WK.h));
+      s.workers = ['WORKER A', 'WORKER B'].map(name => makeAppPanel(root, name, WK.w, WK.h));
       const { w, font, lineH, padY } = CODE_CARD;
       s.code = makeCodeCard(root, { lines: WAIT_CODE, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY });
       s.code.hdr.style.opacity = 1;
@@ -148,7 +148,7 @@
       s.sleeping = makeLineBadge(s.code, SLEEP_LINE, ICON('clock', 20, '#FFFFFF', 2.2), C.uv);
       s.spin = makeLineBadge(s.code, 0, spinnerRing(26), 'none');
       s.status = makeStatusBlock(root);
-      s.temporal = makeTemporalPanel(root, TP.w, TP.h);
+      s.temporal = makeTemporalPanel(root, TP.w, TP.h, TEMPORAL_HEADER);
       s.hist = makeHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h, ROWS.length, 0);
       s.timer = makeTimerBlock(root);
       s.chips = {
@@ -187,9 +187,9 @@
       if (t >= runAt) status = 'running';
       if (t >= doneAt) status = 'free';
       const busy = status === 'running' || status === 'replaying';
-      setWorkerStatus(workerA, 'VERSION 1', busy ? 'running' : 'idle');
-      setWorkerStatus(workerB, 'VERSION 2', busy ? 'running' : 'idle');
-      setStatus(s.status, status);
+      setAppStatus(workerA, 'VERSION 1', busy ? 'running' : 'stopped');
+      setAppStatus(workerB, 'VERSION 2', busy ? 'running' : 'stopped');
+      setStatusBlock(s.status, status);
       place(s.status, WK.x, BLOCK.y, 1, P(t, c[0] + 0.6, 0.4));
 
       // the code card dims while no Worker runs it (restart, deploy)
@@ -228,9 +228,9 @@
         showHistoryRow(s.hist, i, P(t, at - 0.1, 0.3));
         // TimerStarted bumps again as the Worker restarts: it stays in the history
         const bump = i === STARTED_ROW ? bumpAt(t, at) + bumpAt(t, restartAt) + bumpAt(t, deployAt) : bumpAt(t, at);
-        setHistoryTag(s.hist, i, 'SAVED', P(t, at, 0.25), bump);
+        setHistoryTag(s.hist, i, 'SAVED', 'saved', P(t, at, 0.25), bump);
       });
-      markEventHistoryCrash(s.hist, 0, 0);
+      markCrash(s.hist, 0, 0);
       // the TimerStarted row stays lit while the Worker comes and goes; then the replay reads the history: the
       // shipPackage row, then TimerFired (the sleep returns at once)
       const replayRow = t < replaySleep ? SHIP_ROW : FIRED_ROW;

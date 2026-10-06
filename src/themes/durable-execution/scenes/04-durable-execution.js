@@ -62,7 +62,7 @@
   };
   // state: 1 running, 2 succeeded, 3 failed (as in stepState)
   const attemptState = (e, st) => {
-    e.style.borderColor = [C.line, C.violet, C.neon, C.red][st];
+    e.style.borderColor = STEP_COLORS[st];
     e.n.style.opacity = st === 1 ? 1 : 0;
     e.ok.style.opacity = st === 2 ? 1 : 0;
     e.ko.style.opacity = st === 3 ? 1 : 0;

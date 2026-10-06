@@ -60,7 +60,7 @@
         width: '24px', height: '24px', background: C.violet, borderRadius: '50%',
         boxShadow: '0 0 18px 4px rgba(182,100,255,.45)',
       });
-      s.app = makeAppPanel(root, 'APP', APP.w, APP.h);
+      s.app = makeAppPanel(root, 'APP', APP.w, APP.h, APP_TEXT);
       s.mem = E(s.app,
         '<div class="lbl" style="position:absolute;left:20px;top:16px;display:flex;gap:10px;align-items:center;'
         + `padding-left:0">${ICON('server', 22, C.slate, 1.8)} App memory</div>`
@@ -78,7 +78,7 @@
         padding: '10px 16px', borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
       s.lost = tag(root, 'Request lost', 'red big');
-      s.flash = E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
+      s.flash = makeFlash(root);
       s.tiles = PLUMBING.map(([icon, label, , , w]) => iconTile(root, icon, label, w, TILE.h));
       s.stuck = tag(root, 'Request stuck', 'red big'); s.twice = tag(root, 'Ordered twice', 'red big');
       // solid fill: the tags sit on the tangled links, which must not show through them
@@ -103,7 +103,7 @@
       });
       s.vide.style.opacity = win(t, crashAt + 1.0, back, 0.4);
       place(s.lost, APP.x, APP.y + 79, P(t, crashAt + 1.4, 0.45, backOut), win(t, crashAt + 1.4, back, 0.3));
-      place(s.flash, 960, 540, 1, flashAt(t, crashAt) * 0.4);
+      placeFlash(s.flash, t, crashAt);
 
       // day timeline: the marker walks from DAY 1 and stops at the restart
       const lp = P(t, c[0] + 0.3, 0.5);

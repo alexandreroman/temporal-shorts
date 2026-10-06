@@ -53,10 +53,6 @@
   const TRAVEL_HEAD = { x: GAP.x1 + 185, y: CARDS_TOP + CARD.pad + CARD.head / 2 };
   // the instance line sits under TravelAgent, on its left edge: handle and status of the running child workflow
   const INSTANCE_Y = CARDS_Y + CARD_H / 2 + 24 + 17;
-  const INSTANCE_STATES = {
-    started: { text: 'STARTED', color: C.violet, background: 'rgba(182,100,255,.14)' },
-    closed: { text: 'CLOSED', color: C.slate, background: 'transparent' },
-  };
 
   // hex color between a and b (p from 0 to 1), for borders that change with the instance's state
   const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
@@ -292,13 +288,9 @@
       const stopSent = c[4] + 0.8;
       fly(s.stop, t, stopSent, CALL_X0, CALL_Y, stopSent + 1.3, 0.9, CALL_X1, CALL_Y,
         closedAt, TRAVEL_HEAD.x, TRAVEL_HEAD.y);
-      const state = t >= closedAt + 0.3 ? INSTANCE_STATES.closed : INSTANCE_STATES.started;
-      const status = s.instance.status;
-      if (status.textContent !== state.text) status.textContent = state.text;
-      Object.assign(status.style, {
-        color: state.color, borderColor: state.color, background: state.background,
-        transform: `scale(${swell(t, closedAt + 0.3, 0.12).toFixed(3)})`,
-      });
+      const isClosed = t >= closedAt + 0.3;
+      setStatus(s.instance.status, isClosed ? 'CLOSED' : 'STARTED', isClosed ? 'closed' : 'wait');
+      s.instance.status.style.transform = `scale(${swell(t, closedAt + 0.3, 0.12).toFixed(3)})`;
       // the card is live (UV border and glow) from the start until it is closed (its content dims, see phase 1)
       const live = P(t, started + 0.3, 0.4) * (1 - closed);
       s.travel.style.borderColor = mix(C.line, C.uv, live);
