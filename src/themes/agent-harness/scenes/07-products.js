@@ -1,4 +1,4 @@
-// ===================== 7. BUILT FOR REAL PRODUCTS
+// ===================== 7. CALLBACK TOOLS, TYPED SESSIONS
 // The block keeps every name declared in this file local to this scene.
 {
   // Layout grid: the callback column spans x 140-580, the UI window x 800-1780 (same right zone as chapter 6);
@@ -15,14 +15,6 @@
   const UI = { x: 1290, w: 980, h: 596, tagH: 48 };
   UI.y = TOP + UI.h / 2;
   const LINK = { y: LEFT.appY, from: LEFT.x + LEFT.w / 2 + 4, to: UI.x - UI.w / 2 - 4 };
-  // Recap tiles, one chapter each: 3 columns x 2 rows across the frame, 40 px gutters; they land 1 s apart
-  const RECAP = [
-    ['retry', 'Survives crashes'], ['stream', 'Event stream'], ['layers', 'Typed subagents'],
-    ['user', 'Human approvals'], ['code', 'Code Mode'], ['agent', 'Your AI SDK'],
-  ];
-  const TILE = { w: 520, h: 240, gap: 40 };
-  const recapX = i => 140 + TILE.w / 2 + (i % 3) * (TILE.w + TILE.gap);
-  const recapY = i => 522 + (Math.floor(i / 3) - 0.5) * (TILE.h + TILE.gap);
 
   // the app tile: cloud header, the agent inside and where it runs
   const makeAppTile = p => E(p,
@@ -63,12 +55,9 @@
     e.foot = e.querySelector('.foot');
     return e;
   };
-  // recap tile: a large icon over its label, at the size of this grid
-  const makeRecapTile = (p, icon, label) => iconTile(p, icon, label, TILE.w, TILE.h, C.ink,
-    { size: 76, font: 26, gap: 20 });
 
   scene({
-    chapter: 7, title: 'Built for real products',
+    chapter: 7, title: 'Callback tools, typed sessions',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
     pre: 1.5, post: 2.0,
     // laid out at final stage coordinates on the grid (centered near (960, 521)); while the callback column
@@ -81,11 +70,9 @@
       },
       {
         text: "Typed React and Svelte SDKs turn your agent into a live, typed session inside your product UI.",
+        // the SDK pills land at c[1] + 5.9 and read for 2 s before the window ends; post then holds the final
+        // composition
         after: 1.2,
-      },
-      {
-        text: "Durable, observable, composable agents with human approvals, built with the AI SDKs you already use.",
-        after: 0.6,
       },
     ],
     build(root, s) {
@@ -119,22 +106,18 @@
           gap: '24px',
         });
       s.sdks = [...s.sdkRow.querySelectorAll('.pill')];
-
-      // recap
-      s.recap = RECAP.map(([icon, label]) => makeRecapTile(root, icon, label));
     },
     update(t, c, s) {
-      const out = 1 - P(t, c[2], 0.5);
       const pop = at => P(t, at, 0.5, backOut);
 
       // ---- c[0]: the call travels to the laptop, which runs it and sends the result back
-      place(s.lblL, LEFT.x, HEADING_Y, 1, P(t, c[0] + 0.1, 0.4) * out);
+      place(s.lblL, LEFT.x, HEADING_Y, 1, P(t, c[0] + 0.1, 0.4));
       const appIn = pop(c[0] + 0.2);
-      place(s.app, LEFT.x, LEFT.appY, appIn, clamp(appIn * 2) * out);
+      place(s.app, LEFT.x, LEFT.appY, appIn, clamp(appIn * 2));
       const laptopIn = pop(c[0] + 0.6);
-      place(s.laptop, LEFT.x, LEFT.laptopY, laptopIn, clamp(laptopIn * 2) * out);
+      place(s.laptop, LEFT.x, LEFT.laptopY, laptopIn, clamp(laptopIn * 2));
       stepState(s.laptop, t >= c[0] + 4.8 ? 2 : t >= c[0] + 3.3 ? 1 : 0);
-      draw(s.arrow, P(t, c[0] + 1.0, 0.6), out);
+      draw(s.arrow, P(t, c[0] + 1.0, 0.6));
       fly(s.call, t, c[0] + 1.9, LEFT.x, ARROW.top + 30, c[0] + 2.2, 0.8, LEFT.x, ARROW.bottom - 30,
         c[0] + 3.1, LEFT.x, LEFT.laptopY);
       fly(s.result, t, c[0] + 4.9, LEFT.x, ARROW.bottom - 30, c[0] + 5.2, 0.8, LEFT.x, ARROW.top + 30,
@@ -142,31 +125,23 @@
 
       // ---- c[1]: the trip planner UI, then its typed session with the agent and the SDKs it is built with
       const uiIn = pop(c[1] + 0.5);
-      place(s.lblR, UI.x, HEADING_Y, 1, P(t, c[1] + 0.5, 0.5) * out);
-      place(s.planner, UI.x, UI.y, uiIn, clamp(uiIn * 2) * out);
+      place(s.lblR, UI.x, HEADING_Y, 1, P(t, c[1] + 0.5, 0.5));
+      place(s.planner, UI.x, UI.y, uiIn, clamp(uiIn * 2));
       s.planner.rows.forEach((row, i) => showRow(row, P(t, c[1] + 1.2 + i * 0.4, 0.4), 24));
       s.planner.foot.style.opacity = P(t, c[1] + 2.5, 0.4);
-      draw(s.link, P(t, c[1] + 3.2, 0.6), out);
-      place(s.linkL, (LINK.from + LINK.to) / 2, LINK.y - 30, 1, P(t, c[1] + 3.6, 0.4) * out);
+      draw(s.link, P(t, c[1] + 3.2, 0.6));
+      place(s.linkL, (LINK.from + LINK.to) / 2, LINK.y - 30, 1, P(t, c[1] + 3.6, 0.4));
       // session traffic: once the link is drawn, a pulse runs along it in an endless loop. It starts on the story
       // clock t but runs its laps on the ambient clock, which equals t in frozen frames
       const pulseStart = c[1] + 3.9, pulseLap = 1.4;
       const lap = ((ambientTime(this) - pulseStart) % pulseLap) / pulseLap;
       const pulseOn = t >= pulseStart ? Math.sin(Math.PI * lap) : 0;
-      place(s.pulse, lerp(LINK.from + 10, LINK.to - 16, lap), LINK.y, 1, pulseOn * out);
-      place(s.sdkRow, UI.x, BOTTOM - UI.tagH / 2, 1, P(t, c[1] + 5.0, 0.4) * out);
+      place(s.pulse, lerp(LINK.from + 10, LINK.to - 16, lap), LINK.y, 1, pulseOn);
+      place(s.sdkRow, UI.x, BOTTOM - UI.tagH / 2, 1, P(t, c[1] + 5.0, 0.4));
       s.sdks.forEach((e, i) => {
         const p = pop(c[1] + 5.1 + i * 0.3);
         e.style.transform = `scale(${p})`;
         e.style.opacity = clamp(p * 2);
-      });
-
-      // ---- c[2]: the recap, one tile per feature, 1 s apart; each lights up as it lands
-      s.recap.forEach((e, i) => {
-        const at = c[2] + 0.7 + i;
-        const p = P(t, at, 0.45, backOut);
-        place(e, recapX(i), recapY(i), p, clamp(p * 2));
-        e.style.borderColor = t >= at && t < at + 1.0 ? C.uv : C.line;
       });
     }
   });

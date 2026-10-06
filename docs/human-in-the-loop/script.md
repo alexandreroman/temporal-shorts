@@ -118,13 +118,22 @@ the laptop, NOTIFY Sam.
     "Timer started: reminder in 2 days" and "Timer started: escalation in 5
     days" at DAY 0, "Timer fired: reminder due" at DAY 2, "Timer fired:
     escalation due" at DAY 5, each SAVED; pill "TIMERS ARE DURABLE TOO".
-- **2:03** Approvals, reviews, signatures, an AI agent asking before it acts:
+
+## 06 What you get
+
+- **2:04** The Workflow waits for days with no code running, survives
+  restarts and deploys, and never redoes a step.
+  - Visuals: 4 benefit tiles land one at a time across the frame, each
+    lighting up as it lands: WAITS FOR DAYS (hourglass) / SURVIVES RESTARTS
+    (restart arrow) / NO STEP REDONE (check) / SENDS REMINDERS (bell).
+- **2:12** Approvals, reviews, signatures, an AI agent asking before it acts:
   the same pattern fits them all.
-  - Visuals: 4 tiles: Approvals / Reviews / Signatures / AI agent checks.
+  - Visuals: The benefit tiles fade out; 4 use-case tiles pop in one at a
+    time in their places: Approvals / Reviews / Signatures / AI agent checks.
 
 ## Outro
 
-- **2:13** Temporal Workflows wait for people as long as it takes, and pick
+- **2:22** Temporal Workflows wait for people as long as it takes, and pick
   up right where they left off.
   - Visuals: Person avatar with a neon check badge, title
     "Human-in-the-Loop", tagline "WAITS AS LONG AS IT TAKES", Temporal

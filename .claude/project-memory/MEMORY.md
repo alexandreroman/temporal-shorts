@@ -46,3 +46,4 @@
 - [Human-in-the-Loop story](references/project_hitl-story.md) — Sam's laptop, Maria approves; ch3/ch4 mirror DAA ch7; Signal, replay, timers
 - [Custom domain](references/project_custom-domain.md) — durable.withtemporal.dev, Cloudflare CNAME to Pages, DNS only, shared zone
 - [Social preview images stay current](references/feedback_social-previews.md) — `make social` + commit PNGs on intro, title or home changes
+- [Recap chapter: What you get](references/project_recap-chapter.md) — every theme ends with its own "What you get" chapter before the outro
