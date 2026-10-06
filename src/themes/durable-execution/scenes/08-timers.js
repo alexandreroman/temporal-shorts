@@ -55,7 +55,7 @@
   const makeLineBadge = (card, i, html, background) => E(card, html, '', {
     left: (card.w - 48) + 'px', top: (card.padY + i * card.lineH + (card.lineH - 28) / 2) + 'px',
     width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background, borderRadius: 'var(--rs)', transform: 'none',
+    background, borderRadius: 'var(--rs)',
   });
   // RESULT-style chip with another label
   const makeChip = (p, label) => {
@@ -119,7 +119,6 @@
   scene({
     chapter: 8, title: 'Durable timers',
     // the two panels span x 120..1800 and y 152..892, centered on (960, 522)
-    shift: [0, 0],
     subs: [
       {
         text: "A Workflow can even <b>wait for days</b>, for a delivery or a reply, without tying up a Worker.",
@@ -146,7 +145,7 @@
       s.spin = makeLineBadge(s.code, 0, spinnerRing(26), 'none');
       s.status = makeStatusBlock(root);
       s.temporal = makeTemporalPanel(root, TP.w, TP.h, TEMPORAL_HEADER);
-      s.hist = makeHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h, ROWS.length, 0);
+      s.hist = makeHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h);
       s.timer = makeTimerBlock(root);
       s.chips = {
         ship: makeResultCard(root), start: makeChip(root, 'START TIMER'), wake: makeChip(root, 'WAKE UP'),

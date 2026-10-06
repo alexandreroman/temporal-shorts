@@ -18,7 +18,6 @@
   const ARC = { x0: workerRight + 14, x1: workerRight + 22, bulge: workerRight + 105 };
   scene({
     chapter: 6, title: 'When a Worker crashes',
-    shift: EH.shift,
     subs: [
       {
         text: "Now the Worker crashes mid-order, during <b>shipPackage</b>. "
@@ -94,14 +93,15 @@
       if (t >= completed) setOrderStatus(shot.order, 'COMPLETE', C.neon);
       else setOrderStatus(shot.order, 'PENDING');
 
-      // code highlight: the shipPackage line until the crash, back on it for the retry on Worker B; then line 1,
-      // each replayed await line, the emailReceipt line and the closing brace
+      // code highlight: the shipPackage line until the crash, then off during the retry, as Worker B runs only the
+      // Activity, not Workflow code (the spinner and the RETRY chip mark the line end); back on at the jump to
+      // line 1, then each replayed await line, the emailReceipt line and the closing brace
       let line = ehStepLine(SHIP);
       line = lerp(line, 0, P(t, jump + 0.2, 0.6));
       replay.forEach((q, i) => { line = lerp(line, ehStepLine(i), P(t, q, 0.25)); });
       line = lerp(line, ehStepLine(EMAIL), P(t, run, 0.25));
       line = lerp(line, WORKFLOW_CODE.length - 1, P(t, finish, 0.25));
-      const barOn = dead ? P(t, retryRun - 0.2, 0.2) * (1 - P(t, completed + 0.3, 0.4)) : 1;
+      const barOn = dead ? P(t, jump, 0.2) * (1 - P(t, completed + 0.3, 0.4)) : 1;
       const lineSx = dead ? 0 : sx, lineSy = dead ? 0 : sy;
       setCodeLine(shot.code, line, barOn);
       const retrySpin = win(t, retryRun + 0.2, retryRes, 0.15);

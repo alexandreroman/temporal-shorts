@@ -126,7 +126,6 @@
     // the chapter header reads before the first subtitle; the final composition holds before the fade
     pre: 1.5, post: 2.0,
     // laid out at final positions on the grid (x 140-1780), so no offset is needed
-    shift: [0, 0],
     subs: [
       {
         text: "An agent is more than text in, text out: it exposes typed operations, with their inputs and outputs.",

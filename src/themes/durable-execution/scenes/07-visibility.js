@@ -124,7 +124,7 @@
   const at = (left, top) => `position:absolute;left:${left}px;top:${top}px;`;
   // a part that update() changes, positioned on whole pixels inside its parent and visible
   const part = (parent, html, css = {}, cls = '') => {
-    const e = E(parent, html, cls, { transform: 'none', ...css });
+    const e = E(parent, html, cls, css);
     e.style.opacity = 1;
     return e;
   };
@@ -553,7 +553,6 @@
   scene({
     chapter: 7, title: 'Full visibility',
     // the window is laid out centered at (960, 522)
-    shift: [0, 0],
     subs: [
       {
         text: "Temporal also shows every Workflow in its <b>web UI</b>: which ones are running, completed or failed.",

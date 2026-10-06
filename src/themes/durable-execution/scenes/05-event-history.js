@@ -5,7 +5,6 @@
 {
   scene({
     chapter: 5, title: 'The Event History',
-    shift: EH.shift,
     subs: [
       {
         text: "Your code runs in <b>Workers</b>, programs on your own servers. "

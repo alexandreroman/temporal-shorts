@@ -57,7 +57,6 @@
     // the chapter header reads before the first subtitle; the final composition holds before the fade
     pre: 1.5, post: 2.0,
     // laid out in final coordinates: the gate column reserves the AUTO MODE space from the start
-    shift: [0, 0],
     subs: [
       {
         text: "Some tool calls need a person's OK first, like a payment. The approval policy decides which ones.",

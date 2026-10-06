@@ -161,9 +161,11 @@ money is tracked by a CARD CHARGED counter in dollars.
   - Visuals: Same layout, `shipPackage` running; red flash + shake, WORKER
     A CRASHED, "WORKER CRASHED HERE" line under row 3 and tinted kept rows;
     WORKER B appears (IDLE). A RETRY chip flies from the history, under the
-    crash line, to the `shipPackage` line: WORKER B shows RETRYING ACTIVITY,
-    the line runs (spinner), its RESULT chip flies to the history and row 4
-    "shipPackage: tracking 1Z-48" slides in SAVED, below the crash line.
+    crash line, to the end of the `shipPackage` line: WORKER B shows
+    RETRYING ACTIVITY and a spinner turns at the line end, the line itself
+    not highlighted (only the Activity runs); its RESULT chip flies to the
+    history and row 4 "shipPackage: tracking 1Z-48" slides in SAVED, below
+    the crash line.
     (In a real run, Temporal detects the lost attempt through the
     Activity's Start-To-Close timeout; the video does not show it.)
 - **1:59** Then that Worker runs the Workflow from the start, and Temporal

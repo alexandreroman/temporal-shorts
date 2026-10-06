@@ -44,7 +44,6 @@
     chapter: 2, title: 'Survives crashes',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
     pre: 1.5, post: 2.0,
-    shift: [0, 0],
     subs: [
       {
         text: "Every model call and tool call is saved in the agent's Temporal history as soon as it completes.",

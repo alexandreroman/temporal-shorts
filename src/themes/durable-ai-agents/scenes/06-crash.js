@@ -77,7 +77,7 @@
       });
       placeFlash(s.flash, t, crashAt);
       const bp = P(t, crashAt, 0.35, backOut);
-      place(s.bolt, 1290, 190, bp, win(t, crashAt, crashAt + 1.5, 0.2));
+      place(s.bolt, 1650, 190, bp, win(t, crashAt, crashAt + 1.5, 0.2));
       place(s.crash, 1560, 440, bp, win(t, crashAt + 0.1, c[1] + 0.3, 0.25));
       s.causes.forEach((e, i) => {
         const p = P(t, c[0] + 4.8 + i * 0.3, 0.4, backOut);

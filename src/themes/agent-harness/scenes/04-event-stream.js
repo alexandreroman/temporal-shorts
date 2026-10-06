@@ -122,7 +122,7 @@
         + `display:flex;gap:12px;align-items:center">${ICON('eye', 24, '#141414', 1.8)} CONSOLE</div>`,
         'paper', { width: CONSOLE.w + 'px', height: CONSOLE.h + 'px' });
       const badgeCss = color => ({
-        left: 'auto', right: '24px', top: '22px', transform: 'none', display: 'flex', alignItems: 'center', gap: '8px',
+        left: 'auto', right: '24px', top: '22px', display: 'flex', alignItems: 'center', gap: '8px',
         fontSize: '16px', letterSpacing: '.12em', padding: '4px 10px 4px calc(10px + .12em)', borderRadius: '4px',
         border: `1.5px solid ${color}`, color, transformOrigin: 'right center',
       });
@@ -134,19 +134,19 @@
         { ...badgeCss(C.uv), background: 'rgba(68,76,231,.1)' });
       s.marks = [HUMAN_ROW, TOTAL_ROW].map(i => E(s.console, '', '', {
         left: '14px', top: (CONSOLE.row0 - 4 + i * CONSOLE.rowGap) + 'px', width: (CONSOLE.w - 28) + 'px',
-        height: (CONSOLE.rowH + 8) + 'px', borderRadius: 'var(--rs)', transform: 'none',
+        height: (CONSOLE.rowH + 8) + 'px', borderRadius: 'var(--rs)',
         background: i === HUMAN_ROW ? 'rgba(182,100,255,.16)' : 'rgba(68,76,231,.12)',
         borderLeft: `4px solid ${i === HUMAN_ROW ? C.violet : C.uv}`,
       }));
       s.scan = E(s.console, '', '', {
         left: '14px', width: (CONSOLE.w - 28) + 'px', height: (CONSOLE.rowH + 8) + 'px',
-        background: 'rgba(68,76,231,.2)', borderRadius: 'var(--rs)', transform: 'none',
+        background: 'rgba(68,76,231,.2)', borderRadius: 'var(--rs)',
       });
       s.rows = ROWS.map(([type, text], i) => E(s.console,
         `${chipHtml(type)}<span style="margin-left:20px;${i === TOTAL_ROW ? 'font-weight:700' : ''}">${text}</span>`,
         'mono', {
           left: '28px', top: (CONSOLE.row0 + i * CONSOLE.rowGap) + 'px', fontSize: '22px', whiteSpace: 'nowrap',
-          display: 'flex', alignItems: 'center', height: CONSOLE.rowH + 'px', transform: 'none',
+          display: 'flex', alignItems: 'center', height: CONSOLE.rowH + 'px',
         }));
       s.tags = [HUMAN_ROW, TOTAL_ROW].map(i => {
         const e = statusTag(s.console);
@@ -166,7 +166,7 @@
         + `width:12px;height:22px;margin-left:-6px;border-radius:3px;background:${C.uv}"></div></div>`,
         '', {
           left: '28px', top: (CONSOLE.row0 + LAST_ROW * CONSOLE.rowGap + CONSOLE.rowH + 30) + 'px', display: 'flex',
-          alignItems: 'center', transform: 'none',
+          alignItems: 'center',
         });
       s.bar.fill = s.bar.querySelector('.fill'); s.bar.head = s.bar.querySelector('.head');
     },

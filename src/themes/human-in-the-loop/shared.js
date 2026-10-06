@@ -1,8 +1,6 @@
 // ===================== Human-in-the-Loop helpers (shared by the scenes of this theme)
 // Extra stroke icons (24 grid), in the hand-drawn style of engine.js
 Object.assign(ICONS, {
-  // a clock whose hand ends a little higher than durable-execution's `clock`
-  clockFlat: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.2"/>',
   bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.8 1.8H4.2z"/><path d="M10 21.2h4"/>',
   db: '<ellipse cx="12" cy="5.5" rx="7.5" ry="2.5"/><path d="M4.5 5.5v13c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-13'
     + 'M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/>',
@@ -268,9 +266,9 @@ const HIST = {
 };
 // stage y of the middle of row i in that card, where things flying into the history land
 const historyRowY = i => HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2;
-// Kinds of the row tags (see setRowTag): SAVED (neon on black), REPLAYED (white on UV), STILL WAITING (white on
-// violet)
-const ROW_TAG_KINDS = { 'SAVED': 'saved', 'REPLAYED': 'replayed', 'STILL WAITING': 'waiting' };
+// Kinds of the row tags (see setRowTag): SAVED (neon on black), REPLAYED (white on UV, the look of reused rows),
+// STILL WAITING (white on violet)
+const ROW_TAG_KINDS = { 'SAVED': 'saved', 'REPLAYED': 'reused', 'STILL WAITING': 'waiting' };
 // makeHistoryCard with this theme's sizes: numbered rows (Signal rows in UV) and one status tag per row;
 // scanH: height of the row highlight, null for none
 function makeHistory(p, rows, w, h, scanH = null) {

@@ -15,7 +15,6 @@
   scene({
     chapter: 9, title: 'What you get',
     // laid out around the center of the free band (960, 522)
-    shift: [0, 0],
     subs: [
       {
         text: "You write the business logic. Temporal handles retries, state and recovery, with full visibility.",
@@ -24,7 +23,7 @@
     ],
     build(root, s) {
       s.headline = E(root,
-        `<div style="display:flex;align-items:center;gap:24px">${ICON('codeSteep', 66, C.uv, 1.8)}`
+        `<div style="display:flex;align-items:center;gap:24px">${ICON('code', 66, C.uv, 1.8)}`
         + '<div style="font-size:62px;line-height:1.1;white-space:nowrap">You write the business logic</div></div>');
       // the label stays lighter than the logo: slate caps as tall as the wordmark's x-height, on its baseline
       // (both measured on rendered frames)
@@ -38,8 +37,7 @@
     update(t, c, s) {
       // you write the logic, Temporal handles the rest
       const hp = P(t, c[0] + 0.4, 0.6);
-      place(s.headline, 960, HEADLINE_Y, 1, hp);
-      s.headline.style.transform += ` translateY(${(1 - hp) * 20}px)`;
+      rise(s.headline, 960, HEADLINE_Y, hp, 20);
       place(s.handles, 960, HANDLES_Y, 1, P(t, c[0] + 1.9, 0.5));
       // the tiles pop in one by one while the subtitle lists what Temporal handles: the first on "retries",
       // the last on "visibility"

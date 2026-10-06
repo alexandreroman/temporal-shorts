@@ -29,8 +29,8 @@
   const kw = s => [s, C.violet], tool = s => [s, '#A5ABFF'], str = s => [s, C.ink];
   const id = s => [s, C.ink], pun = s => [s, C.slate];
   // The script follows the harness's Code Mode contract: host functions are async, so the script awaits them in
-  // an async main() run by asyncio.run(), and their results are plain dicts (f["price_usd"], as in the harness's
-  // travel example)
+  // an async main() run by asyncio.run(), and their results are plain dicts (f["price_usd"]), for tools declared
+  // with keyword parameters
   const SCRIPT = [
     [kw('import'), pun(' '), id('asyncio')],
     [kw('async'), pun(' '), kw('def'), pun(' '), id('main'), pun('():')],
@@ -108,7 +108,6 @@
     // the chapter header reads before the first subtitle; the final composition holds before the fade
     pre: 1.5, post: 2.0,
     // laid out at final stage coordinates on the grid (content y 150-880, centered at y 515)
-    shift: [0, 0],
     subs: [
       {
         text: "With Code Mode, the model writes a short Python script instead of calling tools one at a time.",
@@ -151,7 +150,7 @@
       // the run highlight sits behind the code lines
       s.hl = E(s.code, '', '', {
         left: '12px', width: (CODE.w - 24) + 'px', background: 'rgba(182,100,255,.16)',
-        borderLeft: '3px solid ' + C.violet, borderRadius: 'var(--rs)', transform: 'none',
+        borderLeft: '3px solid ' + C.violet, borderRadius: 'var(--rs)',
       });
       s.lines = SCRIPT.map((_, i) => {
         const e = E(s.code,
@@ -159,7 +158,7 @@
           + '<span class="src"></span>',
           'mono', {
             left: CODE.textX + 'px', top: (lineY(i) - CODE.lineH / 2) + 'px', height: CODE.lineH + 'px',
-            lineHeight: CODE.lineH + 'px', fontSize: '22px', whiteSpace: 'pre', transform: 'none',
+            lineHeight: CODE.lineH + 'px', fontSize: '22px', whiteSpace: 'pre',
           });
         e.src = e.querySelector('.src');
         return e;

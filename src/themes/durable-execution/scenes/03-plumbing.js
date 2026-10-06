@@ -17,7 +17,7 @@
     { icon: 'queue', label: 'Message queue', side: -1, row: 1, at: 4.25 },
     { icon: 'clock', label: 'Timers', side: 1, row: 1, at: 4.75 },
     { icon: 'trash', label: 'Cleanup jobs', side: -1, row: 2, at: 5.25 },
-    { icon: 'codeSteep', label: 'Recovery scripts', side: 1, row: 2, at: 5.8 },
+    { icon: 'code', label: 'Recovery scripts', side: 1, row: 2, at: 5.8 },
   ];
   const tileX = p => (p.side < 0 ? TILE.leftX : TILE.rightX);
   const tileY = p => Y0 + (p.row - 1) * TILE.pitch;
@@ -32,7 +32,6 @@
   scene({
     chapter: 3, title: 'The usual fix: plumbing',
     // laid out around the center of the free band (960, 522)
-    shift: [0, 0],
     subs: [
       {
         text: "So developers add plumbing around the code: retries, status tables, queues, timers, cleanup jobs.",

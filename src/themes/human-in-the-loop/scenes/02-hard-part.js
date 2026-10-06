@@ -15,7 +15,7 @@
   const PLUMBING = [
     ['db', 'Database', FRAME.x0 + TILE.w / 2, APP.y, TILE.w],
     ['flag', 'Status flags', LINE.x0 + TILE.bandW / 2, BAND_Y, TILE.bandW],
-    ['clockFlat', 'Scheduled jobs', LINE.x1 - TILE.bandW / 2, BAND_Y, TILE.bandW],
+    ['clock', 'Scheduled jobs', LINE.x1 - TILE.bandW / 2, BAND_Y, TILE.bandW],
     ['code', 'Resume code', FRAME.x1 - TILE.w / 2, APP.y, TILE.w],
   ];
   const LINKS = [

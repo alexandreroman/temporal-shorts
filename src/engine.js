@@ -124,6 +124,7 @@ const ICONS = {
   ticket: '<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M15 7v10" stroke-dasharray="2 2"/>',
   bolt: '<path d="M13 2L4 14h7l-1 8 10-13h-7z"/>',
   code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   eye: '<path d="M2 12c3-6 17-6 20 0-3 6-17 6-20 0z"/><circle cx="12" cy="12" r="3"/>',

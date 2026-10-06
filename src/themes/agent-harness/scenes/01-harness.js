@@ -137,7 +137,7 @@
   const makeHeading = (p, title, sub, top) => E(p,
     `<div class="lbl" style="color:var(--ink)">${title}</div>`
     + `<div class="lbl" style="font-size:16px;margin-top:8px">${sub}</div>`,
-    '', { left: CMP.left + 'px', top: top + 'px', transform: 'none' });
+    '', { left: CMP.left + 'px', top: top + 'px' });
   scene({
     chapter: 1, title: 'An agent harness',
     // the loop with its SDK tags sits higher than the taller framed loop: pan while the tags fade out
@@ -180,7 +180,7 @@
       const { x0, x1, y0, y1, r } = FRAME;
       // created first, so the frame tint stays under the arcs and the loop
       s.frameBg = E(root, '', '', {
-        left: x0 + 'px', top: y0 + 'px', width: (x1 - x0) + 'px', height: (y1 - y0) + 'px', transform: 'none',
+        left: x0 + 'px', top: y0 + 'px', width: (x1 - x0) + 'px', height: (y1 - y0) + 'px',
         background: 'rgba(68,76,231,.07)', borderRadius: 'var(--r)',
       });
       s.svg = svgLayer(root);
@@ -214,7 +214,7 @@
         + '<div style="width:1.5px;height:26px;background:#4B5363"></div>'
         + '<span class="lbl" style="color:var(--ink)">Agent harness</span>',
         '', {
-          left: (x0 + 26) + 'px', top: (y0 + 22) + 'px', transform: 'none',
+          left: (x0 + 26) + 'px', top: (y0 + 22) + 'px',
           display: 'flex', alignItems: 'center', gap: '16px',
         });
       // opaque UV tint so the frame line does not show through the pill
@@ -273,7 +273,7 @@
       s.callHead = makeHeading(root, 'An LLM call', 'One step', CMP.head1Top);
       const codeText = text => `<span class="mono" style="font-size:22px;color:var(--slate)">${text}</span>`;
       s.callStrip = E(root, codeText('text in') + inlineArrow(64, C.slate), '', {
-        left: CMP.left + 'px', top: CMP.stripTop + 'px', height: CMP.stripH + 'px', transform: 'none',
+        left: CMP.left + 'px', top: CMP.stripTop + 'px', height: CMP.stripH + 'px',
         display: 'flex', alignItems: 'center', gap: '16px',
       });
       const model = callCard(s.callStrip, 'Model', '', 'uv');

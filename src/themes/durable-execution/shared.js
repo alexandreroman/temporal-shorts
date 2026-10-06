@@ -7,11 +7,8 @@ Object.assign(ICONS, {
   truck: '<path d="M14 18V5H2v13h3M9 18h6M19 18h3v-5l-4-5h-4"/><circle cx="7" cy="18" r="2"/>'
     + '<circle cx="17" cy="18" r="2"/>',
   bag: '<path d="M4.5 8h15l-1 13h-13z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/>',
-  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/>',
   bug: '<path d="M8 10h8v5a4 4 0 0 1-8 0z"/><path d="M9.5 10V9a2.5 2.5 0 0 1 5 0v1M12 13v6"/>'
     + '<path d="M3 14h5M16 14h5M4 9l4 2M20 9l-4 2M4.5 20l3.8-2.2M19.5 20l-3.8-2.2"/>',
-  // brackets with a steeper slash than the engine's `code`
-  codeSteep: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/>',
   plug: '<path d="M9 3v4M15 3v4M6 7h12v3a6 6 0 0 1-12 0zM12 16v5"/>',
   table: '<rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M3 14.5h18M9 9v11"/>',
   queue: '<rect x="2.5" y="5" width="5" height="9"/><rect x="9.5" y="5" width="5" height="9"/>'
@@ -77,14 +74,14 @@ function makeCodeCard(parent, opts = {}) {
   card.w = w; card.h = h; card.lineH = lineH; card.padY = padY;
   // the highlight sits under the text, so it is created first
   card.bar = E(card, '', '', {
-    left: '8px', width: (w - 16) + 'px', height: lineH + 'px', borderRadius: 'var(--rs)', transform: 'none',
+    left: '8px', width: (w - 16) + 'px', height: lineH + 'px', borderRadius: 'var(--rs)',
   });
   card.lines = lines.map((src, i) => {
     const e = E(card,
       `<span style="display:inline-block;width:${gutter}px;color:#B4BCCB">${i + 1}</span>${highlightJs(src)}`,
       'mono', {
         left: padX + 'px', top: (padY + i * lineH) + 'px', height: lineH + 'px',
-        lineHeight: lineH + 'px', fontSize: font + 'px', whiteSpace: 'pre', transform: 'none',
+        lineHeight: lineH + 'px', fontSize: font + 'px', whiteSpace: 'pre',
       });
     e.style.opacity = 1;
     return e;
@@ -97,11 +94,11 @@ function makeCodeCard(parent, opts = {}) {
     card.hdr = E(card,
       `<div style="height:${CODE.tabH}px;padding:0 14px 0 12px;display:flex;align-items:center;gap:8px;`
       + `background:${C.uv};color:#FFFFFF;font-size:15px;letter-spacing:.12em;text-transform:uppercase;`
-      + `border-radius:var(--rs) var(--rs) 0 0">${ICON('codeSteep', 18, '#FFFFFF', 2)}<span>${header}</span></div>`
+      + `border-radius:var(--rs) var(--rs) 0 0">${ICON('code', 18, '#FFFFFF', 2)}<span>${header}</span></div>`
       + fileLabel,
       'mono', {
         left: '18px', top: -CODE.tabH + 'px', height: CODE.tabH + 'px', display: 'flex', alignItems: 'center',
-        gap: '16px', transform: 'none', whiteSpace: 'nowrap',
+        gap: '16px', whiteSpace: 'nowrap',
       });
   }
   card.lineY = i => -h / 2 + padY + (i + 0.5) * lineH;
@@ -162,21 +159,26 @@ const HISTORY_ROWS = [
   ...ORDER_STEPS.map(step => `${uvName(step.fn)}: ${step.result}`),
   'Workflow completed',
 ];
-// rows: HTML of each row; the rows from crashRow on sit crashGap px lower, leaving room for the
-// "WORKER CRASHED HERE" line; w x h: card size (the room under the last row stays free). Returns the
-// makeHistoryCard card: its tags are centered on their rows (see setHistoryTag); card.rowTop(i) is the top of
-// row i.
-function makeHistory(p, rows, w, h, crashRow, crashGap) {
-  const rowTop = i => HIST.row0 + i * HIST.rowGap + (i >= crashRow ? crashGap : 0);
-  const card = makeHistoryCard(p, rows, {
-    w, h, rowTop, rowH: HIST.rowGap, padY: 0, tagTop: i => rowTop(i) + HIST.rowGap / 2, tagRight: 28,
-    tag: { border: false },
-    crash: {
+// rows: HTML of each row; w x h: card size (the room under the last row stays free). With a crashRow, the rows
+// from crashRow on sit crashGap px lower, leaving room for the "WORKER CRASHED HERE" line (see markCrash); without
+// one, the card has no crash marks. Returns the makeHistoryCard card: its tags are centered on their rows (see
+// setHistoryTag); card.rowTop(i) is the top of row i.
+function makeHistory(p, rows, w, h, crashRow = null, crashGap = 0) {
+  const crashed = crashRow !== null;
+  const rowTop = i => HIST.row0 + i * HIST.rowGap + (crashed && i >= crashRow ? crashGap : 0);
+  let crash = null;
+  if (crashed) {
+    crash = {
       keptTop: HIST.row0 - 2, keptH: crashRow * HIST.rowGap + 4,
       cutTop: HIST.row0 + crashRow * HIST.rowGap + crashGap / 2 - 1,
       label: 'WORKER CRASHED HERE', labelX: '58%', labelFont: 14,
-    },
-    scanH: HIST.rowGap,
+    };
+  }
+  // tags 24 px from the card's right edge, 10 px inside the tinted kept block: REUSED, NOT RE-RUN keeps about
+  // 20 px from the longest row text it sits on (shipPackage: tracking 1Z-48)
+  const card = makeHistoryCard(p, rows, {
+    w, h, rowTop, rowH: HIST.rowGap, padY: 0, tagTop: i => rowTop(i) + HIST.rowGap / 2, tagRight: 24,
+    tag: { border: false }, crash, scanH: HIST.rowGap,
   });
   card.rowTop = rowTop;
   return card;
@@ -197,7 +199,7 @@ const setHistoryScan = (hist, i, o) => setScan(hist, hist.rowTop(i), o);
 // ---------- small animation helpers
 // Brief bump (0 to 1 and back to 0) for a pop on a change or an appearance at `at`
 const bumpAt = (t, at) => win(t, at, at + 0.15, 0.15);
-// Appearance at `at` of a small element (badge, icon, tag, chip), as { o, s } for place(): it fades in while it
+// Appearance at `at` of a small element (badge, icon, tag), as { o, s } for place(): it fades in while it
 // bumps briefly above its native size (k: height of the bump, 0 for none)
 const popIn = (t, at, k = 0.14) => ({ o: P(t, at, 0.2), s: 1 + k * bumpAt(t, at) });
 
@@ -205,8 +207,8 @@ const popIn = (t, at, k = 0.14) => ({ o: P(t, at, 0.2), s: 1 + k * bumpAt(t, at)
 // and order status under it, TEMPORAL panel with the Event History on the right, with room under its rows for the
 // WORKFLOW COMPLETE tag. Both chapters build it with the same coordinates, so the cut from chapter 5 to chapter 6
 // reads as one continuous shot.
-// Coordinates are on the 1080 px stage; EH.shift centers the composition at (960, 522). Every part sits on a few
-// shared lines, and every size is even, so the parts rest on whole pixels:
+// Coordinates are final stage coordinates (the scenes have no shift), the composition centered at (960, 522).
+// Every part sits on a few shared lines, and every size is even, so the parts rest on whole pixels:
 // - x 120 and 920: left and right edges of the Worker column (Worker panel; counter left, order pill right);
 //   x 1056 and 1800: edges of the TEMPORAL panel, 136 px right of the Worker column (room for the chips and arrow)
 // - y 152: top of both panels; y 892: bottom of the counter, the pill row and the TEMPORAL panel
@@ -214,7 +216,6 @@ const popIn = (t, at, k = 0.14) => ({ o: P(t, at, 0.2), s: 1 + k * bumpAt(t, at)
 // - 50 px between the Worker panel and the counter row, and between the counter and the order pill
 // - the code card and the history card sit 32 px inside the sides of their panel
 const EH = {
-  shift: [0, 0],
   worker: { x: 520, y: 397, w: 800, h: 490 }, // x 120..920, y 152..642
   // code card: x 152..888, 6 lines of 46 px, its top 126 px below the panel top (under its tab), 36 px of panel
   // under it; 23 px text, so the 48 characters of the export line fit with 20 px to spare
@@ -282,11 +283,10 @@ function setCodeSpinner(shot, i, o, sx = 0, sy = 0) {
 }
 // Spinner opacity for an Activity running from `run` until its RESULT leaves
 const runningSpin = (t, run) => win(t, run + 0.2, run + RESULT_LAG, 0.15);
-// RESULT chip flight, like fly() but small: it fades in at native size at `at`, travels from (x0, y0)
-// to (x1, y1) during [at + 0.1, at + 0.55], then is absorbed there (shrinks and fades)
+// RESULT chip flight: it pops in at (x0, y0) at `at`, travels to (x1, y1) during [at + 0.1, at + 0.55], then is
+// absorbed there (shrinks and fades)
 function flyChip(chip, t, at, x0, y0, x1, y1) {
-  const f = P(t, at + 0.1, 0.45), ab = P(t, at + 0.55, 0.4, easeIn);
-  place(chip, lerp(x0, x1, f), lerp(y0, y1, f), 1 - 0.65 * ab, P(t, at, 0.2) * (1 - ab));
+  fly(chip, t, at, x0, y0, at + 0.1, 0.45, x1, y1, at + 0.55, x1, y1);
 }
 // RESULT chip of step i: appears at `at` at the end of its await line, flies to the start of its history row and
 // is absorbed there

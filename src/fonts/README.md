@@ -10,7 +10,8 @@ proprietary and was not available, so Instrument Sans stands in for it:
 | `Mono` (labels, message cards, event history) | Noto Sans Mono (brand)       | 400, 700 |
 
 `scripts/setup.sh` downloads the Fontsource woff2 files into this folder, at
-a pinned package version; the `@font-face` rules in `src/styles.css` load
+a pinned package version recorded in `.version`: when the pin changes, it
+downloads every file again. The `@font-face` rules in `src/styles.css` load
 them.
 
 If you get the real Aeonik files, add them here and point the `Brand`

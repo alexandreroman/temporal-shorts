@@ -71,7 +71,6 @@
   scene({
     chapter: 4, title: 'Durable Execution with Temporal',
     // laid out around (960, 522): the card-alone phase and the Activities phase are both centered on it
-    shift: [0, 0],
     subs: [
       {
         text: "<b>Durable Execution</b> takes another path: your code runs to completion, even when servers fail.",

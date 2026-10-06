@@ -1,4 +1,4 @@
-// ===================== shared helpers (brand style, used by every theme)
+// ===================== shared helpers (brand style, used by two or more themes)
 const C = {
   uv: '#444CE7', violet: '#B664FF', neon: '#DBFF4B', red: '#FF5A5F', ink: '#F8FAFC', slate: '#94A3B8', line: '#3A4150',
   // on white cards: light UV and neon tints (model and tool results), a darker neon for lines, the violet highlight
@@ -129,12 +129,13 @@ function shakeAt(t, crashAt) {
   const k = Math.max(0, 1 - Math.abs(t - crashAt - 0.2) / 0.4);
   return [Math.sin(G * 90) * 12 * k, Math.cos(G * 77) * 8 * k];
 }
-// red flash intensity (0 to 1) peaking at the crash
-function flashAt(t, crashAt) { return Math.max(0, 1 - Math.abs(t - crashAt) / 0.28); }
 // Red flash over the stage, oversized so it still covers it once the scene is shifted (see placeFlash)
 const makeFlash = root => E(root, '', '', { width: '2400px', height: '1400px', background: C.red });
-// k: opacity of the flash at its peak, at the crash time `at`
-function placeFlash(e, t, at, k = 0.4) { place(e, 960, 540, 1, flashAt(t, at) * k); }
+// The flash peaks at the crash time `at` with opacity k, and fades out within 0.28 s on either side
+function placeFlash(e, t, at, k = 0.4) {
+  const intensity = Math.max(0, 1 - Math.abs(t - at) / 0.28);
+  place(e, 960, 540, 1, intensity * k);
+}
 
 // ---------- status tags
 // Small status label (e.g. on an Event History row); its text and colors are set by setStatus(). font and pad
@@ -150,13 +151,12 @@ function statusTag(p, { font = 15, pad = '4px 10px', icon = 16, border = true } 
   return e;
 }
 // Looks of the statusTag kinds, each with an optional leading icon as [name, color, stroke width]:
-// saved (neon on black, for white panels), ok (neon outline, for the dark stage), reused and replayed (white on UV),
-// wait (violet outline), waiting (white on violet, with an hourglass) and closed (slate outline)
+// saved (neon on black, for white panels), ok (neon outline, for the dark stage), reused (white on UV), wait
+// (violet outline), waiting (white on violet, with an hourglass) and closed (slate outline)
 const STATUS_KINDS = {
   saved: { background: '#141414', color: C.neon, borderColor: 'transparent', icon: ['check', C.neon, 2.6] },
   ok: { background: 'rgba(219,255,75,.08)', color: C.neon, borderColor: C.neon, icon: ['check', C.neon, 2.6] },
   reused: { background: C.uv, color: '#FFFFFF', borderColor: 'transparent' },
-  replayed: { background: C.uv, color: '#FFFFFF', borderColor: 'transparent' },
   wait: { background: 'rgba(182,100,255,.14)', color: C.violet, borderColor: C.violet },
   waiting: { background: C.violet, color: '#FFFFFF', borderColor: 'transparent', icon: ['hourglass', '#FFFFFF', 2.2] },
   closed: { background: 'transparent', color: C.slate, borderColor: C.slate },
@@ -196,7 +196,7 @@ function makeAppPanel(p, name, w, h, { font = 20, statusFont = 16, statusTop = 2
   return e;
 }
 // state: 'running' (the gear spins), 'idle', 'waiting' (violet text), 'stopped' (grey border) or 'crashed' (red);
-// the border is violet unless stopped or crashed
+// the border is violet unless stopped or crashed. 'stopped' is the grey look, also used for idle Workers.
 function setAppStatus(panel, text, state) {
   panel.st.textContent = text;
   panel.st.style.color = { crashed: C.red, waiting: C.violet }[state] || C.slate;
@@ -307,7 +307,8 @@ function makeCounter(p, label, w) {
   e.n = e.querySelector('.n'); e.note = e.querySelector('.note');
   return e;
 }
-function setCounter(e, n, note = '', noteColor = C.neon) {
+// note: neon line next to the number, '' for none
+function setCounter(e, n, note = '') {
   e.n.textContent = n;
-  e.note.textContent = note; e.note.style.color = noteColor;
+  e.note.textContent = note; e.note.style.color = C.neon;
 }
