@@ -23,8 +23,12 @@ Timeline, Event History, Relationships, Workers, Pending Activities, Call
 Stack, Queries, User Metadata, Search Attributes, Memo (the video shows
 Timeline, Event History, Workers and Pending Activities, in that order).
 The Timeline stacks Activity bars (#30A46C) bottom-up under a full-width
-Workflow bar; a retried
-Activity shows "2 • name" and a red-to-green bar. Pending Activities shows
+Workflow bar; labels are name pills with no duration; bar-end squares
+hold the `ti-activity` icon (Workflow bar: `ti-workflow`). A retried
+Activity, crashed or failed alike, reads: white square, `ti-retry` icon,
+"N • name" pill, on a band from its first start to its last attempt's
+start (`linear-gradient(255deg, #30A46C, #E5484D)` at opacity 0.35), then
+the last attempt in the same gradient at full opacity. Pending Activities shows
 the attempt as "3 / UNLIMITED", the last Worker identity and the Last
 Failure as JSON. The UI shows no Worker crash marker: the video adds it as
 an annotation outside the UI style.
