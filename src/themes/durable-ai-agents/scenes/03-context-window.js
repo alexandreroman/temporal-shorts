@@ -11,10 +11,21 @@
     "Model: It's $25 a month.", 'You: What about roaming?', 'Model: Included in Europe.', "You: Great, I'll take it.",
   ];
   const ROW = 40;
+  // height each part adds to the page: the instructions, the gap and the HISTORY label, then one row per message
+  const PART_PX = [74, 10 + 36, ...Array(CHAT.length + 2 + APPENDED.length).fill(ROW)];
+  // grown, the parts make the 560 px of a full page. The gauge and the tokens billed so far (12,400 on a full page)
+  // grow as the square of the page fill: every call resends the whole page, so each new message costs more
+  const PAGE = 560, TOKENS_FULL = 12400;
+  const gaugeFill = pagePx => (pagePx / PAGE) ** 2;
+  const tokensFor = pagePx => Math.round(TOKENS_FULL * clamp(gaugeFill(pagePx)));
+  const easeOut = p => 1 - (1 - p) ** 3;
+  // flight of the coin paid out at each part: degrees from straight up (negative: left) and px of travel, cycled so
+  // consecutive coins differ; a narrow fan around straight up, never downward, at most 5° right to clear the number
+  const COIN_PATHS = [[-20, 100], [5, 95], [-40, 105], [-8, 90], [-30, 110], [5, 105], [-45, 95]];
   scene({
     chapter: 3, title: 'The context window',
-    // one fixed offset fits both the cone phase and the bill phase
-    shift: [-113, 42],
+    // one fixed offset fits the page with its token box in c[0] and the cone, then FULL, in c[1]
+    shift: [-138, 42],
     subs: [
       {
         text: "Everything sent to the model fits on one page: the <b>context window</b>. "
@@ -46,7 +57,7 @@
       };
       s.instr = mk('INSTRUCTIONS', "You are the shop's helpful assistant.", C.uvTint, C.uv);
       s.hist = mk('HISTORY', '', '#EDEFF3', C.slate);
-      // one 40 px row per message; the chat lines show in c[0] as one part, the rest one by one after them
+      // one 40 px row per message, each sliding in on its own part
       const docChip = '<span style="display:inline-block;line-height:30px;padding:0 10px;margin-left:12px;'
         + `background:${C.neonTint};border:1px solid ${C.neonDark};border-radius:var(--rs)">price-list.pdf</span>`;
       const messages = [
@@ -89,15 +100,32 @@
         + '<div class="lbl" style="font-size:15px;margin-top:4px">not in context</div>',
         '', { border: '1.5px dashed #4B5363', padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)' });
       s.bill = E(root,
-        `<div style="display:flex;align-items:center;gap:16px">${ICON('coin', 46, C.neon, 1.6)}<div>`
-        + '<div class="tok" style="font-size:44px;line-height:1">0 tokens</div>'
-        + '<div class="lbl" style="font-size:16px;margin-top:6px;color:var(--neon)">billed at every call</div>'
+        '<div style="display:flex;align-items:center;gap:16px">'
+        + `<div class="coin">${ICON('coin', 46, C.neon, 1.6)}</div><div>`
+        // fixed width, sized for "12,400 tokens" in tabular figures, so the box and "+N" never move
+        + '<div class="tok" style="width:288px;font-size:44px;line-height:1;font-variant-numeric:tabular-nums">'
+        + '0 tokens</div>'
+        + '<div class="lbl" style="font-size:16px;margin-top:6px;color:var(--neon)">billed so far</div>'
         + '</div></div>',
         '', {
           padding: '16px 22px', border: '1.5px solid ' + C.neon, background: 'rgba(219,255,75,.06)',
           borderRadius: 'var(--r)',
         });
       s.tok = s.bill.querySelector('.tok');
+      s.coin = s.bill.querySelector('.coin');
+      // each part spends tokens: a coin leaves the box from the big one and "+N" rises beside the number
+      let pagePx = 0;
+      s.spends = PART_PX.map(px => {
+        const gain = tokensFor(pagePx + px) - tokensFor(pagePx);
+        pagePx += px;
+        // 36 px icon, a 27 px coin, centered on the big coin (1.5 px border + 22 px padding + 23 px)
+        const coin = E(s.bill, ICON('coin', 36, C.neon, 1.8), '', { left: '28.5px', top: 'calc(50% - 18px)' });
+        coin.querySelector('circle').setAttribute('fill', 'rgba(219,255,75,.2)');
+        const plus = E(s.bill, '+' + gain.toLocaleString('en-US'), 'mono', {
+          left: 'calc(100% + 20px)', top: '14px', fontSize: '22px', color: C.neon, whiteSpace: 'nowrap',
+        });
+        return { coin, plus };
+      });
     },
     update(t, c, s) {
       const sp = P(t, c[0] + 0.1, 0.7, backOut);
@@ -105,30 +133,32 @@
       place(s.sheetT, 760, 150, 1, P(t, c[0] + 0.6, 0.4));
       place(s.llm.root, 1560, 445, P(t, c[0] + 0.4, 0.6, backOut), P(t, c[0] + 0.4, 0.4));
       llmState(s.llm, { look: -1 });
-      // c[0]: instructions, chat lines, document, question; c[1]: the conversation goes on, one message at a time
-      const partAt = [0, 1, 2, 3].map(i => c[0] + 2.2 + i * 1.2)
-        .concat(APPENDED.map((_, i) => c[1] + 2.4 + i * 0.55));
+      // c[0]: instructions, the empty HISTORY block, each chat line, document, question;
+      // c[1]: the conversation goes on, one message at a time
+      const partAt = [
+        c[0] + 2.2,
+        c[0] + 2.9,
+        ...CHAT.map((_, i) => c[0] + 3.3 + i * 0.45),
+        c[0] + 5.9,
+        c[0] + 6.6,
+        ...APPENDED.map((_, i) => c[1] + 2.4 + i * 0.55),
+      ];
       const app = partAt.map(at => P(t, at, 0.5));
-      // the chat lines share part 1; the document, the question and each appended message take the next parts
-      const rowApp = s.rows.map((_, i) => app[Math.max(1, i - CHAT.length + 2)]);
+      // parts 0 and 1 are the two blocks, then one part per message row
+      const rowApp = app.slice(2);
       const slideIn = (el, a) => {
         el.style.opacity = a; el.style.transform = `translateX(${(1 - a) * 80}px)`;
       };
-      // grown, the 74 px instructions, the 10 px gap and the history (36 px of label and padding, then 11 rows)
-      // fill the 560 px gauge, and the history keeps the 20 px bottom margin of the 600 px sheet
+      // grown, the history keeps the 20 px bottom margin of the 600 px sheet
       Object.assign(s.instr.style, { top: '20px', height: '74px' });
       slideIn(s.instr, app[0]);
       slideIn(s.hist, app[1]);
-      // the chat lines keep their rows while they fade in; each later message pushes the block's bottom down
-      let y = 28, used = 74 * app[0] + (10 + 36 + CHAT.length * ROW) * app[1];
+      // the HISTORY block arrives with its label only; each message pushes its bottom down
+      let y = 28;
       s.rows.forEach((r, i) => {
         r.row.style.top = y + 'px';
-        if (i < CHAT.length) {
-          y += ROW;
-        } else {
-          slideIn(r.row, rowApp[i]);
-          y += ROW * rowApp[i]; used += ROW * rowApp[i];
-        }
+        slideIn(r.row, rowApp[i]);
+        y += ROW * rowApp[i];
       });
       s.hist.style.top = '104px'; s.hist.style.height = (y + 8) + 'px';
       // the highlight moves to the latest user message: each one fades as the next question comes in
@@ -137,18 +167,37 @@
         const next = questions[i + 1];
         q.hl.style.opacity = next ? 1 - next.a : 1;
       });
-      const fill = used / 560;
+      // the gauge and the token count rise with each part as it slides in
+      const used = PART_PX.reduce((sum, px, k) => sum + px * app[k], 0);
+      const fill = gaugeFill(used);
       s.gf.style.height = (clamp(fill) * 100) + '%';
       s.gf.style.background = fill > 0.98 ? C.red : `linear-gradient(0deg, ${C.uv}, ${C.violet})`;
       place(s.gauge, 1130, 480, 1, P(t, c[0] + 1.6, 0.5));
       place(s.gaugeL, 1130, 810, 1, P(t, c[0] + 1.6, 0.5));
+      // the token count arrives with the gauge and follows it part by part
+      const bp = P(t, c[0] + 1.6, 0.5, backOut);
+      // the 105 px box ends on the sheet's bottom edge (480 + 300)
+      place(s.bill, 1560, 727.5, bp, clamp(bp * 2));
+      s.tok.textContent = tokensFor(used).toLocaleString('en-US') + ' tokens';
+      // money spent at each part, mid-slide: the big coin swells, a small coin flies off, "+N" rises and fades
+      const spendAt = partAt.map(at => at + 0.1);
+      s.coin.style.transform = `scale(${Math.max(...spendAt.map(at => swell(t, at, 0.25)))})`;
+      s.spends.forEach(({ coin, plus }, k) => {
+        const at = spendAt[k];
+        // the coin shoots out of the box fast, then drifts on, turning slightly, as it fades
+        const fly = P(t, at, 0.7, easeOut);
+        const [angle, travel] = COIN_PATHS[k % COIN_PATHS.length];
+        const rad = angle * Math.PI / 180;
+        const dx = Math.sin(rad) * travel * fly, dy = -Math.cos(rad) * travel * fly;
+        coin.style.opacity = P(t, at, 0.08) * (1 - P(t, at + 0.25, 0.45));
+        coin.style.transform = `translate(${dx}px,${dy}px) rotate(${0.4 * angle * fly}deg) scale(${1 - 0.1 * fly})`;
+        plus.style.opacity = P(t, at, 0.1) * (1 - P(t, at + 0.25, 0.25));
+        plus.style.transform = `translateY(${-36 * P(t, at, 0.6)}px)`;
+      });
       // pops as the last message fills the gauge
       place(s.full, 1130, 136, P(t, c[1] + 4.4, 0.4, backOut), P(t, c[1] + 4.4, 0.3));
       s.cone.style.opacity = win(t, c[1] + 0.2, c[1] + 2.6, 0.4);
       place(s.g1, 1560, 205, 1, win(t, c[1] + 0.8, c[1] + 2.8, 0.4));
-      const bp = P(t, c[1] + 3.0, 0.5, backOut);
-      place(s.bill, 1560, 740, bp, clamp(bp * 2));
-      s.tok.textContent = Math.round(lerp(4200, 12400, P(t, c[1] + 3.0, 2.0))).toLocaleString('en-US') + ' tokens';
     }
   });
 }

@@ -70,14 +70,19 @@ the figures follow the step count if the scenario changes.
 
 - **0:47** Everything sent to the model fits on one page: the context window.
   Instructions, history, documents, the new question.
-  - Visuals: Page fills with an instructions block, then the history: chat
-    lines, a "price-list.pdf" message and the new question, tagged NEW; size
-    gauge.
+  - Visuals: Page fills with an instructions block, then the history block:
+    the chat lines slide in one by one, then a "price-list.pdf" message and
+    the new question, tagged NEW. With each message, the size gauge and a
+    token counter "billed so far" (bottom aligned with the page) rise as
+    the square of the page fill, since every call resends the whole page;
+    at each step the counter's coin bumps, a coin flies off, each time in
+    another direction, and "+N" rises.
 - **0:56** It's the only thing the model sees. It has a size limit, and every
   word on it is billed, at every call.
   - Visuals: Vision cone, "Yesterday's email: not in context"; the history
     grows as new messages are appended one by one, NEW moving to the latest
-    question, until the gauge is FULL; token counter "billed at every call".
+    question, the gauge and the counter rising with each, until the gauge
+    is FULL at 12,400 tokens.
 
 ## 04 Tools
 

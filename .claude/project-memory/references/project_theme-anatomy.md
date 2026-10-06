@@ -212,6 +212,13 @@ CLAUDE.md; a section below and the card order in
   NOT RE-RUN" (tools). APP MEMORY blocks: 76x56 px, left-aligned 20 px
   from the panel edge, 12 px apart, two per step in Event History colors
   (UV icon for LLM, black icon for tool).
+- Ch3 context window: messages slide in one by one; the Size gauge moves
+  with each row but fills as the square of the page fill, since every call
+  resends the whole history plus instructions; FULL pops as the page fills.
+  A fixed-width token counter, "billed so far", bottom aligned with the
+  page, shows with the gauge and follows it (12,400 at FULL); each step
+  plays a money-spent effect (coin bump, a coin flying off in a direction
+  that changes at each step, from a fixed list, "+N").
 - Pans: ch1, ch5, ch7.
 
 ### agent-harness
