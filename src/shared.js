@@ -161,14 +161,24 @@ const STATUS_KINDS = {
   waiting: { background: C.violet, color: '#FFFFFF', borderColor: 'transparent', icon: ['hourglass', '#FFFFFF', 2.2] },
   closed: { background: 'transparent', color: C.slate, borderColor: C.slate },
 };
-// kind: a key of STATUS_KINDS; the DOM is only rewritten when label or kind changes
+// kind: a key of STATUS_KINDS; the DOM is only rewritten when label or kind changes.
+// The .1em letter spacing gives fractional widths, and a tag anchored by its right edge or centered then has
+// half-pixel edges, which rasterize differently depending on the frames drawn before. So the width is rounded up
+// to an even number of pixels: the edges land on whole pixels whichever way the tag is anchored. The text keeps
+// its left padding (the 1-2 px extra goes to the right), so it starts on a whole pixel too.
 function setStatus(e, label, kind) {
   const key = kind + ':' + label;
   if (e._l === key) return;
-  e._l = key;
   const { icon, ...colors } = STATUS_KINDS[kind];
   e.innerHTML = icon ? ICON(icon[0], e.iconSize, icon[1], icon[2]) + label : label;
   Object.assign(e.style, colors);
+  e.style.width = '';
+  const width = parseFloat(getComputedStyle(e).width);
+  // no width while the scene is hidden: measured again on the next call
+  if (Number.isNaN(width)) return;
+  e.style.width = 2 * Math.ceil(width / 2) + 'px';
+  // in the live player, a width measured before the fonts load is measured again on the next call
+  if (document.fonts.status === 'loaded') e._l = key;
 }
 
 // ---------- app and Temporal panels

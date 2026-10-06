@@ -41,16 +41,22 @@
     ['TOKENS', 'turn ended · 2,140 tokens'],
   ];
   const HUMAN_ROW = 4, TOTAL_ROW = 6;
+  // status tags of the HUMAN_ROW and TOTAL_ROW marks, as [label, statusTag kind]
+  const MARK_TAGS = [['HUMAN', 'wait'], ['COST', 'reused']];
   const LAST_ROW = ROWS.length - 1;
 
   const chipCss = (type, fontSize) => ({
     ...EVENT_TYPES[type], fontSize, letterSpacing: '.1em', padding: '4px 10px 4px calc(10px + .1em)',
     border: '1.5px solid', borderRadius: '4px', whiteSpace: 'nowrap',
   });
+  // Console row chip and tag text: a 22 px line makes them 32 px tall with their padding and border (the 1.5 px
+  // border is drawn 1 px wide at this scale), an even height, so they center on whole pixels in their 46 px row
+  const CONSOLE_LINE = 22, CONSOLE_TAG_H = 32;
   // the same chip, as inline HTML for the console rows (fixed width so the row texts line up)
   const chipHtml = type => {
     const css = EVENT_TYPES[type];
     return `<span class="mono" style="display:inline-block;width:132px;text-align:center;font-size:16px;`
+      + `line-height:${CONSOLE_LINE}px;`
       + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
       + `background:${css.background};color:${type === 'TOKENS' ? '#5B6475' : css.color}">${type}</span>`;
   };
@@ -144,15 +150,14 @@
         }));
       s.tags = [HUMAN_ROW, TOTAL_ROW].map(i => {
         const e = statusTag(s.console);
-        // centered on its row: the tag is 31 px tall at 16 px
+        // centered on its row
         Object.assign(e.style, {
-          left: 'auto', right: '28px', top: (CONSOLE.row0 + (CONSOLE.rowH - 31) / 2 + i * CONSOLE.rowGap) + 'px',
-          fontSize: '16px', transformOrigin: 'right center',
+          left: 'auto', right: '28px',
+          top: (CONSOLE.row0 + (CONSOLE.rowH - CONSOLE_TAG_H) / 2 + i * CONSOLE.rowGap) + 'px',
+          fontSize: '16px', lineHeight: CONSOLE_LINE + 'px', transformOrigin: 'right center',
         });
         return e;
       });
-      setStatus(s.tags[0], 'HUMAN', 'wait');
-      setStatus(s.tags[1], 'COST', 'reused');
       // replay bar: play icon, track, filled part up to the playhead, playhead
       s.bar = E(s.console,
         `${ICON('play', 24, C.uv, 2.2)}<div class="track" style="position:relative;margin-left:16px;width:${BAR_W}px;`
@@ -235,6 +240,8 @@
       [HUMAN_ROW, TOTAL_ROW].forEach((row, j) => {
         const at = sweep + sweepD * row / LAST_ROW;
         s.marks[j].style.opacity = P(t, at, 0.3);
+        const [label, kind] = MARK_TAGS[j];
+        setStatus(s.tags[j], label, kind);
         s.tags[j].style.opacity = P(t, at, 0.25);
         s.tags[j].style.transform = `scale(${swell(t, at, 0.14)})`;
       });

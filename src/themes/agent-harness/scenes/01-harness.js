@@ -293,7 +293,6 @@
       s.saved = TURN_CALLS.map(() => {
         const e = statusTag(root);
         Object.assign(e.style, { fontSize: '16px', height: CMP.statusH + 'px' });
-        setStatus(e, 'SAVED', 'ok');
         return e;
       });
       // opaque violet tint, so the bracket line does not show through the pill
@@ -422,6 +421,7 @@
         place(e, CMP.xs[i], callY(i), p * swell(t, litAt, 0.08), clamp(p * 2) * cmpO);
         e.style.borderColor = t >= litAt ? C.violet : (isModelCall(i) ? C.uv : '');
         const pS = P(t, b5 + savedAt(i), 0.3, backOut);
+        setStatus(s.saved[i], 'SAVED', 'ok');
         place(s.saved[i], CMP.xs[i], statusY(i), pS, clamp(pS * 2) * cmpO);
       });
       const pReply = P(t, b4 + CMP_AT.reply, 0.45, backOut);

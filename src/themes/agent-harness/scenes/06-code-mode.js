@@ -60,7 +60,7 @@
     return shown;
   });
   const lineY = i => CODE.lineTop + i * CODE.lineH;
-  const CHAR_W = 14.4; // advance of a 24 px JetBrains Mono character
+  const CHAR_W = 14.4; // advance of a 24 px Noto Sans Mono character (0.6 em)
   // left edge of the best: $480 pill, on line 5 (the min line), about 28 px right of the end of its code;
   // rounded, with an even pill height, so the pill rests on whole pixels
   const BEST_LEFT = Math.round(CODE.textX + CODE.numW + lineLength(SCRIPT[4]) * CHAR_W + 28), BEST_H = 42;
@@ -170,11 +170,7 @@
       s.steps = [['plane', 'search_flights'], ['bed', 'search_hotels'], ['ticket', 'book_flight']]
         .map(([icon, name]) => makeToolStep(root, icon, name));
       s.gate = E(root, '', 'pill');
-      s.saved = s.steps.map(() => {
-        const e = statusTag(root);
-        setStatus(e, 'SAVED', 'saved');
-        return e;
-      });
+      s.saved = s.steps.map(() => statusTag(root));
       // what every call keeps: one row spanning the card's width, its label on the card's left edge
       s.tagRow = E(root,
         '<span class="lbl" style="font-size:18px;padding-left:0">Every call</span>'
@@ -299,6 +295,7 @@
       // every call is saved as soon as it completes
       const savedAt = [c[1] + 2.8, c[1] + 2.8, c[2] + 4.0];
       s.saved.forEach((e, i) => {
+        setStatus(e, 'SAVED', 'saved');
         const p = P(t, savedAt[i], 0.4, backOut);
         place(e, STEP.x[i], RIGHT.savedY, p, clamp(p * 2));
       });
