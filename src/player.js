@@ -26,20 +26,30 @@ function startPlayer() {
     presenterOff: '<path d="M8 4h14M20 4v9a2 2 0 0 1-2 2M12.5 15H6a2 2 0 0 1-2-2V8"/><path d="M3 3l18 18"/>'
       + EASEL_STAND,
   };
+  // Keyboard shortcuts by control id, as bound by the keydown handler below.
+  const SHORTCUTS = { play: 'Space', speed: 'S', loop: 'L', subs: 'C', presenter: 'P', fs: 'F' };
+  // Screen readers get the plain name (aria-label) and the shortcut (aria-keyshortcuts); the CSS tooltip
+  // (data-tip) shows both.
+  function setLabel(control, label) {
+    const shortcut = SHORTCUTS[control.id];
+    control.setAttribute('aria-label', label);
+    control.dataset.tip = shortcut ? `${label} (${shortcut})` : label;
+    if (shortcut) control.setAttribute('aria-keyshortcuts', shortcut);
+  }
   function setIcon(button, name, label) {
     if (button.dataset.icon === name) return;
     button.dataset.icon = name;
     button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON_PATHS[name]}</svg>`;
-    button.setAttribute('aria-label', label);
+    setLabel(button, label);
   }
 
   // The overlay lives outside #stage so it keeps its size whatever the stage scale.
   const ctl = document.createElement('div');
   ctl.id = 'ctl';
   // Absolute: `make serve`, the only way to view the pages, serves the home page on /.
-  ctl.innerHTML = '<a id="home" href="/" aria-label="All videos"></a>'
+  ctl.innerHTML = '<a id="home" href="/"></a>'
     + '<button type="button" id="play"></button><div id="seek"><i><b></b></i></div>'
-    + '<span id="time"></span><button type="button" id="speed" aria-label="Playback speed"></button>'
+    + '<span id="time"></span><button type="button" id="speed"></button>'
     + '<button type="button" id="loop"></button><button type="button" id="subs"></button>'
     + '<button type="button" id="presenter"></button><button type="button" id="fs"></button>';
   document.body.appendChild(ctl);
@@ -361,6 +371,7 @@ function startPlayer() {
   document.addEventListener('fullscreenchange', updateFullscreenButton);
 
   setIcon(homeLink, 'home', 'All videos');
+  setLabel(speedButton, 'Speed');
   updateSpeedButton();
   updateLoopButton();
   setSubtitles(subtitlesShown);

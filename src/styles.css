@@ -127,6 +127,20 @@ html,body{margin:0;background:var(--bg)}
 #ctl button[hidden]{display:none}
 #ctl button:hover,#ctl a:hover{background:rgba(248,250,252,.08)}
 #ctl button:focus-visible,#ctl a:focus-visible{outline:2px solid var(--uv);outline-offset:1px}
+/* Tooltips: each control's name and shortcut (data-tip, set by setLabel()), 8 px above the bar, after a delay
+   so they do not flash while the pointer crosses the bar. The end controls align to their outer edge to stay
+   inside the window: home first, fullscreen last, or presenter mode when fullscreen is hidden. */
+#ctl [data-tip]{position:relative}
+#ctl [data-tip]::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 17px);left:50%;transform:translateX(-50%);
+  padding:5px 9px;background:var(--surface);border:1px solid var(--line);border-radius:var(--rs);
+  font-family:'Mono',monospace;font-size:13px;line-height:1.4;letter-spacing:.04em;color:var(--ink);
+  white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;
+}
+@media (hover:hover){#ctl [data-tip]:hover::after{opacity:1;transition-delay:.3s}}
+#ctl [data-tip]:focus-visible::after{opacity:1;transition-delay:.3s}
+#ctl>[data-tip]:first-child::after{left:0;transform:none}
+#ctl>[data-tip]:last-child::after,#ctl>[data-tip]:has(+[hidden]:last-child)::after{left:auto;right:0;transform:none}
 #ctl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #seek{flex:1;height:28px;display:flex;align-items:center;cursor:pointer;touch-action:none}
 #seek i{display:block;width:100%;height:4px;border-radius:2px;background:rgba(248,250,252,.14)}
