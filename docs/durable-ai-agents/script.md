@@ -138,10 +138,10 @@ the figures follow the step count if the scenario changes.
     A with its APP MEMORY, LLM CALLS BILLED at 0; the 4 step tiles on top.
 - **2:21** After each LLM call or tool call, Temporal saves the result in the
   history before the agent moves on.
-  - Visuals: Steps 1 to 3: for each row the app works (LLM rows bill a call), a
-    RESULT card travels from the app to Temporal, the row appears with SAVED, a
-    block with the step icon joins APP MEMORY, only then the step is checked;
-    counter 3, ticket "1 booking".
+  - Visuals: Steps 1 to 3: for each row the app works (LLM rows bill a call), an
+    LLM CALL or TOOL CALL card travels from the app to Temporal, the row appears
+    with SAVED, a block with the step icon joins APP MEMORY, only then the step
+    is checked; counter 3, ticket "1 booking".
 - **2:29** If the app crashes, another copy runs the agent again from the
   start.
   - Visuals: Step 4 starts, flash + shake, A CRASHED, memory blocks fall
@@ -150,10 +150,11 @@ the figures follow the step count if the scenario changes.
     arrow, step 1 runs.
 - **2:34** For each saved step, Temporal returns the result from the
   history. The LLM isn't called again: the context is rebuilt for free.
-  - Visuals: Replay: rows 1 to 6 highlighted in turn, tags REUSED, RESULT cards
-    travel back and refill APP MEMORY, steps re-check, counter stays 3 with "NOT
-    RE-BILLED"; tags "REUSED, NOT RE-BILLED" / "REUSED, NOT RE-RUN"; step 4 runs
-    for real: counter 4, rows 7 and 8 SAVED, AGENT COMPLETE.
+  - Visuals: Replay: rows 1 to 6 highlighted in turn, tags REUSED, LLM CALL and
+    TOOL CALL cards travel back and refill APP MEMORY, steps re-check, counter
+    stays 3 with "NOT RE-BILLED"; tags "REUSED, NOT RE-BILLED" / "REUSED, NOT
+    RE-RUN"; step 4 runs for real: counter 4, rows 7 and 8 SAVED, AGENT
+    COMPLETE.
 
 ## 08 What you get
 

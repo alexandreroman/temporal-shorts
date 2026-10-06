@@ -6,6 +6,8 @@
     `LLM call: ${step.action[0].toLowerCase()}${step.action.slice(1)}`, `${step.tool}: ${step.result}`,
   ]);
   const isLLM = i => i % 2 === 0;
+  // result card of row i, labeled with the kind of call it comes from, as in the subtitle
+  const makeCallCard = (root, i) => makeResultCard(root, isLLM(i), isLLM(i) ? 'LLM CALL' : 'TOOL CALL');
   // Chapter 7 layout: app on the left, Temporal on the right, both under the step tiles
   const APP = { x: 470, y: 445 };
   const MEM = { x: 470, y: 469, slot0: 162, slotGap: 88, slotY: 484 }; // memory panel and its block slots
@@ -58,8 +60,8 @@
         crash: { keptTop: 64, keptH: 262, cutTop: 330, label: 'APP CRASHED HERE', labelX: '66%', labelFont: 13 },
         scanH: 42,
       });
-      s.saveCards = JR.map((_, i) => makeResultCard(root, isLLM(i)));
-      s.reuseCards = JR.slice(0, 6).map((_, i) => makeResultCard(root, isLLM(i)));
+      s.saveCards = JR.map((_, i) => makeCallCard(root, i));
+      s.reuseCards = JR.slice(0, 6).map((_, i) => makeCallCard(root, i));
       s.flash = makeFlash(root);
       s.done = tag(root, 'Agent complete', 'neon');
       s.logo = E(root, `<img src="${LOGO}" style="height:150px;display:block">`);
@@ -132,7 +134,7 @@
       const tp = P(t, saved[5], 0.45, backOut);
       place(s.ticket, 660, 720, tp * (1 + 0.15 * win(t, reused[5], reused[5] + 0.5, 0.2)), clamp(tp * 2));
 
-      // result cards: app -> Temporal when saving, Temporal -> app when replaying
+      // LLM CALL and TOOL CALL cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {
         const w = write[i];
         fly(e, t, w + 0.35, memSlot(i), MEM.slotY, w + 0.4, 0.4, HIST.cardX, rowY(i), w + 0.8, HIST.cardX, rowY(i));
