@@ -15,6 +15,10 @@ the play button resumes; PageUp/PageDown are aliases of Left/Right in
 every mode, for slide clickers. While held, `playing` stays true and the
 ambient clock G keeps running.
 
+A faint, slowly breathing pause glyph (`#hold`, muted slate) sits in the
+top-right corner of the window during a hold, for the presenter, clear of
+the control bar at the bottom; it stays whether the controls show or hide.
+
 **Why:** a presenter talks over each step at their own pace. Animations
 are keyed to `c[i]` and at rest there, so a hold at a cue start shows the
 frame before the transition; holding before the fade-out keeps the scene

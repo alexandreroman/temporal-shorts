@@ -171,8 +171,9 @@ leaves time to explain the screen; the animations keep their normal speed.
 Subtitles are shown by default; the CC button hides or shows them. Presenter
 mode hides the subtitles, plays at 0.5x and holds at each subtitle cue after
 the first of a scene, before that cue's animations begin, and again just
-before each scene fades out; Space, Right, PageDown or the play button
-resumes. Shortcuts:
+before each scene fades out, with a faint pause mark in the top-right
+corner while it holds; Space, Right, PageDown or the play button resumes.
+Shortcuts:
 Space = play/pause, Left/Right or PageUp/PageDown = previous/next section
 (Left first restarts the current section if more than 2 s in), S = speed
 1x/0.5x, L = loop on/off, C = subtitles on/off, P = presenter mode on/off,

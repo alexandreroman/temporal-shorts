@@ -64,6 +64,14 @@ function startPlayer() {
   const seekFill = seekBar.querySelector('b');
   const timeLabel = document.getElementById('time');
 
+  // Hold mark: a discreet pause glyph in the top-right corner while held at a presenter stop, for the
+  // presenter's eyes. Hidden from assistive technologies, which get the play button's "Play" label instead.
+  const holdMark = document.createElement('div');
+  holdMark.id = 'hold';
+  holdMark.setAttribute('aria-hidden', 'true');
+  holdMark.innerHTML = '<i></i><i></i>';
+  document.body.appendChild(holdMark);
+
   // Scale the 1920x1080 stage to fit the window, centered; the body background letterboxes it.
   function fit() {
     const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
@@ -128,6 +136,8 @@ function startPlayer() {
     else setIcon(playButton, 'play', 'Play');
     seekFill.style.width = (time / TOTAL * 100) + '%';
     timeLabel.textContent = `${formatTime(time)} / ${formatTime(TOTAL)}`;
+    // Every change to `held` ends up here, so the hold mark follows it from one place.
+    root.classList.toggle('held', held);
     if (!playing) root.classList.remove('idle');
   }
 
@@ -243,6 +253,7 @@ function startPlayer() {
     setSubtitles(!presenter);
     setSpeed(presenter ? 0.5 : 1);
     updatePresenterButton();
+    updateControls(); // reflect the released hold at once, without waiting for the next frame
   }
 
   function updatePresenterButton() {
