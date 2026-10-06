@@ -68,6 +68,8 @@ src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        theme page (background, subtitles, header, script
                        list); scenes/ (one file per scene: subtitle text +
                        animations), theme-only helpers and social.png
+src/home.css, home.js  home page styles and star field
+src/social.html        home link preview card, captured by make social
 src/social.png         link preview image of the home page (make social)
 src/assets/            official Temporal logo (white horizontal lockup)
 src/fonts/             brand fonts (downloaded by make), see
@@ -201,11 +203,15 @@ make -B html SITE_URL=https://example.com
 
 Each page's image is a 1200x630 `social.png` in its folder:
 `src/social.png` for the home page, `src/themes/<theme>/social.png` for a
-theme, which shows the title card of the intro without its subtitle.
-`make social` writes them with Playwright; they are committed, so
-`make html` and CI only copy them next to the built pages. Run
-`make social` and commit the images after changing an intro scene, a page
-title or the home page.
+theme, which shows the title card of the intro without its subtitle. The
+home image is the card of `src/social.html`, a page made for the capture
+alone (the build skips it): the "Temporal shorts" lockup of the home page
+header (`.brand` in `home.css`) scaled up, above the order steps of the
+Durable Execution intro, on the home page background (`home.css`,
+`home.js`). `make social` writes the images with Playwright; they are
+committed, so `make html` and CI only copy them next to the built pages.
+Run `make social` and commit the images after changing an intro scene, a
+page title, `src/social.html`, the home page lockup or its background.
 
 ### Editing
 

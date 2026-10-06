@@ -15,7 +15,16 @@ comes with a `make social` run and the updated PNGs in the same commit:
   subtitle)
 - a shared visual drawn on a title card: `makeTitleBlock`, the logo, the
   star field, brand colors in `src/styles.css` or `src/shared.js`, the fonts
-- the home page: `src/index.html` (cards, heading, lead), `src/home.css`
+- the home card: `src/social.html` (its texts and layout), what it shares
+  with the home page: the "Temporal shorts" lockup (`.home .brand` in
+  `src/home.css`, which the card scales with `--logo`), the background
+  (`src/home.css`, the star field of `src/home.js`), the brand styles,
+  fonts and logo; the markup and theme cards of `src/index.html` do not
+  appear in the image
+- an icon of the order steps (`card`, `box`, `truck`, `mail`) or of the
+  `check` / `retry` badges: `src/social.html` holds inline copies of their
+  paths, to update with the source (`src/engine.js` ICONS,
+  `src/themes/durable-execution/shared.js`)
 - a page `<title>` or `<meta name="description">` (check the image still
   matches the text)
 - a new theme: its `social.png` is required, `make html` fails without it

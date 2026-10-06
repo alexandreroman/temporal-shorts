@@ -37,8 +37,9 @@ PORT ?= $(if $(CASPER_PORT),$(CASPER_PORT),8000)
 SITE_URL ?=
 export SITE_URL
 
-# The home page is not part of any video: editing it must not invalidate an MP4 or an SRT.
-HOME_SOURCES := src/index.html src/home.css
+# The home page is not part of any video: editing it must not invalidate an MP4 or an SRT. src/social.html, the card
+# that `make social` captures, is no input at all: no wildcard below matches it.
+HOME_SOURCES := src/index.html src/home.css src/home.js
 # The fonts are git-ignored: their version stamp, written by fonts.sh, stands for them. As a prerequisite, it
 # downloads them on the first build after a clone, even without `make setup`, and again when fonts.sh pins a new one.
 FONTS := src/fonts/.version
