@@ -5,3 +5,4 @@ output
 src/fonts/*.woff2
 src/fonts/*.part
 src/fonts/.version
+.env

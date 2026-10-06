@@ -43,3 +43,4 @@
 - [No video durations in docs](references/feedback_no-durations-in-docs.md) — length is never written; `make timeline` is the source
 - [Player 0.5x speed](references/project_player-speed.md) — 0.5x stretches still moments only; ambient loops read G
 - [Human-in-the-Loop story](references/project_hitl-story.md) — Sam's laptop, Maria approves; ch3/ch4 mirror DAA ch7; Signal, replay, timers
+- [Custom domain](references/project_custom-domain.md) — durable.withtemporal.dev, Cloudflare CNAME to Pages, DNS only, shared zone
