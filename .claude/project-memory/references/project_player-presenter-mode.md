@@ -13,7 +13,9 @@ scene, the last one included, where the scene fade-out starts. A cue with
 `stopLead` (seconds) holds that much earlier. Space, Right, PageDown or
 the play button resumes; PageUp/PageDown are aliases of Left/Right in
 every mode, for slide clickers. While held, `playing` stays true and the
-ambient clock G keeps running.
+ambient clock G keeps running. In presenter mode, Left, Right, PageUp and
+PageDown leave the controls as they are: hidden controls stay hidden, and
+shown controls keep their hide timer.
 
 A faint, slowly breathing pause glyph (`#hold`, muted slate) sits in the
 top-right corner of the window during a hold, for the presenter, clear of

@@ -184,9 +184,15 @@ function startPlayer() {
   }
 
   // Right acts like a slide clicker's "next": it releases a presenter hold, or jumps to the next section.
+  // It releases the hold itself rather than through togglePlay(), which wakes the controls: see the keydown
+  // handler.
   function forward() {
-    if (held) togglePlay();
-    else nextSection();
+    if (held) {
+      held = false;
+      show();
+    } else {
+      nextSection();
+    }
   }
 
   function togglePlay() {
@@ -387,7 +393,10 @@ function startPlayer() {
     else if (event.key === 'f' || event.key === 'F') toggleFullscreen();
     else return;
     event.preventDefault();
-    wake();
+    // In presenter mode, the section keys leave the controls as they are, so a transition triggered from the
+    // keyboard or a slide clicker keeps the audience's screen clean; controls already shown keep their timer.
+    const sectionKey = ['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'].includes(event.key);
+    if (!(presenter && sectionKey)) wake();
   });
   document.addEventListener('mousemove', wake);
   document.addEventListener('fullscreenchange', updateFullscreenButton);

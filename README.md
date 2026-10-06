@@ -173,7 +173,8 @@ mode hides the subtitles, plays at 0.5x and holds at each subtitle cue after
 the first of a scene, before that cue's animations begin, and again just
 before each scene fades out, with a faint pause mark in the top-right
 corner while it holds; Space, Right, PageDown or the play button resumes.
-Shortcuts:
+In presenter mode, the section keys (Left, Right, PageUp, PageDown) leave
+the controls hidden, so a clicker keeps the screen clean. Shortcuts:
 Space = play/pause, Left/Right or PageUp/PageDown = previous/next section
 (Left first restarts the current section if more than 2 s in), S = speed
 1x/0.5x, L = loop on/off, C = subtitles on/off, P = presenter mode on/off,
