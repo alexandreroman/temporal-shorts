@@ -5,6 +5,7 @@ function startPlayer() {
 
   const CC_LETTERS = '<path d="M10.5 10a2.5 2.5 0 1 0 0 4M17 10a2.5 2.5 0 1 0 0 4"/>';
   const LOOP_ARROWS = '<path d="M17 3l3 3-3 3M7 21l-3-3 3-3"/>';
+  const EASEL_STAND = '<path d="M12 15v2M8 21l4-4 4 4"/>';
   const ICON_PATHS = {
     home: '<path d="M3 11l9-7.5 9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>',
     play: '<path d="M7 4.5v15l12-7.5z"/>',
@@ -19,29 +20,45 @@ function startPlayer() {
     loopOn: '<path d="M4 12V9a3 3 0 0 1 3-3h13M20 12v3a3 3 0 0 1-3 3H4"/>' + LOOP_ARROWS,
     // Same cycle without the two corners the slash crosses, so the slash stays legible at 20 px.
     loopOff: '<path d="M4 12V9M10 6h10M20 12v3M14 18H4"/><path d="M3 3l18 18"/>' + LOOP_ARROWS,
+    // A board on a stand.
+    presenterOn: '<path d="M2 4h20M4 4v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4"/>' + EASEL_STAND,
+    // Same board, opened where the slash crosses it so the slash stays legible at 20 px.
+    presenterOff: '<path d="M8 4h14M20 4v9a2 2 0 0 1-2 2M12.5 15H6a2 2 0 0 1-2-2V8"/><path d="M3 3l18 18"/>'
+      + EASEL_STAND,
   };
+  // Keyboard shortcuts by control id, as bound by the keydown handler below.
+  const SHORTCUTS = { play: 'Space', speed: 'S', loop: 'L', subs: 'C', presenter: 'P', fs: 'F' };
+  // Screen readers get the plain name (aria-label) and the shortcut (aria-keyshortcuts); the CSS tooltip
+  // (data-tip) shows both.
+  function setLabel(control, label) {
+    const shortcut = SHORTCUTS[control.id];
+    control.setAttribute('aria-label', label);
+    control.dataset.tip = shortcut ? `${label} (${shortcut})` : label;
+    if (shortcut) control.setAttribute('aria-keyshortcuts', shortcut);
+  }
   function setIcon(button, name, label) {
     if (button.dataset.icon === name) return;
     button.dataset.icon = name;
     button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON_PATHS[name]}</svg>`;
-    button.setAttribute('aria-label', label);
+    setLabel(button, label);
   }
 
   // The overlay lives outside #stage so it keeps its size whatever the stage scale.
   const ctl = document.createElement('div');
   ctl.id = 'ctl';
   // Absolute: `make serve`, the only way to view the pages, serves the home page on /.
-  ctl.innerHTML = '<a id="home" href="/" aria-label="All videos"></a>'
+  ctl.innerHTML = '<a id="home" href="/"></a>'
     + '<button type="button" id="play"></button><div id="seek"><i><b></b></i></div>'
-    + '<span id="time"></span><button type="button" id="speed" aria-label="Playback speed"></button>'
+    + '<span id="time"></span><button type="button" id="speed"></button>'
     + '<button type="button" id="loop"></button><button type="button" id="subs"></button>'
-    + '<button type="button" id="fs"></button>';
+    + '<button type="button" id="presenter"></button><button type="button" id="fs"></button>';
   document.body.appendChild(ctl);
   const homeLink = document.getElementById('home');
   const playButton = document.getElementById('play');
   const speedButton = document.getElementById('speed');
   const loopButton = document.getElementById('loop');
   const subtitlesButton = document.getElementById('subs');
+  const presenterButton = document.getElementById('presenter');
   const fullscreenButton = document.getElementById('fs');
   const seekBar = document.getElementById('seek');
   const seekFill = seekBar.querySelector('b');
@@ -72,13 +89,17 @@ function startPlayer() {
   let subtitlesShown = true;
   let looping = false;
   let speed = 1;
+  // Presenter mode: no subtitles, 0.5x, and a hold before each scene fades out, until the presenter resumes.
+  let presenter = false;
+  // Held at a presenter stop: `playing` stays true, so the controls keep hiding, but the story time stands still.
+  let held = false;
 
   // Resume at the same position after a reload: the `make serve` hot reload, or F5.
   // Browser settings can block sessionStorage; the player then simply starts from the beginning.
   // One key per page: the session is shared by every theme page of the same origin.
   const STATE_KEY = 'player-state:' + location.pathname;
   addEventListener('pagehide', () => {
-    try { sessionStorage.setItem(STATE_KEY, JSON.stringify({ time, playing, speed })); } catch {}
+    try { sessionStorage.setItem(STATE_KEY, JSON.stringify({ time, playing, speed, presenter, held })); } catch {}
   });
   if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
     try {
@@ -87,6 +108,9 @@ function startPlayer() {
         time = clamp(saved.time, 0, TOTAL);
         playing = saved.playing;
         speed = saved.speed === 0.5 ? 0.5 : 1;
+        presenter = saved.presenter === true;
+        held = presenter && saved.held === true;
+        subtitlesShown = !presenter;
       }
     } catch {}
   }
@@ -98,7 +122,7 @@ function startPlayer() {
   }
 
   function updateControls() {
-    if (playing) setIcon(playButton, 'pause', 'Pause');
+    if (playing && !held) setIcon(playButton, 'pause', 'Pause');
     else if (time >= TOTAL) setIcon(playButton, 'replay', 'Replay');
     else setIcon(playButton, 'play', 'Play');
     seekFill.style.width = (time / TOTAL * 100) + '%';
@@ -112,6 +136,7 @@ function startPlayer() {
   }
 
   function seek(t) {
+    held = false;
     time = clamp(t, 0, TOTAL);
     ambient = time;
     show();
@@ -147,8 +172,16 @@ function startPlayer() {
     seek(time - current.start > RESTART_THRESHOLD ? current.start : scenes[Math.max(0, index - 1)].start);
   }
 
+  // Right acts like a slide clicker's "next": it releases a presenter hold, or jumps to the next section.
+  function forward() {
+    if (held) togglePlay();
+    else nextSection();
+  }
+
   function togglePlay() {
-    if (playing) {
+    if (held) {
+      held = false; // keep playing: the scene fades out and the next one starts
+    } else if (playing) {
       playing = false;
     } else {
       if (time >= TOTAL) {
@@ -161,9 +194,13 @@ function startPlayer() {
     wake();
   }
 
-  function toggleSpeed() {
-    speed = speed === 1 ? 0.5 : 1;
+  function setSpeed(value) {
+    speed = value;
     updateSpeedButton();
+  }
+
+  function toggleSpeed() {
+    setSpeed(speed === 1 ? 0.5 : 1);
   }
 
   function updateSpeedButton() {
@@ -182,16 +219,43 @@ function startPlayer() {
   }
 
   // Hidden with a class rather than in renderAt(), which keeps driving the subtitle's text and opacity.
-  function toggleSubtitles() {
-    subtitlesShown = !subtitlesShown;
-    root.classList.toggle('no-subs', !subtitlesShown);
+  function setSubtitles(shown) {
+    subtitlesShown = shown;
+    root.classList.toggle('no-subs', !shown);
     updateSubtitlesButton();
+  }
+
+  function toggleSubtitles() {
+    setSubtitles(!subtitlesShown);
   }
 
   function updateSubtitlesButton() {
     // A toggle button keeps one label; aria-pressed tells assistive technologies whether it is on.
     setIcon(subtitlesButton, subtitlesShown ? 'subtitlesOn' : 'subtitlesOff', 'Subtitles');
     subtitlesButton.setAttribute('aria-pressed', String(subtitlesShown));
+  }
+
+  // The speed and CC buttons keep working in presenter mode; leaving it restores the defaults.
+  function togglePresenter() {
+    presenter = !presenter;
+    held = false;
+    setSubtitles(!presenter);
+    setSpeed(presenter ? 0.5 : 1);
+    updatePresenterButton();
+  }
+
+  function updatePresenterButton() {
+    setIcon(presenterButton, presenter ? 'presenterOn' : 'presenterOff', 'Presenter mode');
+    presenterButton.setAttribute('aria-pressed', String(presenter));
+  }
+
+  // A presenter stop sits just before a scene's fade-out (see renderAt), so the hold shows the scene fully
+  // visible. Every scene has one, including the last.
+  const SCENE_FADE = 0.5;
+
+  // The first stop in (from, to]: resuming from exactly a stop point moves on.
+  function presenterStop(from, to) {
+    return scenes.map(sc => sc.end - SCENE_FADE).find(stop => from < stop && stop <= to);
   }
 
   function toggleFullscreen() {
@@ -220,23 +284,34 @@ function startPlayer() {
     const dt = Math.min((now - lastTick) / 1000, 0.25);
     lastTick = now;
     if (playing && !dragging) {
-      // Below 1x, only the still moments stretch, leaving time to explain the screen; animations keep
-      // their normal speed. At 1x the probe is skipped entirely.
-      const rate = speed < 1 && !isAnimating() ? speed : 1;
-      time += dt * rate;
+      // Ambient loops keep running during a presenter hold, so the held frame stays alive.
       ambient += dt;
-      if (time >= TOTAL) {
-        if (looping) {
-          time -= TOTAL; // wrap to the start and keep playing
-          ambient = time;
-        } else {
-          time = TOTAL; // stop on the last frame
-          playing = false;
-        }
-      }
+      if (!held) advance(dt);
       show();
     }
     requestAnimationFrame(tick);
+  }
+
+  function advance(dt) {
+    // Below 1x, only the still moments stretch, leaving time to explain the screen; animations keep
+    // their normal speed. At 1x the probe is skipped entirely.
+    const rate = speed < 1 && !isAnimating() ? speed : 1;
+    let next = time + dt * rate;
+    const stop = presenter ? presenterStop(time, next) : undefined;
+    if (stop !== undefined) {
+      next = stop;
+      held = true;
+    }
+    time = next;
+    if (time >= TOTAL) {
+      if (looping) {
+        time -= TOTAL; // wrap to the start and keep playing
+        ambient = time;
+      } else {
+        time = TOTAL; // stop on the last frame
+        playing = false;
+      }
+    }
   }
 
   function seekToPointer(event) {
@@ -266,11 +341,13 @@ function startPlayer() {
   speedButton.addEventListener('click', toggleSpeed);
   loopButton.addEventListener('click', toggleLoop);
   subtitlesButton.addEventListener('click', toggleSubtitles);
+  presenterButton.addEventListener('click', togglePresenter);
   fullscreenButton.addEventListener('click', toggleFullscreen);
   fullscreenButton.hidden = !document.fullscreenEnabled;
   // Keep mouse clicks from focusing the controls, so Space stays a global play/pause key.
   // Keyboard users can still Tab to a control and activate it natively.
-  for (const control of [homeLink, playButton, speedButton, loopButton, subtitlesButton, fullscreenButton]) {
+  const controls = [homeLink, playButton, speedButton, loopButton, subtitlesButton, presenterButton, fullscreenButton];
+  for (const control of controls) {
     control.addEventListener('mousedown', event => event.preventDefault());
   }
 
@@ -278,11 +355,13 @@ function startPlayer() {
     if (event.metaKey || event.ctrlKey || event.altKey) return;
     if (event.key === ' ' && event.target instanceof HTMLButtonElement) return;
     if (event.key === ' ') togglePlay();
-    else if (event.key === 'ArrowLeft') previousSection();
-    else if (event.key === 'ArrowRight') nextSection();
+    // Slide clickers send PageUp and PageDown.
+    else if (event.key === 'ArrowLeft' || event.key === 'PageUp') previousSection();
+    else if (event.key === 'ArrowRight' || event.key === 'PageDown') forward();
     else if (event.key === 's' || event.key === 'S') toggleSpeed();
     else if (event.key === 'l' || event.key === 'L') toggleLoop();
     else if (event.key === 'c' || event.key === 'C') toggleSubtitles();
+    else if (event.key === 'p' || event.key === 'P') togglePresenter();
     else if (event.key === 'f' || event.key === 'F') toggleFullscreen();
     else return;
     event.preventDefault();
@@ -292,9 +371,11 @@ function startPlayer() {
   document.addEventListener('fullscreenchange', updateFullscreenButton);
 
   setIcon(homeLink, 'home', 'All videos');
+  setLabel(speedButton, 'Speed');
   updateSpeedButton();
   updateLoopButton();
-  updateSubtitlesButton();
+  setSubtitles(subtitlesShown);
+  updatePresenterButton();
   updateFullscreenButton();
   show();
   wake();
