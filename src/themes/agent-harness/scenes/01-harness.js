@@ -155,7 +155,7 @@
         after: 1.0,
       },
       {
-        text: "A message starts a turn: the harness runs your loop, streams the reply, "
+        text: "A message starts a <b>turn</b>: the harness runs your loop, streams the reply, "
           + "then waits for the next message.",
         after: 2.5,
       },
@@ -164,7 +164,7 @@
         after: 1.9,
       },
       {
-        text: "An LLM call is one step. A turn lasts until the agent is idle again: often many model and tool calls.",
+        text: "An LLM call is one <b>step</b>. A turn lasts until the agent is idle again: often many model and tool calls.",
         after: 2.5,
       },
       {

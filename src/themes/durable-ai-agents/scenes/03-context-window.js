@@ -1,4 +1,4 @@
-// ===================== 3. CONTEXT WINDOW
+// ===================== 3. THE CONTEXT WINDOW
 // The block keeps every name declared in this file local to this scene.
 {
   // the conversation in the HISTORY block: chat lines, then the question; APPENDED arrives during c[1]

@@ -49,15 +49,24 @@ function makeTitleBlock(root, kicker, titleHtml, tagline, sizes = {}) {
     + `<div class="mono" style="font-size:${taglineFont}px;letter-spacing:.12em;color:var(--violet);`
     + `margin-top:${taglineGap}px">${tagline}</div>`);
 }
-// End card: the title, a violet tagline and the official logo, centered
-function makeEndCard(root, title, tagline) {
-  return E(root,
-    `<div style="font-size:104px;letter-spacing:-3px;line-height:1.04">${title}</div>`
+// End card: the title, a violet tagline, an optional violet pill and the official logo, centered.
+// opts.pill: text of the pill shown under the tagline, e.g. 'Experimental'.
+function makeEndCard(root, title, tagline, opts = {}) {
+  const { pill } = opts;
+  let html = `<div style="font-size:104px;letter-spacing:-3px;line-height:1.04">${title}</div>`
     + '<div class="mono" style="font-size:24px;letter-spacing:.14em;padding-left:.14em;color:var(--violet);'
     + 'margin-top:30px">'
-    + `${tagline}</div>`
-    + `<img src="${LOGO}" style="height:70px;display:block;margin:76px auto 0">`,
-    '', { textAlign: 'center' });
+    + `${tagline}</div>`;
+  // The tagline's line box ends about 8 px below its letters, the pill at its border: 84 px under the pill
+  // leaves the same visible gap to the logo as 76 px under the tagline.
+  let logoGap = 76;
+  if (pill) {
+    html += '<span class="pill violet" style="display:inline-block;margin-top:30px;font-size:18px;line-height:23px">'
+      + `${pill}</span>`;
+    logoGap = 84;
+  }
+  html += `<img src="${LOGO}" style="height:70px;display:block;margin:${logoGap}px auto 0">`;
+  return E(root, html, '', { textAlign: 'center' });
 }
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
 function rise(e, x, y, p, d = 24) {

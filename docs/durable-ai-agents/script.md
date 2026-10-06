@@ -22,12 +22,25 @@ The video explains to a non-technical audience, in seven topics:
    savings: previous LLM calls are not lost, so they are not redone to
    rebuild the context.
 
+### Budget figure
+
+The budget numbers are deliberately illustrative ("in this example"):
+4 steps = 4 LLM calls. Chapters 6 and 7 crash at the same point: after
+step 3's result (the booking) is in APP MEMORY, before step 4's LLM call.
+Without durable execution the restart re-runs those 3 steps, booking
+included, so 7 calls in total (3/7 ≈ 43% wasted); with Temporal the 3 saved
+steps are reused, so 4 calls and 1 booking.
+
+The "in this example" label stays next to the percentage on screen, and
+the figures follow the step count if the scenario changes.
+
 ## Intro
 
 - **0:01** AI agents search, book and send emails for us. But how do they
   actually work?
-  - Visuals: Temporal logo, title "How does an AI agent work?", LLM orb with
-    orbiting tool icons.
+  - Visuals: Temporal logo, kicker "AN EXPLAINER FOR EVERYONE", title "How
+    does an AI agent work?", tagline "AND WHY IT NEEDS DURABLE EXECUTION"; on
+    the right an LLM orb with orbiting tool icons.
 
 ## 01 LLM calls
 
@@ -43,10 +56,10 @@ The video explains to a non-technical audience, in seven topics:
 
 ## 02 Stateless by design
 
-- **0:28** Surprise: the model has no memory. Tell it your name…
+- **0:28** Surprise: the model has no memory. Tell it your name.
   - Visuals: Call 1: "Hi, I'm Alex." / "Nice to meet you, Alex!", "Alex" bubble
     above orb.
-- **0:33** …then ask again in the next call. It has already forgotten.
+- **0:33** Then ask again in the next call: it has already forgotten.
   - Visuals: Bubble wiped, NOT KEPT label above the orb, Call 2: "What's my
     name?" / "I don't know…" (red).
 - **0:39** That's by design: LLMs are stateless. So the app resends the whole
@@ -72,22 +85,23 @@ The video explains to a non-technical audience, in seven topics:
   tools.
   - Visuals: Crossed-out icons, toolbox: Weather / Calendar / Email / Web
     search.
-- **1:11** When it needs one, the model writes a request: “use the Weather
-  tool, for Paris”. The app runs it…
+- **1:11** When it needs one, the model writes a request: "use the Weather
+  tool, for Paris". The app runs it.
   - Visuals: Request card (tool: weather, city: Paris) goes to the app, app
     calls the tool, "18°C, sunny".
-- **1:19** …adds the result to the context, and calls the model again.
+- **1:19** The app adds the result to the context, then calls the model
+  again.
   - Visuals: "Full context" bundle, Call 2, answer card.
 
 ## 05 The agentic loop
 
-- **1:25** Repeat until the goal is reached: think, act, observe. That's the
+- **1:26** Repeat until the goal is reached: think, act, observe. That's the
   agentic loop.
   - Visuals: Think / Act / Observe loop with travelling token.
-- **1:32** “Book lunch with Marie on Thursday”: check the calendar, find a
+- **1:32** "Book lunch with Marie on Thursday": check the calendar, find a
   restaurant, book a table, send the invite.
   - Visuals: 4 loop turns, each fills a task row, GOAL REACHED.
-- **1:40** An AI agent is a model, plus tools, plus a loop, working toward a
+- **1:41** An AI agent is a model, plus tools, plus a loop, working toward a
   goal.
   - Visuals: MODEL + TOOLS + LOOP = AI AGENT.
 
@@ -123,14 +137,14 @@ The video explains to a non-technical audience, in seven topics:
     RESULT card travels from the app to Temporal, the row appears with SAVED, a
     block with the step icon joins APP MEMORY, only then the step is checked;
     counter 3, ticket "1 booking".
-- **2:28** If the app crashes, another copy runs the agent again from the start.
-  For every step already saved…
+- **2:29** If the app crashes, another copy runs the agent again from the
+  start.
   - Visuals: Step 4 starts, flash + shake, A CRASHED, memory blocks fall
     (EMPTY), "APP CRASHED HERE" line under row 6 and tinted kept rows; APP
     INSTANCE B takes over with an empty memory, steps reset, "From the start"
     arrow, step 1 runs.
-- **2:35** …Temporal hands back the result from the history. The LLM isn't
-  called again: the context is rebuilt for free.
+- **2:34** For each saved step, Temporal returns the result from the
+  history. The LLM isn't called again: the context is rebuilt for free.
   - Visuals: Replay: rows 1 to 6 highlighted in turn, tags REUSED, RESULT cards
     travel back and refill APP MEMORY, steps re-check, counter stays 3 with "NOT
     RE-BILLED"; tags "REUSED, NOT RE-BILLED" / "REUSED, NOT RE-RUN"; step 4 runs
@@ -138,7 +152,7 @@ The video explains to a non-technical audience, in seven topics:
 
 ## 08 What you get
 
-- **2:44** No saved LLM call is paid for twice, and no saved step runs again.
+- **2:43** No saved LLM call is paid for twice, and no saved step runs again.
   Plus retries, human waits and full visibility.
   - Visuals: "43% less LLM spend in this example", "4 vs 7 LLM calls", then 4
     tiles: Saved steps reused / Automatic retries / Waits for humans / Full
@@ -146,18 +160,6 @@ The video explains to a non-technical audience, in seven topics:
 
 ## Outro
 
-- **2:54** Durable AI agents keep their progress and your budget.
-  - Visuals: "Durable AI agents", KEEP THEIR PROGRESS AND YOUR BUDGET, Temporal
-    logo.
-
-## Budget figure
-
-The budget numbers are deliberately illustrative ("in this example"):
-4 steps = 4 LLM calls. Chapters 6 and 7 crash at the same point: after
-step 3's result (the booking) is in APP MEMORY, before step 4's LLM call.
-Without durable execution the restart re-runs those 3 steps, booking
-included, so 7 calls in total (3/7 ≈ 43% wasted); with Temporal the 3 saved
-steps are reused, so 4 calls and 1 booking.
-
-The "in this example" label stays next to the percentage on screen, and
-the figures follow the step count if the scenario changes.
+- **2:53** Durable AI agents keep their progress and your budget.
+  - Visuals: LLM orb, title "Durable AI Agents", tagline "KEEP THEIR
+    PROGRESS AND YOUR BUDGET", Temporal logo.

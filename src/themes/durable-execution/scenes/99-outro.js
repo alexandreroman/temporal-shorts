@@ -2,7 +2,7 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // the 4 order steps, all done: small tiles joined by links, each with a neon check badge
-  const ROW = { x0: 705, gap: 170, y: 250, size: 110 };
+  const ROW = { x0: 705, gap: 170, y: 277, size: 110 };
   const makeDoneTile = (p, icon) => {
     const e = iconTile(p, icon, null, ROW.size, ROW.size);
     e.insertAdjacentHTML('beforeend',
@@ -14,7 +14,7 @@
   };
   scene({
     pre: 0.4, post: 2.6,
-    shift: [0, 35],
+    shift: [0, 60],
     subs: [
       { text: "Durable Execution: your code runs to completion, whatever fails along the way." },
     ],
@@ -22,16 +22,11 @@
       s.svg = svgLayer(root);
       s.links = stepLinks(s.svg, ORDER_STEPS.map((_, i) => ROW.x0 + i * ROW.gap), ROW.y, ROW.size);
       s.tiles = ORDER_STEPS.map(step => makeDoneTile(root, step.icon));
-      s.t = E(root,
-        '<div style="font-size:124px;letter-spacing:-3.5px;line-height:128px">Durable Execution</div>'
-        + '<div class="mono" style="font-size:28px;line-height:36px;letter-spacing:.14em;padding-left:.14em;'
-        + 'color:var(--violet);margin-top:34px">YOUR CODE RUNS TO COMPLETION</div>'
-        // 82 px high, the logo is exactly 314 px wide: centered in the 1040 px block, it rests on whole pixels
-        + `<img src="${LOGO}" style="height:82px;display:block;margin:109px auto 0">`,
-        '', { width: '1040px', textAlign: 'center' });
+      s.t = makeEndCard(root, 'Durable Execution', 'YOUR CODE RUNS TO COMPLETION');
     },
     update(t, c, s) {
-      place(s.t, 960, 600, 1, P(t, 0.3, 0.8));
+      // the tiles' bottom edge sits as far above the title's letters as the tagline sits above the logo
+      place(s.t, 960, 560, 1, P(t, 0.3, 0.8));
       // tiles pop in one after the other, then each step gets its check
       s.tiles.forEach((e, i) => {
         const p = P(t, 0.1 + i * 0.12, 0.45, backOut);

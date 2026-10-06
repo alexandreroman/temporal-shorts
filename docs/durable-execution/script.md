@@ -8,7 +8,7 @@ times below are a snapshot from 2026-10-06.
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
 
-## Audience and story
+## Audience and goal
 
 The video introduces the principles of Durable Execution with Temporal
 Workflows, outside any AI context, to everyone: developers new to Temporal
@@ -67,7 +67,7 @@ money is tracked by a CARD CHARGED counter in dollars.
 - **0:01** Payments, orders, sign-ups: most apps run processes made of
   several steps. What if one fails halfway?
   - Visuals: Temporal logo, kicker "AN INTRODUCTION FOR EVERYONE", title
-    "What is Durable Execution?", violet line "WITH TEMPORAL WORKFLOWS". On
+    "What is Durable Execution?", tagline "WITH TEMPORAL WORKFLOWS". On
     the right, a vertical chain of the 4 step icons; a neon pulse runs down
     the chain in a loop and checks each step; on Ship package it first
     flashes red, shows a retry arrow, then passes.
@@ -258,5 +258,6 @@ readability.
 
 - **3:14** Durable Execution: your code runs to completion, whatever fails
   along the way.
-  - Visuals: The 4 step tiles checked, title "Durable Execution", violet
-    line "YOUR CODE RUNS TO COMPLETION", Temporal logo.
+  - Visuals: The 4 step tiles joined by links, each with a neon check
+    badge, title "Durable Execution", tagline "YOUR CODE RUNS TO
+    COMPLETION", Temporal logo.

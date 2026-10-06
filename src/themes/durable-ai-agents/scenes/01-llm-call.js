@@ -1,4 +1,4 @@
-// ===================== 1. LLM CALL
+// ===================== 1. LLM CALLS
 // The block keeps every name declared in this file local to this scene.
 {
   scene({

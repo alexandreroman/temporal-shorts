@@ -51,7 +51,7 @@ Lisbon.
 - **0:02** Meet Temporal Agent Harness: an experimental project to build
   durable AI agents on Temporal.
   - Visuals: Temporal logo, kicker "AN EXPERIMENTAL PROJECT", title
-    "Temporal Agent Harness", violet line "DURABLE AI AGENTS, WITH THE SDKS
+    "Temporal Agent Harness", tagline "DURABLE AI AGENTS, WITH THE SDKS
     YOU ALREADY USE"; on the right an LLM orb inside a slowly turning dashed
     UV ring (the harness) carrying four capability icons (retry, person,
     eye, layers).
@@ -248,6 +248,6 @@ Lisbon.
 
 - **4:47** Temporal Agent Harness is experimental and open source. Try the
   examples and build your own agents.
-  - Visuals: LLM orb, takeaway title "Your agent, harnessed", violet line
-    "YOUR LOOP AND YOUR SDKS, RUN DURABLY BY TEMPORAL", EXPERIMENTAL tag,
+  - Visuals: LLM orb, title "Temporal Agent Harness", tagline "YOUR LOOP
+    AND YOUR SDKS, RUN DURABLY BY TEMPORAL", violet "EXPERIMENTAL" pill,
     Temporal logo.
