@@ -39,7 +39,8 @@ The video teaches, in order:
 5. typed, self-describing agents that other agents call as tools;
 6. Code Mode: the model writes a script over its tools, and every call inside
    stays durable, gated and visible;
-7. callback tools and typed React and Svelte SDKs, for real products.
+7. callback tools that run on the user's own device, and typed React and
+   Svelte SDKs that put the agent in a live, typed session in your UI.
 
 The running example is a travel agent, as in the harness's own examples:
 `search_flights`, `search_hotels`, `book_flight`, `book_hotel`, a trip to
@@ -222,7 +223,7 @@ Lisbon.
     SAVED; under the dimmed side, "3 ROUND TRIPS vs 1 ROUND TRIP"; EVERY
     CALL: DURABLE / GATED / VISIBLE.
 
-## 07 Built for real products
+## 07 Callback tools, typed sessions
 
 - **4:16** Callback tools run on the user's own device: the agent asks, the
   laptop runs the tool and replies.
@@ -234,7 +235,10 @@ Lisbon.
   - Visuals: the view pans; YOUR UI: a trip planner in a browser window
     ("Lisbon, 3 nights", flight, hotel, tour, TOTAL $895, Book), linked by
     a TYPED SESSION; a TYPED SDKS row: REACT / SVELTE.
-- **4:32** Durable, observable, composable agents with human approvals,
+
+## 08 What you get
+
+- **4:36** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
   - Visuals: six recap tiles land one by one, one per topic: Survives
     crashes / Event stream / Typed subagents / Human approvals / Code Mode /
@@ -242,7 +246,7 @@ Lisbon.
 
 ## Outro
 
-- **4:43** Temporal Agent Harness is experimental and open source. Try the
+- **4:47** Temporal Agent Harness is experimental and open source. Try the
   examples and build your own agents.
   - Visuals: LLM orb, takeaway title "Your agent, harnessed", violet line
     "YOUR LOOP AND YOUR SDKS, RUN DURABLY BY TEMPORAL", EXPERIMENTAL tag,
