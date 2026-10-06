@@ -1,0 +1,62 @@
+# Build the home page and the HTML players (make html), then deploy output/ to GitHub Pages.
+# Pull requests to main run the build only: the pages are attached to the run as an artifact, never deployed.
+# The videos and subtitles are not built here: no Playwright, no ffmpeg.
+name: Deploy HTML pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: each job declares the permissions it needs.
+permissions: {}
+
+# Deployments share one group and never cancel each other: a new push waits for the one in progress.
+# Each pull request gets its own group, where a new commit cancels the previous build.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('pages-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Download fonts
+        run: bash scripts/fonts.sh
+
+      # build_html.py uses the standard library only: the setup-python interpreter replaces the .venv one.
+      - name: Build HTML pages
+        run: make html PY=python
+
+      # Calls the Pages API, which a pull request token (from a fork in particular) cannot reach.
+      - if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v6
+
+      # Needs no Pages permission: on pull requests, reviewers download the pages from the run.
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: output
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
