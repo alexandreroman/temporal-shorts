@@ -11,9 +11,10 @@ The theme picker (`src/index.html`, `src/home.css`) follows these rules:
 - Every card has the same width and height, whatever its text length.
 - Cards sit in a flexible grid (auto-fit columns, equal row heights) that
   takes any number of videos: adding a card needs no CSS change.
-- Card size is responsive: columns stretch to share the available width
-  (4 columns at 1920 px, 2x2 around 1000-1280 px, 1 column on phones with
-  4 cards); padding and icon scale with `clamp()`.
+- Card size is responsive: columns are at least 260 px wide and stretch to
+  share the available width. With 4 cards: 4 in a row from a ~1220 px
+  window (so at 1280 and 1920 px), 3+1 from ~910 px, 2x2 from ~590 px,
+  1 column on phones. Padding and icon scale with `clamp()`.
 - Card order: Introduction to Durable Execution, Human-in-the-Loop, Durable
   AI Agents, Temporal Agent Harness.
 - Cards show no video duration.

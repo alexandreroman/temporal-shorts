@@ -15,14 +15,14 @@
 .home main{position:relative;width:100%;max-width:1720px;padding:72px clamp(20px,4vw,60px) 96px}
 .home header{text-align:center;margin-bottom:64px}
 .home .logo{display:block;height:48px;margin:0 auto 48px}
-.home h1{margin:0;font-size:clamp(44px,6vw,76px);font-weight:400;line-height:1.04;letter-spacing:-2px}
+.home h1{margin:0;font-size:clamp(32px,4vw,52px);font-weight:400;line-height:1.04;letter-spacing:-1.4px}
 .home .lead{margin:20px 0 0;font-size:20px;line-height:1.4;color:var(--slate)}
 /* Every card gets the same width and height, whatever its text and however many cards there are: as many
-   equal columns as fit (376 px at least), stretched to share the width, and every row as tall as the tallest
-   one. With 4 cards: 4 columns from a ~1700 px window (1600 px of content), 2 columns from ~850 px (2x2 at
-   1280 px), 1 column on phones. The 376 px minimum is what keeps 1280 px at 2 columns and 1920 px at 4. */
+   equal columns as fit (260 px at least), stretched to share the width, and every row as tall as the tallest
+   one. With 4 cards: 4 columns from a ~1220 px window (1124 px of content), so a single row at 1280 and 1920 px,
+   3 columns (3+1) from ~910 px, 2 columns (2x2) from ~590 px, 1 column below, on phones. */
 .home .themes{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,376px),1fr));grid-auto-rows:1fr;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));grid-auto-rows:1fr;
   gap:28px;
 }
 .home .theme{
