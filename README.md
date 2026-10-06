@@ -1,5 +1,8 @@
 # Temporal Shorts
 
+[![CI](https://github.com/alexandreroman/temporal-shorts/actions/workflows/pages.yml/badge.svg)](https://github.com/alexandreroman/temporal-shorts/actions/workflows/pages.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 Temporal Shorts: short explainer videos (English, no sound, burned-in
 subtitles) about Temporal. Each video is a theme:
 
