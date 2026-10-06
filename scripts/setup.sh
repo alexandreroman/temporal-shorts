@@ -7,8 +7,10 @@ command -v ffmpeg >/dev/null || { echo "ffmpeg missing: brew install ffmpeg"; ex
 command -v python3 >/dev/null || { echo "python3 missing: brew install python"; exit 1; }
 
 python3 -m venv .venv
-.venv/bin/pip install -q --upgrade pip
-.venv/bin/pip install -q -r requirements.txt
+# pip runs through python -m: the shebangs of .venv/bin/pip* keep the path the venv was created at, so they break
+# once the checkout is moved or renamed.
+.venv/bin/python -m pip install -q --upgrade pip
+.venv/bin/python -m pip install -q -r requirements.txt
 .venv/bin/python -m playwright install chromium
 
 bash scripts/fonts.sh
