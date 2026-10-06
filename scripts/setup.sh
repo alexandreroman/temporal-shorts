@@ -19,10 +19,10 @@ for spec in "instrument-sans 400" "instrument-sans 700" "jetbrains-mono 400" "je
   f="$1-latin-$2-normal.woff2"
   if [ ! -s "$F/$f" ]; then
     echo "Downloading $f"
-    # Download to a temporary file first: an interrupted curl must not leave a partial font that passes -s.
-    tmp=$(mktemp)
-    curl -fsSL -o "$tmp" "https://cdn.jsdelivr.net/npm/@fontsource/$1/files/$f"
-    mv "$tmp" "$F/$f"
+    # Download to a .part file first: an interrupted curl must not leave a partial font that passes -s.
+    # The pinned version keeps glyphs and widths, hence the layout, identical on every machine.
+    curl -fsSL -o "$F/$f.part" "https://cdn.jsdelivr.net/npm/@fontsource/$1@5.3.0/files/$f"
+    mv "$F/$f.part" "$F/$f"
   fi
 done
-echo "Setup OK. Try: make timeline && make preview T=\"3 140\""
+echo "Setup OK. Try: make timeline && make preview THEME=durable-ai-agents T=\"3 140\""

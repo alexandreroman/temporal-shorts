@@ -29,9 +29,11 @@ HOME_SOURCES := src/index.html src/home.css
 # nothing when absent.
 SHARED_SOURCES := $(filter-out $(HOME_SOURCES),$(wildcard src/*.js src/*.css src/assets/*)) \
                   $(wildcard src/fonts/*.woff2) scripts/common.py
+# The live player never changes a frame or a subtitle: editing it must not invalidate an MP4 or an SRT.
+VIDEO_SOURCES := $(filter-out src/player.js,$(SHARED_SOURCES))
 # Inputs of one theme: its page and every script of its folder (helpers and scenes).
 theme_sources = src/themes/$(1)/index.html $(wildcard src/themes/$(1)/*.js src/themes/$(1)/*/*.js)
-# The HTML build depends on every page, the home page included.
+# The HTML build depends on every page, the home page and the live player included.
 ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$(call theme_sources,$(theme)))
 
 # Never keep a partial MP4, SRT or HTML from an interrupted or failed run:
@@ -67,14 +69,15 @@ clean:            ## delete every generated file: output/ (MP4, SRT, HTML, previ
 	rm -rf output
 
 # One rule per theme: output/<theme>.mp4 and output/<theme>.srt depend on the
-# shared inputs and on that theme's own inputs only, so editing a scene
-# rebuilds the outputs of its theme alone. $$* is the theme (the stem).
+# shared inputs (the player aside) and on that theme's own inputs only, so
+# editing a scene rebuilds the outputs of its theme alone. $$* is the theme
+# (the stem).
 .SECONDEXPANSION:
 
-$(ALL_THEMES:%=output/%.mp4): output/%.mp4: $(SHARED_SOURCES) $$(call theme_sources,$$*) scripts/render_video.py
+$(ALL_THEMES:%=output/%.mp4): output/%.mp4: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/render_video.py
 	$(PY) scripts/render_video.py --theme $*
 
-$(ALL_THEMES:%=output/%.srt): output/%.srt: $(SHARED_SOURCES) $$(call theme_sources,$$*) scripts/export_srt.py
+$(ALL_THEMES:%=output/%.srt): output/%.srt: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/export_srt.py
 	$(PY) scripts/export_srt.py --theme $*
 
 $(HTML): $(ALL_SOURCES) scripts/build_html.py

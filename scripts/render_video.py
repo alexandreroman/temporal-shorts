@@ -4,12 +4,12 @@ Usage:
   python scripts/render_video.py --theme durable-ai-agents   # full video, 30 fps -> output/durable-ai-agents.mp4
   python scripts/render_video.py --theme durable-ai-agents --start 130 --end 140 --out output/test.mp4
 """
-import argparse, os, shutil, subprocess, sys, time
+import argparse, os, shutil, subprocess, sys, tempfile, time
 from multiprocessing import Pool
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import OUTPUT, add_theme_argument, open_page
+from common import OUTPUT, add_theme_argument, open_page, warm_up
 from playwright.sync_api import sync_playwright
 
 
@@ -17,6 +17,7 @@ def render_chunk(job):
     idx, theme, n0, n1, fps, crf, seg_path = job
     with sync_playwright() as pw:
         browser, page = open_page(pw, theme)
+        warm_up(page)
         ff = subprocess.Popen(
             ["ffmpeg", "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(fps), "-c:v", "mjpeg",
              "-i", "-", "-c:v", "libx264", "-preset", "medium", "-crf", str(crf), "-pix_fmt", "yuv420p",
@@ -52,8 +53,9 @@ def main():
         total = page.evaluate("TOTAL"); browser.close()
     end = total if a.end is None else min(a.end, total)
     n0, n1 = round(a.start * a.fps), round(end * a.fps)
-    segdir = OUTPUT / ".segments"; segdir.mkdir(parents=True, exist_ok=True)
-    for f in segdir.glob("*"): f.unlink()
+    OUTPUT.mkdir(exist_ok=True)
+    # One folder per run: `make -j render` runs one render per theme at the same time.
+    segdir = Path(tempfile.mkdtemp(prefix=".segments-", dir=OUTPUT))
     k = max(1, min(a.workers, (n1 - n0) // 60))
     bounds = [n0 + (n1 - n0) * i // k for i in range(k + 1)]
     jobs = [(i, a.theme, bounds[i], bounds[i + 1], a.fps, a.crf, segdir / f"seg_{i:02d}.mp4") for i in range(k)]

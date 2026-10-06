@@ -9,8 +9,9 @@ stand-ins:
 | `Brand` (titles, subtitles, body)             | Instrument Sans | 400, 700 |
 | `Mono` (labels, message cards, event history) | JetBrains Mono  | 400, 700 |
 
-`scripts/setup.sh` downloads the Fontsource woff2 files into this folder; the
-`@font-face` rules in `src/styles.css` load them.
+`scripts/setup.sh` downloads the Fontsource woff2 files into this folder, at
+a pinned package version; the `@font-face` rules in `src/styles.css` load
+them.
 
 If you get the real Aeonik files, add them here and point the `Brand`
 `@font-face` at them; check titles afterwards with `make preview`, since
