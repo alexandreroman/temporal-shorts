@@ -44,7 +44,7 @@ src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        list); scenes/ (one file per scene: subtitle text +
                        animations) and theme-only helpers
 src/assets/            official Temporal logo (white horizontal lockup)
-src/fonts/             stand-in fonts (make setup), see src/fonts/README.md
+src/fonts/             brand fonts (make setup), see src/fonts/README.md
 scripts/               setup, render, preview, timeline, SRT export, HTML
 docs/<theme>/script.md full script: subtitles, timings, animations
 output/                generated .srt, .mp4 and standalone .html (the HTML

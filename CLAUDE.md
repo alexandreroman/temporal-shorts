@@ -33,7 +33,7 @@ See [README.md](README.md) for full documentation.
 ## Build & run
 
 ```bash
-make setup                   # venv, Playwright Chromium, stand-in fonts
+make setup                   # venv, Playwright Chromium, fonts
 make timeline                # every theme: scenes, timings, TOTAL duration
 make preview THEME=<theme> T="12 40 136"  # contact sheet -> output/preview.png
 make render                  # output/<theme>.mp4 for every out-of-date theme

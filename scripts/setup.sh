@@ -11,10 +11,10 @@ python3 -m venv .venv
 .venv/bin/pip install -q -r requirements.txt
 .venv/bin/python -m playwright install chromium
 
-# Fonts (SIL OFL): Instrument Sans stands in for Aeonik, JetBrains Mono for Noto Sans Mono.
+# Fonts (SIL OFL): Noto Sans Mono is the brand mono; Instrument Sans stands in for Aeonik only.
 # The @font-face rules in src/styles.css load these Fontsource woff2 files.
 F=src/fonts
-for spec in "instrument-sans 400" "instrument-sans 700" "jetbrains-mono 400" "jetbrains-mono 700"; do
+for spec in "instrument-sans 400" "instrument-sans 700" "noto-sans-mono 400" "noto-sans-mono 700"; do
   set -- $spec
   f="$1-latin-$2-normal.woff2"
   if [ ! -s "$F/$f" ]; then

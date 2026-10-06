@@ -1,13 +1,13 @@
 # Fonts
 
 Temporal's brand typefaces are Aeonik (display/body) and Noto Sans Mono
-(labels). Aeonik is proprietary and was not available, so the video uses
-stand-ins:
+(labels). Noto Sans Mono is open source and used as is. Aeonik is
+proprietary and was not available, so Instrument Sans stands in for it:
 
-| Role in CSS                                   | Stand-in        | Weights  |
-| --------------------------------------------- | --------------- | -------- |
-| `Brand` (titles, subtitles, body)             | Instrument Sans | 400, 700 |
-| `Mono` (labels, message cards, event history) | JetBrains Mono  | 400, 700 |
+| Role in CSS                                   | Font                         | Weights  |
+| --------------------------------------------- | ---------------------------- | -------- |
+| `Brand` (titles, subtitles, body)             | Instrument Sans (stand-in)   | 400, 700 |
+| `Mono` (labels, message cards, event history) | Noto Sans Mono (brand)       | 400, 700 |
 
 `scripts/setup.sh` downloads the Fontsource woff2 files into this folder, at
 a pinned package version; the `@font-face` rules in `src/styles.css` load

@@ -1,9 +1,18 @@
-/* Fonts: Fontsource woff2 stand-ins for Temporal's Aeonik / Noto Sans Mono (not available here).
-   Fetched by scripts/setup.sh. */
+/* Fonts: Fontsource woff2 files fetched by scripts/setup.sh. Mono is Temporal's brand Noto Sans Mono;
+   Brand is Instrument Sans, a stand-in for the proprietary Aeonik.
+   The Mono overrides give a 1.32 em content box (1.02 em above the baseline, .30 below) instead of Noto's
+   1.069 + .293: caps sit centered in it, and line-height:normal boxes keep the heights the layout is built on,
+   whose centers land on whole pixels. */
 @font-face{font-family:'Brand';src:url(fonts/instrument-sans-latin-400-normal.woff2) format('woff2');font-weight:400}
 @font-face{font-family:'Brand';src:url(fonts/instrument-sans-latin-700-normal.woff2) format('woff2');font-weight:700}
-@font-face{font-family:'Mono';src:url(fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2');font-weight:400}
-@font-face{font-family:'Mono';src:url(fonts/jetbrains-mono-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{
+  font-family:'Mono';src:url(fonts/noto-sans-mono-latin-400-normal.woff2) format('woff2');font-weight:400;
+  ascent-override:102%;descent-override:30%;line-gap-override:0%;
+}
+@font-face{
+  font-family:'Mono';src:url(fonts/noto-sans-mono-latin-700-normal.woff2) format('woff2');font-weight:700;
+  ascent-override:102%;descent-override:30%;line-gap-override:0%;
+}
 :root{
   --bg:#141414;--ink:#F8FAFC;--slate:#94A3B8;--line:#3A4150;--uv:#444CE7;--violet:#B664FF;--neon:#DBFF4B;--red:#FF5A5F;
   --surface:#1B1B1F;--r:10px;--rs:6px;

@@ -42,7 +42,7 @@ ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$
 
 .PHONY: setup timeline preview render srt html serve clean
 
-setup:            ## venv + Playwright Chromium + brand stand-in fonts
+setup:            ## venv + Playwright Chromium + fonts
 	bash scripts/setup.sh
 
 timeline:         ## print scenes and subtitle timings of every theme [THEME=<theme>]
