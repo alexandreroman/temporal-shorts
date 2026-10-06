@@ -16,9 +16,23 @@ to that stop at once, at any speed, so the pause mark shows as soon as the
 picture freezes. Space, Right, PageDown or
 the play button resumes; PageUp/PageDown are aliases of Left/Right in
 every mode, for slide clickers. While held, `playing` stays true and the
-ambient clock G keeps running. In presenter mode, Left, Right, PageUp and
-PageDown leave the controls as they are: hidden controls stay hidden, and
-shown controls keep their hide timer.
+ambient clock G keeps running.
+
+Outside presenter mode, Left and Right move between sections (scenes),
+Left restarting the current one when more than 2 s in. In presenter mode,
+they move between steps, a step running from one stop to the next. Right
+while held releases the hold, so the transition plays up to the next stop;
+otherwise it jumps to the next stop after the current time and holds there
+(`playing` and `held` true, even from a pause), or to the end past the
+last stop. Left applies the section rule to steps, with S the last stop at
+or before the current time: more than 2 s (`RESTART_THRESHOLD`) after S,
+it seeks to S; otherwise to the stop before S, or to 0 when there is none.
+Held at S, Left therefore replays the step that leads to S, and two quick
+presses go back two steps. Left always lands playing, unheld, even from a
+pause, so the step plays and the player holds again at its end stop. In
+presenter mode, Left, Right, PageUp and PageDown leave the controls as
+they are: hidden controls stay hidden, and shown controls keep their hide
+timer; after a pause, a jump starts that timer.
 
 A faint, slowly breathing pause glyph (`#hold`, muted slate) sits in the
 top-right corner of the window during a hold, for the presenter, clear of

@@ -168,8 +168,9 @@ function startPlayer() {
     return sceneSnapshot(time) !== sceneSnapshot(Math.min(time + PROBE_STEP, TOTAL));
   }
 
-  // A section is a scene. Left acts like a media player's "previous" button: it restarts the current
-  // section, or goes back to the previous one when pressed within its first seconds.
+  // A section is a scene. Outside presenter mode, Left acts like a media player's "previous" button: it restarts
+  // the current section, or goes back to the previous one when pressed within its first seconds. Presenter mode
+  // applies the same rule to its steps: see previousStop().
   const RESTART_THRESHOLD = 2;
 
   function nextSection() {
@@ -181,18 +182,6 @@ function startPlayer() {
     const index = scenes.findLastIndex(sc => sc.start <= time);
     const current = scenes[index];
     seek(time - current.start > RESTART_THRESHOLD ? current.start : scenes[Math.max(0, index - 1)].start);
-  }
-
-  // Right acts like a slide clicker's "next": it releases a presenter hold, or jumps to the next section.
-  // It releases the hold itself rather than through togglePlay(), which wakes the controls: see the keydown
-  // handler.
-  function forward() {
-    if (held) {
-      held = false;
-      show();
-    } else {
-      nextSection();
-    }
   }
 
   function togglePlay() {
@@ -285,6 +274,60 @@ function startPlayer() {
   // The first stop in (from, to]: resuming from exactly a stop point moves on.
   function presenterStop(from, to) {
     return presenterStops.find(stop => from < stop && stop <= to);
+  }
+
+  // A presenter jump lands playing, even from a pause: either held at a stop, as if playback had just reached it,
+  // so Space or Right resume as for any hold, or running, so the step plays up to the next stop.
+  // seek() releases any hold, so `held` is set after it.
+  function seekAndPlay(t, hold) {
+    const wasPaused = !playing;
+    seek(t);
+    playing = true;
+    held = hold;
+    updateControls();
+    // A pause shows the controls and leaves no hide timer running: start one, so they hide as during playback.
+    if (wasPaused) wake();
+  }
+
+  function nextStop() {
+    const stop = presenterStops.find(s => s > time);
+    if (stop === undefined) seek(TOTAL);
+    else seekAndPlay(stop, true);
+  }
+
+  // A step runs from one stop to the next. Left acts like a media player's "previous" button on steps: it
+  // restarts the current step, or goes back to the previous one when pressed within its first seconds. Held at
+  // stop S, the time is S itself, so Left replays the step that leads to S. Either way, it lands playing, so
+  // the step plays and the player holds again at its end. Before the first stop, the step starts at 0.
+  function previousStop() {
+    const index = presenterStops.findLastIndex(s => s <= time);
+    if (index === -1) {
+      seekAndPlay(0, false);
+      return;
+    }
+    const current = presenterStops[index];
+    const previous = index > 0 ? presenterStops[index - 1] : 0;
+    seekAndPlay(time - current > RESTART_THRESHOLD ? current : previous, false);
+  }
+
+  // Right acts like a slide clicker's "next". In presenter mode, it releases a hold, so the transition plays up
+  // to the next stop, or else jumps to the next stop; otherwise it jumps to the next section. It releases the
+  // hold itself rather than through togglePlay(), which wakes the controls: see the keydown handler.
+  function forward() {
+    if (!presenter) {
+      nextSection();
+    } else if (held) {
+      held = false;
+      show();
+    } else {
+      nextStop();
+    }
+  }
+
+  // Left acts like a slide clicker's "previous": the previous presenter step, or the previous section.
+  function backward() {
+    if (presenter) previousStop();
+    else previousSection();
   }
 
   // The first probe time in (from, to) at which the scene roots differ from `from`; undefined when they stay
@@ -421,7 +464,7 @@ function startPlayer() {
     if (event.key === ' ' && event.target instanceof HTMLButtonElement) return;
     if (event.key === ' ') togglePlay();
     // Slide clickers send PageUp and PageDown.
-    else if (event.key === 'ArrowLeft' || event.key === 'PageUp') previousSection();
+    else if (event.key === 'ArrowLeft' || event.key === 'PageUp') backward();
     else if (event.key === 'ArrowRight' || event.key === 'PageDown') forward();
     else if (event.key === 's' || event.key === 'S') toggleSpeed();
     else if (event.key === 'l' || event.key === 'L') toggleLoop();
@@ -430,10 +473,10 @@ function startPlayer() {
     else if (event.key === 'f' || event.key === 'F') toggleFullscreen();
     else return;
     event.preventDefault();
-    // In presenter mode, the section keys leave the controls as they are, so a transition triggered from the
+    // In presenter mode, the navigation keys leave the controls as they are, so a transition triggered from the
     // keyboard or a slide clicker keeps the audience's screen clean; controls already shown keep their timer.
-    const sectionKey = ['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'].includes(event.key);
-    if (!(presenter && sectionKey)) wake();
+    const navigationKey = ['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'].includes(event.key);
+    if (!(presenter && navigationKey)) wake();
   });
   document.addEventListener('mousemove', wake);
   document.addEventListener('fullscreenchange', updateFullscreenButton);

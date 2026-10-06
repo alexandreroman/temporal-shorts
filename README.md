@@ -174,11 +174,16 @@ the first of a scene, before that cue's animations begin, and again just
 before each scene fades out, with a faint pause mark in the top-right
 corner while it holds; once the picture stands still until the next hold,
 it jumps straight to it. Space, Right, PageDown or the play button resumes.
-In presenter mode, the section keys (Left, Right, PageUp, PageDown) leave
-the controls hidden, so a clicker keeps the screen clean. Shortcuts:
-Space = play/pause, Left/Right or PageUp/PageDown = previous/next section
-(Left first restarts the current section if more than 2 s in), S = speed
-1x/0.5x, L = loop on/off, C = subtitles on/off, P = presenter mode on/off,
+In presenter mode, a step runs from one pause to the next. Right releases
+a pause, so the transition plays, or else jumps to the next pause and holds
+there. Left plays the previous step, which ends at the current pause, or
+restarts the current step if more than 2 s in; it lands playing, so the
+step plays and holds again at its end. PageUp/PageDown act as Left/Right.
+These keys leave the controls hidden, so a clicker keeps the screen clean.
+Shortcuts: Space = play/pause, Left/Right or PageUp/PageDown =
+previous/next section (Left first restarts the current section if more
+than 2 s in), or previous/next step in presenter mode, S = speed 1x/0.5x,
+L = loop on/off, C = subtitles on/off, P = presenter mode on/off,
 F = fullscreen.
 
 `make serve` serves the home page on `/` and each player on
