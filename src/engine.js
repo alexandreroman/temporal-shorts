@@ -23,13 +23,12 @@ let G = 0; // global time
 const stage = document.getElementById('stage');
 
 // Deterministic star field: a fixed-seed generator, so every page and every render worker draws the same sky.
-(function () {
-  let seed = 7;
+// Draws 110 stars over a 1920x1080 area of `sky`; the live player draws extra tiles with other seeds.
+function drawStars(sky, seed) {
   const random = () => {
     seed = (seed * 16807) % 2147483647;
     return seed / 2147483647;
   };
-  const sky = document.getElementById('sky');
   for (let i = 0; i < 110; i++) {
     const star = document.createElement('i');
     star.style.left = (random() * 1920) + 'px';
@@ -38,7 +37,8 @@ const stage = document.getElementById('stage');
     if (random() > .85) star.style.width = star.style.height = '3px';
     sky.appendChild(star);
   }
-})();
+}
+drawStars(document.getElementById('sky'), 7);
 
 function E(parent, html = '', cls = '', css = {}) {
   const e = document.createElement('div');
