@@ -15,7 +15,7 @@
     // laid out centered at (960, 522) on the content frame
     subs: [
       {
-        text: "Three days later, Maria taps Approve. "
+        text: "On day three, Maria taps Approve. "
           + "Temporal delivers the decision to the Workflow as a <b>Signal</b>.",
         after: 1.4,
       },
@@ -47,7 +47,8 @@
     },
     update(t, c, s) {
       const tap = c[0] + 1.6, signalIn = c[0] + 3.5;
-      // replay: rows 1 to 4 are read back one by one, the cursor follows without redoing the steps
+      // replay: rows 1 to 3 are replayed one by one, then the Signal (row 4) is read; the cursor follows without
+      // redoing the steps
       const replay = [0, 1, 2, 3].map(i => c[1] + 1.3 + i * 0.5);
       const resumed = replay[3] + 0.5;
       const orderOn = c[2] + 0.3, ordered = c[2] + 1.3, notifyOn = c[2] + 1.7, notified = c[2] + 2.7;
@@ -62,7 +63,7 @@
       ];
       placeLaptopRow(s.steps, t, -1, states);
 
-      // Maria approves on the approval card, three days later
+      // Maria approves on the approval card, on day three
       const left = P(t, c[1], 0.4);
       const mp = P(t, c[0] + 0.2, 0.5, backOut);
       place(s.maria, MARIA.x, MARIA.y, mp, clamp(mp * 2) * (1 - left));
@@ -103,13 +104,16 @@
       const tp = P(t, ordered, 0.45, backOut);
       place(s.ticket, TICKET_X, STRIP.y, tp, clamp(tp * 2));
 
-      // Event History: rows 1 to 3 already saved, the Signal replaces the waiting line, then the last steps
+      // Event History: rows 1 to 3 already saved, the Signal replaces the waiting line, then the last steps.
+      // Rows 1 to 3 are replayed; the Signal arrived after them, so it is new to the Workflow: it keeps its SAVED
+      // tag, which still pops when the row is read.
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, 1);
       place(s.jr, HIST.x, HIST.y, 1, 1);
       s.jr.rows.forEach((_, i) => {
         showRow(s.jr.rows[i], i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
-        const isReplayed = i < 4 && t >= replay[i];
-        const at = isReplayed ? replay[i] : saved[i];
+        const isRead = i < 4 && t >= replay[i];
+        const isReplayed = isRead && i < 3;
+        const at = isRead ? replay[i] : saved[i];
         setRowTag(s.jr, i, t, isReplayed ? 'REPLAYED' : 'SAVED', at, i < 3 ? 1 : P(t, saved[i], 0.25));
       });
       setWaitLine(s.jr, 1 - P(t, signalIn - 0.2, 0.3));

@@ -24,7 +24,7 @@
     // laid out centered at (960, 522) on the content frame, in both phases
     subs: [
       {
-        text: "No answer? The Workflow can also wait on a timer: a reminder after two days, escalate after five.",
+        text: "No answer? The Workflow can also wait on a timer: a reminder after two days, escalation after five.",
         after: 1.4,
       },
       {

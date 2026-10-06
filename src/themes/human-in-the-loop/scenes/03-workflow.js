@@ -52,7 +52,7 @@
       const aIn = P(t, c[0] + 0.3, 0.5, backOut);
       place(s.A, APP.x + sx, APP.y + sy, aIn, clamp(aIn * 2));
       if (stopped) setAppStatus(s.A, 'STOPPED', 'stopped');
-      else if (t >= waitOn + 0.4) setAppStatus(s.A, 'WAITING, NOTHING RUNNING', 'waiting');
+      else if (t >= waitOn + 0.4) setAppStatus(s.A, 'WAITING, NO CODE RUNNING', 'waiting');
       else setAppStatus(s.A, t >= started ? 'RUNNING THE WORKFLOW' : '', t >= started ? 'running' : 'idle');
       const pos = P(t, checked + 0.3, 0.3) + P(t, c[1] + 0.2, 0.3);
       const cursorOn = t >= started && !stopped;
