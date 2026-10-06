@@ -42,6 +42,7 @@
 - [GitHub Pages deployment](references/project_github-pages.md) — HTML only, served at a domain root so the home link / holds
 - [No video durations in docs](references/feedback_no-durations-in-docs.md) — length is never written; `make timeline` is the source
 - [Player 0.5x speed](references/project_player-speed.md) — 0.5x stretches still moments only; ambient loops read G
+- [Player presenter mode](references/project_player-presenter-mode.md) — no subtitles, 0.5x, hold before each scene's fade-out
 - [Human-in-the-Loop story](references/project_hitl-story.md) — Sam's laptop, Maria approves; ch3/ch4 mirror DAA ch7; Signal, replay, timers
 - [Custom domain](references/project_custom-domain.md) — durable.withtemporal.dev, Cloudflare CNAME to Pages, DNS only, shared zone
 - [Social preview images stay current](references/feedback_social-previews.md) — `make social` + commit PNGs on intro, title or home changes
