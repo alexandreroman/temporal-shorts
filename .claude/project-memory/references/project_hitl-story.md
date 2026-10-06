@@ -20,8 +20,9 @@ Scope: the `human-in-the-loop` theme.
   and survives restarts and deploys (ch3); the decision arrives as a
   Signal, any copy of the app replays the history and resumes right after
   the wait, with no step redone (ch4); durable timers drive reminders and
-  escalation, and the pattern fits approvals, reviews, signatures and AI
-  agent checks (ch5).
+  escalation (ch5); the recap names what the Workflow gives (waits for
+  days, survives restarts, no step redone, sends reminders), and the same
+  pattern fits approvals, reviews, signatures and AI agent checks (ch6).
 - **Layout continuity:** chapters 3 and 4 share one layout that mirrors
   `durable-ai-agents` chapter 7: step row on top, app instance panel with
   a WORKFLOW card on the left, TEMPORAL panel with the Event History on the

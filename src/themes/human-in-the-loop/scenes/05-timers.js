@@ -15,21 +15,14 @@
   // the Event History card is exactly as wide as the timeline (DAY 0 to DAY 5), 40 px under its day labels
   const CARD = { w: 5 * LINE.dayW, h: rowTop(TIMER_ROWS.length) - HROW.gap + HROW.h + 24 };
   CARD.y = LINE.y + 100 + CARD.h / 2;
-  // the use-case tiles span the content frame, 40 px apart
-  const USES = [['check', 'Approvals'], ['eye', 'Reviews'], ['pen', 'Signatures'], ['bot', 'AI agent checks']];
-  const USE = { w: (FRAME.x1 - FRAME.x0 - 3 * FRAME.gap) / 4, h: 300 };
-  const useX = i => FRAME.x0 + USE.w / 2 + i * (USE.w + FRAME.gap);
   scene({
     chapter: 5, title: 'Deadlines and reminders',
-    // laid out centered at (960, 522) on the content frame, in both phases
+    // laid out centered at (960, 522) on the content frame
     subs: [
       {
         text: "No answer? The Workflow can also wait on a timer: a reminder after two days, escalation after five.",
+        // the pill lands at c[0] + 4.95: the finished timeline reads to the end of the subtitle and this pause
         after: 1.4,
-      },
-      {
-        text: "Approvals, reviews, signatures, an AI agent asking before it acts: the same pattern fits them all.",
-        after: 1.8,
       },
     ],
     build(root, s) {
@@ -49,24 +42,21 @@
       }));
       s.jr = makeHistory(root, TIMER_ROWS, CARD.w, CARD.h);
       s.durable = tag(root, 'Timers are durable too', 'uv big');
-      s.uses = USES.map(([icon, label]) => iconTile(root, icon, label, USE.w, USE.h, C.ink,
-        { size: 64, stroke: 1.6, font: 22, gap: 22 }));
     },
     update(t, c, s) {
-      const out = P(t, c[1], 0.5);
       // the marker walks about 0.7 s per day: DAY 2 near c[0] + 1.8, DAY 5 near c[0] + 3.8
       const walkOn = c[0] + 0.4, perDay = 0.68;
       const dayAt = d => walkOn + d * perDay;
       const lp = P(t, c[0] + 0.05, 0.5);
-      draw(s.line, lp, 1 - out);
+      draw(s.line, lp);
       [0, 1, 2, 3, 4, 5].forEach(d => {
-        const p = P(t, c[0] + 0.1 + d * 0.05, 0.3) * (1 - out);
+        const p = P(t, c[0] + 0.1 + d * 0.05, 0.3);
         place(s.ticks[d], dayX(d), LINE.y, 1, p);
         place(s.days[d], dayX(d), LINE.y + 48, 1, p);
       });
       const walk = clamp((t - walkOn) / (5 * perDay));
-      draw(s.done, walk, 1 - out);
-      place(s.marker, lerp(dayX(0), dayX(5), walk), LINE.y, 1, P(t, c[0] + 0.2, 0.3) * (1 - out));
+      draw(s.done, walk);
+      place(s.marker, lerp(dayX(0), dayX(5), walk), LINE.y, 1, P(t, c[0] + 0.2, 0.3));
       s.events.forEach(({ tile, tag: e, stem }, i) => {
         const [day] = EVENTS[i];
         // the request is already out when the marker starts walking
@@ -74,28 +64,22 @@
         const fired = t >= firedAt;
         const p = P(t, c[0] + 0.1 + i * 0.1, 0.45, backOut);
         tile.style.borderColor = fired ? C.violet : C.line;
-        place(tile, dayX(day), LINE.y - 130, p, clamp(p * 2) * (1 - out));
+        place(tile, dayX(day), LINE.y - 130, p, clamp(p * 2));
         stem.style.background = fired ? C.violet : C.line;
-        place(stem, dayX(day), LINE.y - 43, 1, P(t, c[0] + 0.3, 0.3) * (1 - out));
+        place(stem, dayX(day), LINE.y - 43, 1, P(t, c[0] + 0.3, 0.3));
         const tp = P(t, firedAt, 0.45, backOut);
-        place(e, dayX(day), LINE.y - 236, tp, clamp(tp * 2) * (1 - out));
+        place(e, dayX(day), LINE.y - 236, tp, clamp(tp * 2));
       });
 
       // Temporal writes each timer to the Event History, so the timers survive restarts like the wait itself
-      place(s.jr, dayX(0) + CARD.w / 2, CARD.y, 1, P(t, c[0] + 0.2, 0.4) * (1 - out));
+      place(s.jr, dayX(0) + CARD.w / 2, CARD.y, 1, P(t, c[0] + 0.2, 0.4));
       const saved = [c[0] + 0.7, c[0] + 0.9, dayAt(2) + 0.2, dayAt(5) + 0.2];
       saved.forEach((at, i) => {
         showRow(s.jr.rows[i], P(t, at - 0.1, 0.3));
         setRowTag(s.jr, i, t, 'SAVED', at, P(t, at, 0.25));
       });
       const dp = P(t, c[0] + 4.5, 0.45, backOut);
-      place(s.durable, dayX(0) + CARD.w / 2, CARD.y + CARD.h / 2 + 81, dp, clamp(dp * 2) * (1 - out));
-
-      // the same pattern, wherever a person decides
-      s.uses.forEach((e, i) => {
-        const p = P(t, c[1] + 0.4 + i * 0.7, 0.45, backOut);
-        place(e, useX(i), 522, p, clamp(p * 2));
-      });
+      place(s.durable, dayX(0) + CARD.w / 2, CARD.y + CARD.h / 2 + 81, dp, clamp(dp * 2));
     }
   });
 }

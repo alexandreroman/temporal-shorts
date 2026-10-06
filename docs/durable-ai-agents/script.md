@@ -135,7 +135,10 @@ The video explains to a non-technical audience, in seven topics:
     travel back and refill APP MEMORY, steps re-check, counter stays 3 with "NOT
     RE-BILLED"; tags "REUSED, NOT RE-BILLED" / "REUSED, NOT RE-RUN"; step 4 runs
     for real: counter 4, rows 7 and 8 SAVED, AGENT COMPLETE.
-- **2:43** No saved LLM call is paid for twice, and no saved step runs again.
+
+## 08 What you get
+
+- **2:44** No saved LLM call is paid for twice, and no saved step runs again.
   Plus retries, human waits and full visibility.
   - Visuals: "43% less LLM spend in this example", "4 vs 7 LLM calls", then 4
     tiles: Saved steps reused / Automatic retries / Waits for humans / Full
@@ -143,7 +146,7 @@ The video explains to a non-technical audience, in seven topics:
 
 ## Outro
 
-- **2:53** Durable AI agents keep their progress and your budget.
+- **2:54** Durable AI agents keep their progress and your budget.
   - Visuals: "Durable AI agents", KEEP THEIR PROGRESS AND YOUR BUDGET, Temporal
     logo.
 

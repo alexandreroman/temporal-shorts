@@ -21,8 +21,9 @@ own subtitle beat:
 
 Chapters 6 and 7 crash at the same point: after step 3's tool result,
 before step 4's LLM call. The budget message rides on the LLM CALLS BILLED
-counter, which stays put during replay, followed by "43% less LLM spend, in
-this example" (see the Budget figure section of
+counter, which stays put during replay; chapter 8 ("What you get", see
+[Recap chapter](project_recap-chapter.md)) then states "43% less LLM spend,
+in this example" (see the Budget figure section of
 `docs/durable-ai-agents/script.md`).
 
 **Why:** showing the code re-run while Temporal hands back the recorded
