@@ -39,18 +39,38 @@ function svgLayer(parent) {
   s.setAttribute('width', 1920); s.setAttribute('height', 1080);
   s.setAttribute('viewBox', '0 0 1920 1080');
   s.classList.add('layer');
-  s.innerHTML = `<defs>
-   <marker id="ah${parent.dataset.k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5"`
-    + ` orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>`;
+  s.innerHTML = '<defs></defs>';
   parent.appendChild(s);
   return s;
+}
+// Number of arrow head markers created so far: it makes each marker id unique in the document
+let arrowHeadCount = 0;
+// Arrow head marker of `color` in an SVG layer, created on first use and cached on the layer by color (no id is
+// built from the color). Its fill is explicit: WebKit (Safari) does not render fill="context-stroke".
+function arrowHead(svg, color) {
+  svg._heads ??= new Map();
+  if (!svg._heads.has(color)) {
+    arrowHeadCount += 1;
+    const id = `ah${arrowHeadCount}`;
+    const marker = document.createElementNS(SVGNS, 'marker');
+    const attrs = { id, viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 5, markerHeight: 5,
+      orient: 'auto-start-reverse' };
+    for (const [name, value] of Object.entries(attrs)) marker.setAttribute(name, value);
+    const head = document.createElementNS(SVGNS, 'path');
+    head.setAttribute('d', 'M0,0 L10,5 L0,10 z');
+    head.setAttribute('fill', color);
+    marker.appendChild(head);
+    svg.querySelector('defs').appendChild(marker);
+    svg._heads.set(color, `url(#${id})`);
+  }
+  return svg._heads.get(color);
 }
 function path(svg, d, color, w, arrow = true, dash = null) {
   const p = document.createElementNS(SVGNS, 'path');
   p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', color);
   p.setAttribute('stroke-width', w); p.setAttribute('stroke-linecap', 'round');
   // draw() shows the arrow head only once the stroke is nearly drawn
-  p._marker = arrow ? `url(#ah${svg.parentNode.dataset.k})` : null;
+  p._marker = arrow ? arrowHead(svg, color) : null;
   svg.appendChild(p);
   const L = p.getTotalLength();
   p._L = L; p._dash = dash;
@@ -180,7 +200,7 @@ function buildAll() {
   collectChapters();
   // inserted before #hdr so the header, progress segments and subtitles stay on top of every scene
   const hdr = document.getElementById('hdr');
-  let T = 0, k = 0;
+  let T = 0;
   for (const sc of scenes) {
     sc.start = T; let t = T + (sc.pre ?? 0.6);
     sc.cues = [];
@@ -190,7 +210,7 @@ function buildAll() {
       t = s.end + 0.25 + (s.after ?? 0);
     }
     sc.end = t + (sc.post ?? 0.35); sc.dur = sc.end - sc.start; T = sc.end;
-    sc.root = document.createElement('div'); sc.root.className = 'scene'; sc.root.dataset.k = k++;
+    sc.root = document.createElement('div'); sc.root.className = 'scene';
     stage.insertBefore(sc.root, hdr);
     sc.el = {};
     sc.build(sc.root, sc.el);
