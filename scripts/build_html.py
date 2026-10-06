@@ -3,17 +3,30 @@
 Each theme page becomes a standalone HTML player, and src/index.html the home page that links to them. The
 stylesheets, scripts, fonts and logo of each page are inlined so it opens offline; a single player file plays
 with no other file, while the home page links to the players below it: output/ mirrors src/, so the
-relative links stay the same. Standard library only.
+relative links stay the same. Each page's social.png, written by `make social`, is copied next to it.
+
+Link previews on social networks need absolute URLs: when the SITE_URL environment variable holds the root URL of
+the deployed site, set by the Pages workflow, each page also gets a canonical link and the link preview tags of
+social networks (Open Graph, X card). Without it, the pages are built with neither. Standard library only.
 
   python scripts/build_html.py
+  SITE_URL=https://example.com python scripts/build_html.py
 """
 import base64
+import os
 import re
+import shutil
 import sys
+from html import escape, unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import OUTPUT, SRC, built_page, page_sources
+
+SITE_NAME = "Temporal Shorts"
+# The preview image of a page lives next to it, in src/ and output/ alike, so its URL is the page URL + this name.
+SOCIAL_IMAGE = "social.png"
+SOCIAL_IMAGE_WIDTH, SOCIAL_IMAGE_HEIGHT = 1200, 630
 
 MIME_TYPES = {
     ".woff2": "font/woff2",
@@ -27,6 +40,8 @@ SCRIPT_TAG = re.compile(r'<script src="([^"]+)"></script>')
 STYLESHEET_TAG = re.compile(r'<link rel="stylesheet" href="([^"]+)">')
 ASSET_REF = re.compile(r"assets/[\w.-]+")
 DATA_URI = re.compile(r"data:[^\"')\s]+")
+TITLE_TAG = re.compile(r"<title>(.*?)</title>", re.DOTALL)
+DESCRIPTION_TAG = re.compile(r'<meta name="description" content="([^"]*)">')
 
 
 def data_uri(path):
@@ -94,6 +109,64 @@ def inline_scripts(html, page_dir):
     return SCRIPT_TAG.sub(replace, html)
 
 
+def site_url():
+    """The root URL of the deployed site, from SITE_URL, without a trailing slash; empty when unset."""
+    return os.environ.get("SITE_URL", "").strip().rstrip("/")
+
+
+def public_url(source, site):
+    """The URL of a page on the site: its folder, e.g. <site>/themes/<theme>/, never index.html."""
+    folder = source.parent.relative_to(SRC)
+    path = "".join(f"{part}/" for part in folder.parts)
+    return f"{site}/{path}"
+
+
+def attribute_value(html, source, pattern, what):
+    """The text matched by pattern in the page, whitespace collapsed, escaped for a double-quoted attribute."""
+    match = pattern.search(html)
+    if match is None:
+        sys.exit(f"ERROR: {source} has no {what}")
+    # The page text is HTML already: unescape it first, so that an entity such as &amp; is not escaped twice.
+    text = " ".join(unescape(match.group(1)).split())
+    # Inside double quotes, only " needs escaping on top of &, < and >: an apostrophe stays readable.
+    return escape(text, quote=False).replace('"', "&quot;")
+
+
+def add_social_tags(html, source, site):
+    """Add the canonical link and the link preview tags of social networks before </head>; none without a site.
+
+    The page is checked either way, so that a page missing its title or description fails on pull requests too.
+    """
+    if "</head>" not in html:
+        sys.exit(f"ERROR: {source} has no </head>")
+    title = attribute_value(html, source, TITLE_TAG, "<title>")
+    description = attribute_value(html, source, DESCRIPTION_TAG, '<meta name="description" content="...">')
+    if not site:
+        return html
+    url = public_url(source, site)
+    tags = f"""<link rel="canonical" href="{url}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{SITE_NAME}">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{description}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{url}{SOCIAL_IMAGE}">
+<meta property="og:image:width" content="{SOCIAL_IMAGE_WIDTH}">
+<meta property="og:image:height" content="{SOCIAL_IMAGE_HEIGHT}">
+<meta property="og:image:alt" content="{title}">
+<meta name="twitter:card" content="summary_large_image">
+"""
+    return html.replace("</head>", tags + "</head>", 1)
+
+
+def copy_social_image(source, out):
+    """Copy the preview image of a page next to its build: it is linked by URL, never inlined."""
+    image = source.parent / SOCIAL_IMAGE
+    if not image.is_file():
+        sys.exit(f"ERROR: missing social preview image {image}\nRun `make social` to write it, then commit it.")
+    shutil.copyfile(image, out.parent / SOCIAL_IMAGE)
+
+
 def check_self_contained(html):
     # Strip the data URIs first: a base64 payload could contain "fonts/" by pure chance.
     leftover = DATA_URI.sub("", html)
@@ -102,9 +175,10 @@ def check_self_contained(html):
             sys.exit(f"ERROR: the output still references {marker!r}")
 
 
-def build_page(source):
+def build_page(source, site):
     """Write the self-contained build of a page of src/ to the same relative path under output/."""
     html = read_source(source)
+    html = add_social_tags(html, source, site)
     html = inline_assets(html)
     html = inline_stylesheets(html, source.parent)
     html = inline_scripts(html, source.parent)
@@ -112,15 +186,19 @@ def build_page(source):
 
     out = built_page(source)
     out.parent.mkdir(parents=True, exist_ok=True)
+    copy_social_image(source, out)
     out.write_text(html, encoding="utf-8")
     print(f"{out} ({out.stat().st_size / 1024:.0f} KB)")
 
 
 def main():
+    site = site_url()
+    if not site:
+        print("Skipped the social tags and canonical links: SITE_URL is unset")
     # page_sources() lists the home page last, on purpose: the Makefile uses output/index.html as the target of
     # the whole build, so it must be written only once every theme page is, and never be older than any of them.
     for source in page_sources():
-        build_page(source)
+        build_page(source, site)
 
 
 if __name__ == "__main__":

@@ -30,6 +30,13 @@ HTML      := output/index.html
 # workspace and plain checkouts have none. Override with: make serve PORT=9000
 PORT ?= $(if $(CASPER_PORT),$(CASPER_PORT),8000)
 
+# Absolute root URL of the deployed site, used for the Open Graph tags and canonical links of the HTML pages; set
+# by the Pages workflow. Empty: the pages are built without them. Exported, so that build_html.py reads it, as
+# does the rebuild of `make serve`. Changing it does not rebuild up-to-date pages: add -B, as in
+# `make -B html SITE_URL=https://example.com`.
+SITE_URL ?=
+export SITE_URL
+
 # The home page is not part of any video: editing it must not invalidate an MP4 or an SRT.
 HOME_SOURCES := src/index.html src/home.css
 # The fonts are git-ignored: their version stamp, written by fonts.sh, stands for them. As a prerequisite, it
@@ -42,14 +49,18 @@ SHARED_SOURCES := $(filter-out $(HOME_SOURCES),$(wildcard src/*.js src/*.css src
 VIDEO_SOURCES := $(filter-out src/player.js,$(SHARED_SOURCES))
 # Inputs of one theme: its page and every script of its folder (helpers and scenes).
 theme_sources = src/themes/$(1)/index.html $(wildcard src/themes/$(1)/*.js src/themes/$(1)/*/*.js)
-# The HTML build depends on every page, the home page and the live player included.
-ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$(call theme_sources,$(theme)))
+# The social preview image of each page, written by `make social` and committed. No rule builds them: CI has no
+# Playwright, and a checkout gives them arbitrary timestamps. They are no video input, so they rebuild no MP4 or SRT.
+SOCIAL_IMAGES := $(wildcard src/social.png src/themes/*/social.png)
+# The HTML build depends on every page, the home page and the live player included, and copies the images.
+ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$(call theme_sources,$(theme))) \
+               $(SOCIAL_IMAGES)
 
 # Never keep a partial MP4, SRT or HTML from an interrupted or failed run:
 # its fresh timestamp would make Make treat it as up to date.
 .DELETE_ON_ERROR:
 
-.PHONY: setup timeline preview render srt html serve clean
+.PHONY: setup timeline preview render srt social html serve clean
 
 setup:            ## venv + Playwright Chromium + fonts
 	bash scripts/setup.sh
@@ -70,6 +81,10 @@ preview: $(FONTS)   ## contact sheet of one theme: make preview THEME=<theme> T=
 render: $(VIDEOS)       ## one MP4 per theme -> output/<theme>.mp4 [THEME=<theme>]
 
 srt: $(SUBTITLES)       ## one SRT per theme -> output/<theme>.srt [THEME=<theme>]
+
+social: $(FONTS)    ## social preview images, committed -> src/social.png, src/themes/<theme>/social.png
+	$(call require,playwright PIL)
+	$(PY) scripts/social_images.py
 
 html: $(HTML)     ## home page + one standalone HTML player per theme -> output/index.html, output/themes/
 
