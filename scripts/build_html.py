@@ -61,7 +61,7 @@ def inline_fonts(css, css_dir):
     def replace(match):
         path = source_path(css_dir, match.group(1))
         if not path.is_file():
-            sys.exit(f"ERROR: missing font file {path}\nRun `make setup` to download the fonts.")
+            sys.exit(f"ERROR: missing font file {path}\nRun `bash scripts/fonts.sh` to download the fonts.")
         return f"url({data_uri(path)})"
 
     return FONT_URL.sub(replace, css)

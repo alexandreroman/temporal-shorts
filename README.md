@@ -28,14 +28,13 @@ To watch the videos in a browser, you only need Python 3.10+:
 ```bash
 git clone https://github.com/alexandreroman/temporal-shorts.git
 cd temporal-shorts
-bash scripts/fonts.sh        # download the brand fonts
-make serve PY=python3        # home page on http://localhost:8000
+make serve                   # home page on http://localhost:8000
 ```
 
-Open <http://localhost:8000> and pick a theme. The pages use the Python
-standard library only, so `PY=python3` skips the virtualenv. To render the
-MP4 files, run `make setup` first (see the
-[Developer guide](#developer-guide)).
+Open <http://localhost:8000> and pick a theme. The first run downloads the
+brand fonts. The pages need only the Python standard library, so no
+virtualenv is required. To render the MP4 files, run `make setup` first
+(see the [Developer guide](#developer-guide)).
 
 ## Developer guide
 
@@ -60,7 +59,8 @@ src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        list); scenes/ (one file per scene: subtitle text +
                        animations) and theme-only helpers
 src/assets/            official Temporal logo (white horizontal lockup)
-src/fonts/             brand fonts (make setup), see src/fonts/README.md
+src/fonts/             brand fonts (downloaded by make), see
+                       src/fonts/README.md
 scripts/               setup, fonts, render, preview, timeline, SRT
                        export, HTML build and server
 docs/<theme>/script.md full script: subtitles, timings, animations
@@ -84,6 +84,13 @@ make html                    # home page + players -> output/**/index.html
 make serve                   # hot-reloading home page on http://localhost:8000
 make clean                   # delete output/ (every generated file)
 ```
+
+The targets run on `.venv/bin/python` once `make setup` has created it,
+otherwise on the system `python3`: enough for `html` and `serve`, which need
+only the standard library. `timeline`, `preview`, `render` and `srt` need
+Playwright and stop with a hint to run `make setup` when it is missing.
+Override the interpreter with `PY`, for example `make html PY=python`. Every
+target downloads the brand fonts first when they are missing.
 
 `timeline`, `render` and `srt` cover every theme; `timeline` prints each one
 under a `== <theme> ==` header. Set the `THEME` variable to restrict them to
