@@ -27,10 +27,6 @@ function callCard(p, name, arg = '', cls = '') {
   return e;
 }
 
-// Opaque equivalents of the .pill.uv and .pill.violet tints on the Space Black stage: a pill that sits on
-// a line (a lane, a frame, a connector) needs a solid background, or the line shows through it.
-const OPAQUE = { uv: '#1D1E3A', violet: '#2B1F35' };
-
 // Ambient clock of a scene: G counted from the scene's start, so it equals the scene time t in frozen frames.
 // Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G keeps real time while t
 // slows down at 0.5x, and the player only counts the story moving on t as motion. Call it from update()

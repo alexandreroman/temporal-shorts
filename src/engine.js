@@ -172,7 +172,8 @@ function llmState(L, { think = 0, q = 0, look = 0, lookY = 0 } = {}) {
   L.q.style.opacity = q; L.q.style.transform = `scale(${0.6 + 0.4 * q}) rotate(${Math.sin(G * 3) * 8}deg)`;
 }
 function gearSpin(app, on) {
-  app.gear.style.transform = `rotate(${G * 220 * on}deg)`;
+  // the gear turns with the clock whenever it shows as on, so it never races while `on` fades
+  app.gear.style.transform = `rotate(${on > 0 ? G * 220 : 0}deg)`;
   app.gear.style.opacity = 0.35 + 0.65 * on;
 }
 
@@ -282,7 +283,8 @@ function renderAt(t, g = t) {
       const a = cs[0].start, z = cs[cs.length - 1].end;
       f = clamp((t - a) / (z - a));
     }
-    b.style.width = (f * 100) + '%';
+    // whole pixels of the 56 px segment (#segs i in styles.css): a fractional edge varies from run to run
+    b.style.width = Math.round(f * 56) + 'px';
   });
   document.getElementById('segs').style.opacity = chap ? 1 : 0;
 }

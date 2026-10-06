@@ -60,16 +60,15 @@
         boxShadow: '0 0 18px 4px rgba(182,100,255,.45)',
       });
       s.app = makeAppPanel(root, 'APP', APP.w, APP.h, APP_TEXT);
-      s.mem = E(s.app,
-        panelLabel('server', 'App memory', 'left:20px;top:16px;padding-left:0')
+      // the memory card never moves: it is part of the panel's HTML, and only its chips are animated elements
+      s.app.insertAdjacentHTML('beforeend',
+        `<div class="tile" style="position:absolute;left:24px;top:76px;width:${APP.w - 48}px;height:${APP.h - 100}px;`
+        + 'text-align:left;background:rgba(248,250,252,.03)">'
+        + panelLabel('server', 'App memory', 'left:20px;top:16px;padding-left:0')
         // EMPTY and REQUEST LOST, like the chips, sit in the middle of the space under the APP MEMORY label
         + '<div class="empty mono" style="position:absolute;left:0;right:0;top:129px;text-align:center;font-size:30px;'
-        + 'letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
-        'tile', {
-          left: '24px', top: '76px', width: (APP.w - 48) + 'px', height: (APP.h - 100) + 'px', textAlign: 'left',
-          transform: 'none', background: 'rgba(248,250,252,.03)',
-        });
-      s.mem.style.opacity = 1;
+        + 'letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div></div>');
+      s.mem = s.app.lastElementChild;
       s.empty = s.mem.querySelector('.empty');
       s.chips = CHIPS.map((txt, i) => E(s.mem, txt, 'mono', {
         left: '24px', top: (99 + i * 66) + 'px', fontSize: '24px', color: '#141414', background: C.uvTint,
@@ -78,9 +77,8 @@
       s.lost = tag(root, 'Request lost', 'red big');
       s.flash = makeFlash(root);
       s.tiles = PLUMBING.map(([icon, label, , , w]) => iconTile(root, icon, label, w, TILE.h));
-      s.stuck = tag(root, 'Request stuck', 'red big'); s.twice = tag(root, 'Ordered twice', 'red big');
       // solid fill: the tags sit on the tangled links, which must not show through them
-      [s.stuck, s.twice].forEach(e => { e.style.background = '#2A191B'; });
+      s.stuck = tag(root, 'Request stuck', 'red big solid'); s.twice = tag(root, 'Ordered twice', 'red big solid');
     },
     update(t, c, s) {
       const crashAt = c[0] + 4.8, back = c[1] + 0.2;

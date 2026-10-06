@@ -97,11 +97,10 @@
       '<div class="lbl" style="position:absolute;left:26px;top:24px;font-size:18px">Durable timer</div>'
       + '<div class="st lbl" style="position:absolute;right:26px;top:24px;font-size:18px"></div>'
       + '<div style="position:absolute;left:26px;top:70px;display:flex;align-items:center;gap:26px">'
-      // the hand turns on its own layer, so its turns never re-raster the dial under it
       + '<div style="position:relative;width:80px;height:80px">'
       + '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="square"'
       + ` style="display:block"><circle cx="12" cy="12" r="9" stroke="${C.ink}"/></svg>`
-      + '<div class="hand" style="position:absolute;inset:0;will-change:transform">'
+      + '<div class="hand" style="position:absolute;inset:0">'
       + '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="square"'
       + ` style="display:block"><path d="M12 12V6.5" stroke="${C.violet}"/></svg></div></div>`
       // tabular digits: the line only shifts once, from day 9 to day 10

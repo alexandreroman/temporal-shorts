@@ -125,12 +125,12 @@
       s.llm = makeLLM(root, LEFT.orbSize, 'MODEL');
       s.tools = [['plane', 'Flights'], ['bed', 'Hotels'], ['ticket', 'Booking']]
         .map(([icon, label]) => iconTile(root, icon, label, LEFT.toolW, LEFT.toolH));
-      s.trip = E(root, '', 'pill', { fontSize: '16px', padding: '5px 12px 5px calc(12px + .1em)' });
+      s.trip = E(root, '', 'pill', { fontSize: '16px', lineHeight: '21px', padding: '5px 12px 5px calc(12px + .1em)' });
       // 6 round trips one call at a time, vs 1 for the whole script
       s.counter = makeTripCount(root, 0, 'Round trips');
       s.vs = E(root, 'vs', 'lbl', { fontSize: '22px' });
       s.oneTrip = makeTripCount(root, 1, 'Round trip');
-      Object.assign(s.oneTrip.style, { borderColor: C.uv, background: OPAQUE.uv });
+      Object.assign(s.oneTrip.style, { borderColor: C.uv, background: 'var(--uv-solid)' });
 
       // right: the script written by the model, typed line by line
       s.lblR = E(root, 'Code Mode', 'lbl');
@@ -212,9 +212,9 @@
         if (s.trip._out !== goingOut) {
           s.trip._out = goingOut;
           s.trip.textContent = goingOut ? 'call' : 'result';
-          s.trip.className = 'abs pill ' + (goingOut ? 'uv' : '');
           // opaque, so the connector does not show through the card traveling on it
-          s.trip.style.background = goingOut ? OPAQUE.uv : 'var(--surface)';
+          s.trip.className = 'abs pill ' + (goingOut ? 'uv solid' : '');
+          s.trip.style.background = goingOut ? '' : 'var(--surface)';
         }
         place(s.trip, x, y, 1, 1);
         // the tool lights up while the call reaches it, waits and turns back

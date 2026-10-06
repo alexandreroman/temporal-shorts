@@ -33,9 +33,8 @@
       s.steps = makeLaptopRow(root, s.svg, ROW_Y);
       s.maria = makeAvatar(root, 'Maria, manager', AVATAR.size);
       s.card = makeApprovalCard(root, APPROVAL_CARD.k);
-      s.signal = tag(root, 'Signal: approved', 'neon');
       // solid background: the pill leaves from the white card and must stay readable over it
-      s.signal.style.background = '#1B1B1F';
+      s.signal = tag(root, 'Signal: approved', 'neon solid');
       s.B = makeWorkflowApp(root, 'APP INSTANCE B');
       s.strip = makeClockStrip(root);
       s.clock = makeWaitClock(root, 'Waiting for Maria');

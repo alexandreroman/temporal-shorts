@@ -97,10 +97,8 @@
       s.arrow = path(s.svg, `M ${LEFT.x} ${ARROW.top} L ${LEFT.x} ${ARROW.bottom}`, C.slate, 2.5, true, '8,8');
       s.laptop = makeStep(root, 'laptop', "User's laptop", LEFT.w, LEFT.laptopH);
       // opaque pill colors, so the dashed arrow does not show through the cards traveling on it
-      s.call = callCard(root, 'read_file', '"trip.md"', 'violet');
-      s.call.style.background = OPAQUE.violet;
-      s.result = callCard(root, 'result', '"Lisbon, 3 nights"', 'uv');
-      s.result.style.background = OPAQUE.uv;
+      s.call = callCard(root, 'read_file', '"trip.md"', 'violet solid');
+      s.result = callCard(root, 'result', '"Lisbon, 3 nights"', 'uv solid');
 
       // the product UI, built with the typed React or Svelte SDK
       s.lblR = E(root, 'Your UI', 'lbl');

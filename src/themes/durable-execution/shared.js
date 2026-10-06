@@ -181,7 +181,7 @@ function makeHistory(p, rows, w, h, crashRow, crashGap) {
 // Row i slides in from the right with progress p, on whole pixels
 const showHistoryRow = (hist, i, p) => showRow(hist.rows[i], p, 26, true);
 // Status tag of row i (label and statusTag kind), centered on its row with opacity o.
-// pop: 0 to 1, a brief scale bump; use bumpAt(t, switchTime) so the label switches and shows at native size.
+// pop: 0 to 1, a brief scale bump, e.g. bumpAt(t, switchTime) when the label switches.
 function setHistoryTag(hist, i, label, kind, o, pop = 0) {
   const e = hist.tags[i];
   setStatus(e, label, kind);
@@ -192,19 +192,11 @@ function setHistoryTag(hist, i, label, kind, o, pop = 0) {
 const setHistoryScan = (hist, i, o) => setScan(hist, HIST.row0 + i * HIST.rowGap, o);
 
 // ---------- small animation helpers
-// Brief bump (0 to 1 and back to 0) for a pop on a change or an appearance at `at`. It stays exactly 0 until
-// 0.1 s after `at`, so the element is at native size on the frames where its content changes or it first shows:
-// Chromium rasters a layer then and keeps that raster, so a scaled first raster would blur it for good.
-const bumpAt = (t, at) => win(t, at + 0.1, at + 0.25, 0.15);
-// Appearance at `at` of a small element (badge, icon, tag, chip), as { o, s } for place(): it fades in at native
-// size, then bumps briefly above it (k: height of the bump, 0 for none). A small element never grows from a small
-// scale: its layer could keep the raster of that first tiny frame (a neon check vanishes from its dark badge).
+// Brief bump (0 to 1 and back to 0) for a pop on a change or an appearance at `at`
+const bumpAt = (t, at) => win(t, at, at + 0.15, 0.15);
+// Appearance at `at` of a small element (badge, icon, tag, chip), as { o, s } for place(): it fades in while it
+// bumps briefly above its native size (k: height of the bump, 0 for none)
 const popIn = (t, at, k = 0.14) => ({ o: P(t, at, 0.2), s: 1 + k * bumpAt(t, at) });
-// Centers e on (x, y) like place() at scale 1, but on whole pixels, so the native-size logo inside stays sharp
-function placeOnWholePixels(e, x, y, o) {
-  place(e, x, y, 1, o);
-  e.style.transform = `translate(${Math.round(x - e.offsetWidth / 2)}px,${Math.round(y - e.offsetHeight / 2)}px)`;
-}
 
 // ---------- one shot for chapters 5 and 6: Worker panel with the code card on the left, CARD CHARGED counter
 // and order status under it, TEMPORAL panel with the Event History on the right, with room under its rows for the
@@ -287,7 +279,7 @@ function setCodeSpinner(shot, i, o, sx = 0, sy = 0) {
 }
 // Spinner opacity for an Activity running from `run` until its RESULT leaves
 const runningSpin = (t, run) => win(t, run + 0.2, run + RESULT_LAG, 0.15);
-// RESULT chip flight, like fly() but small: it fades in at native size at `at` (see popIn), travels from (x0, y0)
+// RESULT chip flight, like fly() but small: it fades in at native size at `at`, travels from (x0, y0)
 // to (x1, y1) during [at + 0.1, at + 0.55], then is absorbed there (shrinks and fades)
 function flyChip(chip, t, at, x0, y0, x1, y1) {
   const f = P(t, at + 0.1, 0.45), ab = P(t, at + 0.55, 0.4, easeIn);

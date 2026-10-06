@@ -118,9 +118,9 @@
   // c[2] plays order #1045 live, in real time, from second 2.3 of its run (chargeCard and reserveItem done)
   const LIVE_FROM = 2.3;
 
-  // inline style of an absolutely positioned static part (plain div, no layer of its own)
+  // inline style of an absolutely positioned static part (plain div in its parent's HTML)
   const at = (left, top) => `position:absolute;left:${left}px;top:${top}px;`;
-  // a layer of its own, positioned on whole pixels inside its parent and visible (update sets what changes)
+  // a part that update() changes, positioned on whole pixels inside its parent and visible
   const part = (parent, html, css = {}, cls = '') => {
     const e = E(parent, html, cls, { transform: 'none', ...css });
     e.style.opacity = 1;
@@ -144,7 +144,7 @@
   };
 
   // ---------- status badge: a fixed width (centered text) keeps the edges, and the title next to it, in place
-  // when the status changes; innerHTML only changes with the status, at native size (pop: see bumpAt)
+  // when the status changes; innerHTML only changes with the status (pop: a bumpAt() bump)
   const BADGE_H = 30;
   const badgeCss = width => ({
     position: 'relative', height: BADGE_H + 'px', display: 'inline-flex', alignItems: 'center',

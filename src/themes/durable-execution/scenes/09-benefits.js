@@ -38,9 +38,9 @@
     update(t, c, s) {
       // you write the logic, Temporal handles the rest
       const hp = P(t, c[0] + 0.4, 0.6);
-      placeOnWholePixels(s.headline, 960, HEADLINE_Y, hp);
+      place(s.headline, 960, HEADLINE_Y, 1, hp);
       s.headline.style.transform += ` translateY(${(1 - hp) * 20}px)`;
-      placeOnWholePixels(s.handles, 960, HANDLES_Y, P(t, c[0] + 1.9, 0.5));
+      place(s.handles, 960, HANDLES_Y, 1, P(t, c[0] + 1.9, 0.5));
       // the tiles pop in one by one while the subtitle lists what Temporal handles: the first on "retries",
       // the last on "visibility"
       const at = [c[0] + 3.0, c[0] + 3.8, c[0] + 4.5, c[0] + 5.4];

@@ -53,7 +53,8 @@ function makeTitleBlock(root, kicker, titleHtml, tagline, sizes = {}) {
 function makeEndCard(root, title, tagline) {
   return E(root,
     `<div style="font-size:104px;letter-spacing:-3px;line-height:1.04">${title}</div>`
-    + '<div class="mono" style="font-size:24px;letter-spacing:.14em;color:var(--violet);margin-top:30px">'
+    + '<div class="mono" style="font-size:24px;letter-spacing:.14em;padding-left:.14em;color:var(--violet);'
+    + 'margin-top:30px">'
     + `${tagline}</div>`
     + `<img src="${LOGO}" style="height:70px;display:block;margin:76px auto 0">`,
     '', { textAlign: 'center' });

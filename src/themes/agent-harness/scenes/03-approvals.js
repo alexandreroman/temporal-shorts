@@ -140,7 +140,7 @@
       s.minute = s.wait.querySelector('.mh'); s.hour = s.wait.querySelector('.hh');
       s.pause = E(root, ICON('pause', 22, C.violet, 1.8), '', {
         width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: OPAQUE.violet, border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)',
+        background: 'var(--violet-solid)', border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)',
       });
 
       // tool calls, in order of appearance; created last so they travel over the gate
@@ -213,8 +213,7 @@
         const popIn = P(t, appear, 0.45, backOut);
         const [x, y] = pan(t, FROM, legs);
         const o = clamp(popIn * 2) * (1 - P(t, fade, 0.4));
-        s.calls[i].className = 'abs pill ' + cls;
-        s.calls[i].style.background = OPAQUE[cls];
+        s.calls[i].className = 'abs pill solid ' + cls;
         place(s.calls[i], x, y, popIn, o);
         return [x, y, o];
       };

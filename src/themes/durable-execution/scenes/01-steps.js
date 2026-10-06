@@ -29,7 +29,9 @@
   };
   const makeService = (root, name) => {
     const e = tag(root, `${ICON('server', 24, C.slate, 1.8)}${name}`);
-    Object.assign(e.style, { display: 'flex', alignItems: 'center', gap: '12px', fontSize: '20px' });
+    Object.assign(e.style, {
+      display: 'flex', alignItems: 'center', gap: '12px', fontSize: '20px', lineHeight: '26px',
+    });
     return e;
   };
 
@@ -62,9 +64,9 @@
       s.services = ORDER_STEPS.map(step => makeService(root, step.service));
       s.code = makeCodeCard(root, { w: ABOVE_W });
       s.done = tag(root, `${ICON('check', 28, C.neon, 2.6)}Order complete`, 'neon');
-      // whole-pixel size (content: 295.8 x 49), so the centered tag lands on whole pixels
+      // whole-pixel width (content: 295.8 px; the pill is 50 px high), so the centered tag lands on whole pixels
       Object.assign(s.done.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', width: '296px', height: '50px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', width: '296px',
       });
     },
     update(t, c, s) {
@@ -92,7 +94,7 @@
       s.services.forEach((e, i) => {
         const x = s.steps.xs[i], a = c[1] + RUN0 + i * RUN_GAP;
         draw(s.links[i], P(t, a, 0.3), 1 - out);
-        // fades in without a bump: its border lights up 0.3 s later, a change that must happen at native size
+        // fades in without a bump, then its border lights up 0.3 s later
         place(e, x, SERVICE_Y, 1, P(t, a + 0.15, 0.2) * (1 - out));
         // busy while it handles the call, then all four light up together on "Each step calls another service"
         const busy = t >= a + 0.45 && t < a + RUN_D;

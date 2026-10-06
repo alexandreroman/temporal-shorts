@@ -16,9 +16,8 @@
   const FLIGHT = { at: 1.9, d: 0.8 };
   scene({
     chapter: 7, title: 'Durable Execution with Temporal',
-    // logo, then the app and Temporal panels, then the budget and benefits as the panels fade.
-    // The first pan runs with the logo flight and ends on whole pixels as it lands, so the
-    // native-size header logo that takes over stays pixel-aligned.
+    // logo, then the app and Temporal panels, then the budget and benefits as the panels fade;
+    // the first pan runs with the logo flight
     shift: (t, c) => pan(t, [0, -18], [[c[0] + FLIGHT.at, 0, 32], [c[4], 0, -10]], FLIGHT.d),
     subs: [
       {
@@ -68,9 +67,6 @@
       s.flash = makeFlash(root);
       s.done = tag(root, 'Agent complete', 'neon');
       s.logo = E(root, `<img src="${LOGO}" style="height:150px;display:block">`);
-      // native-size copy of the landed logo, on whole pixels where the flying logo lands (centered on 1005, 325)
-      s.headerLogo = E(root, `<img src="${LOGO}" style="height:34px;display:block">`,
-        '', { left: '940px', top: '308px' });
       // payoff: budget line, then the other benefits
       s.budget = E(root,
         `<div style="display:flex;align-items:center;gap:22px">${ICON('coin', 64, C.neon, 1.6)}<div>`
@@ -98,15 +94,10 @@
       const [sx, sy] = shakeAt(t, crashAt);
       const dead = t >= crashAt;
 
-      // Temporal logo: big intro, then it flies into the header of the Temporal panel.
-      // Once landed, the native-size header logo takes over (hard swap, never both): Chromium rasterizes a
-      // scaled-down image differently depending on the frames rendered before, which breaks parallel rendering.
+      // Temporal logo: big intro, then it flies into the header of the Temporal panel, where it stays
       const lp = P(t, c[0] + 0.1, 0.7, backOut), fl = P(t, c[0] + FLIGHT.at, FLIGHT.d);
-      const landed = fl >= 1;
-      const logoOpacity = landed ? 0 : clamp(lp * 2) * (1 - out);
       const logoScale = lp * lerp(1 + 0.06 * P(t, c[0] + 1.2, 0.6), 34 / 150, fl);
-      place(s.logo, lerp(960, 1005, fl), lerp(540, 325, fl), logoScale, logoOpacity);
-      s.headerLogo.style.opacity = landed ? 1 - out : 0;
+      place(s.logo, lerp(960, 1005, fl), lerp(540, 325, fl), logoScale, clamp(lp * 2) * (1 - out));
       place(s.temporal, 1380, 555, 1, P(t, c[0] + 2.4, 0.5) * (1 - out));
       place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 2.6, 0.5) * (1 - out));
 

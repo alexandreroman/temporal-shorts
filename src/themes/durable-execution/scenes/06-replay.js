@@ -38,9 +38,8 @@
       s.reuseChips = [0, 1].map(() => makeResultCard(root));
       s.saveChips = [0, 1].map(() => makeResultCard(root));
       s.done = tag(root, 'Workflow complete', 'neon');
-      // an even height (29 px line + 9 px padding + 1.5 px border, twice), so the centered tag rests on whole
-      // pixels, level with the counter row; dark like the SAVED tags, as it sits on the light history card
-      Object.assign(s.done.style, { height: '50px', lineHeight: '29px', background: '#141414' });
+      // dark like the SAVED tags, as it sits on the light history card
+      s.done.style.background = '#141414';
       s.flash = makeFlash(root);
     },
     update(t, c, s) {

@@ -163,7 +163,8 @@
       // the header tags, side by side: CHILD WORKFLOW (solid UV, a Temporal fact: the parent starts TravelAgent
       // as its child workflow), then SELF-DESCRIBING at the card's right edge
       const headerTag = (text, css = {}) => E(s.travel.tagSlot, text, 'pill uv', {
-        position: 'static', display: 'inline-block', fontSize: '16px', padding: '6px 12px 6px calc(12px + .1em)',
+        position: 'static', display: 'inline-block', fontSize: '16px', lineHeight: '22px',
+        padding: '6px 12px 6px calc(12px + .1em)',
         ...css,
       });
       s.child = headerTag('Child workflow', { background: C.uv, color: '#FFFFFF' });
@@ -178,14 +179,11 @@
       s.readLbl = E(root, 'Reads its interface', 'lbl', { fontSize: '16px' });
       s.requestLbl = E(root, 'Typed request', 'lbl', { fontSize: '16px' });
       s.resultLbl = E(root, 'Typed result', 'lbl', { fontSize: '16px' });
-      s.chip = callCard(root, 'plan_trip', '', 'uv');
-      s.chip.style.background = OPAQUE.uv;
-      // the parent's calls that start and close the TravelAgent instance
-      s.start = callCard(root, 'start_travel', '', 'uv');
-      s.stop = callCard(root, 'stop_travel', '', 'uv');
-      // opaque, so the card's border and rule do not show through a chip being absorbed by the header
-      s.start.style.background = OPAQUE.uv;
-      s.stop.style.background = OPAQUE.uv;
+      s.chip = callCard(root, 'plan_trip', '', 'uv solid');
+      // the parent's calls that start and close the TravelAgent instance; solid, so the card's border and rule
+      // do not show through a chip being absorbed by the header
+      s.start = callCard(root, 'start_travel', '', 'uv solid');
+      s.stop = callCard(root, 'stop_travel', '', 'uv solid');
       s.instance = E(root,
         '<span class="lbl" style="font-size:16px;padding-left:0">Instance</span>'
         + '<span class="mono" style="font-size:20px">travel-1</span>', '', {

@@ -36,7 +36,7 @@ function makeMemory(p, w, h) {
   const e = E(p,
     panelLabel('server', 'App memory', 'left:22px;top:16px')
     + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;`
-    + 'font-size:26px;letter-spacing:.14em;color:var(--red);opacity:0">EMPTY</div>',
+    + 'font-size:26px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
   e.empty = e.querySelector('.empty');
   return e;

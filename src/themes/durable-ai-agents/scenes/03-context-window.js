@@ -74,7 +74,8 @@
       llmState(s.llm, { look: -1 });
       const app = [0, 1, 2, 3].map(i => P(t, c[0] + 2.2 + i * 1.2, 0.5));
       const grow = P(t, c[1] + 2.4, 1.8);
-      const hs = [74, lerp(122, 330, grow), 74, 74];
+      // grown, the blocks fill the 560 px gauge and the last one keeps the 20 px margin of the 600 px sheet
+      const hs = [74, lerp(122, 308, grow), 74, 74];
       let y = 20, used = 0;
       s.blocks.forEach((b, i) => {
         b.style.top = y + 'px'; b.style.height = hs[i] + 'px';

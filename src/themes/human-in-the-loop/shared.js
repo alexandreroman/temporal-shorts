@@ -204,18 +204,18 @@ function makeWorkflowApp(p, name) {
   const { w, h } = WF_LAYOUT.app;
   const app = makeAppPanel(p, name, w, h, APP_TEXT);
   const cardW = w - 48, cardH = h - 100;
-  const card = E(app,
-    panelLabel('code', 'Workflow', 'left:20px;top:16px;padding-left:0')
+  // the card never moves: it is part of the panel's HTML, and only its lines are animated elements
+  app.insertAdjacentHTML('beforeend',
+    `<div style="position:absolute;left:24px;top:76px;width:${cardW}px;height:${cardH}px;`
+    + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
+    + panelLabel('code', 'Workflow', 'left:20px;top:16px;padding-left:0')
     + `<div class="cur" style="position:absolute;left:12px;width:${cardW - 26}px;height:${WF.h + 2}px;`
     + `background:rgba(182,100,255,.2);border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`
     // EMPTY sits in the middle of the space under the WORKFLOW label
-    + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${(44 + cardH) / 2 - 20}px;text-align:center;`
-    + 'font-size:30px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
-    '', {
-      left: '24px', top: '76px', width: cardW + 'px', height: cardH + 'px', background: 'rgba(248,250,252,.03)',
-      border: '1.5px solid ' + C.line, borderRadius: 'var(--r)', transform: 'none',
-    });
-  card.style.opacity = 1; // E() creates hidden elements; the card always shows with its panel
+    + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${(44 + cardH) / 2 - 20}px;`
+    + 'text-align:center;font-size:30px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>'
+    + '</div>');
+  const card = app.lastElementChild;
   app.cur = card.querySelector('.cur'); app.empty = card.querySelector('.empty');
   app.lines = WF_LINES.map((txt, i) => {
     const line = E(card,

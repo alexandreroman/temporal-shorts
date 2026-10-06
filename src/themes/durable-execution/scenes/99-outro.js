@@ -31,7 +31,7 @@
         '', { width: '1040px', textAlign: 'center' });
     },
     update(t, c, s) {
-      placeOnWholePixels(s.t, 960, 600, P(t, 0.3, 0.8));
+      place(s.t, 960, 600, 1, P(t, 0.3, 0.8));
       // tiles pop in one after the other, then each step gets its check
       s.tiles.forEach((e, i) => {
         const p = P(t, 0.1 + i * 0.12, 0.45, backOut);

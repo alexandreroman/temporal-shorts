@@ -89,7 +89,7 @@
         + '<span>Agent event stream</span></div>', 'lbl', { color: 'var(--ink)' });
       // 18 px so the tag stays narrower than the lane, clear of the chips curving in from the lowest agent
       s.same = tag(root, 'Same events for every agent', 'uv');
-      s.same.style.fontSize = '18px';
+      Object.assign(s.same.style, { fontSize: '18px', lineHeight: '24px' });
       s.chips = Array.from({ length: CHIP_POOL }, (_, k) => {
         const type = TYPE_ORDER[k % TYPE_ORDER.length];
         return E(root, type, 'mono', chipCss(type, '16px'));

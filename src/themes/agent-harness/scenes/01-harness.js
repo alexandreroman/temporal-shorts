@@ -87,11 +87,11 @@
   const BADGE_RIGHT = FRAME.x1 - 26;
   // c[4] compares one LLM call (top row) with one turn (bottom row), on the content frame (x 140 to 1780,
   // y 150 to 880). Headings on the left edge; the turn runs from the message card to the reply card, its model
-  // calls on one line and its tool calls on a lower one, a bracket under the whole turn. Chips are 49 px tall,
-  // so their centers sit half a pixel off to rest on whole pixels; the cards' even heights need whole centers
+  // calls on one line and its tool calls on a lower one, a bracket under the whole turn. Chips and cards have
+  // even heights, so their whole-pixel centers rest on whole pixels
   const CMP = {
     left: 140, right: 1780, head1Top: 150, stripTop: 242, stripH: 50, head2Top: 411,
-    cardW: 340, cardY: 584, modelY: 583.5, toolY: 742.5, chipH: 49, statusH: 30, statusGap: 10,
+    cardW: 340, cardY: 584, modelY: 584, toolY: 742, chipH: 50, statusH: 30, statusGap: 10,
     xs: [660, 810, 960, 1110, 1260], bracketY: 855, tick: 16,
   };
   // the calls of one turn: [tool or Model, chip class]; model calls on even indexes
@@ -218,8 +218,7 @@
           display: 'flex', alignItems: 'center', gap: '16px',
         });
       // opaque UV tint so the frame line does not show through the pill
-      s.workflow = tag(root, 'Temporal Workflow', 'uv');
-      s.workflow.style.background = OPAQUE.uv;
+      s.workflow = tag(root, 'Temporal Workflow', 'uv solid');
       s.caps = CAPS.map(([icon, label]) => {
         const e = iconTile(root, icon, label, CAP.w, CAP.h);
         e.style.borderColor = C.uv;
@@ -298,8 +297,7 @@
         return e;
       });
       // opaque violet tint, so the bracket line does not show through the pill
-      s.streamed = tag(root, 'Streamed live, replayable', 'violet');
-      s.streamed.style.background = OPAQUE.violet;
+      s.streamed = tag(root, 'Streamed live, replayable', 'violet solid');
     },
     update(t, c, s) {
       // c[0]: the model, then the tools, then the arcs of the loop; its label and the token, then the SDK tags
@@ -355,9 +353,8 @@
       s.frame.forEach(f => draw(f, P(t, c[1] + 2.4, 1.2), harnessO));
       s.frameBg.style.opacity = P(t, c[1] + 3.9, 0.6) * harnessO;
       s.header.style.opacity = P(t, c[1] + 3.9, 0.5) * harnessO;
-      // half a pixel low, so the 49 px pill rests on whole pixels
       const pW = P(t, c[1] + 5.4, 0.45, backOut);
-      place(s.workflow, LOOP.cx, FRAME.y1 + 0.5, pW, clamp(pW * 2) * harnessO);
+      place(s.workflow, LOOP.cx, FRAME.y1, pW, clamp(pW * 2) * harnessO);
       // c[2]: a message comes in and opens turn 1, the token runs a lap of your loop, the reply streams out and
       // the turn ends; the harness waits. c[3]: the second message runs turn 2 the same way. All of it fades out
       // at c[4], and the side columns stay free for the capability tiles of c[6]
@@ -429,11 +426,10 @@
       });
       const pReply = P(t, b4 + CMP_AT.reply, 0.45, backOut);
       place(s.turnReply, CMP.right - CMP.cardW / 2, CMP.cardY, pReply, clamp(pReply * 2) * cmpO);
-      // the bracket draws under the turn as the reply streams, then the pill pops on it (half a pixel low, so
-      // the 49 px pill rests on whole pixels)
+      // the bracket draws under the turn as the reply streams, then the pill pops on it
       draw(s.bracket, P(t, b5 + SAVE_AT.reply, SAVE_AT.streamed - SAVE_AT.reply, x => x), cmpO);
       const pSt = P(t, b5 + SAVE_AT.streamed, 0.45, backOut);
-      place(s.streamed, 960, CMP.bracketY + 0.5, pSt, clamp(pSt * 2) * cmpO);
+      place(s.streamed, 960, CMP.bracketY, pSt, clamp(pSt * 2) * cmpO);
       // c[6]: each capability pops beside the frame as the subtitle names it, and plugs in with a short link
       CAPS.forEach(([, , side, row], i) => {
         const a = c[6] + 1.6 + i * 1.2;
