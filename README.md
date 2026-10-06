@@ -67,12 +67,15 @@ src/player.js          live player: controls, fit-to-window, shortcuts
 src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        theme page (background, subtitles, header, script
                        list); scenes/ (one file per scene: subtitle text +
-                       animations) and theme-only helpers
+                       animations), theme-only helpers and social.png
+src/home.css, home.js  home page styles and star field
+src/social.html        home link preview card, captured by make social
+src/social.png         link preview image of the home page (make social)
 src/assets/            official Temporal logo (white horizontal lockup)
 src/fonts/             brand fonts (downloaded by make), see
                        src/fonts/README.md
 scripts/               setup, fonts, render, preview, timeline, SRT
-                       export, HTML build and server
+                       export, social images, HTML build and server
 docs/<theme>/script.md full script: subtitles, timings, animations
 output/                generated .srt, .mp4 and standalone .html (the HTML
                        pages mirror src/: index.html, themes/<theme>/)
@@ -94,6 +97,7 @@ make timeline                # checks that everything loads, prints timings
 make preview THEME=durable-ai-agents T="3 140 160"  # -> output/preview.png
 make render                  # videos -> output/<theme>.mp4
 make srt                     # subtitles -> output/<theme>.srt
+make social                  # link preview images -> src/**/social.png
 make html                    # home page + players -> output/**/index.html
 make serve                   # hot-reloading home page on http://localhost:8000
 make clean                   # delete output/ (every generated file)
@@ -101,10 +105,11 @@ make clean                   # delete output/ (every generated file)
 
 The targets run on `.venv/bin/python` once `make setup` has created it,
 otherwise on the system `python3`: enough for `html` and `serve`, which need
-only the standard library. `timeline`, `preview`, `render` and `srt` need
-Playwright and stop with a hint to run `make setup` when it is missing.
-Override the interpreter with `PY`, for example `make html PY=python`. Every
-target downloads the brand fonts first when they are missing.
+only the standard library. `timeline`, `preview`, `render`, `srt` and
+`social` need Playwright and stop with a hint to run `make setup` when it
+is missing. Override the interpreter with `PY`, for example
+`make html PY=python`. Every target downloads the brand fonts first when
+they are missing.
 
 `timeline`, `render` and `srt` cover every theme; `timeline` prints each one
 under a `== <theme> ==` header. Set the `THEME` variable to restrict them to
@@ -126,8 +131,8 @@ each `output/<theme>.mp4` or `.srt` depends on its theme's own sources
 render or export script. Editing a scene rebuilds its theme only; editing
 the home page (`src/index.html`, `src/home.css`) or the live player
 (`src/player.js`) rebuilds no video. `make html` rebuilds when any source
-of any page or `scripts/build_html.py` changes. Use `make -B render` to
-force a full render.
+of any page, a `social.png` image or `scripts/build_html.py` changes. Use
+`make -B render` to force a full render.
 
 `make clean` deletes `output/`: videos, subtitles, HTML pages, previews and
 render leftovers. It leaves the virtualenv and the fonts in place.
@@ -177,6 +182,37 @@ position). A failed build prints its error and keeps the last good pages.
 The reload script is added to the served pages only, never to the built
 files.
 
+### Social link previews
+
+The deployed pages carry link preview tags, so a shared link shows a card
+on social networks: Open Graph (`og:title`, `og:description`, `og:url`,
+`og:image` and its size), an X `summary_large_image` card and a canonical
+link. The title and description come from the page's `<title>` and
+`<meta name="description">`; the build stops if either is missing, with or
+without the tags.
+
+These tags need the absolute root URL of the site, which `make html` reads
+from the `SITE_URL` variable. The Pages workflow sets it to the URL given
+by GitHub Pages (see [Deployment](#deployment)). Local builds leave it
+empty and print that they skipped the tags. To check them locally, set it
+and force the rebuild, as an up-to-date build ignores a new value:
+
+```bash
+make -B html SITE_URL=https://example.com
+```
+
+Each page's image is a 1200x630 `social.png` in its folder:
+`src/social.png` for the home page, `src/themes/<theme>/social.png` for a
+theme, which shows the title card of the intro without its subtitle. The
+home image is the card of `src/social.html`, a page made for the capture
+alone (the build skips it): the "Temporal shorts" lockup of the home page
+header (`.brand` in `home.css`) scaled up, above the order steps of the
+Durable Execution intro, on the home page background (`home.css`,
+`home.js`). `make social` writes the images with Playwright; they are
+committed, so `make html` and CI only copy them next to the built pages.
+Run `make social` and commit the images after changing an intro scene, a
+page title, `src/social.html`, the home page lockup or its background.
+
 ### Editing
 
 Each scene lives in its own file in `src/themes/<theme>/scenes/`, so people
@@ -216,13 +252,16 @@ editing different scenes never touch the same file.
 ### Add a theme
 
 1. Copy a theme page, for example `src/themes/durable-execution/index.html`,
-   to `src/themes/<theme>/index.html`; set its `<title>` and its list of
-   scene scripts. The new folder is a theme as soon as its page exists:
-   `--theme` and `THEME=<theme>` accept it, and `make html` builds it.
+   to `src/themes/<theme>/index.html`; set its `<title>`, its
+   `<meta name="description">` and its list of scene scripts. The new
+   folder is a theme as soon as its page exists: `--theme` and
+   `THEME=<theme>` accept it, and `make html` builds it.
 2. Create `src/themes/<theme>/scenes/` with the scene files.
 3. Add a card linking to `themes/<theme>/` in `src/index.html`; the cards
    wrap and keep the same size, with no CSS change.
 4. Write the script in `docs/<theme>/script.md`.
+5. Run `make social` and commit `src/themes/<theme>/social.png`: the HTML
+   build needs it.
 
 Videos have no maximum length; `make timeline THEME=<theme>` reports it.
 
@@ -249,6 +288,12 @@ Actions" in Settings > Pages.
 The site must be served at the root of a domain, a custom domain or a
 `<user>.github.io` repository: the player's home button links to `/`,
 which a project site under `<user>.github.io/<repository>/` breaks.
+
+The link preview tags hold absolute URLs, as social networks require. The
+workflow takes the site URL from the Pages configuration
+(`actions/configure-pages`, custom domain included) and passes it to the
+build as `SITE_URL`, so no domain is written in the repository. Pull
+request builds skip that step: their pages have no link preview tags.
 
 ## Contributing
 

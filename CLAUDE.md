@@ -38,6 +38,7 @@ make timeline                # every theme: scenes, timings, TOTAL duration
 make preview THEME=<theme> T="12 40 136"  # contact sheet -> output/preview.png
 make render                  # output/<theme>.mp4 for every out-of-date theme
 make srt                     # output/<theme>.srt for every out-of-date theme
+make social                  # link preview images, committed: src/**/social.png
 make html                    # home page + one HTML player per theme
 make serve                   # hot-reload home page on CASPER_PORT, else 8000
 make clean                   # delete output/ (every generated file)
@@ -55,8 +56,13 @@ workspaces run `make setup` automatically.
 
 - `src/`: the animations, one file per concern so parallel edits rarely
   conflict:
-  - `index.html`, `home.css`: home page, one card per theme, linking to
-    `themes/<theme>/`
+  - `index.html`, `home.css`, `home.js`: home page, one card per theme,
+    linking to `themes/<theme>/`; `home.js` draws its star field
+  - `social.html`: link preview card of the home page: the home page
+    lockup (`.brand` in `home.css`) at a larger `--logo`, above a still
+    step chain of the durable-execution intro, on the home page
+    background; captured by `make social` only, not a site page; its icons
+    are copies, see the comment above the chain
   - `styles.css`: brand styles and live-player CSS
   - `engine.js`: timeline, easing and layout helpers, icons, components,
     star field and `boot()`, called last by every theme page (builds the
@@ -72,6 +78,9 @@ workspaces run `make setup` automatically.
     the theme's own scripts relative to its folder, then `boot()`
   - `themes/<theme>/`: the theme's own scripts, e.g.
     `themes/durable-ai-agents/shared.js` (`STEPS`, `makeApp`, memory, bill)
+  - `social.png`, `themes/<theme>/social.png`: 1200x630 link preview
+    image of each page (`social.html`, or the intro title card), written by
+    `make social` and committed
   - `themes/<theme>/scenes/`: one file per scene (subtitles and
     animations), wrapped in a `{ ... }` block so its helpers stay local;
     the first scene of a chapter sets `chapter` and `title`; `shift`
@@ -79,13 +88,19 @@ workspaces run `make setup` automatically.
     composition at (960, 522)
 - `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh`, CI
   and any make target when the fonts are missing), frame preview, parallel
-  render, timeline, SRT export, standalone HTML build and server; the
-  per-theme scripts require `--theme` (no default)
+  render, timeline, SRT export, social preview images
+  (`social_images.py`), standalone HTML build and server; the per-theme
+  scripts require `--theme` (no default). The HTML build adds the Open
+  Graph and X card tags and a canonical link only when the `SITE_URL`
+  environment variable (or make variable) holds the site's root URL:
+  local builds have none
 - `.github/workflows/pages.yml`: on push to `main`, downloads the fonts,
-  runs `make html` and deploys `output/` to GitHub Pages (no video, no
-  SRT); served at a domain root, as the player's home button links to `/`.
-  Pull requests to `main` run the build only, no deploy: the pages are
-  attached to the run as an artifact
+  runs `make html` with `SITE_URL` set to the Pages URL given by
+  `actions/configure-pages` (no domain in the repository) and deploys
+  `output/` to GitHub Pages (no video, no SRT); served at a domain root,
+  as the player's home button links to `/`. Pull requests to `main` run
+  the build only, without the Pages step, so with no social tags, and no
+  deploy: the pages are attached to the run as an artifact
 - `docs/<theme>/script.md`: full script of a theme: subtitles, timings,
   visuals
 - `output/`: generated `<theme>.srt`, `<theme>.mp4`, and the HTML pages
@@ -152,9 +167,10 @@ not shared with the team.
   `type="module"`.
 - New scene: add a file in `src/themes/<theme>/scenes/` and one `<script>`
   line in `src/themes/<theme>/index.html`, in playing order.
-- New theme: folder `src/themes/<theme>/` with its page `index.html` and
-  its scenes, a card linking to `themes/<theme>/` in `src/index.html` and
-  `docs/<theme>/script.md`.
+- New theme: folder `src/themes/<theme>/` with its page `index.html` (with
+  `<title>` and `<meta name="description">`) and its scenes, a card linking
+  to `themes/<theme>/` in `src/index.html`, `docs/<theme>/script.md`, and
+  its `social.png` from `make social`.
 - Relative URLs must work from `src/` and `output/` alike: theme pages
   live two folders below the home page. Link to folders
   (`themes/<theme>/`): `make serve` is the only way to view the HTML pages.
@@ -164,5 +180,8 @@ not shared with the team.
   opens theme pages over `file://` to render frames.
 - Live-mode player code (`startPlayer()`, `.live` CSS) must never affect the
   frozen `?t=` mode: rendered frames must stay pixel-identical.
+- After changing an intro scene, a page title, `src/social.html` or the
+  home page lockup or background, run `make social` and commit the
+  `social.png` images: CI only copies them.
 - Check frames with `make preview` before `make render`; after a text change,
   run `make srt` and update `docs/<theme>/script.md`.

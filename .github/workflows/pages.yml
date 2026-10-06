@@ -1,5 +1,6 @@
 # Build the home page and the HTML players (make html), then deploy output/ to GitHub Pages.
-# Pull requests to main run the build only: the pages are attached to the run as an artifact, never deployed.
+# Pull requests to main run the build only: the pages are attached to the run as an artifact, never deployed, and
+# have no link preview tags, as the Pages URL is known only to deployments.
 # The videos and subtitles are not built here: no Playwright, no ffmpeg.
 name: Deploy HTML pages
 
@@ -34,13 +35,18 @@ jobs:
       - name: Download fonts
         run: bash scripts/fonts.sh
 
-      # build_html.py uses the standard library only: the setup-python interpreter replaces the .venv one.
-      - name: Build HTML pages
-        run: make html PY=python
-
-      # Calls the Pages API, which a pull request token (from a fork in particular) cannot reach.
-      - if: github.event_name != 'pull_request'
+      # Calls the Pages API, which a pull request token (from a fork in particular) cannot reach. Gives the URL of
+      # the site, custom domain included, for the link preview tags.
+      - id: pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v6
+
+      # build_html.py uses the standard library only: the setup-python interpreter replaces the .venv one.
+      # On pull requests, the pages step is skipped and SITE_URL is empty: the pages have no link preview tags.
+      - name: Build HTML pages
+        env:
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
+        run: make html PY=python
 
       # Needs no Pages permission: on pull requests, reviewers download the pages from the run.
       - uses: actions/upload-pages-artifact@v5
