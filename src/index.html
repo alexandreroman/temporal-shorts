@@ -10,18 +10,27 @@
 <div class="glow" aria-hidden="true"></div>
 <main>
   <header>
-    <img class="logo" src="assets/temporal-logo-horizontal-light-cropped.svg" alt="Temporal">
-    <h1>Select a theme</h1>
-    <p class="lead">Short explainers with subtitles, for everyone.</p>
+    <!-- the official logo, untouched, followed by "shorts" in the brand font: the heading reads "Temporal shorts" -->
+    <h1 class="brand"><img src="assets/temporal-logo-horizontal-light-cropped.svg" alt="Temporal">
+      shorts</h1>
   </header>
   <nav class="themes" aria-label="Videos">
     <a class="theme" href="themes/durable-execution/">
       <span class="theme-top">
         <span class="theme-icon" aria-hidden="true">
-          <!-- event history: steps recorded one after the other -->
-          <svg viewBox="0 0 24 24"><rect x="3" y="3.5" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/>
-            <rect x="3" y="16.5" width="4" height="4"/>
-            <path d="M5 7.5V10M5 14v2.5M10.5 5.5H21M10.5 12H21M10.5 18.5H17"/></svg>
+          <!-- event history: steps recorded one after the other; on hover, the rows fill in from the top -->
+          <svg viewBox="0 0 24 24"><rect class="appear" x="3" y="3.5" width="4" height="4"/>
+            <rect class="appear" x="3" y="10" width="4" height="4" style="--d:.2s"/>
+            <rect class="appear" x="3" y="16.5" width="4" height="4" style="--d:.4s"/>
+            <path class="history" d="M5 7.5V10M5 14v2.5M10.5 5.5H21M10.5 12H21M10.5 18.5H17"/>
+            <!-- the same lines, one path each so they are drawn in turn; shown only while history is hidden -->
+            <g class="history-steps">
+              <path class="draw" d="M10.5 5.5H21" pathLength="1" style="--d:.05s"/>
+              <path class="draw" d="M5 7.5V10" pathLength="1" style="--d:.15s"/>
+              <path class="draw" d="M10.5 12H21" pathLength="1" style="--d:.25s"/>
+              <path class="draw" d="M5 14v2.5" pathLength="1" style="--d:.35s"/>
+              <path class="draw" d="M10.5 18.5H17" pathLength="1" style="--d:.45s"/>
+            </g></svg>
         </span>
       </span>
       <span class="theme-title">Introduction to Durable Execution</span>
@@ -31,9 +40,9 @@
     <a class="theme" href="themes/human-in-the-loop/">
       <span class="theme-top">
         <span class="theme-icon" aria-hidden="true">
-          <!-- person with a check mark: a human approves -->
+          <!-- person with a check mark: a human approves; on hover, the check mark is drawn -->
           <svg viewBox="0 0 24 24"><circle cx="9" cy="7.5" r="3.5"/><path d="M2.5 20.5v-1a6.5 6.5 0 0 1 13 0v1"/>
-            <path d="M15.5 11l2.5 2.5L22 9"/></svg>
+            <path class="draw" d="M15.5 11l2.5 2.5L22 9" pathLength="1" style="--d:.15s;--t:.4s"/></svg>
         </span>
       </span>
       <span class="theme-title">Human-in-the-Loop</span>
@@ -43,9 +52,9 @@
     <a class="theme" href="themes/durable-ai-agents/">
       <span class="theme-top">
         <span class="theme-icon" aria-hidden="true">
-          <!-- sparkle: AI -->
-          <svg viewBox="0 0 24 24"><path d="M10 3l1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9z"/>
-            <path d="M18 14v6M15 17h6"/></svg>
+          <!-- sparkle: AI; on hover, the sparkle twinkles, then the small plus pops -->
+          <svg viewBox="0 0 24 24"><path class="twinkle" d="M10 3l1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9z"/>
+            <path class="pop" d="M18 14v6M15 17h6"/></svg>
         </span>
       </span>
       <span class="theme-title">Durable AI Agents</span>
@@ -55,9 +64,9 @@
     <a class="theme" href="themes/agent-harness/">
       <span class="theme-top">
         <span class="theme-icon" aria-hidden="true">
-          <!-- shield holding a plug: a harness that keeps the agent safe -->
+          <!-- shield holding a plug: a harness that keeps the agent safe; on hover, the plug slides in -->
           <svg viewBox="0 0 24 24"><path d="M12 2.5l8 3v6.5c0 4.6-3.3 8.1-8 9.5-4.7-1.4-8-4.9-8-9.5V5.5z"/>
-            <path d="M10 7.5V10M14 7.5V10M8.5 10h7v2a3.5 3.5 0 0 1-7 0zM12 15.5V18"/></svg>
+            <path class="plug" d="M10 7.5V10M14 7.5V10M8.5 10h7v2a3.5 3.5 0 0 1-7 0zM12 15.5V18"/></svg>
         </span>
       </span>
       <span class="theme-title">Temporal Agent Harness</span>
