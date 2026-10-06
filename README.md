@@ -1,6 +1,6 @@
 # Temporal Shorts
 
-[![CI](https://github.com/alexandreroman/temporal-shorts/actions/workflows/pages.yml/badge.svg)](https://github.com/alexandreroman/temporal-shorts/actions/workflows/pages.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/alexandreroman/temporal-shorts/pages.yml?branch=main&label=ci)](https://github.com/alexandreroman/temporal-shorts/actions/workflows/pages.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 Temporal Shorts: short explainer videos (English, no sound, burned-in
@@ -21,17 +21,29 @@ subtitles) about Temporal. Each video is a theme:
   Temporal Workflows while you keep your AI SDK, with human approvals, one
   event stream, typed subagents and Code Mode.
 
-A home page lists the themes and opens their players.
+## Getting started
 
-No theme is the default: the make targets cover every theme unless
-`THEME=<theme>` narrows them to one, and the per-theme scripts require
-`--theme`.
+To watch the videos in a browser, you only need Python 3.10+:
 
-The videos are not edited in a video editor: each one is an HTML page
-animated deterministically (`renderAt(t)`), captured frame by frame by
-headless Chromium (Playwright), then encoded to H.264 by ffmpeg.
+```bash
+git clone https://github.com/alexandreroman/temporal-shorts.git
+cd temporal-shorts
+bash scripts/fonts.sh        # download the brand fonts
+make serve PY=python3        # home page on http://localhost:8000
+```
 
-## Contents
+Open <http://localhost:8000> and pick a theme. The pages use the Python
+standard library only, so `PY=python3` skips the virtualenv. To render the
+MP4 files, run `make setup` first (see the
+[Developer guide](#developer-guide)).
+
+## Developer guide
+
+This guide explains how the project is organized, how to render the
+videos and subtitles, how to edit a scene, add a theme and deploy the
+HTML pages.
+
+### Project layout
 
 ```text
 src/index.html         home page: one card per theme (styles in home.css)
@@ -58,7 +70,7 @@ output/                generated .srt, .mp4 and standalone .html (the HTML
 CLAUDE.md              conventions for Claude sessions working on the project
 ```
 
-## Regenerate a video (macOS)
+### Regenerate a video (macOS)
 
 Requirements: Python 3.10+ and ffmpeg (`brew install python ffmpeg`).
 
@@ -111,7 +123,7 @@ The full render takes a few minutes on a recent Mac with several workers.
 To check a single frame, run `make preview THEME=durable-ai-agents T=140`:
 it writes the frame at 140 s to `output/preview.png`.
 
-## Home page and standalone HTML players
+### Home page and standalone HTML players
 
 `make html` builds `output/index.html`, the home page, and one player per
 theme, `output/themes/<theme>/index.html`: `output/` mirrors `src/`, so the
@@ -144,27 +156,7 @@ position). A failed build prints its error and keeps the last good pages.
 The reload script is added to the served pages only, never to the built
 files.
 
-## Deployment
-
-The `.github/workflows/pages.yml` workflow publishes the home page and the
-players to GitHub Pages on every push to `main`, or on demand from the
-Actions tab (`workflow_dispatch`). It downloads the fonts
-(`scripts/fonts.sh`, the font step of `make setup`), runs `make html` with
-the runner's Python, then deploys `output/`. It builds no video and no
-subtitle file, so it needs neither Playwright nor ffmpeg.
-
-Pull requests to `main` run the same build without deploying: the pages are
-attached to the run as the `github-pages` artifact, a tar archive of
-`output/` that reviewers can download from the run's summary page.
-
-Before the first run, set the repository's Pages source to "GitHub
-Actions" in Settings > Pages.
-
-The site must be served at the root of a domain, a custom domain or a
-`<user>.github.io` repository: the player's home button links to `/`,
-which a project site under `<user>.github.io/<repository>/` breaks.
-
-## Editing
+### Editing
 
 Each scene lives in its own file in `src/themes/<theme>/scenes/`, so people
 editing different scenes never touch the same file.
@@ -200,7 +192,7 @@ editing different scenes never touch the same file.
 - Colors, fonts, styles: `:root` and the CSS in `src/styles.css`, constant `C`
   in `src/shared.js`.
 
-## Add a theme
+### Add a theme
 
 1. Copy a theme page, for example `src/themes/durable-execution/index.html`,
    to `src/themes/<theme>/index.html`; set its `<title>` and its list of
@@ -215,3 +207,35 @@ Videos have no maximum length; `make timeline THEME=<theme>` reports it.
 
 Conventions: see `CLAUDE.md`. Brand rules and decision history: see the
 project memory in `.claude/project-memory/`.
+
+### Deployment
+
+The `.github/workflows/pages.yml` workflow publishes the home page and the
+players to GitHub Pages on every push to `main`, or on demand from the
+Actions tab (`workflow_dispatch`). It downloads the fonts
+(`scripts/fonts.sh`, the font step of `make setup`), runs `make html` with
+the runner's Python, then deploys `output/`. It builds no video and no
+subtitle file, so it needs neither Playwright nor ffmpeg.
+
+Pull requests to `main` run the same build without deploying: the pages are
+attached to the run as the `github-pages` artifact, a tar archive of
+`output/` that reviewers can download from the run's summary page.
+
+Before the first run, set the repository's Pages source to "GitHub
+Actions" in Settings > Pages.
+
+The site must be served at the root of a domain, a custom domain or a
+`<user>.github.io` repository: the player's home button links to `/`,
+which a project site under `<user>.github.io/<repository>/` breaks.
+
+## Contributing
+
+Contributions are welcome: a fix, a clearer subtitle, a new scene or a
+whole new theme. Open an
+[issue](https://github.com/alexandreroman/temporal-shorts/issues) to
+report a problem or discuss an idea, or send a pull request to `main`.
+Each pull request builds the HTML pages and attaches them to the run (see
+[Deployment](#deployment)), so reviewers can watch the change.
+
+By contributing, you agree that your work is licensed under the
+[Apache License 2.0](LICENSE).
