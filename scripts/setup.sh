@@ -12,4 +12,7 @@ python3 -m venv .venv
 .venv/bin/python -m playwright install chromium
 
 bash scripts/fonts.sh
+# VENV_STAMP in the Makefile: while it is newer than requirements.txt and this script, the Playwright targets
+# do not rerun the setup.
+touch .venv/.requirements
 echo "Setup OK. Try: make timeline && make preview THEME=durable-ai-agents T=\"3 140\""

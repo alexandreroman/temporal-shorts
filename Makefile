@@ -8,6 +8,14 @@ PY := $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 require = @$(PY) -c "$(foreach module,$(1),import $(module);)" 2>/dev/null || \
 	{ echo "$(PY) cannot import $(1): run make setup first, or pass PY=<python with $(1)>" >&2; exit 1; }
 
+# A pin bump in requirements.txt leaves an older venv with a Playwright whose Chromium build is missing ("Executable
+# doesn't exist"). The stamp, written by setup.sh, stands for the venv packages: as an order-only prerequisite of the
+# Playwright targets, it reruns setup.sh when requirements.txt or setup.sh changes, without marking an up-to-date MP4
+# or SRT as stale. VENV expands to it only when the targets run on the venv: empty on the system python3, before
+# `make setup`, and with PY=<other python>, which must not trigger a setup.
+VENV_STAMP := .venv/.requirements
+VENV := $(if $(filter .venv/bin/python,$(PY)),$(VENV_STAMP))
+
 # One video per theme: src/themes/<theme>/index.html plays the scenes of its folder; src/index.html is the home page.
 ALL_THEMES := $(patsubst src/themes/%/index.html,%,$(wildcard src/themes/*/index.html))
 
@@ -66,7 +74,7 @@ ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$
 setup:            ## venv + Playwright Chromium + fonts
 	bash scripts/setup.sh
 
-timeline: $(FONTS)  ## print scenes and subtitle timings of every theme [THEME=<theme>]
+timeline: $(FONTS) | $(VENV)  ## print scenes and subtitle timings of every theme [THEME=<theme>]
 	$(call require,playwright)
 	@for theme in $(THEMES); do \
 		echo "== $$theme =="; \
@@ -74,7 +82,7 @@ timeline: $(FONTS)  ## print scenes and subtitle timings of every theme [THEME=<
 		echo; \
 	done
 
-preview: $(FONTS)   ## contact sheet of one theme: make preview THEME=<theme> T="12 40 136"
+preview: $(FONTS) | $(VENV)   ## contact sheet of one theme: make preview THEME=<theme> T="12 40 136"
 	$(if $(THEME),,$(error preview needs a theme: make preview THEME=<theme> T="...". Themes: $(ALL_THEMES)))
 	$(call require,playwright PIL)
 	$(PY) scripts/preview.py --theme $(THEME) $(T)
@@ -83,7 +91,7 @@ render: $(VIDEOS)       ## one MP4 per theme -> output/<theme>.mp4 [THEME=<theme
 
 srt: $(SUBTITLES)       ## one SRT per theme -> output/<theme>.srt [THEME=<theme>]
 
-social: $(FONTS)    ## social preview images, committed -> src/social.png, src/themes/<theme>/social.png
+social: $(FONTS) | $(VENV)    ## social preview images, committed -> src/social.png, src/themes/<theme>/social.png
 	$(call require,playwright PIL)
 	$(PY) scripts/social_images.py
 
@@ -101,11 +109,13 @@ clean:            ## delete every generated file: output/ (MP4, SRT, HTML, previ
 # (the stem).
 .SECONDEXPANSION:
 
-$(ALL_THEMES:%=output/%.mp4): output/%.mp4: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/render_video.py
+$(ALL_THEMES:%=output/%.mp4): output/%.mp4: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/render_video.py \
+                                            | $(VENV)
 	$(call require,playwright)
 	$(PY) scripts/render_video.py --theme $*
 
-$(ALL_THEMES:%=output/%.srt): output/%.srt: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/export_srt.py
+$(ALL_THEMES:%=output/%.srt): output/%.srt: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/export_srt.py \
+                                            | $(VENV)
 	$(call require,playwright)
 	$(PY) scripts/export_srt.py --theme $*
 
@@ -117,3 +127,8 @@ $(HTML): $(ALL_SOURCES) scripts/build_html.py
 $(FONTS): scripts/fonts.sh
 	bash scripts/fonts.sh
 	touch $@
+
+# setup.sh is idempotent: it upgrades the existing venv to the pins of requirements.txt, installs the matching
+# Chromium, then touches the stamp, so that `make setup` alone also refreshes it.
+$(VENV_STAMP): requirements.txt scripts/setup.sh
+	bash scripts/setup.sh

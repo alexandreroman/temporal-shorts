@@ -107,9 +107,12 @@ The targets run on `.venv/bin/python` once `make setup` has created it,
 otherwise on the system `python3`: enough for `html` and `serve`, which need
 only the standard library. `timeline`, `preview`, `render`, `srt` and
 `social` need Playwright and stop with a hint to run `make setup` when it
-is missing. Override the interpreter with `PY`, for example
-`make html PY=python`. Every target downloads the brand fonts first when
-they are missing.
+is missing. Once the virtualenv exists, these five targets rerun
+`make setup` by themselves when `requirements.txt` or `scripts/setup.sh`
+changes, so that a pinned Playwright upgrade also brings its Chromium build;
+this alone does not rebuild an up-to-date MP4 or SRT. Override the
+interpreter with `PY`, for example `make html PY=python`: no automatic setup
+then. Every target downloads the brand fonts first when they are missing.
 
 `timeline`, `render` and `srt` cover every theme; `timeline` prints each one
 under a `== <theme> ==` header. Set the `THEME` variable to restrict them to
