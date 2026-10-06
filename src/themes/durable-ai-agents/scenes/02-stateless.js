@@ -29,7 +29,7 @@
       });
       s.wipe = s.bub.querySelector('.wipe');
       Object.assign(s.wipe.style, { position: 'absolute', left: 0, top: 0, bottom: 0, width: '0%', background: C.uv });
-      s.bubT = E(root, 'memory wiped', 'lbl', { color: C.red });
+      s.bubT = E(root, 'not kept', 'lbl', { color: C.red });
       s.sl = tag(root, 'Stateless', 'violet big');
       const who = name => `<span style='color:#5B6475'>${name}</span>`;
       const history = `${who('YOU')}&nbsp;&nbsp;&nbsp;Hi, I'm Alex.<br>${who('MODEL')} Nice to meet you, Alex!<br>`

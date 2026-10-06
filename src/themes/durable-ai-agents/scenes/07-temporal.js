@@ -36,7 +36,7 @@
         after: 0.3,
       },
       {
-        text: "No token is paid twice, and the booking happens only once. "
+        text: "No saved LLM call is paid for twice, and no saved step runs again. "
           + "Plus retries, human waits and full visibility.",
         after: 0.7,
       },
@@ -75,10 +75,10 @@
         + '<div class="mono" style="font-size:26px;letter-spacing:.06em;color:var(--slate);margin-top:8px">'
         + '<span style="color:var(--neon)">4</span> vs 7 LLM calls</div></div></div>');
       const benefits = [
-        ['ticket', 'One booking only'], ['retry', 'Automatic retries'],
+        ['book', 'Saved steps reused'], ['retry', 'Automatic retries'],
         ['user', 'Waits for humans'], ['eye', 'Full visibility'],
       ];
-      s.ben = benefits.map(([i, l]) => iconTile(root, i, l, 330, 230, i === 'ticket' ? C.neon : C.ink));
+      s.ben = benefits.map(([icon, label], i) => iconTile(root, icon, label, 330, 230, i === 0 ? C.neon : C.ink));
       s.ben[0].style.borderColor = C.neon;
     },
     update(t, c, s) {

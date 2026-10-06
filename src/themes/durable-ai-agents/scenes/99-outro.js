@@ -4,9 +4,9 @@
   scene({
     pre: 0.4, post: 2.6,
     shift: [0, 51],
-    subs: [{ text: "Durable AI agents never lose their progress, or your budget." }],
+    subs: [{ text: "Durable AI agents keep their progress and your budget." }],
     build(root, s) {
-      s.t = makeEndCard(root, 'Durable AI agents', 'NEVER LOSE THEIR PROGRESS, OR YOUR BUDGET');
+      s.t = makeEndCard(root, 'Durable AI agents', 'KEEP THEIR PROGRESS AND YOUR BUDGET');
       s.llm = makeLLM(root, 120, '');
     },
     update(t, c, s) {
