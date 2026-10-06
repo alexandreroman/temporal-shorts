@@ -46,11 +46,12 @@ src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        animations) and theme-only helpers
 src/assets/            official Temporal logo (white horizontal lockup)
 src/fonts/             brand fonts (make setup), see src/fonts/README.md
-scripts/               setup, render, preview, timeline, SRT export, HTML
-                       build and server
+scripts/               setup, fonts, render, preview, timeline, SRT
+                       export, HTML build and server
 docs/<theme>/script.md full script: subtitles, timings, animations
 output/                generated .srt, .mp4 and standalone .html (the HTML
                        pages mirror src/: index.html, themes/<theme>/)
+.github/workflows/     pages.yml: deploys the HTML pages to GitHub Pages
 CLAUDE.md              conventions for Claude sessions working on the project
 ```
 
@@ -139,6 +140,26 @@ same position (a manual reload resumes too; each page keeps its own
 position). A failed build prints its error and keeps the last good pages.
 The reload script is added to the served pages only, never to the built
 files.
+
+## Deployment
+
+The `.github/workflows/pages.yml` workflow publishes the home page and the
+players to GitHub Pages on every push to `main`, or on demand from the
+Actions tab (`workflow_dispatch`). It downloads the fonts
+(`scripts/fonts.sh`, the font step of `make setup`), runs `make html` with
+the runner's Python, then deploys `output/`. It builds no video and no
+subtitle file, so it needs neither Playwright nor ffmpeg.
+
+Pull requests to `main` run the same build without deploying: the pages are
+attached to the run as the `github-pages` artifact, a tar archive of
+`output/` that reviewers can download from the run's summary page.
+
+Before the first run, set the repository's Pages source to "GitHub
+Actions" in Settings > Pages.
+
+The site must be served at the root of a domain, a custom domain or a
+`<user>.github.io` repository: the player's home button links to `/`,
+which a project site under `<user>.github.io/<repository>/` breaks.
 
 ## Editing
 

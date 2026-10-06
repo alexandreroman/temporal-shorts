@@ -39,6 +39,7 @@
 - [Durable AI Agents: chapter 7 story](references/project_durable-ai-agents-story.md) — history outside the app, saved before next step, replay
 - [Home page design](references/feedback_home-page.md) — equal stretched cards, count-agnostic grid, card order, no "silent"
 - [HTML links and viewing](references/project_html-links.md) — view pages via make serve only; no make open, no file:// fallback
+- [GitHub Pages deployment](references/project_github-pages.md) — HTML only, served at a domain root so the home link / holds
 - [No video durations in docs](references/feedback_no-durations-in-docs.md) — length is never written; `make timeline` is the source
 - [Player 0.5x speed](references/project_player-speed.md) — 0.5x stretches still moments only; ambient loops read G
 - [Human-in-the-Loop story](references/project_hitl-story.md) — Sam's laptop, Maria approves; ch3/ch4 mirror DAA ch7; Signal, replay, timers
