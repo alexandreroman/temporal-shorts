@@ -37,7 +37,7 @@
 - [Frame capture noise](references/project_frame-noise.md) — delta-2 specks, render-order diffs on curves only; whole-pixel resting elements
 - [Scene centering](references/project_scene-centering.md) — centered at (960, 522), measured shift; durable-ai-agents pans ch1, ch5, ch7
 - [Durable AI Agents: chapter 7 story](references/project_durable-ai-agents-story.md) — history outside the app, saved before next step, replay
-- [Home page design](references/feedback_home-page.md) — equal stretched cards, count-agnostic grid, card order, no "silent"
+- [Home page design](references/feedback_home-page.md) — lockup header, equal cards, count-agnostic grid, order, hover icons, no "silent"
 - [HTML links and viewing](references/project_html-links.md) — view pages via make serve only; no make open, no file:// fallback
 - [GitHub Pages deployment](references/project_github-pages.md) — HTML only, served at a domain root so the home link / holds
 - [No video durations in docs](references/feedback_no-durations-in-docs.md) — length is never written; `make timeline` is the source

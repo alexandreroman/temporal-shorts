@@ -24,6 +24,14 @@ The theme picker (`src/index.html`, `src/home.css`) follows these rules:
   descriptions) so the cards stay light.
 - Every video player has a home button, first in the control bar, back to
   the home page.
+- The header is only the "Temporal shorts" lockup, the page's `<h1>`: the
+  official logo image, untouched, then the word "shorts", lowercase, in the
+  Brand font and the slate gray `#64748B`, on the wordmark's baseline and at
+  its x-height, a bit more than a word space after it. No other title or
+  lead text.
+- Each theme icon plays a short thematic animation (~0.6 s) once on card
+  hover or focus, in pure CSS; the resting icon stays pixel-identical, and
+  `prefers-reduced-motion: reduce` turns the animations off.
 
 **Why:** the home page lists a growing set of videos; uniform, light cards
 keep it calm, and durations or "silent" wording add noise for viewers.

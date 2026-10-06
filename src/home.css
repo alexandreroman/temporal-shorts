@@ -12,11 +12,16 @@
   left:-10%;right:-10%;bottom:0;height:min(520px,60vh);
   background:radial-gradient(ellipse at 50% 100%,rgba(182,100,255,.20), rgba(68,76,231,.12) 40%, rgba(20,20,20,0) 70%);
 }
-.home main{position:relative;width:100%;max-width:1720px;padding:72px clamp(20px,4vw,60px) 96px}
-.home header{text-align:center;margin-bottom:64px}
-.home .logo{display:block;height:48px;margin:0 auto 48px}
-.home h1{margin:0;font-size:clamp(32px,4vw,52px);font-weight:400;line-height:1.04;letter-spacing:-1.4px}
-.home .lead{margin:20px 0 0;font-size:20px;line-height:1.4;color:var(--slate)}
+.home main{position:relative;width:100%;max-width:1720px;padding:36px clamp(20px,4vw,60px) 96px}
+.home header{text-align:center;margin-bottom:56px}
+/* "Temporal shorts" lockup: the logo, then "shorts" sized and placed after its wordmark, all scaled from --logo
+   (the logo height). In the logo's viewBox (410 units tall), the wordmark's baseline is 120.3 units above the
+   bottom and its x-height is 120.5 units; the Brand font has a .51 em x-height, so .576 x --logo matches it (its
+   .72 em ascenders then land within half a pixel of the "T" and "l"). "shorts" is grayed with #64748B, one step
+   darker than --slate in the same slate scale, and the logo's right margin widens the word space by ~40%, to set
+   it slightly apart from the logo. */
+.home .brand{--logo:48px;margin:0;font-size:calc(var(--logo) * .576);font-weight:400;line-height:1;color:#64748B}
+.home .brand img{height:var(--logo);margin-right:.12em;vertical-align:calc(var(--logo) * -120.3 / 410)}
 /* Every card gets the same width and height, whatever its text and however many cards there are: as many
    equal columns as fit (260 px at least), stretched to share the width, and every row as tall as the tallest
    one. With 4 cards: 4 columns from a ~1220 px window (1124 px of content), so a single row at 1280 and 1920 px,
@@ -49,13 +54,40 @@
 .home .theme-icon svg{
   width:57%;height:57%;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:square;stroke-linejoin:miter;
 }
+/* Icon animations, played once when the card is hovered or focused. Every keyframe ends on the resting look and
+   only fills backwards (hidden until its delay), so the icon is untouched at rest and after the animation.
+   --d staggers the parts of one icon, --t sets a part's duration. */
+.home .theme-icon :is(.appear,.twinkle,.pop){transform-box:fill-box;transform-origin:center}
+/* Durable Execution: the history fills in, row by row from the top, each step square appearing as its line and
+   the link to the next step are drawn. The lines are drawn by separate paths, swapped in for the single history
+   path during the .65 s fill (last delay + draw): split paths antialias slightly differently at rest.
+   Human-in-the-Loop: the approval check mark is drawn. */
+.home .history-steps{opacity:0}
+.home .theme:is(:hover,:focus-visible) .history{animation:icon-hidden .65s}
+.home .theme:is(:hover,:focus-visible) .history-steps{animation:icon-shown .65s}
+.home .theme:is(:hover,:focus-visible) .draw{animation:icon-draw var(--t,.2s) ease-out var(--d,0s) backwards}
+.home .theme:is(:hover,:focus-visible) .appear{animation:icon-appear .2s ease-out var(--d,0s) backwards}
+/* Durable AI Agents: the sparkle twinkles (shrinks and turns a quarter, which looks the same), then the plus pops. */
+.home .theme:is(:hover,:focus-visible) .twinkle{animation:icon-twinkle .45s ease-in-out}
+.home .theme:is(:hover,:focus-visible) .pop{animation:icon-pop .3s ease-out .3s}
+/* Agent Harness: the plug slides down into the shield and settles, as if plugged in. */
+.home .theme:is(:hover,:focus-visible) .plug{animation:icon-plug .55s ease-out backwards}
+/* pathLength="1" on the path: a dash as long as the path, slid from fully hidden to fully shown. */
+@keyframes icon-draw{from{stroke-dasharray:1 2;stroke-dashoffset:1}to{stroke-dasharray:1 2;stroke-dashoffset:0}}
+@keyframes icon-hidden{from,to{opacity:0}}
+@keyframes icon-shown{from,to{opacity:1}}
+@keyframes icon-appear{from{opacity:0;transform:scale(.4)}}
+@keyframes icon-twinkle{50%{transform:scale(.7) rotate(45deg)}to{transform:rotate(90deg)}}
+@keyframes icon-pop{50%{transform:scale(1.35)}}
+@keyframes icon-plug{from{opacity:0;transform:translateY(-4px)}40%{opacity:1}70%{transform:translateY(.6px)}}
 .home .theme-title{font-size:24px;line-height:1.2;letter-spacing:-.2px}
 .home .theme-text{font-size:16px;line-height:1.5;color:var(--slate)}
 @media (max-width:600px){
-  .home main{padding:48px 20px 64px}
+  .home main{padding:28px 20px 64px}
   .home header{margin-bottom:40px}
 }
 @media (prefers-reduced-motion:reduce){
   .home .theme,.home .theme-icon{transition:none}
   .home .theme:hover,.home .theme:focus-visible{transform:none}
+  .home .theme:is(:hover,:focus-visible) .theme-icon *{animation:none}
 }
