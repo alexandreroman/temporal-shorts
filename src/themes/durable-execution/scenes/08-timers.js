@@ -127,6 +127,7 @@
       {
         text: "The timer is saved in the Event History, so Worker restarts and deploys during the wait don't lose it.",
         after: 0.3,
+        stopLead: 0.25, // just before the timer's first tick, at c[1] - 0.2
       },
       {
         text: "On day 30, Temporal wakes the Workflow up: a Worker replays its history and runs the next line.",

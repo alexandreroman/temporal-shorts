@@ -169,8 +169,10 @@ its name and shortcut on hover. The home button goes back to the home page
 and 0.5x. At 0.5x, only the still moments between animations stretch, which
 leaves time to explain the screen; the animations keep their normal speed.
 Subtitles are shown by default; the CC button hides or shows them. Presenter
-mode hides the subtitles, plays at 0.5x and holds each scene just before it
-fades out; Space, Right, PageDown or the play button resumes. Shortcuts:
+mode hides the subtitles, plays at 0.5x and holds at each subtitle cue after
+the first of a scene, before that cue's animations begin, and again just
+before each scene fades out; Space, Right, PageDown or the play button
+resumes. Shortcuts:
 Space = play/pause, Left/Right or PageUp/PageDown = previous/next section
 (Left first restarts the current section if more than 2 s in), S = speed
 1x/0.5x, L = loop on/off, C = subtitles on/off, P = presenter mode on/off,
@@ -230,6 +232,12 @@ editing different scenes never touch the same file.
 - Animation: the scene's `update(t, c, s)` function, where `t` is the scene's
   local time and `c[i]` the moment subtitle `i` starts. Every animation is
   keyed to these cues.
+- Presenter stops: presenter mode holds at each cue but the first of a
+  scene. If a cue's animation starts a little before its cue, set
+  `stopLead` on that subtitle to move its stop that many seconds earlier,
+  just before the animation (`stopLead: 0.4` for an animation at
+  `c[1] - 0.35`). Only the live player reads it: rendered frames do not
+  change.
 - Centering: the scene's optional `shift`, `[dx, dy]` or `(t, c) => [dx, dy]`,
   translates the whole scene so its composition is centered at (960, 522),
   between the header and the subtitles. `pan(t, from, stops)` eases between

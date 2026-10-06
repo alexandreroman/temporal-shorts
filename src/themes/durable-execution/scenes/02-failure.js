@@ -54,6 +54,7 @@
       {
         text: "Here, the server crashes right after charging the card. The order is stuck: paid, but never shipped.",
         after: 0.8,
+        stopLead: 0.45, // the failure causes fade out from c[1] - 0.45
       },
       { text: "Restart it from the top, and the card is charged a second time. The customer pays twice.", after: 1.2 },
     ],

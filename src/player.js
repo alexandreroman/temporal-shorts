@@ -89,7 +89,8 @@ function startPlayer() {
   let subtitlesShown = true;
   let looping = false;
   let speed = 1;
-  // Presenter mode: no subtitles, 0.5x, and a hold before each scene fades out, until the presenter resumes.
+  // Presenter mode: no subtitles, 0.5x, and holds at each subtitle cue after a scene's first and before each
+  // scene fades out, until the presenter resumes.
   let presenter = false;
   // Held at a presenter stop: `playing` stays true, so the controls keep hiding, but the story time stands still.
   let held = false;
@@ -180,7 +181,7 @@ function startPlayer() {
 
   function togglePlay() {
     if (held) {
-      held = false; // keep playing: the scene fades out and the next one starts
+      held = false; // keep playing: the next cue's animations start, or the scene fades out
     } else if (playing) {
       playing = false;
     } else {
@@ -249,13 +250,23 @@ function startPlayer() {
     presenterButton.setAttribute('aria-pressed', String(presenter));
   }
 
-  // A presenter stop sits just before a scene's fade-out (see renderAt), so the hold shows the scene fully
-  // visible. Every scene has one, including the last.
+  // Presenter stops, sorted. Inside a scene, the player holds at the start of each subtitle cue but the
+  // first: animations are keyed to c[i] and still at rest there, so the hold shows the frame before the cue's
+  // animations begin. A cue whose animation starts a little before it sets `stopLead` (seconds) to move its
+  // stop that much earlier, strictly before that animation: a step such as `t >= at` already shows at `at`.
+  // Each scene, the last included, then holds just before its fade-out (see renderAt), so the hold shows it
+  // fully visible.
   const SCENE_FADE = 0.5;
+  const presenterStops = [];
+  for (const sc of scenes) {
+    for (const sub of sc.subs.slice(1)) presenterStops.push(sub.start - (sub.stopLead ?? 0));
+    presenterStops.push(sc.end - SCENE_FADE);
+  }
+  presenterStops.sort((a, b) => a - b);
 
   // The first stop in (from, to]: resuming from exactly a stop point moves on.
   function presenterStop(from, to) {
-    return scenes.map(sc => sc.end - SCENE_FADE).find(stop => from < stop && stop <= to);
+    return presenterStops.find(stop => from < stop && stop <= to);
   }
 
   function toggleFullscreen() {
