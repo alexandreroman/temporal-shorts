@@ -20,9 +20,15 @@ the visuals belong to each theme (last section).
 - `<meta name="description">` is one sentence ending with a period, word
   for word the card's `.theme-text`, about the topic.
 - Same page skeleton everywhere: `#stage` with `#sky`, `#band`, `#hdr`,
-  `#segs`, `#subw > #sub`; scripts `../../engine.js`, `../../shared.js`,
-  `shared.js`, scenes `00-intro.js` to `99-outro.js`, `../../player.js`,
-  `boot()`.
+  `#segs`, `#mark`, `#subw > #sub`; scripts `../../engine.js`,
+  `../../shared.js`, `shared.js`, scenes `00-intro.js` to `99-outro.js`,
+  `../../player.js`, `boot()`.
+- `#mark` is the official Temporal symbol
+  (`assets/temporal-symbol-light-cropped.svg`), 32x32, left edge on the
+  chapter number (x 80), vertically centered on the subtitle box; fully
+  visible across chapter scenes, fading in with the first and out with
+  the last, never on the intro or outro. See
+  [Official Temporal logo](reference_logo.md).
 - Home card: `a.theme` > `.theme-icon` (24x24 stroke SVG with a comment
   naming what it shows and its hover animation), `.theme-title`,
   `.theme-text`; see [Home page design](feedback_home-page.md).

@@ -24,7 +24,7 @@
 - [Temporal Web UI reference](references/reference_temporal-web-ui.md) — local dev server UI, dark-mode colors, real page layout
 - [Arrow heads in Safari](references/project_arrow-heads-safari.md) — engine `path()` fills heads with the line color, no context-stroke
 - [Temporal brand rules](references/project_brand.md) — colors, style, Noto Sans Mono + Aeonik stand-in, icons, sources
-- [Official Temporal logo](references/reference_logo.md) — official lockup only, cropped viewBox
+- [Official Temporal logo](references/reference_logo.md) — official lockup and symbol only, cropped viewBox; corner symbol on chapters
 - [Frame capture noise](references/project_frame-noise.md) — delta-2 specks, render-order diffs on curves only; whole-pixel resting elements
 - [Home page design](references/feedback_home-page.md) — lockup header, equal cards, count-agnostic grid, order, hover icons, no "silent"
 - [HTML links and viewing](references/project_html-links.md) — view pages via make serve only; no make open, no file:// fallback

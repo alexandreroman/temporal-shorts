@@ -272,15 +272,24 @@ function renderAt(t, g = t) {
     const so = P(t, st.start, 0.18, x => x) * (1 - P(t, st.end - 0.18, 0.18, x => x));
     sub.parentNode.style.opacity = so;
   } else sub.parentNode.style.opacity = 0;
-  // header
+  // header, which fades in and out with each chapter scene, and the Temporal symbol, which stays fully visible
+  // across chapter scene changes: it fades in with the first chapter scene and out with the last one, with the same
+  // fades as their scene roots
   const hdr = document.getElementById('hdr');
+  const mark = document.getElementById('mark');
   if (cur && cur.chapter) {
     const lt = t - cur.start;
-    const o = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4));
-    hdr.style.opacity = o;
+    hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4));
+    const chapterScenes = scenes.filter(sc => sc.chapter);
+    const firstStart = chapterScenes[0].start;
+    const lastEnd = chapterScenes[chapterScenes.length - 1].end;
+    mark.style.opacity = P(t, firstStart, 0.5) * (1 - P(t, lastEnd - 0.5, 0.5));
     hdr.querySelector('.num').textContent = String(cur.chapter).padStart(2, '0');
     hdr.querySelector('.ttl').textContent = CHAPTERS[cur.chapter - 1];
-  } else hdr.style.opacity = 0;
+  } else {
+    hdr.style.opacity = 0;
+    mark.style.opacity = 0;
+  }
   const segs = document.querySelectorAll('#segs i b');
   const chap = cur?.chapter || 0;
   segs.forEach((b, i) => {
