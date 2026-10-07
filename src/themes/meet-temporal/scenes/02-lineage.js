@@ -2,14 +2,14 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // A horizontal timeline: four milestones on a line, each with its year above and its tile below; the founder
-  // markers ride the line from one milestone to the next
+  // faces ride the line from one milestone to the next
   const LINE = { x0: 150, x1: 1770, y: 380 };
   const NODE_X = [330, 750, 1170, 1590];
   const TILE = { top: 440, w: 360, h: 300 };
   const TILE_Y = TILE.top + TILE.h / 2;
-  const YEAR_Y = LINE.y - 58;
-  const MARK_SIZE = 44;
-  const MARK_DX = [-26, 26]; // M left of its milestone, S right of it
+  const YEAR_Y = LINE.y - 70; // 18 px above the founders' faces
+  const MARK_SIZE = 56;
+  const MARK_DX = [-32, 32]; // Maxim left of the milestone, Samar right of it, 8 px apart
   // company (null for the Temporal logo), name, detail and year (null for none) of each milestone
   const MILESTONES = [
     { company: 'Amazon', name: 'Simple Workflow<br>Service', detail: 'Long-running processes', year: '2012' },
@@ -39,7 +39,7 @@
 
   scene({
     chapter: 2, title: 'From Amazon to Uber',
-    // laid out centered at (960, 522) on the free band
+    shift: [0, 7],
     subs: [
       {
         text: "At Amazon, they built Simple Workflow Service, launched in 2012, to run long processes reliably.",
@@ -79,7 +79,7 @@
       Object.assign(s.tiles[LAST].style, {
         borderColor: C.uv, background: '#1D1E3A', boxShadow: '0 0 48px rgba(68,76,231,.35)',
       });
-      s.marks = FOUNDERS.map(f => makeFounderMark(root, f.initial, MARK_SIZE));
+      s.marks = FOUNDERS.map(f => makeFace(root, f, MARK_SIZE));
     },
     update(t, c, s) {
       // when each milestone lights up: the founders reach it, then its tile rises

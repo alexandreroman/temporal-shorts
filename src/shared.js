@@ -193,6 +193,65 @@ const makeToken = root => E(root, '', '', {
   borderRadius: '5px',
 });
 
+// ---------- agentic loop: think, act, observe
+// Angle of each node on the loop circle, in degrees from the x axis (clockwise on screen)
+const LOOP_DEG = { think: -90, act: 30, observe: 150 };
+// The agentic loop on a circle of radius r centered on (cx, cy): THINK (the LLM orb) on top, ACT (neon play tile)
+// and OBSERVE (eye tile, UV border) below, slate arcs with arrow heads between them, the node labels, an
+// "Agentic loop" label in the middle and the neon token. The arcs go in svg. Returns the loop, with pos(deg), the
+// point at an angle on the circle, and arcPaths, the d of each arc (to draw them again in another color).
+function makeAgentLoop(root, svg, cx, cy, r = 220) {
+  const loop = { cx, cy, r };
+  loop.pos = deg => {
+    const a = deg * Math.PI / 180;
+    return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+  };
+  const arcD = (d0, d1) => {
+    const [x0, y0] = loop.pos(d0), [x1, y1] = loop.pos(d1);
+    return `M ${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1}`;
+  };
+  // each arc stops 27 degrees short of the nodes it joins
+  const { think, act, observe } = LOOP_DEG;
+  loop.arcPaths = [arcD(think + 27, act - 27), arcD(act + 27, observe - 27), arcD(observe + 27, think + 360 - 27)];
+  loop.arcs = loop.arcPaths.map(d => path(svg, d, C.slate, 2.5));
+  loop.think = makeLLM(root, 130, '');
+  loop.act = iconTile(root, 'play', '', 130, 130, C.neon); loop.act.style.borderColor = C.neon;
+  loop.observe = iconTile(root, 'eye', '', 130, 130, C.ink); loop.observe.style.borderColor = C.uv;
+  loop.labels = ['Think', 'Act', 'Observe'].map(text => E(root, text, 'lbl', { color: 'var(--ink)' }));
+  loop.center = E(root, 'Agentic<br>loop', 'lbl', {
+    textAlign: 'center', color: 'var(--ink)', fontSize: '24px', lineHeight: 1.4,
+  });
+  loop.token = makeToken(root);
+  return loop;
+}
+// Places the loop at time t: its nodes pop in from `a`, 0.2 s apart, then their labels and the arcs. Options:
+// - deg: angle of the token on the loop (null hides it); the node it passes swells by 12%, the LLM thinks near it
+// - centerAt: when the "Agentic loop" label fades in; centerO: its opacity (0 to 1), e.g. while another label shows
+// - o: opacity of the whole loop; arcO: opacity of the arcs; q: the LLM's question mark (0 to 1)
+// - dx, dy: offset of the nodes and labels (a shake)
+function placeAgentLoop(loop, t, a, opts = {}) {
+  const { deg = null, centerAt, centerO = 1, o = 1, arcO = 1, q = 0, dx = 0, dy = 0 } = opts;
+  const near = d => deg === null ? 0 : Math.max(0, 1 - Math.abs((((deg - d) % 360) + 540) % 360 - 180) / 30);
+  const nodes = [[loop.think.root, LOOP_DEG.think], [loop.act, LOOP_DEG.act], [loop.observe, LOOP_DEG.observe]];
+  nodes.forEach(([e, d], i) => {
+    const [x, y] = loop.pos(d), p = P(t, a + i * 0.2, 0.5, backOut);
+    place(e, x + dx, y + dy, p * (1 + 0.12 * near(d)), clamp(p * 2) * o);
+  });
+  llmState(loop.think, { think: near(LOOP_DEG.think) > 0.2 ? 1 : 0, look: 0.5, q });
+  // THINK's label sits left of the orb, the others under their tiles
+  const [tx, ty] = loop.pos(LOOP_DEG.think), [ax, ay] = loop.pos(LOOP_DEG.act), [ox, oy] = loop.pos(LOOP_DEG.observe);
+  const labelAt = [[tx - 130, ty], [ax, ay + 98], [ox, oy + 98]];
+  loop.labels.forEach((e, i) => place(e, labelAt[i][0] + dx, labelAt[i][1] + dy, 1, P(t, a + 0.3 + i * 0.2, 0.4) * o));
+  loop.arcs.forEach((arc, i) => draw(arc, P(t, a + 0.7 + i * 0.3, 0.45), arcO * o));
+  place(loop.center, loop.cx + dx, loop.cy + dy, 1, P(t, centerAt, 0.5) * centerO * o);
+  if (deg === null) {
+    place(loop.token, 0, 0, 1, 0);
+  } else {
+    const [x, y] = loop.pos(deg);
+    place(loop.token, x, y, 1, o);
+  }
+}
+
 // ---------- crash and takeover effects
 // screen shake around a crash, as [dx, dy]
 function shakeAt(t, crashAt) {

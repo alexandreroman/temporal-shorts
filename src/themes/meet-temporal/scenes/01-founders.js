@@ -19,9 +19,9 @@
   ];
   const TEAM = { x: 960, y: 810, w: 460, h: 130 };
   const AVATAR_SIZE = 104;
-  // founder markers inside the shared tile, right of its text: M, then S
-  const SLOT_X = [TEAM.x + 112, TEAM.x + 172]; // S 34 px from the right edge
-  const MARK_SIZE = 48;
+  // the founders' faces inside the shared tile, right of its text: Maxim, then Samar 34 px from the right edge
+  const MARK_SIZE = 56;
+  const SLOT_X = [TEAM.x + TEAM.w / 2 - 34 - MARK_SIZE * 1.5 - 8, TEAM.x + TEAM.w / 2 - 34 - MARK_SIZE / 2];
   // line of each step of a career: Samar's single step lines up with Maxim's last one
   const stepY = (career, k) => STEP_Y[STEP_Y.length - career.length + k];
 
@@ -100,7 +100,7 @@
         + '<div class="mono" style="font-size:32px;letter-spacing:.14em">SAME TEAM</div>'
         + '<div class="lbl" style="font-size:18px;margin-top:8px;padding-left:0">Amazon</div></div>',
         'tile', { width: TEAM.w + 'px', height: TEAM.h + 'px' });
-      s.marks = FOUNDERS.map(f => makeFounderMark(root, f.initial, MARK_SIZE));
+      s.marks = FOUNDERS.map(f => makeFace(root, f, MARK_SIZE));
     },
     update(t, c, s) {
       // when each step of a career shows, its arrow drawing just before; then both careers curve into the shared

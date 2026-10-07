@@ -1,11 +1,10 @@
 // ===================== 4. WHY IT MATTERS FOR AI
 // The block keeps every name declared in this file local to this scene.
 {
-  // The agent loop on the left (LLM on top, tool and person below), the bill and the progress on the right; the
-  // AI companies take the place of the bill once the loop is durable
-  const LOOP = { cx: 560, cy: 540, r: 220 };
-  const NODE_DEG = { llm: -90, tool: 30, person: 150 };
-  const NODE_SIZE = 130;
+  // The agentic loop on the left (think, act, observe, as in durable-ai-agents), the bill and the progress on the
+  // right; the AI companies take the place of the bill once the loop is durable
+  const LOOP = { cx: 560, cy: 540 };
+  const WAIT_Y = LOOP.cy + 275; // the "waits for a person" tag, under the loop
   const PANEL = { x: 560, y: 520, w: 800, h: 740 };
   const SIDE = { x: 1460, w: 560 };
   const BILL_Y = 380, PROGRESS_Y = 610;
@@ -13,14 +12,6 @@
   const TRACK_W = 370; // progress bar track, in px: the fill rests on whole pixels
   const COMPANIES = ['OpenAI · Codex', 'Cursor', 'Lovable', 'Replit'];
   const COMPANY = { y0: 370, gap: 80, w: SIDE.w };
-  const loopPos = deg => {
-    const a = deg * Math.PI / 180;
-    return [LOOP.cx + Math.cos(a) * LOOP.r, LOOP.cy + Math.sin(a) * LOOP.r];
-  };
-  const arcD = (d0, d1) => {
-    const [x0, y0] = loopPos(d0), [x1, y1] = loopPos(d1);
-    return `M ${x0} ${y0} A ${LOOP.r} ${LOOP.r} 0 0 1 ${x1} ${y1}`;
-  };
 
   // Progress tile: a label, a bar that fills step by step and an "n / 6" count
   function makeProgress(root) {
@@ -42,7 +33,7 @@
   scene({
     chapter: 4, title: 'Why it matters for AI',
     // the loop and the bill, then the durable loop and the companies: the pan runs as the bill fades out
-    shift: (t, c) => pan(t, [-62, 19], [[c[2] + 0.2, 10, 0]], 0.6),
+    shift: (t, c) => pan(t, [-62, 14], [[c[2] + 0.2, 10, 0]], 0.6),
     subs: [
       {
         text: "AI agents are long processes too: many LLM calls, tools to run, and waits for a person.",
@@ -55,25 +46,16 @@
       { text: "OpenAI built Codex on Temporal, and Cursor, Lovable and Replit rely on it too.", after: 1.2 },
     ],
     build(root, s) {
-      s.svg = svgLayer(root);
-      // built first, so the loop sits on top of it
+      // built first, so the loop and its arcs sit on top of it
       s.temporal = makeTemporalPanel(root, PANEL.w, PANEL.h, {
         logoAt: [24, 20], noteAt: [24, 25], font: 18, note: 'Durable agent',
       });
-      const gap = 30;
-      const ends = [[NODE_DEG.llm, NODE_DEG.tool], [NODE_DEG.tool, NODE_DEG.person], [NODE_DEG.person, 270]];
-      s.arcs = ends.map(([d0, d1]) => path(s.svg, arcD(d0 + gap, d1 - gap), C.slate, 2.5));
-      s.redArcs = ends.map(([d0, d1]) => path(s.svg, arcD(d0 + gap, d1 - gap), C.red, 2.5));
-      // built before the nodes, so the token passes under them
-      s.token = makeToken(root);
-      s.llm = makeLLM(root, 150);
-      s.tool = iconTile(root, 'code', '', NODE_SIZE, NODE_SIZE, C.neon);
-      s.tool.style.borderColor = C.neon;
-      s.person = makeAvatar(root, '', NODE_SIZE);
-      s.toolL = E(root, 'Tool', 'lbl');
-      s.personL = E(root, 'Person', 'lbl');
-      s.center = E(root, 'Agent<br>loop', 'lbl', {
-        textAlign: 'center', color: 'var(--ink)', fontSize: '24px', lineHeight: 1.4,
+      s.svg = svgLayer(root);
+      s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy);
+      // the same arcs in red, shown over the slate ones while the agent has crashed
+      s.redArcs = s.loop.arcPaths.map(d => path(s.svg, d, C.red, 2.5));
+      s.wait = E(root, `${ICON('user', 22, C.violet, 2)}<span>Waits for a person</span>`, 'pill violet', {
+        display: 'flex', alignItems: 'center', gap: '10px',
       });
       s.over = E(root, 'Start<br>over', 'lbl', {
         textAlign: 'center', color: 'var(--red)', fontSize: '24px', lineHeight: 1.4,
@@ -92,7 +74,7 @@
       });
     },
     update(t, c, s) {
-      // each turn runs the loop once, LLM -> tool -> person -> LLM, and bills one LLM call as it starts
+      // each turn runs the loop once, think -> act -> observe, and bills one LLM call as it starts
       const firstRun = [c[0] + 1.6, c[0] + 3.8, c[1] + 0.2, c[1] + 2.4];
       const crashAt = c[1] + 3.5;
       const restart = c[1] + 4.6; // the agent starts over, from step 1
@@ -108,29 +90,18 @@
       turnStarts.forEach(a => {
         if (t >= a && t < a + TURN && !crashed) deg = -90 + 360 * ease((t - a) / TURN);
       });
-      const near = d => deg === null ? 0 : Math.max(0, 1 - Math.abs((((deg - d) % 360) + 540) % 360 - 180) / 30);
 
-      const pL = P(t, c[0] + 0.1, 0.5, backOut), pT = P(t, c[0] + 0.3, 0.5, backOut);
-      const pP = P(t, c[0] + 0.5, 0.5, backOut);
-      const [lx, ly] = loopPos(NODE_DEG.llm), [tx, ty] = loopPos(NODE_DEG.tool), [px, py] = loopPos(NODE_DEG.person);
-      place(s.llm.root, lx + sx, ly + sy, pL * (1 + 0.1 * near(NODE_DEG.llm)), clamp(pL * 2));
-      llmState(s.llm, { think: near(NODE_DEG.llm) > 0.2 ? 1 : 0, q: crashed ? P(t, crashAt + 0.3, 0.3) : 0 });
-      place(s.tool, tx + sx, ty + sy, pT * (1 + 0.1 * near(NODE_DEG.tool)), clamp(pT * 2));
-      place(s.person, px + sx, py + sy, pP * (1 + 0.1 * near(NODE_DEG.person)), clamp(pP * 2));
-      place(s.toolL, tx + sx, ty + 98 + sy, 1, P(t, c[0] + 0.6, 0.4));
-      place(s.personL, px + sx, py + 98 + sy, 1, P(t, c[0] + 0.8, 0.4));
       const red = win(t, crashAt, restart, 0.25);
-      s.arcs.forEach((a, i) => draw(a, P(t, c[0] + 0.8 + i * 0.25, 0.45), 1 - red));
+      placeAgentLoop(s.loop, t, c[0] + 0.1, {
+        deg, centerAt: c[0] + 1.2, centerO: 1 - red, arcO: 1 - red, q: crashed ? P(t, crashAt + 0.3, 0.3) : 0,
+        dx: sx, dy: sy,
+      });
       s.redArcs.forEach(a => draw(a, 1, red));
       s.svg.style.transform = `translate(${sx}px,${sy}px)`;
-      place(s.center, LOOP.cx + sx, LOOP.cy + sy, 1, P(t, c[0] + 1.2, 0.5) * (1 - red));
       place(s.over, LOOP.cx + sx, LOOP.cy + sy, 1, red);
-      if (deg === null) {
-        place(s.token, 0, 0, 1, 0);
-      } else {
-        const [x, y] = loopPos(deg);
-        place(s.token, x, y, 1, 1);
-      }
+      // the agent also waits for a person: said in the first subtitle
+      const wp = P(t, c[0] + 4.2, 0.45, backOut);
+      place(s.wait, LOOP.cx, WAIT_Y, wp, clamp(wp * 2) * (1 - P(t, c[1] + 0.2, 0.4)));
 
       // the bill keeps adding up: the calls made again after the crash are paid a second time
       const calls = turnStarts.slice(0, firstRun.length + 1).filter(a => t >= a).length;

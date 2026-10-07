@@ -15,11 +15,11 @@ const PHOTO = {
   w: 900, h: 929,
 };
 
-// The two founders, in the order the scenes introduce them; `initial` marks them on the timelines, `face` is the
-// center of the face in the photo (Samar stands on the left, Maxim on the right)
+// The two founders, in the order the scenes introduce them; `face` is the center of the face in the photo (Samar
+// stands on the left, Maxim on the right)
 const FOUNDERS = [
-  { name: 'Maxim Fateev', initial: 'M', role: 'Co-founder, CTO', face: { x: 638, y: 165 } },
-  { name: 'Samar Abbas', initial: 'S', role: 'Co-founder, CEO', face: { x: 230, y: 140 } },
+  { name: 'Maxim Fateev', role: 'Co-founder, CTO', face: { x: 638, y: 165 } },
+  { name: 'Samar Abbas', role: 'Co-founder, CEO', face: { x: 230, y: 140 } },
 ];
 // Side of the square of the photo, around a face, that a face avatar shows
 const FACE_CROP = 240;
@@ -32,14 +32,5 @@ function makeFace(p, founder, size) {
     width: size + 'px', height: size + 'px', borderRadius: '50%', border: '2px solid ' + C.violet,
     backgroundImage: `url("${PHOTO.url}")`, backgroundSize: `${Math.round(PHOTO.w * k)}px auto`,
     backgroundPosition: `${x}px ${y}px`, backgroundOrigin: 'border-box', backgroundRepeat: 'no-repeat',
-  });
-}
-
-// Small round marker of a founder: the initial in a violet ring, size px wide; place() centers it
-function makeFounderMark(p, initial, size) {
-  return E(p, initial, '', {
-    width: size + 'px', height: size + 'px', borderRadius: '50%', border: '2px solid ' + C.violet,
-    background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: Math.round(size * 0.45) + 'px', fontWeight: 700, lineHeight: 1,
   });
 }

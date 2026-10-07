@@ -70,24 +70,25 @@ company, never by model.
   that is where they met.
   - Visuals: Under Samar's card, a long arrow to the tile MICROSOFT, bottom
     aligned with MESSAGING PLATFORM; both careers curve into a shared tile
-    between the columns, SAME TEAM (AMAZON); the M and S markers land in it
-    and it turns violet.
+    between the columns, SAME TEAM (AMAZON); the two founders' faces land in
+    it and it turns violet.
 
 ## 02 From Amazon to Uber
 
 - **0:29** At Amazon, they built Simple Workflow Service, launched in 2012,
   to run long processes reliably.
-  - Visuals: A horizontal timeline with four milestones; the M and S
-    markers ride the line, the travelled part violet. The first milestone
+  - Visuals: A horizontal timeline with four milestones; the founders'
+    faces, cropped from the photo, ride the line (Maxim left, Samar right),
+    the travelled part violet. The first milestone
     lights up: 2012, tile AMAZON / "Simple Workflow Service" /
     LONG-RUNNING PROCESSES.
 - **0:37** Back at Microsoft, Samar co-created the Durable Task Framework,
   the base of Azure Durable Functions.
-  - Visuals: S travels to the second milestone (no year): tile MICROSOFT /
+  - Visuals: Samar travels to the second milestone (no year): tile MICROSOFT /
     "Durable Task Framework" / AZURE DURABLE FUNCTIONS.
 - **0:44** In 2015, both joined Uber and built Cadence. Open source since
   2017, it ran Uber Eats orders.
-  - Visuals: M and S meet at the third milestone: 2017, tile UBER /
+  - Visuals: Maxim and Samar meet at the third milestone: 2017, tile UBER /
     "Cadence" / OPEN SOURCE, UBER EATS.
 - **0:51** In October 2019, they left Uber to found Temporal: Cadence's
   successor, open source under MIT.
@@ -117,10 +118,11 @@ company, never by model.
 
 - **1:16** AI agents are long processes too: many LLM calls, tools to run,
   and waits for a person.
-  - Visuals: An agent loop (LLM orb on top, TOOL tile and PERSON avatar
-    below, "AGENT LOOP" in the middle) with a neon token running round it;
-    on the right LLM CALLS BILLED counts each turn and AGENT PROGRESS fills
-    one step per turn (out of 6).
+  - Visuals: The agentic loop of Durable AI Agents: THINK (the LLM orb) on
+    top, ACT (neon play tile) and OBSERVE (eye tile) below, "AGENTIC LOOP" in
+    the middle, a neon token running round it; on the right LLM CALLS BILLED
+    counts each turn and AGENT PROGRESS fills one step per turn (out of 6); a
+    violet "WAITS FOR A PERSON" tag shows under the loop.
 - **1:23** Every LLM call costs time and money. Without Durable Execution,
   a crash means starting over.
   - Visuals: The bill stands out; after 3 steps, a crash: shake, red
