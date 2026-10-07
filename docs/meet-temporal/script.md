@@ -11,13 +11,14 @@ animation shows.
 ## Audience and goal
 
 Someone who has never heard of Temporal learns who created it, where it
-comes from, what it does, where the company stands today and why it
-matters for AI. The video follows the founders, Maxim Fateev and Samar
+comes from, what it does, why it matters for AI and where the company
+stands today. The video follows the founders, Maxim Fateev and Samar
 Abbas, from their careers at Microsoft and Amazon (careers only, no
 countries of origin) through the lineage Amazon Simple Workflow Service,
 Microsoft Durable Task Framework, Uber Cadence, then Temporal, explains
 Durable Execution with the order of the series (ORDER, CHARGE, SHIP,
-EMAIL), and ends on the company's figures and its AI customers.
+EMAIL), shows why AI agents need it and which AI companies build on it,
+and ends on the company's figures.
 
 The format is a short company introduction, not an explainer: there is no
 "What you get" recap chapter, and the outro sums up. Companies are named
@@ -112,43 +113,43 @@ company, never by model.
     come back checked; it resumes at step 3: rows 3 "Package shipped" and 4
     "Receipt emailed" are SAVED, every tile checked, ORDER COMPLETE.
 
-## 04 Temporal today
+## 04 Why it matters for AI
 
-- **1:16** Temporal 1.0 shipped in 2020, then Temporal Cloud, a managed
-  service. The code stays open source.
-  - Visuals: Three tiles across the top: "Temporal 1.0" (2020), an arrow
-    to "Temporal Cloud" (MANAGED SERVICE), then "Open source" (MIT
-    LICENSE).
-- **1:23** Today, more than 4,300 companies pay for it, including Netflix,
-  Snap, NVIDIA, Salesforce and Shopify.
-  - Visuals: PAYING CUSTOMERS tile, "4,300+", then the names as mono pills
-    one by one: NETFLIX, SNAP, NVIDIA, SALESFORCE, SHOPIFY.
-- **1:31** In September 2026, investors valued Temporal at $12.55 billion.
-  The team has doubled in a year.
-  - Visuals: VALUATION chart, bars proportional to the value, growing one
-    by one: 2022 $1.5B, 2025 $1.72B, FEB 2026 $5B, SEP 2026 $12.55B (the
-    last one violet to UV, its value larger); then the EMPLOYEES tile
-    "570", DOUBLED IN A YEAR.
-
-## 05 Why it matters for AI
-
-- **1:40** AI agents are long processes too: many LLM calls, tools to run,
+- **1:16** AI agents are long processes too: many LLM calls, tools to run,
   and waits for a person.
   - Visuals: An agent loop (LLM orb on top, TOOL tile and PERSON avatar
     below, "AGENT LOOP" in the middle) with a neon token running round it;
     on the right LLM CALLS BILLED counts each turn and AGENT PROGRESS fills
     one step per turn (out of 6).
-- **1:46** Every LLM call costs time and money. Without Durable Execution,
+- **1:23** Every LLM call costs time and money. Without Durable Execution,
   a crash means starting over.
   - Visuals: The bill stands out; after 3 steps, a crash: shake, red
     flash, red loop, "START OVER", the LLM puzzled, AGENT PROGRESS drains
     to 0 / 6, PROGRESS LOST. The loop restarts from step 1 and the bill
     keeps adding: 5, "+1 PAID AGAIN".
-- **1:54** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
+- **1:30** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
   rely on it too.
   - Visuals: The bill and the progress fade out; a TEMPORAL panel ("DURABLE
     AGENT") frames the loop, which runs again; BUILT ON TEMPORAL with pills
     OPENAI · CODEX, then CURSOR, LOVABLE, REPLIT.
+
+## 05 Temporal today
+
+- **1:38** Temporal 1.0 shipped in 2020, then Temporal Cloud, a managed
+  service. The code stays open source.
+  - Visuals: Three tiles across the top: "Temporal 1.0" (2020), an arrow
+    to "Temporal Cloud" (MANAGED SERVICE), then "Open source" (MIT
+    LICENSE).
+- **1:45** Today, more than 4,300 companies pay for it, including Netflix,
+  Snap, NVIDIA, Salesforce and Shopify.
+  - Visuals: PAYING CUSTOMERS tile, "4,300+", then the names as mono pills
+    one by one: NETFLIX, SNAP, NVIDIA, SALESFORCE, SHOPIFY.
+- **1:53** In September 2026, investors valued Temporal at $12.55 billion.
+  The team has doubled in a year.
+  - Visuals: VALUATION chart, bars proportional to the value, growing one
+    by one: 2022 $1.5B, 2025 $1.72B, FEB 2026 $5B, SEP 2026 $12.55B (the
+    last one violet to UV, its value larger); then the EMPLOYEES tile
+    "570", DOUBLED IN A YEAR.
 
 ## Outro
 

@@ -206,7 +206,8 @@ CLAUDE.md; a section below and the card order in
   degrees, customers named only by investors, a Cloud GA date).
 - No "What you get" recap: a short company introduction, the outro sums
   up. Five chapters: Two engineers, From Amazon to Uber, What Temporal
-  does, Temporal today, Why it matters for AI.
+  does, Why it matters for AI (right after the Durable Execution idea it
+  builds on), Temporal today.
 - Founders are told by their careers only, never by country of origin:
   Maxim Fateev (Amazon in Seattle from 2002, tech lead of its messaging
   platform; co-founder, CTO) and Samar Abbas (Microsoft, then Maxim's SWF
@@ -214,11 +215,11 @@ CLAUDE.md; a section below and the card order in
   Service (Amazon, 2012), Durable Task Framework (Microsoft, base of Azure
   Durable Functions), Cadence (Uber, open source 2017), Temporal (October
   2019, MIT). Third-party companies appear as text, never as logos.
-- Ch4 figures are dated (Series E, September 2026: $12.55B valuation,
+- Ch5 figures are dated (Series E, September 2026: $12.55B valuation,
   4,300+ paying customers, 570 employees): refresh them with each funding
-  announcement. Ch5 names OpenAI (Codex), Cursor, Lovable, Replit.
+  announcement. Ch4 names OpenAI (Codex), Cursor, Lovable, Replit.
 - Ch3 is the short series arc: steps run strictly one after the other,
-  each saved before the next starts. Pan: ch5.
+  each saved before the next starts. Pan: ch4.
 
 ### durable-execution
 
