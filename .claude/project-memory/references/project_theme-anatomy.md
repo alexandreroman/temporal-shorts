@@ -25,10 +25,10 @@ the visuals belong to each theme (last section).
   `../../player.js`, `boot()`.
 - `#mark` is the official Temporal symbol
   (`assets/temporal-symbol-light-cropped.svg`), 32x32, left edge on the
-  chapter number (x 80), vertically centered on the subtitle box; fully
-  visible across chapter scenes, fading in with the first and out with
-  the last, never on the intro or outro. See
-  [Official Temporal logo](reference_logo.md).
+  chapter number (x 80), vertically centered on the subtitle box; fixed
+  position, also in the live player; fully visible across chapter scenes,
+  fading in with the first and out with the last, never on the intro or
+  outro. See [Official Temporal logo](reference_logo.md).
 - Home card: `a.theme` > `.theme-icon` (24x24 stroke SVG with a comment
   naming what it shows and its hover animation), `.theme-title`,
   `.theme-text`; see [Home page design](feedback_home-page.md).
