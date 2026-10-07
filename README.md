@@ -8,6 +8,11 @@ subtitles) about [Temporal](https://temporal.io).
 
 Each video is a theme:
 
+- **Meet Temporal** (`meet-temporal`): for everyone who has never heard of
+  Temporal, who created it, Maxim Fateev and Samar Abbas, and where they
+  come from; its lineage, from Amazon Simple Workflow Service to the
+  Microsoft Durable Task Framework, Uber Cadence and Temporal, founded in
+  October 2019; where Temporal stands today, and why it matters for AI.
 - **Introduction to Durable Execution** (`durable-execution`): for
   everyone, the principles of Durable Execution with Temporal Workflows:
   [Workflows](https://docs.temporal.io/workflows),

@@ -3,6 +3,11 @@
 Temporal Shorts: short silent explainer videos about Temporal, each rendered
 from a deterministic HTML animation. Each video is a theme:
 
+- `meet-temporal`: Meet Temporal, a video that introduces Temporal to
+  everyone who has never heard of it: its creators, Maxim Fateev and Samar
+  Abbas, its lineage from Amazon Simple Workflow Service through the
+  Microsoft Durable Task Framework and Uber Cadence, Temporal today, and
+  why it matters for AI
 - `durable-execution`: Introduction to Durable Execution, a video that
   shows everyone the principles of Durable Execution with Temporal
   Workflows

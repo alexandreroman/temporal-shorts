@@ -77,6 +77,7 @@ the visuals belong to each theme (last section).
     call ("AI agent approvals", "chatbots with human approval").
   - The user picks the use cases: propose 2 or 3 sets of 4 tiles, with
     examples, before building the chapter.
+- meet-temporal has neither chapter (see its section below).
 - Outro: `makeEndCard(root, title, tagline, { pill })` in every theme,
   same sizes everywhere: the theme name as title, cased as on its home
   card ("Durable AI Agents"), a violet uppercase tagline stating the
@@ -195,6 +196,28 @@ CLAUDE.md; a section below and the card order in
 [Home page design](feedback_home-page.md).
 
 ## Per theme
+
+### meet-temporal
+
+- For people who have never heard of Temporal, about 2 minutes: the
+  founders and where they come from, the lineage, what Temporal does,
+  Temporal today, why it matters for AI. Every fact is sourced
+  (`### Sources` in `script.md`); unsourced claims stay out (founders'
+  degrees, customers named only by investors, a Cloud GA date).
+- No "What you get" recap: a short company introduction, the outro sums
+  up. Five chapters: Two engineers, From Amazon to Uber, What Temporal
+  does, Temporal today, Why it matters for AI.
+- Founders: Maxim Fateev (Soviet Union, Brazil, Amazon in Seattle from
+  2002; co-founder, CTO) and Samar Abbas (Pakistan, Microsoft, then
+  Maxim's SWF team at Amazon; co-founder, CEO). Lineage: Simple Workflow
+  Service (Amazon, 2012), Durable Task Framework (Microsoft, base of Azure
+  Durable Functions), Cadence (Uber, open source 2017), Temporal (October
+  2019, MIT). Third-party companies appear as text, never as logos.
+- Ch4 figures are dated (Series E, September 2026: $12.55B valuation,
+  4,300+ paying customers, 570 employees): refresh them with each funding
+  announcement. Ch5 names OpenAI (Codex), Cursor, Lovable, Replit.
+- Ch3 is the short series arc: steps run strictly one after the other,
+  each saved before the next starts. Pan: ch5.
 
 ### durable-execution
 

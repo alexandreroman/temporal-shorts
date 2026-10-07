@@ -10,6 +10,15 @@ const C = {
 // live in subfolders. Inlined in a built page, the script has no src and the path is already a data: URI.
 const LOGO = new URL('assets/temporal-logo-horizontal-light-cropped.svg',
   document.currentScript.src || document.baseURI).href;
+// Official Temporal symbol alone (white), resolved like LOGO
+const SYMBOL = new URL('assets/temporal-symbol-light-cropped.svg',
+  document.currentScript.src || document.baseURI).href;
+// Extra stroke icons used by two or more themes (24 grid), in the hand-drawn style of engine.js
+Object.assign(ICONS, {
+  cart: '<path d="M2 4h3l2.5 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
+  card: '<rect x="2.5" y="5" width="19" height="14"/><path d="M2.5 9.5h19M6 15h5"/>',
+  box: '<path d="M12 3l8.5 4.5v9L12 21l-8.5-4.5v-9z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9M7.8 5.3l8.5 4.5"/>',
+});
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
 // icon + label centred in the tile (label null for an icon alone); padding-left offsets the trailing
 // letter-spacing. Options: size and stroke of the icon, font of the label and gap above it; a tile over 130 px
@@ -84,6 +93,17 @@ function makeEndCard(root, title, tagline, opts = {}) {
   }
   html += `<img src="${LOGO}" style="height:70px;display:block;margin:${logoGap}px auto 0">`;
   return E(root, html, '', { textAlign: 'center' });
+}
+// Round avatar of a person: a person icon in a circle of size px with a ring, and a label under it (null or ''
+// for none); place() centers the circle
+function makeAvatar(p, label, size, ring = C.violet) {
+  return E(p,
+    `<div style="width:${size}px;height:${size}px;border-radius:50%;border:2px solid ${ring};`
+    + 'background:var(--surface);display:flex;align-items:center;justify-content:center">'
+    + `${ICON('user', Math.round(size / 2), C.ink, 1.6)}</div>`
+    + (label ? `<div class="lbl" style="position:absolute;left:50%;top:calc(100% + 16px);transform:translateX(-50%);`
+      + `color:var(--ink)">${label}</div>` : ''),
+    '', { width: size + 'px', height: size + 'px' });
 }
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
 function rise(e, x, y, p, d = 24) {
