@@ -133,18 +133,20 @@ def attribute_value(html, source, pattern, what):
 
 
 def add_social_tags(html, source, site):
-    """Add the canonical link and the link preview tags of social networks before </head>; none without a site.
+    """Add the canonical link and the link preview tags of social networks after the description; none without a site.
 
-    The page is checked either way, so that a page missing its title or description fails on pull requests too.
+    The tags go at the top of <head>, ahead of the inlined fonts and scripts: link preview crawlers, such as Slack's,
+    read only the start of a page. The page is checked either way, so that a page missing its title or description
+    fails on pull requests too.
     """
-    if "</head>" not in html:
-        sys.exit(f"ERROR: {source} has no </head>")
     title = attribute_value(html, source, TITLE_TAG, "<title>")
     description = attribute_value(html, source, DESCRIPTION_TAG, '<meta name="description" content="...">')
     if not site:
         return html
     url = public_url(source, site)
-    tags = f"""<link rel="canonical" href="{url}">
+    # Starts with a line break and ends without one, to sit on its own lines right after the description.
+    tags = f"""
+<link rel="canonical" href="{url}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{SITE_NAME}">
 <meta property="og:title" content="{title}">
@@ -154,9 +156,9 @@ def add_social_tags(html, source, site):
 <meta property="og:image:width" content="{SOCIAL_IMAGE_WIDTH}">
 <meta property="og:image:height" content="{SOCIAL_IMAGE_HEIGHT}">
 <meta property="og:image:alt" content="{title}">
-<meta name="twitter:card" content="summary_large_image">
-"""
-    return html.replace("</head>", tags + "</head>", 1)
+<meta name="twitter:card" content="summary_large_image">"""
+    description_end = DESCRIPTION_TAG.search(html).end()
+    return html[:description_end] + tags + html[description_end:]
 
 
 def copy_social_image(source, out):
@@ -175,6 +177,17 @@ def check_self_contained(html):
             sys.exit(f"ERROR: the output still references {marker!r}")
 
 
+def check_social_tags_first(html):
+    """Exit unless og:image comes before the first inline style or script, within reach of link preview crawlers."""
+    image_tag = html.find('<meta property="og:image"')
+    if image_tag == -1:
+        sys.exit("ERROR: the output has no og:image tag")
+    for block in ("<style", "<script"):
+        block_start = html.find(block)
+        if block_start != -1 and block_start < image_tag:
+            sys.exit(f"ERROR: the og:image tag comes after the first {block}: link preview crawlers would miss it")
+
+
 def build_page(source, site):
     """Write the self-contained build of a page of src/ to the same relative path under output/."""
     html = read_source(source)
@@ -183,6 +196,8 @@ def build_page(source, site):
     html = inline_stylesheets(html, source.parent)
     html = inline_scripts(html, source.parent)
     check_self_contained(html)
+    if site:
+        check_social_tags_first(html)
 
     out = built_page(source)
     out.parent.mkdir(parents=True, exist_ok=True)

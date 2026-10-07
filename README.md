@@ -219,7 +219,10 @@ on social networks: Open Graph (`og:title`, `og:description`, `og:url`,
 `og:image` and its size), an X `summary_large_image` card and a canonical
 link. The title and description come from the page's `<title>` and
 `<meta name="description">`; the build stops if either is missing, with or
-without the tags.
+without the tags. The tags sit at the top of `<head>`, right after the
+description, ahead of the inlined fonts and scripts: crawlers such as
+Slack's read only the start of a page, and the build stops if `og:image`
+comes after the first inline style or script.
 
 These tags need the absolute root URL of the site, which `make html` reads
 from the `SITE_URL` variable. The Pages workflow sets it to the URL given
