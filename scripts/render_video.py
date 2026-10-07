@@ -1,7 +1,9 @@
-"""Render a theme page (src/themes/<theme>/index.html) frame by frame into an MP4 (no audio, subtitles burned in).
+"""Render a theme page (src/themes/<theme>/index.html) frame by frame into an MP4 (no audio, subtitles burned in
+unless --no-subtitles is set).
 
 Usage:
   python scripts/render_video.py --theme durable-ai-agents   # full video, 30 fps -> output/durable-ai-agents.mp4
+  python scripts/render_video.py --theme durable-ai-agents --no-subtitles   # -> output/durable-ai-agents-nosubs.mp4
   python scripts/render_video.py --theme durable-ai-agents --start 130 --end 140 --out output/test.mp4
 """
 import argparse, os, shutil, subprocess, sys, tempfile, time
@@ -14,9 +16,13 @@ from playwright.sync_api import sync_playwright
 
 
 def render_chunk(job):
-    idx, theme, n0, n1, fps, crf, seg_path = job
+    idx, theme, n0, n1, fps, crf, subtitles, seg_path = job
     with sync_playwright() as pw:
         browser, page = open_page(pw, theme)
+        if not subtitles:
+            # Hides the subtitle box without touching the page sources: renderAt() still drives its opacity,
+            # every other pixel stays identical to the subtitled video.
+            page.add_style_tag(content="#subw{visibility:hidden}")
         warm_up(page)
         # Web streaming: a keyframe every 2 s for fast seeking, High@4.1 for broad player support,
         # CRF capped at 8 Mbit/s (YouTube's 1080p30 rate) so bitrate peaks stay streamable.
@@ -48,10 +54,14 @@ def main():
     ap.add_argument("--end", type=float, default=None, help="seconds; default = full length")
     ap.add_argument("--workers", type=int, default=max(1, min(6, (os.cpu_count() or 2) // 2)))
     ap.add_argument("--crf", type=int, default=20)
-    ap.add_argument("--out", default=None, help="default: output/<theme>.mp4")
+    ap.add_argument("--no-subtitles", dest="subtitles", action="store_false",
+                    help="hide the burned-in subtitles, e.g. to ship the SRT of `make srt` alongside")
+    ap.add_argument("--out", default=None,
+                    help="default: output/<theme>.mp4, or output/<theme>-nosubs.mp4 with --no-subtitles")
     add_theme_argument(ap)
     a = ap.parse_args()
-    out = a.out or str(OUTPUT / f"{a.theme}.mp4")
+    suffix = "" if a.subtitles else "-nosubs"
+    out = a.out or str(OUTPUT / f"{a.theme}{suffix}.mp4")
 
     with sync_playwright() as pw:
         browser, page = open_page(pw, a.theme)
@@ -63,7 +73,8 @@ def main():
     segdir = Path(tempfile.mkdtemp(prefix=".segments-", dir=OUTPUT))
     k = max(1, min(a.workers, (n1 - n0) // 60))
     bounds = [n0 + (n1 - n0) * i // k for i in range(k + 1)]
-    jobs = [(i, a.theme, bounds[i], bounds[i + 1], a.fps, a.crf, segdir / f"seg_{i:02d}.mp4") for i in range(k)]
+    jobs = [(i, a.theme, bounds[i], bounds[i + 1], a.fps, a.crf, a.subtitles, segdir / f"seg_{i:02d}.mp4")
+            for i in range(k)]
     print(f"Rendering {n1 - n0} frames ({(n1 - n0) / a.fps:.1f}s of {total:.1f}s) with {k} worker(s)…")
     t0 = time.time()
     with Pool(k) as pool:
