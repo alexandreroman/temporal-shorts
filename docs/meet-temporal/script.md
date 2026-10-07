@@ -13,10 +13,11 @@ animation shows.
 Someone who has never heard of Temporal learns who created it, where it
 comes from, what it does, where the company stands today and why it
 matters for AI. The video follows the founders, Maxim Fateev and Samar
-Abbas, through the lineage Amazon Simple Workflow Service, Microsoft
-Durable Task Framework, Uber Cadence, then Temporal, explains Durable
-Execution with the order of the series (ORDER, CHARGE, SHIP, EMAIL), and
-ends on the company's figures and its AI customers.
+Abbas, from their careers at Microsoft and Amazon (careers only, no
+countries of origin) through the lineage Amazon Simple Workflow Service,
+Microsoft Durable Task Framework, Uber Cadence, then Temporal, explains
+Durable Execution with the order of the series (ORDER, CHARGE, SHIP,
+EMAIL), and ends on the company's figures and its AI customers.
 
 The format is a short company introduction, not an explainer: there is no
 "What you get" recap chapter, and the outro sums up. Companies are named
@@ -26,6 +27,9 @@ company, never by model.
 ### Sources
 
 - https://temporal.io/blog/samars-journey
+- https://temporal.io/about (also the source of the founders' photo,
+  `src/assets/temporal-founders.jpg`: "Portrait of Temporal Co-Founders,
+  Maxim Fateev and Samar Abbas")
 - https://temporal.io/blog/oss-startups-podcast
 - https://dev.to/codestorypodcast/s8-e28-maxim-fateev-temporal
 - https://www.uber.com/en-US/blog/open-source-orchestration-tool-cadence-overview/
@@ -50,23 +54,27 @@ company, never by model.
 
 - **0:09** Meet Maxim Fateev and Samar Abbas, the two engineers who created
   Temporal.
-  - Visuals: Two founder cards side by side, each an avatar with the name
-    in mono: MAXIM FATEEV (CO-FOUNDER, CTO), SAMAR ABBAS (CO-FOUNDER, CEO).
-- **0:14** Maxim grew up in the Soviet Union, studied in Brazil, then joined
-  Amazon in Seattle in 2002.
-  - Visuals: Under Maxim's card, the journey draws step by step: arrow,
-    SOVIET UNION, arrow, BRAZIL, then a curve into a shared AMAZON tile
-    (SEATTLE) between the columns, a violet "2002" pill on the curve, and
-    Maxim's M marker lands in the tile.
-- **0:22** Samar grew up in Pakistan, started at Microsoft, then joined
-  Maxim's team at Amazon.
-  - Visuals: Under Samar's card: PAKISTAN, MICROSOFT, then a curve into the
-    same AMAZON tile; Samar's S marker lands next to M and the tile turns
-    violet.
+  - Visuals: The official photo of the two founders, large and centered,
+    framed with a UV border and glow and a dark vignette; a mono name under
+    each person: SAMAR ABBAS (CO-FOUNDER, CEO) on the left, MAXIM FATEEV
+    (CO-FOUNDER, CTO) on the right.
+- **0:14** Maxim joined Amazon in Seattle in 2002 and became tech lead of
+  its messaging platform.
+  - Visuals: The photo gives way to two founder cards side by side, each
+    with the face cropped from the photo in a violet ring: MAXIM FATEEV
+    (CO-FOUNDER, CTO), SAMAR ABBAS (CO-FOUNDER, CEO). Under Maxim's card, his
+    career draws step by step: an arrow, the tile AMAZON · 2002 (SEATTLE),
+    an arrow, the tile MESSAGING PLATFORM (TECH LEAD).
+- **0:21** Samar started at Microsoft, then joined Maxim's team at Amazon:
+  that is where they met.
+  - Visuals: Under Samar's card, a long arrow to the tile MICROSOFT, bottom
+    aligned with MESSAGING PLATFORM; both careers curve into a shared tile
+    between the columns, SAME TEAM (AMAZON); the M and S markers land in it
+    and it turns violet.
 
 ## 02 From Amazon to Uber
 
-- **0:30** At Amazon, they built Simple Workflow Service, launched in 2012,
+- **0:29** At Amazon, they built Simple Workflow Service, launched in 2012,
   to run long processes reliably.
   - Visuals: A horizontal timeline with four milestones; the M and S
     markers ride the line, the travelled part violet. The first milestone
@@ -111,7 +119,7 @@ company, never by model.
   - Visuals: Three tiles across the top: "Temporal 1.0" (2020), an arrow
     to "Temporal Cloud" (MANAGED SERVICE), then "Open source" (MIT
     LICENSE).
-- **1:24** Today, more than 4,300 companies pay for it, including Netflix,
+- **1:23** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS tile, "4,300+", then the names as mono pills
     one by one: NETFLIX, SNAP, NVIDIA, SALESFORCE, SHOPIFY.
@@ -130,7 +138,7 @@ company, never by model.
     below, "AGENT LOOP" in the middle) with a neon token running round it;
     on the right LLM CALLS BILLED counts each turn and AGENT PROGRESS fills
     one step per turn (out of 6).
-- **1:47** Every LLM call costs time and money. Without Durable Execution,
+- **1:46** Every LLM call costs time and money. Without Durable Execution,
   a crash means starting over.
   - Visuals: The bill stands out; after 3 steps, a crash: shake, red
     flash, red loop, "START OVER", the LLM puzzled, AGENT PROGRESS drains
@@ -144,7 +152,8 @@ company, never by model.
 
 ## Outro
 
-- **2:02** Temporal keeps code running whatever fails, from everyday apps
+- **2:01** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
-  - Visuals: The two founder avatars side by side, title "Meet Temporal",
-    tagline "DURABLE EXECUTION FOR APPS AND AI AGENTS", Temporal logo.
+  - Visuals: The two founders' faces, cropped from the photo, side by side,
+    title "Meet Temporal", tagline "DURABLE EXECUTION FOR APPS AND AI
+    AGENTS", Temporal logo.

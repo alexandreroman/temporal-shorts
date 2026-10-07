@@ -32,6 +32,7 @@ SOCIAL_IMAGE_WIDTH, SOCIAL_IMAGE_HEIGHT = 1200, 630
 MIME_TYPES = {
     ".woff2": "font/woff2",
     ".svg": "image/svg+xml",
+    ".jpg": "image/jpeg",
 }
 
 # Relative to the stylesheet, as the browser resolves them.

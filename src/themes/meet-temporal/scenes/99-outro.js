@@ -12,7 +12,7 @@
     build(root, s) {
       s.t = makeEndCard(root, 'Meet Temporal', 'DURABLE EXECUTION FOR APPS AND AI AGENTS');
       // the two founders
-      s.founders = FOUNDERS.map(() => makeAvatar(root, '', AVATAR_SIZE));
+      s.founders = FOUNDERS.map(f => makeFace(root, f, AVATAR_SIZE));
     },
     update(t, c, s) {
       place(s.t, 960, 560, 1, P(t, 0.3, 0.8));

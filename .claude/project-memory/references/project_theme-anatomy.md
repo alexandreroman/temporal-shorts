@@ -207,9 +207,10 @@ CLAUDE.md; a section below and the card order in
 - No "What you get" recap: a short company introduction, the outro sums
   up. Five chapters: Two engineers, From Amazon to Uber, What Temporal
   does, Temporal today, Why it matters for AI.
-- Founders: Maxim Fateev (Soviet Union, Brazil, Amazon in Seattle from
-  2002; co-founder, CTO) and Samar Abbas (Pakistan, Microsoft, then
-  Maxim's SWF team at Amazon; co-founder, CEO). Lineage: Simple Workflow
+- Founders are told by their careers only, never by country of origin:
+  Maxim Fateev (Amazon in Seattle from 2002, tech lead of its messaging
+  platform; co-founder, CTO) and Samar Abbas (Microsoft, then Maxim's SWF
+  team at Amazon, where they met; co-founder, CEO). Lineage: Simple Workflow
   Service (Amazon, 2012), Durable Task Framework (Microsoft, base of Azure
   Durable Functions), Cadence (Uber, open source 2017), Temporal (October
   2019, MIT). Third-party companies appear as text, never as logos.
