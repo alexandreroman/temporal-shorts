@@ -96,6 +96,7 @@ make setup                   # venv + Playwright Chromium + fonts (once)
 make timeline                # checks that everything loads, prints timings
 make preview THEME=durable-ai-agents T="3 140 160"  # -> output/preview.png
 make render                  # videos -> output/<theme>.mp4
+make render SUBS=off         # same, no subtitles -> output/<theme>-nosubs.mp4
 make srt                     # subtitles -> output/<theme>.srt
 make social                  # link preview images -> src/**/social.png
 make html                    # home page + players -> output/**/index.html
@@ -127,11 +128,17 @@ make srt THEME=agent-harness          # -> output/agent-harness.srt
 
 An unknown `THEME` stops make with the list of valid themes.
 
+The videos have the subtitles burned in. `make render SUBS=off` renders
+them without, for instance to upload a clean video with the SRT file of
+`make srt`: each one goes to `output/<theme>-nosubs.mp4`, its own file, so
+that both versions keep their own up-to-date check. `SUBS` accepts `on`
+(the default) and `off`; any other value stops make.
+
 `make render` and `make srt` only rebuild the outputs that are out of date:
-each `output/<theme>.mp4` or `.srt` depends on its theme's own sources
-(`src/themes/<theme>/`: its page and its scripts), the shared sources
-(`src/*.js`, `src/*.css`, assets, fonts, `scripts/common.py`) and the
-render or export script. Editing a scene rebuilds its theme only; editing
+each `output/<theme>.mp4`, `-nosubs.mp4` or `.srt` depends on its theme's
+own sources (`src/themes/<theme>/`: its page and its scripts), the shared
+sources (`src/*.js`, `src/*.css`, assets, fonts, `scripts/common.py`) and
+the render or export script. Editing a scene rebuilds its theme only; editing
 the home page (`src/index.html`, `src/home.css`) or the live player
 (`src/player.js`) rebuilds no video. `make html` rebuilds when any source
 of any page, a `social.png` image or `scripts/build_html.py` changes. Use
@@ -144,8 +151,11 @@ Without make:
 
 ```bash
 .venv/bin/python scripts/render_video.py --theme <theme> \
-  [--start 130 --end 140] [--workers 4] [--fps 30]
+  [--start 130 --end 140] [--workers 4] [--fps 30] [--no-subtitles]
 ```
+
+`--no-subtitles` hides the subtitles and, without `--out`, writes
+`output/<theme>-nosubs.mp4` instead of `output/<theme>.mp4`.
 
 The full render takes a few minutes on a recent Mac with several workers.
 The MP4 is H.264 ready for web streaming: its index sits at the start of the

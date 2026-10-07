@@ -37,6 +37,7 @@ make setup                   # venv, Playwright Chromium, fonts
 make timeline                # every theme: scenes, timings, TOTAL duration
 make preview THEME=<theme> T="12 40 136"  # contact sheet -> output/preview.png
 make render                  # output/<theme>.mp4 for every out-of-date theme
+make render SUBS=off         # same, no subtitles: output/<theme>-nosubs.mp4
 make srt                     # output/<theme>.srt for every out-of-date theme
 make social                  # link preview images, committed: src/**/social.png
 make html                    # home page + one HTML player per theme

@@ -29,7 +29,17 @@ else
 THEMES := $(THEME)
 endif
 
-VIDEOS    := $(THEMES:%=output/%.mp4)
+# render burns the subtitles in; SUBS=off renders the videos without them, e.g. to ship the SRT of `make srt`
+# alongside. They get their own file, output/<theme>-nosubs.mp4, so that each version has its own up-to-date check.
+SUBS ?= on
+ifeq ($(SUBS),on)
+VIDEOS := $(THEMES:%=output/%.mp4)
+else ifeq ($(SUBS),off)
+VIDEOS := $(THEMES:%=output/%-nosubs.mp4)
+else
+$(error Unknown SUBS=$(SUBS). Valid values: on off)
+endif
+
 SUBTITLES := $(THEMES:%=output/%.srt)
 # The HTML build writes every page, the home page (output/index.html) last: it stands for the whole build.
 HTML      := output/index.html
@@ -87,7 +97,7 @@ preview: $(FONTS) | $(VENV)   ## contact sheet of one theme: make preview THEME=
 	$(call require,playwright PIL)
 	$(PY) scripts/preview.py --theme $(THEME) $(T)
 
-render: $(VIDEOS)       ## one MP4 per theme -> output/<theme>.mp4 [THEME=<theme>]
+render: $(VIDEOS)       ## one MP4 per theme -> output/<theme>.mp4 [THEME=<theme>] [SUBS=off]
 
 srt: $(SUBTITLES)       ## one SRT per theme -> output/<theme>.srt [THEME=<theme>]
 
@@ -103,16 +113,22 @@ serve: $(HTML)    ## home page and players on http://localhost:PORT (CASPER_PORT
 clean:            ## delete every generated file: output/ (MP4, SRT, HTML, previews, render leftovers)
 	rm -rf output
 
-# One rule per theme: output/<theme>.mp4 and output/<theme>.srt depend on the
-# shared inputs (the player aside) and on that theme's own inputs only, so
-# editing a scene rebuilds the outputs of its theme alone. $$* is the theme
-# (the stem).
+# One rule per theme: output/<theme>.mp4, output/<theme>-nosubs.mp4 and
+# output/<theme>.srt depend on the shared inputs (the player aside) and on
+# that theme's own inputs only, so editing a scene rebuilds the outputs of its
+# theme alone. $$* is the theme (the stem).
 .SECONDEXPANSION:
 
-$(ALL_THEMES:%=output/%.mp4): output/%.mp4: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/render_video.py \
-                                            | $(VENV)
+# Inputs of both MP4 versions of a theme, expanded a second time in their rules.
+MP4_PREREQUISITES = $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/render_video.py
+
+$(ALL_THEMES:%=output/%.mp4): output/%.mp4: $(MP4_PREREQUISITES) | $(VENV)
 	$(call require,playwright)
 	$(PY) scripts/render_video.py --theme $*
+
+$(ALL_THEMES:%=output/%-nosubs.mp4): output/%-nosubs.mp4: $(MP4_PREREQUISITES) | $(VENV)
+	$(call require,playwright)
+	$(PY) scripts/render_video.py --theme $* --no-subtitles
 
 $(ALL_THEMES:%=output/%.srt): output/%.srt: $(VIDEO_SOURCES) $$(call theme_sources,$$*) scripts/export_srt.py \
                                             | $(VENV)
