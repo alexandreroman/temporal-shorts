@@ -13,17 +13,25 @@
   // result card of row i, labeled with the kind of call it comes from, as in the subtitle
   const makeCallCard = (root, i) => makeResultCard(root, isLLM(i), isLLM(i) ? 'LLM CALL' : 'TOOL CALL');
   // Chapter 7 layout: app on the left, Temporal on the right, both 30 px under the step tiles; the "From the start"
-  // arc and its label use the 58 px above the tiles. Under the instance panel, the bill on the left; on its right,
-  // the booking ticket on the bill's top edge and AGENT COMPLETE on its bottom edge.
-  const APP = { x: 470, y: 445 };
-  const MEM = { x: 470, y: 469, slot0: 162, slotGap: 88, slotY: 484 }; // context panel and its block slots
-  const HIST = { x: 1380, y: 580, cardX: 1050, row0: 447, rowGap: 44 }; // Event History card and its rows
+  // arc and its label use the 58 px above the tiles. The instance panel (x 80-925) ends under the Restaurant tile's
+  // right edge and the TEMPORAL panel (x 995-1840) starts under the Booking tile's left edge; half-pixel centers
+  // put their odd widths on whole pixels. Under the instance panel, the bill on the left (x 80-460); on its right,
+  // the booking ticket on the bill's top edge and AGENT COMPLETE on its bottom edge, centered in the space left.
+  const APP = { x: 502.5, y: 445, w: 845, h: 310 };
+  // context panel, 24 px inside the instance panel, and its 8 block slots, 21 px from each side
+  const MEM = { x: 502.5, y: 469, w: 797, h: 210, slot0: 163, slotGap: 97, slotY: 484 };
+  // TEMPORAL panel, 20 px around the Event History card (x 1015-1820); the card and its rows (call cards land 110 px
+  // inside its left edge)
+  const TEMPORAL = { x: 1417.5, y: 555, w: 845, h: 530 };
+  const HIST = { x: 1417.5, y: 580, w: 805, cardX: 1125, row0: 447, rowGap: 44 };
+  // ticket and AGENT COMPLETE: between the bill's right edge and the instance panel's
+  const DONE_X = 692;
   // NEW INSTANCE: on the top edge of instance B's panel, centered between its name and its TAKING OVER status
-  // (about 65 px from each); 16 px low, so it keeps 20 px of clear space under the Calendar tile. Fixed even width:
-  // it rests on whole pixels (solid: the panel border does not show through).
-  const NEW_TAG = { x: APP.x + 60, y: APP.y - 155 + 16, w: 240 };
-  // the agent chip flies from the first Event History row to instance B's status, at the panel's top right
-  const STATUS_AT = { x: APP.x + 290, y: APP.y - 155 + 36 };
+  // (about 98 px from each); 16 px low, so it keeps 20 px of clear space under the Calendar tile. Fixed even width
+  // and whole-pixel center: it rests on whole pixels (solid: the panel border does not show through).
+  const NEW_TAG = { x: 562, y: APP.y - APP.h / 2 + 16, w: 240 };
+  // the agent chip flies from the first Event History row to instance B's status, 100 px from the panel's right edge
+  const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 36 };
   const memSlot = i => MEM.slot0 + i * MEM.slotGap;
   const rowY = i => HIST.row0 + i * HIST.rowGap;
   // the big intro logo flies into the TEMPORAL panel header from c[0] + FLIGHT.at, for FLIGHT.d seconds
@@ -57,18 +65,19 @@
       s.restart = path(s.svg, 'M 1440 148 Q 960 48 480 148', C.violet, 3);
       s.restartL = E(root, 'From the start', 'lbl', { color: C.violet });
       // app side, mirroring chapter 6: instance panel, its context, the LLM bill and the booking
-      s.A = makeAppPanel(root, 'APP INSTANCE A', 780, 310); s.B = makeAppPanel(root, 'APP INSTANCE B', 780, 310);
-      s.mem = makeMemory(root, 732, 210);
+      s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
+      s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);
+      s.mem = makeMemory(root, MEM.w, MEM.h);
       s.mblocks = makeMemBlocks(root, 8, 76, 56);
       s.bill = makeBill(root);
       s.bill.note.style.color = C.neon;
       s.ticket = makeTicket(root);
       // Temporal side: the Event History lives in Temporal, outside the app (the logo flies into the header)
-      s.temporal = makeTemporalPanel(root, 920, 530, { noteAt: [24, 24] });
+      s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { noteAt: [24, 24] });
       // rows 1-6 survive the crash: tinted block + crash line under them
       const rowsHtml = JR.map((txt, i) => `<span style="color:${isLLM(i) ? C.uv : '#141414'}">${txt}</span>`);
       s.jr = makeHistoryCard(root, rowsHtml, {
-        w: 880, h: 440, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44, tag: { border: false },
+        w: HIST.w, h: 440, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44, tag: { border: false },
         crash: { keptTop: 64, keptH: 262, cutTop: 330, label: 'APP CRASHED HERE', labelX: '66%', labelFont: 13 },
         scanH: 42,
       });
@@ -97,11 +106,13 @@
       const [sx, sy] = shakeAt(t, crashAt);
       const dead = t >= crashAt;
 
-      // Temporal logo: big intro, then it flies into the header of the Temporal panel, where it stays
+      // Temporal logo: big intro, then it flies into the header of the Temporal panel, where it stays, centered
+      // 85 px from the panel's left edge
       const lp = P(t, c[0] + 0.1, 0.7, backOut), fl = P(t, c[0] + FLIGHT.at, FLIGHT.d);
       const logoScale = lp * lerp(1 + 0.06 * P(t, c[0] + 1.2, 0.6), 34 / 150, fl);
-      place(s.logo, lerp(960, 1005, fl), lerp(540, 325, fl), logoScale, clamp(lp * 2));
-      place(s.temporal, 1380, 555, 1, P(t, c[0] + 2.4, 0.5));
+      const logoX = TEMPORAL.x - TEMPORAL.w / 2 + 85;
+      place(s.logo, lerp(960, logoX, fl), lerp(540, 325, fl), logoScale, clamp(lp * 2));
+      place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 2.4, 0.5));
       place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 2.6, 0.5));
 
       // steps
@@ -165,7 +176,7 @@
       place(s.bill, 270 + sx, 720 + sy, P(t, c[0] + 2.7, 0.45, backOut), P(t, c[0] + 2.7, 0.4));
       // the booking is made once and never repeated
       const tp = P(t, saved[5], 0.45, backOut);
-      place(s.ticket, 660, 648, tp * (1 + 0.15 * win(t, reused[5], reused[5] + 0.5, 0.2)), clamp(tp * 2));
+      place(s.ticket, DONE_X, 648, tp * (1 + 0.15 * win(t, reused[5], reused[5] + 0.5, 0.2)), clamp(tp * 2));
 
       // LLM CALL and TOOL CALL cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {
@@ -191,7 +202,7 @@
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 0.4);
       setScan(s.jr, 68 + Math.max(0, scanning) * 44, scanning >= 0 ? 1 : 0);
-      place(s.done, 660, 795, P(t, saved[7] + 0.5, 0.45, backOut), P(t, saved[7] + 0.5, 0.35));
+      place(s.done, DONE_X, 795, P(t, saved[7] + 0.5, 0.45, backOut), P(t, saved[7] + 0.5, 0.35));
       placeFlash(s.flash, t, crashAt);
       // takeover: NEW INSTANCE pops on B once it is almost in place and is gone by c[3]; Temporal hands it the agent,
       // a chip from the first history row to its status, which then reads TAKING OVER
