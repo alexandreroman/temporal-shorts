@@ -83,10 +83,14 @@ the laptop, NOTIFY Sam.
     panel fast-forwards the day counter.
 - **1:18** Temporal keeps its Event History, outside the app. Restarts and
   deploys come and go; the wait survives.
-  - Visuals: "OUTSIDE THE APP" brightens and the SAVED tags pulse; DEPLOY
-    and RESTART pills pop next to the clock, a soft flash and shake: APP
-    INSTANCE A STOPPED, its WORKFLOW lines fall out, EMPTY; the history
-    stays, with a "STILL WAITING" tag on the waiting line.
+  - Visuals: "OUTSIDE THE APP" brightens and the SAVED tags pulse; as the
+    clock runs on to DAY 3, a barrage of DEPLOY, RESTART, DEPLOY, RESTART
+    pills slams into a 2 x 2 grid next to the clock, 0.7 s apart: at each
+    one the app side jolts and APP INSTANCE A flickers red, while a neon
+    ring pulses round the Event History, which never moves. The last
+    restart brings a soft flash and a shake: APP INSTANCE A STOPPED, its
+    WORKFLOW lines fall out, EMPTY; the history stays, with a "STILL
+    WAITING" tag on the waiting line.
 
 ## 04 The decision arrives
 
