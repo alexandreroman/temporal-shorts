@@ -315,7 +315,9 @@ editing different scenes never touch the same file.
   offsets when the layout changes between phases.
 - Fades: every scene fades in and out over 0.5 s; the optional `fadeIn` and
   `fadeOut` set other durations, for a cut that continues one motion across
-  two scenes (meet-temporal zooms into the AI hub this way).
+  two scenes (meet-temporal zooms into the AI hub this way). A chapter scene's
+  header fades with the scene; the optional `headerOutAt` (scene time)
+  fades it out earlier, over 0.4 s, for an ending that plays without it.
 - Chapter title: `title` next to `chapter` on the first scene of the chapter.
   The header and the progress segments are derived from it; a theme without
   chapters shows neither.

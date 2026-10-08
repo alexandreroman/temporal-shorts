@@ -83,6 +83,8 @@
       // presenter mode holds on the settled map just before AI invades the screen, then plays the swell, the
       // morph and the cut in one go (the timeline is laid out before build runs)
       this.holdBeforeEnd = this.dur - (this.cues[1] + SWELL_AT);
+      // the chapter header fades out as AI invades the screen: the swell and the morph play with no header
+      this.headerOutAt = this.cues[1] + SWELL_AT;
       const root = s.cam = makeCamera(stage);
       s.glow = E(root, '', '', {
         width: '560px', height: '560px', borderRadius: '50%',

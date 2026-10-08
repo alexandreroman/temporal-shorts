@@ -6,7 +6,7 @@
   // their place once the loop is durable
   const LOOP = AGENT_LOOP;
   const LLM_AT = { x: LOOP.cx, y: LOOP.cy - LOOP.r }; // the THINK node, where the carried glow condenses
-  const WAIT_Y = LOOP.cy + 275; // the "waits for a person" tag, under the loop
+  const WAIT_Y = LOOP.cy + 301; // the "waits for a person" tag, under the loop, its bottom on the frame's (y 880)
   const PANEL = { x: 560, y: 515, w: 800, h: 730 };
   // the step list in durable-ai-agents' place; the crash comes before step 4, so its row never shows: the bill
   // takes its place, 20 px below the third row

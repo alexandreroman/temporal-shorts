@@ -289,7 +289,9 @@ function renderAt(t, g = t) {
   const mark = document.getElementById('mark');
   if (cur && cur.chapter) {
     const lt = t - cur.start;
-    hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4));
+    // optional `headerOutAt`: the scene time at which the header fades out early, over 0.4 s
+    const headerOut = cur.headerOutAt === undefined ? 1 : 1 - P(lt, cur.headerOutAt, 0.4);
+    hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4)) * headerOut;
     const chapterScenes = scenes.filter(sc => sc.chapter);
     const firstStart = chapterScenes[0].start;
     const lastEnd = chapterScenes[chapterScenes.length - 1].end;
