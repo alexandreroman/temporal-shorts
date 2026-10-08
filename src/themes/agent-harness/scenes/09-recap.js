@@ -1,4 +1,4 @@
-// ===================== 8. WHAT YOU GET
+// ===================== 9. WHAT YOU GET
 // The recap: one tile per feature the video presents, landing one at a time.
 // The block keeps every name declared in this file local to this scene.
 {
@@ -17,7 +17,7 @@
     { size: 76, font: 26, gap: 20 });
 
   scene({
-    chapter: 8, title: 'What you get',
+    chapter: 9, title: 'What you get',
     // the chapter header reads before the subtitle; the full grid holds before the fade
     pre: 1.5, post: 2.0,
     subs: [

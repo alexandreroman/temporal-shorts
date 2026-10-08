@@ -270,7 +270,11 @@ CLAUDE.md; a section below and the card order in
 - Ch3 auto mode shows its three verdicts: approve, deny (the call never
   runs, the reason goes back to the model) and escalate to a person. Ch7
   callback tools reach the user's laptop or a private network, and the
-  agent waits durably for the result without tying up compute.
+  agent waits durably for the result without tying up compute (one target,
+  USER'S LAPTOP; no private network tile). Ch8 typed sessions shows the
+  path agent Python class → generated TypeScript types → UI; on-screen
+  TypeScript follows the harness-codegen shape (`handlers: {name: {input;
+  output}}`, `states`). Ch9 is the recap.
 - The turn is the core concept (a message starts a turn, the developer's
   loop runs inside, the reply streams, the harness waits); ch1 introduces
   it. Ch5 subagents: the parent starts a child workflow (`start_travel`),
@@ -284,8 +288,8 @@ CLAUDE.md; a section below and the card order in
 - Grid: content frame x 140-1780, y 150-880; multi-zone scenes touch both
   sides; tops, bottoms and headings aligned; gutters 40 px within a zone,
   80-120 px between zones; elements at final positions, no `shift`; ch2 is
-  the model. Pans: ch1 (SDK tags fade), ch4 (console slides in), ch7 (UI
-  window enters).
+  the model. Pans: ch1 (SDK tags fade), ch4 (console slides in), ch8 (code
+  column centered alone, then the UI window enters).
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title

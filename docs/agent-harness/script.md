@@ -41,8 +41,10 @@ The video teaches, in order:
    stays durable, gated and visible;
 7. callback tools that run where the agent can't reach (the user's laptop,
    a private network) while the agent waits durably for their result,
-   without holding compute, and typed React and Svelte SDKs that put the
-   agent in a live, typed session in your UI.
+   without holding compute;
+8. typed sessions: TypeScript types generated from the agent's Python class
+   (its state and its message handlers), then typed React and Svelte SDKs
+   that put the agent in a live, typed session in your UI.
 
 The running example is a travel agent, as in the harness's own examples:
 `search_flights`, `search_hotels`, `book_flight`, `book_hotel`, a trip to
@@ -241,13 +243,14 @@ Lisbon.
     level with 3 ROUND TRIPS across the divider (the dimmed count lights up
     again), then EVERY CALL: DURABLE / GATED / VISIBLE beside it.
 
-## 07 Callback tools, typed sessions
+## 07 Callback tools
 
 - **4:30** Callback tools run where the agent can't reach, like the user's
   laptop or a private network.
-  - Visuals: CALLBACK TOOLS: THE APP (agent on a Temporal worker) above
-    USER'S LAPTOP, joined by a straight dashed line; `read_file "trip.md"`
-    travels down it to the laptop, which starts running it.
+  - Visuals: one centered column: THE APP (agent on a Temporal worker)
+    above USER'S LAPTOP, joined by a straight dashed line;
+    `read_file "trip.md"` travels down it to the laptop, which starts
+    running it.
 - **4:37** The agent waits durably for the result, for seconds or days,
   without tying up compute.
   - Visuals: the app tile dims, a pause badge beside the agent; a DURABLE
@@ -255,15 +258,34 @@ Lisbon.
     DAYS", with a NO COMPUTE HELD tag; the laptop finishes, the card slides
     back and `result "Lisbon, 3 nights"` travels up the line into the app,
     which lights again.
-- **4:45** Typed React and Svelte SDKs turn your agent into a live, typed
+
+## 08 Typed sessions
+
+- **4:47** The harness generates TypeScript types from your agent's Python
+  class: its state and its messages.
+  - Visuals: YOUR AGENT, one centered column: a `travel_agent.py` card
+    (PYTHON) holds `class Trip(HarnessState)` with `items: list[Item] = []`
+    and `total_usd: int = 0`, then `@agent.defn class TravelAgent` with
+    `trip = agent.state(Trip)` and an `@agent.accepts` handler
+    `async def plan_trip(self, request: PlanTrip) -> Itinerary: ...`; a
+    GENERATED TYPES arrow leads down to a `client_sdk/TravelAgent.ts` card
+    (GENERATED): `export interface Trip { items: Item[]; total_usd:
+    number; }` and `export interface TravelAgent { handlers: { plan_trip:
+    { input: PlanTrip; output: Itinerary } }; states: { trip: Trip }; }`
+    (the shape `harness-codegen` writes); matching lines light up pair by
+    pair: the Trip model, the observable state, the `plan_trip` handler.
+- **4:56** Typed React and Svelte SDKs turn your agent into a live, typed
   session inside your product UI.
   - Visuals: the view pans; YOUR UI: a trip planner in a browser window
-    ("Lisbon, 3 nights", flight, hotel, tour, TOTAL $895, Book), linked by
-    a TYPED SESSION; a TYPED SDKS row: REACT / SVELTE.
+    ("Lisbon, 3 nights", flight, hotel, tour, TOTAL $895, Book), linked to
+    the TypeScript card by a TYPED SESSION; the rows light up with a
+    `trip.items` badge and the total gets a `trip.total_usd` badge, each
+    lighting its field in the TypeScript card; a TYPED SDKS row: REACT /
+    SVELTE.
 
-## 08 What you get
+## 09 What you get
 
-- **4:56** Durable, observable, composable agents with human approvals,
+- **5:08** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
   - Visuals: six recap tiles land one by one, one per topic: Survives
     crashes / Event stream / Typed subagents / Human approvals / Code Mode /
@@ -271,7 +293,7 @@ Lisbon.
 
 ## Outro
 
-- **5:07** Temporal Agent Harness is experimental and open source. Try the
+- **5:19** Temporal Agent Harness is experimental and open source. Try the
   examples and build your own agents.
   - Visuals: LLM orb, title "Temporal Agent Harness", tagline "YOUR LOOP
     AND YOUR SDKS, RUN DURABLY BY TEMPORAL", violet "EXPERIMENTAL" pill,
