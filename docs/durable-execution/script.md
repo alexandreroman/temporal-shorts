@@ -11,7 +11,7 @@ animation shows.
 ## Audience and goal
 
 The video introduces the principles of Durable Execution with Temporal
-Workflows, outside any AI context, to everyone: developers new to Temporal
+Workflows to everyone: developers new to Temporal
 and tech-curious viewers alike. The code on screen is real Temporal
 TypeScript SDK code, kept short.
 

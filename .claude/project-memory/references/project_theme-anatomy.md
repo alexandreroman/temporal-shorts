@@ -159,7 +159,7 @@ CLAUDE.md; a section below and the card order in
 
 ### durable-execution
 
-- Introduction for everyone, outside any AI context. Order #1042 for $42,
+- Introduction for everyone. Order #1042 for $42,
   four steps (`ORDER_STEPS`); vocabulary "the server" (ch1-3), then "the
   Worker" ("Outside the Workers").
 - Money is the stake: CARD CHARGED reads $84 "CHARGED TWICE!" without
