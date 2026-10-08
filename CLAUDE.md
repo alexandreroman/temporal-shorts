@@ -5,7 +5,7 @@ from a deterministic HTML animation. Each video is a theme:
 
 - `durable-execution`: Introduction to Durable Execution, a video that
   shows everyone the principles of Durable Execution with Temporal
-  Workflows, outside any AI context
+  Workflows
 - `human-in-the-loop`: Human-in-the-Loop, how a Temporal Workflow waits
   durably for a person's decision, such as an approval, then resumes where
   it left off

@@ -9,8 +9,8 @@ subtitles) about [Temporal](https://temporal.io).
 Each video is a theme:
 
 - **Introduction to Durable Execution** (`durable-execution`): for
-  everyone, the principles of Durable Execution with Temporal Workflows,
-  outside any AI context: [Workflows](https://docs.temporal.io/workflows),
+  everyone, the principles of Durable Execution with Temporal Workflows:
+  [Workflows](https://docs.temporal.io/workflows),
   [Activities](https://docs.temporal.io/activities), retries, the
   [Event History](https://docs.temporal.io/encyclopedia/event-history),
   replay and the Temporal web UI.
