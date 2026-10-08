@@ -103,7 +103,10 @@
       place(s.carry, LLM_AT.x, LLM_AT.y, 1, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
       // each turn runs the loop once, think -> act -> observe, for one step, and bills one LLM call as it starts:
       // steps 1 to 3, then the crash before step 4 (the invite), then the agent starts over and redoes steps 1 to 3
-      const firstRun = [0, 1, 2].map(i => c[0] + 1.2 + i * TURN);
+      // the first turn starts once the whole loop is drawn, a short beat later: the token never runs on an arc that
+      // isn't there yet
+      const loopAt = c[0] + 0.1;
+      const firstRun = [0, 1, 2].map(i => loopAt + AGENT_LOOP_DRAWN + 0.25 + i * TURN);
       const crashAt = c[1] + 3.0;
       const restart = c[1] + 3.8;
       const rerun = [0, 1, 2].map(i => restart + i * TURN);
@@ -121,7 +124,7 @@
 
       const red = win(t, crashAt, restart, 0.25);
       const broken = t >= crashAt && t < restart;
-      placeAgentLoop(s.loop, t, c[0] + 0.1, {
+      placeAgentLoop(s.loop, t, loopAt, {
         deg, centerAt: c[0] + 1.2, centerO: 1 - red, arcO: broken ? 0 : 1,
         q: crashed ? P(t, crashAt + 0.3, 0.3) : 0, dx: sx, dy: sy,
         // THINK is there from the first frame: the previous chapter's AI hub turned into it
@@ -151,7 +154,7 @@
       s.svg.style.transform = `translate(${sx}px,${sy}px)`;
       place(s.over, LOOP.cx + sx, LOOP.cy + sy, 1, red);
       // the agent also waits for a person: said in the first subtitle
-      const wp = P(t, c[0] + 4.6, 0.45, backOut);
+      const wp = P(t, firstRun[2] + 0.4, 0.45, backOut);
       place(s.wait, LOOP.cx, WAIT_Y, wp, clamp(wp * 2) * (1 - P(t, c[1] + 0.2, 0.4)));
 
       // the goal and its steps, as in durable-ai-agents: each row slides in during its turn, highlighted while it

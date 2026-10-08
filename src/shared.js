@@ -234,6 +234,9 @@ function makeAgentLoop(root, svg, cx, cy, r = 220) {
 // - centerAt: when the "Agentic loop" label fades in; centerO: its opacity (0 to 1), e.g. while another label shows
 // - o: opacity of the whole loop; arcO: opacity of the arcs; q: the LLM's question mark (0 to 1)
 // - dx, dy: offset of the nodes and labels (a shake)
+// Seconds after `a` (see placeAgentLoop) at which every node, label and arc of the loop is fully drawn: the last arc
+// starts drawing 1.3 s in, for 0.45 s
+const AGENT_LOOP_DRAWN = 1.75;
 function placeAgentLoop(loop, t, a, opts = {}) {
   const { deg = null, centerAt, centerO = 1, o = 1, arcO = 1, q = 0, dx = 0, dy = 0, thinkIn = a } = opts;
   const near = d => deg === null ? 0 : Math.max(0, 1 - Math.abs((((deg - d) % 360) + 540) % 360 - 180) / 30);
