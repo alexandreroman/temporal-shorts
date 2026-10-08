@@ -1,6 +1,6 @@
 // ===================== 7. DURABLE EXECUTION WITH TEMPORAL
 // Temporal keeps the agent's Event History outside the app and saves each result before the next step. Then app
-// instance A crashes: its memory empties, and the dead instance greys, drops and fades with its memory panel. A new
+// instance A crashes: its memory empties, and the dead instance greys, drops and fades with its context panel. A new
 // copy, instance B, slides in to the same place, and Temporal hands it the agent; it runs the agent again from the
 // start, gets every saved result back from the history (no LLM call billed again), then runs the last step.
 // The block keeps every name declared in this file local to this scene.
@@ -14,7 +14,7 @@
   const makeCallCard = (root, i) => makeResultCard(root, isLLM(i), isLLM(i) ? 'LLM CALL' : 'TOOL CALL');
   // Chapter 7 layout: app on the left, Temporal on the right, both under the step tiles
   const APP = { x: 470, y: 445 };
-  const MEM = { x: 470, y: 469, slot0: 162, slotGap: 88, slotY: 484 }; // memory panel and its block slots
+  const MEM = { x: 470, y: 469, slot0: 162, slotGap: 88, slotY: 484 }; // context panel and its block slots
   const HIST = { x: 1380, y: 580, cardX: 1050, row0: 447, rowGap: 44 }; // Event History card and its rows
   // the takeover, in whole pixels: the dead instance A drops 40 px; instance B arrives from 160 px to the left of
   // its resting place
@@ -59,7 +59,7 @@
       s.steps = makeStepRow(root, s.svg, STEP_TILES, 465, 330, 200, 260, 104);
       s.restart = path(s.svg, 'M 1440 140 Q 960 40 480 140', C.violet, 3);
       s.restartL = E(root, 'From the start', 'lbl', { color: C.violet });
-      // app side, mirroring chapter 6: instance panel, its memory, the LLM bill and the booking
+      // app side, mirroring chapter 6: instance panel, its context, the LLM bill and the booking
       s.A = makeAppPanel(root, 'APP INSTANCE A', 780, 310); s.B = makeAppPanel(root, 'APP INSTANCE B', 780, 310);
       s.mem = makeMemory(root, 732, 210);
       s.mblocks = makeMemBlocks(root, 8, 76, 56);
@@ -150,7 +150,7 @@
         s.B.style.boxShadow = '';
       }
 
-      // app memory: filled as results are saved, emptied by the crash, refilled from the history. The panel moves
+      // context: filled as results are saved, emptied by the crash, refilled from the history. The panel moves
       // with the instance on screen (A, then B), so it never floats without its app; both are gone when it switches.
       const memDx = bHere ? bDx : sx, memDy = bHere ? 0 : sy + aDropY;
       const memOn = bHere ? P(t, bIn, 0.25) : aOn;
