@@ -74,7 +74,11 @@
           + "and Temporal records each one outside the app.",
         after: 0.4,
       },
-      { text: "If the app crashes, another copy picks up right where it left off. No progress is lost.", after: 1.6 },
+      { text: "If the app crashes, a new copy of the app starts and takes over.", after: 0.6 },
+      {
+        text: "It gets the saved results back from the history, then picks up where it left off. No progress is lost.",
+        after: 1.2,
+      },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
@@ -103,6 +107,7 @@
       s.cables = STEPS.map((_, i) => path(s.cableSvg, cableD(i), C.violet, 2, false));
       s.pulses = STEPS.map(() => makeSpark(root, 16, '219,255,75'));
       s.backPulses = [0, 1].map(() => makeSpark(root, 16, '182,100,255'));
+      s.newTag = tag(root, 'New app instance', 'violet solid');
       // instance B boots behind a scanline
       s.bootLine = E(root, '', '', {
         width: APP.w + 'px', height: '3px', background: C.violet, boxShadow: '0 0 18px 4px rgba(182,100,255,.6)',
@@ -119,10 +124,11 @@
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
-      // first run on app instance A: steps 1 and 2 are done and saved, step 3 runs until the crash
-      const crashAt = c[1] + 0.8, bOn = crashAt + 1.2;
-      const replay = [bOn + 0.3, bOn + 0.6];
-      const rerun = bOn + 0.9; // app instance B runs step 3 again, from its start: it was never saved
+      // in held beats: the crash on app instance A (it stays dead a moment), a new app instance B arrives where A
+      // was, B replays the history row by row, then resumes at step 3
+      const crashAt = c[1] + 0.6, bOn = c[1] + 2.2, aGone = c[1] + 3.0;
+      const replay = [c[2] + 0.6, c[2] + 1.8];
+      const rerun = c[2] + 3.2; // app instance B runs step 3 again, from its start: it was never saved
       // the steps run one after the other: each starts once the previous result is saved (its result card takes
       // 0.5 s to reach the history), step 4 included
       const run = [c[0] + 1.2, c[0] + 2.6, c[0] + 4.0];
@@ -144,7 +150,9 @@
 
       // app instance A runs the steps, then crashes: its lines fall out
       const aIn = P(t, c[0] + 0.3, 0.5, backOut);
-      place(s.A, APP.x + sx, APP.y + sy, aIn, clamp(aIn * 2) * (1 - P(t, bOn - 0.3, 0.3)));
+      // once crashed it stays on screen, dead (red border, CRASHED, EMPTY), until B has arrived
+      place(s.A, APP.x + sx, APP.y + sy, aIn, clamp(aIn * 2) * (1 - 0.25 * P(t, crashAt + 0.8, 0.4))
+        * (1 - P(t, aGone, 0.4)));
       if (crashed) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, t >= run[0] ? 'RUNNING' : '', t >= run[0] ? 'running' : 'idle');
       LINES.forEach((_, i) => {
@@ -153,19 +161,29 @@
       });
       s.A.empty.style.opacity = P(t, crashAt + 1.0, 0.3);
 
-      // app instance B takes over: the saved steps come back from the history, then step 3 runs again
-      const boot = P(t, bOn, 0.5);
-      place(s.B, APP.x, APP.y, 1, t >= bOn ? 1 : 0);
+      // app instance B arrives where A was: it rises into place as it boots behind a scanline, labelled as a new
+      // instance; then the saved steps come back from the history, and step 3 runs again
+      const arrive = P(t, bOn, 0.8);
+      const boot = P(t, bOn + 0.2, 0.8);
+      place(s.B, APP.x, Math.round(APP.y + (1 - ease(arrive)) * 60), 1, t >= bOn ? clamp(arrive * 3) : 0);
       s.B.style.clipPath = `inset(0 0 ${((1 - boot) * 100).toFixed(2)}% 0)`;
       place(s.bootLine, APP.x, APP.y - APP.h / 2 + boot * APP.h, 1, boot > 0 && boot < 1 ? 1 : 0);
-      if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
+      const tp = P(t, bOn + 0.6, 0.45, backOut);
+      // the tag sits in the empty space at the bottom of B's STEPS card
+      place(s.newTag, APP.x, APP.y - APP.h / 2 + 500, tp, clamp(tp * 2) * (1 - P(t, c[2] + 0.2, 0.4)));
+      if (t < bOn + 1.0) setAppStatus(s.B, 'STARTING', 'idle');
+      else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
       else if (t < rerun) setAppStatus(s.B, 'REPLAYING…', 'running');
       else if (t < complete) setAppStatus(s.B, 'RESUMED AT STEP 3', 'running');
       else setAppStatus(s.B, 'DONE', 'idle');
+      // steps 1 and 2 tick as their results come back, without running again
       LINES.forEach((_, i) => {
-        const doneAt = i < 2 ? replay[i] + 0.2 : done[i];
-        const runAt = i < 2 ? replay[i] : i === 2 ? rerun : run[3];
-        setLine(s.B, i, t >= doneAt ? 2 : t >= runAt ? 1 : 0);
+        if (i < 2) {
+          setLine(s.B, i, t >= replay[i] + 0.4 ? 2 : 0);
+          return;
+        }
+        const runAt = i === 2 ? rerun : run[3];
+        setLine(s.B, i, t >= done[i] ? 2 : t >= runAt ? 1 : 0);
       });
 
       // Temporal and its Event History, outside the app: untouched by the crash
@@ -176,11 +194,11 @@
       // results run back to app instance B
       s.cables.forEach((cable, i) => {
         const at = saved[i] - 0.5;
-        const back = i < 2 ? win(t, replay[i] - 0.1, replay[i] + 0.3, 0.1) : 0;
+        const back = i < 2 ? win(t, replay[i] - 0.1, replay[i] + 0.6, 0.1) : 0;
         draw(cable, P(t, at, 0.2), Math.max((1 - P(t, saved[i], 0.4)) * 0.7, back * 0.7));
         sparkOnPath(s.pulses[i], cable, P(t, at + 0.1, 0.4));
         if (i < 2) {
-          const q = P(t, replay[i] - 0.05, 0.3);
+          const q = P(t, replay[i], 0.45);
           sparkOnPath(s.backPulses[i], cable, q > 0 && q < 1 ? 1 - q : 0);
         }
       });
@@ -192,7 +210,7 @@
         s.jr.tags[i].style.transform = `scale(${swell(t, isReplayed ? replay[i] : saved[i], 0.14)})`;
       });
       markCrash(s.jr, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
-      const scanning = replay.findIndex(q => t >= q && t < q + 0.4);
+      const scanning = replay.findIndex(q => t >= q - 0.2 && t < q + 0.7);
       setScan(s.jr, rowTop(Math.max(0, scanning)) - 3, scanning >= 0 ? 1 : 0);
       const dp = P(t, complete, 0.45, backOut);
       s.jr.done.style.opacity = clamp(dp * 2);
