@@ -26,7 +26,7 @@
   // company (null for the Temporal logo), name, detail and year of each milestone
   const MILESTONES = [
     { company: 'Amazon', name: 'Simple Queue<br>Service', detail: 'Tech lead: Maxim', year: '2004' },
-    { company: 'Amazon', name: 'Simple Workflow<br>Service', detail: 'Long-running processes', year: '2009' },
+    { company: 'Amazon', name: 'Simple Workflow<br>Service', detail: 'AWS workflow service', year: '2009' },
     { company: 'Microsoft', name: 'Durable Task<br>Framework', detail: 'Azure Durable Functions', year: '2014' },
     { company: 'Uber', name: 'Cadence', detail: 'Uber\'s workflow engine', year: '2015' },
     { company: null, name: null, detail: 'Open source, MIT license', year: '2019' },

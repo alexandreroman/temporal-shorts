@@ -84,7 +84,7 @@ and each chapter has a cinematic moment, listed in its visuals.
   Service, to run long processes reliably.
   - Visuals: Maxim's face travels to 2009 with a motion trail; Samar's name
     fades and his face flies to 2009: AMAZON / "Simple Workflow Service" /
-    LONG-RUNNING PROCESSES.
+    AWS WORKFLOW SERVICE.
 - **0:25** In 2014 at Microsoft, Samar co-created the Durable Task
   Framework, the base of Azure Durable Functions.
   - Visuals: Samar travels to 2014: MICROSOFT / "Durable Task Framework" /
