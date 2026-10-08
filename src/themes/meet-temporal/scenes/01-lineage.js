@@ -93,23 +93,28 @@
         width: '700px', height: '700px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(182,100,255,.45) 0%, rgba(68,76,231,.18) 40%, rgba(68,76,231,0) 70%)',
       });
-      // "20 years" carries a marker highlight (a band swept in behind the words), a shine (a copy of the words
-      // filled with a moving light) and a pulse, all in em so they follow the heading's size
+      // "20 years" is put forward once the heading settles: a light runs through its letters (a copy of the words
+      // filled with a moving gradient), a glow blooms around them, they pop, and sparkles burst out
       s.heading = E(root,
-        '<span class="key" style="position:relative;display:inline-block;color:var(--violet)">'
-        + '<i class="band" style="position:absolute;left:-.06em;right:-.04em;top:.34em;height:.6em;'
-        + 'border-radius:.08em;background:rgba(182,100,255,.45);transform-origin:0 50%;transform:scaleX(0)"></i>'
-        + '<span class="txt" style="position:relative">20 years</span>'
+        '<span class="key" style="position:relative;display:inline-block;color:var(--violet);'
+        + 'transform-origin:100% 55%">'
+        + '<span class="txt">20 years</span>'
         + '<span class="shine" style="position:absolute;left:0;top:0;color:transparent;'
         + '-webkit-background-clip:text;background-clip:text;background-size:300% 100%;'
-        + 'background-image:linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.95) 50%, '
-        + 'rgba(255,255,255,0) 60%)">20 years</span></span> in the making', '', {
+        + `background-image:linear-gradient(100deg, rgba(182,100,255,0) 38%, ${C.violet} 44%, #FFFFFF 50%, `
+        + `${C.violet} 56%, rgba(182,100,255,0) 62%)">20 years</span></span> in the making`, '', {
         whiteSpace: 'nowrap', lineHeight: 1,
       });
       s.key = s.heading.querySelector('.key');
-      s.key.band = s.key.querySelector('.band');
       s.key.txt = s.key.querySelector('.txt');
       s.key.shine = s.key.querySelector('.shine');
+      // the sparkles of the burst, each with a seeded direction, distance and size
+      s.sparkles = Array.from({ length: 10 }, (_, i) => {
+        const e = makeSpark(s.key, 7 + Math.round(hash(i * 5 + 3) * 5), i % 2 ? '182,100,255' : '248,250,252');
+        e.angle = (i / 10) * Math.PI * 2 + (hash(i * 5 + 1) - 0.5) * 0.5;
+        e.dist = 130 + hash(i * 5 + 2) * 80;
+        return e;
+      });
       s.svg = svgLayer(root);
       s.line = path(s.svg, `M ${LINE.x0} ${LINE.y} L ${LINE.x1} ${LINE.y}`, C.line, 3, false);
       // the part of the line the founders have travelled, violet to UV
@@ -155,18 +160,23 @@
       s.heading.style.textShadow = glow > 0 ? `0 0 ${Math.round(30 * glow)}px rgba(182,100,255,${(0.7 * glow)
         .toFixed(3)})` : 'none';
       place(s.heading, 960, Math.round(lerp(HEADING.big.y, HEADING.top.y, settle)), 1, clamp(enter * 1.5));
-      // once the heading has settled, "20 years" is highlighted: the band sweeps in from the left, the words turn
-      // white over it, a light shines across them and they pulse; the band stays for the rest of the chapter
+      // once the heading has settled, "20 years" is put forward: a light sweeps through its letters, a glow blooms
+      // and settles to a faint lasting one, the words pop (anchored on their right, clear of "in the making") and
+      // sparkles burst out and fade
       const highlight = c[0] + 2.9;
-      const sweep = P(t, highlight, 0.5);
-      s.key.band.style.transform = `scaleX(${sweep.toFixed(4)})`;
-      s.key.txt.style.color = sweep >= 1 ? C.ink : '';
-      const shine = P(t, highlight + 0.45, 0.6, x => x);
-      s.key.shine.style.opacity = shine > 0 && shine < 1 ? 1 : 0;
-      s.key.shine.style.backgroundPosition = `${lerp(100, 0, shine).toFixed(2)}% 0`;
-      const pulse = swell(t, highlight + 0.45, 0.03);
-      s.key.style.transform = `scale(${pulse})`;
-      s.key.style.textShadow = pulse > 1 ? `0 0 ${Math.round((pulse - 1) * 900)}px rgba(182,100,255,.8)` : '';
+      const sweep = P(t, highlight, 0.7, x => x);
+      s.key.shine.style.opacity = sweep > 0 && sweep < 1 ? 1 : 0;
+      s.key.shine.style.backgroundPosition = `${lerp(100, 0, sweep).toFixed(2)}% 0`;
+      const bloom = Math.max(win(t, highlight, highlight + 0.6, 0.3), 0.35 * P(t, highlight + 0.3, 0.6));
+      s.key.txt.style.textShadow = bloom > 0
+        ? `0 0 ${Math.round(28 * bloom)}px rgba(182,100,255,${(0.9 * bloom).toFixed(3)})` : '';
+      s.key.style.transform = `scale(${swell(t, highlight + 0.2, 0.06)})`;
+      const cx = s.key.offsetWidth / 2, cy = s.key.offsetHeight / 2;
+      s.sparkles.forEach(e => {
+        const b = P(t, highlight + 0.25, 0.6, x => 1 - Math.pow(1 - x, 2));
+        const o = b > 0 && b < 1 ? Math.min(1, (1 - b) * 1.6) : 0;
+        place(e, cx + Math.cos(e.angle) * e.dist * b, cy + Math.sin(e.angle) * e.dist * 0.6 * b, 1, o);
+      });
 
       // when each milestone lights up, as the founders reach it, then its tile rises
       const tileIn = [c[0] + 3.6, c[1] + 1.6, c[2] + 1.3, c[3] + 1.8, c[4] + 1.8];

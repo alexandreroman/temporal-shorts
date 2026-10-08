@@ -70,9 +70,10 @@ and each chapter has a cinematic moment, listed in its visuals.
   - Visuals: The chapter opens before the subtitle on its heading, "20
     years in the making" ("20 years" in violet), very large in the middle:
     its letters close in from wide apart, sharpening, with a violet glow;
-    it holds, then shrinks up to the top, where a violet marker highlight
-    sweeps in behind "20 years", which turns white, shines and pulses; the
-    highlight stays. The founders' faces (cropped from
+    it holds, then shrinks up to the top, where "20 years" is put forward:
+    a white-to-violet light runs through its letters, a violet glow blooms
+    around them, they pop, and a burst of small sparkles fades out; a faint
+    glow stays. The founders' faces (cropped from
     the official photo) pop in under it, each with its name beside it:
     MAXIM FATEEV (CO-FOUNDER, CTO) on the left, SAMAR ABBAS (CO-FOUNDER,
     CEO) on the right. The composition rises as a timeline of five
