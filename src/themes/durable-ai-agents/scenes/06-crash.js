@@ -196,9 +196,10 @@
       place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
       if (t < c[2] + 0.2) setAppStatus(s.B, 'STARTING OVER', 'idle');
       else setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
-      setArrivalGlow(s.B, t, bIn, c[2] - 0.1);
-      // NEW INSTANCE pops on B once it is almost in place and is gone as the rerun starts
-      placeNewTag(s.newTag, t, newAt, c[2] - 0.2, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
+      setArrivalGlow(s.B, t, bIn, c[2] - 0.3);
+      // NEW INSTANCE pops on B once it is almost in place and is gone at c[2], before the rerun, so a presenter hold
+      // there shows the glow and the tag at rest
+      placeNewTag(s.newTag, t, newAt, c[2] - 0.3, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
 
       // context: filled by the first run, emptied by the crash, refilled by the rerun. The panel moves with the
       // instance on screen (A, then B), so it never floats without its app; both are gone when it switches.

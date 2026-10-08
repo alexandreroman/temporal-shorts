@@ -133,14 +133,14 @@ Lisbon.
     to the same place, its border glowing violet, the step tiles clear, and
     a NEW INSTANCE tag pops in where APP CRASH stood. A violet AGENT
     WORKFLOW card flies from the first history row to its status, which
-    turns TAKING OVER; the tag and the glow fade before the replay.
+    turns TAKING OVER; the tag fades.
 - **1:41** Instance B replays the history: steps 1 to 4 return their saved
   results, then step 5 runs for real.
-  - Visuals: rows 1 to 4 are handed back one by one (REUSED, "STEP n: FROM
-    THE HISTORY"), the steps re-check without running, the counters show
-    NOT RE-BILLED / NOT RE-RUN; step 5 then runs and is SAVED (Model: write
-    the reply).
-- **1:51** Saved results are reused, not redone: no finished model call is
+  - Visuals: B's violet glow fades, then rows 1 to 4 are handed back one by
+    one (REUSED, "STEP n: FROM THE HISTORY"), the steps re-check without
+    running, the counters show NOT RE-BILLED / NOT RE-RUN; step 5 then runs
+    and is SAVED (Model: write the reply).
+- **1:50** Saved results are reused, not redone: no finished model call is
   paid again, no finished tool reruns.
   - Visuals: tags "REUSED, NOT RE-BILLED" (model rows) and "REUSED, NOT
     RE-RUN" (tool rows); counters glow: MODEL CALLS BILLED 3 "NOT 5",

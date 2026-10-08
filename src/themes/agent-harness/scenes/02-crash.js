@@ -261,9 +261,10 @@
       // in the panel. Both shake with the app side and leave with A's CRASHED status, before A drops.
       placeFlash(s.flash, t, crashAt);
       placeCrashMarks(s.crash, t, crashAt, tagAt, aOut, ax, ay);
-      // takeover: NEW INSTANCE pops in B once it is almost in place and leaves before the replay; Temporal hands it
-      // the agent's Workflow, a card from the first history row to its status, which then reads TAKING OVER
-      placeNewTag(s.newTag, t, bIn + 0.5, replay[0] - 0.6, CRASH_TAG.x + arrive.dx, CRASH_TAG.y);
+      // takeover: NEW INSTANCE pops in B once it is almost in place and is gone at c[3], before the replay, so a
+      // presenter hold there shows the panel at rest; Temporal hands it the agent's Workflow, a card from the first
+      // history row to its status, which then reads TAKING OVER
+      placeNewTag(s.newTag, t, bIn + 0.5, c[3] - 0.3, CRASH_TAG.x + arrive.dx, CRASH_TAG.y);
       flyChip(s.handCard, t, handOff, CARD_X, rowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });

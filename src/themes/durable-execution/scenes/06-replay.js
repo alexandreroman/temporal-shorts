@@ -118,7 +118,8 @@
       else if (t < c[2] + 0.2) setAppStatus(workerB, 'REPLAYING…', 'running');
       else if (t < completed) setAppStatus(workerB, 'RUNNING', 'running');
       else setAppStatus(workerB, 'DONE', 'stopped');
-      setArrivalGlow(workerB, t, bIn, c[1] - 0.1);
+      // gone at c[1], so a presenter hold there shows it at rest
+      setArrivalGlow(workerB, t, bIn, c[1] - 0.3);
 
       // the code card moves with the Worker on screen (Worker A, then Worker B), so it never floats without a panel;
       // both are gone when it switches

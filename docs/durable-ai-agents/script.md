@@ -128,11 +128,12 @@ the figures follow the step count if the scenario changes.
     in to the same place with a pulsing violet glow, a NEW INSTANCE tag and
     an empty memory, status STARTING OVER: no history to resume from. The
     steps reset and a "Start over" arrow draws from Invite back to Calendar.
+    The tag and glow fade.
 - **2:03** Every LLM call is made, and paid for, a second time, just to rebuild
   the context. And the table gets booked twice.
-  - Visuals: The tag and glow fade as instance B starts RUNNING THE AGENT
-    again: steps 1 to 3 re-run and refill its memory. Each LLM call is
-    billed again and hits the counter: the number swells, the tile jolts
+  - Visuals: Instance B starts RUNNING THE AGENT again: steps 1 to 3
+    re-run and refill its memory. Each LLM call is billed again and hits
+    the counter: the number swells, the tile jolts
     and flashes red with a red glow, and a red "+1 CALL" chip with a coin
     pops out of its top and floats up as it fades; after the third, the
     counter rests at 6 "+3 wasted" with a red border. The booking runs

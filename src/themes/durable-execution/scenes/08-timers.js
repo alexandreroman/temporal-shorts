@@ -202,8 +202,8 @@
       setAppStatus(workerB, 'VERSION 2', busy ? 'running' : 'stopped');
       setStatusBlock(s.status, status);
       place(s.status, WK.x + wkDx, BLOCK.y + wkDy, 1, P(t, c[0] + 0.6, 0.4) * wkOn);
-      // the glow fades before day 30
-      setArrivalGlow(workerB, t, bIn, c[2] - 0.1);
+      // the glow is gone before day 30, at c[2], so a presenter hold there shows it at rest
+      setArrivalGlow(workerB, t, bIn, c[2] - 0.3);
       // NEW WORKER pops on Worker B once it is almost in place and leaves before day 30
       placeNewTag(s.newWorker, t, bIn + 0.5, c[2] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y);
 
