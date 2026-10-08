@@ -132,12 +132,12 @@ the laptop, NOTIFY Sam.
 - **2:13** Sam's laptop is one case: any step where a person decides fits the
   same pattern.
   - Visuals: 4 use-case tiles pop in one at a time across the frame, in the
-    recap's slots, each with its examples in slate under the label:
-    APPROVALS (check) "expenses, purchases, leave" / REVIEWS (eye)
-    "content, code, loan files" / SIGNATURES (pen) "contracts, offers,
-    NDAs" / AI AGENT APPROVALS (robot) "actions, tool calls".
-- **2:19** Approvals, reviews, signatures, a user confirming an AI agent's
-  tool call: the Workflow waits, then carries on.
+    recap's slots, each with an example in slate under the label: FRAUD
+    REVIEWS (flag) "a flagged payment waits" / IDENTITY CHECKS (ID card)
+    "an analyst verifies an ID" / DEPLOY APPROVALS (upload arrow) "a release
+    waits for a go" / AI AGENT APPROVALS (robot) "actions, tool calls".
+- **2:19** Fraud reviews, identity checks, deploy approvals, an AI agent's
+  tool calls: the Workflow waits for a person.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 

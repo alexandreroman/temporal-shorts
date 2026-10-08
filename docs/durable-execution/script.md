@@ -268,19 +268,19 @@ bright red to green.
 
 - **3:16** Order #1042 is one example: any process that must run to the end
   fits a Workflow.
-  - Visuals: 4 use-case tiles pop in one at a time, each with its examples
-    in slate under the label: PAYMENTS (card) "charge, refund, transfer" /
-    DATA PIPELINES (table) "extract, transform, load" / INFRASTRUCTURE
-    (server) "provision, deploy, scale" / ONBOARDING (person) "sign-up,
-    checks, welcome".
-- **3:22** Payments, data pipelines, infrastructure, onboarding: a crash
-  never leaves any of them half done.
+  - Visuals: 4 use-case tiles pop in one at a time, each with an example
+    in slate under the label: MONEY TRANSFERS (dollar coin) "debit, credit,
+    never twice" / SUBSCRIPTIONS (calendar) "bill every month, for years" /
+    DATA PIPELINES (table) "a nightly batch resumes" / CLOUD PROVISIONING
+    (cloud) "a cluster comes up in steps".
+- **3:22** Money transfers, subscriptions, data pipelines, cloud
+  provisioning: a crash never leaves any of them half done.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **3:31** Durable Execution: your code runs to completion, whatever fails
+- **3:32** Durable Execution: your code runs to completion, whatever fails
   along the way.
   - Visuals: The 4 step tiles joined by links, each with a neon check
     badge, title "Durable Execution", tagline "YOUR CODE RUNS TO

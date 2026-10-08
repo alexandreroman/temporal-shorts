@@ -297,10 +297,9 @@ function flyResultToHistory(chip, t, at, i) {
 function flyResultToCode(chip, t, at, i) {
   flyChip(chip, t, at, EH.rowStartX, ehRowY(ehStepRow(i)), EH.lineEndX, ehLineY(ehStepLine(i)));
 }
-// ---------- Worker status icons (chapter 8): free (pauseLines), restarting (power), deploying a new version
-// (upload); pauseLines is drawn with two lines, agent-harness's `pause` with two bars
+// ---------- Worker status icons (chapter 8): free (pauseLines), restarting (power); deploying a new version uses
+// the engine's `upload`. pauseLines is drawn with two lines, agent-harness's `pause` with two bars
 Object.assign(ICONS, {
   pauseLines: '<path d="M8.5 5v14M15.5 5v14"/>',
   power: '<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
-  upload: '<path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 14v6h16v-6"/>',
 });

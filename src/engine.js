@@ -131,6 +131,12 @@ const ICONS = {
   play: '<path d="M7 4l13 8-13 8z"/>',
   retry: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+  upload: '<path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 14v6h16v-6"/>',
+  bot: '<rect x="4" y="8" width="16" height="12"/><path d="M12 4.5V8M9 13h.01M15 13h.01M9.5 16.5h5"/>'
+    + '<circle cx="12" cy="3.5" r="1"/>',
+  coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.9-1.7-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.8 6 1.5 6 4.3'
+    + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
+  cloud: '<path d="M7 19h10.5a4.5 4.5 0 0 0 .4-9A6 6 0 0 0 6.3 11.6 3.8 3.8 0 0 0 7 19z"/>',
   hourglass: '<path d="M6 3h12M6 21h12"/><path d="M8 3v3.5l4 5.5-4 5.5V21M16 3v3.5L12 12l4 5.5V21"/>'
     + '<path d="M10 18.5h4"/>',
   // 8 trapezoidal teeth (tips at r 10, root circle r 7) around a center hole; centered on (12, 12) for gearSpin()

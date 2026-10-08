@@ -53,12 +53,25 @@ the visuals belong to each theme (last section).
 - Recap: **What you get** has its own scene file after the topic
   chapters. Recap tiles and subtitles live there, never in a topic
   chapter, so every chapter title stays true to its content.
-- Use cases: in durable-execution, human-in-the-loop and
-  durable-ai-agents, a **What you can build** chapter follows the recap,
-  right before the outro: 4 `useCaseTile`s (icon, label, slate example
-  line) land during the first of 2 subtitles ("<running example> is one
-  example: any … fits"), each lit as the second names it. agent-harness
-  ends on its recap. Topic lists in `script.md` leave out both chapters.
+- Use cases: every explainer has a **What you can build** chapter after
+  the recap, right before the outro (`NN-use-cases.js`); a product
+  presentation (agent-harness) ends on its recap. Topic lists in
+  `script.md` leave out both chapters.
+  - 4 `useCaseTile`s (icon, uppercase label, lowercase slate example
+    line) land during the first of 2 subtitles ("<running example> is one
+    example: any … fits"); the second names the 4 tiles in order and ends
+    on the benefit; each tile lights (UV border) as its name is read:
+    `NAMED_AT` offsets from `c[1]` = name position at 16 characters per
+    second + 0.3 s, the last one lit `LAST_LIT` 1.2 s.
+  - Tiles are concrete use cases, named scenarios matched to the audience
+    ("Fraud reviews", "Money transfers", "Deep research"), never generic
+    actions or broad categories ("Approvals", "Payments", "Documents").
+    Examples are short concrete phrases ("a flagged payment waits"),
+    about 300 px at most in the tile.
+  - An AI use case reads as a person confirming an agent's action or tool
+    call ("AI agent approvals", "chatbots with human approval").
+  - The user picks the use cases: propose 2 or 3 sets of 4 tiles, with
+    examples, before building the chapter.
 - Outro: `makeEndCard(root, title, tagline, { pill })` in every theme,
   same sizes everywhere: the theme name as title, cased as on its home
   card ("Durable AI Agents"), a violet uppercase tagline stating the
@@ -132,6 +145,8 @@ the visuals belong to each theme (last section).
 - Theme-local `shared.js`: header `// ===================== <Theme name>
   helpers (shared by the scenes of this theme)`; extends `ICONS` with
   `Object.assign`; holds the running example and theme-only components.
+  An icon used by two themes or more is defined once, in `ICONS` in
+  `src/engine.js`; a theme's `shared.js` holds only its own icons.
 - `docs/<theme>/script.md`: `# Script and timeline: <card title>`, the
   shared preamble (subtitles are the only narration, `autoDur` + `after`,
   `make timeline THEME=<theme>`, dated snapshot), `## Audience and goal`
@@ -186,6 +201,9 @@ CLAUDE.md; a section below and the card order in
   least once and stay idempotent: idempotency keys are never shown as
   plumbing Temporal removes (ch3 tiles: retry loops, status table, message
   queue, timers, cleanup jobs, recovery scripts).
+- Ch10 use cases, in order: money transfers (coin, "debit, credit, never
+  twice"), subscriptions (calendar), data pipelines (table), cloud
+  provisioning (cloud, "a cluster comes up in steps").
 
 ### human-in-the-loop
 
@@ -197,8 +215,9 @@ CLAUDE.md; a section below and the card order in
   Temporal keeps the history outside the app (ch3); the decision arrives
   as a Signal, any copy replays and resumes after the wait (ch4); durable
   timers drive reminders and escalation (ch5); recap (ch6); the use cases
-  the pattern fits: approvals, reviews, signatures, and AI agent approvals,
-  a user confirming an agent's action or tool call (ch7).
+  the pattern fits: fraud reviews (flag), identity checks (ID card), deploy
+  approvals (upload), and AI agent approvals, a person confirming an
+  agent's action or tool call (ch7).
 - Ch3 and ch4 share the durable-ai-agents ch7 layout: step row on top, app
   panel with a WORKFLOW card left, TEMPORAL panel with the Event History
   right. Replayed rows get REPLAYED, the Signal row keeps SAVED; "WAITING
@@ -231,6 +250,9 @@ CLAUDE.md; a section below and the card order in
   page, shows with the gauge and follows it (12,400 at FULL); each step
   plays a money-spent effect (coin bump, a coin flying off in a direction
   that changes at each step, from a fixed list, "+N").
+- Ch9 use cases, in order: deep research, multi-agent (a lead agent and
+  its helpers), chatbots with human approval, background agents (clock,
+  "watch for days, then act").
 - Pans: ch1, ch5, ch7.
 
 ### agent-harness

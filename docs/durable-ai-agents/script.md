@@ -169,17 +169,17 @@ the figures follow the step count if the scenario changes.
 - **2:53** Lunch with Marie is one example: any agent that works through many
   steps needs Durable Execution.
   - Visuals: 4 use-case tiles pop in one at a time, each with its examples
-    in slate under the label: CUSTOMER SUPPORT (person) "answers, refunds,
-    follow-ups" / RESEARCH (magnifier) "hours of reading, one report" /
-    DOCUMENTS (page) "invoices, contracts, claims" / CODING AGENTS (code)
-    "plan, edit, test, repeat".
-- **3:00** Customer support, research, documents, coding: the longer the
-  task, the more a crash would cost.
+    in slate under the label: DEEP RESEARCH (magnifier) "hours of reading,
+    one report" / MULTI-AGENT (a lead bot linked to two helpers) "a lead
+    agent and its helpers" / CHATBOTS (bot) "acts once a person approves" /
+    BACKGROUND AGENTS (clock) "watch for days, then act".
+- **3:00** Deep research, multi-agent teams, chatbots with human approval,
+  background agents: all survive crashes.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **3:08** Durable AI agents keep their progress and your budget.
+- **3:09** Durable AI agents keep their progress and your budget.
   - Visuals: LLM orb, title "Durable AI Agents", tagline "KEEP THEIR
     PROGRESS AND YOUR BUDGET", Temporal logo.

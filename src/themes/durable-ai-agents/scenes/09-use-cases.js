@@ -4,12 +4,15 @@
 {
   // A row of 4 tiles, a little wider than the recap's to fit the examples (x 180..1740), centered on (960, 522)
   const USES = [
-    ['user', 'Customer support', 'answers, refunds, follow-ups'],
-    ['search', 'Research', 'hours of reading, one report'],
-    ['book', 'Documents', 'invoices, contracts, claims'],
-    ['code', 'Coding agents', 'plan, edit, test, repeat'],
+    ['search', 'Deep research', 'hours of reading, one report'],
+    ['agentTeam', 'Multi-agent', 'a lead agent and its helpers'],
+    ['bot', 'Chatbots', 'acts once a person approves'],
+    ['clock', 'Background agents', 'watch for days, then act'],
   ];
   const TILE = { y: 522, w: 360, h: 280, pitch: 400 };
+  // Seconds after c[1] when subtitle 2 names each tile; a tile stays lit until the next one is named
+  const NAMED_AT = [0.3, 1.3, 2.4, 4.3];
+  const LAST_LIT = 1.2;
 
   scene({
     chapter: 9, title: 'What you can build',
@@ -19,8 +22,10 @@
         // the last tile lands at c[0] + 4.45, within the subtitle
       },
       {
-        text: "Customer support, research, documents, coding: the longer the task, the more a crash would cost.",
-        // the last tile is lit until c[1] + 3.9; the full row then holds through this pause until the fade
+        text: "Deep research, multi-agent teams, chatbots with human approval, background agents: "
+          + "all survive crashes.",
+        // the last tile is lit until c[1] + 5.5; the full row then holds through the end of the subtitle and
+        // this pause until the fade
         after: 0.6,
       },
     ],
@@ -32,8 +37,9 @@
       s.uses.forEach((e, i) => {
         const p = P(t, c[0] + 1.6 + i * 0.8, 0.45, backOut);
         place(e, 960 + (i - 1.5) * TILE.pitch, TILE.y, p, clamp(p * 2));
-        const named = c[1] + 0.3 + i * 0.9;
-        e.style.borderColor = t >= named && t < named + 0.9 ? C.uv : C.line;
+        const litFrom = c[1] + NAMED_AT[i];
+        const litUntil = i + 1 < NAMED_AT.length ? c[1] + NAMED_AT[i + 1] : litFrom + LAST_LIT;
+        e.style.borderColor = t >= litFrom && t < litUntil ? C.uv : C.line;
       });
     }
   });
