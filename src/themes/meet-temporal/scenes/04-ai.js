@@ -267,7 +267,11 @@
 
       // the statement before the rewind, over a scrim that dims the failed run: two lines in the brand font,
       // "doesn't survive" in red; built under the VCR display, which shows over the scrim
-      s.scrim = E(root, '', '', { width: '2400px', height: '1400px', background: 'var(--bg)' });
+      // stage black, 84% opaque in the middle, darker towards the edges (a soft vignette)
+      s.scrim = E(root, '', '', {
+        width: '2400px', height: '1400px',
+        background: 'radial-gradient(ellipse 50% 50% at center, rgba(20,20,20,.84) 40%, rgba(20,20,20,.93) 100%)',
+      });
       s.msg = E(root, 'Without Temporal, an AI agent<br>'
         + `<span style="color:${C.red}">doesn't survive</span> a production incident.`, '', {
         width: '1600px', textAlign: 'center', fontSize: '60px', lineHeight: '75px', fontWeight: 700, color: C.ink,
@@ -309,9 +313,9 @@
       const firstRun = [0, 1, 2].map(i => loopAt + AGENT_LOOP_DRAWN + 0.25 + i * TURN);
       // the crash, in held stages: impact (the token stops dead mid-arc in step 4's turn, shake, flash, glitch, app
       // A CRASHED), break (the arcs shatter and drift down, the token fades, the nodes dim red), loss (each done row
-      // loses its result, top to bottom, and PROGRESS LOST holds); then A leaves and B slides into its place, NEW
-      // APP INSTANCE held; then the restart on B, which has nothing to resume from: the pieces fly back and steps
-      // 1 to 3 run again
+      // loses its result, top to bottom, and PROGRESS LOST holds); then A leaves with its broken loop and B slides
+      // into its place with an intact, idle one, NEW APP INSTANCE held; then the restart on B, which has nothing to
+      // resume from: steps 1 to 3 run again
       const crashAt = c[1] + 2.8;
       const breakAt = crashAt + 0.8, lossAt = crashAt + 2.0;
       const lostAt = crashAt + 2.4;
@@ -372,13 +376,17 @@
       const rewinding = tf >= restart && tf < rewindAt + 1.4;
       if (rewinding) deg = lerp(frozenDeg, -90 - 360, ease(P(tf, rewindAt, 1.2, x => x)));
 
-      // the arcs stay whole through the impact, are shards from the break until the pieces fly back
-      const shattered = tf >= breakAt && tf < restart;
-      const dim = P(tf, breakAt, 0.6) * (1 - P(tf, restart - 0.6, 0.6));
+      // the arcs stay whole through the impact and are shards from the break; the broken state belongs to A and
+      // leaves with it (the shards, the red, the grey LLM and its question mark fade as A leaves), and B arrives
+      // with an intact, idle loop, its arcs drawn again and no token until the restart
+      const shattered = tf >= breakAt && tf < bOn1;
+      const dim = P(tf, breakAt, 0.6) * (1 - P(tf, aOut1, 0.6));
+      const arcO = tf < breakAt ? 1 : P(tf, bOn1, 0.4);
+      const q = crashed ? P(tf, crashAt + 0.2, 0.3) * (1 - P(tf, aOut1, 0.3)) : 0;
       const gx = sx + glitch.dx;
       placeAgentLoop(s.loop, tf, loopAt, {
         deg: crashed ? null : deg, centerAt: c[0] + 1.2, centerO: 1 - win(tf, crashAt, restart + 2.0, 0.25),
-        arcO: shattered ? 0 : 1, q: crashed ? P(tf, crashAt + 0.2, 0.3) : 0, dx: gx + ax, dy: sy + ay,
+        arcO, q, dx: gx + ax, dy: sy + ay,
         // THINK is there from the first frame: the previous chapter's AI hub turned into it
         thinkIn: -1,
         // the loop dims while its durable app is down
@@ -401,13 +409,13 @@
       });
       s.loop.think.root.style.filter = dim > 0 ? `grayscale(${(0.7 * dim).toFixed(3)})` : '';
       s.loop.labels.forEach(e => { e.style.color = dim > 0.5 ? C.red : 'var(--ink)'; });
-      // the shards drift and fall slowly through the break, rest dimmed, then fly back into place at the restart
-      const fallT = clamp((tf - breakAt) / 1.2) * 1.2 * (1 - P(tf, restart - 0.6, 0.6));
+      // the shards drift and fall slowly through the break, rest dimmed, and fade out as A leaves
+      const fallT = clamp((tf - breakAt) / 1.2) * 1.2;
       s.shards.forEach(shard => {
         const dx = shard.vx * fallT * 0.5, dy = shard.vy * fallT * 0.5 + 110 * fallT * fallT;
         shard.setAttribute('transform', `translate(${dx.toFixed(2)} ${dy.toFixed(2)}) `
           + `rotate(${(shard.spin * fallT * 0.5).toFixed(2)} ${shard.mid[0]} ${shard.mid[1]})`);
-        draw(shard, 1, shattered ? 1 - 0.6 * P(tf, lossAt, 0.6) * (1 - P(tf, restart - 0.6, 0.3)) : 0);
+        draw(shard, 1, shattered ? (1 - 0.6 * P(tf, lossAt, 0.6)) * (1 - P(tf, aOut1, 0.6)) : 0);
       });
       // the token's comet tail: sparks along the loop behind it, smaller and fainter
       // (behind it while rewinding too, so the tail follows the backward run)
@@ -607,7 +615,7 @@
       // letter spacing tightening, with one red glitch flicker; they hold, then fade as the rewind starts
       const mIn = P(t, msgAt, 0.7, easeOut);
       const msgO = 1 - P(t, msgOut, 0.35);
-      place(s.scrim, 960 - shiftX, 540 - shiftY, 1, 0.75 * P(t, msgAt, 0.5) * msgO);
+      place(s.scrim, 960 - shiftX, 540 - shiftY, 1, P(t, msgAt, 0.5) * msgO);
       const flicker = t >= msgAt + 1.0 && t < msgAt + 1.1;
       place(s.msg, 960 - shiftX + (flicker ? 6 : 0), 515 - shiftY + Math.round(24 * (1 - mIn)), 1, mIn * msgO);
       s.msg.style.letterSpacing = `${(0.06 * (1 - mIn)).toFixed(4)}em`;
