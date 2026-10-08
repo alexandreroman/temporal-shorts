@@ -93,9 +93,23 @@
         width: '700px', height: '700px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(182,100,255,.45) 0%, rgba(68,76,231,.18) 40%, rgba(68,76,231,0) 70%)',
       });
-      s.heading = E(root, '<span style="color:var(--violet)">20 years</span> in the making', '', {
+      // "20 years" carries a marker highlight (a band swept in behind the words), a shine (a copy of the words
+      // filled with a moving light) and a pulse, all in em so they follow the heading's size
+      s.heading = E(root,
+        '<span class="key" style="position:relative;display:inline-block;color:var(--violet)">'
+        + '<i class="band" style="position:absolute;left:-.06em;right:-.04em;top:.34em;height:.6em;'
+        + 'border-radius:.08em;background:rgba(182,100,255,.45);transform-origin:0 50%;transform:scaleX(0)"></i>'
+        + '<span class="txt" style="position:relative">20 years</span>'
+        + '<span class="shine" style="position:absolute;left:0;top:0;color:transparent;'
+        + '-webkit-background-clip:text;background-clip:text;background-size:300% 100%;'
+        + 'background-image:linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.95) 50%, '
+        + 'rgba(255,255,255,0) 60%)">20 years</span></span> in the making', '', {
         whiteSpace: 'nowrap', lineHeight: 1,
       });
+      s.key = s.heading.querySelector('.key');
+      s.key.band = s.key.querySelector('.band');
+      s.key.txt = s.key.querySelector('.txt');
+      s.key.shine = s.key.querySelector('.shine');
       s.svg = svgLayer(root);
       s.line = path(s.svg, `M ${LINE.x0} ${LINE.y} L ${LINE.x1} ${LINE.y}`, C.line, 3, false);
       // the part of the line the founders have travelled, violet to UV
@@ -141,6 +155,18 @@
       s.heading.style.textShadow = glow > 0 ? `0 0 ${Math.round(30 * glow)}px rgba(182,100,255,${(0.7 * glow)
         .toFixed(3)})` : 'none';
       place(s.heading, 960, Math.round(lerp(HEADING.big.y, HEADING.top.y, settle)), 1, clamp(enter * 1.5));
+      // once the heading has settled, "20 years" is highlighted: the band sweeps in from the left, the words turn
+      // white over it, a light shines across them and they pulse; the band stays for the rest of the chapter
+      const highlight = c[0] + 2.9;
+      const sweep = P(t, highlight, 0.5);
+      s.key.band.style.transform = `scaleX(${sweep.toFixed(4)})`;
+      s.key.txt.style.color = sweep >= 1 ? C.ink : '';
+      const shine = P(t, highlight + 0.45, 0.6, x => x);
+      s.key.shine.style.opacity = shine > 0 && shine < 1 ? 1 : 0;
+      s.key.shine.style.backgroundPosition = `${lerp(100, 0, shine).toFixed(2)}% 0`;
+      const pulse = swell(t, highlight + 0.45, 0.03);
+      s.key.style.transform = `scale(${pulse})`;
+      s.key.style.textShadow = pulse > 1 ? `0 0 ${Math.round((pulse - 1) * 900)}px rgba(182,100,255,.8)` : '';
 
       // when each milestone lights up, as the founders reach it, then its tile rises
       const tileIn = [c[0] + 3.6, c[1] + 1.6, c[2] + 1.3, c[3] + 1.8, c[4] + 1.8];
