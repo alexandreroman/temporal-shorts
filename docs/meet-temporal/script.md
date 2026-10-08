@@ -85,7 +85,7 @@ and each chapter has a cinematic moment, listed in its visuals.
   - Visuals: Maxim's face travels to 2009 with a motion trail; Samar's name
     fades and his face flies to 2009: AMAZON / "Simple Workflow Service" /
     AWS WORKFLOW SERVICE.
-- **0:25** In 2014 at Microsoft, Samar co-created the Durable Task
+- **0:26** In 2014 at Microsoft, Samar co-created the Durable Task
   Framework, the base of Azure Durable Functions.
   - Visuals: Samar travels to 2014: MICROSOFT / "Durable Task Framework" /
     AZURE DURABLE FUNCTIONS.
@@ -93,7 +93,7 @@ and each chapter has a cinematic moment, listed in its visuals.
   since 2017, it ran Uber Eats orders.
   - Visuals: Both faces reach 2015: UBER / "Cadence" / UBER'S WORKFLOW
     ENGINE.
-- **0:41** In October 2019, they left Uber to found Temporal: Cadence's
+- **0:40** In October 2019, they left Uber to found Temporal: Cadence's
   successor, open source under MIT.
   - Visuals: Both travel to 2019: a highlighted tile (UV border and glow)
     THEIR OWN COMPANY / official Temporal logo / OPEN SOURCE, MIT LICENSE
@@ -129,7 +129,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 03 Where Temporal is used
 
-- **1:11** A Workflow is any process that must finish correctly: payments,
+- **1:12** A Workflow is any process that must finish correctly: payments,
   orders, bookings, subscriptions.
   - Visuals: A compact hub-and-spoke map: the official Temporal symbol,
     large, glows in the middle; four short spokes draw out with a pulse of
@@ -159,102 +159,99 @@ and each chapter has a cinematic moment, listed in its visuals.
     at its final place: the halo fades into the LLM's own glow while the
     rest of the agentic loop of Durable AI Agents emerges around it: THINK
     (the LLM orb) on top, ACT (neon play tile) and OBSERVE (eye tile)
-    below, "AGENTIC LOOP" in the middle. On the right, as in Durable AI
-    Agents chapter 5, the goal card "Book lunch with Marie on Thursday."
-    (YOU, with a discreet "RUN 1" tag), then one row per step: a neon
-    token with a comet tail runs one turn of the loop per step (1.5 s), the
-    node it passes swelling, the LLM thinking at THINK; each row slides in
-    highlighted while its turn runs, its result and check appearing at the
-    end: Check the calendar
-    (Thu 12:30 is free), Find a restaurant (Chez Paulette), Book a table
-    (table for 2, confirmed). LLM CALLS BILLED counts one call per turn
-    (3): at each call the count swells and a neon coin drops onto a stack
-    inside the tile, with a small bounce and a glint; a violet "WAITS FOR A
-    PERSON" tag shows under the loop.
+    below, "AGENTIC LOOP" in the middle. The loop stays at this place and
+    size, 80% of Durable AI Agents', for the whole chapter. On the right, as
+    in Durable AI Agents chapter 5, the goal card "Book lunch with Marie on
+    Thursday." (YOU, with a discreet "RUN 1" tag), then one row per step,
+    all as wide and as high as the goal card, 20 px apart: a neon token with
+    a comet tail runs one turn of the loop per step (1.5 s), the node it
+    passes swelling, the LLM thinking at THINK; each row slides in
+    highlighted while its turn runs, a small neon coin dropping on it for
+    its LLM call, its result and check appearing at the end: Check the
+    calendar (Thu 12:30 is free), Find a restaurant (Chez Paulette), Book a
+    table (table for 2, confirmed). A violet "WAITS FOR A PERSON" tag shows
+    under the loop.
 - **1:35** Every LLM call costs time and money. Without Durable Execution,
   a crash means starting over.
-  - Visuals: The bill stands out. Then the crash, in held stages. Impact:
-    the token stops dead mid-arc in step 4's turn (the invite), the screen
-    shakes, a red flash and a glitch, the LLM shows a question mark.
-    Break: the loop's arcs crack into red pieces that drift and fall
-    slowly, the token fades out, the nodes and their labels dim to red.
-    Loss: top to bottom, each done row's result is corrupted into glyphs,
-    then dissolves into falling particles, its check turns into a red
-    cross that vanishes, and the row greys out; a big red PROGRESS LOST
-    pops over the broken loop with a jolt and a glow, and holds. The bill
-    stays as it is, fully visible: the money spent is not lost. Restart,
-    held: a violet "RESTARTING FROM STEP 1" banner with a rewind icon
-    turning backwards replaces PROGRESS LOST over the loop, the pieces fly
-    back and the loop re-forms, and the token reappears where it stopped
-    and rewinds backwards a full turn, back to THINK; a bar of light wipes
-    up the list, leaving the three steps empty, to do again, and the goal
-    card's "RUN 1" tag turns to a red "RUN 2". Then the agent runs steps 1
-    to 3 again, at a calmer pace (2 s a turn): each row reads "RUNNING
-    AGAIN" while its turn runs, then gets its result and check, and each
-    LLM call is billed again, a red coin landing on top of the stack: 4,
-    5, 6, "+3 PAID AGAIN", the pile now twice as high as what was useful. A red
-    WITHOUT TEMPORAL tag then holds over the loop, on that outcome: six LLM
-    calls billed for three useful steps.
+  - Visuals: The three coins swell one after the other. Then the crash, in
+    held stages. Impact: the token stops dead mid-arc in step 4's turn (the
+    invite), the screen shakes, a red flash and a glitch, the LLM shows a
+    question mark. Break: the loop's arcs crack into red pieces that drift
+    and fall slowly, the token fades out, the nodes and their labels dim to
+    red. Loss: top to bottom, each done row's result is corrupted into
+    glyphs, then dissolves into falling particles, its check turns into a
+    red cross that vanishes, and the row greys out; a big red PROGRESS LOST
+    pops over the broken loop with a jolt and a glow, and holds. The coins
+    stay bright: the money spent is not lost. Restart, held: a violet
+    "RESTARTING FROM STEP 1" banner with a rewind icon turning backwards
+    replaces PROGRESS LOST over the loop, the pieces fly back and the loop
+    re-forms, and the token reappears where it stopped and rewinds
+    backwards a full turn, back to THINK; a bar of light wipes up the list,
+    leaving the three steps empty, to do again, and the goal card's "RUN 1"
+    tag turns to a red "RUN 2". Then the agent runs steps 1 to 3 again, at
+    a calmer pace (2 s a turn): each row reads "RUNNING AGAIN" while its
+    turn runs and its LLM call is paid again, a red coin landing on its
+    neon one; then the row reads "PAID AGAIN" in red and gets its result
+    and check. A red WITHOUT TEMPORAL tag then holds over the loop, on that
+    outcome: six LLM calls paid for three useful steps.
 - **1:51** Let's rewind and run the same agent with Temporal.
   - Visuals: A VCR rewind: a blinking REWIND display with a timecode
     counting backwards in the top left corner, tracking noise bands and
     scanlines over the stage, a color fringe; the failed run plays
-    backwards, fast: the reruns undo and the red coins fly back up out of
-    the stack (6 to 3), the list rewinds to its greyed rows, PROGRESS LOST
-    and the crash un-happen, the token runs backwards round the loop, the
-    first run's rows slide out and the neon coins leave, back to the start:
-    the goal card, empty steps, 0 billed. The tape stops with a jolt and
-    PLAY shows for a moment.
-- **1:56** There's a better way: with Durable Execution, an agent never
-  loses its progress.
-  - Visuals: The failed run clears: the loop, the steps and the bill fade
-    out. A message card on the dark stage, on a soft violet glow: the
-    official Temporal logo glows up, "There's a better way" rises below it
-    (108 px, "better" in violet with a glow) as its letters close in, then
-    DURABLE EXECUTION in violet mono; it holds. Then the card fades while
-    a glowing UV ring leaves it and condenses around the loop, which comes
-    back inside it.
-- **2:03** With Temporal, every step the agent takes is saved in an Event
+    backwards, fast: the reruns undo and the red coins fly back up, the
+    list rewinds to its greyed rows, PROGRESS LOST and the crash un-happen,
+    the token runs backwards round the loop, the first run's rows slide out
+    with their coins, back to the start: the goal card and empty steps. The
+    tape stops with a jolt and PLAY shows for a moment. Then the failed
+    run's steps fade around the loop, which does not move, and a glowing UV
+    Temporal ring draws itself around it; APP INSTANCE A frames it,
+    TEMPORAL ("OUTSIDE THE APP") with an empty EVENT HISTORY enters on the
+    right, on the same edges as the failed run's column, and a WITH
+    TEMPORAL tag pops in the loop's middle. The app panel and the Temporal
+    panel share their top and bottom edges, 40 px apart.
+- **1:58** With Temporal, every step the agent takes is saved in an Event
   History, outside the app.
-  - Visuals: The loop, inside its Temporal ring, now runs in APP INSTANCE A
-    on the left, a WITH TEMPORAL tag in its middle. On the right, a
-    TEMPORAL panel ("OUTSIDE THE APP") with an EVENT HISTORY, and under it
-    a fresh LLM CALLS BILLED tile. The agent runs steps 1 to 3, one turn
-    each: its LLM call (an "LLM CALL" card from THINK) and its tool result
-    (a "TOOL CALL" card from ACT) fly into the history, where the rows "LLM
-    call: check the calendar", "Calendar: Thu 12:30 is free", and so on
-    turn SAVED; a neon coin lands on the bill at each call: 1, 2, 3.
-- **2:11** After a crash, the agent gets its saved results back and
+  - Visuals: The agent runs steps 1 to 3, slowly, one turn each (3.2 s):
+    its LLM call, an "LLM CALL" card, leaves THINK, flies to the history
+    and docks at its row's left end, never over the row's text; the row
+    "LLM call: check the calendar" is written and turns SAVED, highlighted
+    for a moment; then a "TOOL CALL" card leaves ACT as the token passes
+    it, and "Calendar: Thu 12:30 is free" is saved the same way, and so on.
+    At the first save, "SAVED OUTSIDE THE APP" shows under the history for
+    a couple of seconds.
+- **2:09** After a crash, the agent gets its saved results back and
   resumes at the invite: nothing is paid twice.
   - Visuals: Crash before the invite: shake, red flash, a bolt and APP
     CRASH on the dimmed loop, APP INSTANCE A CRASHED; the history keeps
-    its six rows, tinted, over "APP CRASHED HERE". A leaves; APP INSTANCE B
-    slides into its place with a violet glow, NEW APP INSTANCE in the
-    loop's middle. Replay: each saved row is highlighted, turns REUSED and
-    hands its result back to the loop, then reads "REUSED, NOT RE-BILLED"
-    (LLM calls) or "REUSED, NOT RE-RUN" (tools); the bill stays at 3, "NOT
-    RE-BILLED". Then the invite runs for real: LLM call 4, a coin lands,
-    rows 7 "LLM call: invite Marie" and 8 "Email: invite sent" SAVED, AGENT
-    COMPLETE in the loop.
-- **2:20** That's why OpenAI built Codex on Temporal, and Cursor, Lovable
+    its six rows, tinted, over "APP CRASHED HERE", and "HISTORY KEPT" shows
+    under it; the crashed state holds. A leaves; APP INSTANCE B slides into
+    its place with a violet glow, NEW APP INSTANCE holds in the loop's
+    middle. Replay, one row a second: each saved row is highlighted, its
+    tag turns "REUSED, NOT RE-BILLED" (LLM calls) or "REUSED, NOT RE-RUN"
+    (tools), and its card flies from the row's left end back to THINK or
+    ACT. Then the invite runs for real at the same slow pace: rows 7 "LLM
+    call: invite Marie" and 8 "Email: invite sent" are saved, a neon
+    NO PROGRESS LOST pill pops under the history with a soft glow and
+    holds, the answer to the failed run's PROGRESS LOST, and AGENT COMPLETE
+    shows in the loop.
+- **2:25** That's why OpenAI built Codex on Temporal, and Cursor, Lovable
   and Replit rely on it too.
-  - Visuals: The completed state holds; next to the bill's 4, "INSTEAD OF
-    7" (the failed run's six calls plus the invite it never reached).
+  - Visuals: The completed state holds.
 
 ## 05 Open source and Cloud
 
-- **2:29** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
+- **2:34** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
   can run it on their own servers.
   - Visuals: Three tiles across the top, one by one: "Open source" (MIT
     LICENSE), "Temporal 1.0" (2020), "Self-hosted" (ON YOUR OWN SERVERS).
-- **2:36** Temporal Cloud runs the service for you. Your code stays in your
+- **2:41** Temporal Cloud runs the service for you. Your code stays in your
   environment: Temporal never sees it.
   - Visuals: On the right, TEMPORAL CLOUD (UV border, official logo):
     "Temporal Service" and three bars SECURITY & COMPLIANCE, CONTROL PLANE
     & SCALE, HIGH AVAILABILITY; on the left, YOUR ENVIRONMENT (dashed slate
     border, "YOUR APP, YOUR CODE"): YOUR APP with a small Workflow card and
     TEMPORAL SDK · OPEN SOURCE; then NEVER SEES YOUR CODE.
-- **2:44** Connections only go out from your side, and data stays encrypted
+- **2:49** Connections only go out from your side, and data stays encrypted
   end to end.
   - Visuals: A one-way arrow draws from your environment to Temporal Cloud,
     OUTBOUND ONLY, mTLS; neon packets flow out along it; an inbound attempt
@@ -265,12 +262,12 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 06 Temporal today
 
-- **2:52** Today, more than 4,300 companies pay for it, including Netflix,
+- **2:57** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **3:00** In September 2026, investors valued Temporal at $12.55 billion.
+- **3:04** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
@@ -280,9 +277,11 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **3:08** Temporal keeps code running whatever fails, from everyday apps
+- **3:13** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
-  - Visuals: The two founders' faces, cropped from the photo, side by side,
-    in a small constellation of twinkling stars and lines; title "Meet
-    Temporal", tagline "DURABLE EXECUTION FOR APPS AND AI AGENTS", Temporal
-    logo.
+  - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
+    its stars twinkle in one by one, then its lines draw stroke by stroke,
+    around the body, along the feet, then the eye and the folds of its
+    body, and a soft glow sweeps across the finished constellation. Below,
+    the title "Meet" followed by the Temporal logo, and the tagline
+    "DURABLE EXECUTION FOR APPS AND AI AGENTS".

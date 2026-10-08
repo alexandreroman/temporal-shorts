@@ -203,13 +203,16 @@ const LOOP_DEG = { think: -90, act: 30, observe: 150 };
 // The agentic loop on a circle of radius r centered on (cx, cy): THINK (the LLM orb) on top, ACT (neon play tile)
 // and OBSERVE (eye tile, UV border) below, slate arcs with arrow heads between them, the node labels, an
 // "Agentic loop" label in the middle and the neon token. The arcs go in svg. Returns the loop, with pos(deg), the
-// point at an angle on the circle, and arcPaths, the d of each arc (to draw them again in another color).
+// point at an angle on the circle, nodePos(deg), where a node and its label sit (pos; a scene that scales the
+// loop can replace it to keep the tiles on whole pixels), and arcPaths, the d of each arc (to draw them again in
+// another color).
 function makeAgentLoop(root, svg, cx, cy, r = 220) {
   const loop = { cx, cy, r };
   loop.pos = deg => {
     const a = deg * Math.PI / 180;
     return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
   };
+  loop.nodePos = loop.pos;
   const arcD = (d0, d1) => {
     const [x0, y0] = loop.pos(d0), [x1, y1] = loop.pos(d1);
     return `M ${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1}`;
@@ -242,12 +245,13 @@ function placeAgentLoop(loop, t, a, opts = {}) {
   const near = d => deg === null ? 0 : Math.max(0, 1 - Math.abs((((deg - d) % 360) + 540) % 360 - 180) / 30);
   const nodes = [[loop.think.root, LOOP_DEG.think], [loop.act, LOOP_DEG.act], [loop.observe, LOOP_DEG.observe]];
   nodes.forEach(([e, d], i) => {
-    const [x, y] = loop.pos(d), p = P(t, i === 0 ? thinkIn : a + i * 0.2, 0.5, backOut);
+    const [x, y] = loop.nodePos(d), p = P(t, i === 0 ? thinkIn : a + i * 0.2, 0.5, backOut);
     place(e, x + dx, y + dy, p * (1 + 0.12 * near(d)), clamp(p * 2) * o);
   });
   llmState(loop.think, { think: near(LOOP_DEG.think) > 0.2 ? 1 : 0, look: 0.5, q });
   // THINK's label sits left of the orb, the others under their tiles
-  const [tx, ty] = loop.pos(LOOP_DEG.think), [ax, ay] = loop.pos(LOOP_DEG.act), [ox, oy] = loop.pos(LOOP_DEG.observe);
+  const [tx, ty] = loop.nodePos(LOOP_DEG.think), [ax, ay] = loop.nodePos(LOOP_DEG.act);
+  const [ox, oy] = loop.nodePos(LOOP_DEG.observe);
   const labelAt = [[tx - 130, ty], [ax, ay + 98], [ox, oy + 98]];
   loop.labels.forEach((e, i) => place(e, labelAt[i][0] + dx, labelAt[i][1] + dy, 1, P(t, a + 0.3 + i * 0.2, 0.4) * o));
   loop.arcs.forEach((arc, i) => draw(arc, P(t, a + 0.7 + i * 0.3, 0.45), arcO * o));
@@ -479,8 +483,8 @@ function makeTemporalPanel(p, w, h, { logoAt = null, noteAt, font = 16, note = '
 }
 
 // ---------- Event History card
-// White card with an EVENT HISTORY header (headerFont, its icon 4 px larger), numbered rows and one status tag per
-// row. rowsHtml: HTML of each row, after its number. Options:
+// White card with an EVENT HISTORY header (headerFont, its icon 4 px larger, headerTop px from the card top),
+// numbered rows and one status tag per row. rowsHtml: HTML of each row, after its number. Options:
 // - w, h: card size; rowTop(i): top of row i; font: row text size; rowH: row height with its text centered (null:
 //   the height of the text); padY: vertical padding of a row
 // - tagTop(i): top of the tag of row i; tagRight: its right margin; tag: statusTag options
@@ -490,11 +494,11 @@ function makeTemporalPanel(p, w, h, { logoAt = null, noteAt, font = 16, note = '
 // Returns the card with rows, tags, kept and cut (crash) and scan.
 function makeHistoryCard(p, rowsHtml, opts) {
   const {
-    w, h, headerFont = 18, rowTop, font = 22, rowH = null, padY = 4, tagTop, tagRight = 36, tag = {},
-    crash = null, scanH = null,
+    w, h, headerFont = 18, headerTop = headerFont + 2, rowTop, font = 22, rowH = null, padY = 4, tagTop,
+    tagRight = 36, tag = {}, crash = null, scanH = null,
   } = opts;
   const card = E(p,
-    `<div class="mono" style="position:absolute;left:26px;top:${headerFont + 2}px;font-size:${headerFont}px;`
+    `<div class="mono" style="position:absolute;left:26px;top:${headerTop}px;font-size:${headerFont}px;`
     + 'letter-spacing:.14em;color:#141414;display:flex;gap:10px;align-items:center">'
     + `${ICON('book', headerFont + 4, '#141414', 1.8)} EVENT HISTORY</div>`,
     'paper', { width: w + 'px', height: h + 'px' });
