@@ -210,8 +210,10 @@ A `#t=<time>` fragment opens a player paused at that time, in seconds
 example `http://localhost:8000/themes/human-in-the-loop/#t=70`; Space plays
 on. Editing the fragment in an open tab jumps there, paused. An invalid
 value is ignored, and a reload keeps the current position over the
-fragment. Not to be confused with `?t=<seconds>`, the frozen frame of
-frame capture, without the player.
+fragment. While paused, the player writes its position into the URL in
+whole seconds (`#t=70`), so copying the URL shares that moment; playing
+clears the fragment. Not to be confused with `?t=<seconds>`, the frozen
+frame of frame capture, without the player.
 
 `make serve` hot-reloads: edit a file in `src/` and the server rebuilds the
 pages, then every open tab reloads by itself and a player resumes at the
