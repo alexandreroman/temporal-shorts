@@ -107,10 +107,11 @@
       });
     },
     update(t, c, s) {
-      // the scene opens on the LLM node the previous chapter's AI hub turned into, magnified, with its halo; the
-      // camera settles while the halo fades into the LLM's own glow, and the rest of the loop emerges
-      setCamera(s.cam, t, this.dur, { enter: AGENT_START.enter, enterD: 1.4 });
-      place(s.carry, LLM_AT.x, LLM_AT.y, 1 / AGENT_START.enter, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
+      // the scene opens on the LLM node the previous chapter's AI hub turned into, at its final place and size, with
+      // its halo; no entrance zoom, so the node never moves: the halo fades into the LLM's own glow and the rest of
+      // the loop emerges around it
+      setCamera(s.cam, t, this.dur, { enter: 1 });
+      place(s.carry, LLM_AT.x, LLM_AT.y, 1, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
       // each turn runs the loop once, think -> act -> observe, and bills one LLM call as it starts
       const firstRun = [c[0] + 1.6, c[0] + 3.8, c[1] + 0.2, c[1] + 2.4];
       const crashAt = c[1] + 3.5;

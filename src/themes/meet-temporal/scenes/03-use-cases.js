@@ -114,7 +114,7 @@
       const contract = P(t, morphAt + 1.7, 1.3);
       const rest = 1 - P(t, morphAt, 0.6);
       const ai = HUBS[AI];
-      const llmSize = AGENT_LLM.size * AGENT_START.enter;
+      const llmSize = AGENT_LLM.size;
       const x = lerp(lerp(ai.x, 960, swellP), AGENT_HANDOFF.x, contract);
       const y = lerp(lerp(ai.y, 540, swellP), AGENT_HANDOFF.y, contract);
       const size = lerp(lerp(HUB_SIZE, FULL_SCREEN, swellP), llmSize, contract);

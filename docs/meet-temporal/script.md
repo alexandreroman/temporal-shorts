@@ -151,9 +151,10 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 - **1:28** AI agents are long processes too: many LLM calls, tools to run,
   and waits for a person.
-  - Visuals: The chapter opens on that same LLM orb and its halo; the
-    camera settles while the halo fades into the LLM's own glow, and the
-    rest of the agentic loop of Durable AI Agents emerges: THINK (the LLM
+  - Visuals: The chapter opens on that same LLM orb and its halo, already
+    at its final place and size: it never moves; the halo fades into the
+    LLM's own glow while the rest of the agentic loop of Durable AI Agents
+    emerges around it: THINK (the LLM
     orb) on top, ACT (neon play tile) and OBSERVE (eye tile) below,
     "AGENTIC LOOP" in the middle, a neon token with a comet tail running
     round it; on the right LLM CALLS BILLED

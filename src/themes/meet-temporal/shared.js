@@ -131,14 +131,15 @@ function setSymbolDraw(e, draw, fill) {
 }
 
 // ===================== hand-off from chapter 3 (the AI hub) to chapter 4 (the agentic loop)
-// Chapter 4's agentic loop: its center, and its camera at the start of the scene (shift and magnification)
+// Chapter 4's agentic loop: its center, and its camera shift while the loop shows (it starts at its final framing:
+// no entrance zoom, so the LLM node never moves after the cut)
 const AGENT_LOOP = { cx: 560, cy: 540, r: 220 };
-const AGENT_START = { shift: [-62, 14], enter: 1.35 };
+const AGENT_START = { shift: [-62, 14] };
 // The stage point where chapter 4's LLM node (THINK, on top of the loop) shows as the scene starts, and its size
 // there: chapter 3's AI hub turns into that LLM node, so the same bubble carries across the cut
 const AGENT_HANDOFF = {
-  x: 960 + (AGENT_LOOP.cx - 960) * AGENT_START.enter + AGENT_START.shift[0],
-  y: 540 + (AGENT_LOOP.cy - AGENT_LOOP.r - 540) * AGENT_START.enter + AGENT_START.shift[1],
+  x: AGENT_LOOP.cx + AGENT_START.shift[0],
+  y: AGENT_LOOP.cy - AGENT_LOOP.r + AGENT_START.shift[1],
 };
 const AGENT_LLM = { size: 130, seed: 0.37 }; // the LLM node's size in chapter 4, and the blink phase of both orbs
 // The halo around the bubble at the cut: its size on screen (diameter, px) and opacity, the same on both sides
