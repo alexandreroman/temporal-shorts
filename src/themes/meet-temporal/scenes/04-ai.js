@@ -3,9 +3,8 @@
 {
   // The agentic loop on the left (think, act, observe, as in durable-ai-agents), the bill and the progress on the
   // right; the AI companies take the place of the bill once the loop is durable
-  const LOOP = { cx: 560, cy: 540 };
-  // the middle of the stage, in scene coordinates, at the start of the scene (magnified 1.35 and shifted)
-  const CARRY_FROM = { x: 960 + 62 / 1.35, y: 540 - 14 / 1.35 };
+  const LOOP = AGENT_LOOP;
+  const LLM_AT = { x: LOOP.cx, y: LOOP.cy - LOOP.r }; // the THINK node, where the carried glow condenses
   const WAIT_Y = LOOP.cy + 275; // the "waits for a person" tag, under the loop
   const PANEL = { x: 560, y: 520, w: 800, h: 740 };
   const SIDE = { x: 1460, w: 560 };
@@ -37,9 +36,9 @@
 
   scene({
     chapter: 4, title: 'Why it matters for AI',
-    fadeIn: 0.15, // continues the zoom of the previous chapter, which fades out as briefly
+    fadeIn: 0.04, // continues the zoom of the previous chapter: a cut, which fades out as briefly
     // the loop and the bill, then the durable loop and the companies: the pan runs as the bill fades out
-    shift: (t, c) => pan(t, [-62, 14], [[c[2] + 0.2, 10, 0]], 0.6),
+    shift: (t, c) => pan(t, AGENT_START.shift, [[c[2] + 0.2, 10, 0]], 0.6),
     subs: [
       {
         text: "AI agents are long processes too: many LLM calls, tools to run, and waits for a person.",
@@ -53,7 +52,7 @@
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-      // the AI tile's violet glow, carried over from the previous chapter, fades into the loop
+      // the AI hub's violet glow, carried over from the previous chapter, condenses into the LLM node
       s.carry = E(root, '', '', {
         width: '900px', height: '900px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(182,100,255,.4) 0%, rgba(68,76,231,.15) 40%, rgba(68,76,231,0) 70%)',
@@ -63,7 +62,7 @@
         logoAt: [24, 20], noteAt: [24, 25], font: 18, note: 'Durable agent',
       });
       s.svg = svgLayer(root);
-      s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy);
+      s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy, LOOP.r);
       // at the crash the loop shatters: each arc breaks into red pieces that fall, then fly back at the restart
       const { think, act, observe } = LOOP_DEG;
       const arcEnds = [[think + 27, act - 27], [act + 27, observe - 27], [observe + 27, think + 333]];
@@ -108,10 +107,12 @@
     update(t, c, s) {
       // the zoom into the AI hub of the previous chapter carries on: the scene starts magnified and settles, while
       // the violet glow that filled the view shrinks from the middle of the stage onto the loop
-      setCamera(s.cam, t, this.dur, { enter: 1.35, enterD: 1.4 });
-      const carried = P(t, 0, 1.3);
-      place(s.carry, lerp(CARRY_FROM.x, LOOP.cx, carried), lerp(CARRY_FROM.y, LOOP.cy, carried),
-        lerp(1.8, 0.7, carried), 1 - P(t, 0.4, 1.3));
+      // the zoom into the AI hub of the previous chapter carries on: the scene starts magnified and settles, while
+      // the violet glow, centered on the LLM node from the first frame, condenses into it as the LLM pops in
+      setCamera(s.cam, t, this.dur, { enter: AGENT_START.enter, enterD: 1.4 });
+      const startScale = HANDOFF_GLOW / AGENT_START.enter / 900;
+      const condense = P(t, 0, 1.1);
+      place(s.carry, LLM_AT.x, LLM_AT.y, lerp(startScale, 0.3, condense), 1 - P(t, 0.5, 0.9));
       // each turn runs the loop once, think -> act -> observe, and bills one LLM call as it starts
       const firstRun = [c[0] + 1.6, c[0] + 3.8, c[1] + 0.2, c[1] + 2.4];
       const crashAt = c[1] + 3.5;

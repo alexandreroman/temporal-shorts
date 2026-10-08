@@ -59,8 +59,8 @@ function makeCamera(root) {
 // Zoom-through between scenes: the composition grows from `enter` (0.94; 1 for none) to 1 over enterD seconds as
 // the scene fades in, and on to 1.06 as it fades out (dur: the scene duration). scale, dx, dy: an extra camera move
 // of the scene, at rest 1, 0, 0 so that a resting frame sits on whole pixels.
-function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enterD = 0.6 } = {}) {
-  const zoom = lerp(enter, 1, P(t, 0, enterD)) * lerp(1, 1.06, P(t, dur - 0.6, 0.6, easeIn));
+function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enterD = 0.6, exit = 1.06 } = {}) {
+  const zoom = lerp(enter, 1, P(t, 0, enterD)) * lerp(1, exit, P(t, dur - 0.6, 0.6, easeIn));
   cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
 }
 
@@ -129,3 +129,16 @@ function setSymbolDraw(e, draw, fill) {
   e.outline.style.opacity = draw > 0 ? 1 - fill : 0;
   e.img.style.opacity = fill;
 }
+
+// ===================== hand-off from chapter 3 (the AI hub) to chapter 4 (the agentic loop)
+// Chapter 4's agentic loop: its center, and its camera at the start of the scene (shift and magnification)
+const AGENT_LOOP = { cx: 560, cy: 540, r: 220 };
+const AGENT_START = { shift: [-62, 14], enter: 1.35 };
+// The stage point where chapter 4's LLM node (THINK, on top of the loop) shows as the scene starts: chapter 3's
+// zoom lands the AI hub there, so the hub's glow turns into the agent across the cut
+const AGENT_HANDOFF = {
+  x: 960 + (AGENT_LOOP.cx - 960) * AGENT_START.enter + AGENT_START.shift[0],
+  y: 540 + (AGENT_LOOP.cy - AGENT_LOOP.r - 540) * AGENT_START.enter + AGENT_START.shift[1],
+};
+// Diameter of the violet glow on screen at the cut, the same on both sides of it
+const HANDOFF_GLOW = 3584;

@@ -67,7 +67,7 @@
   scene({
     chapter: 3, title: 'Where Temporal is used',
     // a short fade out: the zoom into the AI hub runs on into the next chapter, which fades in as briefly
-    fadeOut: 0.15,
+    fadeOut: 0.04,
     // laid out centered at (960, 522) on the free band
     subs: [
       {
@@ -103,12 +103,15 @@
       const zoomAt = c[1] + 5.9;
       const zoom = P(t, zoomAt, this.dur - zoomAt - 0.1);
       const scale = lerp(1, ZOOM, zoom);
+      // the hub travels on screen to where the next chapter's LLM node appears (AGENT_HANDOFF)
       const ai = HUBS[AI];
+      const onScreen = [lerp(ai.x, AGENT_HANDOFF.x, zoom), lerp(ai.y, AGENT_HANDOFF.y, zoom)];
       setCamera(s.cam, t, this.dur, {
-        scale, dx: -(ai.x - 960) * scale * zoom, dy: -(ai.y - 540) * scale * zoom,
+        scale, dx: onScreen[0] - 960 - (ai.x - 960) * scale, dy: onScreen[1] - 540 - (ai.y - 540) * scale, exit: 1,
       });
       const rest = 1 - P(t, zoomAt + 0.2, 0.8);
-      place(s.aiGlow, ai.x, ai.y, 0.6 + 0.8 * zoom, P(t, zoomAt, 0.6));
+      // the glow ends HANDOFF_GLOW wide on screen, as the next chapter's starts
+      place(s.aiGlow, ai.x, ai.y, lerp(0.6, HANDOFF_GLOW / 640 / ZOOM, zoom), P(t, zoomAt, 0.6));
 
       // the symbol glows in the middle, the spokes draw out with a pulse of light, each hub pops as its pulse lands
       place(s.symbol, CENTER.x, CENTER.y, P(t, c[0] + 0.1, 0.5, backOut), P(t, c[0] + 0.1, 0.3) * rest);

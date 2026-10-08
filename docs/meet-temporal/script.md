@@ -140,17 +140,18 @@ and each chapter has a cinematic moment, listed in its visuals.
 - **1:18** Teams also run infrastructure, data pipelines and, more and
   more, AI on Temporal.
   - Visuals: The map holds; once the subtitle is read, the camera zooms
-    into the AI hub: it grows to fill the view while the rest of the map
-    slides out and fades, then dissolves into its violet glow, which opens
-    the next chapter.
+    into the AI hub: it grows and moves to where the next chapter's LLM
+    node appears while the rest of the map slides out and fades, then
+    dissolves into its violet glow, which opens the next chapter.
 
 ## 04 Why it matters for AI
 
 - **1:27** AI agents are long processes too: many LLM calls, tools to run,
   and waits for a person.
   - Visuals: The zoom carries on: the scene starts magnified and settles
-    while the violet glow that fills the view shrinks onto the agentic loop
-    of Durable AI Agents: THINK (the LLM orb) on top, ACT (neon play tile)
+    while the violet glow, centered on the LLM node, condenses into it as
+    the LLM pops in; the rest of the agentic loop of Durable AI Agents
+    emerges: THINK (the LLM orb) on top, ACT (neon play tile)
     and OBSERVE (eye tile) below, "AGENTIC LOOP" in the middle, a neon token
     with a comet tail running round it; on the right LLM CALLS BILLED
     counts each turn and AGENT PROGRESS fills one step per turn (out of 6);
