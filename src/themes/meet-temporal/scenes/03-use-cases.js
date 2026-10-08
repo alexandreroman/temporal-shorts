@@ -3,18 +3,18 @@
 {
   // A hub-and-spoke map: the Temporal symbol in the middle, four spokes out to four category hubs, each hub with
   // its three examples as icon bubbles fanned out on its outer side
-  const CENTER = { x: 960, y: 520 };
-  const SYMBOL_SIZE = 120;
+  const CENTER = { x: 960, y: 524 };
+  const SYMBOL_SIZE = 190;
   const HUB_SIZE = 150;
-  const BUBBLE = { size: 90, r: 160 }; // bubble size and distance from its hub
+  const BUBBLE = { size: 90, r: 155 }; // bubble size and distance from its hub
   const FLOAT = 4; // how far a bubble floats around its place, in px
   // hubs at the four diagonals; `angles`: directions of the hub's three bubbles, away from the center (degrees,
   // clockwise from the x axis)
   const HUBS = [
-    { name: 'Process', x: 520, y: 370, angles: [170, 230, 290] },
-    { name: 'Lifecycle', x: 1400, y: 370, angles: [250, 310, 10] },
-    { name: 'Operational', x: 520, y: 670, angles: [190, 130, 70] },
-    { name: 'AI', x: 1400, y: 670, angles: [110, 50, 350] },
+    { name: 'Process', x: 640, y: 374, angles: [170, 230, 290] },
+    { name: 'Lifecycle', x: 1280, y: 374, angles: [250, 310, 10] },
+    { name: 'Operational', x: 640, y: 674, angles: [190, 130, 70] },
+    { name: 'AI', x: 1280, y: 674, angles: [110, 50, 350] },
   ];
   // the examples of each hub, [icon, label], in the order of its angles
   const EXAMPLES = [
@@ -23,7 +23,8 @@
     [['code', 'CI/CD'], ['server', 'Provisioning'], ['pipeline', 'Data pipelines']],
     [['sparkle', 'Agents'], ['search', 'RAG flows'], ['chip', 'Model training']],
   ];
-  const AI = HUBS.length - 1, OPERATIONAL = 2;
+  const AI = HUBS.length - 1;
+  const ZOOM = 4; // how far the camera zooms into the AI hub at the end
   const bubbleAt = (hub, k) => {
     const a = hub.angles[k] * Math.PI / 180;
     return [hub.x + Math.cos(a) * BUBBLE.r, hub.y + Math.sin(a) * BUBBLE.r];
@@ -54,32 +55,32 @@
     } else {
       labelAt = (Math.sin(a) < 0 ? 'bottom' : 'top') + ':calc(100% + 12px);left:50%;transform:translateX(-50%)';
     }
-    const e = E(root,
-      `<div class="disc" style="width:${BUBBLE.size}px;height:${BUBBLE.size}px;border-radius:50%;`
+    return E(root,
+      `<div style="width:${BUBBLE.size}px;height:${BUBBLE.size}px;border-radius:50%;`
       + `background:var(--surface);border:1.5px solid ${C.line};display:flex;align-items:center;`
       + `justify-content:center">${ICON(icon, 40, C.ink, 1.7)}</div>`
       + `<div class="lbl" style="position:absolute;${labelAt};font-size:16px">`
       + `${label}</div>`,
       '', { width: BUBBLE.size + 'px', height: BUBBLE.size + 'px' });
-    e.disc = e.querySelector('.disc');
-    e.label = e.querySelector('.lbl');
-    return e;
   }
 
   scene({
     chapter: 3, title: 'Where Temporal is used',
+    // a short fade out: the zoom into the AI hub runs on into the next chapter, which fades in as briefly
+    fadeOut: 0.15,
     // laid out centered at (960, 522) on the free band
     subs: [
       {
         text: "A <b>Workflow</b> is any process that must finish correctly: payments, orders, bookings, subscriptions.",
         after: 0.4,
       },
-      { text: "Teams also run infrastructure, data pipelines and, more and more, AI on Temporal.", after: 1.2 },
+      // the pause holds the zoom into the AI hub, which leads into the next chapter
+      { text: "Teams also run infrastructure, data pipelines and, more and more, AI on Temporal.", after: 2.0 },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
       s.glow = E(root, '', '', {
-        width: '420px', height: '420px', borderRadius: '50%',
+        width: '560px', height: '560px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(182,100,255,.35) 0%, rgba(68,76,231,.12) 45%, rgba(68,76,231,0) 70%)',
       });
       s.aiGlow = E(root, '', '', {
@@ -97,52 +98,46 @@
         HUBS[i].angles[k])));
     },
     update(t, c, s) {
-      setCamera(s.cam, t, this.dur);
-      // the symbol glows in the middle, the spokes draw out with a pulse of light, each hub pops as its pulse lands
-      place(s.symbol, CENTER.x, CENTER.y, P(t, c[0] + 0.1, 0.5, backOut), P(t, c[0] + 0.1, 0.3));
-      place(s.glow, CENTER.x, CENTER.y, 1 + 0.05 * Math.sin(G * 1.5), P(t, c[0] + 0.2, 0.6));
-      const spokeAt = i => c[0] + 0.5 + i * 0.18;
-      // examples the subtitle reads, [hub, example, when]; they light up and stay lit
-      const reads = [
-        [0, 0, c[0] + 3.6], [0, 1, c[0] + 4.1], [0, 2, c[0] + 4.6], [1, 0, c[0] + 5.3],
-        [2, 0, c[1] + 1.0], [2, 1, c[1] + 1.2], [2, 2, c[1] + 2.0],
-      ];
-      const opsOn = c[1] + 0.9, aiOn = c[1] + 3.6;
-      // once the AI hub lights up it grows and glows while the rest steps back; its glow carries into the next chapter
-      const focus = P(t, aiOn, 0.6);
-      place(s.aiGlow, HUBS[AI].x, HUBS[AI].y, 0.8 + 0.3 * focus, focus);
+      // at the end the camera zooms into the AI hub: it grows to fill the view, the rest slides out and fades, and
+      // its violet glow becomes the opening of the next chapter
+      const zoomAt = c[1] + 5.9;
+      const zoom = P(t, zoomAt, this.dur - zoomAt - 0.1);
+      const scale = lerp(1, ZOOM, zoom);
+      const ai = HUBS[AI];
+      setCamera(s.cam, t, this.dur, {
+        scale, dx: -(ai.x - 960) * scale * zoom, dy: -(ai.y - 540) * scale * zoom,
+      });
+      const rest = 1 - P(t, zoomAt + 0.2, 0.8);
+      place(s.aiGlow, ai.x, ai.y, 0.6 + 0.8 * zoom, P(t, zoomAt, 0.6));
 
+      // the symbol glows in the middle, the spokes draw out with a pulse of light, each hub pops as its pulse lands
+      place(s.symbol, CENTER.x, CENTER.y, P(t, c[0] + 0.1, 0.5, backOut), P(t, c[0] + 0.1, 0.3) * rest);
+      place(s.glow, CENTER.x, CENTER.y, 1 + 0.05 * Math.sin(G * 1.5), P(t, c[0] + 0.2, 0.6) * rest);
+      const spokeAt = i => c[0] + 0.5 + i * 0.18;
       HUBS.forEach((hub, i) => {
-        const dim = i === AI ? 1 : 1 - 0.6 * focus;
+        // everything but the AI hub fades as the camera zooms in
+        const o = i === AI ? 1 : rest;
         const prog = P(t, spokeAt(i), 0.5);
-        draw(s.spokes[i], prog, (0.35 + 0.65 * (i === AI ? 1 : 1 - focus)));
+        draw(s.spokes[i], prog, rest);
         sparkOnPath(s.pulses[i], s.spokes[i], prog);
         const hp = P(t, spokeAt(i) + 0.45, 0.5, backOut);
-        const lit = i === AI ? focus : i === OPERATIONAL ? P(t, opsOn, 0.4) : 0;
-        place(s.hubs[i], hub.x, hub.y, hp * (1 + 0.12 * (i === AI ? focus : 0)) * swell(t, opsOn, i === OPERATIONAL
-          ? 0.08 : 0), clamp(hp * 2) * dim);
-        s.hubs[i].style.background = lit > 0.5 ? `linear-gradient(135deg, ${C.violet}, ${C.uv})` : C.uv;
-        s.hubs[i].style.boxShadow = `0 0 ${Math.round(50 * lit)}px rgba(182,100,255,${(0.6 * lit).toFixed(3)})`;
-
+        // the AI hub dissolves into its glow just before the cut
+        const dissolve = i === AI ? 1 - P(t, this.dur - 0.7, 0.5) : 1;
+        place(s.hubs[i], hub.x, hub.y, hp, clamp(hp * 2) * o * dissolve);
         s.bubbles[i].forEach((b, k) => {
           const [bx, by] = bubbleAt(hub, k);
           // a gentle float around its place (ambient, driven by G), each bubble on its own phase
           const phase = (i * 3 + k) * 1.9;
           const x = bx + FLOAT * Math.sin(G * 0.9 + phase), y = by + FLOAT * Math.cos(G * 0.7 + phase);
           const bp = P(t, spokeAt(i) + 0.8 + k * 0.12, 0.45, backOut);
-          place(b, x, y, bp, clamp(bp * 2) * dim);
-          const hit = reads.find(([hi, ki]) => hi === i && ki === k);
-          const read = (hit && t >= hit[2]) || (i === AI && focus > 0.5);
-          b.disc.style.borderColor = read ? C.violet : C.line;
-          b.disc.style.boxShadow = read ? '0 0 18px rgba(182,100,255,.45)' : 'none';
-          b.label.style.color = read ? C.ink : C.slate;
+          place(b, x, y, bp, clamp(bp * 2) * rest);
           // the link from the hub's edge to the bubble's edge
           const d = Math.hypot(x - hub.x, y - hub.y);
           const ux = (x - hub.x) / d, uy = (y - hub.y) / d;
           const link = s.links[i][k];
           link.setAttribute('d', `M ${hub.x + ux * (HUB_SIZE / 2 + 6)} ${hub.y + uy * (HUB_SIZE / 2 + 6)} `
             + `L ${x - ux * (BUBBLE.size / 2 + 6)} ${y - uy * (BUBBLE.size / 2 + 6)}`);
-          link.style.opacity = clamp(bp * 2) * dim;
+          link.style.opacity = clamp(bp * 2) * rest;
         });
       });
     }

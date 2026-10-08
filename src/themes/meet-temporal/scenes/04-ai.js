@@ -4,6 +4,8 @@
   // The agentic loop on the left (think, act, observe, as in durable-ai-agents), the bill and the progress on the
   // right; the AI companies take the place of the bill once the loop is durable
   const LOOP = { cx: 560, cy: 540 };
+  // the middle of the stage, in scene coordinates, at the start of the scene (magnified 1.35 and shifted)
+  const CARRY_FROM = { x: 960 + 62 / 1.35, y: 540 - 14 / 1.35 };
   const WAIT_Y = LOOP.cy + 275; // the "waits for a person" tag, under the loop
   const PANEL = { x: 560, y: 520, w: 800, h: 740 };
   const SIDE = { x: 1460, w: 560 };
@@ -35,6 +37,7 @@
 
   scene({
     chapter: 4, title: 'Why it matters for AI',
+    fadeIn: 0.15, // continues the zoom of the previous chapter, which fades out as briefly
     // the loop and the bill, then the durable loop and the companies: the pan runs as the bill fades out
     shift: (t, c) => pan(t, [-62, 14], [[c[2] + 0.2, 10, 0]], 0.6),
     subs: [
@@ -103,8 +106,12 @@
       });
     },
     update(t, c, s) {
-      setCamera(s.cam, t, this.dur);
-      place(s.carry, LOOP.cx, LOOP.cy, lerp(1.2, 0.7, P(t, 0, 1.4)), 1 - P(t, 0.2, 1.2));
+      // the zoom into the AI hub of the previous chapter carries on: the scene starts magnified and settles, while
+      // the violet glow that filled the view shrinks from the middle of the stage onto the loop
+      setCamera(s.cam, t, this.dur, { enter: 1.35, enterD: 1.4 });
+      const carried = P(t, 0, 1.3);
+      place(s.carry, lerp(CARRY_FROM.x, LOOP.cx, carried), lerp(CARRY_FROM.y, LOOP.cy, carried),
+        lerp(1.8, 0.7, carried), 1 - P(t, 0.4, 1.3));
       // each turn runs the loop once, think -> act -> observe, and bills one LLM call as it starts
       const firstRun = [c[0] + 1.6, c[0] + 3.8, c[1] + 0.2, c[1] + 2.4];
       const crashAt = c[1] + 3.5;

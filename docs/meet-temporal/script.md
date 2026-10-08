@@ -122,38 +122,41 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 - **1:03** A Workflow is any process that must finish correctly: payments,
   orders, bookings, subscriptions.
-  - Visuals: A hub-and-spoke map: the official Temporal symbol glows in the
-    middle; four spokes draw out with a pulse of light, and a round UV hub
-    pops at the end of each: PROCESS, LIFECYCLE, OPERATIONAL, AI, each
-    with WORKFLOWS. Around each hub, three icon bubbles pop in a cascade
-    and float gently, joined to it by thin links: Payments, Orders,
-    Bookings; Subscriptions, User accounts, Inventory; CI/CD, Provisioning,
-    Data pipelines; Agents, RAG flows, Model training. Each example the
-    subtitle reads lights up in violet.
+  - Visuals: A compact hub-and-spoke map: the official Temporal symbol,
+    large, glows in the middle; four short spokes draw out with a pulse of
+    light, and a round UV hub pops at the end of each: PROCESS, LIFECYCLE,
+    OPERATIONAL, AI, each with WORKFLOWS. Around each hub, three icon
+    bubbles pop in a cascade and float gently, joined to it by thin links,
+    their labels on the outer side: Payments, Orders, Bookings;
+    Subscriptions, User accounts, Inventory; CI/CD, Provisioning, Data
+    pipelines; Agents, RAG flows, Model training. All hubs and bubbles stay
+    equal: no domain is highlighted.
 - **1:11** Teams also run infrastructure, data pipelines and, more and
   more, AI on Temporal.
-  - Visuals: The OPERATIONAL hub lights up with CI/CD, Provisioning and
-    Data pipelines; then the AI hub grows and glows, its examples lit, while
-    the rest of the map dims; its glow carries into the next chapter.
+  - Visuals: The map holds; once the subtitle is read, the camera zooms
+    into the AI hub: it grows to fill the view while the rest of the map
+    slides out and fades, then dissolves into its violet glow, which opens
+    the next chapter.
 
 ## 04 Why it matters for AI
 
 - **1:19** AI agents are long processes too: many LLM calls, tools to run,
   and waits for a person.
-  - Visuals: The violet glow fades into the agentic loop of Durable AI
-    Agents: THINK (the LLM orb) on top, ACT (neon play tile) and OBSERVE
-    (eye tile) below, "AGENTIC LOOP" in the middle, a neon token with a
-    comet tail running round it; on the right LLM CALLS BILLED counts each
-    turn and AGENT PROGRESS fills one step per turn (out of 6); a violet
-    "WAITS FOR A PERSON" tag shows under the loop.
-- **1:25** Every LLM call costs time and money. Without Durable Execution,
+  - Visuals: The zoom carries on: the scene starts magnified and settles
+    while the violet glow that fills the view shrinks onto the agentic loop
+    of Durable AI Agents: THINK (the LLM orb) on top, ACT (neon play tile)
+    and OBSERVE (eye tile) below, "AGENTIC LOOP" in the middle, a neon token
+    with a comet tail running round it; on the right LLM CALLS BILLED
+    counts each turn and AGENT PROGRESS fills one step per turn (out of 6);
+    a violet "WAITS FOR A PERSON" tag shows under the loop.
+- **1:26** Every LLM call costs time and money. Without Durable Execution,
   a crash means starting over.
   - Visuals: The bill stands out; after 3 steps, a crash: shake, red
     flash, the loop shatters into red pieces that fall, "START OVER", the
     LLM puzzled, AGENT PROGRESS drains to 0 / 6, PROGRESS LOST. The pieces
     fly back, the loop restarts from step 1 and coins drop on the bill: 5,
     "+1 PAID AGAIN".
-- **1:33** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
+- **1:34** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
   rely on it too.
   - Visuals: The bill and the progress fade out; a TEMPORAL panel ("DURABLE
     AGENT") frames the loop and a glowing UV ring draws around it, a
@@ -166,14 +169,14 @@ and each chapter has a cinematic moment, listed in its visuals.
   can run it on their own servers.
   - Visuals: Three tiles across the top, one by one: "Open source" (MIT
     LICENSE), "Temporal 1.0" (2020), "Self-hosted" (ON YOUR OWN SERVERS).
-- **1:48** Temporal Cloud runs the service for you. Your code stays in your
+- **1:49** Temporal Cloud runs the service for you. Your code stays in your
   environment: Temporal never sees it.
   - Visuals: On the right, TEMPORAL CLOUD (UV border, official logo):
     "Temporal Service" and three bars SECURITY & COMPLIANCE, CONTROL PLANE
     & SCALE, HIGH AVAILABILITY; on the left, YOUR ENVIRONMENT (dashed slate
     border, "YOUR APP, YOUR CODE"): YOUR APP with a small Workflow card and
     TEMPORAL SDK · OPEN SOURCE; then NEVER SEES YOUR CODE.
-- **1:56** Connections only go out from your side, and data stays encrypted
+- **1:57** Connections only go out from your side, and data stays encrypted
   end to end.
   - Visuals: A one-way arrow draws from your environment to Temporal Cloud,
     OUTBOUND ONLY, mTLS; neon packets flow out along it; an inbound attempt
@@ -184,12 +187,12 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 06 Temporal today
 
-- **2:04** Today, more than 4,300 companies pay for it, including Netflix,
+- **2:05** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **2:11** In September 2026, investors valued Temporal at $12.55 billion.
+- **2:12** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
@@ -199,7 +202,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **2:20** Temporal keeps code running whatever fails, from everyday apps
+- **2:21** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: The two founders' faces, cropped from the photo, side by side,
     in a small constellation of twinkling stars and lines; title "Meet

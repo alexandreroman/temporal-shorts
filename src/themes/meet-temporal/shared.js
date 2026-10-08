@@ -56,11 +56,11 @@ function makeCamera(root) {
   cam.style.opacity = 1;
   return cam;
 }
-// Zoom-through between scenes: the composition grows from `enter` (0.94; 1 for none) to 1 as the scene fades in,
-// and on to 1.06 as it fades out (dur: the scene duration). scale, dx, dy: an extra camera move of the scene, at
-// rest 1, 0, 0 so that a resting frame sits on whole pixels.
-function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94 } = {}) {
-  const zoom = lerp(enter, 1, P(t, 0, 0.6)) * lerp(1, 1.06, P(t, dur - 0.6, 0.6, easeIn));
+// Zoom-through between scenes: the composition grows from `enter` (0.94; 1 for none) to 1 over enterD seconds as
+// the scene fades in, and on to 1.06 as it fades out (dur: the scene duration). scale, dx, dy: an extra camera move
+// of the scene, at rest 1, 0, 0 so that a resting frame sits on whole pixels.
+function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enterD = 0.6 } = {}) {
+  const zoom = lerp(enter, 1, P(t, 0, enterD)) * lerp(1, 1.06, P(t, dur - 0.6, 0.6, easeIn));
   cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
 }
 
