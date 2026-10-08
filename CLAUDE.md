@@ -45,10 +45,15 @@ make serve                   # hot-reload home page on CASPER_PORT, else 8000
 make clean                   # delete output/ (every generated file)
 ```
 
-After a visual change, give the user a link to the changed moment:
-`http://localhost:${CASPER_PORT:-8000}/themes/<theme>/#t=<seconds>`, with
-times from `make timeline THEME=<theme>` (scene and cue starts). `#t=`
-opens the live player paused there; `?t=` is the frozen capture frame.
+To show any moment of a theme, use
+`http://localhost:<port>/themes/<theme>/#t=<time>`, `<port>` being the
+`make serve` port and `<time>` seconds or `m:ss` (scene and cue starts from
+`make timeline THEME=<theme>`); start `make serve` first if it is not
+running, and open the link in a browser when one is available. The player
+opens paused there. A reload keeps the viewer's position over the
+fragment: change `#t=` to jump. After a visual change, give the user the
+link to the changed moment. `?t=` is the frozen capture frame, without the
+player.
 
 `preview` requires `THEME`. Each MP4 or SRT rebuilds only when the shared
 sources or its own theme change (see README.md); `-B` forces a rebuild.
@@ -78,7 +83,7 @@ workspaces run `make setup` automatically.
     themes (`C`, `LOGO`, tiles, step rows, app and TEMPORAL panels, the
     Event History card, status tags, crash effects, title and end cards)
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
-    the home page
+    the home page; opens paused at a `#t=<time>` URL fragment
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
     ordered `<link>` / `<script>` list: shared files as `../../<file>`,
     the theme's own scripts relative to its folder, then `boot()`
