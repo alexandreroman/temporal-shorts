@@ -10,27 +10,25 @@
   const RERUN_TURN = 2.0; // the reruns after the restart run slower, so each step paid again reads
   const COMET = 6; // sparks trailing the token
   const SHARDS_PER_ARC = 4; // the pieces each arc breaks into at the crash
-  // the loop shows at 80% of its size for the whole chapter, centered where its durable app panel goes, with room
-  // around it inside the Temporal ring (scene pixels); the ring is 40 px inside the panel's sides, clear of its header
+  // the loop shows at 80% of its size for the whole chapter, centered in its app panel (scene pixels)
   const DL = AGENT_PLACE;
-  const RING_R = 312;
   // a point of the loop (from s.loop.pos) where it shows on the stage of the scene
   const durablePos = ([x, y]) => [DL.x + (x - LOOP.cx) * DL.k, DL.y + (y - LOOP.cy) * DL.k];
   // a point of the loop moved to the nearest one that shows on a whole pixel of the stage
   const snapToPixel = ([x, y]) => [Math.round(x * DL.k) / DL.k, Math.round(y * DL.k) / DL.k];
 
-  // Scene pixels; the shift [10, 0] puts the stage 10 px to the right. The app panel of the durable part spans the
-  // content frame (y 150 to 880) around the loop; the right column starts one GUTTER right of it, 800 px wide (x 932
-  // to 1732 on screen), for both parts: the switch at PLAY keeps its edges in place
-  const APP = { x: DL.x, y: 515, w: 2 * RING_R + 80, h: 730 };
+  // Scene pixels; the shift [10, 0] puts the stage 10 px to the right. The app panel spans the content frame (y 150
+  // to 880) around the loop, in both runs; the right column starts one GUTTER right of it, 800 px wide (x 932 to
+  // 1732 on screen), for both runs: the switch at PLAY keeps its edges in place
+  const APP = { x: DL.x, y: 515, w: 704, h: 730 };
   const GUTTER = 40;
   const RIGHT = { x: APP.x + APP.w / 2 + GUTTER + 400, w: 800 };
 
-  // The failed run's column: the goal card and the step rows, as wide and as high, GAP apart, centered on 515. The
-  // crash comes before step 4, so its row never shows
-  const ROW_H = 88;
-  const GAP = 20;
-  const COLUMN_TOP = 515 - (4 * ROW_H + 3 * GAP) / 2;
+  // The failed run's column: the goal card and the four step rows, as wide and as high, GAP apart, spanning the app
+  // panel's height: its top and bottom edges are the panel's. The crash hits while step 4 (the invite) runs
+  const ROW_H = 118;
+  const GAP = 35;
+  const COLUMN_TOP = APP.y - APP.h / 2;
   const LIST = {
     x: RIGHT.x, w: RIGHT.w, goalY: COLUMN_TOP + ROW_H / 2, rowY: COLUMN_TOP + ROW_H + GAP + ROW_H / 2,
     gap: ROW_H + GAP,
@@ -53,8 +51,10 @@
     row0: 78, gap: 58, rowH: 40,
   };
   const CALLOUT_Y = OUTSIDE.y + OUTSIDE.h / 2 - CALLOUT_GAP - CALLOUT_H / 2;
-  // the durable part enters this long after the rewind subtitle starts: the rewind (1 s in, 3 s long), then PLAY
-  const DURABLE_AFTER_REWIND = 4.5;
+  // the VCR rewind starts VCR_IN after its subtitle and runs VCR_D; the durable part enters half a second after it,
+  // as PLAY shows
+  const VCR_IN = 0.4, VCR_D = 3.0;
+  const DURABLE_AFTER_REWIND = VCR_IN + VCR_D + 0.5;
   // Each durable turn, slow enough to follow the Event History (seconds into the turn): the LLM CALL card leaves
   // THINK and lands on its row at llm, the row turns SAVED, highlighted for HOLD; the TOOL CALL card leaves ACT,
   // lands at tool and its row holds the same; a card flies FLIGHT seconds
@@ -99,11 +99,12 @@
       },
       {
         text: "Every LLM call costs time and money. Without Durable Execution, a crash means starting over.",
-        // the crash plays in held stages, then a held restart, then the three steps run again, slower
-        after: 9.3,
+        // the crash plays in held stages, then the takeover by app B and a held restart, the three steps run again,
+        // slower, then the statement holds over the dimmed run
+        after: 14.2,
       },
-      // the failed run is rewound like a tape, back to its start; then the durable part enters around the loop
-      { text: "Let's rewind and run the same agent with Temporal.", after: 2.9 },
+      // the failed run is rewound like a tape, back to its start; then the durable part enters beside the loop
+      { text: "Let's rewind and run the same agent with Temporal.", after: 1.5 },
       // the durable agent: every step saved, slowly enough to follow (three turns), a crash, a takeover that
       // replays the history row by row and pays nothing twice, then the invite and AGENT COMPLETE
       {
@@ -126,12 +127,6 @@
       // the app instances that run the durable loop: built first, so the loop and its arcs sit on top of them
       s.appA = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
       s.appB = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
-      // the Temporal ring that forms around the durable loop, and a dashed ring turning on it, behind the loop
-      s.ringSvg = svgLayer(root);
-      const ring = r => `M ${DL.x} ${DL.y - r} A ${r} ${r} 0 1 1 ${DL.x - 0.01} ${DL.y - r}`;
-      s.ring = path(s.ringSvg, ring(RING_R), C.uv, 4, false);
-      s.ring.style.filter = 'drop-shadow(0 0 10px rgba(68,76,231,.9))';
-      s.ringDash = path(s.ringSvg, ring(RING_R), C.violet, 2, false, '6 18');
       // the loop, its arcs and its token's tail on one layer, scaled as a whole
       s.loopLayer = E(root, '', '', {
         width: '1920px', height: '1080px', transformOrigin: `${LOOP.cx}px ${LOOP.cy}px`,
@@ -180,8 +175,10 @@
       s.restartTag.rw = s.restartTag.querySelector('.rw');
 
       s.list = makeStepList(root, 'Book lunch with Marie on Thursday.', LUNCH_STEPS, LIST.w);
-      // the goal card as wide as the rows (cards are 640 px at most) and as high
-      Object.assign(s.list.goal.style, { maxWidth: 'none', height: ROW_H + 'px' });
+      // the goal card as wide as the rows (cards are 640 px at most) and as high, its text centered vertically
+      Object.assign(s.list.goal.style, {
+        maxWidth: 'none', height: ROW_H + 'px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
+      });
       // the run the agent is on, on the goal card: RUN 1, then RUN 2 after the restart
       s.list.goal.insertAdjacentHTML('beforeend', '<div class="run mono" style="position:absolute;right:16px;'
         + 'top:10px;font-size:14px;letter-spacing:.12em;padding:3px 9px 3px calc(9px + .12em);border-radius:4px;'
@@ -268,9 +265,13 @@
       s.complete = tag(root, 'Agent complete', 'neon solid');
       s.complete.style.width = '256px'; // even, so it rests on whole pixels once centered
 
-      // WITHOUT TEMPORAL on the failed run's outcome, WITH TEMPORAL on the durable run, both in the loop's middle
-      s.without = tag(root, 'Without Temporal', 'red solid');
-      s.withT = tag(root, 'With Temporal', 'uv solid');
+      // the statement before the rewind, over a scrim that dims the failed run: two lines in the brand font,
+      // "doesn't survive" in red; built under the VCR display, which shows over the scrim
+      s.scrim = E(root, '', '', { width: '2400px', height: '1400px', background: 'var(--bg)' });
+      s.msg = E(root, 'Without Temporal, an AI agent<br>'
+        + `<span style="color:${C.red}">doesn't survive</span> a production incident.`, '', {
+        width: '1600px', textAlign: 'center', fontSize: '60px', lineHeight: '75px', fontWeight: 700, color: C.ink,
+      });
       // the VCR rewind: an on-screen display in the corner (two rewind triangles and REWIND, then PLAY) with a
       // timecode, tracking noise bands and scanlines over the stage
       const tri = (x, dir) => `<path d="M${x} 2 L${x + 18 * dir} 15 L${x} 28 Z"/>`;
@@ -306,28 +307,29 @@
       // isn't there yet
       const loopAt = c[0] + 0.1;
       const firstRun = [0, 1, 2].map(i => loopAt + AGENT_LOOP_DRAWN + 0.25 + i * TURN);
-      // the crash, in held stages: impact (the token stops dead mid-arc in step 4's turn, shake, flash, glitch),
-      // break (the arcs shatter and drift down, the token fades, the nodes dim red), loss (each done row loses its
-      // result, top to bottom, and PROGRESS LOST holds), then the restart: START OVER, the pieces fly back and
-      // steps 1 to 3 run again
+      // the crash, in held stages: impact (the token stops dead mid-arc in step 4's turn, shake, flash, glitch, app
+      // A CRASHED), break (the arcs shatter and drift down, the token fades, the nodes dim red), loss (each done row
+      // loses its result, top to bottom, and PROGRESS LOST holds); then A leaves and B slides into its place, NEW
+      // APP INSTANCE held; then the restart on B, which has nothing to resume from: the pieces fly back and steps
+      // 1 to 3 run again
       const crashAt = c[1] + 2.8;
       const breakAt = crashAt + 0.8, lossAt = crashAt + 2.0;
-      const restart = crashAt + 4.6;
       const lostAt = crashAt + 2.4;
+      const aOut1 = crashAt + 4.4, bOn1 = aOut1 + 0.6;
+      const restart = bOn1 + 1.4;
       // the restart, held: the loop re-forms, the banner shows, the token rewinds back to THINK and the list is
       // wiped back to empty steps; then steps 1 to 3 run again, slower
       const rewindAt = restart + 0.2, wipeAt = restart + 0.5;
       const rerun = [0, 1, 2].map(i => restart + 2.1 + i * RERUN_TURN);
       // step 4's turn: it starts just before the crash, which freezes the token mid-arc
       const lastTurn = crashAt - 0.5;
-      // after the rewind the failed run clears (its steps and coins fade) around the loop, already in its durable
-      // place, and its Temporal ring draws around it; then the app panel, Temporal with the Event History and
-      // WITH TEMPORAL enter
+      // after the rewind the failed run's column clears (its steps and coins fade) beside app A, which stays in
+      // place around the loop; then Temporal with the Event History enters in the column's place
       const clearAt = c[2] + DURABLE_AFTER_REWIND;
       // the durable run: steps 1 to 3, each LLM call and tool result saved in the Event History (the card leaves
       // the loop, lands on its row, the row turns SAVED); then the crash before the invite, a new app instance
       // that replays the six saved rows (nothing re-billed, nothing re-run), and the invite, run for real
-      const durableIn = clearAt + 0.8;
+      const durableIn = clearAt + 0.4;
       const runAt = [0, 1, 2].map(i => c[3] + 1.4 + i * D_TURN.d);
       // the crashed app holds, its history kept, then A leaves, and is gone before B slides into its place; NEW
       // APP INSTANCE holds before the replay, one row a second
@@ -342,11 +344,15 @@
       const turns = [...[...firstRun, lastTurn].map(a => [a, TURN]), ...rerun.map(a => [a, RERUN_TURN]),
         ...stepAt.map(a => [a, D_TURN.d])];
       const [ax, ay] = shakeAt(t, crash2);
-      // the failed run, then its VCR rewind: WITHOUT TEMPORAL holds on its outcome, then the tape rewinds it fast to
-      // its start (empty steps, no coins), stops and plays; the failed run's states read the tape's clock tf,
-      // which runs backwards during the rewind and stays at the start until the durable part takes over
-      const withoutAt = rerun[2] + RERUN_TURN - 0.4;
-      const vcrAt = c[2] + 1.0, vcrEnd = vcrAt + 3.0;
+      // the scene's shift, to place what sits on the screen's own grid
+      const [shiftX, shiftY] = AGENT_START.shift;
+      // the failed run, then the statement over it (it dims, two lines hold), then its VCR rewind: the tape rewinds
+      // it fast to its start (app A, empty steps, no coins), stops and plays; the failed run's states read the
+      // tape's clock tf, which runs backwards during the rewind and stays at the start until the durable part
+      // takes over
+      const msgAt = rerun[2] + RERUN_TURN + 0.3;
+      const vcrAt = c[2] + VCR_IN, vcrEnd = vcrAt + VCR_D;
+      const msgOut = vcrAt - 0.3;
       const tapeStart = firstRun[0] - 0.05;
       let tf = t;
       if (t >= vcrAt && t < durableIn) {
@@ -379,7 +385,7 @@
         o: 1 - 0.6 * win(t, crash2, bOn + 0.4, 0.3),
       });
       // AGENTIC LOOP fades with the failed run after PLAY and stays hidden through the durable run: its spot is
-      // for the durable run's tags (WITH TEMPORAL, the crash, NEW APP INSTANCE, AGENT COMPLETE)
+      // for the durable run's tags (the crash, NEW APP INSTANCE, AGENT COMPLETE)
       if (t >= clearAt) {
         s.loop.center.style.opacity = (parseFloat(s.loop.center.style.opacity) * (1 - P(t, clearAt, 0.5))).toFixed(3);
       }
@@ -414,10 +420,6 @@
         const [x, y] = s.loop.pos(tailDeg);
         place(e, x, y, 1, 0.55 - 0.08 * k);
       });
-      // the durable loop: a Temporal ring draws around it, a dashed ring turns on it (ambient, driven by G)
-      draw(s.ring, P(t, clearAt + 0.9, 1.0), 1);
-      draw(s.ringDash, P(t, clearAt + 1.8, 0.4), 0.6);
-      s.ringDash.setAttribute('stroke-dashoffset', -G * 30);
       s.svg.style.transform = `translate(${sx + ax}px,${sy + ay}px)`;
       // the loop sits in its durable place for the whole chapter, at 80% of its size
       s.loopLayer.style.transform = `translate(${DL.x - LOOP.cx}px,${DL.y - LOOP.cy}px) scale(${DL.k})`;
@@ -434,8 +436,20 @@
       const sideOut = P(t, clearAt, 0.5);
       placeStepList(s.list, tf, {
         x: LIST.x + sx, goalY: LIST.goalY + sy, rowY: LIST.rowY + sy, gap: LIST.gap, goalAt: c[0] + 0.3,
-        turnStarts: [...firstRun, c[1] + 99], turn: TURN, o: 1 - sideOut,
+        turnStarts: [...firstRun, lastTurn - 0.5], turn: TURN, o: 1 - sideOut,
       });
+      // step 4, the invite, is running when the app crashes: it never gets a result; it greys out with the done
+      // steps and is wiped back to an empty step with them
+      const invite = s.list.rows[3];
+      invite.res.style.opacity = 0;
+      invite.ck.style.opacity = 0;
+      invite.style.color = '';
+      if (tf >= crashAt + 0.3) {
+        const cleared = P(tf, wipeAt, 0.25);
+        const k = cleared > 0 ? lerp(0.45, 1, cleared) : 1 - 0.55 * P(tf, crashAt + 0.3, 0.4);
+        invite.style.opacity = (k * (1 - sideOut)).toFixed(3);
+        if (cleared > 0) invite.style.color = C.slate;
+      }
       // the loss: each done row, top to bottom, has its result corrupted, then dissolving into falling particles,
       // its check turned into a red cross that vanishes, and greys out until the agent redoes it from step 1
       s.list.rows.slice(0, 3).forEach((r, i) => {
@@ -454,7 +468,7 @@
           r.ko.style.opacity = 1 - P(tf, at + 0.6, 0.3);
           r.style.opacity = ((1 - 0.55 * P(tf, at + 0.3, 0.4)) * (1 - sideOut)).toFixed(3);
           // the wipe passes the row, bottom to top, and leaves it an empty step to do again
-          const cleared = P(tf, wipeAt + (2 - i) * 0.2, 0.25);
+          const cleared = P(tf, wipeAt + (3 - i) * 0.2, 0.25);
           if (cleared > 0) {
             r.style.opacity = (lerp(0.45, 1, cleared) * (1 - sideOut)).toFixed(3);
             r.style.color = C.slate;
@@ -479,9 +493,10 @@
           place(e, x0 + e.drift * f + sx, y0 + 50 * f + 90 * f * f + sy, 1, f > 0 && f < 1 ? 1 - f : 0);
         });
       });
-      // the wipe: a bar of light sweeps up the list, from under step 3 to over step 1
-      const wp2 = P(tf, wipeAt, 0.6, x => x);
-      place(s.wipe, LIST.x + sx, lerp(LIST.rowY + 2 * LIST.gap + 50, LIST.rowY - 50, wp2) + sy, 1,
+      // the wipe: a bar of light sweeps up the list, from under step 4 to over step 1
+      const wp2 = P(tf, wipeAt, 0.8, x => x);
+      const edge = ROW_H / 2 + GAP / 2;
+      place(s.wipe, LIST.x + sx, lerp(LIST.rowY + 3 * LIST.gap + edge, LIST.rowY - edge, wp2) + sy, 1,
         wp2 > 0 && wp2 < 1 ? 1 : 0);
       // RUN 1, then RUN 2 in red after the restart, with a swell
       const run2 = tf >= wipeAt + 0.6;
@@ -491,7 +506,7 @@
       // PROGRESS LOST pops over the broken loop with a jolt and a glow, and holds until the restart
       const lp = P(tf, lostAt, 0.45, backOut);
       const [jx, jy] = shakeAt(t, lostAt - 0.1);
-      place(s.lost, DL.x + jx * 0.6, DL.y - 45 + jy * 0.6, lp, clamp(lp * 2) * (1 - P(tf, restart - 0.6, 0.3)));
+      place(s.lost, DL.x + jx * 0.6, DL.y - 45 + jy * 0.6, lp, clamp(lp * 2) * (1 - P(tf, aOut1 - 0.2, 0.3)));
 
       // each LLM call drops a coin on its row as the row slides in; a call made again stacks a red coin on it. The
       // money spent is not lost: the coins stay bright through the whole crash, and swell one after the other
@@ -504,31 +519,47 @@
       });
       placeFlash(s.flash, t, crashAt);
 
-      // the durable part. The app instances: A runs the loop, crashes before the invite and leaves; B slides into
-      // its place, replays the history, then runs the invite
-      const aIn = P(t, durableIn, 0.5);
-      const leaving = leavingInstance(t, aOut);
-      place(s.appA, APP.x + ax, APP.y + ay + leaving.dy, 1, aIn * leaving.o);
-      s.appA.style.filter = t >= crash2 ? leaving.grey || 'none' : '';
-      if (t >= crash2) setAppStatus(s.appA, 'CRASHED', 'crashed');
-      else setAppStatus(s.appA, t >= runAt[0] ? 'RUNNING THE AGENT' : '', t >= runAt[0] ? 'running' : 'idle');
-      const arriving = arrivingInstance(t, bOn);
-      place(s.appB, APP.x + arriving.dx, APP.y, 1, t >= bOn ? arriving.o : 0);
-      if (t < replay[0]) setAppStatus(s.appB, 'TAKING OVER', 'idle');
-      else if (t < inviteAt) setAppStatus(s.appB, 'REPLAYING…', 'running');
-      else if (t < complete) setAppStatus(s.appB, 'RUNNING THE AGENT', 'running');
-      // AGENT COMPLETE shows in the loop: the status just reads DONE
-      else setAppStatus(s.appB, 'DONE', 'idle');
-      setArrivalGlow(s.appB, t, bOn, bOn + 1.6);
-      placeNewTag(s.newTag, t, bOn + 0.3, replay[0], DL.x + arriving.dx, DL.y - 25);
+      // The app instances, in the same panel geometry in both runs. In the failed run (on the tape's clock): A runs
+      // the loop from the chapter's start, turns CRASHED at the crash and leaves; B slides into its place with
+      // nothing to resume from, and starts over. In the durable run (from PLAY): A, already in place, runs the
+      // loop, crashes before the invite and leaves; B slides in, replays the history, then runs the invite
+      if (t < clearAt) {
+        const leaving1 = leavingInstance(tf, aOut1);
+        place(s.appA, APP.x + sx, APP.y + sy + leaving1.dy, 1, P(t, loopAt, 0.5) * leaving1.o);
+        s.appA.style.filter = leaving1.grey;
+        const running = tf >= firstRun[0];
+        if (tf >= crashAt) setAppStatus(s.appA, 'CRASHED', 'crashed');
+        else setAppStatus(s.appA, running ? 'RUNNING THE AGENT' : '', running ? 'running' : 'idle');
+        const arriving1 = arrivingInstance(tf, bOn1);
+        place(s.appB, APP.x + arriving1.dx, APP.y, 1, tf >= bOn1 ? arriving1.o : 0);
+        setAppStatus(s.appB, tf < restart ? 'TAKING OVER' : 'RUNNING THE AGENT', tf < restart ? 'idle' : 'running');
+        setArrivalGlow(s.appB, tf, bOn1, bOn1 + 1.6);
+        // NEW APP INSTANCE gives way to the restart banner
+        placeNewTag(s.newTag, tf, bOn1 + 0.3, restart - 0.4, DL.x + arriving1.dx, DL.y - 25);
+      } else {
+        const leaving = leavingInstance(t, aOut);
+        place(s.appA, APP.x + ax, APP.y + ay + leaving.dy, 1, leaving.o);
+        s.appA.style.filter = t >= crash2 ? leaving.grey || 'none' : '';
+        if (t >= crash2) setAppStatus(s.appA, 'CRASHED', 'crashed');
+        else setAppStatus(s.appA, t >= runAt[0] ? 'RUNNING THE AGENT' : '', t >= runAt[0] ? 'running' : 'idle');
+        const arriving = arrivingInstance(t, bOn);
+        place(s.appB, APP.x + arriving.dx, APP.y, 1, t >= bOn ? arriving.o : 0);
+        if (t < replay[0]) setAppStatus(s.appB, 'TAKING OVER', 'idle');
+        else if (t < inviteAt) setAppStatus(s.appB, 'REPLAYING…', 'running');
+        else if (t < complete) setAppStatus(s.appB, 'RUNNING THE AGENT', 'running');
+        // AGENT COMPLETE shows in the loop: the status just reads DONE
+        else setAppStatus(s.appB, 'DONE', 'idle');
+        setArrivalGlow(s.appB, t, bOn, bOn + 1.6);
+        placeNewTag(s.newTag, t, bOn + 0.3, replay[0], DL.x + arriving.dx, DL.y - 25);
+      }
       placeCrashMarks(s.crash2, t, crash2, crash2 + 0.3, aOut, ax, ay);
       placeFlash(s.flash2, t, crash2);
       const cp2 = P(t, complete, 0.45, backOut);
       place(s.complete, DL.x, DL.y - 25, cp2, clamp(cp2 * 2));
 
       // Temporal, outside the app, with the Event History: untouched by the crash
-      place(s.outside, OUTSIDE.x, OUTSIDE.y, 1, P(t, durableIn + 0.4, 0.5));
-      place(s.history, HIST.x, HIST.y, 1, P(t, durableIn + 0.6, 0.5));
+      place(s.outside, OUTSIDE.x, OUTSIDE.y, 1, P(t, durableIn, 0.5));
+      place(s.history, HIST.x, HIST.y, 1, P(t, durableIn + 0.2, 0.5));
       // each result leaves the loop (an LLM call from THINK, a tool result from ACT just after the token passes
       // it), flies to its row's left end and is absorbed there as the row is written
       const [thx, thy] = durablePos(s.loop.pos(LOOP_DEG.think)), [acx, acy] = durablePos(s.loop.pos(LOOP_DEG.act));
@@ -572,23 +603,23 @@
       const np = P(t, noLossAt, 0.45, backOut);
       place(s.noLoss, OUTSIDE.x, CALLOUT_Y, np, clamp(np * 2));
 
-      // WITHOUT TEMPORAL holds on the failed run's outcome until the rewind; WITH TEMPORAL on the durable run's
-      // first steps
-      const wo = P(t, withoutAt, 0.45, backOut);
-      place(s.without, DL.x, DL.y - 25, wo, clamp(wo * 2) * (1 - P(t, vcrAt - 0.2, 0.3)));
-      const wi = P(t, durableIn + 0.8, 0.45, backOut);
-      place(s.withT, DL.x, DL.y - 25, wi, clamp(wi * 2) * (1 - P(t, crash2 - 0.4, 0.3)));
-      // AGENTIC LOOP gives way to WITHOUT TEMPORAL until the rewind
-      if (t >= withoutAt && t < vcrAt) s.loop.center.style.opacity = 0;
+      // the statement before the rewind: the failed run dims under the scrim and the two lines rise in, their
+      // letter spacing tightening, with one red glitch flicker; they hold, then fade as the rewind starts
+      const mIn = P(t, msgAt, 0.7, easeOut);
+      const msgO = 1 - P(t, msgOut, 0.35);
+      place(s.scrim, 960 - shiftX, 540 - shiftY, 1, 0.75 * P(t, msgAt, 0.5) * msgO);
+      const flicker = t >= msgAt + 1.0 && t < msgAt + 1.1;
+      place(s.msg, 960 - shiftX + (flicker ? 6 : 0), 515 - shiftY + Math.round(24 * (1 - mIn)), 1, mIn * msgO);
+      s.msg.style.letterSpacing = `${(0.06 * (1 - mIn)).toFixed(4)}em`;
+      s.msg.style.textShadow = flicker ? '-4px 0 0 rgba(255,90,95,.7)' : '';
 
       // the VCR rewind: REWIND blinks in the corner over a timecode running backwards, noise bands roll over the
       // stage with scanlines and a color fringe; then the tape stops (a jolt) and PLAY shows for a moment
       const vcrOn = t >= vcrAt - 0.15 && t < vcrEnd + 0.9;
       const rolling = t >= vcrAt && t < vcrEnd;
       const frame = Math.floor(t * 24);
-      // the stage's top left under the header (screen x 432, y 176), in the scene
-      const [shiftX, shiftY] = AGENT_START.shift;
-      const OSD = { x: 432 - shiftX, y: 176 - shiftY };
+      // in the app panel, centered on it, between its header and THINK (screen x 540, y 240), in the scene
+      const OSD = { x: 540 - shiftX, y: 240 - shiftY };
       s.osd.style.opacity = 0;
       if (vcrOn) {
         const playing = t >= vcrEnd;
