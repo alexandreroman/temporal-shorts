@@ -161,9 +161,18 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 - **1:52** Now the Worker crashes mid-order, during shipPackage. Another
   Worker takes over the Workflow.
-  - Visuals: Same layout, `shipPackage` running; red flash + shake, WORKER
-    A CRASHED, "WORKER CRASHED HERE" line under row 3 and tinted kept rows;
-    WORKER B appears (IDLE), then shows TAKING OVER.
+  - Visuals: Same layout, `shipPackage` running; WORKER A glitches (its
+    border and status flicker red, the `shipPackage` line jitters), then
+    crashes: red flash + shake, a red bolt strikes its code card, WORKER A
+    CRASHED, a WORKER CRASH tag pops in under the `emailReceipt` line,
+    "WORKER CRASHED HERE" line under row 3 and tinted kept rows; the
+    Temporal side stays still. Bolt and tag leave with WORKER A's status,
+    then WORKER A, a dead machine, greys, drops and fades out with its code
+    card. A new machine, WORKER B (IDLE), slides in from the left with the
+    code card to the same place, its border glowing violet, and a NEW
+    WORKER tag pops on its top edge. A violet WORKFLOW #1042 chip flies
+    from the "Workflow started" row to its status, which turns TAKING
+    OVER; the tag and the glow fade before the replay.
 - **1:59** It first runs the Workflow from the start, and Temporal hands
   back every saved result: no second charge.
   - Visuals: WORKER B shows REPLAYING…, a violet "FROM THE START" arrow and
