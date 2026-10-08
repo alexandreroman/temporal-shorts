@@ -10,7 +10,7 @@
     TOKENS: { background: 'transparent', color: C.slate, borderColor: C.slate },
   };
   const TYPE_ORDER = ['TURN', 'MODEL', 'TOOL', 'APPROVAL', 'TOKENS'];
-  const SDKS = ['OpenAI Agents SDK', 'Google Gen AI SDK', 'Pydantic AI'];
+  const SDKS = ['OpenAI Agents SDK', 'Google Gemini', 'Pydantic AI'];
   // Layout grid, final positions: the agents column on the left (x 140-500), the lane in the middle (x 600-1040),
   // the console on the right (x 1140-1780), 100 px apart. The agents column and the console share their top
   // (y 227) and bottom (y 817).

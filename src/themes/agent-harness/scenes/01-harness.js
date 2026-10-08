@@ -72,8 +72,16 @@
   const capY = row => (row ? FRAME.y1 - CAP.h / 2 : FRAME.y0 + CAP.h / 2);
   // the harness frame's edge on a side, where the link from a tile plugs in
   const frameX = side => (side < 0 ? FRAME.x0 : FRAME.x1);
-  // the SDK tags sit well below the loop, where the frame's bottom edge comes later
-  const SDK_Y = LOOP.cy + 330;
+  // the SDK tags sit well below the loop, where the frame's bottom edge comes later: the available SDKs on a
+  // first row, the planned ones on a second, each row headed by its label. Every tag has the width of the widest,
+  // so the two rows line up column by column; Google ADK sits under Google Gemini, sharing the Google column
+  const SDKS = ['OpenAI Agents SDK', 'Google Gemini', 'Pydantic AI'];
+  const PLANNED_SDKS = ['Strands Agents', 'Google ADK', 'LangGraph'];
+  const SDK = { y: LOOP.cy + 310, h: 50, rowGap: 20, labelW: 112, tagW: 340, gap: 28 };
+  SDK.plannedY = SDK.y + SDK.h + SDK.rowGap;
+  // when each row's label fades in and its first tag pops, in seconds after c[0]; the tags of a row follow 0.2 s
+  // apart
+  const SDK_AT = [5.9, 6.9];
   // the turn beat uses the side columns before the capability tiles take them: messages on the left, replies on
   // the right. Headings on the harness header's center line, cards below with explicit even heights (2 or 1
   // lines of text), so their centers rest on whole pixels
@@ -141,14 +149,15 @@
   scene({
     chapter: 1, title: 'An agent harness',
     // the loop with its SDK tags sits higher than the taller framed loop: pan while the tags fade out
-    shift: (t, c) => pan(t, [0, -56], [[c[1], 0, 0]], 0.9),
+    shift: (t, c) => pan(t, [0, -82], [[c[1], 0, 0]], 0.9),
     // every state holds long enough to be read: the header before the first subtitle, the last tiles at the end
     pre: 1.5,
     post: 2.0,
     subs: [
       {
         text: "An AI agent is a model, plus tools, plus a loop. You write that loop with the AI SDK you already know.",
-        after: 1.5,
+        // the planned SDKs land at c[0] + 7.75 and read for 2 s before the tags fade
+        after: 2.5,
       },
       {
         text: "The harness doesn't replace your loop, it wraps it: every agent runs as a durable Temporal Workflow.",
@@ -203,11 +212,17 @@
       s.tools = [iconTile(root, 'plane', 'Flights', TILE.w, TILE.h), iconTile(root, 'bed', 'Hotels', TILE.w, TILE.h)];
       s.loopL = E(root, 'Your agentic loop', 'lbl', { color: 'var(--ink)' });
       s.yourL = E(root, 'Your loop', 'lbl', { color: 'var(--ink)' });
-      // the SDKs your loop is written with
-      const sdks = ['OpenAI Agents SDK', 'Google Gen AI SDK', 'Pydantic AI'];
-      s.sdkRow = E(root, sdks.map(n => '<span class="pill" style="display:flex;align-items:center;gap:10px">'
-        + `${ICON('code', 22, C.slate, 1.8)}${n}</span>`).join(''), '', { display: 'flex', gap: '28px' });
-      s.sdks = [...s.sdkRow.children];
+      // the SDKs your loop is written with: the available ones, then the planned ones, dashed and dimmed
+      const sdkTag = (name, planned) => {
+        const look = planned ? `border-style:dashed;border-color:${C.slate};color:${C.slate};background:none;` : '';
+        return `<span class="pill" style="width:${SDK.tagW}px;display:flex;align-items:center;justify-content:center;`
+          + `gap:10px;${look}">${ICON('code', 22, C.slate, 1.8)}${name}</span>`;
+      };
+      const sdkRow = (label, names, planned) => E(root,
+        `<span class="lbl" style="width:${SDK.labelW}px;font-size:16px;text-align:right">${label}</span>`
+        + names.map(name => sdkTag(name, planned)).join(''),
+        '', { display: 'flex', alignItems: 'center', gap: SDK.gap + 'px' });
+      s.sdkRows = [sdkRow('Available', SDKS, false), sdkRow('Planned', PLANNED_SDKS, true)];
       // header on whole pixels at native size: official logo, a thin rule, then the label
       s.header = E(root,
         `<img src="${LOGO}" style="height:32px;display:block">`
@@ -340,12 +355,17 @@
       const rename = P(t, c[1] + 1.0, 0.5);
       place(s.loopL, LOOP.cx, LOOP.cy - 20, 1, P(t, c[0] + TOKEN_AT, 0.5) * (1 - rename));
       place(s.yourL, LOOP.cx, LOOP.cy - 20, 1, rename * loopO);
+      // the available SDKs, then the planned ones: each row's label fades in, then its tags pop one by one
       const sdkOut = P(t, c[1], 0.4);
-      place(s.sdkRow, LOOP.cx, SDK_Y, 1, 1 - sdkOut);
-      s.sdks.forEach((e, i) => {
-        const p = P(t, c[0] + 5.9 + i * 0.2, 0.45, backOut);
-        e.style.transform = `scale(${p})`;
-        e.style.opacity = clamp(p * 2);
+      s.sdkRows.forEach((row, r) => {
+        place(row, LOOP.cx, r === 0 ? SDK.y : SDK.plannedY, 1, 1 - sdkOut);
+        const [label, ...tags] = row.children;
+        label.style.opacity = P(t, c[0] + SDK_AT[r] - 0.1, 0.4);
+        tags.forEach((e, i) => {
+          const p = P(t, c[0] + SDK_AT[r] + i * 0.2, 0.45, backOut);
+          e.style.transform = `scale(${p})`;
+          e.style.opacity = clamp(p * 2);
+        });
       });
       // c[1]: the label becomes YOUR LOOP (above), the frame draws around the loop, then its header and the
       // Workflow pill appear
