@@ -199,9 +199,11 @@ CLAUDE.md; a section below and the card order in
 
 ### meet-temporal
 
-- For people who have never heard of Temporal, about 2 minutes: the
-  founders and where they come from, the lineage, what Temporal does,
-  Temporal today, why it matters for AI. Every fact is sourced
+- For people who have never heard of Temporal: the founders and where
+  they come from, the lineage, what Temporal does, Temporal today, why it
+  matters for AI. Length is no constraint: every beat gets the time it
+  needs to read (held states, slow dramatic moments) rather than being
+  rushed to save seconds. Every fact is sourced
   (`### Sources` in `script.md`); unsourced claims stay out (founders'
   degrees, customers named only by investors, a Cloud GA date).
 - No "What you get" recap: a short company introduction, the outro sums
