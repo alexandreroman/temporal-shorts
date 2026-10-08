@@ -22,6 +22,8 @@
   const SECRET = 'card: $42'; // the data that leaves your environment, encrypted on the way
   const GLYPHS = '#%&@$*+=?/<>{}';
   const DATA_LANDING = { x: SERVICE.x, y: SERVICE.y + 48 }; // inside the Temporal Service box, under its title
+  // the data's lane over the arrow: its 38 px chip clears the arrow's packets by 12 px
+  const DATA_LANE = ARROW.y - 36;
 
   // text with the first `n` characters (rounded) swapped for glyphs picked by a hash of the frame: encrypted text
   function scramble(text, n, frame) {
@@ -143,10 +145,11 @@
 
       // the one-way connection, from your side out to Temporal Cloud, then encryption end to end
       draw(s.arrow, P(t, c[2] + 0.3, 0.7));
-      place(s.outbound, ARROW_X, ARROW.y - 34, 1, P(t, c[2] + 0.8, 0.4));
-      place(s.mtls, ARROW_X, ARROW.y + 30, 1, P(t, c[2] + 1.1, 0.4));
+      // the labels sit under the arrow, so the data crossing above it never passes over them
+      place(s.outbound, ARROW_X, ARROW.y + 25, 1, P(t, c[2] + 0.8, 0.4));
+      place(s.mtls, ARROW_X, ARROW.y + 54, 1, P(t, c[2] + 1.1, 0.4));
       const ep = P(t, c[2] + 3.0, 0.45, backOut);
-      place(s.encrypted, ARROW_X, ARROW.y + 120, ep, clamp(ep * 2));
+      place(s.encrypted, ARROW_X, ARROW.y + 130, ep, clamp(ep * 2));
       // the lock snaps shut as the tag lands
       const snap = P(t, c[2] + 3.4, 0.2, easeIn);
       s.shackle.setAttribute('transform', `translate(0 ${(-4 * (1 - snap)).toFixed(2)})`);
@@ -162,16 +165,20 @@
       const inbound = c[2] + 1.4;
       const go = P(t, inbound, 0.6, easeIn), back = P(t, inbound + 0.6, 0.5);
       const ix = lerp(lerp(ARROW.x1 - 20, ARROW.x0 + 20, go), ARROW.x1 - 120, back);
-      place(s.inbound, ix, ARROW.y + 60, 1, win(t, inbound, inbound + 1.0, 0.15));
+      place(s.inbound, ix, ARROW.y + 84, 1, win(t, inbound, inbound + 1.0, 0.15));
       const bp = P(t, inbound + 0.6, 0.3, backOut);
-      place(s.block, ARROW.x0 + 20, ARROW.y + 60, bp, win(t, inbound + 0.6, inbound + 1.6, 0.2));
+      place(s.block, ARROW.x0 + 16, ARROW.y + 84, bp, win(t, inbound + 0.6, inbound + 1.6, 0.2));
 
       // a piece of data leaves your app and crosses over, encrypted as it leaves your environment; it stays
       // encrypted in Temporal Cloud
       const sent = c[2] + 2.2;
       const dp = P(t, sent, 1.4);
+      // it rises out of the app into a lane just above the arrow (DATA_LANE), crosses over in it, and drifts into
+      // the Temporal Service box
       const dx = lerp(APP.x + 100, DATA_LANDING.x, dp);
-      const dy = lerp(APP.y + 20, DATA_LANDING.y, dp) - Math.sin(dp * Math.PI) * 60;
+      const lift = (1 - Math.cos(Math.PI * clamp((dx - APP.x - 100) / (ARROW.x0 - 10 - APP.x - 100)))) / 2;
+      const dy = lerp(lerp(APP.y + 20, DATA_LANE, lift), DATA_LANDING.y, clamp((dx - ARROW.x1) / (DATA_LANDING.x
+        - ARROW.x1)));
       const encrypted = clamp((dx - (ARROW.x0 - 40)) / 120);
       // the glyphs flicker on the ambient clock G counted from the scene's start (equal to t in rendered frames),
       // so the live player sees a still scene once the data has landed
