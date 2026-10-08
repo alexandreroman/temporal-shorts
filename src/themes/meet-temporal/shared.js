@@ -134,11 +134,14 @@ function setSymbolDraw(e, draw, fill) {
 // Chapter 4's agentic loop: its center, and its camera at the start of the scene (shift and magnification)
 const AGENT_LOOP = { cx: 560, cy: 540, r: 220 };
 const AGENT_START = { shift: [-62, 14], enter: 1.35 };
-// The stage point where chapter 4's LLM node (THINK, on top of the loop) shows as the scene starts: chapter 3's
-// zoom lands the AI hub there, so the hub's glow turns into the agent across the cut
+// The stage point where chapter 4's LLM node (THINK, on top of the loop) shows as the scene starts, and its size
+// there: chapter 3's AI hub turns into that LLM node, so the same bubble carries across the cut
 const AGENT_HANDOFF = {
   x: 960 + (AGENT_LOOP.cx - 960) * AGENT_START.enter + AGENT_START.shift[0],
   y: 540 + (AGENT_LOOP.cy - AGENT_LOOP.r - 540) * AGENT_START.enter + AGENT_START.shift[1],
 };
-// Diameter of the violet glow on screen at the cut, the same on both sides of it
-const HANDOFF_GLOW = 3584;
+const AGENT_LLM = { size: 130, seed: 0.37 }; // the LLM node's size in chapter 4, and the blink phase of both orbs
+// The halo around the bubble at the cut: its size on screen (diameter, px) and opacity, the same on both sides
+const HANDOFF_HALO = { size: 440, o: 0.8 };
+const HALO_BACKGROUND = 'radial-gradient(circle, rgba(182,100,255,.4) 0%, rgba(68,76,231,.15) 45%, '
+  + 'rgba(68,76,231,0) 70%)';

@@ -229,15 +229,16 @@ function makeAgentLoop(root, svg, cx, cy, r = 220) {
 }
 // Places the loop at time t: its nodes pop in from `a`, 0.2 s apart, then their labels and the arcs. Options:
 // - deg: angle of the token on the loop (null hides it); the node it passes swells by 12%, the LLM thinks near it
+// - thinkIn: when THINK pops in (default `a`); before the start of the scene to show it from the first frame
 // - centerAt: when the "Agentic loop" label fades in; centerO: its opacity (0 to 1), e.g. while another label shows
 // - o: opacity of the whole loop; arcO: opacity of the arcs; q: the LLM's question mark (0 to 1)
 // - dx, dy: offset of the nodes and labels (a shake)
 function placeAgentLoop(loop, t, a, opts = {}) {
-  const { deg = null, centerAt, centerO = 1, o = 1, arcO = 1, q = 0, dx = 0, dy = 0 } = opts;
+  const { deg = null, centerAt, centerO = 1, o = 1, arcO = 1, q = 0, dx = 0, dy = 0, thinkIn = a } = opts;
   const near = d => deg === null ? 0 : Math.max(0, 1 - Math.abs((((deg - d) % 360) + 540) % 360 - 180) / 30);
   const nodes = [[loop.think.root, LOOP_DEG.think], [loop.act, LOOP_DEG.act], [loop.observe, LOOP_DEG.observe]];
   nodes.forEach(([e, d], i) => {
-    const [x, y] = loop.pos(d), p = P(t, a + i * 0.2, 0.5, backOut);
+    const [x, y] = loop.pos(d), p = P(t, i === 0 ? thinkIn : a + i * 0.2, 0.5, backOut);
     place(e, x + dx, y + dy, p * (1 + 0.12 * near(d)), clamp(p * 2) * o);
   });
   llmState(loop.think, { think: near(LOOP_DEG.think) > 0.2 ? 1 : 0, look: 0.5, q });

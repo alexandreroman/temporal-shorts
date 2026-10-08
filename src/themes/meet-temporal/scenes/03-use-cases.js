@@ -24,7 +24,8 @@
     [['sparkle', 'Agents'], ['search', 'RAG flows'], ['chip', 'Model training']],
   ];
   const AI = HUBS.length - 1;
-  const ZOOM = 4; // how far the camera zooms into the AI hub at the end
+  const FULL_SCREEN = 2300; // the AI hub's diameter when it fills the stage (its diagonal is 2203 px)
+
   const bubbleAt = (hub, k) => {
     const a = hub.angles[k] * Math.PI / 180;
     return [hub.x + Math.cos(a) * BUBBLE.r, hub.y + Math.sin(a) * BUBBLE.r];
@@ -67,7 +68,7 @@
   scene({
     chapter: 3, title: 'Where Temporal is used',
     // a short fade out: the zoom into the AI hub runs on into the next chapter, which fades in as briefly
-    fadeOut: 0.04,
+    fadeOut: 0.001,
     // laid out centered at (960, 522) on the free band
     subs: [
       {
@@ -75,7 +76,7 @@
         after: 0.4,
       },
       // the pause holds the zoom into the AI hub, which leads into the next chapter
-      { text: "Teams also run infrastructure, data pipelines and, more and more, AI on Temporal.", after: 2.0 },
+      { text: "Teams also run infrastructure, data pipelines and, more and more, AI on Temporal.", after: 3.0 },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
@@ -83,9 +84,10 @@
         width: '560px', height: '560px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(182,100,255,.35) 0%, rgba(68,76,231,.12) 45%, rgba(68,76,231,0) 70%)',
       });
-      s.aiGlow = E(root, '', '', {
-        width: '640px', height: '640px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,100,255,.4) 0%, rgba(68,76,231,.15) 45%, rgba(68,76,231,0) 70%)',
+      // the AI hub's halo, which travels with it at the end
+      s.halo = E(root, '', '', {
+        width: HANDOFF_HALO.size + 'px', height: HANDOFF_HALO.size + 'px', borderRadius: '50%',
+        background: HALO_BACKGROUND,
       });
       s.svg = svgLayer(root);
       s.spokes = HUBS.map(hub => path(s.svg, spokeD(hub), C.violet, 2.5, false));
@@ -96,22 +98,31 @@
       s.hubs = HUBS.map(hub => makeHub(root, hub.name));
       s.bubbles = EXAMPLES.map((examples, i) => examples.map((example, k) => makeBubble(root, example,
         HUBS[i].angles[k])));
+      // the LLM orb the AI hub turns into: the next chapter's LLM node, same size and blink
+      s.llm = makeLLM(root, AGENT_LLM.size, '');
+      s.llm.seed = AGENT_LLM.seed;
     },
     update(t, c, s) {
-      // at the end the camera zooms into the AI hub: it grows to fill the view, the rest slides out and fades, and
-      // its violet glow becomes the opening of the next chapter
-      const zoomAt = c[1] + 5.9;
-      const zoom = P(t, zoomAt, this.dur - zoomAt - 0.1);
-      const scale = lerp(1, ZOOM, zoom);
-      // the hub travels on screen to where the next chapter's LLM node appears (AGENT_HANDOFF)
+      // at the end AI invades the screen, then turns into the next chapter's LLM node: the rest of the map fades
+      // while the AI hub, with its halo and its text, swells from its place to fill the whole stage and holds there;
+      // then it contracts to where that node shows when the next chapter starts (AGENT_HANDOFF), at its size, its
+      // text and UV fill giving way to the violet orb and its eyes. No camera move, no zoom-out at the end: the
+      // stage here is the stage there.
+      setCamera(s.cam, t, this.dur, { exit: 1 });
+      const morphAt = c[1] + 5.9;
+      const swellP = P(t, morphAt, 1.0);
+      const contract = P(t, morphAt + 1.7, 1.3);
+      const rest = 1 - P(t, morphAt, 0.6);
       const ai = HUBS[AI];
-      const onScreen = [lerp(ai.x, AGENT_HANDOFF.x, zoom), lerp(ai.y, AGENT_HANDOFF.y, zoom)];
-      setCamera(s.cam, t, this.dur, {
-        scale, dx: onScreen[0] - 960 - (ai.x - 960) * scale, dy: onScreen[1] - 540 - (ai.y - 540) * scale, exit: 1,
-      });
-      const rest = 1 - P(t, zoomAt + 0.2, 0.8);
-      // the glow ends HANDOFF_GLOW wide on screen, as the next chapter's starts
-      place(s.aiGlow, ai.x, ai.y, lerp(0.6, HANDOFF_GLOW / 640 / ZOOM, zoom), P(t, zoomAt, 0.6));
+      const llmSize = AGENT_LLM.size * AGENT_START.enter;
+      const x = lerp(lerp(ai.x, 960, swellP), AGENT_HANDOFF.x, contract);
+      const y = lerp(lerp(ai.y, 540, swellP), AGENT_HANDOFF.y, contract);
+      const size = lerp(lerp(HUB_SIZE, FULL_SCREEN, swellP), llmSize, contract);
+      const orb = P(t, morphAt + 2.4, 0.6);
+      place(s.llm.root, x, y, size / AGENT_LLM.size, orb);
+      llmState(s.llm, { look: 0.5 });
+      // the halo grows with the hub (HANDOFF_HALO.size at the LLM's size), washing the stage violet
+      place(s.halo, x, y, size / llmSize, P(t, morphAt, 0.5) * HANDOFF_HALO.o);
 
       // the symbol glows in the middle, the spokes draw out with a pulse of light, each hub pops as its pulse lands
       place(s.symbol, CENTER.x, CENTER.y, P(t, c[0] + 0.1, 0.5, backOut), P(t, c[0] + 0.1, 0.3) * rest);
@@ -124,9 +135,18 @@
         draw(s.spokes[i], prog, rest);
         sparkOnPath(s.pulses[i], s.spokes[i], prog);
         const hp = P(t, spokeAt(i) + 0.45, 0.5, backOut);
-        // the AI hub dissolves into its glow just before the cut
-        const dissolve = i === AI ? 1 - P(t, this.dur - 0.7, 0.5) : 1;
-        place(s.hubs[i], hub.x, hub.y, hp, clamp(hp * 2) * o * dissolve);
+        if (i === AI) {
+          // the hub follows the morph, fading as the orb takes over; its text fades before the orb's eyes come in,
+          // and a violet light glows in it while it fills the stage
+          const hub = s.hubs[i];
+          place(hub, x, y, hp * size / HUB_SIZE, clamp(hp * 2) * (1 - orb));
+          hub.style.color = `rgba(255,255,255,${(1 - P(t, morphAt + 1.8, 0.5)).toFixed(3)})`;
+          const light = swellP * (1 - contract) * 0.55;
+          hub.style.background = light > 0
+            ? `radial-gradient(circle at 50% 42%, rgba(182,100,255,${light.toFixed(3)}), ${C.uv} 70%)` : C.uv;
+        } else {
+          place(s.hubs[i], hub.x, hub.y, hp, clamp(hp * 2) * o);
+        }
         s.bubbles[i].forEach((b, k) => {
           const [bx, by] = bubbleAt(hub, k);
           // a gentle float around its place (ambient, driven by G), each bubble on its own phase

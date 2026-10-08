@@ -36,7 +36,7 @@
 
   scene({
     chapter: 4, title: 'Why it matters for AI',
-    fadeIn: 0.04, // continues the zoom of the previous chapter: a cut, which fades out as briefly
+    fadeIn: 0.001, // a hard cut: the previous chapter ends on this chapter's first frame
     // the loop and the bill, then the durable loop and the companies: the pan runs as the bill fades out
     shift: (t, c) => pan(t, AGENT_START.shift, [[c[2] + 0.2, 10, 0]], 0.6),
     subs: [
@@ -52,10 +52,10 @@
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-      // the AI hub's violet glow, carried over from the previous chapter, condenses into the LLM node
+      // the halo the LLM node arrives with from the previous chapter, which settles into the LLM's own glow
       s.carry = E(root, '', '', {
-        width: '900px', height: '900px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,100,255,.4) 0%, rgba(68,76,231,.15) 40%, rgba(68,76,231,0) 70%)',
+        width: HANDOFF_HALO.size + 'px', height: HANDOFF_HALO.size + 'px', borderRadius: '50%',
+        background: HALO_BACKGROUND,
       });
       // built first, so the loop and its arcs sit on top of it
       s.temporal = makeTemporalPanel(root, PANEL.w, PANEL.h, {
@@ -63,6 +63,8 @@
       });
       s.svg = svgLayer(root);
       s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy, LOOP.r);
+      // the same blink as the orb the previous chapter's AI hub turned into
+      s.loop.think.seed = AGENT_LLM.seed;
       // at the crash the loop shatters: each arc breaks into red pieces that fall, then fly back at the restart
       const { think, act, observe } = LOOP_DEG;
       const arcEnds = [[think + 27, act - 27], [act + 27, observe - 27], [observe + 27, think + 333]];
@@ -105,14 +107,10 @@
       });
     },
     update(t, c, s) {
-      // the zoom into the AI hub of the previous chapter carries on: the scene starts magnified and settles, while
-      // the violet glow that filled the view shrinks from the middle of the stage onto the loop
-      // the zoom into the AI hub of the previous chapter carries on: the scene starts magnified and settles, while
-      // the violet glow, centered on the LLM node from the first frame, condenses into it as the LLM pops in
+      // the scene opens on the LLM node the previous chapter's AI hub turned into, magnified, with its halo; the
+      // camera settles while the halo fades into the LLM's own glow, and the rest of the loop emerges
       setCamera(s.cam, t, this.dur, { enter: AGENT_START.enter, enterD: 1.4 });
-      const startScale = HANDOFF_GLOW / AGENT_START.enter / 900;
-      const condense = P(t, 0, 1.1);
-      place(s.carry, LLM_AT.x, LLM_AT.y, lerp(startScale, 0.3, condense), 1 - P(t, 0.5, 0.9));
+      place(s.carry, LLM_AT.x, LLM_AT.y, 1 / AGENT_START.enter, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
       // each turn runs the loop once, think -> act -> observe, and bills one LLM call as it starts
       const firstRun = [c[0] + 1.6, c[0] + 3.8, c[1] + 0.2, c[1] + 2.4];
       const crashAt = c[1] + 3.5;
@@ -135,6 +133,8 @@
       placeAgentLoop(s.loop, t, c[0] + 0.1, {
         deg, centerAt: c[0] + 1.2, centerO: 1 - red, arcO: broken ? 0 : 1,
         q: crashed ? P(t, crashAt + 0.3, 0.3) : 0, dx: sx, dy: sy,
+        // THINK is there from the first frame: the previous chapter's AI hub turned into it
+        thinkIn: -1,
       });
       // the shards fall under gravity for 0.9 s, rest, then fly back into place just before the restart
       const fall = Math.min(Math.max(t - crashAt, 0), 0.9) * (1 - P(t, restart - 0.5, 0.5));

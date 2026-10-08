@@ -139,31 +139,34 @@ and each chapter has a cinematic moment, listed in its visuals.
     equal: no domain is highlighted.
 - **1:18** Teams also run infrastructure, data pipelines and, more and
   more, AI on Temporal.
-  - Visuals: The map holds; once the subtitle is read, the camera zooms
-    into the AI hub: it grows and moves to where the next chapter's LLM
-    node appears while the rest of the map slides out and fades, then
-    dissolves into its violet glow, which opens the next chapter.
+  - Visuals: The map holds; once the subtitle is read, AI invades the
+    screen: the rest of the map fades while the AI hub, its "AI WORKFLOWS"
+    text and its halo swell until the disc fills the whole stage, a violet
+    light glowing in it, and hold there. Then it contracts to where the
+    next chapter's LLM node appears, at its size; its text fades and its UV
+    fill gives way to the violet LLM orb and its eyes, so the hub becomes
+    the agent across the cut.
 
 ## 04 Why it matters for AI
 
-- **1:27** AI agents are long processes too: many LLM calls, tools to run,
+- **1:28** AI agents are long processes too: many LLM calls, tools to run,
   and waits for a person.
-  - Visuals: The zoom carries on: the scene starts magnified and settles
-    while the violet glow, centered on the LLM node, condenses into it as
-    the LLM pops in; the rest of the agentic loop of Durable AI Agents
-    emerges: THINK (the LLM orb) on top, ACT (neon play tile)
-    and OBSERVE (eye tile) below, "AGENTIC LOOP" in the middle, a neon token
-    with a comet tail running round it; on the right LLM CALLS BILLED
+  - Visuals: The chapter opens on that same LLM orb and its halo; the
+    camera settles while the halo fades into the LLM's own glow, and the
+    rest of the agentic loop of Durable AI Agents emerges: THINK (the LLM
+    orb) on top, ACT (neon play tile) and OBSERVE (eye tile) below,
+    "AGENTIC LOOP" in the middle, a neon token with a comet tail running
+    round it; on the right LLM CALLS BILLED
     counts each turn and AGENT PROGRESS fills one step per turn (out of 6);
     a violet "WAITS FOR A PERSON" tag shows under the loop.
-- **1:34** Every LLM call costs time and money. Without Durable Execution,
+- **1:35** Every LLM call costs time and money. Without Durable Execution,
   a crash means starting over.
   - Visuals: The bill stands out; after 3 steps, a crash: shake, red
     flash, the loop shatters into red pieces that fall, "START OVER", the
     LLM puzzled, AGENT PROGRESS drains to 0 / 6, PROGRESS LOST. The pieces
     fly back, the loop restarts from step 1 and coins drop on the bill: 5,
     "+1 PAID AGAIN".
-- **1:41** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
+- **1:42** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
   rely on it too.
   - Visuals: The bill and the progress fade out; a TEMPORAL panel ("DURABLE
     AGENT") frames the loop and a glowing UV ring draws around it, a
@@ -172,18 +175,18 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 05 Open source and Cloud
 
-- **1:49** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
+- **1:50** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
   can run it on their own servers.
   - Visuals: Three tiles across the top, one by one: "Open source" (MIT
     LICENSE), "Temporal 1.0" (2020), "Self-hosted" (ON YOUR OWN SERVERS).
-- **1:56** Temporal Cloud runs the service for you. Your code stays in your
+- **1:57** Temporal Cloud runs the service for you. Your code stays in your
   environment: Temporal never sees it.
   - Visuals: On the right, TEMPORAL CLOUD (UV border, official logo):
     "Temporal Service" and three bars SECURITY & COMPLIANCE, CONTROL PLANE
     & SCALE, HIGH AVAILABILITY; on the left, YOUR ENVIRONMENT (dashed slate
     border, "YOUR APP, YOUR CODE"): YOUR APP with a small Workflow card and
     TEMPORAL SDK · OPEN SOURCE; then NEVER SEES YOUR CODE.
-- **2:04** Connections only go out from your side, and data stays encrypted
+- **2:05** Connections only go out from your side, and data stays encrypted
   end to end.
   - Visuals: A one-way arrow draws from your environment to Temporal Cloud,
     OUTBOUND ONLY, mTLS; neon packets flow out along it; an inbound attempt
@@ -194,12 +197,12 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 06 Temporal today
 
-- **2:12** Today, more than 4,300 companies pay for it, including Netflix,
+- **2:13** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **2:19** In September 2026, investors valued Temporal at $12.55 billion.
+- **2:20** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
@@ -209,7 +212,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **2:28** Temporal keeps code running whatever fails, from everyday apps
+- **2:29** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: The two founders' faces, cropped from the photo, side by side,
     in a small constellation of twinkling stars and lines; title "Meet
