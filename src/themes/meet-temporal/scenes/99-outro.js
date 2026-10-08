@@ -10,6 +10,7 @@
   const LINKS = [[-1, 1], [1, 0], [0, 2], [1, 2], [-2, 4], [4, 3], [3, 5], [4, 5]];
   scene({
     pre: 0.4, post: 2.6,
+    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     shift: [0, 55],
     subs: [
       { text: "Temporal keeps code running whatever fails, from everyday apps to AI agents." },

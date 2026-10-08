@@ -21,6 +21,7 @@
 
   scene({
     chapter: 6, title: 'Temporal today',
+    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     // the customers tile alone in the middle, then the whole layout as the chart comes in
     shift: (t, c) => pan(t, [430, 47], [[c[1], 0, -68]], 0.8),
     subs: [

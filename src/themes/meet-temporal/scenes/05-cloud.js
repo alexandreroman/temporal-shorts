@@ -74,6 +74,7 @@
 
   scene({
     chapter: 5, title: 'Open source and Cloud',
+    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     // laid out centered at (960, 522) on the free band
     subs: [
       {
@@ -172,7 +173,9 @@
       const dx = lerp(APP.x + 100, DATA_LANDING.x, dp);
       const dy = lerp(APP.y + 20, DATA_LANDING.y, dp) - Math.sin(dp * Math.PI) * 60;
       const encrypted = clamp((dx - (ARROW.x0 - 40)) / 120);
-      s.data.textContent = scramble(SECRET, Math.round(encrypted * SECRET.length), Math.floor(t * 20));
+      // the glyphs flicker on the ambient clock G counted from the scene's start (equal to t in rendered frames),
+      // so the live player sees a still scene once the data has landed
+      s.data.textContent = scramble(SECRET, Math.round(encrypted * SECRET.length), Math.floor((G - this.start) * 20));
       s.data.style.background = encrypted > 0.5 ? C.neonTint : C.uvTint;
       place(s.data, Math.round(dx), Math.round(dy), 1, P(t, sent - 0.2, 0.3) * (1 - P(t, c[2] + 5.2, 0.4)));
     }

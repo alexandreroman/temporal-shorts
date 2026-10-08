@@ -59,8 +59,11 @@ function makeCamera(root) {
 // Zoom-through between scenes: the composition grows from `enter` (0.94; 1 for none) to 1 over enterD seconds as
 // the scene fades in, and on to 1.06 as it fades out (dur: the scene duration). scale, dx, dy: an extra camera move
 // of the scene, at rest 1, 0, 0 so that a resting frame sits on whole pixels.
+// The exit zoom runs over the scene's last CAMERA_EXIT seconds: scenes set `holdBeforeEnd: CAMERA_EXIT`, so the
+// presenter's end-of-scene stop falls just before it and the zoom plays with the fade into the next scene.
+const CAMERA_EXIT = 0.6;
 function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enterD = 0.6, exit = 1.06 } = {}) {
-  const zoom = lerp(enter, 1, P(t, 0, enterD)) * lerp(1, exit, P(t, dur - 0.6, 0.6, easeIn));
+  const zoom = lerp(enter, 1, P(t, 0, enterD)) * lerp(1, exit, P(t, dur - CAMERA_EXIT, CAMERA_EXIT, easeIn));
   cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
 }
 

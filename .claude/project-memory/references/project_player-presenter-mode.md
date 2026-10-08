@@ -8,9 +8,14 @@ type: project
 
 The live player has a presenter mode (button and P key, off by default).
 It hides the subtitles and plays at 0.5x. It holds at the start of each
-subtitle cue after a scene's first, and 0.5 s before the end of each
-scene, the last one included, where the scene fade-out starts. A cue with
-`stopLead` (seconds) holds that much earlier. With the subtitles hidden,
+subtitle cue after a scene's first, and before the end of each scene,
+the last one included, where its fade-out starts (`fadeOut`, 0.5 s by
+default, as in `renderAt`). A cue with `stopLead` (seconds) holds that much
+earlier; a scene with `holdBeforeEnd` (seconds) holds that much before its
+end instead, so an ending animation (meet-temporal's AI swell into the
+next chapter) plays straight on after the hold. A step whose picture
+stays still from one stop to the next is empty: released at its start,
+the player plays through it, and Left steps back over it. With the subtitles hidden,
 once the scene roots stay unchanged until the next stop, the player jumps
 to that stop at once, at any speed, so the pause mark shows as soon as the
 picture freezes. Space, Right, PageDown or
@@ -48,7 +53,7 @@ agent-harness token loop in scene 1, the durable-execution timer clock at
 day 30) is acceptable: a pause in mid-motion still reads well.
 
 **How to apply:** an animation keyed before its cue (`c[i] - x`) needs a
-`stopLead` on that cue that puts the stop strictly before it. Scene
-fade-outs stay at the last 0.5 s of each scene (`SCENE_FADE` in
-`player.js` mirrors `renderAt`); a change to the fade length in
+`stopLead` on that cue that puts the stop strictly before it. The end stop
+reads the scene's `holdBeforeEnd`, then its `fadeOut`, then `SCENE_FADE`
+(0.5 s, mirroring `renderAt`); a change to the default fade length in
 `engine.js` needs the same change there.

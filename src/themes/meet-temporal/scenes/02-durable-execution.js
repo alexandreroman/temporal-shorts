@@ -67,6 +67,7 @@
 
   scene({
     chapter: 2, title: 'What Temporal does',
+    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     // laid out centered at (960, 522) on the free band
     subs: [
       {
@@ -225,6 +226,11 @@
       s.cam.style.filter = k > 0.01 ? `drop-shadow(${fringe}px 0 0 rgba(255,90,95,.8)) `
         + `drop-shadow(${-fringe}px 0 0 rgba(68,76,231,.8))` : 'none';
       s.glitchBars.forEach((e, j) => {
+        // hidden outside the glitch, and left in place there, so the scene stays still for the live player
+        if (k <= 0.01) {
+          place(e, 960, 540, 1, 0);
+          return;
+        }
         e.style.height = Math.round(4 + hash(frame * 11 + j) * 26) + 'px';
         const shown = hash(frame * 17 + j) > 0.3 ? k * 0.8 : 0;
         place(e, 960 + (hash(frame * 13 + j) - 0.5) * 160, hash(frame * 7 + j) * 1080, 1, shown);

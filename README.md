@@ -298,11 +298,16 @@ editing different scenes never touch the same file.
   local time and `c[i]` the moment subtitle `i` starts. Every animation is
   keyed to these cues.
 - Presenter stops: presenter mode holds at each cue but the first of a
-  scene. If a cue's animation starts a little before its cue, set
-  `stopLead` on that subtitle to move its stop that many seconds earlier,
-  just before the animation (`stopLead: 0.4` for an animation at
-  `c[1] - 0.35`). Only the live player reads it: rendered frames do not
-  change.
+  scene, and at the end of each scene, just before its fade-out (`fadeOut`,
+  0.5 s by default). If a cue's animation starts a little before its cue,
+  set `stopLead` on that subtitle to move its stop that many seconds
+  earlier, just before the animation (`stopLead: 0.4` for an animation at
+  `c[1] - 0.35`). A scene whose ending animation should play straight into
+  the next scene sets `holdBeforeEnd` (seconds before its end) to hold
+  there instead, before that animation starts. A step whose picture stays
+  still from one stop to the next is empty: the player plays through it
+  rather than holding the same picture twice, and Left steps back over
+  it. Only the live player reads these: rendered frames do not change.
 - Centering: the scene's optional `shift`, `[dx, dy]` or `(t, c) => [dx, dy]`,
   translates the whole scene so its composition is centered at (960, 515),
   inside the content frame y 150-880 between the header and the subtitles

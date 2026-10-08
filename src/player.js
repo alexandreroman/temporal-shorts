@@ -352,14 +352,16 @@ function startPlayer() {
   // first: animations are keyed to c[i] and still at rest there, so the hold shows the frame before the cue's
   // animations begin. A cue whose animation starts a little before it sets `stopLead` (seconds) to move its
   // stop that much earlier, strictly before that animation: a step such as `t >= at` already shows at `at`.
-  // Each scene, the last included, then holds just before its fade-out (see renderAt), so the hold shows it
-  // fully visible. When the scene stops changing well before a stop, the player jumps to it as soon as the
-  // picture freezes (see skipStillToStop()).
+  // Each scene, the last included, then holds just before its fade-out (`fadeOut`, 0.5 s by default, as in
+  // renderAt), so the hold shows it fully visible; a scene whose ending animation should play straight into the
+  // next scene sets `holdBeforeEnd` (seconds) to hold that much before its end instead, before that animation
+  // starts. When the scene stops changing well before a stop, the player jumps to it as soon as the picture
+  // freezes (see skipStillToStop()).
   const SCENE_FADE = 0.5;
   const presenterStops = [];
   for (const sc of scenes) {
     for (const sub of sc.subs.slice(1)) presenterStops.push(sub.start - (sub.stopLead ?? 0));
-    presenterStops.push(sc.end - SCENE_FADE);
+    presenterStops.push(sc.end - (sc.holdBeforeEnd ?? sc.fadeOut ?? SCENE_FADE));
   }
   presenterStops.sort((a, b) => a - b);
 
@@ -397,9 +399,18 @@ function startPlayer() {
       seekAndPlay(0, false);
       return;
     }
-    const current = presenterStops[index];
-    const previous = index > 0 ? presenterStops[index - 1] : 0;
-    seekAndPlay(time - current > RESTART_THRESHOLD ? current : previous, false);
+    let target = time - presenterStops[index] > RESTART_THRESHOLD ? index : index - 1;
+    // Playing on from the start of an empty step passes its end (see skipStillToStop()), so landing there would
+    // only run forward again: step back over empty steps.
+    while (target >= 0 && isEmptyStep(target)) target--;
+    seekAndPlay(target >= 0 ? presenterStops[target] : 0, false);
+  }
+
+  // A step is empty when the picture stays still from its start stop to the next one, subtitles hidden: the
+  // player passes such a step's end rather than holding the same picture twice.
+  function isEmptyStep(index) {
+    const next = presenterStops[index + 1];
+    return !subtitlesShown && next !== undefined && firstChange(presenterStops[index], next) === undefined;
   }
 
   // Right acts like a slide clicker's "next". In presenter mode, it releases a hold, so the transition plays up
@@ -440,7 +451,9 @@ function startPlayer() {
 
   // Once the scene stands still until the next stop, the frozen picture would run for the subtitle's reading
   // time, stretched at 0.5x, before the hold: jump to the stop and hold there at once. Only with the subtitles
-  // hidden, as presenter mode starts, since the reading time is for them.
+  // hidden, as presenter mode starts, since the reading time is for them. When that still span starts right at
+  // a stop (the player was just released there), the next stop would hold the very same picture: an empty step
+  // (see isEmptyStep()). The player then passes it, jumping there and playing on.
   function skipStillToStop() {
     const stop = presenterStops.find(s => s > time);
     if (stop === undefined || subtitlesShown) return false;
@@ -450,8 +463,9 @@ function startPlayer() {
       changeAhead = { from: time, at: change };
       return false;
     }
+    const emptyStep = presenterStops.includes(time);
     time = stop;
-    held = true;
+    held = !emptyStep;
     return true;
   }
 

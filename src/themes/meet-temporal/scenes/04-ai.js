@@ -36,6 +36,7 @@
 
   scene({
     chapter: 4, title: 'Why it matters for AI',
+    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     fadeIn: 0.001, // a hard cut: the previous chapter ends on this chapter's first frame
     // the loop and the bill, then the durable loop and the companies: the pan runs as the bill fades out
     shift: (t, c) => pan(t, AGENT_START.shift, [[c[2] + 0.2, 10, 0]], 0.6),

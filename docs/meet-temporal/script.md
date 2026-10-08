@@ -143,12 +143,13 @@ and each chapter has a cinematic moment, listed in its visuals.
 - **1:19** Teams also run infrastructure, data pipelines and, more and
   more, AI on Temporal.
   - Visuals: The map holds; once the subtitle is read, AI invades the
-    screen: the rest of the map fades while the AI hub, its "AI WORKFLOWS"
-    text and its halo swell until the disc fills the whole stage, a violet
-    light glowing in it, and hold there. Then it contracts to where the
-    next chapter's LLM node appears, at its size; its text fades and its UV
-    fill gives way to the violet LLM orb and its eyes, so the hub becomes
-    the agent across the cut.
+    screen: the rest of the map fades while the AI hub and its halo swell
+    until the disc fills the whole stage, a violet light glowing in it;
+    "WORKFLOWS" fades as it grows and "AI" glides to the center, so the
+    full screen shows a big "AI" alone, held a moment. Then it contracts to
+    where the next chapter's LLM node appears, at its size; "AI" fades and
+    the UV fill gives way to the violet LLM orb and its eyes, so the hub
+    becomes the agent across the cut.
 
 ## 04 Why it matters for AI
 
