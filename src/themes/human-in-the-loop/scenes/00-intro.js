@@ -4,7 +4,7 @@
   const ORBIT = { x: 1510, y: 440, rx: 430, ry: 300 }; // the card is centered on the title block (y 440)
   scene({
     pre: 1.0,
-    shift: [-155, 82],
+    shift: [-155, 42],
     subs: [
       {
         text: "Some processes need a person to decide: approve a purchase, review a contract. How does the app wait?",

@@ -6,7 +6,8 @@
 {
   // One column of 3 tiles on each side, symmetric about the card (x 175-465 and 1455-1745, 155 px from the card);
   // the card is centered on the middle row (Y0), with the BUSINESS LOGIC label above it and the LINES OF CODE bar
-  // below it, as wide as the card, its bottom edge level with the bottom tiles
+  // below it, as wide as the card, its bottom edge level with the bottom tiles. Y0 is 7 px under the content frame's
+  // middle (y 515), within its centering tolerance
   const Y0 = 522;
   const CARD = { x: 960, y: Y0 };
   const TILE = { w: 290, h: 150, leftX: 320, rightX: 1600, pitch: 235 };
@@ -77,7 +78,7 @@
 
   scene({
     chapter: 3, title: 'The usual fix: plumbing',
-    // laid out around the center of the free band (960, 522)
+    // laid out in the content frame (y 150-880) around (960, Y0)
     subs: [
       {
         text: "So developers add plumbing around the code: retries, status tables, queues, timers, cleanup jobs.",

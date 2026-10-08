@@ -212,6 +212,12 @@
           justifyContent: 'flex-end', gap: '24px',
         });
       s.sdks = [...s.sdkRow.querySelectorAll('.pill')];
+      // the pills fill the row's height, so they rest on the content bottom; they grow from their bottom edge, so
+      // the pop's overshoot stays above it
+      s.sdks.forEach(e => Object.assign(e.style, {
+        height: UI.tagH + 'px', paddingTop: '0', paddingBottom: '0', display: 'flex', alignItems: 'center',
+        transformOrigin: 'center bottom',
+      }));
     },
     update(t, c, s) {
       const pop = at => P(t, at, 0.5, backOut);

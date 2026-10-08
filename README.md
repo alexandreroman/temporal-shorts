@@ -74,8 +74,9 @@ src/social.png         link preview image of the home page (make social)
 src/assets/            official Temporal logo (white horizontal lockup)
 src/fonts/             brand fonts (downloaded by make), see
                        src/fonts/README.md
-scripts/               setup, fonts, render, preview, timeline, SRT
-                       export, social images, HTML build and server
+scripts/               setup, fonts, render, preview, timeline, layout
+                       check, SRT export, social images, HTML build and
+                       server
 docs/<theme>/script.md full script: subtitles, timings, animations
 output/                generated .srt, .mp4 and standalone .html (the HTML
                        pages mirror src/: index.html, themes/<theme>/)
@@ -94,6 +95,7 @@ Chromium.
 ```bash
 make setup                   # venv + Playwright Chromium + fonts (once)
 make timeline                # checks that everything loads, prints timings
+make layout                  # checks every scene stays inside y 150-880
 make preview THEME=durable-ai-agents T="3 140 160"  # -> output/preview.png
 make render                  # videos -> output/<theme>.mp4
 make render SUBS=off         # same, no subtitles -> output/<theme>-nosubs.mp4
@@ -106,19 +108,19 @@ make clean                   # delete output/ (every generated file)
 
 The targets run on `.venv/bin/python` once `make setup` has created it,
 otherwise on the system `python3`: enough for `html` and `serve`, which need
-only the standard library. `timeline`, `preview`, `render`, `srt` and
-`social` need Playwright and stop with a hint to run `make setup` when it
-is missing. Once the virtualenv exists, these five targets rerun
+only the standard library. `timeline`, `layout`, `preview`, `render`, `srt`
+and `social` need Playwright and stop with a hint to run `make setup` when
+it is missing. Once the virtualenv exists, these six targets rerun
 `make setup` by themselves when `requirements.txt` or `scripts/setup.sh`
 changes, so that a pinned Playwright upgrade also brings its Chromium build;
 this alone does not rebuild an up-to-date MP4 or SRT. Override the
 interpreter with `PY`, for example `make html PY=python`: no automatic setup
 then. Every target downloads the brand fonts first when they are missing.
 
-`timeline`, `render` and `srt` cover every theme; `timeline` prints each one
-under a `== <theme> ==` header. Set the `THEME` variable to restrict them to
-one theme. `preview` needs a theme, as its timestamps belong to one video.
-Outputs are named after the theme:
+`timeline`, `layout`, `render` and `srt` cover every theme; `timeline` and
+`layout` print each one under a `== <theme> ==` header. Set the `THEME`
+variable to restrict them to one theme. `preview` needs a theme, as its
+timestamps belong to one video. Outputs are named after the theme:
 
 ```bash
 make timeline THEME=durable-execution
@@ -164,6 +166,23 @@ file (faststart), with a keyframe every 2 seconds and a bitrate capped at
 
 To check a single frame, run `make preview THEME=durable-ai-agents T=140`:
 it writes the frame at 140 s to `output/preview.png`.
+
+`make layout` (`scripts/layout_check.py`) checks the vertical layout rule
+shared by every theme. Each scene keeps its resting content inside the
+content frame, y 150 to 880: 66 px under the header and 80 px above the
+subtitles. Only brief one-off effects, such as flashes, glitches or flying
+coins, may leave it. A scene shorter than the frame is centered on y 515
+within 25 px, and every scene spans at least 440 px, 60 % of the frame. The
+check renders each scene inside each subtitle and just before its end,
+measures the visible content at its resting size (an element a pop is
+still scaling counts at its unscaled size), scene `shift` included, and
+prints one line per scene: its top, bottom, height, middle and a verdict,
+`ok`, `OUT`, `THIN` or `OFF-CENTER`. `OUT` allows 2 px past the frame, as
+sub-pixel borders and strokes (a 1.5 px border) round past a whole-pixel
+edge; an `OUT` scene also names the element that leaves the frame and
+when. `OUT` fails the check; `THIN` and `OFF-CENTER` are warnings, as some
+scenes have legitimate exceptions. The check goes on over every theme and
+fails at the end if any scene is `OUT`.
 
 ### Home page and standalone HTML players
 
@@ -274,8 +293,9 @@ editing different scenes never touch the same file.
   `c[1] - 0.35`). Only the live player reads it: rendered frames do not
   change.
 - Centering: the scene's optional `shift`, `[dx, dy]` or `(t, c) => [dx, dy]`,
-  translates the whole scene so its composition is centered at (960, 522),
-  between the header and the subtitles. `pan(t, from, stops)` eases between
+  translates the whole scene so its composition is centered at (960, 515),
+  inside the content frame y 150-880 between the header and the subtitles
+  (`make layout` checks it). `pan(t, from, stops)` eases between
   offsets when the layout changes between phases.
 - Chapter title: `title` next to `chapter` on the first scene of the chapter.
   The header and the progress segments are derived from it; a theme without

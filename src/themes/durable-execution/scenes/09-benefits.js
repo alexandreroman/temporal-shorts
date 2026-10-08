@@ -14,7 +14,8 @@
   ];
   scene({
     chapter: 9, title: 'What you get',
-    // laid out around the center of the free band (960, 522)
+    // laid out in the content frame (y 150-880) around (960, 522): within the centering tolerance of its middle,
+    // y 515
     subs: [
       {
         text: "You write the business logic. Temporal handles retries, state and recovery, with full visibility.",

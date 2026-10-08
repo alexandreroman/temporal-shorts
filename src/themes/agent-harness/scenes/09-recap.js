@@ -2,8 +2,8 @@
 // The recap: one tile per feature the video presents, landing one at a time.
 // The block keeps every name declared in this file local to this scene.
 {
-  // Recap tiles, one chapter each: 3 columns x 2 rows across the frame (x 140-1780), 40 px gutters, centered on
-  // (960, 522); they land 1 s apart
+  // Recap tiles, one chapter each: 3 columns x 2 rows (x 140-1780), 40 px gutters, centered on (960, 522) in the
+  // content frame (y 150-880), within the centering tolerance of its middle, y 515; they land 1 s apart
   const RECAP = [
     ['retry', 'Survives crashes'], ['stream', 'Event stream'], ['layers', 'Typed subagents'],
     ['user', 'Human approvals'], ['code', 'Code Mode'], ['agent', 'Your AI SDK'],

@@ -67,7 +67,12 @@ the visuals belong to each theme (last section).
     ("Fraud reviews", "Money transfers", "Deep research"), never generic
     actions or broad categories ("Approvals", "Payments", "Documents").
     Examples are short concrete phrases ("a flagged payment waits"),
-    about 300 px at most in the tile.
+    about 340 px at most in the tile.
+  - One row shared by every theme, `USE_CASE_ROW` in `src/shared.js`: 4
+    tiles of 384x460 px, 48 px apart, x 120-1800, centered on y 515; type
+    scale `USE_CASE_TYPE` (icon 96, label 26), example line 20 px in
+    `useCaseTile`. Recaps of 4 tiles use the same width, pitch and type
+    scale.
   - An AI use case reads as a person confirming an agent's action or tool
     call ("AI agent approvals", "chatbots with human approval").
   - The user picks the use cases: propose 2 or 3 sets of 4 tiles, with
@@ -86,8 +91,20 @@ the visuals belong to each theme (last section).
 
 ## Layout
 
-- Compositions spread over the free band (about x 120-1800, y 130-920)
-  with generous gaps, not a compact cluster in the middle.
+- Content frame, shared by every theme and scene: resting content stays
+  inside y 150-880 (730 px, middle 515), scene `shift` included: 66 px
+  under the header (bottom y 84), 80 px above the subtitles (top y 960),
+  so the content breathes. Only brief one-off effects (flash, glitch,
+  crash bolt, flying coin, a pop's overshoot) leave it. Horizontally,
+  compositions spread over about x 120-1800.
+- Every scene spans at least 440 px (60 % of the frame), with generous
+  gaps, not a compact cluster in the middle. A dense scene fits by
+  tightening gaps first, then component heights (rows, panels, tiles);
+  font sizes and CSS scaling stay untouched. A thin scene grows its
+  tiles, type and gaps.
+- `make layout` (`scripts/layout_check.py`) measures each scene's content
+  box: OUT fails, THIN and OFF-CENTER warn. Every scene of every theme
+  passes; a new or edited scene passes before it ships.
 - Components share alignment lines, measured in the rendered DOM to the
   pixel: stacked ones share a left or right edge, side-by-side ones a top
   or bottom edge, equal relations get equal gaps; a component whose text
@@ -98,9 +115,8 @@ the visuals belong to each theme (last section).
   to their `letter-spacing`.
 - Tags and labels keep about 20 px of clear space from their neighbors; a
   label beside the Temporal logo is never larger than its wordmark.
-- Centering: each composition is centered at (960, 522) within about
-  25 px, the middle of the free band (header bottom near y 84, subtitle
-  top near y 960). The scene `shift` is a fixed whole-number `[dx, dy]`,
+- Centering: each composition is centered at (960, 515) within about
+  25 px, the middle of the content frame. The scene `shift` is a fixed whole-number `[dx, dy]`,
   one compromise across phases, measured from the rendered content box;
   `pan(t, from, stops, d)` eases between offsets only where content
   already fades or moves. Brief one-off elements do not drive the offset;

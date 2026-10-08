@@ -12,14 +12,16 @@
   const isLLM = i => i % 2 === 0;
   // result card of row i, labeled with the kind of call it comes from, as in the subtitle
   const makeCallCard = (root, i) => makeResultCard(root, isLLM(i), isLLM(i) ? 'LLM CALL' : 'TOOL CALL');
-  // Chapter 7 layout: app on the left, Temporal on the right, both under the step tiles
+  // Chapter 7 layout: app on the left, Temporal on the right, both 30 px under the step tiles; the "From the start"
+  // arc and its label use the 58 px above the tiles. Under the instance panel, the bill on the left; on its right,
+  // the booking ticket on the bill's top edge and AGENT COMPLETE on its bottom edge.
   const APP = { x: 470, y: 445 };
   const MEM = { x: 470, y: 469, slot0: 162, slotGap: 88, slotY: 484 }; // context panel and its block slots
   const HIST = { x: 1380, y: 580, cardX: 1050, row0: 447, rowGap: 44 }; // Event History card and its rows
-  // NEW INSTANCE: astride the top edge of instance B's panel, centered between its name and its TAKING OVER status
-  // (about 65 px from each); 6 px low, so it keeps 20 px of clear space under the Calendar tile. Fixed even width:
+  // NEW INSTANCE: on the top edge of instance B's panel, centered between its name and its TAKING OVER status
+  // (about 65 px from each); 16 px low, so it keeps 20 px of clear space under the Calendar tile. Fixed even width:
   // it rests on whole pixels (solid: the panel border does not show through).
-  const NEW_TAG = { x: APP.x + 60, y: APP.y - 155 + 6, w: 240 };
+  const NEW_TAG = { x: APP.x + 60, y: APP.y - 155 + 16, w: 240 };
   // the agent chip flies from the first Event History row to instance B's status, at the panel's top right
   const STATUS_AT = { x: APP.x + 290, y: APP.y - 155 + 36 };
   const memSlot = i => MEM.slot0 + i * MEM.slotGap;
@@ -30,8 +32,8 @@
     chapter: 7, title: 'Durable Execution with Temporal',
     // AGENT COMPLETE lands at c[3] + 5.75: the final composition holds ~2 s before the fade
     post: 0.5,
-    // logo, then the app and Temporal panels; the pan runs with the logo flight
-    shift: (t, c) => pan(t, [0, -18], [[c[0] + FLIGHT.at, 0, 32]], FLIGHT.d),
+    // logo, then the app and Temporal panels, each centered on y 515; the pan runs with the logo flight
+    shift: (t, c) => pan(t, [0, -25], [[c[0] + FLIGHT.at, 0, 56]], FLIGHT.d),
     subs: [
       {
         text: "<b>Durable Execution</b> with Temporal fixes this. "
@@ -51,8 +53,8 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, STEP_TILES, 465, 330, 200, 260, 104);
-      s.restart = path(s.svg, 'M 1440 140 Q 960 40 480 140', C.violet, 3);
+      s.steps = makeStepRow(root, s.svg, STEP_TILES, 465, 330, 208, 260, 104);
+      s.restart = path(s.svg, 'M 1440 148 Q 960 48 480 148', C.violet, 3);
       s.restartL = E(root, 'From the start', 'lbl', { color: C.violet });
       // app side, mirroring chapter 6: instance panel, its context, the LLM bill and the booking
       s.A = makeAppPanel(root, 'APP INSTANCE A', 780, 310); s.B = makeAppPanel(root, 'APP INSTANCE B', 780, 310);
@@ -114,7 +116,7 @@
       });
       placeStepRow(s.steps, t, c[0] + 2.5, states, sx, sy);
       draw(s.restart, P(t, handOff, 0.8), 1 - P(t, c[3] + 0.3, 0.4));
-      place(s.restartL, 960, 115, 1, P(t, handOff + 0.4, 0.35) * (1 - P(t, c[3] + 0.3, 0.4)));
+      place(s.restartL, 960, 123, 1, P(t, handOff + 0.4, 0.35) * (1 - P(t, c[3] + 0.3, 0.4)));
 
       // app instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
       const aIn = P(t, c[0] + 2.3, 0.5, backOut);
@@ -163,7 +165,7 @@
       place(s.bill, 270 + sx, 720 + sy, P(t, c[0] + 2.7, 0.45, backOut), P(t, c[0] + 2.7, 0.4));
       // the booking is made once and never repeated
       const tp = P(t, saved[5], 0.45, backOut);
-      place(s.ticket, 660, 720, tp * (1 + 0.15 * win(t, reused[5], reused[5] + 0.5, 0.2)), clamp(tp * 2));
+      place(s.ticket, 660, 648, tp * (1 + 0.15 * win(t, reused[5], reused[5] + 0.5, 0.2)), clamp(tp * 2));
 
       // LLM CALL and TOOL CALL cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {
@@ -189,7 +191,7 @@
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 0.4);
       setScan(s.jr, 68 + Math.max(0, scanning) * 44, scanning >= 0 ? 1 : 0);
-      place(s.done, 1380, 872, P(t, saved[7] + 0.5, 0.45, backOut), P(t, saved[7] + 0.5, 0.35));
+      place(s.done, 660, 795, P(t, saved[7] + 0.5, 0.45, backOut), P(t, saved[7] + 0.5, 0.35));
       placeFlash(s.flash, t, crashAt);
       // takeover: NEW INSTANCE pops on B once it is almost in place and is gone by c[3]; Temporal hands it the agent,
       // a chip from the first history row to its status, which then reads TAKING OVER

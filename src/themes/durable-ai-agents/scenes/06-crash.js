@@ -7,25 +7,25 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // Layout grid, in whole pixels, laid out on the stage itself (no shift): the composition spans x 160-1760 around
-  // x 960, and y 137-900 ("Start over" label to panel bottom) around y 518, 60 px above the subtitles.
+  // x 960, and y 156-876 ("Start over" arc to panel bottom) around y 516, the content frame's middle.
   // Columns: the 4 step tiles, 340 wide and 80 apart. The instance panel spans the first three, from the Calendar
   // tile's left edge to the Booking tile's right edge; the right column (APP CRASH, the bill, the tickets) is
   // exactly as wide as the Invite tile, under it.
-  // Rows, 72 px apart: the step tiles (240-380), the tags (452-518: a cause centered under each of the first three
-  // tiles, APP CRASH in the right column), the panels (590-900: the instance panel; the bill on its top edge, the
+  // Rows, 72 px apart: the step tiles (216-356), the tags (428-494: a cause centered under each of the first three
+  // tiles, APP CRASH in the right column), the panels (566-876: the instance panel; the bill on its top edge, the
   // ticket on its bottom edge, until it flies to the middle of the tags row). The "Start over" arc and its label use
-  // the 103 px above the tiles.
+  // the 60 px above the tiles.
   const TILE = { w: 340, h: 140, gap: 80 };
   const PITCH = TILE.w + TILE.gap;
   const ROW_GAP = 72;
   const GRID_LEFT = 960 - (4 * TILE.w + 3 * TILE.gap) / 2; // 160
   const colX = i => GRID_LEFT + TILE.w / 2 + i * PITCH; // column centers: 330, 750, 1170, 1590
-  const STEPS_Y = 310;
+  const STEPS_Y = 286;
   const STEPS_TOP = STEPS_Y - TILE.h / 2;
   const TAGS_H = 66; // the APP CRASH tag (big pill); the causes are 50 high, on the same center line
-  const TAGS_Y = STEPS_Y + TILE.h / 2 + ROW_GAP + TAGS_H / 2; // 485
+  const TAGS_Y = STEPS_Y + TILE.h / 2 + ROW_GAP + TAGS_H / 2; // 461
   const APP = { x: colX(1), w: 3 * TILE.w + 2 * TILE.gap, h: 310 };
-  APP.y = TAGS_Y + TAGS_H / 2 + ROW_GAP + APP.h / 2; // 745
+  APP.y = TAGS_Y + TAGS_H / 2 + ROW_GAP + APP.h / 2; // 721
   const APP_TOP = APP.y - APP.h / 2, APP_BOTTOM = APP.y + APP.h / 2;
   // context panel, 24 px inside the instance panel (as in chapter 7)
   const MEM = { x: APP.x, y: APP.y + 24, w: APP.w - 48, h: 210 };
@@ -35,8 +35,8 @@
   const BILL = { x: COL.x, y: APP_TOP + 100 }; // 200 high (makeBill)
   const TICKET = { x: COL.x, y: APP_BOTTOM - 30, h: 60 };
   // the double booking: the ticket flies in TICKET_FLIGHT seconds to the middle of the tags row, empty by then,
-  // growing to 1.5 times its size: 510x90, on whole pixels (705-1215, 452-542). 12 px below the row's center line,
-  // so the pair, with the second ticket stacked 24 px up behind it (428-518), sits 48 px from the tiles and the
+  // growing to 1.5 times its size: 510x90, on whole pixels (705-1215, 428-518). 12 px below the row's center line,
+  // so the pair, with the second ticket stacked 24 px up behind it (404-494), sits 48 px from the tiles and the
   // panels
   const TICKET_CENTER = { x: 960, y: TAGS_Y + 12, scale: 1.5 };
   const TICKET_FLIGHT = 0.4;
@@ -47,9 +47,9 @@
   // the bolt strikes the Invite tile's top right corner, inside the right column's edge
   const BOLT = { x: COL.x + COL.w / 2 - 20, y: STEPS_TOP - 36 };
   // "Start over": from the Invite tile's top back to the Calendar tile's, peaking 60 px above the tiles, its label
-  // above the peak
+  // under the peak, 20 px above the tiles (as "From the start" in chapter 7)
   const REDO = { from: [colX(3), STEPS_TOP - 10], ctrl: [960, STEPS_TOP - 108], to: [colX(0), STEPS_TOP - 15] };
-  const REDO_LABEL_Y = STEPS_TOP - 90;
+  const REDO_LABEL_Y = STEPS_TOP - 33;
   // memory blocks left-aligned like chapter 7's slots: 20 px panel margin, then 76 px blocks every 88 px (12 px gaps)
   const memSlot = i => MEM.x - MEM.w / 2 + 20 + 76 / 2 + i * 88;
   // NEW INSTANCE: centered on the top edge of instance B's panel (the Restaurant column's axis), well clear of its

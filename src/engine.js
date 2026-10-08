@@ -265,7 +265,8 @@ function renderAt(t, g = t) {
     const lt = t - sc.start;
     const o = P(lt, 0, 0.5) * (1 - P(lt, sc.dur - 0.5, 0.5));
     sc.root.style.opacity = o;
-    // optional `shift`: [dx, dy] or (t, c) => [dx, dy], centers the composition in the free band
+    // optional `shift`: [dx, dy] or (t, c) => [dx, dy], centers the composition in the content frame (y 150-880,
+    // middle 515)
     const sh = typeof sc.shift === 'function' ? sc.shift(lt, sc.cues) : sc.shift;
     sc.root.style.transform = sh ? `translate(${sh[0]}px,${sh[1]}px)` : '';
     sc.update(lt, sc.cues, sc.el);

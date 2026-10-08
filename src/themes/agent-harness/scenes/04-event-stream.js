@@ -13,7 +13,8 @@
   const SDKS = ['OpenAI Agents SDK', 'Google Gemini', 'Pydantic AI'];
   // Layout grid, final positions: the agents column on the left (x 140-500), the lane in the middle (x 600-1040),
   // the console on the right (x 1140-1780), 100 px apart. The agents column and the console share their top
-  // (y 227) and bottom (y 817).
+  // (y 227) and bottom (y 817): the lane and the console are centered on y 522, within the centering tolerance of
+  // the content frame's middle (y 515).
   const AGENT = { x: 320, y0: 302, gap: 220, w: 360, h: 150 }; // three equal tiles, 70 px apart
   const agentY = i => AGENT.y0 + i * AGENT.gap;
   const LANE = { x: 820, y: 522, w: 440, h: 76 };

@@ -23,16 +23,16 @@
   const DAYS = 30;
   const TICK_D = 0.18; // length of a day tick of the timer
 
-  // Two panels on the lines of chapters 5 and 6: the Worker x 120..920, Temporal x 1056..1800, both y 152..892.
+  // Two panels on the lines of chapters 5 and 6: the Worker x 120..920, Temporal x 1056..1800, both y 176..880.
   // Inside each, 32 px from its sides: a card on top (both end at y 572) and a status block under it (both
-  // y 612..860: 40 px under the cards, 32 px above the panel bottoms). Every size is even, so all rest on whole pixels.
-  const WK = { x: 520, y: 522, w: 800, h: 740 };
-  const TP = { x: 1428, y: 522, w: 744, h: 740 };
-  // code card: x 152..888, y 278..572, 126 px below the panel top (under its tab), 4 lines of 60 px
-  const CODE_CARD = { x: 520, y: 425, w: 736, font: 28, lineH: 60, padY: 27 };
-  // history card: x 1088..1768, y 232..572, 80 px below the panel top (under the logo header), 4 rows of 60 px
-  const HIST_CARD = { x: 1428, y: 402, w: 680, h: 340 };
-  const BLOCK = { y: 736, h: 248 };
+  // y 604..848: 32 px under the cards and above the panel bottoms). Every size is even, so all rest on whole pixels.
+  const WK = { x: 520, y: 528, w: 800, h: 704 };
+  const TP = { x: 1428, y: 528, w: 744, h: 704 };
+  // code card: x 152..888, y 294..572, 118 px below the panel top (under its tab), 4 lines of 56 px
+  const CODE_CARD = { x: 520, y: 433, w: 736, font: 28, lineH: 56, padY: 27 };
+  // history card: x 1088..1768, y 256..572, 80 px below the panel top (under the logo header), 4 rows of 56 px
+  const HIST_CARD = { x: 1428, y: 414, w: 680, h: 316 };
+  const BLOCK = { y: 726, h: 244 };
   const BAR_W = 628; // timer progress bar: the block's width less 26 px on each side
   // chips leave and reach the code 72 px inside the card's right edge, and the history at the start of the row text;
   // WAKE UP lands on the sleep line short of its clock badge
@@ -122,7 +122,7 @@
 
   scene({
     chapter: 8, title: 'Durable timers',
-    // the two panels span x 120..1800 and y 152..892, centered on (960, 522)
+    // the two panels span x 120..1800 and y 176..880, the NEW WORKER tag on Worker B's top edge reaching y 151
     subs: [
       {
         text: "A Workflow can even <b>wait for days</b>, for a delivery or a reply, without tying up a Worker.",

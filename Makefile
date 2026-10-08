@@ -19,7 +19,7 @@ VENV := $(if $(filter .venv/bin/python,$(PY)),$(VENV_STAMP))
 # One video per theme: src/themes/<theme>/index.html plays the scenes of its folder; src/index.html is the home page.
 ALL_THEMES := $(patsubst src/themes/%/index.html,%,$(wildcard src/themes/*/index.html))
 
-# timeline, render and srt cover every theme; THEME=<theme> restricts them to one. preview needs one.
+# timeline, layout, render and srt cover every theme; THEME=<theme> restricts them to one. preview needs one.
 THEME ?=
 ifeq ($(THEME),)
 THEMES := $(ALL_THEMES)
@@ -79,7 +79,7 @@ ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$
 # its fresh timestamp would make Make treat it as up to date.
 .DELETE_ON_ERROR:
 
-.PHONY: setup timeline preview render srt social html serve clean
+.PHONY: setup timeline layout preview render srt social html serve clean
 
 setup:            ## venv + Playwright Chromium + fonts
 	bash scripts/setup.sh
@@ -91,6 +91,17 @@ timeline: $(FONTS) | $(VENV)  ## print scenes and subtitle timings of every them
 		$(PY) scripts/timeline.py --theme $$theme || exit 1; \
 		echo; \
 	done
+
+# Checks every theme, even after a failure, and fails at the end if any scene of any theme leaves the frame.
+layout: $(FONTS) | $(VENV)    ## check that every scene stays inside the content frame y 150-880 [THEME=<theme>]
+	$(call require,playwright)
+	@status=0; \
+	for theme in $(THEMES); do \
+		echo "== $$theme =="; \
+		$(PY) scripts/layout_check.py --theme $$theme || status=1; \
+		echo; \
+	done; \
+	exit $$status
 
 preview: $(FONTS) | $(VENV)   ## contact sheet of one theme: make preview THEME=<theme> T="12 40 136"
 	$(if $(THEME),,$(error preview needs a theme: make preview THEME=<theme> T="...". Themes: $(ALL_THEMES)))

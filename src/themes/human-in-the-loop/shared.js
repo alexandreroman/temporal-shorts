@@ -15,7 +15,8 @@ Object.assign(ICONS, {
     + '<path d="M4.5 16.5c0-2 1.6-3 3.5-3s3.5 1 3.5 3M14 10.5h4.5M14 14h4.5"/>',
 });
 
-// Content frame of every scene: inside the 80 px header margins, zones 40 px apart
+// Horizontal extent of this theme's scenes, x 80 to 1840 inside the 80 px header margins, and the 40 px between
+// their zones. Vertically, every scene stays inside the content frame shared by all themes, y 150 to 880.
 const FRAME = { x0: 80, x1: 1840, gap: 40 };
 
 // The 4 steps of the laptop order, used by chapters 1, 3 and 4
@@ -177,13 +178,14 @@ function setWaitClock(e, elapsed, blur = 0) {
 // Text sizes of the app panels (makeAppPanel options): a larger name and status
 const APP_TEXT = { font: 22, statusFont: 18, statusTop: 25 };
 
-// Chapters 3 and 4 share one layout on the content frame: the step row on top; under it, the app column (instance
-// panel, then a strip with the clock) on the left and the Temporal panel on the right, both ending on y 922
+// Chapters 3 and 4 share one layout on the content frame, y 153-877 around y 515: the step row on top; 30 px under
+// it, the app column (instance panel, then 30 px lower a strip with the clock) on the left and the Temporal panel on
+// the right, both ending on y 877
 const WF_LAYOUT = {
-  rowY: 192,
-  app: { x: 480, y: 517, w: 800, h: 430 },
-  strip: { x: 480, y: 847, w: 800, h: 150 },
-  temporal: { x: 1380, y: 612, w: 920, h: 620 },
+  rowY: 223,
+  app: { x: 480, y: 515, w: 800, h: 384 },
+  strip: { x: 480, y: 807, w: 800, h: 140 },
+  temporal: { x: 1380, y: 600, w: 920, h: 554 },
 };
 // the wait clock in the strip, 30 px from its left edge
 WF_LAYOUT.clock = {
@@ -197,14 +199,15 @@ function makeClockStrip(p) {
 
 // The Workflow as plain-English lines, shown inside an app instance panel
 const WF_LINES = ['check the request', 'ask Maria', 'wait for the decision', 'place the order', 'notify Sam'];
-const WF = { top: 60, gap: 50, h: 42 }; // first line, line spacing and line height inside the WORKFLOW card
+const WF = { top: 52, gap: 44, h: 42 }; // first line, line spacing and line height inside the WORKFLOW card
 function makeWorkflowApp(p, name) {
   const { w, h } = WF_LAYOUT.app;
   const app = makeAppPanel(p, name, w, h, APP_TEXT);
-  const cardW = w - 48, cardH = h - 100;
+  // the WORKFLOW card: under the 72 px header, 24 px from the other panel edges
+  const cardW = w - 48, cardH = h - 96;
   // the card never moves: it is part of the panel's HTML, and only its lines are animated elements
   app.insertAdjacentHTML('beforeend',
-    `<div style="position:absolute;left:24px;top:76px;width:${cardW}px;height:${cardH}px;`
+    `<div style="position:absolute;left:24px;top:72px;width:${cardW}px;height:${cardH}px;`
     + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
     + panelLabel('code', 'Workflow', 'left:20px;top:16px;padding-left:0')
     + `<div class="cur" style="position:absolute;left:12px;width:${cardW - 26}px;height:${WF.h + 2}px;`
@@ -258,7 +261,7 @@ const HISTORY = [
   'Workflow started: laptop for Sam', 'Request checked: $2,400', 'Approval requested: Maria',
   'Signal: approved by Maria', 'Order placed: laptop', 'Sam notified',
 ];
-const HROW = { top: 78, gap: 54, h: 40 }; // rows inside an Event History card: first row top, spacing, height
+const HROW = { top: 74, gap: 52, h: 40 }; // rows inside an Event History card: first row top, spacing, height
 const rowTop = i => HROW.top + i * HROW.gap;
 // the chapter 3 and 4 Event History card: 20 px inside the Temporal panel, under its 70 px header
 const HIST = {
@@ -279,7 +282,7 @@ function makeHistory(p, rows, w, h, scanH = null) {
   });
 }
 // The laptop order history of chapters 3 and 4, with a scan highlight for the replay, the pulsing line shown in
-// the slot of row 4 while the Workflow waits for the Signal, and WORKFLOW COMPLETE under the rows
+// the slot of row 4 while the Workflow waits for the Signal, and WORKFLOW COMPLETE 26 px under the rows
 function makeOrderHistory(p) {
   const jr = makeHistory(p, HISTORY, HIST.w, HIST.h, HROW.h + 6);
   // UV, as light violet is too faint on white
@@ -292,9 +295,9 @@ function makeOrderHistory(p) {
     });
   jr.wait.hg = jr.wait.querySelector('.hg');
   jr.done = E(jr, `${ICON('check', 24, C.neon, 2.6)} WORKFLOW COMPLETE`, 'mono', {
-    left: '50%', top: (rowTop(HISTORY.length) + 30) + 'px', fontSize: '20px', letterSpacing: '.12em', color: C.neon,
-    background: '#141414', padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)', display: 'flex', gap: '10px',
-    alignItems: 'center',
+    left: '50%', top: (rowTop(HISTORY.length - 1) + HROW.h + 26) + 'px', fontSize: '20px', letterSpacing: '.12em',
+    color: C.neon, background: '#141414', padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)',
+    display: 'flex', gap: '10px', alignItems: 'center',
   });
   return jr;
 }

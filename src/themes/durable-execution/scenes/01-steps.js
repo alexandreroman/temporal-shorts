@@ -5,8 +5,8 @@
 {
   const ROW = { x0: 375, gap: 390, y: 540, w: 290, h: 170 };
   // order card (136 px tall) and code card (256 px) both 110 px above the row and as wide as the two inner steps
-  // (x 620 to 1300); services 150 px below the row, centered under their steps; ORDER COMPLETE (50 px) 70 px below
-  const ABOVE_W = 680, ORDER_Y = 277, SERVICE_Y = 798, CODE_Y = 217, DONE_Y = 720;
+  // (x 620 to 1300); services 150 px below the row, centered under their steps; ORDER COMPLETE (50 px) 50 px below
+  const ABOVE_W = 680, ORDER_Y = 277, SERVICE_Y = 798, CODE_Y = 217, DONE_Y = 700;
   const SERVICE_LINK = [ROW.y + ROW.h / 2 + 4, SERVICE_Y - 28]; // y range of the link from a step to its service
   // c[1]: step i runs from RUN0 + i * RUN_GAP for RUN_D seconds, in step with the words of the subtitle
   const RUN0 = 0.2, RUN_GAP = 1.15, RUN_D = 0.9;
@@ -38,8 +38,8 @@
   scene({
     chapter: 1, title: 'A process in many steps',
     // order card + steps, then + services (pans as the first one appears), then code card + steps + ORDER COMPLETE
-    // (pans as the services fade; measured compromise: 30 px high before ORDER COMPLETE, 30 px low with it)
-    shift: (t, c) => pan(t, [0, 105], [[c[1], 0, 7], [c[2] + 0.1, 0, 135]], 0.9),
+    // (pans as the services fade; measured compromise: 30 px high before ORDER COMPLETE, 20 px low with it)
+    shift: (t, c) => pan(t, [0, 105], [[c[1], 0, 7], [c[2] + 0.1, 0, 128]], 0.9),
     subs: [
       { text: "Take an online order. Behind the Buy button, four steps run one after the other.", after: 0.4 },
       {

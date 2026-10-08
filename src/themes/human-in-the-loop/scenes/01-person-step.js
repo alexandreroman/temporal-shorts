@@ -29,7 +29,8 @@
     });
   scene({
     chapter: 1, title: 'A step that needs a person',
-    // laid out centered at (960, 522) on the content frame
+    // laid out in the content frame (y 150-880), centered at (960, 522): within the centering tolerance of its
+    // middle, y 515
     subs: [
       {
         text: "Take a simple process: Sam orders a new laptop for $2,400. Above $1,000, a manager must approve it.",

@@ -22,24 +22,25 @@
   // result card of step i, labeled with the kind of call it comes from, as in the subtitle
   const makeCallCard = (root, i) => makeResultCard(root, isModel(i), isModel(i) ? 'MODEL CALL' : 'TOOL CALL');
   // Layout: step tiles on top; the app and its counters on the left, Temporal and its Event History on the right.
-  // The step row spans exactly the width of the components below it, from LEFT to RIGHT.
+  // The step row spans exactly the width of the components below it, from LEFT to RIGHT. On the content frame
+  // y 150-880: the step row's top at 150, the panels 86 px below it, the counters and the TEMPORAL panel ending at 880.
   const LEFT = 140, RIGHT = 1780;
-  const ROW = { w: 240, h: 110, y: 215 };
+  const ROW = { w: 240, h: 110, y: 205 };
   const ROW_GAP = (RIGHT - LEFT - ROW.w) / 4; // center to center: five tiles, equal gaps
-  const APP = { x: 465, y: 503, w: 650, h: 306, lblY: 497, chipY: 553 };
+  const APP = { x: 465, y: 499, w: 650, h: 306, lblY: 493, chipY: 549 };
   // the crash on A: APP CRASH centered between the step label and the chip (where TURN COMPLETE shows later), the
   // bolt in the panel's right part, clear of the status text above it and of the tag on its left
   const CRASH_TAG = { x: APP.x, y: (APP.lblY + APP.chipY) / 2, w: 250 };
-  const BOLT = { x: 715, y: 487, size: 140 };
+  const BOLT = { x: 715, y: 483, size: 140 };
   // the takeover (see TAKEOVER): the dead instance A drops 40 px, faded out by then, 8 px above the counters.
   // NEW INSTANCE stands where APP CRASH stood on A: the top edge has no room for it between the panel name and the
   // status. Fixed even size, so it rests on whole pixels.
   const NEW_TAG = { w: 250, h: 52 };
   // the Workflow card flies from the first history row to B's status, at the panel's top right (inside the panel)
   const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 38 };
-  const COUNTER = { y: 794, w: 305, h: 180 };
-  const TEMPORAL = { x: 1340, y: 617, w: 880, h: 534 };
-  const HIST = { x: 1340, y: 652, w: 824, h: 404, row0: 80, rowGap: 62 };
+  const COUNTER = { y: 790, w: 305, h: 180 };
+  const TEMPORAL = { x: 1340, y: 613, w: 880, h: 534 };
+  const HIST = { x: 1340, y: 648, w: 824, h: 404, row0: 80, rowGap: 62 };
   const CARD_X = HIST.x - HIST.w / 2 + 110; // where result cards land, on the left part of the rows
   const rowTop = i => HIST.row0 + i * HIST.rowGap; // inside the Event History card
   const rowY = i => HIST.y - HIST.h / 2 + rowTop(i) + 18; // on the stage, where result cards land

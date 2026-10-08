@@ -23,8 +23,8 @@
   // the crash on Worker A, in the blank right part of its code card: the bolt beside the await lines of steps 1 to 3
   // (clear of line 1 and of the text), WORKER CRASH under the emailReceipt line, its right edge on the highlight's
   // right edge (16 px inside the card), its bottom 7 px above the card's. Even sizes: whole-pixel edges at rest.
-  const BOLT = { x: 725, y: 410, size: 130 };
-  const CRASH_TAG = { x: 717, y: 566, w: 310, h: 66 };
+  const BOLT = { x: 725, y: 426, size: 130 };
+  const CRASH_TAG = { x: 717, y: 558, w: 310, h: 66 };
   // the takeover (see TAKEOVER): the dead Worker A drops 40 px, its bottom staying 10 px above the counter row
   // NEW WORKER: astride the top edge of Worker B's panel, centered on it, clear of its name and status; fixed even
   // width, so it rests on whole pixels (solid: the panel border does not show through)

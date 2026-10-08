@@ -14,16 +14,17 @@
   const TICKET_X = STRIP.x + 265; // 30 px from the strip's right edge, like the clock from its left edge
   // the Signal lands on the left part of the row it becomes, in the slot of the waiting line
   const SIGNAL_LANDING = { x: HIST.x - 180, y: historyRowY(3) };
-  // NEW INSTANCE: astride the top edge of instance B's panel, centered in the free space between its name (right
-  // edge near x 362) and its longest status, TAKING OVER (left edge near x 720), about 60 px clear of both and 15 px
-  // under the step row; fixed even width, so it rests on whole pixels (solid: the panel border does not show through)
-  const NEW_TAG = { x: 540, y: APP.y - APP.h / 2, w: 240 };
+  // NEW INSTANCE: on the top edge of instance B's panel, centered in the free space between its name (right edge
+  // near x 362) and its longest status, TAKING OVER (left edge near x 720), about 60 px clear of both; 16 px low, so
+  // it keeps 20 px of clear space under the step row. Fixed even width, so it rests on whole pixels (solid: the
+  // panel border does not show through)
+  const NEW_TAG = { x: 540, y: APP.y - APP.h / 2 + 16, w: 240 };
   // the order chip flies from the "Workflow started" history row to instance B's status, at the panel's top right
   const CHIP_FROM = { x: HIST.x - 180, y: historyRowY(0) };
   const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 36 };
   scene({
     chapter: 4, title: 'The decision arrives',
-    // laid out centered at (960, 522) on the content frame
+    // laid out centered at (960, 515) on the content frame (see WF_LAYOUT)
     subs: [
       {
         text: "On day three, Maria taps Approve. "

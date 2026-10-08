@@ -24,7 +24,8 @@
   // Layout grid: the Trip planner's column on the left (x 140-520), TravelAgent on the right (x 960-1780), a
   // 440 px gap between them for the calls. TravelAgent stays in place in both phases; in phase 1 the crossed-out
   // pill holds the left column, where the Trip planner appears in phase 2. CARDS_Y balances both phases around
-  // y 522: the cards alone in phase 1, the cards and the READS ITS INTERFACE link arching over them in phase 2.
+  // y 522, within the centering tolerance of the content frame's middle (y 515): the cards alone in phase 1, the
+  // cards and the READS ITS INTERFACE link arching over them in phase 2.
   const CARDS_Y = 545, CARDS_TOP = CARDS_Y - CARD_H / 2;
   const PARENT = { x: 330, y: CARDS_Y, w: 380 };
   const TRAVEL = { x: 1370, y: CARDS_Y, w: 820 };

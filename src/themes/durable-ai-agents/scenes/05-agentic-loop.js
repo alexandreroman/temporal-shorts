@@ -12,8 +12,9 @@
   };
   scene({
     chapter: 5, title: 'The agentic loop',
-    // loop + steps (the loop waits on the left for its steps), then the formula as the loop fades
-    shift: (t, c) => pan(t, [-76, 66], [[c[2], 0, 63]], 0.6),
+    // loop + steps (the loop waits on the left for its steps), then the formula as the loop fades; each phase
+    // centered on y 515
+    shift: (t, c) => pan(t, [-76, 43], [[c[2], 0, 56]], 0.6),
     subs: [
       { text: "Repeat until the goal is reached: think, act, observe. That's the <b>agentic loop</b>.", after: 0.6 },
       {
@@ -89,8 +90,9 @@
         r.res.style.opacity = P(t, a + 1.05, 0.3); r.ck.style.opacity = P(t, a + 1.15, 0.25);
         r.style.borderColor = (t > a && t < a + 1.5) ? C.violet : C.line;
       });
+      // GOAL REACHED under the steps, as far from the last one as the goal card from the first one
       const ep = P(t, c[1] + 7.0, 0.45, backOut);
-      place(s.exit, 1440, 790, ep, clamp(ep * 2) * (1 - out));
+      place(s.exit, 1440, 753, ep, clamp(ep * 2) * (1 - out));
       place(s.formula, 960, 410, 1.15 * P(t, c[2] + 0.4, 0.6, backOut), P(t, c[2] + 0.4, 0.5));
       place(s.goalF, 960, 530, 1, P(t, c[2] + 2.6, 0.5));
     }
