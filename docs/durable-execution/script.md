@@ -120,7 +120,10 @@ money is tracked by a CARD CHARGED counter in dollars.
 - **1:04** Soon the plumbing outweighs the business logic, and every corner
   case is a new bug to chase.
   - Visuals: LINES OF CODE bar: BUSINESS LOGIC (neon) stays thin while
-    PLUMBING (red) grows; red bug badges pop on four plumbing tiles.
+    PLUMBING (red) grows. Then a swarm of bugs: red bug badges land on
+    the tiles, one by one, then faster and faster, until every tile is
+    buggy and four carry a second badge; each landing jolts its tile,
+    flickers its border red and pulses the PLUMBING bar.
 
 ## 04 Durable Execution with Temporal
 
