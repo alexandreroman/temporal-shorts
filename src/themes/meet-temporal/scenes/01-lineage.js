@@ -66,19 +66,19 @@
     shift: (t, c) => pan(t, [0, INTRO_DY], [[c[0] + 1.1, 0, 0]], 0.9),
     subs: [
       {
-        text: "Meet Maxim Fateev and Samar Abbas. In 2004, Maxim was tech lead of Simple Queue Service at Amazon.",
+        text: "Meet Maxim Fateev and Samar Abbas. In 2004, Maxim led Amazon's Simple Queue Service.",
       },
       {
-        text: "In 2009 at Amazon, they led the launch of Simple Workflow Service, to run long processes reliably.",
+        text: "In 2009, they launched Amazon's Simple Workflow Service.",
       },
       {
-        text: "In 2014 at Microsoft, Samar co-created the Durable Task Framework, the base of Azure Durable Functions.",
+        text: "In 2014, Samar co-created Microsoft's Durable Task Framework.",
       },
       {
-        text: "In 2015, both reunited at Uber to create Cadence. Open source since 2017, it ran Uber Eats orders.",
+        text: "In 2015, they reunited at Uber to create Cadence, open source since 2017.",
       },
       {
-        text: "In October 2019, they left Uber to found Temporal: Cadence's successor, open source under MIT.",
+        text: "In 2019, they founded Temporal, the open source successor of Cadence.",
         after: 0.2, // a short beat before the exit zoom: Temporal's bloom has long settled
       },
     ],
