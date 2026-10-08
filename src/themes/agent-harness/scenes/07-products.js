@@ -4,19 +4,16 @@
   // Layout grid: the callback column spans x 140-580, the UI window x 800-1780 (same right zone as chapter 6);
   // the typed session link crosses the gap between them. That 220 px gap is wider than the 80-120 px zone
   // gutter on purpose: it holds the TYPED SESSION label above the link. Both headings share one baseline; both
-  // zones start at y 196 and end at y 880 (the target tiles, the SDK row).
+  // zones start at y 196 and end at y 880 (the laptop tile, the SDK row).
   const TOP = 196, BOTTOM = 880, HEADING_Y = 163;
-  // Left: the app (agent on a Temporal worker) calls tools that run where it can't reach: the user's laptop and a
-  // private network, two target tiles side by side under it, spanning the column width 40 px apart
-  const LEFT = { x: 360, w: 440, appH: 260, targetW: 200, targetH: 170 };
+  // Left: the app (agent on a Temporal worker) calls a tool that runs where it can't reach, on the user's laptop:
+  // the laptop tile sits under the app, at the column width
+  const LEFT = { x: 360, w: 440, appH: 260, laptopH: 170 };
   LEFT.appY = TOP + LEFT.appH / 2;
-  LEFT.targetY = BOTTOM - LEFT.targetH / 2;
-  LEFT.laptopX = LEFT.x - (LEFT.w - LEFT.targetW) / 2;
-  LEFT.networkX = LEFT.x + (LEFT.w - LEFT.targetW) / 2;
-  // the dashed request line: a trunk down from the app, forking 20 px under the durable wait card into one
-  // branch per target
-  const ARROW = { top: TOP + LEFT.appH + 10, fork: 612, bottom: BOTTOM - LEFT.targetH - 10 };
-  // the durable wait card slides out from under the app tile, 12 px below it, over the trunk
+  LEFT.laptopY = BOTTOM - LEFT.laptopH / 2;
+  // the dashed request line, straight down from the app to the laptop
+  const ARROW = { top: TOP + LEFT.appH + 10, bottom: BOTTOM - LEFT.laptopH - 10 };
+  // the durable wait card slides out from under the app tile, 12 px below it, over the line
   const WAIT = { h: 124 };
   WAIT.y = TOP + LEFT.appH + 12 + WAIT.h / 2;
   // the agent icon in the app tile, and the pause badge 16 px right of it while the agent waits
@@ -104,12 +101,8 @@
       // callback tool: the agent asks the user's laptop to read a local file, then waits durably for the result
       s.lblL = E(root, 'Callback tools', 'lbl');
       s.app = makeApp(root);
-      s.trunk = path(s.svg, `M ${LEFT.x} ${ARROW.top} L ${LEFT.x} ${ARROW.fork}`, C.slate, 2.5, false, '8,8');
-      const branch = x => `M ${LEFT.x} ${ARROW.fork} C ${LEFT.x} ${ARROW.fork + 50} ${x} ${ARROW.bottom - 50} `
-        + `${x} ${ARROW.bottom}`;
-      s.branches = [LEFT.laptopX, LEFT.networkX].map(x => path(s.svg, branch(x), C.slate, 2.5, true, '8,8'));
-      s.laptop = makeStep(root, 'laptop', "User's<br>laptop", LEFT.targetW, LEFT.targetH);
-      s.network = makeStep(root, 'server', 'Private<br>network', LEFT.targetW, LEFT.targetH);
+      s.arrow = path(s.svg, `M ${LEFT.x} ${ARROW.top} L ${LEFT.x} ${ARROW.bottom}`, C.slate, 2.5, true, '8,8');
+      s.laptop = makeStep(root, 'laptop', "User's laptop", LEFT.w, LEFT.laptopH);
       // durable wait: a clock racing through the waiting time (as in chapter 3), and the worker left free
       s.wait = E(root,
         '<div class="lbl" style="font-size:16px">Durable wait</div>'
@@ -159,26 +152,22 @@
     update(t, c, s) {
       const pop = at => P(t, at, 0.5, backOut);
 
-      // ---- c[0]: the app and the two places it can't reach; the call travels down to the laptop, which runs it
+      // ---- c[0]: the app and the laptop it can't reach; the call travels down to the laptop, which runs it
       place(s.lblL, LEFT.x, HEADING_Y, 1, P(t, c[0] + 0.1, 0.4));
       const appIn = pop(c[0] + 0.2);
       place(s.app, LEFT.x, LEFT.appY, appIn, clamp(appIn * 2));
-      [s.laptop, s.network].forEach((e, i) => {
-        const p = pop(c[0] + 0.6 + i * 0.2);
-        place(e, i === 0 ? LEFT.laptopX : LEFT.networkX, LEFT.targetY, p, clamp(p * 2));
-      });
+      const laptopIn = pop(c[0] + 0.6);
+      place(s.laptop, LEFT.x, LEFT.laptopY, laptopIn, clamp(laptopIn * 2));
       // the laptop runs the tool from the call's arrival until just before the result leaves (in c[1])
       const resultAt = c[1] + 4.5;
       stepState(s.laptop, t >= resultAt - 0.1 ? 2 : t >= c[0] + 3.3 ? 1 : 0);
-      stepState(s.network, 0);
-      draw(s.trunk, P(t, c[0] + 1.0, 0.4));
-      s.branches.forEach((b, i) => draw(b, P(t, c[0] + 1.3 + i * 0.2, 0.4)));
-      // down the trunk, then into the laptop along its branch
-      fly(s.call, t, c[0] + 1.9, LEFT.x, ARROW.top + 30, c[0] + 2.2, 0.6, LEFT.x, ARROW.fork - 20,
-        c[0] + 2.9, LEFT.laptopX, LEFT.targetY);
+      draw(s.arrow, P(t, c[0] + 1.0, 0.7));
+      // down the line, then into the laptop
+      fly(s.call, t, c[0] + 1.9, LEFT.x, ARROW.top + 30, c[0] + 2.2, 0.6, LEFT.x, ARROW.bottom - 30,
+        c[0] + 2.9, LEFT.x, LEFT.laptopY);
 
       // ---- c[1]: the agent waits durably, the worker free (the agent icon dims), while the clock races from
-      // seconds to days; then the card slides back and the result comes up the trunk into the app
+      // seconds to days; then the card slides back and the result comes up the line into the app
       const waitIn = P(t, c[1] + 0.3, 0.4) * (1 - P(t, resultAt - 0.3, 0.3));
       s.app.agent.style.opacity = 1 - 0.6 * waitIn;
       s.app.style.borderColor = waitIn > 0.5 ? C.line : C.violet;
@@ -193,7 +182,7 @@
       const freeIn = pop(c[1] + 1.5);
       s.free.style.transform = `scale(${freeIn})`;
       s.free.style.opacity = clamp(freeIn * 2);
-      fly(s.result, t, resultAt, LEFT.x, ARROW.fork - 20, resultAt + 0.3, 0.8, LEFT.x, ARROW.top + 30,
+      fly(s.result, t, resultAt, LEFT.x, ARROW.bottom - 30, resultAt + 0.3, 0.8, LEFT.x, ARROW.top + 30,
         resultAt + 1.2, LEFT.x, LEFT.appY);
 
       // ---- c[2]: the trip planner UI, then its typed session with the agent and the SDKs it is built with

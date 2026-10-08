@@ -245,17 +245,16 @@ Lisbon.
 
 - **4:30** Callback tools run where the agent can't reach, like the user's
   laptop or a private network.
-  - Visuals: CALLBACK TOOLS: THE APP (agent on a Temporal worker) above two
-    targets, USER'S LAPTOP and PRIVATE NETWORK, a dashed line forking to
-    each; `read_file "trip.md"` travels down to the laptop, which starts
-    running it.
+  - Visuals: CALLBACK TOOLS: THE APP (agent on a Temporal worker) above
+    USER'S LAPTOP, joined by a straight dashed line; `read_file "trip.md"`
+    travels down it to the laptop, which starts running it.
 - **4:37** The agent waits durably for the result, for seconds or days,
   without tying up compute.
   - Visuals: the app tile dims, a pause badge beside the agent; a DURABLE
     WAIT card slides out under the app, its clock racing from "5 SEC" to "2
     DAYS", with a NO COMPUTE HELD tag; the laptop finishes, the card slides
-    back and `result "Lisbon, 3 nights"` travels up into the app, which
-    lights again.
+    back and `result "Lisbon, 3 nights"` travels up the line into the app,
+    which lights again.
 - **4:45** Typed React and Svelte SDKs turn your agent into a live, typed
   session inside your product UI.
   - Visuals: the view pans; YOUR UI: a trip planner in a browser window
