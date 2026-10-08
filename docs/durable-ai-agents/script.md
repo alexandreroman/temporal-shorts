@@ -145,9 +145,13 @@ the figures follow the step count if the scenario changes.
 - **2:29** If the app crashes, another copy runs the agent again from the
   start.
   - Visuals: Step 4 starts, flash + shake, A CRASHED, memory blocks fall
-    (EMPTY), "APP CRASHED HERE" line under row 6 and tinted kept rows; APP
-    INSTANCE B takes over with an empty memory, steps reset, "From the start"
-    arrow, step 1 runs.
+    (EMPTY), "APP CRASHED HERE" line under row 6 and tinted kept rows. The dead
+    instance A greys, drops and fades with its APP MEMORY; APP INSTANCE B slides
+    in to the same place with a pulsing violet glow and a "NEW INSTANCE" tag,
+    with an empty memory, and the steps reset. A violet "LUNCH AGENT" chip
+    flies from the first Event History row to B's status, which turns from
+    IDLE to TAKING OVER, as the "From the start" arrow draws; step 1 runs. The
+    tag and glow fade before the replay.
 - **2:34** For each saved step, Temporal returns the result from the
   history. The LLM isn't called again: the context is rebuilt for free.
   - Visuals: Replay: rows 1 to 6 highlighted in turn, tags REUSED, LLM CALL and

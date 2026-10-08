@@ -1,7 +1,11 @@
 // ===================== 4. THE DECISION ARRIVES
+// Same layout as chapter 3, which ends with the Workflow waiting and app instance A gone: on day three, Maria taps
+// Approve and the Signal lands in the Event History, while no app is running. Then a new app instance, B, slides in
+// where A stood, and Temporal hands it the Workflow. Instance B replays the history, resumes right after the wait,
+// places the order and notifies Sam; Temporal's side stays still.
 // The block keeps every name declared in this file local to this scene.
 {
-  // same layout as chapter 3, which ends with the Workflow waiting and app instance A gone
+  // the layout of chapter 3
   const { rowY: ROW_Y, app: APP, strip: STRIP, temporal: TEMPORAL, clock: CLOCK } = WF_LAYOUT;
   // before app instance B arrives, Maria and the approval card fill the app panel's place: the card against the
   // column's right edge, Maria (avatar and label) centered in the space on its left
@@ -10,6 +14,16 @@
   const TICKET_X = STRIP.x + 265; // 30 px from the strip's right edge, like the clock from its left edge
   // the Signal lands on the left part of the row it becomes, in the slot of the waiting line
   const SIGNAL_LANDING = { x: HIST.x - 180, y: historyRowY(3) };
+  // the takeover, in whole pixels: app instance B arrives from 160 px to the left of its resting place
+  const ARRIVE = -160;
+  // NEW INSTANCE: astride the top edge of instance B's panel, centered in the free space between its name (right
+  // edge near x 362) and its longest status, TAKING OVER (left edge near x 720), about 60 px clear of both and 15 px
+  // under the step row; fixed even width, so it rests on whole pixels (solid: the panel border does not show through)
+  const NEW_TAG = { x: 540, y: APP.y - APP.h / 2, w: 240 };
+  // the order chip flies from the "Workflow started" history row to instance B's status, at the panel's top right
+  const CHIP_FROM = { x: HIST.x - 180, y: historyRowY(0) };
+  const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 36 };
+  const VIOLET_TINT = '#F2E6FF';
   scene({
     chapter: 4, title: 'The decision arrives',
     // laid out centered at (960, 522) on the content frame
@@ -44,12 +58,20 @@
         '', { padding: '12px 20px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
       s.temporal = makeWfTemporalPanel(root);
       s.jr = makeOrderHistory(root);
+      // the Workflow itself, handed to instance B: a result chip in violet
+      s.handChip = makeResultCard(root, true, 'LAPTOP ORDER');
+      Object.assign(s.handChip.style, { background: VIOLET_TINT, borderLeftColor: C.violet });
+      s.newTag = tag(root, 'New instance', 'violet solid');
+      Object.assign(s.newTag.style, { width: NEW_TAG.w + 'px', textAlign: 'center' });
     },
     update(t, c, s) {
       const tap = c[0] + 1.6, signalIn = c[0] + 3.5;
+      // c[1]: Maria and the card leave, app instance B slides in (bIn) and Temporal hands it the Workflow: the chip
+      // leaves the history at handOff and reaches instance B's status at takeOver
+      const bIn = c[1] + 0.4, handOff = bIn + 0.9, takeOver = handOff + 0.55;
       // replay: rows 1 to 3 are replayed one by one, then the Signal (row 4) is read; the cursor follows without
       // redoing the steps
-      const replay = [0, 1, 2, 3].map(i => c[1] + 1.3 + i * 0.5);
+      const replay = [0, 1, 2, 3].map(i => takeOver + 0.75 + i * 0.5);
       const resumed = replay[3] + 0.5;
       const orderOn = c[2] + 0.3, ordered = c[2] + 1.3, notifyOn = c[2] + 1.7, notified = c[2] + 2.7;
       const saved = [-1, -1, -1, signalIn + 0.1, ordered + 0.2, notified + 0.2];
@@ -83,13 +105,33 @@
       place(s.strip, STRIP.x, STRIP.y, 1, 1);
       place(s.clock, CLOCK.x, CLOCK.y, 1, 1);
 
-      // app instance B takes over in the place of A
-      const bIn = P(t, c[1] + 0.5, 0.5, backOut);
-      place(s.B, APP.x, APP.y, bIn, clamp(bIn * 2));
-      if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
+      // a new app instance, B, slides in from the left to the place of A, its border glowing violet while it arrives
+      // and takes over (the glow pulses on G, as an ambient loop); IDLE until the order chip reaches it
+      const bDx = Math.round(ARRIVE * (1 - P(t, bIn, 0.7, backOut)));
+      place(s.B, APP.x + bDx, APP.y, 1, P(t, bIn, 0.25));
+      if (t < takeOver) setAppStatus(s.B, 'IDLE', 'stopped');
+      else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
       else if (t < resumed) setAppStatus(s.B, 'REPLAYING…', 'running');
       else if (t < complete) setAppStatus(s.B, 'RESUMED AFTER THE WAIT', 'running');
       else setAppStatus(s.B, 'WORKFLOW COMPLETE', 'idle');
+      // the glow is gone when the replay starts
+      const glow = P(t, bIn, 0.3) * (1 - P(t, replay[0] - 0.3, 0.3));
+      if (glow > 0) {
+        const pulse = 0.5 + 0.5 * Math.sin(G * Math.PI * 2.4);
+        const blur = Math.round(20 + 16 * pulse), spread = Math.round(2 + 4 * pulse);
+        s.B.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(182,100,255,${(0.6 * glow).toFixed(3)})`;
+        s.B.style.borderColor = C.violet;
+      } else {
+        s.B.style.boxShadow = '';
+      }
+      // NEW INSTANCE pops on instance B once it is almost in place and leaves before the replay; Temporal hands it
+      // the Workflow, a chip from the "Workflow started" row to its status, which then reads TAKING OVER
+      const newAt = bIn + 0.5;
+      const newScale = 1 + 0.14 * win(t, newAt, newAt + 0.15, 0.15);
+      const newOn = P(t, newAt, 0.2) * (1 - P(t, replay[0] - 0.4, 0.3));
+      place(s.newTag, NEW_TAG.x + bDx, NEW_TAG.y, newScale, newOn);
+      fly(s.handChip, t, handOff, CHIP_FROM.x, CHIP_FROM.y, handOff + 0.1, 0.45, STATUS_AT.x, STATUS_AT.y,
+        takeOver, STATUS_AT.x, STATUS_AT.y);
       // the cursor jumps quickly through the replayed lines, then moves at the pace of the real steps
       const pos = P(t, replay[1], 0.2) + P(t, replay[2], 0.2) + P(t, replay[3], 0.2) + P(t, ordered + 0.3, 0.3);
       const cursorOn = t >= replay[0] && t < complete;

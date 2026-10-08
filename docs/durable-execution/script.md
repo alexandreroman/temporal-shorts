@@ -258,8 +258,14 @@ bright red to green.
 - **2:52** The timer is saved in the Event History, so Worker restarts and
   deploys during the wait don't lose it.
   - Visuals: The timer ticks day by day to day 30 while the TimerStarted
-    row stays lit; the Worker shows RESTARTING…, then DEPLOYING V2…, and
-    WORKER A gives way to WORKER B (VERSION 2).
+    row stays lit; the Worker shows RESTARTING…, then DEPLOYING V2…. WORKER
+    A (VERSION 1), retired, drops and fades out with its code card and
+    status block. A new machine, WORKER B (VERSION 2), slides in from the
+    left with them to the same place, its border glowing violet, and a NEW
+    WORKER tag pops on its top edge; its status shows V2 DEPLOYED, then
+    FREE FOR OTHER WORK. No chip comes from the Event History: no Worker
+    holds the sleeping Workflow. The tag and the glow fade before day 30;
+    the Temporal side stays still.
 - **2:59** On day 30, Temporal wakes the Workflow up: a Worker replays its
   history and runs the next line.
   - Visuals: TIME IS UP, row "TimerFired" SAVED; a WAKE UP chip flies to

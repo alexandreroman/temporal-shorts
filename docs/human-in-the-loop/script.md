@@ -102,8 +102,13 @@ the laptop, NOTIFY Sam.
     the clock caption turns "ANSWER RECEIVED".
 - **1:37** Any running copy of the app picks it up, replays the history, and
   resumes right after the wait.
-  - Visuals: APP INSTANCE B takes over (TAKING OVER, REPLAYING…); rows 1 to
-    3 are highlighted in turn and tagged REPLAYED, then row 4, the Signal,
+  - Visuals: Maria and the approval card leave. A new app instance, APP
+    INSTANCE B (IDLE), slides in from the left to the place of instance A,
+    its border glowing violet, and a NEW INSTANCE tag pops on its top edge;
+    the Temporal side stays still. A violet LAPTOP ORDER chip flies from the
+    "Workflow started" row to its status, which turns TAKING OVER; the tag
+    and the glow fade before the replay. Then REPLAYING…: rows 1 to 3 are
+    highlighted in turn and tagged REPLAYED, then row 4, the Signal,
     is read and keeps SAVED (it is new to the Workflow); the WORKFLOW cursor
     runs the first lines again without redoing the steps, passes the wait
     and lands after it ("RESUMED AFTER THE WAIT"); APPROVAL is checked.
