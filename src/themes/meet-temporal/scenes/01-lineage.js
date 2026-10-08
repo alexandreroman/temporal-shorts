@@ -67,23 +67,19 @@
     subs: [
       {
         text: "Meet Maxim Fateev and Samar Abbas. In 2004, Maxim was tech lead of Simple Queue Service at Amazon.",
-        after: 0.4,
       },
       {
         text: "In 2009 at Amazon, they led the launch of Simple Workflow Service, to run long processes reliably.",
-        after: 0.4,
       },
       {
         text: "In 2014 at Microsoft, Samar co-created the Durable Task Framework, the base of Azure Durable Functions.",
-        after: 0.4,
       },
       {
         text: "In 2015, both reunited at Uber to create Cadence. Open source since 2017, it ran Uber Eats orders.",
-        after: 0.4,
       },
       {
         text: "In October 2019, they left Uber to found Temporal: Cadence's successor, open source under MIT.",
-        after: 1.0,
+        after: 0.2, // a short beat before the exit zoom: Temporal's bloom has long settled
       },
     ],
     build(stage, s) {
