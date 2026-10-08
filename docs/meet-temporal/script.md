@@ -63,7 +63,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     everyday-app icons orbit it with light trails (cart, card, car, play,
     AI spark); a slow camera push-in.
 
-## 01 20 years in the making
+## 01 Where it comes from
 
 - **0:10** Meet Maxim Fateev and Samar Abbas. In 2004, Maxim was tech lead
   of Simple Queue Service at Amazon.

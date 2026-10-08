@@ -205,7 +205,7 @@ CLAUDE.md; a section below and the card order in
   (`### Sources` in `script.md`); unsourced claims stay out (founders'
   degrees, customers named only by investors, a Cloud GA date).
 - No "What you get" recap: a short company introduction, the outro sums
-  up. Six chapters: 20 years in the making (the video opens straight on
+  up. Six chapters: Where it comes from (the video opens straight on
   the founders' timeline, no separate founders chapter), What Temporal
   does, Where Temporal is used, Why it matters for AI, Open source and
   Cloud, Temporal today. Source material includes a Temporal

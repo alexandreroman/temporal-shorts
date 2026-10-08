@@ -1,4 +1,4 @@
-// ===================== 1. 20 YEARS IN THE MAKING
+// ===================== 1. WHERE IT COMES FROM
 // The block keeps every name declared in this file local to this scene.
 {
   // The chapter opens on its heading, very large in the middle; it shrinks up to the top. The founders' faces
@@ -55,7 +55,7 @@
     '', { width: NAME.w + 'px', textAlign: align, whiteSpace: 'nowrap' });
 
   scene({
-    chapter: 1, title: '20 years in the making',
+    chapter: 1, title: 'Where it comes from',
     // the heading plays before the first subtitle
     pre: 2.0,
     // the heading and the founders centered, then the whole timeline, laid out centered at (960, 522)
