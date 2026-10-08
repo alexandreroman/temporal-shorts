@@ -49,14 +49,9 @@
   ];
   const RED_RGB = '255,90,95'; // C.red, for translucent glows
 
-  // Short decaying shake of an element hit at `at`, as [dx, dy] in px; exactly [0, 0] outside it, so resting
-  // elements stay on whole pixels
-  function jolt(t, at, amp) {
-    const u = (t - at) / 0.35;
-    if (u < 0 || u >= 1) return [0, 0];
-    const k = amp * (1 - u);
-    return [Math.sin(u * Math.PI * 5) * k, Math.sin(u * Math.PI * 4) * k * 0.4];
-  }
+  // Short decaying shake of an element hit at `at`, as [dx, dy] in px: five half swings of amp px across, four of
+  // 0.4 amp up and down, within 0.35 s
+  const jolt = (t, at, amp) => [dampedShake(t, at, amp, 0.35, 5), dampedShake(t, at, amp * 0.4, 0.35, 4)];
   // Sum of the jolts of every hit in `hits`
   function jolts(t, hits, amp) {
     let dx = 0, dy = 0;

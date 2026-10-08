@@ -6,7 +6,6 @@
 // table a second time: the ticket flies to the middle of the stage and slams to "2 BOOKINGS!".
 // The block keeps every name declared in this file local to this scene.
 {
-  const easeOut = p => 1 - (1 - p) ** 3;
   // Layout grid, in whole pixels, laid out on the stage itself (no shift): the composition spans x 160-1760 around
   // x 960, and y 137-900 ("Start over" label to panel bottom) around y 518, 60 px above the subtitles.
   // Columns: the 4 step tiles, 340 wide and 80 apart. The instance panel spans the first three, from the Calendar
@@ -53,21 +52,10 @@
   const REDO_LABEL_Y = STEPS_TOP - 90;
   // memory blocks left-aligned like chapter 7's slots: 20 px panel margin, then 76 px blocks every 88 px (12 px gaps)
   const memSlot = i => MEM.x - MEM.w / 2 + 20 + 76 / 2 + i * 88;
-  // the takeover, as in chapter 7: the dead instance A drops 40 px; instance B arrives from 160 px to the left of
-  // its resting place
-  const DROP = 40;
-  const ARRIVE = -160;
   // NEW INSTANCE: centered on the top edge of instance B's panel (the Restaurant column's axis), well clear of its
   // name and its STARTING OVER status. Fixed even width: it rests on whole pixels (solid: the panel border does not
   // show through).
   const NEW_TAG = { x: APP.x, y: APP_TOP, w: 240 };
-  // Horizontal jolt of a tile hit at `at`: two fast swings of amp px, fading out over d seconds; 0 outside them, so
-  // the tile rests on the same pixels as before the hit
-  const jolt = (t, at, amp, d = 0.35) => {
-    const k = (t - at) / d;
-    if (k <= 0 || k >= 1) return 0;
-    return Math.sin(k * Math.PI * 4) * amp * (1 - k);
-  };
   // Red glow around a tile, k from 0 (none) to 1
   const redGlow = (e, k, blur) => {
     const glow = `0 0 ${Math.round(blur * k)}px ${Math.round(4 * k)}px rgba(255,90,95,${(0.5 * k).toFixed(3)})`;
@@ -99,8 +87,7 @@
       s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);
       s.mem = makeMemory(root, MEM.w, MEM.h);
       s.mblocks = makeMemBlocks(root, 6, 76, 56);
-      s.newTag = tag(root, 'New instance', 'violet solid');
-      Object.assign(s.newTag.style, { width: NEW_TAG.w + 'px', textAlign: 'center' });
+      s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w);
       s.bill = makeBill(root, COL.w);
       s.bill.n.style.transformOrigin = '50% 60%';
       // one chip per wasted LLM call, rising out of the bill: the money spent again
@@ -158,9 +145,9 @@
       // LLM call counter
       const calls = [c[0] + 0.3, c[0] + 1.4, c[0] + 2.5, ...wastedAt].filter(x => t >= x).length;
       setBill(s.bill, calls, Math.max(0, calls - 3));
-      // each wasted call hits the bill: the number swells, the tile jolts and flashes red; after the third one, its
-      // border stays red
-      const billJolt = wastedAt.reduce((sum, at) => sum + jolt(t, at, 8), 0);
+      // each wasted call hits the bill: the number swells, the tile jolts (two fast swings) and flashes red; after
+      // the third one, its border stays red
+      const billJolt = wastedAt.reduce((sum, at) => sum + dampedShake(t, at, 8, 0.35, 4), 0);
       place(s.bill, BILL.x + sx + billJolt, BILL.y + sy, P(t, 0.3, 0.45, backOut), P(t, 0.3, 0.4));
       const numberSwell = Math.max(...wastedAt.map(at => swell(t, at + 0.15, 0.3)));
       s.bill.n.style.transform = numberSwell > 1 ? `scale(${numberSwell.toFixed(3)})` : '';
@@ -187,7 +174,7 @@
       const flightX = P(t, bookedTwiceAt, TICKET_FLIGHT, easeOut);
       const flightY = P(t, bookedTwiceAt, TICKET_FLIGHT, easeIn);
       const grow = lerp(1, TICKET_CENTER.scale, P(t, bookedTwiceAt, TICKET_FLIGHT));
-      const ticketX = lerp(TICKET.x, TICKET_CENTER.x, flightX) + sx + jolt(t, slamAt, 10, 0.4);
+      const ticketX = lerp(TICKET.x, TICKET_CENTER.x, flightX) + sx + dampedShake(t, slamAt, 10, 0.4, 4);
       const ticketY = lerp(TICKET.y, TICKET_CENTER.y, flightY);
       place(s.ticket, ticketX, ticketY, tp * grow * (1 + slam), clamp(tp * 2));
       redGlow(s.ticket, P(t, slamAt, 0.08) * (1 - P(t, slamAt + 0.2, 0.8)), 30);
@@ -198,41 +185,29 @@
 
       // app instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
       const aIn = P(t, 0.3, 0.45, backOut);
-      const aGrey = P(t, aDrop, 0.3);
-      const aDropY = Math.round(DROP * P(t, aDrop, 0.6, easeIn));
-      const aOn = 1 - P(t, aDrop, 0.6);
-      place(s.A, APP.x + sx, APP.y + sy + aDropY, aIn, clamp(aIn * 2) * aOn);
+      const leave = leavingInstance(t, aDrop);
+      place(s.A, APP.x + sx, APP.y + sy + leave.dy, aIn, clamp(aIn * 2) * leave.o);
       if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, 'RUNNING THE AGENT', t >= c[0] + 0.3 ? 'running' : 'idle');
       // a new copy, instance B, slides in from the left once A is gone, its border glowing violet while it arrives,
-      // gone as the rerun starts (the glow pulses on G, as an ambient loop). No Event History hands it anything: it
-      // starts over from scratch, idle until the rerun
-      const bDx = Math.round(ARRIVE * (1 - P(t, bIn, 0.7, backOut)));
-      place(s.B, APP.x + bDx, APP.y, 1, P(t, bIn, 0.25));
+      // gone as the rerun starts. No Event History hands it anything: it starts over from scratch, idle until the
+      // rerun
+      const arrive = arrivingInstance(t, bIn);
+      place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
       if (t < c[2] + 0.2) setAppStatus(s.B, 'STARTING OVER', 'idle');
       else setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
-      const glow = P(t, bIn, 0.3) * (1 - P(t, c[2] - 0.1, 0.3));
-      if (glow > 0) {
-        const pulse = 0.5 + 0.5 * Math.sin(G * Math.PI * 2.4);
-        const blur = Math.round(20 + 16 * pulse), spread = Math.round(2 + 4 * pulse);
-        s.B.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(182,100,255,${(0.6 * glow).toFixed(3)})`;
-        s.B.style.borderColor = C.violet;
-      } else {
-        s.B.style.boxShadow = '';
-      }
+      setArrivalGlow(s.B, t, bIn, c[2] - 0.1);
       // NEW INSTANCE pops on B once it is almost in place and is gone as the rerun starts
-      const newOn = P(t, newAt, 0.2) * (1 - P(t, c[2] - 0.2, 0.3));
-      place(s.newTag, NEW_TAG.x + bDx, NEW_TAG.y, swell(t, newAt, 0.14), newOn);
+      placeNewTag(s.newTag, t, newAt, c[2] - 0.2, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
 
       // context: filled by the first run, emptied by the crash, refilled by the rerun. The panel moves with the
       // instance on screen (A, then B), so it never floats without its app; both are gone when it switches.
-      const memDx = bHere ? bDx : sx, memDy = bHere ? 0 : sy + aDropY;
-      const memOn = bHere ? P(t, bIn, 0.25) : aOn;
+      const memDx = bHere ? arrive.dx : sx, memDy = bHere ? 0 : sy + leave.dy;
+      const memOn = bHere ? arrive.o : leave.o;
       place(s.mem, MEM.x + memDx, MEM.y + memDy, 1, P(t, 0.5, 0.45) * memOn);
       s.mem.style.borderColor = dead && !bHere ? C.red : C.line;
       s.mem.empty.style.opacity = bHere ? 0 : P(t, c[1] + 1.2, 0.4);
-      let greyed = '';
-      if (!bHere && aGrey > 0) greyed = `grayscale(${aGrey.toFixed(3)}) brightness(${(1 - 0.35 * aGrey).toFixed(3)})`;
+      const greyed = bHere ? '' : leave.grey;
       s.A.style.filter = greyed;
       s.mem.style.filter = greyed;
       // the blocks of A have all fallen before A leaves; B's stay empty until the rerun

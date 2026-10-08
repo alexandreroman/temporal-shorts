@@ -183,12 +183,9 @@
         const sparkO = t < hit ? 0 : 1 - sparkP;
         place(s.sparks[k], CARD.x0 + b.edge[0], CARD.y0 + b.edge[1], lerp(0.3, 1.8, sparkP), sparkO);
 
-        const u = (t - hit) / 0.3; // the jolt decays within 0.3 s
-        if (u >= 0 && u < 1) {
-          const push = (strong ? 8 : 4) * (1 - u) * (1 - u);
-          joltX += dx * push;
-          joltY += dy * push;
-        }
+        const push = (strong ? 8 : 4) * recoil(t, hit); // the jolt decays within 0.3 s
+        joltX += dx * push;
+        joltY += dy * push;
         const ring = strong ? win(t, hit - 0.05, hit + 0.6, 0.15) : win(t, hit - 0.05, hit + 0.25, 0.15) * 0.75;
         glow = Math.max(glow, ring);
       });

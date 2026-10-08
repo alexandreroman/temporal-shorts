@@ -25,19 +25,12 @@
   // right edge (16 px inside the card), its bottom 7 px above the card's. Even sizes: whole-pixel edges at rest.
   const BOLT = { x: 725, y: 410, size: 130 };
   const CRASH_TAG = { x: 717, y: 566, w: 310, h: 66 };
-  // horizontal jitter of the running shipPackage line just before the crash, in whole pixels, one offset every
-  // 0.05 s (as the running chip in agent-harness chapter 2)
-  const JITTER = [3, -4, 5, -5, 6, -7, 7];
-  // the takeover, in whole pixels: the dead Worker A drops 40 px (its bottom stays 10 px above the counter row);
-  // Worker B arrives from 160 px to the left of its resting place
-  const DROP = 40;
-  const ARRIVE = -160;
+  // the takeover (see TAKEOVER): the dead Worker A drops 40 px, its bottom staying 10 px above the counter row
   // NEW WORKER: astride the top edge of Worker B's panel, centered on it, clear of its name and status; fixed even
   // width, so it rests on whole pixels (solid: the panel border does not show through)
   const NEW_TAG = { x: EH.worker.x, y: EH.worker.y - EH.worker.h / 2, w: 200 };
   // the Workflow chip flies from the "Workflow started" history row to Worker B's status, at the panel's top right
   const STATUS_AT = { x: workerRight - 100, y: EH.worker.y - EH.worker.h / 2 + 36 };
-  const VIOLET_TINT = '#F2E6FF';
   scene({
     chapter: 6, title: 'When a Worker crashes',
     subs: [
@@ -70,26 +63,20 @@
       s.retryChip.firstChild.textContent = 'RETRY';
       s.reuseChips = REUSED_LABELS.map(() => makeResultCard(root));
       s.saveChips = [SHIP, EMAIL].map(() => makeResultCard(root));
-      // the Workflow itself, handed to Worker B: a RESULT chip in violet
-      s.handChip = makeResultCard(root, true, 'WORKFLOW #1042');
-      Object.assign(s.handChip.style, { background: VIOLET_TINT, borderLeftColor: C.violet });
-      s.newWorker = tag(root, 'New Worker', 'violet solid');
-      Object.assign(s.newWorker.style, { width: NEW_TAG.w + 'px', textAlign: 'center' });
+      // the Workflow itself, handed to Worker B
+      s.handChip = makeHandOffCard(root, 'WORKFLOW #1042');
+      s.newWorker = makeNewTag(root, 'New Worker', NEW_TAG.w);
       s.done = tag(root, 'Workflow complete', 'neon');
       // dark like the SAVED tags, as it sits on the light history card
       s.done.style.background = '#141414';
-      s.bolt = E(root, ICON('bolt', BOLT.size, C.red, 1.6));
-      // fixed even size: whole-pixel edges once centered (the .1em letter spacing gives fractional widths); solid, so
-      // the code card does not show through
-      s.crash = tag(root, 'Worker crash', 'red big solid');
-      Object.assign(s.crash.style, { width: CRASH_TAG.w + 'px', height: CRASH_TAG.h + 'px', textAlign: 'center' });
+      s.crash = makeCrashMarks(root, 'Worker crash', BOLT, CRASH_TAG);
       s.flash = makeFlash(root);
     },
     update(t, c, s) {
       const { shot } = s;
       const [workerA, workerB] = shot.workers;
       // c[0]: the glitch just before the crash at crashAt; Worker A's CRASHED status, bolt and tag leave from aOut
-      const crashAt = c[0] + 1.2, glitchAt = crashAt - 0.35, tagAt = crashAt + 0.45, aOut = crashAt + 1.15;
+      const crashAt = c[0] + 1.2, tagAt = crashAt + 0.45, aOut = crashAt + 1.15;
       // then Worker A leaves (aDrop), Worker B arrives (bIn) and Temporal hands it the Workflow: the chip leaves the
       // history at handOff and reaches Worker B's status at takeOver
       const aDrop = aOut + 0.25, bIn = aDrop + 0.6, handOff = bIn + 0.9, takeOver = handOff + 0.55;
@@ -109,49 +96,35 @@
       const [sx, sy] = shakeAt(t, crashAt);
       const dead = t >= crashAt;
       // the failure builds up before the crash: Worker A's border and status flicker red, the shipPackage line jitters
-      const glitching = t >= glitchAt && t < crashAt;
-      const glitchStep = Math.min(Math.floor((t - glitchAt) / 0.05), JITTER.length - 1);
-      const flickerRed = glitching && glitchStep % 2 === 0;
-      const jitter = glitching ? JITTER[glitchStep] : 0;
+      const glitch = crashGlitch(t, crashAt);
 
       // Worker A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
-      const aGrey = P(t, aDrop, 0.3);
-      const aDropY = Math.round(DROP * P(t, aDrop, 0.6, easeIn));
-      const aOn = 1 - P(t, aDrop, 0.6);
-      place(workerA, EH.worker.x + sx, EH.worker.y + sy + aDropY, 1, aOn);
+      const leave = leavingInstance(t, aDrop);
+      place(workerA, EH.worker.x + sx, EH.worker.y + sy + leave.dy, 1, leave.o);
       if (dead) setAppStatus(workerA, 'CRASHED', 'crashed');
       else setAppStatus(workerA, 'RUNNING', 'running');
-      if (flickerRed) {
+      if (glitch.red) {
         workerA.style.borderColor = C.red;
         workerA.st.style.color = C.red;
       }
       workerA.st.style.opacity = 1 - P(t, aOut, 0.25);
       // a new machine, Worker B, slides in from the left once Worker A is gone, its border glowing violet while it
-      // arrives and takes over (the glow pulses on G, as an ambient loop); IDLE until the Workflow chip reaches it
+      // arrives and takes over; IDLE until the Workflow chip reaches it
       const bHere = t >= bIn;
-      const bDx = Math.round(ARRIVE * (1 - P(t, bIn, 0.7, backOut)));
-      place(workerB, EH.worker.x + bDx, EH.worker.y, 1, P(t, bIn, 0.25));
+      const arrive = arrivingInstance(t, bIn);
+      place(workerB, EH.worker.x + arrive.dx, EH.worker.y, 1, arrive.o);
       if (t < takeOver) setAppStatus(workerB, 'IDLE', 'stopped');
       else if (t < c[1] + 0.2) setAppStatus(workerB, 'TAKING OVER', 'running');
       else if (t < c[2] + 0.2) setAppStatus(workerB, 'REPLAYING…', 'running');
       else if (t < completed) setAppStatus(workerB, 'RUNNING', 'running');
       else setAppStatus(workerB, 'DONE', 'stopped');
-      const glow = P(t, bIn, 0.3) * (1 - P(t, c[1] - 0.1, 0.3));
-      if (glow > 0) {
-        const pulse = 0.5 + 0.5 * Math.sin(G * Math.PI * 2.4);
-        const blur = Math.round(20 + 16 * pulse), spread = Math.round(2 + 4 * pulse);
-        workerB.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(182,100,255,${(0.6 * glow).toFixed(3)})`;
-        workerB.style.borderColor = C.violet;
-      } else {
-        workerB.style.boxShadow = '';
-      }
+      setArrivalGlow(workerB, t, bIn, c[1] - 0.1);
 
       // the code card moves with the Worker on screen (Worker A, then Worker B), so it never floats without a panel;
       // both are gone when it switches
-      const codeDx = bHere ? bDx : sx, codeDy = bHere ? 0 : sy + aDropY;
-      const codeOn = bHere ? P(t, bIn, 0.25) : aOn;
-      let greyed = '';
-      if (!bHere && aGrey > 0) greyed = `grayscale(${aGrey.toFixed(3)}) brightness(${(1 - 0.35 * aGrey).toFixed(3)})`;
+      const codeDx = bHere ? arrive.dx : sx, codeDy = bHere ? 0 : sy + leave.dy;
+      const codeOn = bHere ? arrive.o : leave.o;
+      const greyed = bHere ? '' : leave.grey;
       workerA.style.filter = greyed;
       shot.code.style.filter = greyed;
       // CARD CHARGED: $42 all along; the replay charges nothing, the order completes with one charge (each note pops)
@@ -176,12 +149,12 @@
       const lineSx = dead ? 0 : sx, lineSy = dead ? 0 : sy;
       setCodeLine(shot.code, line, barOn);
       // the glitch moves the running line: its text, its highlight and its spinner
-      const jitterShift = jitter ? `translateX(${jitter}px)` : '';
+      const jitterShift = glitch.dx ? `translateX(${glitch.dx}px)` : '';
       shot.code.lines[ehStepLine(SHIP)].style.transform = jitterShift;
       shot.code.bar.style.transform = jitterShift;
       const retrySpin = win(t, retryRun + 0.2, retryRes, 0.15);
       const spinning = (1 - P(t, crashAt, 0.05)) + retrySpin + runningSpin(t, run);
-      setCodeSpinner(shot, line, spinning, lineSx + jitter, lineSy);
+      setCodeSpinner(shot, line, spinning, lineSx + glitch.dx, lineSy);
       // "From the start": drawn as the highlight jumps back, gone once the replay starts
       const arcOut = 1 - P(t, replay[0] - 0.3, 0.3);
       draw(s.restart, P(t, jump, 0.6), arcOut);
@@ -220,14 +193,10 @@
       // crash: red flash and a bolt strikes Worker A's panel; once the bolt has landed, WORKER CRASH pops in. Both
       // shake with Worker A and leave with its CRASHED status, before Worker A drops.
       placeFlash(s.flash, t, crashAt);
-      const boltPop = P(t, crashAt, 0.35, backOut), crashPop = P(t, tagAt, 0.35, backOut);
-      place(s.bolt, BOLT.x + sx, BOLT.y + sy, boltPop, win(t, crashAt, aOut, 0.2));
-      const crashOn = P(t, tagAt, 0.1) * (1 - P(t, aOut, 0.25));
-      place(s.crash, CRASH_TAG.x + sx, CRASH_TAG.y + sy, crashPop, crashOn);
+      placeCrashMarks(s.crash, t, crashAt, tagAt, aOut, sx, sy);
       // takeover: NEW WORKER pops on Worker B once it is almost in place and leaves before the replay; Temporal hands
       // it the Workflow, a chip from the "Workflow started" row to its status, which then reads TAKING OVER
-      const newPop = popIn(t, bIn + 0.5);
-      place(s.newWorker, NEW_TAG.x + bDx, NEW_TAG.y, newPop.s, newPop.o * (1 - P(t, c[1] - 0.4, 0.3)));
+      placeNewTag(s.newWorker, t, bIn + 0.5, c[1] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y);
       flyChip(s.handChip, t, handOff, EH.rowStartX, ehRowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });

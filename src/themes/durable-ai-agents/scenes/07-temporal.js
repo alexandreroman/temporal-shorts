@@ -16,17 +16,12 @@
   const APP = { x: 470, y: 445 };
   const MEM = { x: 470, y: 469, slot0: 162, slotGap: 88, slotY: 484 }; // context panel and its block slots
   const HIST = { x: 1380, y: 580, cardX: 1050, row0: 447, rowGap: 44 }; // Event History card and its rows
-  // the takeover, in whole pixels: the dead instance A drops 40 px; instance B arrives from 160 px to the left of
-  // its resting place
-  const DROP = 40;
-  const ARRIVE = -160;
   // NEW INSTANCE: astride the top edge of instance B's panel, centered between its name and its TAKING OVER status
   // (about 65 px from each); 6 px low, so it keeps 20 px of clear space under the Calendar tile. Fixed even width:
   // it rests on whole pixels (solid: the panel border does not show through).
   const NEW_TAG = { x: APP.x + 60, y: APP.y - 155 + 6, w: 240 };
   // the agent chip flies from the first Event History row to instance B's status, at the panel's top right
   const STATUS_AT = { x: APP.x + 290, y: APP.y - 155 + 36 };
-  const VIOLET_TINT = '#F2E6FF';
   const memSlot = i => MEM.slot0 + i * MEM.slotGap;
   const rowY = i => HIST.row0 + i * HIST.rowGap;
   // the big intro logo flies into the TEMPORAL panel header from c[0] + FLIGHT.at, for FLIGHT.d seconds
@@ -77,11 +72,9 @@
       });
       s.saveCards = JR.map((_, i) => makeCallCard(root, i));
       s.reuseCards = JR.slice(0, 6).map((_, i) => makeCallCard(root, i));
-      // the agent itself, handed to instance B: a call card in violet
-      s.handChip = makeResultCard(root, true, 'LUNCH AGENT');
-      Object.assign(s.handChip.style, { background: VIOLET_TINT, borderLeftColor: C.violet });
-      s.newTag = tag(root, 'New instance', 'violet solid');
-      Object.assign(s.newTag.style, { width: NEW_TAG.w + 'px', textAlign: 'center' });
+      // the agent itself, handed to instance B
+      s.handChip = makeHandOffCard(root, 'LUNCH AGENT');
+      s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w);
       s.flash = makeFlash(root);
       s.done = tag(root, 'Agent complete', 'neon');
       s.logo = E(root, `<img src="${LOGO}" style="height:150px;display:block">`);
@@ -125,40 +118,29 @@
 
       // app instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
       const aIn = P(t, c[0] + 2.3, 0.5, backOut);
-      const aGrey = P(t, aDrop, 0.3);
-      const aDropY = Math.round(DROP * P(t, aDrop, 0.6, easeIn));
-      const aOn = 1 - P(t, aDrop, 0.6);
-      place(s.A, APP.x + sx, APP.y + sy + aDropY, aIn, clamp(aIn * 2) * aOn);
+      const leave = leavingInstance(t, aDrop);
+      place(s.A, APP.x + sx, APP.y + sy + leave.dy, aIn, clamp(aIn * 2) * leave.o);
       if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, 'RUNNING THE AGENT', t >= write[0] ? 'running' : 'idle');
       // a new copy, instance B, slides in from the left once A is gone, its border glowing violet while it arrives
-      // and takes over, gone by c[3] (the glow pulses on G, as an ambient loop); IDLE until the agent chip reaches it
+      // and takes over, gone by c[3]; IDLE until the agent chip reaches it
       const bHere = t >= bIn;
-      const bDx = Math.round(ARRIVE * (1 - P(t, bIn, 0.7, backOut)));
-      place(s.B, APP.x + bDx, APP.y, 1, P(t, bIn, 0.25));
+      const arrive = arrivingInstance(t, bIn);
+      place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
       if (t < takeOver) setAppStatus(s.B, 'IDLE', 'stopped');
       else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', t >= rerun ? 'running' : 'idle');
       else if (t < told[0]) setAppStatus(s.B, 'REPLAYING…', 'running');
       else setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
-      const glow = P(t, bIn, 0.3) * (1 - P(t, c[3] - 0.3, 0.3));
-      if (glow > 0) {
-        const pulse = 0.5 + 0.5 * Math.sin(G * Math.PI * 2.4);
-        const blur = Math.round(20 + 16 * pulse), spread = Math.round(2 + 4 * pulse);
-        s.B.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(182,100,255,${(0.6 * glow).toFixed(3)})`;
-        s.B.style.borderColor = C.violet;
-      } else {
-        s.B.style.boxShadow = '';
-      }
+      setArrivalGlow(s.B, t, bIn, c[3] - 0.3);
 
       // context: filled as results are saved, emptied by the crash, refilled from the history. The panel moves
       // with the instance on screen (A, then B), so it never floats without its app; both are gone when it switches.
-      const memDx = bHere ? bDx : sx, memDy = bHere ? 0 : sy + aDropY;
-      const memOn = bHere ? P(t, bIn, 0.25) : aOn;
+      const memDx = bHere ? arrive.dx : sx, memDy = bHere ? 0 : sy + leave.dy;
+      const memOn = bHere ? arrive.o : leave.o;
       place(s.mem, MEM.x + memDx, MEM.y + memDy, 1, P(t, c[0] + 2.5, 0.45) * memOn);
       s.mem.style.borderColor = dead && !bHere ? C.red : C.line;
       s.mem.empty.style.opacity = bHere ? 0 : P(t, crashAt + 1.1, 0.4);
-      let greyed = '';
-      if (!bHere && aGrey > 0) greyed = `grayscale(${aGrey.toFixed(3)}) brightness(${(1 - 0.35 * aGrey).toFixed(3)})`;
+      const greyed = bHere ? '' : leave.grey;
       s.A.style.filter = greyed;
       s.mem.style.filter = greyed;
       // the blocks of A have all fallen before A leaves; B's are empty until the replay
@@ -212,10 +194,8 @@
       // takeover: NEW INSTANCE pops on B once it is almost in place and is gone by c[3]; Temporal hands it the agent,
       // a chip from the first history row to its status, which then reads TAKING OVER
       const newAt = bIn + 0.5;
-      const newOn = P(t, newAt, 0.2) * (1 - P(t, c[3] - 0.4, 0.3));
-      place(s.newTag, NEW_TAG.x + bDx, NEW_TAG.y, swell(t, newAt, 0.14), newOn);
-      fly(s.handChip, t, handOff, HIST.cardX, rowY(0), handOff + 0.1, 0.45, STATUS_AT.x, STATUS_AT.y,
-        takeOver, STATUS_AT.x, STATUS_AT.y);
+      placeNewTag(s.newTag, t, newAt, c[3] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
+      flyChip(s.handChip, t, handOff, HIST.cardX, rowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });
 }

@@ -21,11 +21,9 @@
   const joltAt = (t, c) => {
     let x = 0, y = 0;
     HITS.forEach(h => {
-      const u = (t - c[2] - h.at) / 0.3;
-      if (u >= 0 && u < 1) {
-        x += h.kick[0] * (1 - u) * (1 - u);
-        y += h.kick[1] * (1 - u) * (1 - u);
-      }
+      const k = recoil(t, c[2] + h.at);
+      x += h.kick[0] * k;
+      y += h.kick[1] * k;
     });
     return [x, y];
   };

@@ -82,7 +82,8 @@ workspaces run `make setup` automatically.
     from the scenes
   - `shared.js`: brand constants and components used by two or more
     themes (`C`, `LOGO`, tiles, step rows, app and TEMPORAL panels, the
-    Event History card, status tags, crash effects, title and end cards)
+    Event History card, status tags, crash and takeover effects, small
+    animation helpers, title and end cards)
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page; opens paused at a `#t=<time>` URL fragment
   - `themes/<theme>/index.html`: theme page, stage skeleton and the

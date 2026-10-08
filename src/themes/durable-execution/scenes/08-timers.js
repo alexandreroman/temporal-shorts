@@ -51,10 +51,6 @@
     replaying: { text: 'REPLAYING…', icon: 'retry', color: C.ink },
   };
   const ICON_COLOR = { pauseLines: C.slate, power: C.slate, upload: C.violet, retry: C.violet };
-  // the deploy, in whole pixels, as the takeover of chapter 6: the retired Worker A drops 40 px; Worker B arrives
-  // from 160 px to the left of its resting place
-  const DROP = 40;
-  const ARRIVE = -160;
   // NEW WORKER: astride the top edge of Worker B's panel, centered on it, clear of its name and of VERSION 2; fixed
   // even width, so it rests on whole pixels (solid: the panel border does not show through)
   const NEW_TAG = { x: WK.x, y: WK.y - WK.h / 2, w: 200 };
@@ -160,8 +156,7 @@
         ship: makeResultCard(root), start: makeChip(root, 'START TIMER'), wake: makeChip(root, 'WAKE UP'),
         review: makeResultCard(root),
       };
-      s.newWorker = tag(root, 'New Worker', 'violet solid');
-      Object.assign(s.newWorker.style, { width: NEW_TAG.w + 'px', textAlign: 'center' });
+      s.newWorker = makeNewTag(root, 'New Worker', NEW_TAG.w);
     },
     update(t, c, s) {
       const [workerA, workerB] = s.workers;
@@ -183,16 +178,15 @@
       // Worker A, retired by the deploy (not crashed, so not greyed), drops and fades out; then a new machine, Worker
       // B, slides in from the left to the same place, its border glowing violet while it arrives
       const wp = P(t, c[0] + 0.1, 0.5, backOut);
-      const aDropY = Math.round(DROP * P(t, aDrop, 0.6, easeIn));
-      const aOn = 1 - P(t, aDrop, 0.6);
-      place(workerA, WK.x, WK.y + aDropY, wp, clamp(wp * 2) * aOn);
+      const leave = leavingInstance(t, aDrop);
+      place(workerA, WK.x, WK.y + leave.dy, wp, clamp(wp * 2) * leave.o);
       const bHere = t >= bIn;
-      const bDx = Math.round(ARRIVE * (1 - P(t, bIn, 0.7, backOut)));
-      place(workerB, WK.x + bDx, WK.y, 1, P(t, bIn, 0.25));
+      const arrive = arrivingInstance(t, bIn);
+      place(workerB, WK.x + arrive.dx, WK.y, 1, arrive.o);
       // the code card and the status block move with the Worker on screen (Worker A, then Worker B), so they never
       // float without a panel; both Workers are gone when they switch
-      const wkDx = bHere ? bDx : 0, wkDy = bHere ? 0 : aDropY;
-      const wkOn = bHere ? P(t, bIn, 0.25) : aOn;
+      const wkDx = bHere ? arrive.dx : 0, wkDy = bHere ? 0 : leave.dy;
+      const wkOn = bHere ? arrive.o : leave.o;
 
       let status = 'running';
       if (t >= freeAt) status = 'free';
@@ -208,19 +202,10 @@
       setAppStatus(workerB, 'VERSION 2', busy ? 'running' : 'stopped');
       setStatusBlock(s.status, status);
       place(s.status, WK.x + wkDx, BLOCK.y + wkDy, 1, P(t, c[0] + 0.6, 0.4) * wkOn);
-      // the glow pulses on G, as an ambient loop, and fades before day 30
-      const glow = P(t, bIn, 0.3) * (1 - P(t, c[2] - 0.1, 0.3));
-      if (glow > 0) {
-        const pulse = 0.5 + 0.5 * Math.sin(G * Math.PI * 2.4);
-        const blur = Math.round(20 + 16 * pulse), spread = Math.round(2 + 4 * pulse);
-        workerB.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(182,100,255,${(0.6 * glow).toFixed(3)})`;
-        workerB.style.borderColor = C.violet;
-      } else {
-        workerB.style.boxShadow = '';
-      }
+      // the glow fades before day 30
+      setArrivalGlow(workerB, t, bIn, c[2] - 0.1);
       // NEW WORKER pops on Worker B once it is almost in place and leaves before day 30
-      const newPop = popIn(t, bIn + 0.5);
-      place(s.newWorker, NEW_TAG.x + bDx, NEW_TAG.y, newPop.s, newPop.o * (1 - P(t, c[2] - 0.4, 0.3)));
+      placeNewTag(s.newWorker, t, bIn + 0.5, c[2] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y);
 
       // the code card dims while the Worker restarts and no Worker runs it
       const down = win(t, restartAt, backAt, 0.3);

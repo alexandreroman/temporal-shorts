@@ -29,20 +29,14 @@
   const APP = { x: 465, y: 503, w: 650, h: 306, lblY: 497, chipY: 553 };
   // the crash on A: APP CRASH centered between the step label and the chip (where TURN COMPLETE shows later), the
   // bolt in the panel's right part, clear of the status text above it and of the tag on its left
-  const CRASH_Y = (APP.lblY + APP.chipY) / 2;
+  const CRASH_TAG = { x: APP.x, y: (APP.lblY + APP.chipY) / 2, w: 250 };
   const BOLT = { x: 715, y: 487, size: 140 };
-  // horizontal jitter of the running chip just before the crash, in whole pixels, one offset every 0.05 s
-  const JITTER = [3, -4, 5, -5, 6, -7, 7];
-  // the takeover, in whole pixels: the dead instance A drops 40 px (faded out by then, 8 px above the counters);
-  // instance B arrives from 160 px to the left of its resting place
-  const DROP = 40;
-  const ARRIVE = -160;
+  // the takeover (see TAKEOVER): the dead instance A drops 40 px, faded out by then, 8 px above the counters.
   // NEW INSTANCE stands where APP CRASH stood on A: the top edge has no room for it between the panel name and the
   // status. Fixed even size, so it rests on whole pixels.
   const NEW_TAG = { w: 250, h: 52 };
   // the Workflow card flies from the first history row to B's status, at the panel's top right (inside the panel)
   const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 38 };
-  const VIOLET_TINT = '#F2E6FF';
   const COUNTER = { y: 794, w: 305, h: 180 };
   const TEMPORAL = { x: 1340, y: 617, w: 880, h: 534 };
   const HIST = { x: 1340, y: 652, w: 824, h: 404, row0: 80, rowGap: 62 };
@@ -109,16 +103,11 @@
       });
       s.saveCards = STEPS.map((_, i) => makeCallCard(root, i));
       s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeCallCard(root, i));
-      // the agent's Workflow, handed to instance B: a result card in violet
-      s.handCard = makeResultCard(root, true, 'AGENT WORKFLOW');
-      Object.assign(s.handCard.style, { background: VIOLET_TINT, borderLeftColor: C.violet });
-      s.newTag = tag(root, 'New instance', 'violet solid');
-      Object.assign(s.newTag.style, { width: NEW_TAG.w + 'px', height: NEW_TAG.h + 'px', textAlign: 'center' });
-      s.bolt = E(root, ICON('bolt', BOLT.size, C.red, 1.6));
-      // fixed even width: whole-pixel edges once centered (the .1em letter spacing gives fractional widths);
-      // solid, so the tail of the falling step chip does not show through
-      s.crash = tag(root, 'App crash', 'red big solid');
-      Object.assign(s.crash.style, { width: '250px', textAlign: 'center' });
+      // the agent's Workflow, handed to instance B
+      s.handCard = makeHandOffCard(root, 'AGENT WORKFLOW');
+      s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w, NEW_TAG.h);
+      // the solid tag hides the tail of the falling step chip
+      s.crash = makeCrashMarks(root, 'App crash', BOLT, CRASH_TAG);
       s.flash = makeFlash(root);
     },
     update(t, c, s) {
@@ -127,7 +116,7 @@
       const CARD_AT = 1.2, SAVE_AT = 2.1;
       const run = [c[0] + 1.0, c[0] + 4.2, c[1] + 0.6, c[1] + 3.8];
       // c[2]: step 5 starts, the app glitches then crashes; A's CRASHED status, bolt and tag leave from aOut
-      const firstTry = c[2] + 0.4, crashAt = c[2] + 2.0, glitchAt = crashAt - 0.35, tagAt = crashAt + 0.45;
+      const firstTry = c[2] + 0.4, crashAt = c[2] + 2.0, tagAt = crashAt + 0.45;
       const aOut = crashAt + 1.5;
       // then A leaves (aDrop), B arrives (bIn, the reset of the step row) and Temporal hands it the Workflow: the card
       // leaves the history at handOff and reaches B's status at takeOver
@@ -145,10 +134,7 @@
       // the app side shakes with the crash; Temporal, outside the app, stays still
       const ax = onA ? sx : 0, ay = onA ? sy : 0;
       // the failure builds up before the crash: A's border and status flicker red, the running chip jitters
-      const glitching = t >= glitchAt && t < crashAt;
-      const glitchStep = Math.min(Math.floor((t - glitchAt) / 0.05), JITTER.length - 1);
-      const flickerRed = glitching && glitchStep % 2 === 0;
-      const jitter = glitching ? JITTER[glitchStep] : 0;
+      const glitch = crashGlitch(t, crashAt);
 
       // steps: before the reset, instance A runs them; after it, rows 1-4 re-check without running
       const states = STEPS.map((_, i) => {
@@ -163,35 +149,26 @@
 
       // instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
       const aIn = P(t, c[0] + 0.1, 0.5, backOut);
-      const aGrey = P(t, aDrop, 0.3);
-      const aDropY = Math.round(DROP * P(t, aDrop, 0.6, easeIn));
-      place(s.A, APP.x + ax, APP.y + ay + aDropY, aIn, clamp(aIn * 2) * (1 - P(t, aDrop, 0.6)));
+      const leave = leavingInstance(t, aDrop);
+      place(s.A, APP.x + ax, APP.y + ay + leave.dy, aIn, clamp(aIn * 2) * leave.o);
       if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, 'RUNNING THE AGENT', t >= run[0] ? 'running' : 'idle');
-      if (flickerRed) {
+      if (glitch.red) {
         s.A.style.borderColor = C.red;
         s.A.st.style.color = C.red;
       }
       s.A.st.style.opacity = 1 - P(t, aOut, 0.25);
-      s.A.style.filter = aGrey > 0 ? `grayscale(${aGrey.toFixed(3)}) brightness(${(1 - 0.35 * aGrey).toFixed(3)})` : '';
+      s.A.style.filter = leave.grey;
       // a new instance B slides in from the left once A is gone, its border glowing violet while it arrives and
-      // takes over (the glow pulses on G, as an ambient loop); IDLE until the Workflow card reaches it
-      const bDx = Math.round(ARRIVE * (1 - P(t, bIn, 0.7, backOut)));
-      place(s.B, APP.x + bDx, APP.y, 1, P(t, bIn, 0.25));
+      // takes over; IDLE until the Workflow card reaches it
+      const arrive = arrivingInstance(t, bIn);
+      place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
       if (t < takeOver) setAppStatus(s.B, 'IDLE', 'stopped');
       else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'running');
       else if (t < rerun) setAppStatus(s.B, 'REPLAYING…', 'running');
       else if (t < doneAt) setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
       else setAppStatus(s.B, 'IDLE', 'idle');
-      const bGlow = P(t, bIn, 0.3) * (1 - P(t, replay[0] - 0.3, 0.3));
-      if (bGlow > 0) {
-        const pulse = 0.5 + 0.5 * Math.sin(G * Math.PI * 2.4);
-        const blur = Math.round(20 + 16 * pulse), spread = Math.round(2 + 4 * pulse);
-        s.B.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(182,100,255,${(0.6 * bGlow).toFixed(3)})`;
-        s.B.style.borderColor = C.violet;
-      } else {
-        s.B.style.boxShadow = '';
-      }
+      setArrivalGlow(s.B, t, bIn, replay[0] - 0.3);
 
       // the step at work in the app, shown until the next one starts: run for real, or handed back from
       // the history during the replay. Each chip fades out before the next fades in, so texts never overlap.
@@ -207,7 +184,7 @@
       const fall = P(t, crashAt + 0.1, 0.6, easeIn);
       s.chips.forEach((e, i) => {
         if (i === 4 && t < reset) {
-          const x = APP.x + ax + jitter;
+          const x = APP.x + ax + glitch.dx;
           place(e, x, APP.chipY + ay + fall * 120, 1, win(t, firstTry, aOut, 0.15) * (1 - fall), fall * -12);
         } else {
           place(e, APP.x + ax, APP.chipY + ay, 1, chipOn[i]);
@@ -283,17 +260,11 @@
       // crash: red flash and a bolt strikes A's panel; once step 5's chip has mostly fallen out, APP CRASH stands
       // in the panel. Both shake with the app side and leave with A's CRASHED status, before A drops.
       placeFlash(s.flash, t, crashAt);
-      const boltPop = P(t, crashAt, 0.35, backOut), crashPop = P(t, tagAt, 0.35, backOut);
-      place(s.bolt, BOLT.x + ax, BOLT.y + ay, boltPop, win(t, crashAt, aOut, 0.2));
-      const crashOn = P(t, tagAt, 0.1) * (1 - P(t, aOut, 0.25));
-      place(s.crash, APP.x + ax, CRASH_Y + ay, crashPop, crashOn);
+      placeCrashMarks(s.crash, t, crashAt, tagAt, aOut, ax, ay);
       // takeover: NEW INSTANCE pops in B once it is almost in place and leaves before the replay; Temporal hands it
       // the agent's Workflow, a card from the first history row to its status, which then reads TAKING OVER
-      const newOn = P(t, bIn + 0.5, 0.2) * (1 - P(t, replay[0] - 0.6, 0.3));
-      const newPop = 1 + 0.14 * win(t, bIn + 0.5, bIn + 0.65, 0.15);
-      place(s.newTag, APP.x + bDx, CRASH_Y, newPop, newOn);
-      fly(s.handCard, t, handOff, CARD_X, rowY(0), handOff + 0.1, 0.45, STATUS_AT.x, STATUS_AT.y,
-        takeOver, STATUS_AT.x, STATUS_AT.y);
+      placeNewTag(s.newTag, t, bIn + 0.5, replay[0] - 0.6, CRASH_TAG.x + arrive.dx, CRASH_TAG.y);
+      flyChip(s.handCard, t, handOff, CARD_X, rowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });
 }

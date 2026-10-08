@@ -2,6 +2,7 @@
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
 const easeIn = p => p * p * p;
+const easeOut = p => 1 - (1 - p) ** 3;
 const backOut = p => {
   const c1 = 1.70158, c3 = c1 + 1;
   return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);

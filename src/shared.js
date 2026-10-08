@@ -1,8 +1,10 @@
 // ===================== shared helpers (brand style, used by two or more themes)
 const C = {
   uv: '#444CE7', violet: '#B664FF', neon: '#DBFF4B', red: '#FF5A5F', ink: '#F8FAFC', slate: '#94A3B8', line: '#3A4150',
-  // on white cards: light UV and neon tints (model and tool results), a darker neon for lines, the violet highlight
+  // on white cards: light UV and neon tints (model and tool results), a darker neon for lines, the violet highlight,
+  // a light violet tint (a Workflow handed to a new instance)
   uvTint: '#E6E7FC', neonTint: '#F3FBD2', neonDark: '#9DB82A', highlight: 'rgba(182,100,255,.28)',
+  violetTint: '#F2E6FF',
 };
 // Official Temporal logo (white horizontal lockup). Resolved against this script, not the page: theme pages
 // live in subfolders. Inlined in a built page, the script has no src and the path is already a data: URI.
@@ -130,6 +132,30 @@ function fly(e, t, a, x0, y0, b, d, x1, y1, k = null, kx = 0, ky = 0) {
   const x = lerp(lerp(x0, x1, f), kx, ab), y = lerp(lerp(y0, y1, f), ky, ab);
   place(e, x, y, ap * (1 - 0.65 * ab), clamp(ap * 2) * (1 - ab));
 }
+// Chip flight: it pops in at (x0, y0) at `at`, travels to (x1, y1) during [at + 0.1, at + 0.55], then is absorbed
+// there (shrinks and fades)
+function flyChip(chip, t, at, x0, y0, x1, y1) {
+  fly(chip, t, at, x0, y0, at + 0.1, 0.45, x1, y1, at + 0.55, x1, y1);
+}
+// Brief bump (0 to 1 and back to 0) for a pop on a change or an appearance at `at`
+const bumpAt = (t, at) => win(t, at, at + 0.15, 0.15);
+// Appearance at `at` of a small element (badge, icon, tag), as { o, s } for place(): it fades in while it
+// bumps briefly above its native size (k: height of the bump, 0 for none)
+const popIn = (t, at, k = 0.14) => ({ o: P(t, at, 0.2), s: 1 + k * bumpAt(t, at) });
+// Damped shake of an element hit at `at`: `swings` half swings of amp px, fading out linearly over d seconds.
+// Exactly 0 outside them, so the element rests on the same pixels as before the hit.
+function dampedShake(t, at, amp, d, swings) {
+  const u = (t - at) / d;
+  if (u <= 0 || u >= 1) return 0;
+  return Math.sin(u * Math.PI * swings) * amp * (1 - u);
+}
+// Recoil of an element pushed at `at`, from 1 at the hit down to 0 within d seconds (ease-out); multiply it by the
+// push in px. Exactly 0 outside it, so the element rests on whole pixels.
+function recoil(t, at, d = 0.3) {
+  const u = (t - at) / d;
+  if (u < 0 || u >= 1) return 0;
+  return (1 - u) * (1 - u);
+}
 // A list row fades in as it slides into place from dx px to its right (p from 0 to 1); round keeps it on whole
 // pixels, so its text always rasters the same way
 function showRow(e, p, dx = 26, round = false) {
@@ -143,7 +169,7 @@ const makeToken = root => E(root, '', '', {
   borderRadius: '5px',
 });
 
-// ---------- crash effects
+// ---------- crash and takeover effects
 // screen shake around a crash, as [dx, dy]
 function shakeAt(t, crashAt) {
   const k = Math.max(0, 1 - Math.abs(t - crashAt - 0.2) / 0.4);
@@ -155,6 +181,88 @@ const makeFlash = root => E(root, '', '', { width: '2400px', height: '1400px', b
 function placeFlash(e, t, at, k = 0.4) {
   const intensity = Math.max(0, 1 - Math.abs(t - at) / 0.28);
   place(e, 960, 540, 1, intensity * k);
+}
+// Horizontal jitter of the running element in the glitch before a crash, in whole pixels: one offset every 0.05 s
+const GLITCH_JITTER = [3, -4, 5, -5, 6, -7, 7];
+// The failure builds up in the 0.35 s before a crash at crashAt: the running element jitters (dx, see
+// GLITCH_JITTER) and the panel flickers red on every other step (red). Returns { red, dx }: false and 0 outside.
+function crashGlitch(t, crashAt) {
+  const glitchAt = crashAt - 0.35;
+  if (t < glitchAt || t >= crashAt) return { red: false, dx: 0 };
+  const step = Math.min(Math.floor((t - glitchAt) / 0.05), GLITCH_JITTER.length - 1);
+  return { red: step % 2 === 0, dx: GLITCH_JITTER[step] };
+}
+// Crash marks on a crashed panel: a red bolt (bolt: { x, y, size }) and a solid red tag, e.g. 'App crash'
+// (crashTag: { x, y, w, h }, h optional). Even sizes keep the tag on whole pixels once centered (the .1em letter
+// spacing gives fractional widths); solid, so nothing under it shows through.
+function makeCrashMarks(root, label, bolt, crashTag) {
+  const marks = {
+    bolt: E(root, ICON('bolt', bolt.size, C.red, 1.6)), tag: tag(root, label, 'red big solid'),
+    boltSpot: bolt, tagSpot: crashTag,
+  };
+  Object.assign(marks.tag.style, { width: crashTag.w + 'px', textAlign: 'center' });
+  if (crashTag.h) marks.tag.style.height = crashTag.h + 'px';
+  return marks;
+}
+// The bolt strikes at crashAt, the tag pops in at tagAt once it has landed; both leave from outAt. (dx, dy): the
+// shake of the crashed side.
+function placeCrashMarks(marks, t, crashAt, tagAt, outAt, dx = 0, dy = 0) {
+  const { boltSpot, tagSpot } = marks;
+  place(marks.bolt, boltSpot.x + dx, boltSpot.y + dy, P(t, crashAt, 0.35, backOut), win(t, crashAt, outAt, 0.2));
+  const tagOn = P(t, tagAt, 0.1) * (1 - P(t, outAt, 0.25));
+  place(marks.tag, tagSpot.x + dx, tagSpot.y + dy, P(t, tagAt, 0.35, backOut), tagOn);
+}
+
+// Takeover: a dead (or retired) app instance or Worker leaves, and a new one slides in to its place. Offsets in
+// whole pixels: the old one drops 40 px, the new one arrives from 160 px to the left of its resting place.
+const TAKEOVER = { drop: 40, arrive: -160 };
+// The old instance leaves from `at`: it drops and fades out within 0.6 s. A dead one also greys within 0.3 s:
+// grey is its CSS filter ('' before `at`). Returns { dy, o, grey }.
+function leavingInstance(t, at) {
+  const g = P(t, at, 0.3);
+  return {
+    dy: Math.round(TAKEOVER.drop * P(t, at, 0.6, easeIn)),
+    o: 1 - P(t, at, 0.6),
+    grey: g > 0 ? `grayscale(${g.toFixed(3)}) brightness(${(1 - 0.35 * g).toFixed(3)})` : '',
+  };
+}
+// The new instance arrives at `at`: it slides in (0.7 s, backOut) and fades in within 0.25 s. Returns { dx, o }.
+const arrivingInstance = (t, at) => ({
+  dx: Math.round(TAKEOVER.arrive * (1 - P(t, at, 0.7, backOut))), o: P(t, at, 0.25),
+});
+// Violet glow round the new instance's panel from `at` until `out` (0.3 s fades), pulsing on G as an ambient loop.
+// Call it after setAppStatus: it turns the border violet while it shows.
+function setArrivalGlow(panel, t, at, out) {
+  const k = P(t, at, 0.3) * (1 - P(t, out, 0.3));
+  if (k <= 0) {
+    panel.style.boxShadow = '';
+    return;
+  }
+  const pulse = 0.5 + 0.5 * Math.sin(G * Math.PI * 2.4);
+  const blur = Math.round(20 + 16 * pulse), spread = Math.round(2 + 4 * pulse);
+  panel.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(182,100,255,${(0.6 * k).toFixed(3)})`;
+  panel.style.borderColor = C.violet;
+}
+// "New Worker" or "New instance" tag on the new instance, violet and solid (the panel border does not show
+// through); fixed even width w (and height h if given), so it rests on whole pixels once centered
+function makeNewTag(root, label, w, h = null) {
+  const e = tag(root, label, 'violet solid');
+  Object.assign(e.style, { width: w + 'px', textAlign: 'center' });
+  if (h) e.style.height = h + 'px';
+  return e;
+}
+// The tag pops in at `at` and fades out from `out` within 0.3 s, at (x, y): add the arriving panel's dx to x so it
+// slides in with it. s: its scale, popIn's bump by default
+function placeNewTag(e, t, at, out, x, y, s = null) {
+  const pop = popIn(t, at);
+  place(e, x, y, s ?? pop.s, pop.o * (1 - P(t, out, 0.3)));
+}
+// The Workflow (or agent) that Temporal hands to the new instance: a result card in violet, labelled with its
+// name; fly it with flyChip from the history to the panel's status
+function makeHandOffCard(root, label) {
+  const e = makeResultCard(root, true, label);
+  Object.assign(e.style, { background: C.violetTint, borderLeftColor: C.violet });
+  return e;
 }
 
 // ---------- status tags
