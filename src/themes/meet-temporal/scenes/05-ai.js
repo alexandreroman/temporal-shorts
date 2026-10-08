@@ -1,4 +1,4 @@
-// ===================== 4. WHY IT MATTERS FOR AI
+// ===================== 5. WHY IT MATTERS FOR AI
 // The block keeps every name declared in this file local to this scene.
 {
   // The agentic loop on the left (think, act, observe, as in durable-ai-agents), the bill and the progress on the
@@ -9,6 +9,9 @@
   const SIDE = { x: 1460, w: 560 };
   const BILL_Y = 380, PROGRESS_Y = 610;
   const TOTAL_STEPS = 6;
+  const COMET = 6; // sparks trailing the token
+  const SHARDS_PER_ARC = 4; // the pieces each arc breaks into at the crash
+  const RING_R = 338; // the Temporal ring that wraps the durable loop
   const TRACK_W = 370; // progress bar track, in px: the fill rests on whole pixels
   const COMPANIES = ['OpenAI · Codex', 'Cursor', 'Lovable', 'Replit'];
   const COMPANY = { y0: 370, gap: 80, w: SIDE.w };
@@ -31,7 +34,7 @@
   }
 
   scene({
-    chapter: 4, title: 'Why it matters for AI',
+    chapter: 5, title: 'Why it matters for AI',
     // the loop and the bill, then the durable loop and the companies: the pan runs as the bill fades out
     shift: (t, c) => pan(t, [-62, 14], [[c[2] + 0.2, 10, 0]], 0.6),
     subs: [
@@ -45,15 +48,41 @@
       },
       { text: "OpenAI built Codex on Temporal, and Cursor, Lovable and Replit rely on it too.", after: 1.2 },
     ],
-    build(root, s) {
+    build(stage, s) {
+      const root = s.cam = makeCamera(stage);
+      // the AI tile's violet glow, carried over from the previous chapter, fades into the loop
+      s.carry = E(root, '', '', {
+        width: '900px', height: '900px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(182,100,255,.4) 0%, rgba(68,76,231,.15) 40%, rgba(68,76,231,0) 70%)',
+      });
       // built first, so the loop and its arcs sit on top of it
       s.temporal = makeTemporalPanel(root, PANEL.w, PANEL.h, {
         logoAt: [24, 20], noteAt: [24, 25], font: 18, note: 'Durable agent',
       });
       s.svg = svgLayer(root);
       s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy);
-      // the same arcs in red, shown over the slate ones while the agent has crashed
-      s.redArcs = s.loop.arcPaths.map(d => path(s.svg, d, C.red, 2.5));
+      // at the crash the loop shatters: each arc breaks into red pieces that fall, then fly back at the restart
+      const { think, act, observe } = LOOP_DEG;
+      const arcEnds = [[think + 27, act - 27], [act + 27, observe - 27], [observe + 27, think + 333]];
+      s.shards = arcEnds.flatMap(([a0, a1], k) => Array.from({ length: SHARDS_PER_ARC }, (_, j) => {
+        const from = lerp(a0, a1, j / SHARDS_PER_ARC) + 1.5, to = lerp(a0, a1, (j + 1) / SHARDS_PER_ARC) - 1.5;
+        const [x0, y0] = s.loop.pos(from), [x1, y1] = s.loop.pos(to);
+        const shard = path(s.svg, `M ${x0} ${y0} A 220 220 0 0 1 ${x1} ${y1}`, C.red, 2.5, false);
+        const n = k * SHARDS_PER_ARC + j;
+        Object.assign(shard, {
+          mid: s.loop.pos((from + to) / 2), vx: (hash(n * 5) - 0.5) * 220, vy: -60 - hash(n * 5 + 1) * 160,
+          spin: (hash(n * 5 + 2) - 0.5) * 300,
+        });
+        return shard;
+      }));
+      // the Temporal ring that forms around the durable loop, and a dashed ring turning on it
+      const ring = r => `M ${LOOP.cx} ${LOOP.cy - r} A ${r} ${r} 0 1 1 ${LOOP.cx - 0.01} ${LOOP.cy - r}`;
+      s.ring = path(s.svg, ring(RING_R), C.uv, 4, false);
+      s.ring.style.filter = 'drop-shadow(0 0 10px rgba(68,76,231,.9))';
+      s.ringDash = path(s.svg, ring(RING_R), C.violet, 2, false, '6 18');
+      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(root, 16 - 2 * k, '219,255,75'));
+      // coins dropping on the bill when a call is paid again
+      s.coins = [0, 1, 2].map(() => E(root, ICON('coin', 44, C.neon, 1.8)));
       s.wait = E(root, `${ICON('user', 22, C.violet, 2)}<span>Waits for a person</span>`, 'pill violet', {
         display: 'flex', alignItems: 'center', gap: '10px',
       });
@@ -74,6 +103,8 @@
       });
     },
     update(t, c, s) {
+      setCamera(s.cam, t, this.dur);
+      place(s.carry, LOOP.cx, LOOP.cy, lerp(1.2, 0.7, P(t, 0, 1.4)), 1 - P(t, 0.2, 1.2));
       // each turn runs the loop once, think -> act -> observe, and bills one LLM call as it starts
       const firstRun = [c[0] + 1.6, c[0] + 3.8, c[1] + 0.2, c[1] + 2.4];
       const crashAt = c[1] + 3.5;
@@ -92,11 +123,32 @@
       });
 
       const red = win(t, crashAt, restart, 0.25);
+      const broken = t >= crashAt && t < restart;
       placeAgentLoop(s.loop, t, c[0] + 0.1, {
-        deg, centerAt: c[0] + 1.2, centerO: 1 - red, arcO: 1 - red, q: crashed ? P(t, crashAt + 0.3, 0.3) : 0,
-        dx: sx, dy: sy,
+        deg, centerAt: c[0] + 1.2, centerO: 1 - red, arcO: broken ? 0 : 1,
+        q: crashed ? P(t, crashAt + 0.3, 0.3) : 0, dx: sx, dy: sy,
       });
-      s.redArcs.forEach(a => draw(a, 1, red));
+      // the shards fall under gravity for 0.9 s, rest, then fly back into place just before the restart
+      const fall = Math.min(Math.max(t - crashAt, 0), 0.9) * (1 - P(t, restart - 0.5, 0.5));
+      s.shards.forEach(shard => {
+        const dx = shard.vx * fall, dy = shard.vy * fall + 520 * fall * fall;
+        shard.setAttribute('transform', `translate(${dx.toFixed(2)} ${dy.toFixed(2)}) `
+          + `rotate(${(shard.spin * fall).toFixed(2)} ${shard.mid[0]} ${shard.mid[1]})`);
+        draw(shard, 1, broken ? 1 : 0);
+      });
+      // the token's comet tail: sparks along the loop behind it, smaller and fainter
+      s.comet.forEach((e, k) => {
+        if (deg === null || deg - (k + 1) * 6 < -90) {
+          place(e, 0, 0, 1, 0);
+          return;
+        }
+        const [x, y] = s.loop.pos(deg - (k + 1) * 6);
+        place(e, x, y, 1, 0.55 - 0.08 * k);
+      });
+      // the durable loop: a Temporal ring draws around it, a dashed ring turns on it (ambient, driven by G)
+      draw(s.ring, P(t, durable + 0.2, 1.0), 1);
+      draw(s.ringDash, P(t, durable + 1.0, 0.4), 0.6);
+      s.ringDash.setAttribute('stroke-dashoffset', -G * 30);
       s.svg.style.transform = `translate(${sx}px,${sy}px)`;
       place(s.over, LOOP.cx + sx, LOOP.cy + sy, 1, red);
       // the agent also waits for a person: said in the first subtitle
@@ -113,6 +165,13 @@
       s.bill.style.borderColor = win(t, c[1] + 0.2, c[1] + 2.4, 0.3) > 0.5 ? C.violet : C.line;
       const sideOut = P(t, durable, 0.4);
       rise(s.bill, SIDE.x + sx, BILL_Y + sy, P(t, c[0] + 0.6, 0.5) * (1 - sideOut));
+      // three coins drop onto the bill as the restarted call is paid again, bounce and fade
+      s.coins.forEach((e, i) => {
+        const at = restart + i * 0.18;
+        const p = P(t, at, 0.5, backOut);
+        const x = SIDE.x - 120 + i * 64, y = lerp(BILL_Y - 220, BILL_Y - 36, p);
+        place(e, x, y, 1, clamp(P(t, at, 0.1) * 2) * (1 - P(t, at + 0.9, 0.4)));
+      });
 
       // progress: one step per completed turn; the crash drains it, then the first step is done again
       const stepsBefore = at => firstRun.filter(a => at >= a + TURN).length;

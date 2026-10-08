@@ -14,7 +14,7 @@
   const STEP = { w: 400, h: 110 };
   const STEP_Y = [455, 625]; // Maxim's two steps; Samar's single step sits on the second line
   const CAREERS = [
-    [{ title: 'Amazon · 2002', caption: 'Seattle' }, { title: 'Messaging platform', caption: 'Tech lead' }],
+    [{ title: 'Amazon · 2002', caption: 'Seattle' }, { title: 'Simple Queue Service', caption: 'Tech lead · 2004' }],
     [{ title: 'Microsoft', caption: null }],
   ];
   const TEAM = { x: 960, y: 810, w: 460, h: 130 };
@@ -25,17 +25,38 @@
   // line of each step of a career: Samar's single step lines up with Maxim's last one
   const stepY = (career, k) => STEP_Y[STEP_Y.length - career.length + k];
 
-  // The founders' photo, framed: UV border and glow, a dark vignette that blends it into the stage
+  // Ken Burns on the photo: it zooms in slowly around this point (in hero pixels) while the first subtitle reads
+  const KB = { ox: HERO.w / 2, oy: HERO.h * 0.3, zoom: 0.07 };
+  const AVATAR_AT = i => [COL_X[i] - CARD.w / 2 + 28 + AVATAR_SIZE / 2, CARD.y]; // the face in founder card i
+
+  // The founders' photo, framed: UV border and glow, the photo itself on an inner layer (for the Ken Burns zoom), a
+  // dark vignette that blends it into the stage and a band of light that sweeps across it once
   function makeHero(root) {
-    return E(root,
-      '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%, rgba(20,20,20,0) 58%, '
-      + 'rgba(20,20,20,.5) 100%), linear-gradient(180deg, rgba(20,20,20,0) 72%, rgba(20,20,20,.45) 100%)"></div>',
+    const hero = E(root,
+      '<div class="kb" style="position:absolute;inset:0;'
+      + `background:url(&quot;${PHOTO.url}&quot;) center top / ${HERO.w}px auto no-repeat;`
+      + `transform-origin:${KB.ox}px ${KB.oy}px"></div>`
+      + '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%, rgba(20,20,20,0) 58%, '
+      + 'rgba(20,20,20,.5) 100%), linear-gradient(180deg, rgba(20,20,20,0) 72%, rgba(20,20,20,.45) 100%)"></div>'
+      + '<div class="sweep" style="position:absolute;top:-20%;bottom:-20%;left:0;width:30%;'
+      + 'background:linear-gradient(100deg, rgba(248,250,252,0), rgba(248,250,252,.22), rgba(248,250,252,0))">'
+      + '</div>',
       '', {
         width: HERO.w + 'px', height: HERO.h + 'px', overflow: 'hidden', borderRadius: 'var(--r)',
         border: '1.5px solid ' + C.uv, boxShadow: '0 0 60px rgba(68,76,231,.35)',
-        backgroundImage: `url("${PHOTO.url}")`, backgroundSize: `${HERO.w}px auto`,
-        backgroundPosition: 'center top', backgroundOrigin: 'border-box', backgroundRepeat: 'no-repeat',
       });
+    hero.kb = hero.querySelector('.kb');
+    hero.sweep = hero.querySelector('.sweep');
+    return hero;
+  }
+  // Stage point and size of a founder's face in the hero photo, zoomed by k (Ken Burns)
+  function heroFace(founder, k) {
+    const x = founder.face.x * HERO_K, y = founder.face.y * HERO_K;
+    return {
+      x: HERO.x - HERO.w / 2 + KB.ox + (x - KB.ox) * k,
+      y: HERO.y - HERO.h / 2 + KB.oy + (y - KB.oy) * k,
+      size: FACE_CROP * HERO_K * k,
+    };
   }
   // Name and role of a founder, centered under the person in the photo
   const makeHeroLabel = (root, founder) => E(root,
@@ -50,8 +71,8 @@
       + `<div class="mono" style="font-size:26px;letter-spacing:.1em;text-transform:uppercase">${founder.name}</div>`
       + `<div class="lbl" style="font-size:18px;margin-top:10px;padding-left:0">${founder.role}</div></div>`,
       'tile', { width: CARD.w + 'px', height: CARD.h + 'px' });
-    const avatar = makeFace(card, founder, AVATAR_SIZE);
-    place(avatar, 28 + AVATAR_SIZE / 2, CARD.h / 2);
+    card.avatar = makeFace(card, founder, AVATAR_SIZE);
+    place(card.avatar, 28 + AVATAR_SIZE / 2, CARD.h / 2);
     return card;
   }
   // Career step: a title and an optional caption under it, centered
@@ -79,10 +100,14 @@
     // laid out centered at (960, 522) on the free band
     subs: [
       { text: "Meet Maxim Fateev and Samar Abbas, the two engineers who created Temporal.", after: 0.4 },
-      { text: "Maxim joined Amazon in Seattle in 2002 and became tech lead of its messaging platform.", after: 0.6 },
+      {
+        text: "Maxim joined Amazon in Seattle in 2002 and became tech lead of Simple Queue Service in 2004.",
+        after: 0.6,
+      },
       { text: "Samar started at Microsoft, then joined Maxim's team at Amazon: that is where they met.", after: 0.8 },
     ],
-    build(root, s) {
+    build(stage, s) {
+      const root = s.cam = makeCamera(stage);
       s.svg = svgLayer(root);
       s.hero = makeHero(root);
       s.heroLabels = FOUNDERS.map(f => makeHeroLabel(root, f));
@@ -101,8 +126,13 @@
         + '<div class="lbl" style="font-size:18px;margin-top:8px;padding-left:0">Amazon</div></div>',
         'tile', { width: TEAM.w + 'px', height: TEAM.h + 'px' });
       s.marks = FOUNDERS.map(f => makeFace(root, f, MARK_SIZE));
+      // a spark of light runs at the head of every link as it draws
+      s.sparks = s.links.flatMap(l => [...l.down, l.curve]).map(() => makeSpark(root, 12, '182,100,255'));
+      // the faces that leave the photo and fly into the founder cards
+      s.flyers = FOUNDERS.map(f => makeFace(root, f, AVATAR_SIZE));
     },
     update(t, c, s) {
+      setCamera(s.cam, t, this.dur);
       // when each step of a career shows, its arrow drawing just before; then both careers curve into the shared
       // tile, where the founders meet
       const stepIn = [[c[1] + 1.2, c[1] + 3.4], [c[2] + 0.8]];
@@ -113,21 +143,45 @@
       const heroOut = P(t, c[1] - 0.1, 0.4);
       const hp = P(t, c[0] + 0.1, 0.7);
       place(s.hero, HERO.x, HERO.y + (1 - hp) * 24, 1 - 0.06 * heroOut, hp * (1 - heroOut));
+      const kb = 1 + KB.zoom * P(t, c[0] + 0.1, c[1] - c[0], x => x);
+      s.hero.kb.style.transform = `scale(${kb})`;
+      s.hero.sweep.style.transform = `translateX(${lerp(-120, 420, P(t, c[0] + 0.9, 1.3))}%) skewX(-12deg)`;
+
+      // continuity from the photo to the cards: each face lifts off the photo in a violet ring, then flies along a
+      // curve into its card (Samar, on the left in the photo, crosses over to the right card)
+      const fly = [c[1] - 0.2, c[1] + 0.1];
+      s.flyers.forEach((e, i) => {
+        const from = heroFace(FOUNDERS[i], 1 + KB.zoom);
+        const [x1, y1] = AVATAR_AT(i);
+        const p = P(t, fly[1] + i * 0.12, 1.0);
+        const bend = { x: (from.x + x1) / 2, y: Math.min(from.y, y1) - 140 };
+        const x = lerp(lerp(from.x, bend.x, p), lerp(bend.x, x1, p), p);
+        const y = lerp(lerp(from.y, bend.y, p), lerp(bend.y, y1, p), p);
+        const size = lerp(from.size, AVATAR_SIZE, p);
+        const o = P(t, fly[0], 0.25) * (p < 1 ? 1 : 0);
+        place(e, x, y, size / AVATAR_SIZE, o);
+      });
       s.heroLabels.forEach((e, i) => {
         rise(e, heroX(FOUNDERS[i]), HERO_LABEL_Y, P(t, c[0] + 0.6 + i * 0.15, 0.5) * (1 - heroOut), 12);
       });
       s.cards.forEach((card, i) => {
         const p = P(t, c[1] + 0.2 + i * 0.2, 0.5, backOut);
         place(card, COL_X[i], CARD.y, p, clamp(p * 2));
+        card.avatar.style.opacity = t >= fly[1] + i * 0.12 + 1.0 ? 1 : 0;
       });
+      let spark = 0;
       CAREERS.forEach((career, i) => {
         career.forEach((_, k) => {
           const at = stepIn[i][k];
-          draw(s.links[i].down[k], P(t, at - 0.35, 0.35));
+          const prog = P(t, at - 0.35, 0.35);
+          draw(s.links[i].down[k], prog);
+          sparkOnPath(s.sparks[spark++], s.links[i].down[k], prog);
           const p = P(t, at, 0.45, backOut);
           place(s.steps[i][k], COL_X[i], stepY(career, k), p, clamp(p * 2));
         });
-        draw(s.links[i].curve, P(t, curves, 0.6));
+        const prog = P(t, curves, 0.6);
+        draw(s.links[i].curve, prog);
+        sparkOnPath(s.sparks[spark++], s.links[i].curve, prog);
       });
 
       // the shared tile swells as each founder arrives, and turns violet once both are in

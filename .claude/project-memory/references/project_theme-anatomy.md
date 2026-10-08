@@ -205,21 +205,31 @@ CLAUDE.md; a section below and the card order in
   (`### Sources` in `script.md`); unsourced claims stay out (founders'
   degrees, customers named only by investors, a Cloud GA date).
 - No "What you get" recap: a short company introduction, the outro sums
-  up. Five chapters: Two engineers, From Amazon to Uber, What Temporal
-  does, Why it matters for AI (right after the Durable Execution idea it
-  builds on), Temporal today.
+  up. Seven chapters: Two engineers, 20 years in the making, What
+  Temporal does, Where Temporal is used, Why it matters for AI, Open
+  source and Cloud, Temporal today. Source material includes a Temporal
+  deck from the user (slides 3, 5, 6, 7; its slide 4, customer proof
+  points, stays out). Simple Workflow Service is dated 2009, the launch
+  Max and Samar led.
 - Founders are told by their careers only, never by country of origin:
   Maxim Fateev (Amazon in Seattle from 2002, tech lead of its messaging
   platform; co-founder, CTO) and Samar Abbas (Microsoft, then Maxim's SWF
-  team at Amazon, where they met; co-founder, CEO). Lineage: Simple Workflow
-  Service (Amazon, 2012), Durable Task Framework (Microsoft, base of Azure
-  Durable Functions), Cadence (Uber, open source 2017), Temporal (October
-  2019, MIT). Third-party companies appear as text, never as logos.
-- Ch5 figures are dated (Series E, September 2026: $12.55B valuation,
+  team at Amazon, where they met; co-founder, CEO). Lineage: 2004 Simple
+  Queue Service (Maxim tech lead), 2009 Simple Workflow Service, 2014
+  Durable Task Framework (Microsoft, base of Azure Durable Functions), 2015
+  Cadence (Uber, open source 2017), 2019 Temporal (MIT). The official
+  founders photo (`src/assets/temporal-founders.jpg`, temporal.io/about)
+  opens ch1; faces cropped from it mark the founders everywhere else. Third-party companies appear as text, never as logos.
+- Ch7 figures are dated (Series E, September 2026: $12.55B valuation,
   4,300+ paying customers, 570 employees): refresh them with each funding
-  announcement. Ch4 names OpenAI (Codex), Cursor, Lovable, Replit.
+  announcement. Ch5 names OpenAI (Codex), Cursor, Lovable, Replit.
 - Ch3 is the short series arc: steps run strictly one after the other,
-  each saved before the next starts. Pan: ch4.
+  each saved before the next starts.
+- Motion goes beyond the series framework: cinematic, creative animations
+  (stroke drawing, camera moves, trails, glitch crashes, particles, 3D
+  flips, scrambles), at least one strong moment per chapter, still
+  on-brand and deterministic. Engine additions stay opt-in, the other
+  themes render unchanged.
 
 ### durable-execution
 

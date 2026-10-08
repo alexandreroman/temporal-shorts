@@ -17,9 +17,15 @@
   const rowTop = i => HROW.top + i * HROW.gap;
   // stage points where a saved result leaves the app (end of line i) and lands in the history (the tag slot of row i,
   // where its SAVED tag then appears)
-  const lineEnd = i => [APP.x - APP.w / 2 + CARD.left + CARD.w - 150, APP.y - APP.h / 2 + CARD.top + LINE.top
+  const lineEnd = i => [APP.x - APP.w / 2 + CARD.left + CARD.w - 20, APP.y - APP.h / 2 + CARD.top + LINE.top
     + i * LINE.gap + LINE.h / 2];
-  const tagSlot = i => [HIST.x + HIST.w / 2 - 100, HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2];
+  const rowEntry = i => [HIST.x - HIST.w / 2 + 14, HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2];
+  // the cable a result runs along: from the end of line i, across the gap between the panels, into row i
+  function cableD(i) {
+    const [x0, y0] = lineEnd(i), [x1, y1] = rowEntry(i);
+    return `M ${x0} ${y0} C ${x0 + 90} ${y0}, ${x1 - 90} ${y1}, ${x1} ${y1}`;
+  }
+  const GLITCH_BARS = 7;
 
   // App instance panel holding a STEPS card: one line per step, with a neon check once done
   function makeStepsApp(root, name) {
@@ -70,7 +76,8 @@
       },
       { text: "If the app crashes, another copy picks up right where it left off. No progress is lost.", after: 1.6 },
     ],
-    build(root, s) {
+    build(stage, s) {
+      const root = s.cam = makeCamera(stage);
       s.svg = svgLayer(root);
       s.steps = makeStepRow(root, s.svg, STEPS, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       s.A = makeStepsApp(root, 'APP INSTANCE A');
@@ -91,10 +98,27 @@
         color: C.neon, background: '#141414', padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)',
         display: 'flex', gap: '10px', alignItems: 'center',
       });
-      s.results = STEPS.map(([, label]) => makeResultCard(root, true, label.toUpperCase()));
+      // each result runs as a neon pulse along a cable into the history; replayed results run back in violet
+      s.cableSvg = svgLayer(root);
+      s.cables = STEPS.map((_, i) => path(s.cableSvg, cableD(i), C.violet, 2, false));
+      s.pulses = STEPS.map(() => makeSpark(root, 16, '219,255,75'));
+      s.backPulses = [0, 1].map(() => makeSpark(root, 16, '182,100,255'));
+      // instance B boots behind a scanline
+      s.bootLine = E(root, '', '', {
+        width: APP.w + 'px', height: '3px', background: C.violet, boxShadow: '0 0 18px 4px rgba(182,100,255,.6)',
+      });
       s.flash = makeFlash(root);
+      // the crash glitch: torn horizontal bars and scanlines over the whole stage
+      s.glitchBars = Array.from({ length: GLITCH_BARS }, (_, j) => E(root, '', '', {
+        width: '1920px', background: j % 2 ? 'rgba(68,76,231,.45)' : 'rgba(255,90,95,.45)',
+      }));
+      s.scanlines = E(root, '', '', {
+        width: '2400px', height: '1400px',
+        background: 'repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 2px, rgba(0,0,0,0) 2px 5px)',
+      });
     },
     update(t, c, s) {
+      setCamera(s.cam, t, this.dur);
       // first run on app instance A: steps 1 and 2 are done and saved, step 3 runs until the crash
       const crashAt = c[1] + 0.8, bOn = crashAt + 1.2;
       const replay = [bOn + 0.3, bOn + 0.6];
@@ -130,7 +154,10 @@
       s.A.empty.style.opacity = P(t, crashAt + 1.0, 0.3);
 
       // app instance B takes over: the saved steps come back from the history, then step 3 runs again
-      place(s.B, APP.x, APP.y, 1, P(t, bOn, 0.35));
+      const boot = P(t, bOn, 0.5);
+      place(s.B, APP.x, APP.y, 1, t >= bOn ? 1 : 0);
+      s.B.style.clipPath = `inset(0 0 ${((1 - boot) * 100).toFixed(2)}% 0)`;
+      place(s.bootLine, APP.x, APP.y - APP.h / 2 + boot * APP.h, 1, boot > 0 && boot < 1 ? 1 : 0);
       if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
       else if (t < rerun) setAppStatus(s.B, 'REPLAYING…', 'running');
       else if (t < complete) setAppStatus(s.B, 'RESUMED AT STEP 3', 'running');
@@ -145,11 +172,17 @@
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 0.6, 0.5));
       s.temporal.out.style.color = t >= c[0] + 5.0 ? C.ink : C.slate;
       place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 0.8, 0.5));
-      // each result flies from the app into the history, where its row is saved
-      s.results.forEach((e, i) => {
-        const [x0, y0] = lineEnd(i), [x1, y1] = tagSlot(i);
+      // each result runs along its cable into the history, where its row is saved; during the replay the saved
+      // results run back to app instance B
+      s.cables.forEach((cable, i) => {
         const at = saved[i] - 0.5;
-        fly(e, t, at, x0, y0, at + 0.05, 0.4, x1, y1, at + 0.45, x1, y1);
+        const back = i < 2 ? win(t, replay[i] - 0.1, replay[i] + 0.3, 0.1) : 0;
+        draw(cable, P(t, at, 0.2), Math.max((1 - P(t, saved[i], 0.4)) * 0.7, back * 0.7));
+        sparkOnPath(s.pulses[i], cable, P(t, at + 0.1, 0.4));
+        if (i < 2) {
+          const q = P(t, replay[i] - 0.05, 0.3);
+          sparkOnPath(s.backPulses[i], cable, q > 0 && q < 1 ? 1 - q : 0);
+        }
       });
       HISTORY.forEach((_, i) => {
         showRow(s.jr.rows[i], P(t, saved[i] - 0.1, 0.3));
@@ -165,6 +198,20 @@
       s.jr.done.style.opacity = clamp(dp * 2);
       s.jr.done.style.transform = `translateX(-50%) scale(${dp})`;
       placeFlash(s.flash, t, crashAt);
+
+      // the crash glitch: color fringes on the whole composition, torn bars and scanlines, re-drawn 24 times a
+      // second from hashed values
+      const frame = Math.floor(t * 24);
+      const k = win(t, crashAt - 0.02, crashAt + 0.55, 0.05) * (0.5 + 0.5 * hash(frame));
+      const fringe = Math.round(2 + 10 * k * hash(frame + 1));
+      s.cam.style.filter = k > 0.01 ? `drop-shadow(${fringe}px 0 0 rgba(255,90,95,.8)) `
+        + `drop-shadow(${-fringe}px 0 0 rgba(68,76,231,.8))` : 'none';
+      s.glitchBars.forEach((e, j) => {
+        e.style.height = Math.round(4 + hash(frame * 11 + j) * 26) + 'px';
+        const shown = hash(frame * 17 + j) > 0.3 ? k * 0.8 : 0;
+        place(e, 960 + (hash(frame * 13 + j) - 0.5) * 160, hash(frame * 7 + j) * 1080, 1, shown);
+      });
+      place(s.scanlines, 960, 540, 1, k * 0.6);
     }
   });
 }

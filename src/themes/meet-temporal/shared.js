@@ -34,3 +34,92 @@ function makeFace(p, founder, size) {
     backgroundPosition: `${x}px ${y}px`, backgroundOrigin: 'border-box', backgroundRepeat: 'no-repeat',
   });
 }
+
+// ===================== motion helpers (this theme is livelier than the others: camera moves, trails, sparks)
+// Deterministic pseudo-random number in [0, 1) for an integer n: the same n gives the same value on every page and
+// render worker, so scattered particles and glitches render identically in parallel
+function hash(n) {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+// Camera of a scene: a full-stage layer that holds the scene's elements, so the whole composition can be scaled and
+// moved around the stage center. Build the scene's elements in it.
+function makeCamera(root) {
+  const cam = E(root, '', 'cam', { width: '1920px', height: '1080px', transformOrigin: '960px 540px' });
+  cam.style.opacity = 1;
+  return cam;
+}
+// Zoom-through between scenes: the composition grows from `enter` (0.94; 1 for none) to 1 as the scene fades in,
+// and on to 1.06 as it fades out (dur: the scene duration). scale, dx, dy: an extra camera move of the scene, at
+// rest 1, 0, 0 so that a resting frame sits on whole pixels.
+function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94 } = {}) {
+  const zoom = lerp(enter, 1, P(t, 0, 0.6)) * lerp(1, 1.06, P(t, dur - 0.6, 0.6, easeIn));
+  cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
+}
+
+// Glowing dot of light, size px wide, in a color (an rgb triplet such as '219,255,75'); place() centers it
+const makeSpark = (p, size = 14, rgb = '248,250,252') => E(p, '', '', {
+  width: size + 'px', height: size + 'px', borderRadius: '50%', background: `rgb(${rgb})`,
+  boxShadow: `0 0 ${size}px ${Math.round(size / 2)}px rgba(${rgb},.55)`,
+});
+// Puts a spark on the head of a path drawn to prog (0 to 1): it shows only while the path draws
+function sparkOnPath(spark, pathEl, prog, dx = 0, dy = 0) {
+  if (prog <= 0 || prog >= 1) {
+    place(spark, 0, 0, 1, 0);
+    return;
+  }
+  const point = pathEl.getPointAtLength(pathEl._L * prog);
+  place(spark, point.x + dx, point.y + dy, 1, Math.min(1, prog * 6, (1 - prog) * 6));
+}
+
+// Ripple rings: n circles of a color growing from size0 to size1 px and fading, one after the other, from `at`
+function makeRipples(p, n, rgb) {
+  return Array.from({ length: n }, () => E(p, '', '', { borderRadius: '50%', border: `3px solid rgb(${rgb})` }));
+}
+function placeRipples(rings, t, at, x, y, size0, size1, d = 1.2) {
+  rings.forEach((e, i) => {
+    const p = P(t, at + i * 0.25, d, x => 1 - Math.pow(1 - x, 2));
+    // sized, not scaled, so the ring keeps its 3 px line
+    const size = Math.round(lerp(size0, size1, p) / 2) * 2;
+    e.style.width = e.style.height = size + 'px';
+    place(e, x, y, 1, p > 0 && p < 1 ? (1 - p) * 0.9 : 0);
+  });
+}
+
+// The official symbol's outline (the path of src/assets/temporal-symbol-light-cropped.svg, same viewBox), drawn
+// stroke by stroke before the official file itself fades in over it
+const SYMBOL_PATH = {
+  viewBox: '390.49 392 386 386',
+  d: 'M651.14,517.35C642.02,449.03,618.94,392,583.49,392s-58.53,57.03-67.65,125.35'
+    + 'c-68.32,9.12-125.35,32.2-125.35,67.65s57.04,58.53,125.35,67.65c9.12,68.31,32.2,125.35,67.65,125.35'
+    + 's58.53-57.04,67.65-125.35c68.32-9.12,125.35-32.2,125.35-67.65S719.45,526.47,651.14,517.35z'
+    + 'M513.61,632.75c-65.43-9.45-103.59-31.08-103.59-47.75s38.16-38.3,103.59-47.75'
+    + 'c-1.44,15.75-2.19,31.83-2.19,47.75C511.42,600.92,512.17,617.01,513.61,632.75z'
+    + 'M583.49,411.53c16.67,0,38.3,38.16,47.75,103.59c-15.74-1.44-31.83-2.19-47.75-2.19'
+    + 's-32.01,0.75-47.75,2.19C545.19,449.69,566.82,411.53,583.49,411.53z'
+    + 'M653.37,632.75c-3.22,0.47-16.43,2.02-19.77,2.35c-0.33,3.35-1.89,16.55-2.35,19.77'
+    + 'c-9.45,65.43-31.08,103.59-47.75,103.59s-38.3-38.16-47.75-103.59c-0.46-3.22-2.02-16.43-2.35-19.77'
+    + 'c-1.52-15.51-2.44-32.17-2.44-50.1s0.92-34.59,2.44-50.11c15.51-1.52,32.17-2.44,50.1-2.44'
+    + 's34.59,0.92,50.1,2.44c3.35,0.33,16.55,1.89,19.77,2.35c65.43,9.45,103.6,31.09,103.6,47.75'
+    + 'S718.8,623.3,653.37,632.75z',
+};
+// The symbol, size px wide, as an outline that draws (setSymbolDraw) under the official file, which fades in
+function makeDrawnSymbol(p, size) {
+  const e = E(p,
+    `<svg width="${size}" height="${size}" viewBox="${SYMBOL_PATH.viewBox}" style="position:absolute;left:0;top:0">`
+    + `<path d="${SYMBOL_PATH.d}" fill="none" stroke="${C.ink}" stroke-width="3"/></svg>`
+    + `<img src="${SYMBOL}" style="position:absolute;left:0;top:0;width:${size}px;height:${size}px">`,
+    '', { width: size + 'px', height: size + 'px' });
+  e.outline = e.querySelector('path');
+  e.img = e.querySelector('img');
+  e.outlineL = e.outline.getTotalLength();
+  return e;
+}
+// draw: 0 to 1, the outline drawing; fill: 0 to 1, the official symbol fading in while the outline fades out
+function setSymbolDraw(e, draw, fill) {
+  e.outline.setAttribute('stroke-dasharray', `${e.outlineL} ${e.outlineL}`);
+  e.outline.setAttribute('stroke-dashoffset', e.outlineL * (1 - draw));
+  e.outline.style.opacity = draw > 0 ? 1 - fill : 0;
+  e.img.style.opacity = fill;
+}
