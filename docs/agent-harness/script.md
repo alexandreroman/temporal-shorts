@@ -123,9 +123,12 @@ Lisbon.
     SAVED; MODEL CALLS BILLED 2, FLIGHTS BOOKED 1.
 - **1:34** If the app crashes mid-turn, another copy picks up the agent
   exactly where it left off.
-  - Visuals: step 5 starts, flash + shake, A turns red (CRASHED), "APP
-    CRASHED HERE" under row 4 and the saved rows tinted; APP INSTANCE B
-    takes over (TAKING OVER).
+  - Visuals: step 5 starts; just before the crash, A's border and status
+    flicker red and its chip jitters; then flash + shake of the app side
+    only, a red bolt strikes A's panel, A turns red (CRASHED) and its chip
+    falls; then an "APP CRASH" tag stands in the panel until A fades out;
+    Temporal stays still, with "APP CRASHED HERE" under row 4 and the saved
+    rows tinted; APP INSTANCE B takes over (TAKING OVER).
 - **1:41** Instance B replays the history: steps 1 to 4 return their saved
   results, then step 5 runs for real.
   - Visuals: rows 1 to 4 are handed back one by one (REUSED, "STEP n: FROM

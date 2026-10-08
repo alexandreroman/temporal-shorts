@@ -1,4 +1,8 @@
 // ===================== 2. SURVIVES CRASHES
+// Step row on top; APP INSTANCE A and its two counters on the left, the TEMPORAL panel and its Event History on
+// the right. A runs the turn and each result is saved in the history; at step 5 the app glitches, then crashes: a
+// red bolt strikes its panel and APP CRASH stands where the step was, while Temporal stays still. Instance B
+// takes over, replays steps 1 to 4 from the history and runs step 5 for real.
 // The block keeps every name declared in this file local to this scene.
 {
   // One agent turn: model steps (UV rows) and tool steps (black rows), as in durable-ai-agents chapter 7
@@ -21,6 +25,12 @@
   const ROW = { w: 240, h: 110, y: 215 };
   const ROW_GAP = (RIGHT - LEFT - ROW.w) / 4; // center to center: five tiles, equal gaps
   const APP = { x: 465, y: 503, w: 650, h: 306, lblY: 497, chipY: 553 };
+  // the crash on A: APP CRASH centered between the step label and the chip (where TURN COMPLETE shows later), the
+  // bolt in the panel's right part, clear of the status text above it and of the tag on its left
+  const CRASH_Y = (APP.lblY + APP.chipY) / 2;
+  const BOLT = { x: 715, y: 487, size: 140 };
+  // horizontal jitter of the running chip just before the crash, in whole pixels, one offset every 0.05 s
+  const JITTER = [3, -4, 5, -5, 6, -7, 7];
   const COUNTER = { y: 794, w: 305, h: 180 };
   const TEMPORAL = { x: 1340, y: 617, w: 880, h: 534 };
   const HIST = { x: 1340, y: 652, w: 824, h: 404, row0: 80, rowGap: 62 };
@@ -87,6 +97,11 @@
       });
       s.saveCards = STEPS.map((_, i) => makeCallCard(root, i));
       s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeCallCard(root, i));
+      s.bolt = E(root, ICON('bolt', BOLT.size, C.red, 1.6));
+      // fixed even width: whole-pixel edges once centered (the .1em letter spacing gives fractional widths);
+      // solid, so the tail of the falling step chip does not show through
+      s.crash = tag(root, 'App crash', 'red big solid');
+      Object.assign(s.crash.style, { width: '250px', textAlign: 'center' });
       s.flash = makeFlash(root);
     },
     update(t, c, s) {
@@ -94,8 +109,9 @@
       // lands in the history at r + SAVE_AT where its row reads SAVED, and only then the next step starts
       const CARD_AT = 1.2, SAVE_AT = 2.1;
       const run = [c[0] + 1.0, c[0] + 4.2, c[1] + 0.6, c[1] + 3.8];
-      // c[2]: step 5 starts, the app crashes, instance B takes over
+      // c[2]: step 5 starts, the app glitches then crashes, instance B takes over
       const firstTry = c[2] + 0.4, crashAt = c[2] + 2.0, bOn = c[2] + 3.7, reset = bOn + 0.2;
+      const glitchAt = crashAt - 0.35;
       // c[3]: B replays rows 1-4 one by one, then step 5 runs for real
       const replay = [0, 1, 2, 3].map(i => c[3] + 0.5 + i * 1.2);
       run.push(c[3] + 5.4);
@@ -107,6 +123,11 @@
       const dead = t >= crashAt, onA = t < bOn;
       // the app side shakes with the crash; Temporal, outside the app, stays still
       const ax = onA ? sx : 0, ay = onA ? sy : 0;
+      // the failure builds up before the crash: A's border and status flicker red, the running chip jitters
+      const glitching = t >= glitchAt && t < crashAt;
+      const glitchStep = Math.min(Math.floor((t - glitchAt) / 0.05), JITTER.length - 1);
+      const flickerRed = glitching && glitchStep % 2 === 0;
+      const jitter = glitching ? JITTER[glitchStep] : 0;
 
       // steps: before the reset, instance A runs them; after it, rows 1-4 re-check without running
       const states = STEPS.map((_, i) => {
@@ -124,6 +145,10 @@
       place(s.A, APP.x + ax, APP.y + ay, aIn, clamp(aIn * 2) * (1 - P(t, bOn, 0.3)));
       if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, 'RUNNING THE AGENT', t >= run[0] ? 'running' : 'idle');
+      if (flickerRed) {
+        s.A.style.borderColor = C.red;
+        s.A.st.style.color = C.red;
+      }
       place(s.B, APP.x, APP.y, 1, P(t, reset, 0.35));
       if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
       else if (t < rerun) setAppStatus(s.B, 'REPLAYING…', 'running');
@@ -144,7 +169,8 @@
       const fall = P(t, crashAt + 0.1, 0.6, easeIn);
       s.chips.forEach((e, i) => {
         if (i === 4 && t < reset) {
-          place(e, APP.x + ax, APP.chipY + ay + fall * 120, 1, win(t, firstTry, bOn, 0.15) * (1 - fall), fall * -12);
+          const x = APP.x + ax + jitter;
+          place(e, x, APP.chipY + ay + fall * 120, 1, win(t, firstTry, bOn, 0.15) * (1 - fall), fall * -12);
         } else {
           place(e, APP.x + ax, APP.chipY + ay, 1, chipOn[i]);
         }
@@ -156,7 +182,9 @@
       else step = replaying ? Math.max(0, replay.filter(q => t >= q).length - 1) : 4;
       s.chipLbl.textContent = replaying ? `Step ${step + 1}: from the history` : `Step ${step + 1} of 5`;
       s.chipLbl.style.color = replaying ? C.violet : C.slate;
-      const lblOn = Math.max(win(t, run[0], bOn, 0.15) * (1 - fall), win(t, replay[0], doneAt - 0.45, 0.15));
+      // A's label goes out at once with the crash, before APP CRASH pops in where it was
+      const lblOff = P(t, crashAt + 0.1, 0.2);
+      const lblOn = Math.max(win(t, run[0], bOn, 0.15) * (1 - lblOff), win(t, replay[0], doneAt - 0.45, 0.15));
       place(s.chipLbl, APP.x + ax, APP.lblY + ay, 1, lblOn);
       const dp = P(t, doneAt, 0.45, backOut);
       place(s.done, APP.x, (APP.lblY + APP.chipY) / 2, dp, clamp(dp * 2));
@@ -214,7 +242,14 @@
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 1.0);
       setScan(s.jr, rowTop(Math.max(0, scanning)) - 2, scanning >= 0 ? 1 : 0);
+      // crash: red flash and a bolt strikes A's panel; once step 5's chip has mostly fallen out, APP CRASH stands
+      // in the panel until A fades out. All shake with the app side and are gone by the reset.
       placeFlash(s.flash, t, crashAt);
+      const tagAt = crashAt + 0.45;
+      const boltPop = P(t, crashAt, 0.35, backOut), crashPop = P(t, tagAt, 0.35, backOut);
+      place(s.bolt, BOLT.x + ax, BOLT.y + ay, boltPop, win(t, crashAt, crashAt + 1.5, 0.2));
+      const crashOn = P(t, tagAt, 0.1) * (1 - P(t, bOn, 0.2));
+      place(s.crash, APP.x + ax, CRASH_Y + ay, crashPop, crashOn);
     }
   });
 }
