@@ -19,6 +19,7 @@ Object.assign(ICONS, {
   card: '<rect x="2.5" y="5" width="19" height="14"/><path d="M2.5 9.5h19M6 15h5"/>',
   box: '<path d="M12 3l8.5 4.5v9L12 21l-8.5-4.5v-9z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9M7.8 5.3l8.5 4.5"/>',
   lock: '<rect x="5" y="11" width="14" height="10"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/>',
+  food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
   coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.9-1.7-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.8 6 1.5 6 4.3'
     + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
 });
@@ -254,6 +255,45 @@ function placeAgentLoop(loop, t, a, opts = {}) {
     const [x, y] = loop.pos(deg);
     place(loop.token, x, y, 1, o);
   }
+}
+
+// The agent's example task, lunch with Marie: each step's tile icon and label, its action in the step list, then
+// the tool it calls and that tool's result
+const LUNCH_STEPS = [
+  { icon: 'cal', label: 'Calendar', action: 'Check the calendar', tool: 'Calendar', result: 'Thu 12:30 is free' },
+  { icon: 'search', label: 'Restaurant', action: 'Find a restaurant', tool: 'Search', result: 'Chez Paulette' },
+  { icon: 'food', label: 'Booking', action: 'Book a table', tool: 'Booking', result: 'table for 2, confirmed' },
+  { icon: 'mail', label: 'Invite', action: 'Invite Marie', tool: 'Email', result: 'invite sent' },
+];
+// The agent's goal and its steps: the user's goal card (YOU), then one row per step (icon, action, a neon result
+// line and a check, both hidden until the step is done); w: their width
+function makeStepList(root, goalText, steps, w = 640) {
+  const goal = makeCard(root, goalText, 'user', null, w);
+  const rows = steps.map(step => {
+    const row = E(root,
+      `${ICON(step.icon, 36, C.ink, 1.6)}<div style="flex:1;margin-left:18px">`
+      + `<div style="font-size:27px">${step.action}</div>`
+      + `<div class="res mono" style="font-size:18px;color:var(--neon);opacity:0">${step.result}</div></div>`
+      + `<div class="ck" style="opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`,
+      'tile', {
+        width: w + 'px', height: '88px', display: 'flex', alignItems: 'center', padding: '0 22px', textAlign: 'left',
+      });
+    row.res = row.querySelector('.res'); row.ck = row.querySelector('.ck'); return row;
+  });
+  return { goal, rows };
+}
+// Places the goal card at (x, goalY), popping in at goalAt, and the rows from rowY, `gap` apart. Row i slides in
+// half a second into its turn (turnStarts[i]), shows its result and its check at the end of the turn, and has a
+// violet border while its turn runs (`turn` seconds); o: opacity of the whole list
+function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts, turn = 1.5, o = 1 }) {
+  place(list.goal, x, goalY, P(t, goalAt, 0.45, backOut), P(t, goalAt, 0.4) * o);
+  list.rows.forEach((r, i) => {
+    const a = turnStarts[i], pr = P(t, a + 0.5, 0.35);
+    place(r, x, rowY + i * gap, 1, pr * o);
+    r.style.transform += ` translateX(${(1 - pr) * 40}px)`;
+    r.res.style.opacity = P(t, a + 1.05, 0.3); r.ck.style.opacity = P(t, a + 1.15, 0.25);
+    r.style.borderColor = (t > a && t < a + turn) ? C.violet : C.line;
+  });
 }
 
 // ---------- crash and takeover effects

@@ -3,19 +3,13 @@
 Object.assign(ICONS, {
   sun: '<circle cx="12" cy="12" r="4"/>'
     + '<path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
-  food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
   // a lead bot (antenna, eyes) linked to two helper boxes below it: several agents working together
   agentTeam: '<rect x="7" y="4" width="10" height="7"/><path d="M12 1.5V4M10 7.5h.01M14 7.5h.01'
     + 'M12 11v2.5M6 16v-2.5h12V16"/><rect x="2.5" y="16" width="7" height="5.5"/>'
     + '<rect x="14.5" y="16" width="7" height="5.5"/>',
 });
-// The 4 steps of the lunch booking: tile icon and label, the action of chapter 5, then the tool and its result
-const STEPS = [
-  { icon: 'cal', label: 'Calendar', action: 'Check the calendar', tool: 'Calendar', result: 'Thu 12:30 is free' },
-  { icon: 'search', label: 'Restaurant', action: 'Find a restaurant', tool: 'Search', result: 'Chez Paulette' },
-  { icon: 'food', label: 'Booking', action: 'Book a table', tool: 'Booking', result: 'table for 2, confirmed' },
-  { icon: 'mail', label: 'Invite', action: 'Invite Marie', tool: 'Email', result: 'invite sent' },
-];
+// The 4 steps of the lunch booking (LUNCH_STEPS in src/shared.js)
+const STEPS = LUNCH_STEPS;
 // The steps as [icon, label], for makeStepRow
 const STEP_TILES = STEPS.map(step => [step.icon, step.label]);
 

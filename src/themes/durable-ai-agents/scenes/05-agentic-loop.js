@@ -19,18 +19,7 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy);
-      s.goal = makeCard(root, "Book lunch with Marie on Thursday.", 'user', null, 640);
-      s.rows = STEPS.map(step => {
-        const row = E(root,
-          `${ICON(step.icon, 36, C.ink, 1.6)}<div style="flex:1;margin-left:18px">`
-          + `<div style="font-size:27px">${step.action}</div>`
-          + `<div class="res mono" style="font-size:18px;color:var(--neon);opacity:0">${step.result}</div></div>`
-          + `<div class="ck" style="opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`,
-          'tile', {
-            width: '640px', height: '88px', display: 'flex', alignItems: 'center', padding: '0 22px', textAlign: 'left',
-          });
-        row.res = row.querySelector('.res'); row.ck = row.querySelector('.ck'); return row;
-      });
+      s.list = makeStepList(root, "Book lunch with Marie on Thursday.", STEPS);
       s.exit = tag(root, 'Goal reached', 'neon');
       const pill = (cls, text) => `<span class="pill ${cls}" style="position:static">${text}</span>`;
       s.formula = E(root, '<div style="display:flex;align-items:center;gap:22px;font-size:40px">'
@@ -44,13 +33,9 @@
       let deg = null;
       turns.forEach(([a, d]) => { if (t >= a && t < a + d) deg = -90 + 360 * ease((t - a) / d); });
       placeAgentLoop(s.loop, t, c[0] + 0.1, { deg, centerAt: c[0] + 3.0, o: 1 - out });
-      place(s.goal, 1440, 210, P(t, c[1] + 0.1, 0.45, backOut), P(t, c[1] + 0.1, 0.4) * (1 - out));
-      s.rows.forEach((r, i) => {
-        const a = c[1] + 0.8 + i * 1.5, pr = P(t, a + 0.5, 0.35);
-        place(r, 1440, 335 + i * 104, 1, pr * (1 - out));
-        r.style.transform += ` translateX(${(1 - pr) * 40}px)`;
-        r.res.style.opacity = P(t, a + 1.05, 0.3); r.ck.style.opacity = P(t, a + 1.15, 0.25);
-        r.style.borderColor = (t > a && t < a + 1.5) ? C.violet : C.line;
+      placeStepList(s.list, t, {
+        x: 1440, goalY: 210, rowY: 335, goalAt: c[1] + 0.1, turnStarts: [0, 1, 2, 3].map(i => c[1] + 0.8 + i * 1.5),
+        o: 1 - out,
       });
       // GOAL REACHED under the steps, as far from the last one as the goal card from the first one
       const ep = P(t, c[1] + 7.0, 0.45, backOut);
