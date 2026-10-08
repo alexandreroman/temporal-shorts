@@ -21,11 +21,16 @@
   const RERUN_TURN = 2.0; // the reruns after the restart run slower, so each step billed again reads
   const COMET = 6; // sparks trailing the token
   const SHARDS_PER_ARC = 4; // the pieces each arc breaks into at the crash
-  const RING_R = 330; // the Temporal ring that wraps the durable loop
+  // the durable part's loop: 80% of its size, centered in its app panel, with room around it inside the Temporal
+  // ring (scene pixels), and the ring itself, 40 px inside the panel's sides and clear of its header
+  const DL = { x: 530, y: 522, k: 0.8 };
+  const RING_R = 312;
+  // a point of the loop (from s.loop.pos) where it shows in the durable part
+  const durablePos = ([x, y]) => [DL.x + (x - LOOP.cx) * DL.k, DL.y + (y - LOOP.cy) * DL.k];
   // the durable part: the app instance with the loop on the left; the Temporal panel with the Event History on the
   // right, the bill under it (scene pixels, the shift then at [10, 0]: the stage is 10 px to the right)
-  const APP = { x: 560, y: 515, w: 780, h: 730 };
-  const OUTSIDE = { x: 1390, y: 432, w: 800, h: 540 };
+  const APP = { x: DL.x, y: 515, w: 2 * RING_R + 80, h: 730 };
+  const OUTSIDE = { x: 1322, y: 432, w: 800, h: 540 };
   const HIST = { x: OUTSIDE.x, y: OUTSIDE.y + 25, w: 760, h: 450, row0: 70, gap: 44 };
   const BILL2 = { x: OUTSIDE.x, y: OUTSIDE.y + OUTSIDE.h / 2 + 20 + BILL_H / 2, w: OUTSIDE.w };
   const D_TURN = 2.0; // seconds per turn of the durable loop: each step and its saved results read
@@ -113,8 +118,19 @@
       // the app instances that run the durable loop: built first, so the loop and its arcs sit on top of them
       s.appA = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
       s.appB = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
-      s.svg = svgLayer(root);
-      s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy, LOOP.r);
+      // the Temporal ring that forms around the durable loop, and a dashed ring turning on it, behind the loop
+      s.ringSvg = svgLayer(root);
+      const ring = r => `M ${DL.x} ${DL.y - r} A ${r} ${r} 0 1 1 ${DL.x - 0.01} ${DL.y - r}`;
+      s.ring = path(s.ringSvg, ring(RING_R), C.uv, 4, false);
+      s.ring.style.filter = 'drop-shadow(0 0 10px rgba(68,76,231,.9))';
+      s.ringDash = path(s.ringSvg, ring(RING_R), C.violet, 2, false, '6 18');
+      // the loop, its arcs and its token's tail on one layer, so the durable part can scale and move it as a whole
+      s.loopLayer = E(root, '', '', {
+        width: '1920px', height: '1080px', transformOrigin: `${LOOP.cx}px ${LOOP.cy}px`,
+      });
+      s.loopLayer.style.opacity = 1;
+      s.svg = svgLayer(s.loopLayer);
+      s.loop = makeAgentLoop(s.loopLayer, s.svg, LOOP.cx, LOOP.cy, LOOP.r);
       // the same blink as the orb the previous chapter's AI hub turned into
       s.loop.think.seed = AGENT_LLM.seed;
       // at the crash the loop shatters: each arc breaks into red pieces that fall, then fly back at the restart
@@ -131,12 +147,7 @@
         });
         return shard;
       }));
-      // the Temporal ring that forms around the durable loop, and a dashed ring turning on it
-      const ring = r => `M ${LOOP.cx} ${LOOP.cy - r} A ${r} ${r} 0 1 1 ${LOOP.cx - 0.01} ${LOOP.cy - r}`;
-      s.ring = path(s.svg, ring(RING_R), C.uv, 4, false);
-      s.ring.style.filter = 'drop-shadow(0 0 10px rgba(68,76,231,.9))';
-      s.ringDash = path(s.svg, ring(RING_R), C.violet, 2, false, '6 18');
-      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(root, 16 - 2 * k, '219,255,75'));
+      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(s.loopLayer, 16 - 2 * k, '219,255,75'));
       s.wait = E(root, `${ICON('user', 22, C.violet, 2)}<span>Waits for a person</span>`, 'pill violet', {
         display: 'flex', alignItems: 'center', gap: '10px',
       });
@@ -209,8 +220,9 @@
       s.reuseCards = HISTORY.slice(0, 6).map((_, i) => callCard(i));
       s.bill2 = makeCoinBill(root, BILL2.w, [neonCoin, neonCoin, neonCoin, neonCoin]);
       s.bill2.note.style.color = C.neon;
-      s.crash2 = makeCrashMarks(root, 'App crash', { x: APP.x + 300, y: APP.y - 250, size: 110 },
-        { x: LOOP.cx, y: LOOP.cy, w: 280 });
+      // the tags in the durable loop's middle sit 30 px above it, clear of the ACT and OBSERVE tiles
+      s.crash2 = makeCrashMarks(root, 'App crash', { x: DL.x + 250, y: DL.y - 240, size: 110 },
+        { x: DL.x, y: DL.y - 30, w: 280 });
       s.newTag = makeNewTag(root, 'New app instance', 300);
       s.flash2 = makeFlash(root);
       s.complete = tag(root, 'Agent complete', 'neon solid');
@@ -227,8 +239,8 @@
         + 'better</span> way', '', { fontSize: '108px', lineHeight: 1.1, whiteSpace: 'nowrap' });
       s.cardKicker = E(root, 'Durable Execution', 'lbl', { fontSize: '30px', color: 'var(--violet)' });
       // WITHOUT TEMPORAL on the failed run's outcome, WITH TEMPORAL on the durable run, both in the loop's middle
-      s.without = tag(root, 'Without Temporal', 'red big solid');
-      s.withT = tag(root, 'With Temporal', 'uv big solid');
+      s.without = tag(root, 'Without Temporal', 'red solid');
+      s.withT = tag(root, 'With Temporal', 'uv solid');
       // the VCR rewind: an on-screen display in the corner (two rewind triangles and REWIND, then PLAY) with a
       // timecode, tracking noise bands and scanlines over the stage
       const tri = (x, dir) => `<path d="M${x} 2 L${x + 18 * dir} 15 L${x} 28 Z"/>`;
@@ -378,6 +390,9 @@
       draw(s.ringDash, P(t, condenseEnd + 0.3, 0.4), 0.6);
       s.ringDash.setAttribute('stroke-dashoffset', -G * 30);
       s.svg.style.transform = `translate(${sx + ax}px,${sy + ay}px)`;
+      // the loop moves into its durable place, 80% of its size, while it is hidden behind the message card
+      s.loopLayer.style.transform = t >= c[3] + 0.6
+        ? `translate(${DL.x - LOOP.cx}px,${DL.y - LOOP.cy}px) scale(${DL.k})` : '';
       // the restart banner, over the loop as it re-forms, its rewind icon turning backwards
       const rp = P(tf, restart - 0.3, 0.45, backOut);
       place(s.restartTag, LOOP.cx, LOOP.cy - 20, rp, clamp(rp * 2) * (1 - P(tf, restart + 1.9, 0.3)));
@@ -476,17 +491,17 @@
       // AGENT COMPLETE shows in the loop: the status just reads DONE
       else setAppStatus(s.appB, 'DONE', 'idle');
       setArrivalGlow(s.appB, t, bOn, bOn + 1.6);
-      placeNewTag(s.newTag, t, bOn + 0.3, replay[0], LOOP.cx + arriving.dx, LOOP.cy);
+      placeNewTag(s.newTag, t, bOn + 0.3, replay[0], DL.x + arriving.dx, DL.y - 25);
       placeCrashMarks(s.crash2, t, crash2, crash2 + 0.3, aOut, ax, ay);
       placeFlash(s.flash2, t, crash2);
       const cp2 = P(t, complete, 0.45, backOut);
-      place(s.complete, LOOP.cx, LOOP.cy, cp2, clamp(cp2 * 2));
+      place(s.complete, DL.x, DL.y - 25, cp2, clamp(cp2 * 2));
 
       // Temporal, outside the app, with the Event History: untouched by the crash
       place(s.outside, OUTSIDE.x, OUTSIDE.y, 1, P(t, durableIn + 0.4, 0.5));
       place(s.history, HIST.x, HIST.y, 1, P(t, durableIn + 0.6, 0.5));
       // each result leaves the loop (an LLM call from THINK, a tool result from ACT), lands on its row, saved
-      const [thx, thy] = s.loop.pos(LOOP_DEG.think), [acx, acy] = s.loop.pos(LOOP_DEG.act);
+      const [thx, thy] = durablePos(s.loop.pos(LOOP_DEG.think)), [acx, acy] = durablePos(s.loop.pos(LOOP_DEG.act));
       s.saveCards.forEach((e, i) => {
         const at = saved[i] - 0.45;
         const [fx, fy] = isLLM(i) ? [thx, thy] : [acx, acy];
@@ -527,9 +542,9 @@
       // WITHOUT TEMPORAL holds on the failed run's outcome until the rewind; WITH TEMPORAL on the durable run's
       // first steps
       const wo = P(t, withoutAt, 0.45, backOut);
-      place(s.without, LOOP.cx, LOOP.cy, wo, clamp(wo * 2) * (1 - P(t, vcrAt - 0.2, 0.3)));
+      place(s.without, LOOP.cx, LOOP.cy - 25, wo, clamp(wo * 2) * (1 - P(t, vcrAt - 0.2, 0.3)));
       const wi = P(t, durableIn + 0.8, 0.45, backOut);
-      place(s.withT, LOOP.cx, LOOP.cy, wi, clamp(wi * 2) * (1 - P(t, crash2 - 0.4, 0.3)));
+      place(s.withT, DL.x, DL.y - 25, wi, clamp(wi * 2) * (1 - P(t, crash2 - 0.4, 0.3)));
       // AGENTIC LOOP gives way to either tag
       if ((t >= withoutAt && t < vcrAt) || (t >= durableIn + 0.8 && t < crash2)) s.loop.center.style.opacity = 0;
 
@@ -588,7 +603,7 @@
       const cp = P(t, cardOut, condenseEnd - cardOut);
       const size = Math.round(lerp(880, 2 * RING_R, cp));
       s.condense.style.width = s.condense.style.height = size + 'px';
-      place(s.condense, lerp(CARD.x, LOOP.cx, cp), lerp(CARD.y, LOOP.cy, cp), 1,
+      place(s.condense, lerp(CARD.x, DL.x, cp), lerp(CARD.y, DL.y, cp), 1,
         cp > 0 && t < condenseEnd ? Math.min(1, cp * 3) : 0);
     }
   });
