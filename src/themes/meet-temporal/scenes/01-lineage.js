@@ -13,8 +13,6 @@
   // a face alone sits centered on its milestone; two faces together sit either side of it (Maxim left, Samar
   // right), 44 px apart, so the milestone's dot shows isolated between them
   const PAIR_DX = MARK_SIZE / 2 + 22;
-  const PAIR_SIDE = [-1, 1];
-  const PAIR_RANGE = 160; // how close (px) the faces must be to start making room for each other
   // the heading: large in the middle first, then at the top of the composition
   const HEADING = { big: { y: 322, font: 140 }, top: { y: 228, font: 64 } };
   // while only the heading and the founders show, the composition sits this much lower, centered on the stage;
@@ -183,22 +181,33 @@
 
       // when each milestone lights up, as the founders reach it, then its tile rises
       const tileIn = [c[0] + 4.0, c[1] + 1.6, c[2] + 1.3, c[3] + 1.8, c[4] + 1.8];
-      // each founder: the face shows with its name at `show`, leaves at `fly` (the name fading), lands on its first
-      // milestone FLY_D seconds later, then travels the line ([at, milestone]). Maxim lands on 2004, Samar on 2009.
+      // each founder: the face shows with its name at `show`, leaves at `fly` and lands FLY_D seconds later on its
+      // first milestone, then travels the line. Every place is [milestone, slot]: slot 0 is centered on the node, for a
+      // face alone there for the beat; -1 and 1 are the paired slots, left of the node for Maxim and right for Samar,
+      // taken straight away when the other founder joins that milestone in the same beat
       const founders = [
-        { show: c[0] + 0.1, fly: c[0] + 2.5, first: 0, route: [[c[1] + 0.3, 1], [c[3] + 0.5, 3], [c[4] + 0.6, 4]] },
-        { show: c[0] + 0.3, fly: c[1] + 0.5, first: 1, route: [[c[2] + 0.3, 2], [c[3] + 0.5, 3], [c[4] + 0.6, 4]] },
+        {
+          show: c[0] + 0.1, fly: c[0] + 2.5, first: [0, 0],
+          // 2009 with Samar, then alone there once Samar leaves for 2014, then 2015 and 2019 together
+          route: [[c[1] + 0.3, 1, -1], [c[2] + 0.3, 1, 0], [c[3] + 0.5, 3, -1], [c[4] + 0.6, 4, -1]],
+        },
+        {
+          show: c[0] + 0.3, fly: c[1] + 0.5, first: [1, 1],
+          route: [[c[2] + 0.3, 2, 0], [c[3] + 0.5, 3, 1], [c[4] + 0.6, 4, 1]],
+        },
       ];
-      // where a face's center of travel is at a time, and its size: the flight is one smooth arc (a quadratic curve
-      // through the corner above its landing) that heads sideways at the face's height, then curves down onto the
-      // line, under the heading, shrinking all the way; on the line the face rides from milestone to milestone
-      const travelPos = (i, at) => {
+      const slotX = ([k, slot]) => NODE_X[k] + slot * PAIR_DX;
+      // a gentle sine ease in and out, so a face neither snaps away nor arrives with a jolt
+      const sine = x => (1 - Math.cos(Math.PI * clamp(x))) / 2;
+      // where a face is at a time, and its size: the flight is one smooth arc (a quadratic curve through the corner
+      // above its landing) that heads sideways at the face's height, then curves down onto the line, under the
+      // heading, shrinking all the way; on the line the face moves from place to place
+      const facePos = (i, at) => {
         const { fly, first, route } = founders[i];
         const from = [INTRO.x[i], INTRO.y];
-        const landing = [NODE_X[first], LINE.y];
+        const landing = [slotX(first), LINE.y];
         if (at < fly + FLY_D) {
-          // a gentle sine ease in and out, so the face neither snaps away nor lands with a jolt
-          const p = (1 - Math.cos(Math.PI * clamp((at - fly) / FLY_D))) / 2;
+          const p = sine((at - fly) / FLY_D);
           const bend = [landing[0], from[1]];
           return {
             x: lerp(lerp(from[0], bend[0], p), lerp(bend[0], landing[0], p), p),
@@ -206,14 +215,19 @@
             size: lerp(INTRO.size, MARK_SIZE, p),
           };
         }
-        const stops = route.map(([when, k]) => [when, NODE_X[k], LINE.y]);
-        return { x: pan(at, landing, stops, 1.1)[0], y: LINE.y, size: MARK_SIZE };
+        let x = landing[0];
+        route.forEach(([when, k, slot]) => {
+          x = lerp(x, slotX([k, slot]), sine((at - when) / 1.1));
+        });
+        return { x, y: LINE.y, size: MARK_SIZE };
       };
-      // where a face shows: its center of travel, moved aside as the other face comes near (eased with distance)
-      const facePos = (i, at) => {
-        const own = travelPos(i, at), other = travelPos(1 - i, at);
-        const near = ease(clamp(1 - Math.hypot(own.x - other.x, own.y - other.y) / PAIR_RANGE));
-        return { ...own, x: own.x + PAIR_SIDE[i] * PAIR_DX * near };
+      // the milestone a face has reached on the line, as an x: where the travelled part of the line ends
+      const nodeX = (i, at) => {
+        let x = NODE_X[founders[i].first[0]];
+        founders[i].route.forEach(([when, k]) => {
+          x = lerp(x, NODE_X[k], sine((at - when) / 1.1));
+        });
+        return x;
       };
       const marks = founders.map((_, i) => facePos(i, t));
       const landed = i => t >= founders[i].fly + FLY_D;
@@ -239,7 +253,7 @@
       const timelineIn = c[0] + 1.2;
       draw(s.line, P(t, timelineIn, 0.8));
       // the travelled part reaches the founder furthest along
-      const onLine = i => (landed(i) ? travelPos(i, t).x : NODE_X[0]);
+      const onLine = i => (landed(i) ? nodeX(i, t) : NODE_X[0]);
       s.progress.style.width = Math.round(Math.max(onLine(0), onLine(1)) - LINE.x0) + 'px';
       s.progress.style.opacity = P(t, founders[0].fly + FLY_D, 0.4);
 
