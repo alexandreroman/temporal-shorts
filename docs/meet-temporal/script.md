@@ -91,8 +91,8 @@ and each chapter has a cinematic moment, listed in its visuals.
     AZURE DURABLE FUNCTIONS.
 - **0:33** In 2015, both reunited at Uber to create Cadence. Open source
   since 2017, it ran Uber Eats orders.
-  - Visuals: Both faces reach 2015: UBER / "Cadence" / OPEN SOURCE, UBER
-    EATS.
+  - Visuals: Both faces reach 2015: UBER / "Cadence" / UBER'S WORKFLOW
+    ENGINE.
 - **0:41** In October 2019, they left Uber to found Temporal: Cadence's
   successor, open source under MIT.
   - Visuals: Both travel to 2019: a highlighted tile (UV border and glow)

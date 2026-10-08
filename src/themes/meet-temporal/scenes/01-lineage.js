@@ -28,7 +28,7 @@
     { company: 'Amazon', name: 'Simple Queue<br>Service', detail: 'Tech lead: Maxim', year: '2004' },
     { company: 'Amazon', name: 'Simple Workflow<br>Service', detail: 'Long-running processes', year: '2009' },
     { company: 'Microsoft', name: 'Durable Task<br>Framework', detail: 'Azure Durable Functions', year: '2014' },
-    { company: 'Uber', name: 'Cadence', detail: 'Open source, Uber Eats', year: '2015' },
+    { company: 'Uber', name: 'Cadence', detail: 'Uber\'s workflow engine', year: '2015' },
     { company: null, name: null, detail: 'Open source, MIT license', year: '2019' },
   ];
   const LAST = MILESTONES.length - 1;
