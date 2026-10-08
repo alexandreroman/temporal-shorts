@@ -161,10 +161,11 @@ and each chapter has a cinematic moment, listed in its visuals.
     (the LLM orb) on top, ACT (neon play tile) and OBSERVE (eye tile)
     below, "AGENTIC LOOP" in the middle. On the right, as in Durable AI
     Agents chapter 5, the goal card "Book lunch with Marie on Thursday."
-    (YOU), then one row per step: a neon token with a comet tail runs one
-    turn of the loop per step (1.5 s), the node it passes swelling, the
-    LLM thinking at THINK; each row slides in highlighted while its turn
-    runs, its result and check appearing at the end: Check the calendar
+    (YOU, with a discreet "RUN 1" tag), then one row per step: a neon
+    token with a comet tail runs one turn of the loop per step (1.5 s), the
+    node it passes swelling, the LLM thinking at THINK; each row slides in
+    highlighted while its turn runs, its result and check appearing at the
+    end: Check the calendar
     (Thu 12:30 is free), Find a restaurant (Chez Paulette), Book a table
     (table for 2, confirmed). LLM CALLS BILLED counts one call per turn
     (3): at each call the count swells and a neon coin drops onto a stack
@@ -181,32 +182,46 @@ and each chapter has a cinematic moment, listed in its visuals.
     then dissolves into falling particles, its check turns into a red
     cross that vanishes, and the row greys out; a big red PROGRESS LOST
     pops over the broken loop with a jolt and a glow, and holds. The bill
-    stays as it is, fully visible: the money spent is not lost. Restart:
-    START OVER, the pieces fly back into the loop, and the agent runs steps
-    1 to 3 again, each row highlighted and checked again, each LLM call
-    billed again, a red coin landing on top of the stack: 4, 5, 6, "+3
-    PAID AGAIN", the pile now twice as high as what was useful.
-- **1:47** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
+    stays as it is, fully visible: the money spent is not lost. Restart,
+    held: a violet "RESTARTING FROM STEP 1" banner with a rewind icon
+    turning backwards replaces PROGRESS LOST over the loop, the pieces fly
+    back and the loop re-forms, and the token reappears where it stopped
+    and rewinds backwards a full turn, back to THINK; a bar of light wipes
+    up the list, leaving the three steps empty, to do again, and the goal
+    card's "RUN 1" tag turns to a red "RUN 2". Then the agent runs steps 1
+    to 3 again, at a calmer pace (2 s a turn): each row reads "RUNNING
+    AGAIN" while its turn runs, then gets its result and check, and each
+    LLM call is billed again, a red coin landing on top of the stack: 4,
+    5, 6, "+3 PAID AGAIN", the pile now twice as high as what was useful.
+- **1:51** There's a better way: with Durable Execution, an agent never
+  loses its progress.
+  - Visuals: The failed run clears: the loop, the steps and the bill fade
+    out. A message card on the dark stage, on a soft violet glow: the
+    official Temporal logo glows up, "There's a better way" rises below it
+    (108 px, "better" in violet with a glow) as its letters close in, then
+    DURABLE EXECUTION in violet mono; it holds. Then the card fades while
+    a glowing UV ring leaves it and condenses around the loop, which comes
+    back inside it.
+- **1:58** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
   rely on it too.
-  - Visuals: The steps and the bill fade out; a TEMPORAL panel ("DURABLE
-    AGENT") frames the loop and a glowing UV ring draws around it, a
-    dashed ring turning on it; BUILT ON TEMPORAL with pills OPENAI · CODEX,
-    then CURSOR, LOVABLE, REPLIT.
+  - Visuals: The glowing UV ring settles around the loop, a dashed ring
+    turning on it, and a TEMPORAL panel ("DURABLE AGENT") frames it; BUILT
+    ON TEMPORAL with pills OPENAI · CODEX, then CURSOR, LOVABLE, REPLIT.
 
 ## 05 Open source and Cloud
 
-- **1:55** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
+- **2:06** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
   can run it on their own servers.
   - Visuals: Three tiles across the top, one by one: "Open source" (MIT
     LICENSE), "Temporal 1.0" (2020), "Self-hosted" (ON YOUR OWN SERVERS).
-- **2:03** Temporal Cloud runs the service for you. Your code stays in your
+- **2:13** Temporal Cloud runs the service for you. Your code stays in your
   environment: Temporal never sees it.
   - Visuals: On the right, TEMPORAL CLOUD (UV border, official logo):
     "Temporal Service" and three bars SECURITY & COMPLIANCE, CONTROL PLANE
     & SCALE, HIGH AVAILABILITY; on the left, YOUR ENVIRONMENT (dashed slate
     border, "YOUR APP, YOUR CODE"): YOUR APP with a small Workflow card and
     TEMPORAL SDK · OPEN SOURCE; then NEVER SEES YOUR CODE.
-- **2:10** Connections only go out from your side, and data stays encrypted
+- **2:21** Connections only go out from your side, and data stays encrypted
   end to end.
   - Visuals: A one-way arrow draws from your environment to Temporal Cloud,
     OUTBOUND ONLY, mTLS; neon packets flow out along it; an inbound attempt
@@ -217,12 +232,12 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 06 Temporal today
 
-- **2:18** Today, more than 4,300 companies pay for it, including Netflix,
+- **2:29** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **2:26** In September 2026, investors valued Temporal at $12.55 billion.
+- **2:37** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
@@ -232,7 +247,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **2:34** Temporal keeps code running whatever fails, from everyday apps
+- **2:45** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: The two founders' faces, cropped from the photo, side by side,
     in a small constellation of twinkling stars and lines; title "Meet
