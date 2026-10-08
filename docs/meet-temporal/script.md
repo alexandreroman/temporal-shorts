@@ -192,8 +192,20 @@ and each chapter has a cinematic moment, listed in its visuals.
     to 3 again, at a calmer pace (2 s a turn): each row reads "RUNNING
     AGAIN" while its turn runs, then gets its result and check, and each
     LLM call is billed again, a red coin landing on top of the stack: 4,
-    5, 6, "+3 PAID AGAIN", the pile now twice as high as what was useful.
-- **1:51** There's a better way: with Durable Execution, an agent never
+    5, 6, "+3 PAID AGAIN", the pile now twice as high as what was useful. A red
+    WITHOUT TEMPORAL tag then holds over the loop, on that outcome: six LLM
+    calls billed for three useful steps.
+- **1:51** Let's rewind and run the same agent with Temporal.
+  - Visuals: A VCR rewind: a blinking REWIND display with a timecode
+    counting backwards in the top left corner, tracking noise bands and
+    scanlines over the stage, a color fringe; the failed run plays
+    backwards, fast: the reruns undo and the red coins fly back up out of
+    the stack (6 to 3), the list rewinds to its greyed rows, PROGRESS LOST
+    and the crash un-happen, the token runs backwards round the loop, the
+    first run's rows slide out and the neon coins leave, back to the start:
+    the goal card, empty steps, 0 billed. The tape stops with a jolt and
+    PLAY shows for a moment.
+- **1:56** There's a better way: with Durable Execution, an agent never
   loses its progress.
   - Visuals: The failed run clears: the loop, the steps and the bill fade
     out. A message card on the dark stage, on a soft violet glow: the
@@ -202,26 +214,47 @@ and each chapter has a cinematic moment, listed in its visuals.
     DURABLE EXECUTION in violet mono; it holds. Then the card fades while
     a glowing UV ring leaves it and condenses around the loop, which comes
     back inside it.
-- **1:58** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
-  rely on it too.
-  - Visuals: The glowing UV ring settles around the loop, a dashed ring
-    turning on it, and a TEMPORAL panel ("DURABLE AGENT") frames it; BUILT
-    ON TEMPORAL with pills OPENAI · CODEX, then CURSOR, LOVABLE, REPLIT.
+- **2:03** With Temporal, every step the agent takes is saved in an Event
+  History, outside the app.
+  - Visuals: The loop, inside its Temporal ring, now runs in APP INSTANCE A
+    on the left, a WITH TEMPORAL tag in its middle. On the right, a
+    TEMPORAL panel ("OUTSIDE THE APP") with an EVENT HISTORY, and under it
+    a fresh LLM CALLS BILLED tile. The agent runs steps 1 to 3, one turn
+    each: its LLM call (an "LLM CALL" card from THINK) and its tool result
+    (a "TOOL CALL" card from ACT) fly into the history, where the rows "LLM
+    call: check the calendar", "Calendar: Thu 12:30 is free", and so on
+    turn SAVED; a neon coin lands on the bill at each call: 1, 2, 3.
+- **2:11** After a crash, the agent gets its saved results back and
+  resumes at the invite: nothing is paid twice.
+  - Visuals: Crash before the invite: shake, red flash, a bolt and APP
+    CRASH on the dimmed loop, APP INSTANCE A CRASHED; the history keeps
+    its six rows, tinted, over "APP CRASHED HERE". A leaves; APP INSTANCE B
+    slides into its place with a violet glow, NEW APP INSTANCE in the
+    loop's middle. Replay: each saved row is highlighted, turns REUSED and
+    hands its result back to the loop, then reads "REUSED, NOT RE-BILLED"
+    (LLM calls) or "REUSED, NOT RE-RUN" (tools); the bill stays at 3, "NOT
+    RE-BILLED". Then the invite runs for real: LLM call 4, a coin lands,
+    rows 7 "LLM call: invite Marie" and 8 "Email: invite sent" SAVED, AGENT
+    COMPLETE in the loop.
+- **2:20** That's why OpenAI built Codex on Temporal, and Cursor, Lovable
+  and Replit rely on it too.
+  - Visuals: The completed state holds; next to the bill's 4, "INSTEAD OF
+    7" (the failed run's six calls plus the invite it never reached).
 
 ## 05 Open source and Cloud
 
-- **2:06** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
+- **2:29** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
   can run it on their own servers.
   - Visuals: Three tiles across the top, one by one: "Open source" (MIT
     LICENSE), "Temporal 1.0" (2020), "Self-hosted" (ON YOUR OWN SERVERS).
-- **2:13** Temporal Cloud runs the service for you. Your code stays in your
+- **2:36** Temporal Cloud runs the service for you. Your code stays in your
   environment: Temporal never sees it.
   - Visuals: On the right, TEMPORAL CLOUD (UV border, official logo):
     "Temporal Service" and three bars SECURITY & COMPLIANCE, CONTROL PLANE
     & SCALE, HIGH AVAILABILITY; on the left, YOUR ENVIRONMENT (dashed slate
     border, "YOUR APP, YOUR CODE"): YOUR APP with a small Workflow card and
     TEMPORAL SDK · OPEN SOURCE; then NEVER SEES YOUR CODE.
-- **2:21** Connections only go out from your side, and data stays encrypted
+- **2:44** Connections only go out from your side, and data stays encrypted
   end to end.
   - Visuals: A one-way arrow draws from your environment to Temporal Cloud,
     OUTBOUND ONLY, mTLS; neon packets flow out along it; an inbound attempt
@@ -232,12 +265,12 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 06 Temporal today
 
-- **2:29** Today, more than 4,300 companies pay for it, including Netflix,
+- **2:52** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **2:37** In September 2026, investors valued Temporal at $12.55 billion.
+- **3:00** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
@@ -247,7 +280,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **2:45** Temporal keeps code running whatever fails, from everyday apps
+- **3:08** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: The two founders' faces, cropped from the photo, side by side,
     in a small constellation of twinkling stars and lines; title "Meet
