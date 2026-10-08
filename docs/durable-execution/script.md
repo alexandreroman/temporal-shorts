@@ -95,8 +95,11 @@ money is tracked by a CARD CHARGED counter in dollars.
   servers restart for a deploy.
   - Visuals: Step row; under it, two equal tiles, each under two steps: the
     ORDER #1042 status (PENDING) and the CARD CHARGED counter ($0); red
-    tags NETWORK CUT / TIMEOUT / RESTART pop in over the links, each
-    jolting its neighbors.
+    tags NETWORK CUT / TIMEOUT / RESTART slam down over the links on their
+    words. At each impact the link snaps at its middle with a red ring and
+    a burst of sparks, the tiles on each side jolt and flicker red, and the
+    row kicks; the TIMEOUT clock ticks, the tiles next to RESTART blink off
+    and on. Each link mends a second later.
 - **0:40** Here, the server crashes right after charging the card. The
   order is stuck: paid, but never shipped.
   - Visuals: Charge card runs and checks, counter $42; Reserve item runs,
