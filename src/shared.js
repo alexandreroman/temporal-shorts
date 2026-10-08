@@ -26,15 +26,19 @@ function iconTile(p, icon, label, w, h, col = C.ink, opts = {}) {
     alignItems: 'center', justifyContent: 'center',
   });
 }
+// The row of 4 tiles of the use cases ("What you can build") of every theme, which some recaps match: tiles of
+// w x h px, 48 px apart (x 120..1800), centered on y 515, the content frame's middle. Tile i is centered at
+// x = 960 + (i - 1.5) * pitch.
+const USE_CASE_ROW = { y: 515, w: 384, h: 460, pitch: 432 };
+// Type scale of the tiles of that row, as iconTile options: icon size and stroke, label font and gap above it
+const USE_CASE_TYPE = { size: 96, stroke: 1.6, font: 26, gap: 30 };
 // Use-case tile ("What you can build"): an iconTile with one short example line under its label, in smaller
 // lowercase slate mono ("charge, refund, transfer"), which sets it apart from the recap's benefit tiles.
-// opts: those of iconTile, plus exampleFont and exampleGap (font of the example line and gap above it).
-function useCaseTile(p, icon, label, example, w, h, opts = {}) {
-  const { exampleFont = 18, exampleGap = 12, ...tileOpts } = opts;
-  const tile = iconTile(p, icon, label, w, h, C.ink, tileOpts);
+function useCaseTile(p, icon, label, example, w, h) {
+  const tile = iconTile(p, icon, label, w, h, C.ink, USE_CASE_TYPE);
   tile.insertAdjacentHTML('beforeend',
-    `<div class="mono" style="font-size:${exampleFont}px;color:var(--slate);white-space:nowrap;`
-    + `margin-top:${exampleGap}px">${example}</div>`);
+    '<div class="mono" style="font-size:20px;color:var(--slate);white-space:nowrap;margin-top:16px">'
+    + `${example}</div>`);
   return tile;
 }
 // Mono label with a 22 px slate icon, at the top left corner of a panel; css: its position (left, top, ...)

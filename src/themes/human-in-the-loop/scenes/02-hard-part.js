@@ -31,7 +31,8 @@
   const TAG_Y = APP.y + TILE.h / 2 + FRAME.gap + 30;
   scene({
     chapter: 2, title: 'Waiting is the hard part',
-    // laid out centered at (960, 522) on the content frame
+    // laid out in the content frame (y 150-880), centered at (960, 522): within the centering tolerance of its
+    // middle, y 515
     subs: [
       {
         text: "But the app can't simply pause for three days. Its memory lives on one machine, and machines restart.",

@@ -6,26 +6,26 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // Layout: the Temporal logo stays on top, centered on x=960. Alone, the code card (the workflows.ts excerpt) and
-  // the badge stand under it, about 94 px apart; then the card and the badge slide left to make room for a column
-  // of 4 Activity tiles (one row per step, 48 px apart) and, on the right, the services they call, each centered on
-  // its row. Next to the Activities, the card's top is level with the column's top (its await lines face the
-  // middle of the column) and the badge's bottom with the column's bottom; the composition spans x 120..1800 and
-  // y 142..902 in both phases.
-  const ROW = { y0: 574, pitch: 176 }; // middle of the 4 rows, distance between rows
+  // the badge stand under it, 66 px apart; then the card and the badge slide left to make room for a column of 4
+  // Activity tiles (one row per step, 40 px apart, 40 px under the logo) and, on the right, the services they call,
+  // each centered on its row. Next to the Activities, the card's top is level with the column's top (its await lines
+  // face the middle of the column) and the badge's bottom with the column's bottom; the composition spans
+  // x 120..1800 and y 163..867 in both phases, centered on the content frame.
+  const ROW = { y0: 567, pitch: 160 }; // middle of the 4 rows, distance between rows
   const rowY = i => ROW.y0 + (i - 1.5) * ROW.pitch;
   // code card: 20 px text on 38 px lines (its 62-character first line fits), 820 x 458; centered alone at
-  // (x0, y0), then at (x, y): x 120..940, y 246..704
+  // (x0, y0): y 293..751, then at (x, y): x 120..940, y 267..725
   const CARD = {
-    w: 820, font: 20, lineH: 38, padY: 20, padX: 18, gutter: 36, x0: 960, y0: 529, x: 530, y: 475,
+    w: 820, font: 20, lineH: 38, padY: 20, padX: 18, gutter: 36, x0: 960, y0: 522, x: 530, y: 496,
   };
   const CARD_H = CARD.padY * 2 + WORKFLOWS_TS.length * CARD.lineH; // 458
-  const LOGO_BOX = { h: 64, w: 245, top: 142 }; // the logo's height, width and top edge
-  const BADGE_Y = CARD.y0 + CARD_H / 2 + 95 + 25; // badge (50 px high) center, 95 px under the card alone
+  const LOGO_BOX = { h: 64, w: 245, top: 163 }; // the logo's height, width and top edge
+  const BADGE_Y = CARD.y0 + CARD_H / 2 + 66 + 25; // badge (50 px high) center, 66 px under the card alone
   // lines of the card: the Activities declaration on top, then the Workflow function
   const DECLARATION_LINES = WORKFLOWS_TS.indexOf('');
   const FUNCTION_LINE = WORKFLOWS_TS.indexOf(WORKFLOW_CODE[0]);
   const LAST_LINE = WORKFLOWS_TS.length - 1;
-  const TILE = { x: 1139, w: 190, h: 128 }; // x 1044..1234, 104 px right of the card
+  const TILE = { x: 1139, w: 190, h: 120 }; // x 1044..1234, 104 px right of the card
   const SERVICE = { x: 1706, w: 188, h: 64 }; // x 1612..1800
   // Ship package retry line: attempt markers on its link to the Carrier, the gaps grow with the delays; the first
   // and last markers sit 27 px from the tile and the chip
@@ -87,7 +87,7 @@
 
   scene({
     chapter: 4, title: 'Durable Execution with Temporal',
-    // laid out around (960, 522): the card-alone phase and the Activities phase are both centered on it
+    // laid out around (960, 515): the card-alone phase and the Activities phase are both centered on it
     subs: [
       {
         text: "<b>Durable Execution</b> takes another path: your code runs to completion, even when servers fail.",

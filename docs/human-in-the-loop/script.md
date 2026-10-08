@@ -132,7 +132,7 @@ the laptop, NOTIFY Sam.
 
 - **2:04** The Workflow waits for days with no code running, survives
   restarts and deploys, and never redoes a step.
-  - Visuals: 4 benefit tiles land one at a time across the frame, each
+  - Visuals: 4 tall benefit tiles land one at a time across the frame, each
     lighting up as it lands: WAITS FOR DAYS (hourglass) / SURVIVES RESTARTS
     (restart arrow) / NO STEP REDONE (check) / SENDS REMINDERS (bell).
 
@@ -140,11 +140,12 @@ the laptop, NOTIFY Sam.
 
 - **2:13** Sam's laptop is one case: any step where a person decides fits the
   same pattern.
-  - Visuals: 4 use-case tiles pop in one at a time across the frame, in the
-    recap's slots, each with an example in slate under the label: FRAUD
-    REVIEWS (flag) "a flagged payment waits" / IDENTITY CHECKS (ID card)
-    "an analyst verifies an ID" / DEPLOY APPROVALS (upload arrow) "a release
-    waits for a go" / AI AGENT APPROVALS (robot) "actions, tool calls".
+  - Visuals: 4 tall use-case tiles, the row every theme's use cases share,
+    pop in one at a time in the recap's slots, each with an example in slate
+    under the label: FRAUD REVIEWS (flag) "a flagged payment waits" /
+    IDENTITY CHECKS (ID card) "an analyst verifies an ID" / DEPLOY APPROVALS
+    (upload arrow) "a release waits for a go" / AI AGENT APPROVALS (robot)
+    "actions, tool calls".
 - **2:19** Fraud reviews, identity checks, deploy approvals, an AI agent's
   tool calls: the Workflow waits for a person.
   - Visuals: The full row; each tile lights up in turn as the subtitle

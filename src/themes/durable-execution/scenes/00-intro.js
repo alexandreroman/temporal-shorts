@@ -15,7 +15,8 @@
 
   scene({
     pre: 1.0,
-    // title + chain, measured: centered at (960, 522)
+    // title + chain, measured: centered at (960, 522) in the content frame (y 150-880), within the centering
+    // tolerance of its middle, y 515
     shift: [18, 0],
     subs: [
       {

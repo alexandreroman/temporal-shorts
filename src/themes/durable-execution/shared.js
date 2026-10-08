@@ -152,7 +152,7 @@ const TEMPORAL_HEADER = { logoAt: [26, 22], noteAt: [24, 30], note: 'Outside the
 // ---------- Event History card
 // Row i spans HIST.row0 + i * HIST.rowGap (from the card top) over HIST.rowGap px; the rows below a crash line
 // sit lower, see makeHistory.
-const HIST = { row0: 76, rowGap: 60 };
+const HIST = { row0: 76, rowGap: 56 };
 const uvName = fn => `<span style="color:${C.uv}">${fn}</span>`;
 const HISTORY_ROWS = [
   'Workflow started: order #1042',
@@ -200,31 +200,32 @@ const setHistoryScan = (hist, i, o) => setScan(hist, hist.rowTop(i), o);
 // and order status under it, TEMPORAL panel with the Event History on the right, with room under its rows for the
 // WORKFLOW COMPLETE tag. Both chapters build it with the same coordinates, so the cut from chapter 5 to chapter 6
 // reads as one continuous shot.
-// Coordinates are final stage coordinates (the scenes have no shift), the composition centered at (960, 522).
+// Coordinates are final stage coordinates (the scenes have no shift): the panels fill the content frame (y 150..880)
+// but for the room above them that the NEW WORKER tag of chapter 6, astride the Worker panel's top edge, needs.
 // Every part sits on a few shared lines, and every size is even, so the parts rest on whole pixels:
 // - x 120 and 920: left and right edges of the Worker column (Worker panel; counter left, order pill right);
 //   x 1056 and 1800: edges of the TEMPORAL panel, 136 px right of the Worker column (room for the chips and arrow)
-// - y 152: top of both panels; y 892: bottom of the counter, the pill row and the TEMPORAL panel
-// - y 692: top of the counter row; y 792: middle of the counter, the order pill and WORKFLOW COMPLETE
+// - y 176: top of both panels; y 880: bottom of the counter, the pill row and the TEMPORAL panel
+// - y 680: top of the counter row; y 780: middle of the counter, the order pill and WORKFLOW COMPLETE
 // - 50 px between the Worker panel and the counter row, and between the counter and the order pill
 // - the code card and the history card sit 32 px inside the sides of their panel
 const EH = {
-  worker: { x: 520, y: 397, w: 800, h: 490 }, // x 120..920, y 152..642
-  // code card: x 152..888, 6 lines of 46 px, its top 126 px below the panel top (under its tab), 36 px of panel
-  // under it; 23 px text, so the 48 characters of the export line fit with 20 px to spare
-  code: { w: 736, font: 23, lineH: 46, padY: 26, padX: 18, gutter: 36, dy: 45 },
-  temporal: { x: 1428, y: 522, w: 744, h: 740 }, // x 1056..1800, y 152..892
-  // history card: x 1088..1768, y 232..860, 80 px below the top of the TEMPORAL panel (under its logo header);
-  // its 6 rows of 60 px and the crash line end at y 728
-  hist: { w: 680, h: 628, top: 232 },
-  charge: { x: 310, y: 792, w: 380 }, // counter: x 120..500, y 692..892
+  worker: { x: 520, y: 403, w: 800, h: 454 }, // x 120..920, y 176..630
+  // code card: x 152..888, y 294..598, 6 lines of 42 px, its top 118 px below the panel top (under its tab), 32 px
+  // of panel under it; 23 px text, so the 48 characters of the export line fit with 20 px to spare
+  code: { w: 736, font: 23, lineH: 42, padY: 26, padX: 18, gutter: 36, dy: 43 },
+  temporal: { x: 1428, y: 528, w: 744, h: 704 }, // x 1056..1800, y 176..880
+  // history card: x 1088..1768, y 256..848, 80 px below the top of the TEMPORAL panel (under its logo header);
+  // its 6 rows of 56 px and the crash line end at y 724
+  hist: { w: 680, h: 592, top: 256 },
+  charge: { x: 310, y: 780, w: 380 }, // counter: x 120..500, y 680..880
   // order status pill: x 550..920, centered on the counter row; its fixed width fits its longest status
   // (ORDER #1042 | COMPLETE), so neither edge moves when the status changes
   order: { left: 550, w: 370 },
   // WORKFLOW COMPLETE (50 px high), in the free room at the bottom of the history card, level with the counter row
-  doneY: 792,
+  doneY: 780,
   crashRow: 3, // the Worker crashes while row 4 (shipPackage) is running
-  crashGap: 60, // room above row 4 for the "WORKER CRASHED HERE" line, one row high
+  crashGap: 56, // room above row 4 for the "WORKER CRASHED HERE" line, one row high
   lineEndX: 816, // RESULT chips leave and reach the code near the card's right edge (72 px inside it)
   spinX: 858, // running spinner, at the right end of the highlighted line (30 px from the card's right edge)
   rowStartX: 1208, // RESULT chips reach and leave the history at the start of the row text (120 px into the card)

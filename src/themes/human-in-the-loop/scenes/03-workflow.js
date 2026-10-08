@@ -12,7 +12,7 @@
     { at: 4.0, label: 'Restart', cell: [1, 1], kick: [0, -6] },
   ];
   // The tags fill a 2 x 2 grid right of the clock: 160 px wide, 20 px apart across, 30 px from the clock and from
-  // the strip's right edge; 50 px high, 14 px apart down, 18 px from the strip's top and bottom edges
+  // the strip's right edge; 50 px high, 14 px apart down, 13 px from the strip's top and bottom edges
   const TAG_W = 160;
   const TAG_X = [STRIP.x + 110, STRIP.x + 290];
   const TAG_Y = [STRIP.y - 32, STRIP.y + 32];
@@ -29,7 +29,7 @@
   };
   scene({
     chapter: 3, title: 'A Workflow that waits',
-    // laid out centered at (960, 522) on the content frame
+    // laid out centered at (960, 515) on the content frame (see WF_LAYOUT)
     subs: [
       {
         text: "With Temporal, the whole process is a <b>Workflow</b>: ordinary code that runs the steps in order.",

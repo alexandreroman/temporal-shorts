@@ -307,8 +307,9 @@
       placeTag(4, h1, deny + 0.1, 'DENIED', 'denied');
       const reasonO = P(t, back + 0.2, 0.4) * (1 - P(t, c[4], 0.4));
       place(s.reason, (AGENT.x + ORB / 2 + GATE.x0) / 2, LANE - CALL_H / 2 - 30, 1, reasonO);
-      // the escalated call drops from the gate to the person
-      const h2Legs = [toPark(bigPop), [drop, PARK.x, YOU.y, 0.8]];
+      // the escalated call drops from the gate to the person, on the Approve button's center line: it shares its top
+      // edge with the person and the button, and its tag stays inside the content bottom
+      const h2Legs = [toPark(bigPop), [drop, PARK.x, YOU.y - YOU.buttonDy, 0.8]];
       const h2 = placeCall(5, bigPop, h2Legs, t >= escalate ? 'violet' : 'uv');
       placeTag(5, h2, escalate + 0.1, 'ESCALATED', 'wait');
     }

@@ -292,11 +292,12 @@ bright red to green.
 
 - **3:16** Order #1042 is one example: any process that must run to the end
   fits a Workflow.
-  - Visuals: 4 use-case tiles pop in one at a time, each with an example
-    in slate under the label: MONEY TRANSFERS (dollar coin) "debit, credit,
-    never twice" / SUBSCRIPTIONS (calendar) "bill every month, for years" /
-    DATA PIPELINES (table) "a nightly batch resumes" / CLOUD PROVISIONING
-    (cloud) "a cluster comes up in steps".
+  - Visuals: 4 tall use-case tiles, the row every theme's use cases share,
+    pop in one at a time, each with an example in slate under the label:
+    MONEY TRANSFERS (dollar coin) "debit, credit, never twice" /
+    SUBSCRIPTIONS (calendar) "bill every month, for years" / DATA PIPELINES
+    (table) "a nightly batch resumes" / CLOUD PROVISIONING (cloud) "a
+    cluster comes up in steps".
 - **3:22** Money transfers, subscriptions, data pipelines, cloud
   provisioning: a crash never leaves any of them half done.
   - Visuals: The full row; each tile lights up in turn as the subtitle

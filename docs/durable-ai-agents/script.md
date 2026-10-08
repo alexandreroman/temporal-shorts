@@ -172,25 +172,26 @@ the figures follow the step count if the scenario changes.
     TOOL CALL cards travel back and refill CONTEXT, steps re-check, counter
     stays 3 with "NOT RE-BILLED"; tags "REUSED, NOT RE-BILLED" / "REUSED, NOT
     RE-RUN"; step 4 runs for real: counter 4, rows 7 and 8 SAVED, AGENT
-    COMPLETE.
+    COMPLETE under the booking ticket, beside the counter.
 
 ## 08 What you get
 
 - **2:43** No saved LLM call is paid for twice, and no saved step runs again.
   Plus retries, human waits and full visibility.
-  - Visuals: "43% less LLM spend in this example", "4 vs 7 LLM calls", then 4
-    tiles: Saved steps reused / Automatic retries / Waits for humans / Full
-    visibility.
+  - Visuals: "43% less LLM spend in this example", "4 vs 7 LLM calls", then a
+    row of 4 large tiles, as wide as the use cases' row: Saved steps reused /
+    Automatic retries / Waits for humans / Full visibility.
 
 ## 09 What you can build
 
 - **2:53** Lunch with Marie is one example: any agent that works through many
   steps needs Durable Execution.
-  - Visuals: 4 use-case tiles pop in one at a time, each with its examples
-    in slate under the label: DEEP RESEARCH (magnifier) "hours of reading,
-    one report" / MULTI-AGENT (a lead bot linked to two helpers) "a lead
-    agent and its helpers" / CHATBOTS (bot) "acts once a person approves" /
-    BACKGROUND AGENTS (clock) "watch for days, then act".
+  - Visuals: 4 tall use-case tiles, the row every theme's use cases share,
+    pop in one at a time, each with its examples in slate under the label:
+    DEEP RESEARCH (magnifier) "hours of reading, one report" / MULTI-AGENT
+    (a lead bot linked to two helpers) "a lead agent and its helpers" /
+    CHATBOTS (bot) "acts once a person approves" / BACKGROUND AGENTS (clock)
+    "watch for days, then act".
 - **3:00** Deep research, multi-agent teams, chatbots with human approval,
   background agents: all survive crashes.
   - Visuals: The full row; each tile lights up in turn as the subtitle

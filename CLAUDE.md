@@ -35,6 +35,7 @@ See [README.md](README.md) for full documentation.
 ```bash
 make setup                   # venv, Playwright Chromium, fonts
 make timeline                # every theme: scenes, timings, TOTAL duration
+make layout                  # every theme: content inside the frame y 150-880
 make preview THEME=<theme> T="12 40 136"  # contact sheet -> output/preview.png
 make render                  # output/<theme>.mp4 for every out-of-date theme
 make render SUBS=off         # same, no subtitles: output/<theme>-nosubs.mp4
@@ -98,15 +99,15 @@ workspaces run `make setup` automatically.
     animations), wrapped in a `{ ... }` block so its helpers stay local;
     the first scene of a chapter sets `chapter` and `title`; `shift`
     (`[dx, dy]` or `(t, c) => [dx, dy]`, see `pan()`) centers the
-    composition at (960, 522)
+    composition at (960, 515)
 - `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh`, CI
   and any make target when the fonts are missing), frame preview, parallel
-  render, timeline, SRT export, social preview images
-  (`social_images.py`), standalone HTML build and server; the per-theme
-  scripts require `--theme` (no default). The HTML build adds the Open
-  Graph and X card tags and a canonical link only when the `SITE_URL`
-  environment variable (or make variable) holds the site's root URL:
-  local builds have none
+  render, timeline, layout check (`layout_check.py`), SRT export, social
+  preview images (`social_images.py`), standalone HTML build and server;
+  the per-theme scripts require `--theme` (no default). The HTML build
+  adds the Open Graph and X card tags and a canonical link only when the
+  `SITE_URL` environment variable (or make variable) holds the site's root
+  URL: local builds have none
 - `.github/workflows/pages.yml`: on push to `main`, downloads the fonts,
   runs `make html` with `SITE_URL` set to the Pages URL given by
   `actions/configure-pages` (no domain in the repository) and deploys
@@ -198,3 +199,6 @@ not shared with the team.
   `social.png` images: CI only copies them.
 - Check frames with `make preview` before `make render`; after a text change,
   run `make srt` and update `docs/<theme>/script.md`.
+- Compositions stay inside the content frame y 150-880 (scene `shift`
+  included), centered on y 515 when shorter, spanning at least 440 px;
+  `make layout` checks every scene.

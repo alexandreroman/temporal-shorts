@@ -7,11 +7,11 @@
 // text stays readable on video.
 // The block keeps every name declared in this file local to this scene.
 {
-  // Window: 1560 x 770, centered at (960, 522) (x 180..1740, y 137..907). As in the real UI, a full-height sidebar
+  // Window: 1560 x 720, centered at (960, 515) (x 180..1740, y 155..875). As in the real UI, a full-height sidebar
   // on the left and a top bar over the page area, where the pages swap like a navigation. Every part is laid out on
   // whole pixels inside its parent, so the text rests sharp.
-  const WIN = { x: 960, y: 522, w: 1560, h: 770, side: 240, bar: 64 };
-  const PAGE = { w: WIN.w - WIN.side, h: WIN.h - WIN.bar, pad: 44 }; // 1320 x 706
+  const WIN = { x: 960, y: 515, w: 1560, h: 720, side: 240, bar: 64 };
+  const PAGE = { w: WIN.w - WIN.side, h: WIN.h - WIN.bar, pad: 44 }; // 1320 x 656
   const CONTENT_W = PAGE.w - 2 * PAGE.pad; // 1232: headers, tables and cards span x 44..1276 of the page
 
   // Colors sampled from the real Web UI (dark mode)
@@ -233,7 +233,7 @@
 
   // ---------- Workflows list page: heading, count pills and Start Workflow, then one card holding the filter tabs,
   // the table and its footer
-  const LIST = { headTop: 26, cardTop: 104, tabsH: 60, headH: 50, rowH: 66, footH: 56 };
+  const LIST = { headTop: 22, cardTop: 96, tabsH: 60, headH: 50, rowH: 60, footH: 52 };
   const COL = { status: 24, id: 220, run: 420, type: 700, start: 920 }; // left edge of each column, in the card
   const ROWS_TOP = LIST.tabsH + LIST.headH;
   const makeListPage = win => {
@@ -293,7 +293,7 @@
   };
 
   // ---------- Workflow page: Back to Workflows, badge + title + actions, summary, tabs; then the tab content
-  const DETAILS = { backTop: 24, titleTop: 66, summaryTop: 140, summaryPitch: 34, tabsTop: 252, contentTop: 318 };
+  const DETAILS = { backTop: 20, titleTop: 58, summaryTop: 130, summaryPitch: 32, tabsTop: 236, contentTop: 298 };
   const TITLE_BADGE_W = 136; // fits COMPLETED, so RUNNING and COMPLETED badges share their edges
   const SUMMARY_COLS = [{ label: 0, value: 110 }, { label: 440, value: 590 }, { label: 870, value: 1032 }];
   const ACTION = { running: 'Request Cancellation', completed: 'Reset' }; // the primary action, by status
@@ -352,8 +352,8 @@
   // ---------- Timeline tab of a Workflow page: heading and buttons, then the chart card. As in the real chart: a
   // white start line and end line (with their date, vertical), a time axis, the Workflow bar on top, then one lane
   // per Activity, the latest on top; each bar has a small square at each end and its name beside it.
-  const CHART = { top: DETAILS.contentTop + 56, h: 300, line: 52, wfTop: 22, barH: 22, laneTop: 72, lanePitch: 42,
-    axisY: 240, tickTop: 254, tick: 2 };
+  const CHART = { top: DETAILS.contentTop + 56, h: 270, line: 52, wfTop: 20, barH: 22, laneTop: 64, lanePitch: 36,
+    axisY: 212, tickTop: 226, tick: 2 };
   const chartX0 = CHART.line + 4, chartX1 = CONTENT_W - CHART.line - 4;
   // the x of second `s` of a run that lasts `runtime` seconds: the chart spans the whole run
   const timeScale = runtime => s => Math.round(chartX0 + s * (chartX1 - chartX0) / runtime);
@@ -557,7 +557,7 @@
   // ---------- Pending Activities tab of order #1045: the pending shipPackage card (state, Activity ID, attempt,
   // last started time, last worker, Last Failure), until the pointer switches to the Timeline tab as it completes.
   // Its last worker is worker-c, not order-1042's worker-b, so that viewers don't take this page for order #1042
-  const PENDING = { h: 362, fieldTop: 86, fieldPitch: 44, valueX: 300, failureX: 640 };
+  const PENDING = { h: 334, fieldTop: 80, fieldPitch: 42, valueX: 300, failureX: 640 };
   const FAILURE_JSON = [
     ['{', 0], ['"message": "Carrier timeout",', 1], ['"source": "TypeScriptSDK",', 1],
     ['"applicationFailureInfo": {', 1], ['"type": "CarrierTimeout"', 2], ['}', 1], ['}', 0],
@@ -596,7 +596,7 @@
     card.started = part(card, '', value(2));
     card.failure = part(card,
       `<div style="font-size:18px;color:${UI.dim};height:24px;display:flex;align-items:center">Last Failure</div>`
-      + `<div class="mono" style="margin-top:12px;padding:14px 20px;font-size:19px;line-height:26px;`
+      + `<div class="mono" style="margin-top:12px;padding:12px 20px;font-size:19px;line-height:24px;`
       + `background:${UI.json};border-radius:4px;box-shadow:inset 0 0 0 1px ${UI.jsonEdge}">`
       + FAILURE_JSON.map(jsonLine).join('') + '</div>',
       { left: PENDING.failureX + 'px', top: PENDING.fieldTop + 4 + 'px', width: (w - PENDING.failureX - 24) + 'px' });
@@ -619,7 +619,7 @@
 
   scene({
     chapter: 7, title: 'Full visibility',
-    // the window is laid out centered at (960, 522)
+    // the window is laid out centered at (960, 515), the middle of the content frame
     subs: [
       {
         text: "Temporal also shows every Workflow in its <b>web UI</b>: which ones are running, completed or failed.",
