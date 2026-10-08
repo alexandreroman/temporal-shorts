@@ -3,7 +3,7 @@
 {
   // Layout, in final stage coordinates (shift 0) on the content frame x 140-1780, y 150-880: three columns
   // crossed by one horizontal lane the calls travel along. Left, the agent; center, the gate column (AUTO MODE
-  // and its rule on top, reserved from the start, then the APPROVAL POLICY block above the lane, its RULES
+  // and its rules on top, reserved from the start, then the APPROVAL POLICY block above the lane, its RULES
   // below it, the person at the bottom); right, the tools. Related components keep 40 px gutters.
   const TOP = 150, BOTTOM = 880, LEFT = 140, RIGHT = 1780, GUTTER = 40;
   const CALL_W = 280, CALL_H = 48; // a tool call chip
@@ -12,14 +12,15 @@
   const GATE = { x: 960, w: 380 };
   GATE.x0 = GATE.x - GATE.w / 2; GATE.x1 = GATE.x + GATE.w / 2;
   const JUDGE = { y0: TOP, h: 64 };
-  const RULE_CARD = { y0: JUDGE.y0 + JUDGE.h + 12, h: 40 }; // attached under AUTO MODE
+  const RULE_CARD = { y0: JUDGE.y0 + JUDGE.h + 12, h: 72 }; // attached under AUTO MODE, two rules
   const POLICY = { y0: RULE_CARD.y0 + RULE_CARD.h + GUTTER, h: 142 };
   // the lane runs between the policy block and its rules, with 20 px on each side of a passing call
   const LANE = POLICY.y0 + POLICY.h + 20 + CALL_H / 2;
   const RULES = { y0: LANE + CALL_H / 2 + 20, h: 164 };
-  // the person and the two buttons span the column width, GUTTER apart; their bottom is the content bottom.
-  // The buttons have an even height and an even gap, so they rest on whole pixels.
-  const YOU = { w: 170, h: 140, buttonW: 170, buttonH: 48, buttonGap: 12 };
+  // the person and the two buttons span the column width, GUTTER apart; their bottom is the content bottom, and
+  // the person is as tall as the two buttons, so it shares their top and bottom edges. The buttons have an even
+  // height and an even gap, so they rest on whole pixels.
+  const YOU = { w: 170, h: 108, buttonW: 170, buttonH: 48, buttonGap: 12 };
   YOU.y = BOTTOM - YOU.h / 2; YOU.x = GATE.x0 + YOU.w / 2; YOU.buttonX = GATE.x1 - YOU.buttonW / 2;
   YOU.buttonDy = (YOU.buttonH + YOU.buttonGap) / 2; // from the person's center to each button's center
   // the agent's orb touches the left edge, centered on the lane
@@ -45,7 +46,7 @@
   // 0 -> 1 -> 0 over [at, at + d]
   const bump = (t, at, d) => Math.sin(Math.PI * clamp((t - at) / d));
 
-  // status tag under a call, a little larger than the shared one: 'ok' (allowed, approved, done) or 'wait'
+  // status tag under a call, a little larger than the shared one: 'ok' (allowed, approved, done), 'denied' or 'wait'
   const makeTag = p => {
     const e = statusTag(p);
     Object.assign(e.style, { fontSize: '17px', paddingLeft: 'calc(10px + .1em)' });
@@ -70,7 +71,11 @@
         text: '<b>Auto mode</b> lets code or a model approve routine calls, judged against criteria you define.',
         after: 1.85,
       },
-      // auto mode can also deny a call outright; only the calls it escalates wait for a person
+      // a denied call never runs: the reason goes back to the model as the call's result
+      {
+        text: 'It can also deny a call, like a $6,800 suite: the tool never runs and the model is told why.',
+        after: 0.5,
+      },
       { text: 'Calls it escalates, like a $2,400 hotel, still go to a human.', after: 2.0 },
     ],
     build(root, s) {
@@ -98,12 +103,18 @@
         });
       // rule rows, in order: search_flights, search_hotels, everything else
       s.ruleRows = [...s.rules.children].slice(1);
-      // AUTO MODE's rule card, created first so it slides out from under the AUTO MODE tile
-      s.rule = E(root, 'approve: hotel under $500', 'mono', {
-        width: GATE.w + 'px', height: RULE_CARD.h + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontSize: '20px', background: C.ink, color: '#141414',
-        borderLeft: '5px solid ' + C.uv, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
-      });
+      // AUTO MODE's rule card: approve the cheap hotels, deny the very expensive ones, and escalate whatever
+      // matches neither. The two lines share their left edge; created first so the card slides out from under
+      // the AUTO MODE tile
+      const autoRule = text => `<div style="line-height:26px;padding:0 10px;border-radius:4px">${text}</div>`;
+      s.rule = E(root, `<div>${autoRule('approve: hotel under $500')}${autoRule('deny: hotel over $5,000')}</div>`,
+        'mono', {
+          width: GATE.w + 'px', height: RULE_CARD.h + 'px', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', fontSize: '20px', background: C.ink, color: '#141414',
+          borderLeft: '5px solid ' + C.uv, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
+        });
+      // rule lines, in order: approve, deny
+      s.ruleLines = [...s.rule.firstChild.children];
       s.judge = E(root,
         `${ICON('bolt', 30, C.ink, 1.8)}<span class="mono" style="font-size:19px;letter-spacing:.1em">AUTO MODE</span>`,
         'tile', {
@@ -142,11 +153,19 @@
         width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: 'var(--violet-solid)', border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)',
       });
+      // a denied call goes back to the agent, the reason as its result: a left arrow (its head filled explicitly,
+      // see arrowHead in engine.js) and a label
+      s.reason = E(root,
+        `<svg width="36" height="14" viewBox="0 0 36 14" style="display:block">`
+        + `<path d="M10 7 H 34.5" stroke="${C.red}" stroke-width="2.5" stroke-linecap="round"/>`
+        + `<path d="M12 1.5 L0 7 L12 12.5 z" fill="${C.red}"/></svg>`
+        + `<span class="lbl" style="font-size:18px;color:${C.red}">Reason sent to the model</span>`,
+        '', { display: 'flex', alignItems: 'center', gap: '12px' });
 
       // tool calls, in order of appearance; created last so they travel over the gate
       const calls = [
         ['search_flights', ''], ['search_hotels', ''], ['book_flight', '$480'],
-        ['book_hotel', '$390'], ['book_hotel', '$2,400'],
+        ['book_hotel', '$390'], ['book_hotel', '$6,800'], ['book_hotel', '$2,400'],
       ];
       s.calls = calls.map(([name, arg]) => {
         const e = callCard(root, name, arg, 'uv');
@@ -163,8 +182,11 @@
       const approve = c[1] + 4.5, approved = c[1] + 4.8;
       // c[2]: AUTO MODE docks on the gate and approves the cheap hotel
       const hotelPop = c[2] + 1.8, hotelParked = hotelPop + 1.1, autoOk = c[2] + 3.6;
-      // c[3]: the expensive hotel stops at the gate, AUTO MODE escalates it and it drops to the person
-      const bigPop = c[3] + 0.5, bigParked = bigPop + 1.1, escalate = c[3] + 2.3, drop = c[3] + 3.3;
+      // c[3]: the suite stops at the gate, AUTO MODE denies it, and it goes back into the agent, which reads why
+      const suitePop = c[3] + 0.5, suiteParked = suitePop + 1.1, deny = c[3] + 2.3, back = c[3] + 3.8;
+      const backAtAgent = back + 0.8;
+      // c[4]: the expensive hotel stops at the gate, AUTO MODE escalates it and it drops to the person
+      const bigPop = c[4] + 0.5, bigParked = bigPop + 1.1, escalate = c[4] + 2.3, drop = c[4] + 3.3;
       const atYou = drop + 0.8;
       // when each call heads through the gate: search_flights, search_hotels, book_flight, the cheap book_hotel
       const cross = [pop[0] + 0.5, pop[1] + 0.5, c[1] + 6.0, c[2] + 4.4];
@@ -177,7 +199,9 @@
       // agent, gate, tools, person
       const ap = P(t, c[0], 0.6, backOut);
       place(s.agent.root, AGENT.x, AGENT.y, ap, clamp(ap * 2));
-      const think = win(t, c[0] + 0.6, pop[2], 0.3) + win(t, c[2] + 0.9, bigPop, 0.3);
+      // the agent thinks before each call it sends, and once it has read why the suite was denied
+      const think = win(t, c[0] + 0.6, pop[2], 0.3) + win(t, c[2] + 0.9, suitePop, 0.3)
+        + win(t, backAtAgent, bigPop, 0.3);
       llmState(s.agent, { think, look: 1 });
       draw(s.lane, P(t, c[0] + 0.6, 0.6));
       const gateColor = crossing ? C.neon : (flightWaits || hotelWaits) ? C.violet : C.line;
@@ -188,7 +212,8 @@
       });
       // the rule a call matches lights up: each search its own ALLOW row, the bookings the ASK row
       const searchLit = i => t >= cross[i] + 0.2 && t < cross[i] + 1.2;
-      const hotelAsks = (t >= hotelParked && t < autoOk + 0.8) || (t >= bigParked && t < drop + 0.4);
+      const hotelAsks = (t >= hotelParked && t < autoOk + 0.8) || (t >= suiteParked && t < deny + 0.8)
+        || (t >= bigParked && t < drop + 0.4);
       const ruleLit = [searchLit(0), searchLit(1), flightWaits || hotelAsks];
       s.ruleRows.forEach((row, i) => {
         const litColor = i < 2 ? 'rgba(219,255,75,.12)' : 'rgba(182,100,255,.18)';
@@ -254,27 +279,38 @@
       s.hour.setAttribute('transform', `rotate(${race * 360} 12 12)`);
       draw(s.ask, P(t, c[1] + 1.0, 0.6), 1 - P(t, approved + 0.1, 0.3));
 
-      // c[2] and c[3]: the AUTO MODE judge docks on the gate; it weighs each hotel parked in front of the gate
-      // (UV), approves the cheap one (neon) and escalates the expensive one (violet)
+      // c[2] to c[4]: the AUTO MODE judge docks on the gate; it weighs each hotel parked in front of the gate
+      // (UV), approves the cheap one (neon), denies the suite (red) and escalates the expensive one (violet)
       const jp = P(t, c[2] + 0.3, 0.5);
-      const judging = (t >= hotelParked && t < autoOk - 0.1) || (t >= bigParked && t < escalate - 0.1);
+      const judging = (t >= hotelParked && t < autoOk - 0.1) || (t >= suiteParked && t < deny - 0.1)
+        || (t >= bigParked && t < escalate - 0.1);
       const judgeOk = t >= autoOk - 0.1 && t < autoOk + 1.2;
+      const judgeDenies = t >= deny - 0.1 && t < back;
       const judgeDeclines = t >= escalate - 0.1 && t < drop + 0.4;
-      const judgeColor = judgeOk ? C.neon : judgeDeclines ? C.violet : judging ? C.uv : C.line;
+      const judgeColor = judgeOk ? C.neon : judgeDenies ? C.red : judgeDeclines ? C.violet : judging ? C.uv : C.line;
       s.judge.style.borderColor = judgeColor;
       place(s.judge, GATE.x, JUDGE.y0 + JUDGE.h / 2 - 30 * (1 - jp), 1, jp);
-      // its rule slides out from under it
+      // its rules slide out from under it; the rule behind a verdict lights up
       const rp = P(t, c[2] + 0.8, 0.4);
       s.rule.style.borderLeftColor = judgeColor === C.line ? C.uv : judgeColor;
+      s.ruleLines[0].style.background = judgeOk ? 'rgba(219,255,75,.6)' : 'transparent';
+      s.ruleLines[1].style.background = judgeDenies ? 'rgba(255,90,95,.3)' : 'transparent';
       place(s.rule, GATE.x, RULE_CARD.y0 + RULE_CARD.h / 2 - 12 * (1 - rp), 1, rp);
 
       const h0 = placeCall(3, hotelPop, [toPark(hotelPop), ...through(cross[3], 1)], 'uv');
       if (t < hotelLands) placeTag(3, h0, autoOk + 0.1, 'AUTO-APPROVED', 'ok', Infinity, cross[3]);
       else placeTag(3, h0, hotelLands, 'AUTO-APPROVED', 'ok');
+      // the denied suite never reaches the tools: it goes back along the lane and fades into the agent, while the
+      // cue above the lane tells that the reason went to the model
+      const suiteLegs = [toPark(suitePop), [back, AGENT.x + ORB / 2, LANE, 0.8]];
+      const h1 = placeCall(4, suitePop, suiteLegs, t >= deny ? 'red' : 'uv', back + 0.4);
+      placeTag(4, h1, deny + 0.1, 'DENIED', 'denied');
+      const reasonO = P(t, back + 0.2, 0.4) * (1 - P(t, c[4], 0.4));
+      place(s.reason, (AGENT.x + ORB / 2 + GATE.x0) / 2, LANE - CALL_H / 2 - 30, 1, reasonO);
       // the escalated call drops from the gate to the person
-      const h1Legs = [toPark(bigPop), [drop, PARK.x, YOU.y, 0.8]];
-      const h1 = placeCall(4, bigPop, h1Legs, t >= escalate ? 'violet' : 'uv');
-      placeTag(4, h1, escalate + 0.1, 'ESCALATED', 'wait');
+      const h2Legs = [toPark(bigPop), [drop, PARK.x, YOU.y, 0.8]];
+      const h2 = placeCall(5, bigPop, h2Legs, t >= escalate ? 'violet' : 'uv');
+      placeTag(5, h2, escalate + 0.1, 'ESCALATED', 'wait');
     }
   });
 }

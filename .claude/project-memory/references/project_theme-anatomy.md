@@ -263,8 +263,14 @@ CLAUDE.md; a section below and the card order in
   (https://github.com/temporal-community/temporal-agent-harness:
   `README.md`, `docs/internal/what-the-harness-adds.md`,
   `docs/internal/core-concepts.md`): exact tool names in approval rules,
-  valid Python. SDKs: "OpenAI Agents SDK", "Google Gen AI SDK",
-  "Pydantic AI"; subtitles name features by what they do, not by API.
+  valid Python. SDKs: "OpenAI Agents SDK", "Google Gemini",
+  "Pydantic AI" (the README and deck labels), with Google ADK, Strands
+  Agents and LangGraph marked as planned; subtitles name features by what
+  they do, not by API.
+- Ch3 auto mode shows its three verdicts: approve, deny (the call never
+  runs, the reason goes back to the model) and escalate to a person. Ch7
+  callback tools reach the user's laptop or a private network, and the
+  agent waits durably for the result without tying up compute.
 - The turn is the core concept (a message starts a turn, the developer's
   loop runs inside, the reply streams, the harness waits); ch1 introduces
   it. Ch5 subagents: the parent starts a child workflow (`start_travel`),

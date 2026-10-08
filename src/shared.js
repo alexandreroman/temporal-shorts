@@ -171,11 +171,13 @@ function statusTag(p, { font = 15, pad = '4px 10px', icon = 16, border = true } 
   return e;
 }
 // Looks of the statusTag kinds, each with an optional leading icon as [name, color, stroke width]:
-// saved (neon on black, for white panels), ok (neon outline, for the dark stage), reused (white on UV), wait
-// (violet outline), waiting (white on violet, with an hourglass) and closed (slate outline)
+// saved (neon on black, for white panels), ok (neon outline, for the dark stage), denied (red outline, with a
+// cross), reused (white on UV), wait (violet outline), waiting (white on violet, with an hourglass) and closed
+// (slate outline)
 const STATUS_KINDS = {
   saved: { background: '#141414', color: C.neon, borderColor: 'transparent', icon: ['check', C.neon, 2.6] },
   ok: { background: 'rgba(219,255,75,.08)', color: C.neon, borderColor: C.neon, icon: ['check', C.neon, 2.6] },
+  denied: { background: 'rgba(255,90,95,.1)', color: C.red, borderColor: C.red, icon: ['x', C.red, 2.6] },
   reused: { background: C.uv, color: '#FFFFFF', borderColor: 'transparent' },
   wait: { background: 'rgba(182,100,255,.14)', color: C.violet, borderColor: C.violet },
   waiting: { background: C.violet, color: '#FFFFFF', borderColor: 'transparent', icon: ['hourglass', '#FFFFFF', 2.2] },

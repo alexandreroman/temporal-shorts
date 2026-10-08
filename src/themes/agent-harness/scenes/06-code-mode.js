@@ -2,26 +2,36 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // Layout grid: the left zone spans x 140-700, the right zone x 800-1780 (100 px gutter). Both headings share
-  // one baseline; both zones start at y 196 and end at y 880 (the round-trip counts, the EVERY CALL row).
+  // one baseline; both zones start at y 196 and end at y 880 (each zone's round-trip count, the EVERY CALL row).
   const TOP = 196, BOTTOM = 880, HEADING_Y = 163;
-  // Left: the model orb and its three tools (one column, 40 px gutters), then the round-trip counts
-  const LEFT = { x: 420, orbX: 220, orbSize: 160, toolX: 610, toolW: 180, toolH: 158, toolGap: 40 };
+  // the "before vs after" divider, in the middle of the gutter, over the whole content frame height
+  const DIVIDER = { x: 750, top: 150, bottom: 880 };
+  // Left: the model orb and its three tools (one column, 40 px gutters), then its round-trip count
+  const LEFT = { x: 420, orbX: 220, orbSize: 160, toolX: 610, toolW: 180, toolH: 164, toolGap: 40 };
   const toolY = i => TOP + LEFT.toolH / 2 + i * (LEFT.toolH + LEFT.toolGap);
   const ORB_Y = toolY(1);
   const ORB_EDGE = LEFT.orbX + LEFT.orbSize / 2 + 4, TOOL_EDGE = LEFT.toolX - LEFT.toolW / 2 - 4; // connector ends
   // the 3 round trips, one per tool the script calls (tool index of each call), and their timing, from
   // c[0] + TRIPS.at: the call travels for `out` seconds, waits `stay` seconds at the tool, and the result travels
-  // back for `out` seconds. The last result is back at c[0] + 6.2, before the side dims at c[0] + 7.6.
-  const TRIPS = { at: 0.9, gap: 2.2, out: 0.4, stay: 0.1, targets: [0, 1, 2] };
-  // "3 round trips vs 1 round trip": two equal count tiles at the zone's edges, "vs" in the gutter between them
-  const COUNT = { w: 240, h: 90, y: BOTTOM - 45, x: [140 + 120, 700 - 120] };
-  // Right: the script card; its three tools below, equal and spread across its width; SAVED; the closing row
-  // 8 script lines of 30 px fit the card with the paddings of the header rule (16 px above, 18 px below)
-  const CODE = { x: 1290, w: 980, h: 330, lineTop: 87, lineH: 30, textX: 28, numW: 44 };
+  // back for `out` seconds. The last result is back at c[0] + 5.95; the count of 3 then holds until c[1].
+  const TRIPS = { at: 1.0, gap: 1.9, out: 0.45, stay: 0.25, targets: [0, 1, 2] };
+  // "3 round trips" vs "1 round trip": two equal count tiles on the zones' bottom line (y 808-880), so the divider
+  // runs between them: 3 ROUND TRIPS right-aligned with the tool tiles above it (x 460-700), 1 ROUND TRIP on the
+  // left edge of the right zone (x 800-1040)
+  const COUNT = { w: 240, h: 72, y: BOTTOM - 36, x: [700 - 120, 800 + 120] };
+  // Right, from top to bottom: the script card (y 196-494); the fan-out arrows and the approval gate (118 px); the
+  // three tools, equal and spread across the card's width (y 612-722); their SAVED tags 16 px under them (y 738-768,
+  // level with the left zone's BOOKING tile); 40 px; the closing row: the 1 ROUND TRIP count, then the EVERY CALL
+  // row filling the rest of the card's width, centered on the count tile.
+  // 8 script lines of 26 px (20 px code) fit the card with the paddings of the header rule (16 px above, 18 px below)
+  const CODE = { x: 1290, w: 980, h: 298, lineTop: 85, lineH: 26, font: 20, textX: 28, numW: 44 };
   CODE.y = TOP + CODE.h / 2;
-  const STEP = { w: 300, h: 120, y: 700 };
+  const STEP = { w: 300, h: 110, y: 612 + 55 };
   STEP.x = [0, 1, 2].map(i => CODE.x - CODE.w / 2 + STEP.w / 2 + i * (CODE.w - STEP.w) / 2);
-  const RIGHT = { gateY: 583, savedY: 794, tagH: 48 }; // the gate midway between the card and the steps
+  // the gate midway between the card (bottom 494) and the steps (top 612); each 30 px SAVED tag 16 px under its step
+  const RIGHT = { gateY: 553, savedY: 753, tagH: 50 }; // tagH: the height of a pill
+  // the EVERY CALL row: 40 px right of the 1 ROUND TRIP tile, to the card's right edge
+  const TAG_ROW = { left: COUNT.x[1] + COUNT.w / 2 + 40, right: CODE.x + CODE.w / 2 };
   const CARD_BOTTOM = CODE.y + CODE.h / 2 + 4, STEP_TOP = STEP.y - STEP.h / 2 - 6; // where the fan-out arrows run
   const GATE_HALF = 24; // half the height of the approval pill, which sits on the book_flight arrow
 
@@ -68,10 +78,15 @@
     return shown;
   });
   const lineY = i => CODE.lineTop + i * CODE.lineH;
-  const CHAR_W = 13.2; // advance of a 22 px Noto Sans Mono character (0.6 em)
-  // left edge of the best: $480 pill, on line 6 (the min line), about 28 px right of the end of its code;
-  // rounded, with an even pill height, so the pill rests on whole pixels
-  const BEST_LEFT = Math.round(CODE.textX + CODE.numW + lineLength(SCRIPT[MIN_LINE]) * CHAR_W + 28), BEST_H = 34;
+  const CHAR_W = 0.6 * CODE.font; // advance of a Noto Sans Mono character: 12 px, so every column is a whole pixel
+  // the band of the code glyphs in a 26 px line, ascender to descender, as rendered: 4 px below the line top, 21 px
+  // tall (the font's ascent and descent are uneven, so the band sits 1.5 px below the middle of the line)
+  const GLYPHS = { top: 4, h: 21 };
+  // the typing caret spans that band, 2 px after the advance of the last typed character
+  const CARET = { w: 10, gap: 2 };
+  // left edge of the best: $480 pill, on line 6 (the min line), 28 px right of the end of its code; with an even
+  // pill height, the pill rests on whole pixels
+  const BEST_LEFT = CODE.textX + CODE.numW + lineLength(SCRIPT[MIN_LINE]) * CHAR_W + 28, BEST_H = 34;
 
   // place() anchored on the element's left edge, so a pill keeps its gap to the code it follows
   const placeLeft = (e, x, y, scale, o) => {
@@ -87,21 +102,23 @@
     });
     return e;
   };
-  // round-trip count tile: a big number and its label side by side (e.n holds the number)
+  // round-trip count tile: a big number and its label side by side (e.n holds the number); the 2 px left padding
+  // offsets the label's trailing letter spacing, so the number and label are centered as they read
   const makeTripCount = (p, n, label) => {
     const e = E(p,
-      `<div class="n" style="font-size:64px;line-height:1">${n}</div>`
+      `<div class="n" style="font-size:52px;line-height:1">${n}</div>`
       + `<div class="lbl" style="font-size:18px;color:var(--ink)">${label}</div>`,
       'tile', {
         width: COUNT.w + 'px', height: COUNT.h + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', gap: '18px',
+        justifyContent: 'center', gap: '18px', paddingLeft: '2px',
       });
     e.n = e.querySelector('.n'); e.label = e.querySelector('.lbl');
     return e;
   };
-  // UV pill with an icon before its text, sharing the closing row equally with its neighbors
+  // UV pill with an icon before its text, sharing the closing row equally with its neighbors; 20 px text so the
+  // three fit beside the count tile
   const iconPillHtml = (icon, text) => '<span class="pill uv" style="flex:1;display:flex;align-items:center;'
-    + `justify-content:center;gap:10px">${ICON(icon, 22, C.ink, 2)}${text}</span>`;
+    + `justify-content:center;gap:8px;font-size:20px">${ICON(icon, 20, C.ink, 2)}${text}</span>`;
 
   scene({
     chapter: 6, title: 'Code Mode',
@@ -110,9 +127,16 @@
     // laid out at final stage coordinates on the grid (content y 150-880, centered at y 515)
     subs: [
       {
-        text: "With <b>Code Mode</b>, the model writes a short Python script instead of calling tools one at a time.",
-        // the script is typed until c[0] + 8.7, then reads complete for about 2 s
-        after: 4.2,
+        // only the left zone plays: three round trips, one after the other
+        text: "Without <b>Code Mode</b>, the model calls its tools one at a time: one round trip per call.",
+        // the last result is back at c[0] + 5.95, then 3 ROUND TRIPS holds for about 2 s
+        after: 1.7,
+      },
+      {
+        // the left zone dims, the divider draws, then the right zone appears and the script is typed
+        text: "With <b>Code Mode</b>, the model writes a short Python script instead.",
+        // the script is typed until c[1] + 7.0, then reads complete for about 2 s
+        after: 4.3,
       },
       {
         text: "Loops, conditions and parallel calls all run inside the script, in one turn.",
@@ -120,7 +144,7 @@
       },
       {
         text: "Every call stays durable, gated and visible, and the whole script takes one round trip, not three.",
-        // the tag row settles at c[2] + 6.65, about 1 s before the window ends; post then holds the final composition
+        // the tag row settles at c[3] + 6.65, about 1 s before the window ends; post then holds the final composition
         after: 1.0,
       },
     ],
@@ -128,20 +152,20 @@
       s.svg = svgLayer(root);
 
       // left: the model calls its tools one at a time
-      s.lblL = E(root, 'One call at a time', 'lbl');
+      s.lblL = E(root, 'Without Code Mode', 'lbl');
       s.links = [0, 1, 2].map(i => path(s.svg, `M ${ORB_EDGE} ${ORB_Y} L ${TOOL_EDGE} ${toolY(i)}`, C.line, 2, false));
       s.llm = makeLLM(root, LEFT.orbSize, 'MODEL');
       s.tools = [['plane', 'Flights'], ['bed', 'Hotels'], ['ticket', 'Booking']]
         .map(([icon, label]) => iconTile(root, icon, label, LEFT.toolW, LEFT.toolH));
       s.trip = E(root, '', 'pill', { fontSize: '16px', lineHeight: '21px', padding: '5px 12px 5px calc(12px + .1em)' });
-      // 3 round trips one call at a time, vs 1 for the whole script
+      // 3 round trips one call at a time (the 1 round trip of the whole script sits in the right zone)
       s.counter = makeTripCount(root, 0, 'Round trips');
-      s.vs = E(root, 'vs', 'lbl', { fontSize: '22px' });
-      s.oneTrip = makeTripCount(root, 1, 'Round trip');
-      Object.assign(s.oneTrip.style, { borderColor: C.uv, background: 'var(--uv-solid)' });
+
+      // between the zones: before (left) vs after (right)
+      s.divider = path(s.svg, `M ${DIVIDER.x} ${DIVIDER.top} L ${DIVIDER.x} ${DIVIDER.bottom}`, C.line, 2, false);
 
       // right: the script written by the model, typed line by line
-      s.lblR = E(root, 'Code Mode', 'lbl');
+      s.lblR = E(root, 'With Code Mode', 'lbl');
       s.code = E(root,
         '<div class="lbl" style="position:absolute;left:24px;top:20px;font-size:16px;padding-left:0;'
         + `display:flex;align-items:center;gap:10px">${ICON('code', 20, C.slate, 2)}Script written by the model</div>`
@@ -158,12 +182,14 @@
           + '<span class="src"></span>',
           'mono', {
             left: CODE.textX + 'px', top: (lineY(i) - CODE.lineH / 2) + 'px', height: CODE.lineH + 'px',
-            lineHeight: CODE.lineH + 'px', fontSize: '22px', whiteSpace: 'pre',
+            lineHeight: CODE.lineH + 'px', fontSize: CODE.font + 'px', whiteSpace: 'pre',
           });
         e.src = e.querySelector('.src');
         return e;
       });
-      s.cursor = E(s.code, '', '', { width: '12px', height: '26px', background: C.violet, borderRadius: '2px' });
+      s.cursor = E(s.code, '', '', {
+        width: CARET.w + 'px', height: GLYPHS.h + 'px', background: C.violet, borderRadius: '2px',
+      });
       s.best = E(s.code, '<span>best: <span style="color:var(--ink)">$480</span></span>', 'pill violet', {
         textTransform: 'none', letterSpacing: '.02em', fontSize: '20px', padding: '0 14px', color: C.violet,
         height: BEST_H + 'px', display: 'flex', alignItems: 'center', transformOrigin: '0 50%',
@@ -177,20 +203,28 @@
       s.fromGate = down(STEP.x[2], RIGHT.gateY + GATE_HALF + 2, STEP_TOP);
       s.steps = [['plane', 'search_flights'], ['bed', 'search_hotels'], ['ticket', 'book_flight']]
         .map(([icon, name]) => makeToolStep(root, icon, name));
-      s.gate = E(root, '', 'pill');
+      // a fixed, even width for both states (APPROVAL, APPROVED), so the centered pill rests on whole pixels; the
+      // content is centered without the pill's side paddings, which offset a trailing letter spacing that the
+      // icon's own margin already balances
+      s.gate = E(root, '', 'pill', { width: '194px', padding: '9px 0', display: 'flex', justifyContent: 'center' });
       s.saved = s.steps.map(() => statusTag(root));
-      // what every call keeps: one row spanning the card's width, its label on the card's left edge
+      // the whole script in 1 round trip, on the card's left edge, level with the 3 round trips across the divider
+      s.oneTrip = makeTripCount(root, 1, 'Round trip');
+      Object.assign(s.oneTrip.style, { borderColor: C.uv, background: 'var(--uv-solid)' });
+      // what every call keeps: one row from the count tile to the card's right edge
       s.tagRow = E(root,
-        '<span class="lbl" style="font-size:18px;padding-left:0">Every call</span>'
+        // a whole-pixel label width, so the three pills that share the rest of the row get whole-pixel edges
+        '<span class="lbl" style="font-size:18px;padding-left:0;width:130px">Every call</span>'
         + iconPillHtml('retry', 'Durable') + iconPillHtml('shield', 'Gated') + iconPillHtml('eye', 'Visible'),
         '', {
-          width: CODE.w + 'px', height: RIGHT.tagH + 'px', display: 'flex', alignItems: 'center', gap: '24px',
+          width: (TAG_ROW.right - TAG_ROW.left) + 'px', height: RIGHT.tagH + 'px', display: 'flex',
+          alignItems: 'center', gap: '20px',
         });
       s.tags = [...s.tagRow.querySelectorAll('.pill')];
     },
     update(t, c, s) {
-      // ---- c[0], left: three round trips, then the whole side dims
-      const dim = lerp(1, 0.35, P(t, c[0] + 7.6, 0.5));
+      // ---- c[0], left: three round trips; c[1]: the whole side dims as Code Mode takes over
+      const dim = lerp(1, 0.35, P(t, c[1], 0.5));
       const leftIn = at => P(t, c[0] + at, 0.5, backOut);
       place(s.lblL, LEFT.x, HEADING_Y, 1, P(t, c[0] + 0.1, 0.4) * dim);
       s.links.forEach((l, i) => draw(l, P(t, c[0] + 0.5 + i * 0.1, 0.4), dim));
@@ -227,20 +261,26 @@
       s.tools.forEach((e, i) => { e.style.borderColor = i === busyTool ? C.violet : C.line; });
       llmState(s.llm, { look: 0.8 });
 
-      // the count dims with its zone, then comes back for the comparison with Code Mode in c[2]
+      // the count swells at each result, dims with its zone, then comes back for the comparison with Code Mode
+      // in c[3]
       const trips = returned.filter(r => t >= r).length;
       s.counter.n.textContent = trips;
       s.counter.label.textContent = trips === 1 ? 'Round trip' : 'Round trips';
       const counterIn = leftIn(0.7);
-      const compare = P(t, c[2] + 5.2, 0.4);
-      place(s.counter, COUNT.x[0], COUNT.y, counterIn, clamp(counterIn * 2) * lerp(dim, 1, compare));
+      const counterSwell = trips > 0 ? swell(t, returned[trips - 1], 0.1) : 1;
+      const compare = P(t, c[3] + 5.2, 0.4);
+      place(s.counter, COUNT.x[0], COUNT.y, counterIn * counterSwell,
+        clamp(counterIn * 2) * lerp(dim, 1, compare));
 
-      // ---- c[0], right: the model writes the script instead, at a brisk but readable pace (about 45 characters a
+      // ---- c[1]: the divider draws down between the zones
+      draw(s.divider, P(t, c[1] + 0.2, 0.6));
+
+      // ---- c[1], right: the model writes the script instead, at a brisk but readable pace (about 45 characters a
       // second)
-      const codeIn = P(t, c[0] + 2.2, 0.6, backOut);
-      place(s.lblR, CODE.x, HEADING_Y, 1, P(t, c[0] + 2.2, 0.5));
+      const codeIn = P(t, c[1] + 0.6, 0.6, backOut);
+      place(s.lblR, CODE.x, HEADING_Y, 1, P(t, c[1] + 0.6, 0.5));
       place(s.code, CODE.x, CODE.y, codeIn, clamp(codeIn * 2));
-      const typeStart = c[0] + 2.9, typeEnd = c[0] + 8.7;
+      const typeStart = c[1] + 1.2, typeEnd = c[1] + 7.0;
       const shownPerLine = typedPerLine(Math.floor(TOTAL_CHARS * clamp((t - typeStart) / (typeEnd - typeStart))));
       shownPerLine.forEach((shown, i) => {
         const e = s.lines[i];
@@ -252,16 +292,17 @@
       const cursorCol = shownPerLine[cursorLine];
       // blinking cursor while typing, gone once the script runs
       const blink = Math.floor(G * 3) % 2 === 0 ? 1 : 0.35;
-      const cursorOn = t >= typeStart && t < c[1] + 0.3 ? 1 : 0;
-      const cursorX = CODE.textX + CODE.numW + cursorCol * CHAR_W + 7;
-      place(s.cursor, cursorX, lineY(cursorLine), 1, cursorOn * (t < typeEnd ? 1 : blink));
+      const cursorOn = t >= typeStart && t < c[2] + 0.3 ? 1 : 0;
+      const cursorX = CODE.textX + CODE.numW + cursorCol * CHAR_W + CARET.gap + CARET.w / 2;
+      const cursorY = lineY(cursorLine) - CODE.lineH / 2 + GLYPHS.top + GLYPHS.h / 2;
+      place(s.cursor, cursorX, cursorY, 1, cursorOn * (t < typeEnd ? 1 : blink));
 
-      // ---- c[1]: the script runs, its line highlight slides down from block to block: the gather block
-      // (lines 3-5), the min line, then (c[2]) the book_flight line
+      // ---- c[2]: the script runs, its line highlight slides down from block to block: the gather block
+      // (lines 3-5), the min line, then (c[3]) the book_flight line
       const highlight = [
-        { at: c[1] + 0.5, from: 2, to: 4 },
-        { at: c[1] + 4.0, from: MIN_LINE, to: MIN_LINE },
-        { at: c[2] + 0.3, from: MIN_LINE + 1, to: MIN_LINE + 1 },
+        { at: c[2] + 0.5, from: 2, to: 4 },
+        { at: c[2] + 4.0, from: MIN_LINE, to: MIN_LINE },
+        { at: c[3] + 0.3, from: MIN_LINE + 1, to: MIN_LINE + 1 },
       ];
       let top = lineY(highlight[0].from), bottom = lineY(highlight[0].to);
       for (const h of highlight.slice(1)) {
@@ -269,29 +310,30 @@
         top = lerp(top, lineY(h.from), p);
         bottom = lerp(bottom, lineY(h.to), p);
       }
-      s.hl.style.top = (top - CODE.lineH / 2 + 1) + 'px';
-      s.hl.style.height = (bottom - top + CODE.lineH - 2) + 'px';
-      s.hl.style.opacity = win(t, highlight[0].at, c[2] + 4.6, 0.25);
+      // 2 px of margin around the glyph band of the highlighted lines
+      s.hl.style.top = (top - CODE.lineH / 2 + GLYPHS.top - 2) + 'px';
+      s.hl.style.height = (bottom - top + GLYPHS.h + 4) + 'px';
+      s.hl.style.opacity = win(t, highlight[0].at, c[3] + 4.6, 0.25);
 
       // the tools the script calls
       s.steps.forEach((e, i) => {
-        const p = P(t, c[1] + 0.2 + i * 0.15, 0.5, backOut);
+        const p = P(t, c[2] + 0.2 + i * 0.15, 0.5, backOut);
         place(e, STEP.x[i], STEP.y, p, clamp(p * 2));
       });
       // both searches start at the same time
-      draw(s.fanFlights, P(t, c[1] + 0.8, 0.5));
-      draw(s.fanHotels, P(t, c[1] + 0.8, 0.5));
-      const searchState = t >= c[1] + 2.7 ? 2 : t >= c[1] + 1.3 ? 1 : 0;
+      draw(s.fanFlights, P(t, c[2] + 0.8, 0.5));
+      draw(s.fanHotels, P(t, c[2] + 0.8, 0.5));
+      const searchState = t >= c[2] + 2.7 ? 2 : t >= c[2] + 1.3 ? 1 : 0;
       stepState(s.steps[0], searchState);
       stepState(s.steps[1], searchState);
       // the cheapest flight is picked
-      const bestIn = P(t, c[1] + 4.2, 0.45, backOut);
+      const bestIn = P(t, c[2] + 4.2, 0.45, backOut);
       placeLeft(s.best, BEST_LEFT, lineY(MIN_LINE), bestIn, clamp(bestIn * 2));
 
-      // ---- c[2]: book_flight passes the approval gate first
-      draw(s.toGate, P(t, c[2] + 0.5, 0.4));
-      const gateIn = P(t, c[2] + 0.8, 0.45, backOut);
-      const approved = t >= c[2] + 2.1;
+      // ---- c[3]: book_flight passes the approval gate first
+      draw(s.toGate, P(t, c[3] + 0.5, 0.4));
+      const gateIn = P(t, c[3] + 0.8, 0.45, backOut);
+      const approved = t >= c[3] + 2.1;
       const gateKey = approved ? 'ok' : 'wait';
       if (s.gate._k !== gateKey) {
         s.gate._k = gateKey;
@@ -300,25 +342,25 @@
           + (approved ? ICON('check', 20, C.neon, 2.6) + 'Approved' : ICON('lock', 20, C.violet, 2) + 'Approval')
           + '</span>';
       }
-      place(s.gate, STEP.x[2], RIGHT.gateY, gateIn * swell(t, c[2] + 2.1, 0.12), clamp(gateIn * 2));
-      draw(s.fromGate, P(t, c[2] + 2.25, 0.3));
-      stepState(s.steps[2], t >= c[2] + 3.9 ? 2 : t >= c[2] + 2.6 ? 1 : 0);
+      place(s.gate, STEP.x[2], RIGHT.gateY, gateIn * swell(t, c[3] + 2.1, 0.12), clamp(gateIn * 2));
+      draw(s.fromGate, P(t, c[3] + 2.25, 0.3));
+      stepState(s.steps[2], t >= c[3] + 3.9 ? 2 : t >= c[3] + 2.6 ? 1 : 0);
       // every call is saved as soon as it completes
-      const savedAt = [c[1] + 2.8, c[1] + 2.8, c[2] + 4.0];
+      const savedAt = [c[2] + 2.8, c[2] + 2.8, c[3] + 4.0];
       s.saved.forEach((e, i) => {
         setStatus(e, 'SAVED', 'saved');
         const p = P(t, savedAt[i], 0.4, backOut);
         place(e, STEP.x[i], RIGHT.savedY, p, clamp(p * 2));
       });
 
-      // ---- c[2], payoff: the whole script ran in one round trip, against three one call at a time
-      place(s.vs, (COUNT.x[0] + COUNT.x[1]) / 2, COUNT.y, 1, compare);
-      const oneTripIn = P(t, c[2] + 5.3, 0.45, backOut);
+      // ---- c[3], payoff: the whole script ran in one round trip, against three one call at a time across the
+      // divider
+      const oneTripIn = P(t, c[3] + 5.3, 0.45, backOut);
       place(s.oneTrip, COUNT.x[1], COUNT.y, oneTripIn, clamp(oneTripIn * 2));
-      // and what every call keeps, right after the payoff
-      place(s.tagRow, CODE.x, BOTTOM - RIGHT.tagH / 2, 1, P(t, c[2] + 5.5, 0.4));
+      // and what every call keeps, right after the payoff, centered on the count tile so the row reads as one line
+      place(s.tagRow, (TAG_ROW.left + TAG_ROW.right) / 2, COUNT.y, 1, P(t, c[3] + 5.5, 0.4));
       s.tags.forEach((e, i) => {
-        const p = P(t, c[2] + 5.6 + i * 0.3, 0.45, backOut);
+        const p = P(t, c[3] + 5.6 + i * 0.3, 0.45, backOut);
         e.style.transform = `scale(${p})`;
         e.style.opacity = clamp(p * 2);
       });
