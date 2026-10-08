@@ -230,6 +230,11 @@ CLAUDE.md; a section below and the card order in
   announcement. Ch4 names OpenAI (Codex), Cursor, Lovable, Replit.
 - Ch2 is the short series arc: steps run strictly one after the other,
   each saved before the next starts.
+- Outro departs from `makeEndCard`: a constellation of Ziggy, Temporal's
+  mascot (a tardigrade), drawn star by star then line by line, with the
+  founders' faces on either side linked to it; the title is "Meet"
+  followed by the official lockup (no logo below the tagline), "Meet"
+  matching the wordmark's size and baseline.
 - Motion goes beyond the series framework: cinematic, creative animations
   (stroke drawing, camera moves, trails, glitch crashes, particles, 3D
   flips, scrambles), at least one strong moment per chapter, still
