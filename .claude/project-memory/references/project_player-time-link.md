@@ -9,6 +9,10 @@ type: project
 A `#t=<time>` URL fragment (seconds or `m:ss`) opens a theme's live
 player paused at that time; editing it in an open tab seeks there,
 paused. A reload keeps the sessionStorage position over the fragment.
+While paused, the player keeps the URL at `#t=<seconds>` for its
+position, in whole seconds (`#t=70`; `history.replaceState`, debounced),
+so the URL is shareable; playing, presenter holds included, leaves the
+URL without a fragment.
 `?t=` is reserved for the frozen frame-capture mode.
 
 **Why:** a coding agent shows the user any moment of a video, and the

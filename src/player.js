@@ -187,6 +187,39 @@ function startPlayer() {
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   }
 
+  // While paused, the URL names the current moment as `#t=<time>`, so a paused viewer can copy and share it;
+  // while playing, it has no fragment, so a URL copied then never points to a stale time. Presenter holds count
+  // as playing. replaceState adds no history entry and never fires hashchange, so the handler below stays quiet.
+  // Browsers throttle replaceState (Safari throws after about 100 calls in 30 s) and a seek-bar drag moves the
+  // time on every pointer move: the URL is written only when it changes, once the time has settled.
+  const URL_DELAY = 200;
+  let urlTimer = 0;
+  // The URL last scheduled; the page's own at first, so opening the player rewrites nothing.
+  let urlTarget = location.pathname + location.search + location.hash;
+
+  function currentFragment() {
+    if (playing) return '';
+    // Whole seconds, floored like the time label: `#t=70`.
+    const seconds = Math.floor(time);
+    // Keep a fragment that already names this second, such as the `#t=1:10` or `#t=70.5` the player was opened with.
+    const fragmentTime = parseTimeFragment(location.hash);
+    if (fragmentTime !== null && Math.floor(fragmentTime) === seconds) return location.hash;
+    return `#t=${seconds}`;
+  }
+
+  function syncUrl() {
+    const url = location.pathname + location.search + currentFragment();
+    if (url === urlTarget) return;
+    urlTarget = url;
+    clearTimeout(urlTimer);
+    urlTimer = setTimeout(writeUrl, URL_DELAY);
+  }
+
+  function writeUrl() {
+    if (urlTarget === location.pathname + location.search + location.hash) return;
+    try { history.replaceState(history.state, '', urlTarget); } catch {}
+  }
+
   function updateControls() {
     if (playing && !held) setIcon(playButton, 'pause', 'Pause');
     else if (time >= TOTAL) setIcon(playButton, 'replay', 'Replay');
@@ -196,6 +229,8 @@ function startPlayer() {
     // Every change to `held` ends up here, so the hold mark follows it from one place.
     root.classList.toggle('held', held);
     if (!playing) root.classList.remove('idle');
+    // Every play, pause and seek goes through here too.
+    syncUrl();
   }
 
   function show() {

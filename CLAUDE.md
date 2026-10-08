@@ -51,9 +51,10 @@ To show any moment of a theme, use
 `make timeline THEME=<theme>`); start `make serve` first if it is not
 running, and open the link in a browser when one is available. The player
 opens paused there. A reload keeps the viewer's position over the
-fragment: change `#t=` to jump. After a visual change, give the user the
-link to the changed moment. `?t=` is the frozen capture frame, without the
-player.
+fragment: change `#t=` to jump. Pausing writes the position into the URL
+in whole seconds (`#t=70`), so a paused viewer can share it; playing
+clears it. After a visual change, give the user the link to the changed
+moment. `?t=` is the frozen capture frame, without the player.
 
 `preview` requires `THEME`. Each MP4 or SRT rebuilds only when the shared
 sources or its own theme change (see README.md); `-B` forces a rebuild.
