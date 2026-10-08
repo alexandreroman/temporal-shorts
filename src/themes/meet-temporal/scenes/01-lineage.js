@@ -1,9 +1,9 @@
 // ===================== 1. 20 YEARS IN THE MAKING
 // The block keeps every name declared in this file local to this scene.
 {
-  // First the founders' photo, large; then, as in the deck, the photo settles top left next to the heading, and a
-  // horizontal timeline runs below: five milestones across the free band, each with its year above and its tile
-  // below. The founders' faces lift off the photo and ride the line from one milestone to the next.
+  // The chapter opens on its heading, very large in the middle; it shrinks up to the top. The founders' faces
+  // appear with their names, then fly onto a horizontal timeline: five milestones across the free band, each with
+  // its year above and its tile below. The faces ride the line from one milestone to the next.
   const LINE = { x0: 120, x1: 1800, y: 500 };
   const TILE = { top: 560, w: 300, h: 300, gap: 45 }; // five tiles span the band, 45 px apart
   const NODE_X = [0, 1, 2, 3, 4].map(i => LINE.x0 + TILE.w / 2 + i * (TILE.w + TILE.gap));
@@ -11,16 +11,16 @@
   const YEAR_Y = LINE.y - 70; // 18 px above the founders' faces
   const MARK_SIZE = 56;
   const MARK_DX = [-32, 32]; // Maxim left of the milestone, Samar right of it, 8 px apart
-  // the photo: large and centered first (HERO), then compact at the top left (PHOTO_AT, scale PHOTO_K)
-  const HERO = { x: 960, y: 470, w: 760, h: 560 };
-  const HERO_K = HERO.w / PHOTO.w;
-  const HERO_LABEL_Y = HERO.y + HERO.h / 2 + 54; // 24 px under the photo
-  const PHOTO_K = 0.36;
-  const PHOTO_AT = { x: Math.round(LINE.x0 + HERO.w * PHOTO_K / 2), y: Math.round(180 + HERO.h * PHOTO_K / 2) };
-  // the heading, then the odometer, left-aligned 40 px right of the compact photo and centered on it
-  const HEADING = { left: Math.round(LINE.x0 + HERO.w * PHOTO_K + 40), w: 660, odometerW: 130, gap: 24 };
-  // Ken Burns on the photo: it zooms in slowly around this point (in hero pixels) while it is large
-  const KB = { ox: HERO.w / 2, oy: HERO.h * 0.3, zoom: 0.07 };
+  // the heading: large in the middle first, then at the top of the composition
+  const HEADING = { big: { y: 322, font: 140 }, top: { y: 228, font: 64 } };
+  // while only the heading and the founders show, the composition sits this much lower, centered on the stage;
+  // it rises into place as the timeline draws in
+  const INTRO_DY = 200;
+  // the founders' introduction, between the heading and the line: each face with its name and role beside it, on
+  // the outer side (Maxim's on the left, Samar's on the right)
+  const INTRO = { y: 380, size: 140, x: [760, 1160] };
+  const NAME = { w: 340, gap: 24 };
+  const nameX = i => INTRO.x[i] + (i === 0 ? -1 : 1) * (INTRO.size / 2 + NAME.gap + NAME.w / 2);
   // company (null for the Temporal logo), name, detail and year of each milestone
   const MILESTONES = [
     { company: 'Amazon', name: 'Simple Queue<br>Service', detail: 'Tech lead: Maxim', year: '2004' },
@@ -30,72 +30,7 @@
     { company: null, name: null, detail: 'Open source, MIT license', year: '2019' },
   ];
   const LAST = MILESTONES.length - 1;
-  const YEARS = MILESTONES.map(m => Number(m.year));
   const TRAIL = [0.06, 0.12, 0.18]; // how far each ghost of a travelling face lags behind it, in seconds
-  const DIGIT_H = 52; // height of one digit of the year odometer
-
-  // The founders' photo, framed: UV border and glow, the photo itself on an inner layer (for the Ken Burns zoom), a
-  // dark vignette that blends it into the stage and a band of light that sweeps across it once
-  function makeHero(root) {
-    const hero = E(root,
-      '<div class="kb" style="position:absolute;inset:0;'
-      + `background:url(&quot;${PHOTO.url}&quot;) center top / ${HERO.w}px auto no-repeat;`
-      + `transform-origin:${KB.ox}px ${KB.oy}px"></div>`
-      + '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%, rgba(20,20,20,0) 58%, '
-      + 'rgba(20,20,20,.5) 100%), linear-gradient(180deg, rgba(20,20,20,0) 72%, rgba(20,20,20,.45) 100%)"></div>'
-      + '<div class="sweep" style="position:absolute;top:-20%;bottom:-20%;left:0;width:30%;'
-      + 'background:linear-gradient(100deg, rgba(248,250,252,0), rgba(248,250,252,.22), rgba(248,250,252,0))">'
-      + '</div>',
-      '', {
-        width: HERO.w + 'px', height: HERO.h + 'px', overflow: 'hidden', borderRadius: 'var(--r)',
-        border: '1.5px solid ' + C.uv, boxShadow: '0 0 60px rgba(68,76,231,.35)',
-      });
-    hero.kb = hero.querySelector('.kb');
-    hero.sweep = hero.querySelector('.sweep');
-    return hero;
-  }
-  // Name and role of a founder, centered under the person in the photo
-  const makeHeroLabel = (root, founder) => E(root,
-    `<div class="mono" style="font-size:24px;letter-spacing:.1em;padding-left:.1em;text-transform:uppercase">`
-    + `${founder.name}</div><div class="lbl" style="font-size:16px;margin-top:8px">${founder.role}</div>`,
-    '', { textAlign: 'center', whiteSpace: 'nowrap' });
-  // Stage point and size of a founder's face in the photo, the photo centered on (x, y) at scale k, zoomed by kb
-  function photoFace(founder, x, y, k, kb) {
-    const fx = founder.face.x * HERO_K, fy = founder.face.y * HERO_K;
-    return {
-      x: x + (KB.ox + (fx - KB.ox) * kb - HERO.w / 2) * k,
-      y: y + (KB.oy + (fy - KB.oy) * kb - HERO.h / 2) * k,
-      size: FACE_CROP * HERO_K * kb * k,
-    };
-  }
-
-  // Year odometer: four digit columns (0 to 9, then 0 again for the wrap) behind a window one digit high
-  function makeOdometer(root) {
-    const column = '<div class="col" style="display:flex;flex-direction:column">'
-      + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(d => `<span style="height:${DIGIT_H}px;line-height:${DIGIT_H}px">${d}`
-        + '</span>').join('') + '</div>';
-    const e = E(root, `<div style="display:flex;height:${DIGIT_H}px;overflow:hidden">${column.repeat(4)}</div>`,
-      'mono', { fontSize: '44px', color: C.ink, letterSpacing: '.04em' });
-    e.cols = [...e.querySelectorAll('.col')];
-    return e;
-  }
-  // Rolls the odometer to a (fractional) year: each digit turns as the one to its right wraps from 9 to 0
-  function setOdometer(e, year) {
-    e.cols.forEach((col, i) => {
-      const unit = Math.pow(10, 3 - i);
-      const lower = year % unit;
-      const position = Math.floor(year / unit) % 10 + Math.max(0, lower - (unit - 1));
-      col.style.transform = `translateY(${-Math.round(position * DIGIT_H * 100) / 100}px)`;
-    });
-  }
-  // Year at a point of the line: linear between the milestones' years
-  function yearAt(x) {
-    if (x <= NODE_X[0]) return YEARS[0];
-    for (let k = 1; k < NODE_X.length; k++) {
-      if (x <= NODE_X[k]) return lerp(YEARS[k - 1], YEARS[k], (x - NODE_X[k - 1]) / (NODE_X[k] - NODE_X[k - 1]));
-    }
-    return YEARS[LAST];
-  }
 
   // Milestone tile: company on top, name in a two-line box (or the official logo), a rule, the detail at the bottom
   function makeMilestone(root, { company, name, detail }) {
@@ -112,10 +47,19 @@
       + `${detail}</div>`,
       'tile', { width: TILE.w + 'px', height: TILE.h + 'px' });
   }
+  // Name and role of a founder, aligned toward the face (align: 'right' or 'left')
+  const makeNameLabel = (root, founder, align) => E(root,
+    `<div class="mono" style="font-size:24px;letter-spacing:.1em;text-transform:uppercase">`
+    + `${founder.name}</div>`
+    + `<div class="lbl" style="font-size:16px;margin-top:8px;padding-left:0">${founder.role}</div>`,
+    '', { width: NAME.w + 'px', textAlign: align, whiteSpace: 'nowrap' });
 
   scene({
     chapter: 1, title: '20 years in the making',
-    // laid out centered at (960, 522) on the free band
+    // the heading plays before the first subtitle
+    pre: 2.0,
+    // the heading and the founders centered, then the whole timeline, laid out centered at (960, 522)
+    shift: (t, c) => pan(t, [0, INTRO_DY], [[c[0] + 1.1, 0, 0]], 0.9),
     subs: [
       {
         text: "Meet Maxim Fateev and Samar Abbas. In 2004, Maxim was tech lead of Simple Queue Service at Amazon.",
@@ -145,11 +89,9 @@
         width: '700px', height: '700px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(182,100,255,.45) 0%, rgba(68,76,231,.18) 40%, rgba(68,76,231,0) 70%)',
       });
-      s.heading = E(root, '20 years in the making', 'lbl', {
-        fontSize: '40px', color: 'var(--violet)', width: HEADING.w + 'px', textAlign: 'left', paddingLeft: 0,
+      s.heading = E(root, '<span style="color:var(--violet)">20 years</span> in the making', '', {
+        whiteSpace: 'nowrap', lineHeight: 1,
       });
-      s.odometer = makeOdometer(root);
-      s.odometer.style.width = HEADING.odometerW + 'px';
       s.svg = svgLayer(root);
       s.line = path(s.svg, `M ${LINE.x0} ${LINE.y} L ${LINE.x1} ${LINE.y}`, C.line, 3, false);
       // the part of the line the founders have travelled, violet to UV
@@ -171,96 +113,85 @@
         borderColor: C.uv, background: '#1D1E3A', boxShadow: '0 0 48px rgba(68,76,231,.35)',
       });
       s.ripples = makeRipples(root, 3, '182,100,255');
-      s.hero = makeHero(root);
-      s.heroLabels = FOUNDERS.map(f => makeHeroLabel(root, f));
-      // faint violet discs trailing each face while it travels; the faces fly over everything
+      s.names = FOUNDERS.map((f, i) => makeNameLabel(root, f, i === 0 ? 'right' : 'left'));
+      // faint violet discs trailing each face while it travels
       s.ghosts = FOUNDERS.map(() => TRAIL.map(() => E(root, '', '', {
         width: MARK_SIZE + 'px', height: MARK_SIZE + 'px', borderRadius: '50%', background: C.violet,
       })));
+      // each founder's face: large for the introduction and the flight, small on the line
+      s.faces = FOUNDERS.map(f => makeFace(root, f, INTRO.size));
       s.marks = FOUNDERS.map(f => makeFace(root, f, MARK_SIZE));
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
-      // the photo: large, zooming in slowly with a band of light across it, then it settles at the top left
-      const kbAt = at => 1 + KB.zoom * P(at, 0.1, c[0] + 2.3, x => x);
-      const settle = P(t, c[0] + 2.4, 1.0);
-      const heroK = lerp(1, PHOTO_K, settle);
-      const heroX = lerp(HERO.x, PHOTO_AT.x, settle), heroY = lerp(HERO.y, PHOTO_AT.y, settle);
-      const hp = P(t, 0.1, 0.7);
-      place(s.hero, heroX, heroY + (1 - hp) * 24, heroK, hp);
-      s.hero.kb.style.transform = `scale(${kbAt(t)})`;
-      s.hero.sweep.style.transform = `translateX(${lerp(-120, 420, P(t, c[0] + 0.8, 1.3))}%) skewX(-12deg)`;
-      s.heroLabels.forEach((e, i) => {
-        const face = photoFace(FOUNDERS[i], HERO.x, HERO.y, 1, 1);
-        rise(e, Math.round(face.x), HERO_LABEL_Y, P(t, c[0] + 0.6 + i * 0.15, 0.5) * (1 - P(t, c[0] + 2.1, 0.3)), 12);
-      });
 
-      // when each milestone lights up: Simple Queue Service once the timeline is in, the others as the founders
-      // reach them, then their tile rises
-      const tileIn = [c[0] + 3.8, c[1] + 1.3, c[2] + 1.3, c[3] + 1.8, c[4] + 1.8];
-      // each founder: the face lifts off the photo (a violet ring) at `lift`, flies from `from` (the face in the
-      // photo then) to its first milestone during [fly, fly + 1], then travels the line ([at, milestone]).
-      // Maxim lifts off the large photo onto 2004; Samar off the compact photo onto 2009.
+      // the heading: large in the middle, its letters closing in from wide apart, sharpening and glowing as they
+      // land; it holds, then shrinks up to the top as the founders come in
+      const enter = P(t, 0.15, 1.0);
+      const settle = P(t, 1.7, 0.8);
+      const font = lerp(HEADING.big.font, HEADING.top.font, settle);
+      s.heading.style.fontSize = font.toFixed(2) + 'px';
+      s.heading.style.letterSpacing = (lerp(0.35, -0.02, ease(enter))).toFixed(4) + 'em';
+      s.heading.style.filter = enter < 1 ? `blur(${((1 - enter) * 8).toFixed(2)}px)` : 'none';
+      const glow = win(t, 0.6, 1.8, 0.4);
+      s.heading.style.textShadow = glow > 0 ? `0 0 ${Math.round(30 * glow)}px rgba(182,100,255,${(0.7 * glow)
+        .toFixed(3)})` : 'none';
+      place(s.heading, 960, Math.round(lerp(HEADING.big.y, HEADING.top.y, settle)), 1, clamp(enter * 1.5));
+
+      // when each milestone lights up, as the founders reach it, then its tile rises
+      const tileIn = [c[0] + 3.6, c[1] + 1.6, c[2] + 1.3, c[3] + 1.8, c[4] + 1.8];
+      // each founder: the face shows with its name at `show`, leaves at `fly` (the name fading), lands on its first
+      // milestone one second later, then travels the line ([at, milestone]). Maxim lands on 2004, Samar on 2009.
       const founders = [
-        {
-          lift: c[0] + 1.9, fly: c[0] + 2.2, first: 0,
-          from: photoFace(FOUNDERS[0], HERO.x, HERO.y, 1, kbAt(c[0] + 2.2)),
-          // down from the large photo first, then left along the line, away from the photo settling top left
-          bend: from => [from.x, LINE.y - 20],
-          route: [[c[1] + 0.3, 1], [c[3] + 0.5, 3], [c[4] + 0.6, 4]],
-        },
-        {
-          lift: c[1] + 0.2, fly: c[1] + 0.5, first: 1, from: photoFace(FOUNDERS[1], PHOTO_AT.x, PHOTO_AT.y, PHOTO_K,
-            kbAt(c[1])),
-          route: [[c[2] + 0.3, 2], [c[3] + 0.5, 3], [c[4] + 0.6, 4]],
-          // down and right under the heading, then down onto 2009: it never crosses the heading
-          bend: () => [NODE_X[1] + MARK_DX[1], 460],
-        },
+        { show: c[0] + 0.1, fly: c[0] + 2.5, first: 0, route: [[c[1] + 0.3, 1], [c[3] + 0.5, 3], [c[4] + 0.6, 4]] },
+        { show: c[0] + 0.3, fly: c[1] + 0.5, first: 1, route: [[c[2] + 0.3, 2], [c[3] + 0.5, 3], [c[4] + 0.6, 4]] },
       ];
-      // where a face is at a time, and its size
+      // where a face is at a time, and its size: the flight curves sideways at the face's height first, then down
+      // onto the line, under the heading
       const facePos = (i, at) => {
-        const { fly, first, from, route, bend: bendOf } = founders[i];
+        const { fly, first, route } = founders[i];
+        const from = [INTRO.x[i], INTRO.y];
         const landing = [NODE_X[first] + MARK_DX[i], LINE.y];
         if (at < fly + 1) {
           const p = ease(clamp(at - fly));
-          const bend = bendOf(from);
+          const bend = [landing[0], from[1]];
           return {
-            x: lerp(lerp(from.x, bend[0], p), lerp(bend[0], landing[0], p), p),
-            y: lerp(lerp(from.y, bend[1], p), lerp(bend[1], landing[1], p), p),
-            size: lerp(from.size, MARK_SIZE, p),
+            x: lerp(lerp(from[0], bend[0], p), lerp(bend[0], landing[0], p), p),
+            y: lerp(lerp(from[1], bend[1], p), lerp(bend[1], landing[1], p), p),
+            size: lerp(INTRO.size, MARK_SIZE, p),
           };
         }
         const stops = route.map(([when, k]) => [when, NODE_X[k] + MARK_DX[i], LINE.y]);
         return { x: pan(at, landing, stops, 1.1)[0], y: LINE.y, size: MARK_SIZE };
       };
       const marks = founders.map((_, i) => facePos(i, t));
+      const landed = i => t >= founders[i].fly + 1;
 
-      // the timeline comes in as the photo settles: the line, the nodes, the heading and its odometer, which rolls
-      // with Maxim until Samar joins, then with the founder furthest along
-      const timelineIn = c[0] + 2.6;
-      const headingIn = P(t, c[0] + 3.0, 0.6);
-      rise(s.heading, HEADING.left + HEADING.w / 2, PHOTO_AT.y, headingIn, 12);
-      rise(s.odometer, HEADING.left + HEADING.w + HEADING.gap + HEADING.odometerW / 2, PHOTO_AT.y, headingIn, 12);
-      const onLine = i => (t >= founders[i].fly + 1 ? marks[i].x - MARK_DX[i] : NODE_X[0]);
-      const front = t < c[2] ? onLine(0) : Math.max(onLine(0), onLine(1));
-      setOdometer(s.odometer, yearAt(front));
-      draw(s.line, P(t, timelineIn, 0.8));
-      // the travelled part reaches the founder furthest along
-      s.progress.style.width = Math.round(Math.max(onLine(0) + MARK_DX[0], onLine(1)) - LINE.x0) + 'px';
-      s.progress.style.opacity = P(t, founders[0].fly + 1, 0.4);
-
-      s.marks.forEach((e, i) => {
-        const { lift } = founders[i];
+      s.faces.forEach((e, i) => {
+        const { show } = founders[i];
         const m = marks[i];
-        place(e, Math.round(m.x), Math.round(m.y), m.size / MARK_SIZE, P(t, lift, 0.25));
+        const pop = P(t, show, 0.5, backOut);
+        // the large face is the one shown until it lands; then the small one takes over on the line
+        place(e, Math.round(m.x), Math.round(m.y), pop * m.size / INTRO.size, landed(i) ? 0 : clamp(pop * 2));
+        place(s.marks[i], Math.round(m.x), Math.round(m.y), 1, landed(i) ? 1 : 0);
+        rise(s.names[i], nameX(i), INTRO.y, P(t, show + 0.2, 0.5) * (1 - P(t, founders[i].fly - 0.1, 0.3)), 12);
         // the trail shows with the speed of the face
         const before = facePos(i, t - 0.1);
-        const speed = t > lift ? clamp(Math.hypot(m.x - before.x, m.y - before.y) / 30) : 0;
+        const speed = t > founders[i].fly ? clamp(Math.hypot(m.x - before.x, m.y - before.y) / 30) : 0;
         s.ghosts[i].forEach((g, k) => {
           const ghost = facePos(i, t - TRAIL[k]);
           place(g, ghost.x, ghost.y, ghost.size / MARK_SIZE * (1 - 0.15 * (k + 1)), speed * (0.35 - 0.1 * k));
         });
       });
+
+      // the timeline draws in below as the names show
+      const timelineIn = c[0] + 1.2;
+      draw(s.line, P(t, timelineIn, 0.8));
+      // the travelled part reaches the founder furthest along
+      const onLine = i => (landed(i) ? marks[i].x - MARK_DX[i] : NODE_X[0]);
+      s.progress.style.width = Math.round(Math.max(onLine(0), onLine(1)) - LINE.x0) + 'px';
+      s.progress.style.opacity = P(t, founders[0].fly + 1, 0.4);
+
       // Temporal arrives: bloom and ripples around its tile
       const arrive = tileIn[LAST];
       const tileCenter = [NODE_X[LAST], TILE_Y];

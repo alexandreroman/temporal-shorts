@@ -217,10 +217,11 @@ CLAUDE.md; a section below and the card order in
   Lineage: 2004 Simple
   Queue Service (Maxim tech lead), 2009 Simple Workflow Service, 2014
   Durable Task Framework (Microsoft, base of Azure Durable Functions), 2015
-  Cadence (Uber, open source 2017), 2019 Temporal (MIT). The official
-  founders photo (`src/assets/temporal-founders.jpg`, temporal.io/about)
-  opens ch1, beside the timeline as in the deck; faces cropped from it
-  mark the founders everywhere else. Third-party companies appear as
+  Cadence (Uber, open source 2017), 2019 Temporal (MIT). Ch1 opens on
+  "20 YEARS IN THE MAKING" in large type, which shrinks into the heading
+  (no year beside it) as the timeline draws in. The founders appear as
+  faces cropped from the official photo (`src/assets/temporal-founders.jpg`,
+  temporal.io/about), never the full photo. Third-party companies appear as
   text, never as logos.
 - Ch6 figures are dated (Series E, September 2026: $12.55B valuation,
   4,300+ paying customers, 570 employees): refresh them with each funding

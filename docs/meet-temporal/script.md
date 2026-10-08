@@ -16,7 +16,7 @@ is offered (open source and Temporal Cloud) and where the company stands
 today. The video opens on the founders, Maxim Fateev and Samar Abbas
 (their careers only, no countries of origin), inside 20 years of lineage:
 Amazon Simple Queue Service and Simple Workflow Service, Microsoft Durable
-Task Framework, Uber Cadence, then Temporal, laid out as in the user's
+Task Framework, Uber Cadence, then Temporal, laid out after the user's
 deck (slide 5). It explains Durable Execution with the order of the series
 (ORDER, CHARGE, SHIP, EMAIL), then the kinds of Workflows teams run, why AI
 agents need it, the open source and Cloud offer, and ends on the company's
@@ -65,41 +65,40 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 01 20 years in the making
 
-- **0:09** Meet Maxim Fateev and Samar Abbas. In 2004, Maxim was tech lead
+- **0:10** Meet Maxim Fateev and Samar Abbas. In 2004, Maxim was tech lead
   of Simple Queue Service at Amazon.
-  - Visuals: The official photo of the two founders, large and centered,
-    framed with a UV border and glow and a dark vignette, zooming in slowly
-    (Ken Burns), a band of light sweeping across it; a mono name under each
-    person: SAMAR ABBAS (CO-FOUNDER, CEO) on the left, MAXIM FATEEV
-    (CO-FOUNDER, CTO) on the right. Maxim's face lifts off the photo in a
-    violet ring and flies with a trail onto a timeline that draws below,
-    as the photo settles at the top left next to the heading "20 YEARS IN
-    THE MAKING" and a year odometer (2004), as on the deck's slide 5. Five
-    milestones across the screen; the first lights up: 2004 AMAZON /
-    "Simple Queue Service" / TECH LEAD: MAXIM.
-- **0:16** In 2009 at Amazon, they led the launch of Simple Workflow
+  - Visuals: The chapter opens before the subtitle on its heading, "20
+    years in the making" ("20 years" in violet), very large in the middle:
+    its letters close in from wide apart, sharpening, with a violet glow;
+    it holds, then shrinks up to the top. The founders' faces (cropped from
+    the official photo) pop in under it, each with its name beside it:
+    MAXIM FATEEV (CO-FOUNDER, CTO) on the left, SAMAR ABBAS (CO-FOUNDER,
+    CEO) on the right. The composition rises as a timeline of five
+    milestones draws in below; Maxim's name fades and his face flies with
+    a trail onto 2004, which lights up: AMAZON / "Simple Queue Service" /
+    TECH LEAD: MAXIM.
+- **0:17** In 2009 at Amazon, they led the launch of Simple Workflow
   Service, to run long processes reliably.
-  - Visuals: Maxim's face travels to 2009 with a motion trail, the odometer
-    rolling; Samar's face lifts off the photo and flies to 2009: AMAZON /
-    "Simple Workflow Service" / LONG-RUNNING PROCESSES.
-- **0:23** In 2014 at Microsoft, Samar co-created the Durable Task
+  - Visuals: Maxim's face travels to 2009 with a motion trail; Samar's name
+    fades and his face flies to 2009: AMAZON / "Simple Workflow Service" /
+    LONG-RUNNING PROCESSES.
+- **0:25** In 2014 at Microsoft, Samar co-created the Durable Task
   Framework, the base of Azure Durable Functions.
-  - Visuals: Samar travels to 2014, the odometer rolling with him:
-    MICROSOFT / "Durable Task Framework" / AZURE DURABLE FUNCTIONS.
-- **0:31** In 2015, both reunited at Uber to create Cadence. Open source
+  - Visuals: Samar travels to 2014: MICROSOFT / "Durable Task Framework" /
+    AZURE DURABLE FUNCTIONS.
+- **0:32** In 2015, both reunited at Uber to create Cadence. Open source
   since 2017, it ran Uber Eats orders.
   - Visuals: Both faces reach 2015: UBER / "Cadence" / OPEN SOURCE, UBER
     EATS.
-- **0:38** In October 2019, they left Uber to found Temporal: Cadence's
+- **0:40** In October 2019, they left Uber to found Temporal: Cadence's
   successor, open source under MIT.
-  - Visuals: Both travel to 2019, the odometer settles on 2019: a
-    highlighted tile (UV border and glow) THEIR OWN COMPANY / official
-    Temporal logo / OPEN SOURCE, MIT LICENSE arrives with a bloom of light
-    and violet ripples.
+  - Visuals: Both travel to 2019: a highlighted tile (UV border and glow)
+    THEIR OWN COMPANY / official Temporal logo / OPEN SOURCE, MIT LICENSE
+    arrives with a bloom of light and violet ripples.
 
 ## 02 What Temporal does
 
-- **0:47** The idea is Durable Execution: an app runs in steps, and Temporal
+- **0:49** The idea is Durable Execution: an app runs in steps, and Temporal
   records each one outside the app.
   - Visuals: Step tiles ORDER / CHARGE / SHIP / EMAIL on top; APP INSTANCE
     A on the left with a STEPS card (take the order, charge the card, ship
@@ -108,7 +107,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     runs as a neon pulse along a cable into the history, where rows 1
     "Order #1042 received" and 2 "Card charged: $42" are SAVED; step 3
     starts.
-- **0:55** If the app crashes, another copy picks up right where it left
+- **0:56** If the app crashes, another copy picks up right where it left
   off. No progress is lost.
   - Visuals: Crash during SHIP: a glitch (color fringes, torn bars,
     scanlines), shake, red flash, APP INSTANCE A CRASHED, its lines fall
@@ -120,7 +119,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 03 Where Temporal is used
 
-- **1:03** A Workflow is any process that must finish correctly: payments,
+- **1:05** A Workflow is any process that must finish correctly: payments,
   orders, bookings, subscriptions.
   - Visuals: A compact hub-and-spoke map: the official Temporal symbol,
     large, glows in the middle; four short spokes draw out with a pulse of
@@ -131,7 +130,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     Subscriptions, User accounts, Inventory; CI/CD, Provisioning, Data
     pipelines; Agents, RAG flows, Model training. All hubs and bubbles stay
     equal: no domain is highlighted.
-- **1:11** Teams also run infrastructure, data pipelines and, more and
+- **1:12** Teams also run infrastructure, data pipelines and, more and
   more, AI on Temporal.
   - Visuals: The map holds; once the subtitle is read, the camera zooms
     into the AI hub: it grows to fill the view while the rest of the map
@@ -140,7 +139,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 04 Why it matters for AI
 
-- **1:19** AI agents are long processes too: many LLM calls, tools to run,
+- **1:21** AI agents are long processes too: many LLM calls, tools to run,
   and waits for a person.
   - Visuals: The zoom carries on: the scene starts magnified and settles
     while the violet glow that fills the view shrinks onto the agentic loop
@@ -149,14 +148,14 @@ and each chapter has a cinematic moment, listed in its visuals.
     with a comet tail running round it; on the right LLM CALLS BILLED
     counts each turn and AGENT PROGRESS fills one step per turn (out of 6);
     a violet "WAITS FOR A PERSON" tag shows under the loop.
-- **1:26** Every LLM call costs time and money. Without Durable Execution,
+- **1:28** Every LLM call costs time and money. Without Durable Execution,
   a crash means starting over.
   - Visuals: The bill stands out; after 3 steps, a crash: shake, red
     flash, the loop shatters into red pieces that fall, "START OVER", the
     LLM puzzled, AGENT PROGRESS drains to 0 / 6, PROGRESS LOST. The pieces
     fly back, the loop restarts from step 1 and coins drop on the bill: 5,
     "+1 PAID AGAIN".
-- **1:34** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
+- **1:35** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
   rely on it too.
   - Visuals: The bill and the progress fade out; a TEMPORAL panel ("DURABLE
     AGENT") frames the loop and a glowing UV ring draws around it, a
@@ -165,18 +164,18 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 05 Open source and Cloud
 
-- **1:41** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
+- **1:43** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
   can run it on their own servers.
   - Visuals: Three tiles across the top, one by one: "Open source" (MIT
     LICENSE), "Temporal 1.0" (2020), "Self-hosted" (ON YOUR OWN SERVERS).
-- **1:49** Temporal Cloud runs the service for you. Your code stays in your
+- **1:50** Temporal Cloud runs the service for you. Your code stays in your
   environment: Temporal never sees it.
   - Visuals: On the right, TEMPORAL CLOUD (UV border, official logo):
     "Temporal Service" and three bars SECURITY & COMPLIANCE, CONTROL PLANE
     & SCALE, HIGH AVAILABILITY; on the left, YOUR ENVIRONMENT (dashed slate
     border, "YOUR APP, YOUR CODE"): YOUR APP with a small Workflow card and
     TEMPORAL SDK · OPEN SOURCE; then NEVER SEES YOUR CODE.
-- **1:57** Connections only go out from your side, and data stays encrypted
+- **1:58** Connections only go out from your side, and data stays encrypted
   end to end.
   - Visuals: A one-way arrow draws from your environment to Temporal Cloud,
     OUTBOUND ONLY, mTLS; neon packets flow out along it; an inbound attempt
@@ -187,12 +186,12 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 06 Temporal today
 
-- **2:05** Today, more than 4,300 companies pay for it, including Netflix,
+- **2:06** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **2:12** In September 2026, investors valued Temporal at $12.55 billion.
+- **2:13** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
@@ -202,7 +201,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **2:21** Temporal keeps code running whatever fails, from everyday apps
+- **2:22** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: The two founders' faces, cropped from the photo, side by side,
     in a small constellation of twinkling stars and lines; title "Meet
