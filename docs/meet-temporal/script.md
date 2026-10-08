@@ -167,7 +167,9 @@ and each chapter has a cinematic moment, listed in its visuals.
     runs, its result and check appearing at the end: Check the calendar
     (Thu 12:30 is free), Find a restaurant (Chez Paulette), Book a table
     (table for 2, confirmed). LLM CALLS BILLED counts one call per turn
-    (3); a violet "WAITS FOR A PERSON" tag shows under the loop.
+    (3): at each call the count swells and a neon coin drops onto a stack
+    inside the tile, with a small bounce and a glint; a violet "WAITS FOR A
+    PERSON" tag shows under the loop.
 - **1:35** Every LLM call costs time and money. Without Durable Execution,
   a crash means starting over.
   - Visuals: The bill stands out. Then the crash, in held stages. Impact:
@@ -178,11 +180,12 @@ and each chapter has a cinematic moment, listed in its visuals.
     Loss: top to bottom, each done row's result is corrupted into glyphs,
     then dissolves into falling particles, its check turns into a red
     cross that vanishes, and the row greys out; a big red PROGRESS LOST
-    pops over the broken loop with a jolt and a glow, and holds. Restart:
+    pops over the broken loop with a jolt and a glow, and holds. The bill
+    stays as it is, fully visible: the money spent is not lost. Restart:
     START OVER, the pieces fly back into the loop, and the agent runs steps
     1 to 3 again, each row highlighted and checked again, each LLM call
-    billed again with a coin dropping on the bill: 4, 5, 6, "+3 PAID
-    AGAIN".
+    billed again, a red coin landing on top of the stack: 4, 5, 6, "+3
+    PAID AGAIN", the pile now twice as high as what was useful.
 - **1:47** OpenAI built Codex on Temporal, and Cursor, Lovable and Replit
   rely on it too.
   - Visuals: The steps and the bill fade out; a TEMPORAL panel ("DURABLE

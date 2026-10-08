@@ -13,6 +13,9 @@
   const LIST = { x: 1440, goalY: 210, rowY: 335, gap: 104, w: 640 };
   const BILL_H = 146;
   const BILL_Y = LIST.rowY + 2 * LIST.gap + 44 + 20 + BILL_H / 2;
+  // the coins that pile up in the bill, one per call: flat discs seen slightly from the side, each 9 px above the
+  // last, on the tile's right; the stack's bottom 22 px above the tile's bottom (in tile pixels)
+  const COIN = { w: 64, h: 26, step: 9, x: LIST.w - 24 - 32, bottom: BILL_H - 22, drop: 40 };
   const TURN = 1.5; // seconds per turn of the loop, one step each, as in durable-ai-agents
   const COMET = 6; // sparks trailing the token
   const SHARDS_PER_ARC = 4; // the pieces each arc breaks into at the crash
@@ -102,7 +105,18 @@
       s.bill = makeCounter(root, 'LLM calls billed', LIST.w);
       s.bill.style.height = BILL_H + 'px';
       // coins dropping on the bill when a call is paid again
-      s.coins = [0, 1, 2].map(() => E(root, ICON('coin', 44, C.neon, 1.8)));
+      // the coin stack, clipped to the tile: six coins, the first run's in neon, the reruns' in red
+      s.bill.style.overflow = 'hidden';
+      s.coins = [0, 1, 2, 3, 4, 5].map(i => {
+        const [face, rim] = i < 3 ? [C.neon, C.neonDark] : [C.red, '#B83B3F'];
+        return E(s.bill,
+          `<svg width="${COIN.w}" height="${COIN.h}" viewBox="0 0 64 26" style="display:block;overflow:visible">`
+          + `<path d="M1 9v8a31 8 0 0 0 62 0V9" fill="${rim}"/>`
+          + `<ellipse cx="32" cy="9" rx="31" ry="8" fill="${face}"/>`
+          + '<ellipse cx="32" cy="9" rx="20" ry="4.5" fill="none" stroke="rgba(20,20,20,.35)" stroke-width="1.5"/>'
+          + '</svg>');
+      });
+      s.bill.n.style.transformOrigin = '0 100%';
       s.bill.note.style.color = C.red;
       s.flash = makeFlash(root);
 
@@ -253,13 +267,22 @@
       s.bill.note.textContent = paidAgain > 0 ? `+${paidAgain} PAID AGAIN` : '';
       // the bill stands out while the subtitle says what each call costs
       s.bill.style.borderColor = win(t, c[1] + 0.2, c[1] + 2.4, 0.3) > 0.5 ? C.violet : C.line;
-      rise(s.bill, LIST.x + sx, BILL_Y + sy, P(t, c[0] + 0.6, 0.5) * (1 - sideOut));
-      // a coin drops onto the bill each time a call is paid again, bounces and fades
+      // the money spent is not lost: the bill stays in place, fully visible, through the whole crash
+      rise(s.bill, LIST.x, BILL_Y, P(t, c[0] + 0.6, 0.5) * (1 - sideOut));
+      // the count swells as it ticks up
+      const billed = [...firstRun, ...rerun];
+      const lastCall = billed.filter(a => t >= a).pop();
+      s.bill.n.style.transform = lastCall === undefined ? '' : `scale(${swell(t, lastCall, 0.14)})`;
+      // at each call a coin drops from just above its place and lands on the stack with a small bounce and a
+      // glint; the stack keeps growing, the reruns' red coins on top of the first run's
       s.coins.forEach((e, i) => {
-        const at = rerun[i];
-        const p = P(t, at, 0.5, backOut);
-        const x = LIST.x + 120 + i * 64, y = lerp(BILL_Y - 90, BILL_Y - 14, p);
-        place(e, x, y, 1, clamp(P(t, at, 0.1) * 2) * (1 - P(t, at + 0.9, 0.4)));
+        const at = billed[i];
+        const land = P(t, at, 0.35, easeIn);
+        const bounce = Math.sin(Math.PI * clamp((t - at - 0.35) / 0.2)) * 3;
+        const y = COIN.bottom - COIN.h / 2 - i * COIN.step - (1 - land) * COIN.drop - bounce;
+        place(e, COIN.x, Math.round(y * 100) / 100, 1, P(t, at, 0.1));
+        const glint = win(t, at + 0.35, at + 0.55, 0.1);
+        e.style.filter = glint > 0 ? `drop-shadow(0 0 ${Math.round(10 * glint)}px rgba(255,255,255,.8))` : '';
       });
       placeFlash(s.flash, t, crashAt);
 
