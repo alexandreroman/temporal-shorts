@@ -119,7 +119,10 @@ the visuals belong to each theme (last section).
   panel (`makeAppPanel`), TEMPORAL panel (`makeTemporalPanel`, "Outside the
   app"), Event History card (`makeHistoryCard`, `markCrash`, "APP CRASHED
   HERE"), status tags (`statusTag`), crash effects (`shakeAt`,
-  `makeFlash`). A helper used by two themes lives in `src/shared.js`.
+  `makeFlash`, `crashGlitch`, `makeCrashMarks`), the takeover by a new
+  instance (`leavingInstance`, `arrivingInstance`, `setArrivalGlow`,
+  `makeNewTag`, `makeHandOffCard`). A helper used by two themes lives in
+  `src/shared.js`.
 - The runtime is **"the app"** (APP MEMORY, APP CRASH, APP INSTANCE A / B,
   "OUTSIDE THE APP"); "server" would blur with the LLM's server.
   durable-execution, which teaches Workers, says "server" then "Worker".

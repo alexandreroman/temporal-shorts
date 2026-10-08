@@ -123,16 +123,24 @@ Lisbon.
     SAVED; MODEL CALLS BILLED 2, FLIGHTS BOOKED 1.
 - **1:34** If the app crashes mid-turn, another copy picks up the agent
   exactly where it left off.
-  - Visuals: step 5 starts, flash + shake, A turns red (CRASHED), "APP
-    CRASHED HERE" under row 4 and the saved rows tinted; APP INSTANCE B
-    takes over (TAKING OVER).
+  - Visuals: step 5 starts; just before the crash, A's border and status
+    flicker red and its chip jitters; then flash + shake of the app side
+    only, a red bolt strikes A's panel, A turns red (CRASHED) and its chip
+    falls; then an "APP CRASH" tag stands in the panel; Temporal stays
+    still, with "APP CRASHED HERE" under row 4 and the saved rows tinted.
+    Bolt and tag leave with A's status, then A, a dead machine, greys,
+    drops and fades out. A new APP INSTANCE B (IDLE) slides in from the left
+    to the same place, its border glowing violet, the step tiles clear, and
+    a NEW INSTANCE tag pops in where APP CRASH stood. A violet AGENT
+    WORKFLOW card flies from the first history row to its status, which
+    turns TAKING OVER; the tag fades.
 - **1:41** Instance B replays the history: steps 1 to 4 return their saved
   results, then step 5 runs for real.
-  - Visuals: rows 1 to 4 are handed back one by one (REUSED, "STEP n: FROM
-    THE HISTORY"), the steps re-check without running, the counters show
-    NOT RE-BILLED / NOT RE-RUN; step 5 then runs and is SAVED (Model: write
-    the reply).
-- **1:51** Saved results are reused, not redone: no finished model call is
+  - Visuals: B's violet glow fades, then rows 1 to 4 are handed back one by
+    one (REUSED, "STEP n: FROM THE HISTORY"), the steps re-check without
+    running, the counters show NOT RE-BILLED / NOT RE-RUN; step 5 then runs
+    and is SAVED (Model: write the reply).
+- **1:50** Saved results are reused, not redone: no finished model call is
   paid again, no finished tool reruns.
   - Visuals: tags "REUSED, NOT RE-BILLED" (model rows) and "REUSED, NOT
     RE-RUN" (tool rows); counters glow: MODEL CALLS BILLED 3 "NOT 5",

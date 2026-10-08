@@ -1,7 +1,7 @@
 // ===================== 2. WHEN A STEP FAILS
 // Step row on top, ORDER #1042 status tile and CARD CHARGED counter below, one under each half of the row.
-// Everyday failures strike the links, then the server crashes after Charge card: the order is stuck. Restarting
-// from the top charges the card a second time.
+// Everyday failures slam down on the links and snap them, then the server crashes after Charge card: the order is
+// stuck. Restarting from the top charges the card a second time.
 // The block keeps every name declared in this file local to this scene.
 {
   const ROW = { x0: 375, gap: 390, y: 430, w: 290, h: 170 };
@@ -12,14 +12,101 @@
   // edge to the last step's right edge
   const BOTTOM = { w: ROW.gap + ROW.w, h: 200, statusX: ROW.x0 + ROW.gap / 2, chargeX: ROW.x0 + ROW.gap * 2.5 };
   const CRASH_X = ROW.x0 + ROW.gap * 2; // SERVER CRASH centered over Ship package
-  // c[0]: each cause pops in on its word; the link under it flashes red and the tiles on each side jolt
+  // c[0]: each cause slams down on its word, the link under it snaps with a burst of sparks, the tiles on each side
+  // jolt and flicker red, and the whole row kicks; the link mends a second later. accent: the cause's own touch,
+  // the clock of Timeout ticks, the tiles next to Restart blink off and on.
   const CAUSES = [
-    { label: 'Network cut', icon: 'plug', at: 2.0 },
-    { label: 'Timeout', icon: 'clock', at: 2.9 },
-    { label: 'Restart', icon: 'retry', at: 4.1 },
+    { label: 'Network cut', icon: 'plug', at: 2.0, accent: null },
+    { label: 'Timeout', icon: 'clock', at: 2.9, accent: 'tick' },
+    { label: 'Restart', icon: 'retry', at: 4.1, accent: 'blink' },
   ];
-  // small damped shake of the tiles next to a failing link, as dx
-  const jolt = (t, a) => (t < a ? 0 : Math.sin((t - a) * 55) * 7 * (1 - clamp((t - a) / 0.45)));
+  // the tag falls DROP.h px in DROP.d s and lands at the cause's time; the link mends from HEAL.at s after the hit,
+  // over HEAL.d s: everything is back at rest long before the tags fade out at c[1] - 0.45
+  const DROP = { h: 50, d: 0.16 };
+  // widening and flattening of a tag at its impact; it stretches the other way on the rebound
+  const SQUASH = { x: 0.14, y: 0.2 };
+  const HEAL = { at: 1.0, d: 0.3 };
+  // sparks flying out of the break: [angle in degrees, 0 pointing right and -90 up, distance in px]. A fixed table
+  // keeps every frame deterministic; at most 60 px, they stay clear of the tags above.
+  const SPARKS = [[-150, 50], [-105, 60], [-60, 52], [-20, 40], [25, 44], [70, 56], [120, 48], [165, 40]];
+  // damped shake of the tiles next to a failing link, as dx
+  const jolt = (t, a) => (t < a ? 0 : Math.sin((t - a) * 55) * 12 * (1 - clamp((t - a) / 0.45)));
+  // much smaller vertical kick of the whole row at each hit, as dy (the crash shake is 12 by 8 px)
+  const kick = (t, a) => (t < a ? 0 : Math.sin((t - a) * 60) * 4 * (1 - clamp((t - a) / 0.3)));
+  // the border of the tiles next to a failing link flickers red, 0.07 s on, 0.07 s off, three times
+  const flickerOn = (t, a) => t >= a && t < a + 0.42 && Math.floor((t - a) / 0.07) % 2 === 0;
+  // Restart: the tiles go dark twice, 0.1 s each
+  const blinkOff = (t, a) => t >= a && t < a + 0.4 && Math.floor((t - a) / 0.1) % 2 === 1;
+  // Timeout: the clock hand ticks a quarter turn every 0.15 s, four times, back to its resting angle
+  const tickAngle = (t, a) => (t >= a && t < a + 0.6 ? (Math.floor((t - a) / 0.15) + 1) * 90 : 0);
+  // squash of a landing tag: 1 at the impact, a stretch (negative) on the rebound, 0 at rest 0.25 s later
+  const squash = (t, a) => {
+    if (t < a) return 0;
+    const u = clamp((t - a) / 0.25);
+    return (1 - u) ** 2 * Math.cos(u * Math.PI * 3);
+  };
+  const svgLine = (svg, width) => {
+    const l = document.createElementNS(SVGNS, 'line');
+    l.setAttribute('stroke-width', width);
+    l.setAttribute('stroke-linecap', 'round');
+    l.style.opacity = 0;
+    svg.appendChild(l);
+    return l;
+  };
+  const svgRing = svg => {
+    const ring = document.createElementNS(SVGNS, 'circle');
+    ring.setAttribute('fill', 'none');
+    ring.setAttribute('stroke', C.red);
+    ring.setAttribute('stroke-width', 3);
+    ring.style.opacity = 0;
+    svg.appendChild(ring);
+    return ring;
+  };
+  const setLine = (l, x1, y1, x2, y2, color, o) => {
+    l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+    l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+    l.setAttribute('stroke', color);
+    l.style.opacity = o;
+  };
+  // the link between tiles i and i + 1 (see stepLinks()), snapped at its middle from `hit` until it mends: a ring at
+  // the break, two halves pulled apart, their broken ends bent away from each other, and the sparks. Returns whether
+  // the break shows (the link itself hides meanwhile).
+  const placeBreak = (brk, i, t, hit) => {
+    const healAt = hit + HEAL.at, healed = healAt + HEAL.d;
+    const broken = t >= hit && t < healed;
+    if (!broken) {
+      brk.ring.style.opacity = 0;
+      brk.halves.forEach(l => { l.style.opacity = 0; });
+      brk.sparks.forEach(l => { l.style.opacity = 0; });
+      return false;
+    }
+    const xa = ROW.x0 + i * ROW.gap + ROW.w / 2 + 2;
+    const xb = ROW.x0 + (i + 1) * ROW.gap - ROW.w / 2 - 2;
+    const xm = (xa + xb) / 2;
+    const open = P(t, hit, 0.08, backOut) * (1 - P(t, healAt, HEAL.d));
+    const gap = 28 * open, bend = 7 * open;
+    // red and crackling while broken, back to the plain link color as it mends
+    const mending = t >= healAt;
+    const crackle = !mending && t < hit + 0.4 && Math.floor((t - hit) / 0.07) % 2 === 1 ? 0.55 : 1;
+    const color = mending ? C.line : C.red;
+    brk.halves.forEach(l => l.setAttribute('stroke-width', mending ? 2 : 3));
+    setLine(brk.halves[0], xa, ROW.y, xm - gap / 2, ROW.y + bend, color, crackle);
+    setLine(brk.halves[1], xm + gap / 2, ROW.y - bend, xb, ROW.y, color, crackle);
+    // a red ring that widens and fades within 0.25 s
+    const f = clamp((t - hit) / 0.25);
+    brk.ring.setAttribute('cx', xm); brk.ring.setAttribute('cy', ROW.y);
+    brk.ring.setAttribute('r', 4 + 22 * (1 - (1 - f) ** 2));
+    brk.ring.style.opacity = 1 - f;
+    // sparks: each streak flies out along its angle, shrinking and fading within 0.4 s; each link turns the table
+    const u = clamp((t - hit) / 0.4), out = 1 - (1 - u) ** 3, len = 16 * (1 - u) + 2;
+    brk.sparks.forEach((l, k) => {
+      const [deg, dist] = SPARKS[k];
+      const a = (deg + i * 17) * Math.PI / 180, r = dist * out;
+      const r0 = Math.max(0, r - len), cos = Math.cos(a), sin = Math.sin(a);
+      setLine(l, xm + cos * r0, ROW.y + sin * r0, xm + cos * r, ROW.y + sin * r, C.red, 1 - u);
+    });
+    return true;
+  };
   // ORDER #1042 status tile, laid out like the CARD CHARGED counter: label, status line, note
   const makeStatusTile = root => {
     const e = E(root,
@@ -74,8 +161,14 @@
         Object.assign(e.style, {
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '250px', height: '50px',
         });
+        e.icon = e.querySelector('svg');
         return e;
       });
+      s.breaks = s.steps.links.map(() => ({
+        halves: [svgLine(s.svg, 3), svgLine(s.svg, 3)],
+        ring: svgRing(s.svg),
+        sparks: SPARKS.map(() => svgLine(s.svg, 3)),
+      }));
       s.bolt = E(root, ICON('bolt', 100, C.red, 1.6));
       s.crash = tag(root, 'Server crash', 'red big');
       Object.assign(s.crash.style, { width: '310px', height: '66px', textAlign: 'center' });
@@ -95,22 +188,40 @@
         if (t < restart && i === 1 && t >= crashAt) return 3;
         return t < a ? 0 : t < b ? 1 : 2;
       });
-      // step row; the tiles next to a failing link jolt, the link flashes red
+      // step row; at each hit the whole row kicks, the tiles next to the link jolt and flicker red (Restart: they
+      // blink off and on), the link snaps
       s.steps.tiles.forEach((e, i) => {
         stepState(e, states[i]);
-        let dx = sx;
-        CAUSES.forEach((cause, k) => { if (k === i || k + 1 === i) dx += jolt(t, c[0] + cause.at); });
+        let dx = sx, dy = sy, o = 1;
+        CAUSES.forEach((cause, k) => {
+          const hit = c[0] + cause.at;
+          dy += kick(t, hit);
+          const nextToLink = k === i || k + 1 === i;
+          if (!nextToLink) return;
+          dx += jolt(t, hit);
+          if (flickerOn(t, hit)) e.style.borderColor = C.red;
+          if (cause.accent === 'blink' && blinkOff(t, hit)) o = 0.15;
+        });
         const p = P(t, 0.1 + i * 0.12, 0.45, backOut);
-        place(e, s.steps.xs[i] + dx, ROW.y + sy, p, clamp(p * 2));
+        place(e, s.steps.xs[i] + dx, ROW.y + dy, p, clamp(p * 2) * o);
       });
       s.steps.links.forEach((l, i) => {
-        const hit = win(t, c[0] + CAUSES[i].at, c[0] + CAUSES[i].at + 0.6, 0.12);
-        l.setAttribute('stroke', hit > 0.5 ? C.red : C.line);
-        draw(l, P(t, 0.5 + i * 0.12, 0.35));
+        const broken = placeBreak(s.breaks[i], i, t, c[0] + CAUSES[i].at);
+        draw(l, P(t, 0.5 + i * 0.12, 0.35), broken ? 0 : 1);
       });
+      // the tags fall onto their spots and land with a squash, their bottom edge kept on the spot (the 50 px tag
+      // shrinks by SQUASH.y * sq of its height around its center)
       s.causes.forEach((e, i) => {
-        const p = popIn(t, c[0] + CAUSES[i].at, 0.08);
-        place(e, (s.steps.xs[i] + s.steps.xs[i + 1]) / 2, TOP_Y, p.s, p.o * (1 - P(t, c[1] - 0.45, 0.35)));
+        const land = c[0] + CAUSES[i].at;
+        const fall = P(t, land - DROP.d, DROP.d, easeIn), sq = squash(t, land);
+        const y = TOP_Y - DROP.h * (1 - fall) + SQUASH.y * sq * 25;
+        const o = P(t, land - DROP.d, 0.06) * (1 - P(t, c[1] - 0.45, 0.35));
+        place(e, (s.steps.xs[i] + s.steps.xs[i + 1]) / 2, y, 1, o);
+        if (sq !== 0) e.style.transform += ` scale(${1 + SQUASH.x * sq}, ${1 - SQUASH.y * sq})`;
+        if (CAUSES[i].accent === 'tick') {
+          const angle = tickAngle(t, land);
+          e.icon.style.transform = angle ? `rotate(${angle}deg)` : '';
+        }
       });
       // order status: PENDING, stuck after the crash, PENDING again once restarted
       const isStuck = t >= stuck && t < restart;

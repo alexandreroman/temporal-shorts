@@ -18,7 +18,6 @@
   const PAGE = 560, TOKENS_FULL = 12400;
   const gaugeFill = pagePx => (pagePx / PAGE) ** 2;
   const tokensFor = pagePx => Math.round(TOKENS_FULL * clamp(gaugeFill(pagePx)));
-  const easeOut = p => 1 - (1 - p) ** 3;
   // flight of the coin paid out at each part: degrees from straight up (negative: left) and px of travel, cycled so
   // consecutive coins differ; a narrow fan around straight up, never downward, at most 5° right to clear the number
   const COIN_PATHS = [[-20, 100], [5, 95], [-40, 105], [-8, 90], [-30, 110], [5, 105], [-45, 95]];

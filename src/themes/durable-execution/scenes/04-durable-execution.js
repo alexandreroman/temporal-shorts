@@ -1,7 +1,8 @@
 // ===================== 4. DURABLE EXECUTION WITH TEMPORAL
-// Temporal logo and the code card alone: it runs to completion. The card becomes a Workflow (a workflows.ts excerpt
-// with the TypeScript SDK), its Activities declaration lights up and each await line links to an Activity tile
-// calling its service; then Ship package fails and Temporal retries it, with growing delays, until it succeeds.
+// Temporal logo and the code card alone: it runs to completion, and a barrage of failure bolts bounces off it. The
+// card becomes a Workflow (a workflows.ts excerpt with the TypeScript SDK), its Activities declaration lights up
+// and each await line links to an Activity tile calling its service; then Ship package fails and Temporal retries
+// it, with growing delays, until it succeeds.
 // The block keeps every name declared in this file local to this scene.
 {
   // Layout: the Temporal logo stays on top, centered on x=960. Alone, the code card (the workflows.ts excerpt) and
@@ -32,6 +33,22 @@
   const ATTEMPT_X = [1278, 1398, 1568];
   const MARK = 34;
   const RUNNING = C.highlight; // the code highlight, as in setCodeLine
+  // failure bolts thrown at the card alone, in impact order: impact time after c[0], contact point on the card's
+  // edge, approach start and bounce end (all relative to the card's center, x0, y0), icon size and bounce spin in
+  // degrees; they come from the sides and the top corners, clear of the logo above and the badge below. The last,
+  // bigger bolt hits hardest.
+  const BOLTS = [
+    { at: 3.5, edge: [410, -70], from: [700, -220], to: [580, -170], size: 48, spin: 40 },
+    { at: 4.0, edge: [-410, 50], from: [-720, -100], to: [-590, -60], size: 48, spin: -40 },
+    { at: 4.4, edge: [-410, -229], from: [-660, -340], to: [-560, -320], size: 48, spin: -50 },
+    { at: 4.75, edge: [410, -229], from: [670, -350], to: [570, -330], size: 48, spin: 50 },
+    { at: 5.2, edge: [410, 60], from: [760, 170], to: [640, -40], size: 76, spin: 60 },
+  ];
+  // unit vector from point a to point b
+  const unit = ([ax, ay], [bx, by]) => {
+    const d = Math.hypot(bx - ax, by - ay);
+    return [(bx - ax) / d, (by - ay) / d];
+  };
 
   // Activity tile: icon, ACTIVITY kicker and label stacked in the middle, with the makeStep status marks
   // (see stepState)
@@ -101,12 +118,16 @@
       Object.assign(s.badge.style, {
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '350px',
       });
-      // a neon ring around the card when the bolt bounces off it
+      // a neon ring around the card each time a bolt bounces off it
       s.ring = E(root, '', '', {
         width: (s.card.w + 20) + 'px', height: (s.card.h + 20) + 'px', border: '2px solid ' + C.neon,
         borderRadius: '14px',
       });
-      s.bolt = E(root, ICON('bolt', 48, C.red, 2));
+      // a red spark where each bolt hits, under the bolt
+      s.sparks = BOLTS.map(b => E(root, '', '', {
+        width: b.size + 'px', height: b.size + 'px', border: '3px solid ' + C.red, borderRadius: '50%',
+      }));
+      s.bolts = BOLTS.map(b => E(root, ICON('bolt', b.size, C.red, 2)));
 
       // calls: await line -> Activity tile (from the card's right edge), Activity -> its service
       const cardRight = CARD.x + s.card.w / 2 + 4, tileLeft = TILE.x - TILE.w / 2 - 4;
@@ -131,27 +152,46 @@
       Object.assign(s.retries.style, { fontSize: '18px', lineHeight: '23px' });
     },
     update(t, c, s) {
-      // ---- c[0]: the logo, then the code card alone, running to completion; at c[1] the card and its badge slide
-      // left
+      // ---- c[0]: the logo, then the code card alone, running to completion, unharmed by a barrage of failure
+      // bolts; at c[1] the card and its badge slide left
       const lp = P(t, c[0] + 0.1, 0.6);
       const slide = P(t, c[1] + 0.2, 0.9);
       const cardX = lerp(CARD.x0, CARD.x, slide), cardY = lerp(CARD.y0, CARD.y, slide);
       s.logo.style.opacity = lp;
       s.logo.style.transform = `translateY(${(1 - lp) * 16}px)`;
-      const cp = P(t, c[0] + 0.5, 0.6, backOut);
-      place(s.card, cardX, cardY, cp, clamp(cp * 2));
       s.card.hdr.style.opacity = P(t, c[1] + 1.4, 0.4);
       const bp = popIn(t, c[0] + 2.9, 0.08);
       place(s.badge, cardX, BADGE_Y, bp.s, bp.o);
 
-      // a failure bolt hits the card and bounces off
-      const hit = c[0] + 4.6;
-      const cardRight = CARD.x0 + s.card.w / 2;
-      const inP = P(t, hit - 0.4, 0.4, easeIn), outP = P(t, hit, 0.6);
-      const bx = lerp(lerp(cardRight + 300, cardRight + 34, inP), cardRight + 170, outP);
-      const by = lerp(lerp(CARD.y0 - 190, CARD.y0 - 60, inP), CARD.y0 - 150, outP);
-      place(s.bolt, bx, by, 1, P(t, hit - 0.4, 0.15) * (1 - P(t, hit + 0.25, 0.35)), outP * 40);
-      place(s.ring, CARD.x0, CARD.y0, 1, win(t, hit - 0.05, hit + 0.3, 0.15) * 0.9);
+      // each bolt accelerates in, hits the card's edge with a red spark and bounces off, spinning and fading; the
+      // card jolts a few pixels along the hit and lights its neon ring. The jolt is exactly 0 outside the hits, so
+      // the card rests on whole pixels.
+      let joltX = 0, joltY = 0, glow = 0;
+      BOLTS.forEach((b, k) => {
+        const hit = c[0] + b.at;
+        const strong = k === BOLTS.length - 1;
+        const [dx, dy] = unit(b.from, b.edge); // direction of travel
+        const gap = b.size * 0.7; // from the bolt's center to the edge at impact
+        const hitX = b.edge[0] - dx * gap, hitY = b.edge[1] - dy * gap;
+        const inP = P(t, hit - 0.4, 0.4, easeIn), outP = P(t, hit, 0.6);
+        const bx = lerp(lerp(b.from[0], hitX, inP), b.to[0], outP);
+        const by = lerp(lerp(b.from[1], hitY, inP), b.to[1], outP);
+        const boltO = P(t, hit - 0.4, 0.15) * (1 - P(t, hit + 0.25, 0.35));
+        place(s.bolts[k], CARD.x0 + bx, CARD.y0 + by, 1, boltO, outP * b.spin);
+
+        const sparkP = P(t, hit, 0.35);
+        const sparkO = t < hit ? 0 : 1 - sparkP;
+        place(s.sparks[k], CARD.x0 + b.edge[0], CARD.y0 + b.edge[1], lerp(0.3, 1.8, sparkP), sparkO);
+
+        const push = (strong ? 8 : 4) * recoil(t, hit); // the jolt decays within 0.3 s
+        joltX += dx * push;
+        joltY += dy * push;
+        const ring = strong ? win(t, hit - 0.05, hit + 0.6, 0.15) : win(t, hit - 0.05, hit + 0.25, 0.15) * 0.75;
+        glow = Math.max(glow, ring);
+      });
+      const cp = P(t, c[0] + 0.5, 0.6, backOut);
+      place(s.card, cardX + joltX, cardY + joltY, cp, clamp(cp * 2));
+      place(s.ring, cardX + joltX, cardY + joltY, 1, glow);
 
       // ---- c[2]: each Activity runs in turn; Ship package fails twice and is retried after 1s, then 2s
       const run = [c[2] + 0.2, c[2] + 0.75, c[2] + 1.3, c[2] + 5.9]; // when each Activity starts

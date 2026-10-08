@@ -196,13 +196,6 @@ function setHistoryTag(hist, i, label, kind, o, pop = 0) {
 // Highlight row i with opacity o, below the crash line for the rows under it
 const setHistoryScan = (hist, i, o) => setScan(hist, hist.rowTop(i), o);
 
-// ---------- small animation helpers
-// Brief bump (0 to 1 and back to 0) for a pop on a change or an appearance at `at`
-const bumpAt = (t, at) => win(t, at, at + 0.15, 0.15);
-// Appearance at `at` of a small element (badge, icon, tag), as { o, s } for place(): it fades in while it
-// bumps briefly above its native size (k: height of the bump, 0 for none)
-const popIn = (t, at, k = 0.14) => ({ o: P(t, at, 0.2), s: 1 + k * bumpAt(t, at) });
-
 // ---------- one shot for chapters 5 and 6: Worker panel with the code card on the left, CARD CHARGED counter
 // and order status under it, TEMPORAL panel with the Event History on the right, with room under its rows for the
 // WORKFLOW COMPLETE tag. Both chapters build it with the same coordinates, so the cut from chapter 5 to chapter 6
@@ -283,11 +276,6 @@ function setCodeSpinner(shot, i, o, sx = 0, sy = 0) {
 }
 // Spinner opacity for an Activity running from `run` until its RESULT leaves
 const runningSpin = (t, run) => win(t, run + 0.2, run + RESULT_LAG, 0.15);
-// RESULT chip flight: it pops in at (x0, y0) at `at`, travels to (x1, y1) during [at + 0.1, at + 0.55], then is
-// absorbed there (shrinks and fades)
-function flyChip(chip, t, at, x0, y0, x1, y1) {
-  fly(chip, t, at, x0, y0, at + 0.1, 0.45, x1, y1, at + 0.55, x1, y1);
-}
 // RESULT chip of step i: appears at `at` at the end of its await line, flies to the start of its history row and
 // is absorbed there
 function flyResultToHistory(chip, t, at, i) {

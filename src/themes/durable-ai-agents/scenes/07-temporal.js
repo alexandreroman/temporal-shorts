@@ -1,4 +1,8 @@
 // ===================== 7. DURABLE EXECUTION WITH TEMPORAL
+// Temporal keeps the agent's Event History outside the app and saves each result before the next step. Then app
+// instance A crashes: its memory empties, and the dead instance greys, drops and fades with its context panel. A new
+// copy, instance B, slides in to the same place, and Temporal hands it the agent; it runs the agent again from the
+// start, gets every saved result back from the history (no LLM call billed again), then runs the last step.
 // The block keeps every name declared in this file local to this scene.
 {
   // Event History rows: the LLM call of each step (its action, lowercase), then its tool result
@@ -10,8 +14,14 @@
   const makeCallCard = (root, i) => makeResultCard(root, isLLM(i), isLLM(i) ? 'LLM CALL' : 'TOOL CALL');
   // Chapter 7 layout: app on the left, Temporal on the right, both under the step tiles
   const APP = { x: 470, y: 445 };
-  const MEM = { x: 470, y: 469, slot0: 162, slotGap: 88, slotY: 484 }; // memory panel and its block slots
+  const MEM = { x: 470, y: 469, slot0: 162, slotGap: 88, slotY: 484 }; // context panel and its block slots
   const HIST = { x: 1380, y: 580, cardX: 1050, row0: 447, rowGap: 44 }; // Event History card and its rows
+  // NEW INSTANCE: astride the top edge of instance B's panel, centered between its name and its TAKING OVER status
+  // (about 65 px from each); 6 px low, so it keeps 20 px of clear space under the Calendar tile. Fixed even width:
+  // it rests on whole pixels (solid: the panel border does not show through).
+  const NEW_TAG = { x: APP.x + 60, y: APP.y - 155 + 6, w: 240 };
+  // the agent chip flies from the first Event History row to instance B's status, at the panel's top right
+  const STATUS_AT = { x: APP.x + 290, y: APP.y - 155 + 36 };
   const memSlot = i => MEM.slot0 + i * MEM.slotGap;
   const rowY = i => HIST.row0 + i * HIST.rowGap;
   // the big intro logo flies into the TEMPORAL panel header from c[0] + FLIGHT.at, for FLIGHT.d seconds
@@ -44,7 +54,7 @@
       s.steps = makeStepRow(root, s.svg, STEP_TILES, 465, 330, 200, 260, 104);
       s.restart = path(s.svg, 'M 1440 140 Q 960 40 480 140', C.violet, 3);
       s.restartL = E(root, 'From the start', 'lbl', { color: C.violet });
-      // app side, mirroring chapter 6: instance panel, its memory, the LLM bill and the booking
+      // app side, mirroring chapter 6: instance panel, its context, the LLM bill and the booking
       s.A = makeAppPanel(root, 'APP INSTANCE A', 780, 310); s.B = makeAppPanel(root, 'APP INSTANCE B', 780, 310);
       s.mem = makeMemory(root, 732, 210);
       s.mblocks = makeMemBlocks(root, 8, 76, 56);
@@ -62,6 +72,9 @@
       });
       s.saveCards = JR.map((_, i) => makeCallCard(root, i));
       s.reuseCards = JR.slice(0, 6).map((_, i) => makeCallCard(root, i));
+      // the agent itself, handed to instance B
+      s.handChip = makeHandOffCard(root, 'LUNCH AGENT');
+      s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w);
       s.flash = makeFlash(root);
       s.done = tag(root, 'Agent complete', 'neon');
       s.logo = E(root, `<img src="${LOGO}" style="height:150px;display:block">`);
@@ -70,7 +83,11 @@
       // first run: each row is worked on, then saved, and only then the agent moves on
       const write = [0, 1, 2, 3, 4, 5].map(i => c[1] + 0.3 + i * 1.05).concat([c[3] + 2.9, c[3] + 3.95]);
       const saved = write.map(w => w + 0.85);
-      const crashAt = c[2] + 0.8, bOn = crashAt + 1.8, reset = bOn + 0.3, rerun = bOn + 1.3;
+      // c[2]: the crash; once the memory blocks have fallen, instance A leaves (aDrop) and instance B arrives (bIn),
+      // and the steps reset; Temporal hands B the agent: the chip leaves the history at handOff, as the "From the
+      // start" arc draws, and reaches B's status at takeOver; step 1 runs again at rerun
+      const crashAt = c[2] + 0.8, aDrop = crashAt + 1.6, bIn = aDrop + 0.6, reset = bIn;
+      const handOff = bIn + 0.7, takeOver = handOff + 0.55, rerun = takeOver + 0.3;
       // replay: saved rows 1-6 are handed back one by one, then their tags explain why it matters;
       // the replay ends at told[0]
       const replay = [0, 1, 2, 3, 4, 5].map(i => c[3] + 0.2 + i * 0.4);
@@ -96,25 +113,39 @@
         return t >= replay[2 * i + 1] + 0.35 ? 2 : t >= start ? 1 : 0;
       });
       placeStepRow(s.steps, t, c[0] + 2.5, states, sx, sy);
-      draw(s.restart, P(t, bOn + 0.5, 0.8), 1 - P(t, c[3] + 0.3, 0.4));
-      place(s.restartL, 960, 115, 1, P(t, bOn + 0.9, 0.35) * (1 - P(t, c[3] + 0.3, 0.4)));
+      draw(s.restart, P(t, handOff, 0.8), 1 - P(t, c[3] + 0.3, 0.4));
+      place(s.restartL, 960, 115, 1, P(t, handOff + 0.4, 0.35) * (1 - P(t, c[3] + 0.3, 0.4)));
 
-      // app instances: A runs then crashes, B takes over in the same place
+      // app instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
       const aIn = P(t, c[0] + 2.3, 0.5, backOut);
-      place(s.A, APP.x + sx, APP.y + sy, aIn, clamp(aIn * 2) * (1 - P(t, bOn, 0.3)));
+      const leave = leavingInstance(t, aDrop);
+      place(s.A, APP.x + sx, APP.y + sy + leave.dy, aIn, clamp(aIn * 2) * leave.o);
       if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, 'RUNNING THE AGENT', t >= write[0] ? 'running' : 'idle');
-      place(s.B, APP.x, APP.y, 1, P(t, bOn + 0.3, 0.35));
-      if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', t >= rerun ? 'running' : 'idle');
+      // a new copy, instance B, slides in from the left once A is gone, its border glowing violet while it arrives
+      // and takes over, gone by c[3]; IDLE until the agent chip reaches it
+      const bHere = t >= bIn;
+      const arrive = arrivingInstance(t, bIn);
+      place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
+      if (t < takeOver) setAppStatus(s.B, 'IDLE', 'stopped');
+      else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', t >= rerun ? 'running' : 'idle');
       else if (t < told[0]) setAppStatus(s.B, 'REPLAYING…', 'running');
       else setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
+      setArrivalGlow(s.B, t, bIn, c[3] - 0.3);
 
-      // app memory: filled as results are saved, emptied by the crash, refilled from the history
-      place(s.mem, MEM.x + sx, MEM.y + sy, 1, P(t, c[0] + 2.5, 0.45));
-      s.mem.style.borderColor = t > crashAt && t < bOn ? C.red : C.line;
-      s.mem.empty.style.opacity = P(t, crashAt + 1.1, 0.4) * (1 - P(t, bOn, 0.3));
+      // context: filled as results are saved, emptied by the crash, refilled from the history. The panel moves
+      // with the instance on screen (A, then B), so it never floats without its app; both are gone when it switches.
+      const memDx = bHere ? arrive.dx : sx, memDy = bHere ? 0 : sy + leave.dy;
+      const memOn = bHere ? arrive.o : leave.o;
+      place(s.mem, MEM.x + memDx, MEM.y + memDy, 1, P(t, c[0] + 2.5, 0.45) * memOn);
+      s.mem.style.borderColor = dead && !bHere ? C.red : C.line;
+      s.mem.empty.style.opacity = bHere ? 0 : P(t, crashAt + 1.1, 0.4);
+      const greyed = bHere ? '' : leave.grey;
+      s.A.style.filter = greyed;
+      s.mem.style.filter = greyed;
+      // the blocks of A have all fallen before A leaves; B's are empty until the replay
       s.mblocks.forEach((b, i) => {
-        if (t < bOn) {
+        if (!bHere) {
           const grow = i < 6 ? P(t, saved[i], 0.35, backOut) : 0;
           placeMemBlock(b, memSlot(i), MEM.slotY, grow, P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn), sx, sy);
         } else {
@@ -160,6 +191,11 @@
       setScan(s.jr, 68 + Math.max(0, scanning) * 44, scanning >= 0 ? 1 : 0);
       place(s.done, 1380, 872, P(t, saved[7] + 0.5, 0.45, backOut), P(t, saved[7] + 0.5, 0.35));
       placeFlash(s.flash, t, crashAt);
+      // takeover: NEW INSTANCE pops on B once it is almost in place and is gone by c[3]; Temporal hands it the agent,
+      // a chip from the first history row to its status, which then reads TAKING OVER
+      const newAt = bIn + 0.5;
+      placeNewTag(s.newTag, t, newAt, c[3] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
+      flyChip(s.handChip, t, handOff, HIST.cardX, rowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });
 }

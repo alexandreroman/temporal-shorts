@@ -34,16 +34,18 @@ function makeApp(parent) {
 }
 
 // ===================== shared by chapters 6 and 7 (crash vs Durable Execution)
+// CONTEXT panel: the agent's context, held in the app's memory, with an EMPTY note for when a crash wipes it.
+// Its icon is a page, as chapter 3 draws the context window.
 function makeMemory(p, w, h) {
   const e = E(p,
-    panelLabel('server', 'App memory', 'left:22px;top:16px')
+    panelLabel('book', 'Context', 'left:22px;top:16px')
     + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;`
     + 'font-size:26px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
   e.empty = e.querySelector('.empty');
   return e;
 }
-// context blocks held in the app's memory: LLM results and tool results alternate,
+// context blocks held by the app: LLM results and tool results alternate,
 // two per step, each centring the icon of its step (same colours as the Event History rows)
 function makeMemBlocks(p, n, w, h) {
   return Array.from({ length: n }, (_, i) => {
@@ -61,9 +63,10 @@ function makeMemBlocks(p, n, w, h) {
 function placeMemBlock(b, x, y, grow, fall, dx = 0, dy = 0, o = 1) {
   place(b, x + dx, y + fall * 300 + dy, grow, clamp(grow * 2) * (1 - fall) * o, fall * b.tilt);
 }
-// LLM calls billed: a counter tile (red note) with a strip of 8 cells, one per call
-function makeBill(p) {
-  const e = makeCounter(p, 'LLM calls billed', 380);
+// LLM calls billed: a counter tile (red note) with a strip of 8 cells, one per call; w: width in px, 330 or more
+// for the strip to fit
+function makeBill(p, w = 380) {
+  const e = makeCounter(p, 'LLM calls billed', w);
   e.style.height = '200px';
   e.note.style.color = C.red;
   const cell = '<i style="display:block;width:30px;height:16px;background:rgba(248,250,252,.08);'

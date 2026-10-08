@@ -83,10 +83,14 @@ the laptop, NOTIFY Sam.
     panel fast-forwards the day counter.
 - **1:18** Temporal keeps its Event History, outside the app. Restarts and
   deploys come and go; the wait survives.
-  - Visuals: "OUTSIDE THE APP" brightens and the SAVED tags pulse; DEPLOY
-    and RESTART pills pop next to the clock, a soft flash and shake: APP
-    INSTANCE A STOPPED, its WORKFLOW lines fall out, EMPTY; the history
-    stays, with a "STILL WAITING" tag on the waiting line.
+  - Visuals: "OUTSIDE THE APP" brightens and the SAVED tags pulse; as the
+    clock runs on to DAY 3, a barrage of DEPLOY, RESTART, DEPLOY, RESTART
+    pills slams into a 2 x 2 grid next to the clock, 0.7 s apart: at each
+    one the app side jolts and APP INSTANCE A flickers red, while a neon
+    ring pulses round the Event History, which never moves. The last
+    restart brings a soft flash and a shake: APP INSTANCE A STOPPED, its
+    WORKFLOW lines fall out, EMPTY; the history stays, with a "STILL
+    WAITING" tag on the waiting line.
 
 ## 04 The decision arrives
 
@@ -98,8 +102,13 @@ the laptop, NOTIFY Sam.
     the clock caption turns "ANSWER RECEIVED".
 - **1:37** Any running copy of the app picks it up, replays the history, and
   resumes right after the wait.
-  - Visuals: APP INSTANCE B takes over (TAKING OVER, REPLAYING…); rows 1 to
-    3 are highlighted in turn and tagged REPLAYED, then row 4, the Signal,
+  - Visuals: Maria and the approval card leave. A new app instance, APP
+    INSTANCE B (IDLE), slides in from the left to the place of instance A,
+    its border glowing violet, and a NEW INSTANCE tag pops on its top edge;
+    the Temporal side stays still. A violet LAPTOP ORDER chip flies from the
+    "Workflow started" row to its status, which turns TAKING OVER; the tag
+    and the glow fade before the replay. Then REPLAYING…: rows 1 to 3 are
+    highlighted in turn and tagged REPLAYED, then row 4, the Signal,
     is read and keeps SAVED (it is new to the Workflow); the WORKFLOW cursor
     runs the first lines again without redoing the steps, passes the wait
     and lands after it ("RESUMED AFTER THE WAIT"); APPROVAL is checked.

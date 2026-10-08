@@ -95,8 +95,11 @@ money is tracked by a CARD CHARGED counter in dollars.
   servers restart for a deploy.
   - Visuals: Step row; under it, two equal tiles, each under two steps: the
     ORDER #1042 status (PENDING) and the CARD CHARGED counter ($0); red
-    tags NETWORK CUT / TIMEOUT / RESTART pop in over the links, each
-    jolting its neighbors.
+    tags NETWORK CUT / TIMEOUT / RESTART slam down over the links on their
+    words. At each impact the link snaps at its middle with a red ring and
+    a burst of sparks, the tiles on each side jolt and flicker red, and the
+    row kicks; the TIMEOUT clock ticks, the tiles next to RESTART blink off
+    and on. Each link mends a second later.
 - **0:40** Here, the server crashes right after charging the card. The
   order is stuck: paid, but never shipped.
   - Visuals: Charge card runs and checks, counter $42; Reserve item runs,
@@ -117,15 +120,21 @@ money is tracked by a CARD CHARGED counter in dollars.
 - **1:04** Soon the plumbing outweighs the business logic, and every corner
   case is a new bug to chase.
   - Visuals: LINES OF CODE bar: BUSINESS LOGIC (neon) stays thin while
-    PLUMBING (red) grows; red bug badges pop on four plumbing tiles.
+    PLUMBING (red) grows. Then a swarm of bugs: red bug badges land on
+    the tiles, one by one, then faster and faster, until every tile is
+    buggy and four carry a second badge; each landing jolts its tile,
+    flickers its border red and pulses the PLUMBING bar.
 
 ## 04 Durable Execution with Temporal
 
 - **1:12** Durable Execution takes another path: your code runs to
   completion, even when servers fail.
   - Visuals: Temporal logo; the `workflows.ts` card alone, a highlight
-    walks the Workflow, a neon RUNS TO COMPLETION badge; a red bolt bounces
-    off the card.
+    walks the Workflow, a neon RUNS TO COMPLETION badge; a barrage of red
+    bolts hits the card from the right, the left and both top corners,
+    then a bigger one from the right: each sparks red at its impact, jolts
+    the card a few pixels and lights a neon ring around it, then bounces
+    off, spinning. The card stays intact.
 - **1:19** With Temporal, you write the process as a Workflow, and each
   step that calls a service as an Activity.
   - Visuals: The card slides left, the badge with it; the `proxyActivities`
@@ -158,9 +167,18 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 - **1:52** Now the Worker crashes mid-order, during shipPackage. Another
   Worker takes over the Workflow.
-  - Visuals: Same layout, `shipPackage` running; red flash + shake, WORKER
-    A CRASHED, "WORKER CRASHED HERE" line under row 3 and tinted kept rows;
-    WORKER B appears (IDLE), then shows TAKING OVER.
+  - Visuals: Same layout, `shipPackage` running; WORKER A glitches (its
+    border and status flicker red, the `shipPackage` line jitters), then
+    crashes: red flash + shake, a red bolt strikes its code card, WORKER A
+    CRASHED, a WORKER CRASH tag pops in under the `emailReceipt` line,
+    "WORKER CRASHED HERE" line under row 3 and tinted kept rows; the
+    Temporal side stays still. Bolt and tag leave with WORKER A's status,
+    then WORKER A, a dead machine, greys, drops and fades out with its code
+    card. A new machine, WORKER B (IDLE), slides in from the left with the
+    code card to the same place, its border glowing violet, and a NEW
+    WORKER tag pops on its top edge. A violet WORKFLOW #1042 chip flies
+    from the "Workflow started" row to its status, which turns TAKING
+    OVER; the tag and the glow fade before the replay.
 - **1:59** It first runs the Workflow from the start, and Temporal hands
   back every saved result: no second charge.
   - Visuals: WORKER B shows REPLAYING…, a violet "FROM THE START" arrow and
@@ -246,8 +264,14 @@ bright red to green.
 - **2:52** The timer is saved in the Event History, so Worker restarts and
   deploys during the wait don't lose it.
   - Visuals: The timer ticks day by day to day 30 while the TimerStarted
-    row stays lit; the Worker shows RESTARTING…, then DEPLOYING V2…, and
-    WORKER A gives way to WORKER B (VERSION 2).
+    row stays lit; the Worker shows RESTARTING…, then DEPLOYING V2…. WORKER
+    A (VERSION 1), retired, drops and fades out with its code card and
+    status block. A new machine, WORKER B (VERSION 2), slides in from the
+    left with them to the same place, its border glowing violet, and a NEW
+    WORKER tag pops on its top edge; its status shows V2 DEPLOYED, then
+    FREE FOR OTHER WORK. No chip comes from the Event History: no Worker
+    holds the sleeping Workflow. The tag and the glow fade before day 30;
+    the Temporal side stays still.
 - **2:59** On day 30, Temporal wakes the Workflow up: a Worker replays its
   history and runs the next line.
   - Visuals: TIME IS UP, row "TimerFired" SAVED; a WAKE UP chip flies to

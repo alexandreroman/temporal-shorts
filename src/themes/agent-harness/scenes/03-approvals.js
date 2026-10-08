@@ -235,20 +235,20 @@
 
       // tool calls: pop out next to the agent, then follow their route; tags ride under them
       const placeCall = (i, appear, legs, cls, fade = Infinity) => {
-        const popIn = P(t, appear, 0.45, backOut);
+        const grow = P(t, appear, 0.45, backOut);
         const [x, y] = pan(t, FROM, legs);
-        const o = clamp(popIn * 2) * (1 - P(t, fade, 0.4));
+        const o = clamp(grow * 2) * (1 - P(t, fade, 0.4));
         s.calls[i].className = 'abs pill solid ' + cls;
-        place(s.calls[i], x, y, popIn, o);
+        place(s.calls[i], x, y, grow, o);
         return [x, y, o];
       };
       // the tag pops at popAt, swells briefly at swellAt (a status change), and hides from hideAt: it is
       // too wide to follow its call through the gate, so it pops again once the call has landed
       const placeTag = (i, [x, y, o], popAt, label, kind, swellAt = Infinity, hideAt = Infinity) => {
         setStatus(s.tags[i], label, kind);
-        const popIn = P(t, popAt, 0.4, backOut);
-        const scale = popIn * (1 + 0.12 * bump(t, swellAt, 0.3));
-        place(s.tags[i], x, y + TAG_DY, scale, o * clamp(popIn * 2) * (1 - P(t, hideAt, 0.2)));
+        const grow = P(t, popAt, 0.4, backOut);
+        const scale = grow * (1 + 0.12 * bump(t, swellAt, 0.3));
+        place(s.tags[i], x, y + TAG_DY, scale, o * clamp(grow * 2) * (1 - P(t, hideAt, 0.2)));
       };
       // a call that stops in front of the gate: from the agent to the parking spot, 0.3 s after it pops
       const toPark = at => [at + 0.3, PARK.x, PARK.y, 0.8];

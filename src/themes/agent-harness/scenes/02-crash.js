@@ -1,4 +1,10 @@
 // ===================== 2. SURVIVES CRASHES
+// Step row on top; APP INSTANCE A and its two counters on the left, the TEMPORAL panel and its Event History on
+// the right. A runs the turn and each result is saved in the history; at step 5 the app glitches, then crashes: a
+// red bolt strikes its panel and APP CRASH stands where the step was, while Temporal stays still. Once both are
+// gone, the dead instance A greys, drops and fades, a new instance B slides in to the same place, and Temporal hands
+// it the agent's Workflow (as the Worker takeover in durable-execution chapter 6). B replays steps 1 to 4 from the
+// history and runs step 5 for real.
 // The block keeps every name declared in this file local to this scene.
 {
   // One agent turn: model steps (UV rows) and tool steps (black rows), as in durable-ai-agents chapter 7
@@ -21,6 +27,16 @@
   const ROW = { w: 240, h: 110, y: 215 };
   const ROW_GAP = (RIGHT - LEFT - ROW.w) / 4; // center to center: five tiles, equal gaps
   const APP = { x: 465, y: 503, w: 650, h: 306, lblY: 497, chipY: 553 };
+  // the crash on A: APP CRASH centered between the step label and the chip (where TURN COMPLETE shows later), the
+  // bolt in the panel's right part, clear of the status text above it and of the tag on its left
+  const CRASH_TAG = { x: APP.x, y: (APP.lblY + APP.chipY) / 2, w: 250 };
+  const BOLT = { x: 715, y: 487, size: 140 };
+  // the takeover (see TAKEOVER): the dead instance A drops 40 px, faded out by then, 8 px above the counters.
+  // NEW INSTANCE stands where APP CRASH stood on A: the top edge has no room for it between the panel name and the
+  // status. Fixed even size, so it rests on whole pixels.
+  const NEW_TAG = { w: 250, h: 52 };
+  // the Workflow card flies from the first history row to B's status, at the panel's top right (inside the panel)
+  const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 38 };
   const COUNTER = { y: 794, w: 305, h: 180 };
   const TEMPORAL = { x: 1340, y: 617, w: 880, h: 534 };
   const HIST = { x: 1340, y: 652, w: 824, h: 404, row0: 80, rowGap: 62 };
@@ -87,6 +103,11 @@
       });
       s.saveCards = STEPS.map((_, i) => makeCallCard(root, i));
       s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeCallCard(root, i));
+      // the agent's Workflow, handed to instance B
+      s.handCard = makeHandOffCard(root, 'AGENT WORKFLOW');
+      s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w, NEW_TAG.h);
+      // the solid tag hides the tail of the falling step chip
+      s.crash = makeCrashMarks(root, 'App crash', BOLT, CRASH_TAG);
       s.flash = makeFlash(root);
     },
     update(t, c, s) {
@@ -94,8 +115,13 @@
       // lands in the history at r + SAVE_AT where its row reads SAVED, and only then the next step starts
       const CARD_AT = 1.2, SAVE_AT = 2.1;
       const run = [c[0] + 1.0, c[0] + 4.2, c[1] + 0.6, c[1] + 3.8];
-      // c[2]: step 5 starts, the app crashes, instance B takes over
-      const firstTry = c[2] + 0.4, crashAt = c[2] + 2.0, bOn = c[2] + 3.7, reset = bOn + 0.2;
+      // c[2]: step 5 starts, the app glitches then crashes; A's CRASHED status, bolt and tag leave from aOut
+      const firstTry = c[2] + 0.4, crashAt = c[2] + 2.0, tagAt = crashAt + 0.45;
+      const aOut = crashAt + 1.5;
+      // then A leaves (aDrop), B arrives (bIn, the reset of the step row) and Temporal hands it the Workflow: the card
+      // leaves the history at handOff and reaches B's status at takeOver
+      const aDrop = aOut + 0.25, bIn = aDrop + 0.6, handOff = bIn + 0.9, takeOver = handOff + 0.55;
+      const reset = bIn;
       // c[3]: B replays rows 1-4 one by one, then step 5 runs for real
       const replay = [0, 1, 2, 3].map(i => c[3] + 0.5 + i * 1.2);
       run.push(c[3] + 5.4);
@@ -104,9 +130,11 @@
       const told = replay.map((_, i) => c[4] + 0.5 + i * 0.3);
       const glow = c[4] + 2.2, doneAt = c[4] + 3.9;
       const [sx, sy] = shakeAt(t, crashAt);
-      const dead = t >= crashAt, onA = t < bOn;
+      const dead = t >= crashAt, onA = t < bIn;
       // the app side shakes with the crash; Temporal, outside the app, stays still
       const ax = onA ? sx : 0, ay = onA ? sy : 0;
+      // the failure builds up before the crash: A's border and status flicker red, the running chip jitters
+      const glitch = crashGlitch(t, crashAt);
 
       // steps: before the reset, instance A runs them; after it, rows 1-4 re-check without running
       const states = STEPS.map((_, i) => {
@@ -119,16 +147,28 @@
       });
       placeStepRow(s.steps, t, c[0] + 0.2, states, ax, ay);
 
-      // app instances: A runs then crashes, B takes over in the same place
+      // instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
       const aIn = P(t, c[0] + 0.1, 0.5, backOut);
-      place(s.A, APP.x + ax, APP.y + ay, aIn, clamp(aIn * 2) * (1 - P(t, bOn, 0.3)));
+      const leave = leavingInstance(t, aDrop);
+      place(s.A, APP.x + ax, APP.y + ay + leave.dy, aIn, clamp(aIn * 2) * leave.o);
       if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, 'RUNNING THE AGENT', t >= run[0] ? 'running' : 'idle');
-      place(s.B, APP.x, APP.y, 1, P(t, reset, 0.35));
-      if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
+      if (glitch.red) {
+        s.A.style.borderColor = C.red;
+        s.A.st.style.color = C.red;
+      }
+      s.A.st.style.opacity = 1 - P(t, aOut, 0.25);
+      s.A.style.filter = leave.grey;
+      // a new instance B slides in from the left once A is gone, its border glowing violet while it arrives and
+      // takes over; IDLE until the Workflow card reaches it
+      const arrive = arrivingInstance(t, bIn);
+      place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
+      if (t < takeOver) setAppStatus(s.B, 'IDLE', 'stopped');
+      else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'running');
       else if (t < rerun) setAppStatus(s.B, 'REPLAYING…', 'running');
       else if (t < doneAt) setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
       else setAppStatus(s.B, 'IDLE', 'idle');
+      setArrivalGlow(s.B, t, bIn, replay[0] - 0.3);
 
       // the step at work in the app, shown until the next one starts: run for real, or handed back from
       // the history during the replay. Each chip fades out before the next fades in, so texts never overlap.
@@ -144,7 +184,8 @@
       const fall = P(t, crashAt + 0.1, 0.6, easeIn);
       s.chips.forEach((e, i) => {
         if (i === 4 && t < reset) {
-          place(e, APP.x + ax, APP.chipY + ay + fall * 120, 1, win(t, firstTry, bOn, 0.15) * (1 - fall), fall * -12);
+          const x = APP.x + ax + glitch.dx;
+          place(e, x, APP.chipY + ay + fall * 120, 1, win(t, firstTry, aOut, 0.15) * (1 - fall), fall * -12);
         } else {
           place(e, APP.x + ax, APP.chipY + ay, 1, chipOn[i]);
         }
@@ -156,7 +197,9 @@
       else step = replaying ? Math.max(0, replay.filter(q => t >= q).length - 1) : 4;
       s.chipLbl.textContent = replaying ? `Step ${step + 1}: from the history` : `Step ${step + 1} of 5`;
       s.chipLbl.style.color = replaying ? C.violet : C.slate;
-      const lblOn = Math.max(win(t, run[0], bOn, 0.15) * (1 - fall), win(t, replay[0], doneAt - 0.45, 0.15));
+      // A's label goes out at once with the crash, before APP CRASH pops in where it was
+      const lblOff = P(t, crashAt + 0.1, 0.2);
+      const lblOn = Math.max(win(t, run[0], aOut, 0.15) * (1 - lblOff), win(t, replay[0], doneAt - 0.45, 0.15));
       place(s.chipLbl, APP.x + ax, APP.lblY + ay, 1, lblOn);
       const dp = P(t, doneAt, 0.45, backOut);
       place(s.done, APP.x, (APP.lblY + APP.chipY) / 2, dp, clamp(dp * 2));
@@ -214,7 +257,15 @@
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 1.0);
       setScan(s.jr, rowTop(Math.max(0, scanning)) - 2, scanning >= 0 ? 1 : 0);
+      // crash: red flash and a bolt strikes A's panel; once step 5's chip has mostly fallen out, APP CRASH stands
+      // in the panel. Both shake with the app side and leave with A's CRASHED status, before A drops.
       placeFlash(s.flash, t, crashAt);
+      placeCrashMarks(s.crash, t, crashAt, tagAt, aOut, ax, ay);
+      // takeover: NEW INSTANCE pops in B once it is almost in place and is gone at c[3], before the replay, so a
+      // presenter hold there shows the panel at rest; Temporal hands it the agent's Workflow, a card from the first
+      // history row to its status, which then reads TAKING OVER
+      placeNewTag(s.newTag, t, bIn + 0.5, c[3] - 0.3, CRASH_TAG.x + arrive.dx, CRASH_TAG.y);
+      flyChip(s.handCard, t, handOff, CARD_X, rowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });
 }

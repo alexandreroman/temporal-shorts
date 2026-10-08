@@ -1,8 +1,9 @@
 // ===================== 8. DURABLE TIMERS
 // The Worker (code card, status) on the left, Temporal (Event History, durable timer) on the right, on the lines of
 // chapters 5 and 6. The Workflow sleeps 30 days: the timer is saved in the history, so the Worker holds nothing,
-// restarts and gets a new version meanwhile; on day 30 Temporal wakes the Workflow up, a Worker replays its history
-// and runs the next line.
+// restarts, then version 2 is deployed meanwhile: Worker A (version 1) leaves and Worker B (version 2) slides in, as
+// in the takeover of chapter 6 but with no handoff, since no Worker holds the sleeping Workflow; on day 30 Temporal
+// wakes the Workflow up, a Worker replays its history and runs the next line.
 // The block keeps every name declared in this file local to this scene.
 {
   const WAIT_CODE = [
@@ -50,6 +51,9 @@
     replaying: { text: 'REPLAYING…', icon: 'retry', color: C.ink },
   };
   const ICON_COLOR = { pauseLines: C.slate, power: C.slate, upload: C.violet, retry: C.violet };
+  // NEW WORKER: astride the top edge of Worker B's panel, centered on it, clear of its name and of VERSION 2; fixed
+  // even width, so it rests on whole pixels (solid: the panel border does not show through)
+  const NEW_TAG = { x: WK.x, y: WK.y - WK.h / 2, w: 200 };
 
   // badge (28 x 28) at the right end of code line i, inside the card
   const makeLineBadge = (card, i, html, background) => E(card, html, '', {
@@ -152,6 +156,7 @@
         ship: makeResultCard(root), start: makeChip(root, 'START TIMER'), wake: makeChip(root, 'WAKE UP'),
         review: makeResultCard(root),
       };
+      s.newWorker = makeNewTag(root, 'New Worker', NEW_TAG.w);
     },
     update(t, c, s) {
       const [workerA, workerB] = s.workers;
@@ -159,20 +164,29 @@
       const shipAt = c[0] + 0.9, shipRes = shipAt + RESULT_LAG, shipSaved = shipRes + SAVE_LAG;
       const sleepAt = shipSaved + 0.3, startChip = sleepAt + 0.3, timerSaved = startChip + SAVE_LAG;
       const freeAt = timerSaved + 0.4;
-      // c[1]: the days go by; the Worker restarts, then version 2 is deployed (Worker B)
+      // c[1]: the days go by; the Worker restarts, then version 2 is deployed: Worker A leaves (aDrop), Worker B
+      // arrives (bIn), deployed, then free once settled
       const restartAt = c[1] + 1.6, backAt = restartAt + 1.2;
-      const deployAt = c[1] + 3.8, swapAt = deployAt + 0.4, deployedAt = deployAt + 1.0, settledAt = deployAt + 2.2;
+      const deployAt = c[1] + 3.8, aDrop = deployAt + 0.5, bIn = aDrop + 0.6;
+      const deployedAt = bIn, settledAt = bIn + 1.2;
       // c[2]: day 30, the timer fires, Temporal wakes the Workflow up, the Worker replays then runs askForReview
       const fireAt = c[2] + 0.4, firedSaved = fireAt + 0.4, wakeAt = firedSaved + 0.3;
       const replayAt = wakeAt + 0.8, replaySleep = replayAt + 0.5, slept = replaySleep + 0.3;
       const runAt = slept + 0.4, reviewRes = runAt + RESULT_LAG, reviewSaved = reviewRes + SAVE_LAG;
       const doneAt = reviewSaved + 0.3;
 
-      // Worker A, then Worker B in the same place (cross-fade, so the code card never floats without a panel)
+      // Worker A, retired by the deploy (not crashed, so not greyed), drops and fades out; then a new machine, Worker
+      // B, slides in from the left to the same place, its border glowing violet while it arrives
       const wp = P(t, c[0] + 0.1, 0.5, backOut);
-      const swap = P(t, swapAt, 0.5);
-      place(workerA, WK.x, WK.y, wp, clamp(wp * 2) * (1 - swap));
-      place(workerB, WK.x, WK.y, 1, swap);
+      const leave = leavingInstance(t, aDrop);
+      place(workerA, WK.x, WK.y + leave.dy, wp, clamp(wp * 2) * leave.o);
+      const bHere = t >= bIn;
+      const arrive = arrivingInstance(t, bIn);
+      place(workerB, WK.x + arrive.dx, WK.y, 1, arrive.o);
+      // the code card and the status block move with the Worker on screen (Worker A, then Worker B), so they never
+      // float without a panel; both Workers are gone when they switch
+      const wkDx = bHere ? arrive.dx : 0, wkDy = bHere ? 0 : leave.dy;
+      const wkOn = bHere ? arrive.o : leave.o;
 
       let status = 'running';
       if (t >= freeAt) status = 'free';
@@ -187,11 +201,16 @@
       setAppStatus(workerA, 'VERSION 1', busy ? 'running' : 'stopped');
       setAppStatus(workerB, 'VERSION 2', busy ? 'running' : 'stopped');
       setStatusBlock(s.status, status);
-      place(s.status, WK.x, BLOCK.y, 1, P(t, c[0] + 0.6, 0.4));
+      place(s.status, WK.x + wkDx, BLOCK.y + wkDy, 1, P(t, c[0] + 0.6, 0.4) * wkOn);
+      // the glow is gone before day 30, at c[2], so a presenter hold there shows it at rest
+      setArrivalGlow(workerB, t, bIn, c[2] - 0.3);
+      // NEW WORKER pops on Worker B once it is almost in place and leaves before day 30
+      placeNewTag(s.newWorker, t, bIn + 0.5, c[2] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y);
 
-      // the code card dims while no Worker runs it (restart, deploy)
-      const down = win(t, restartAt, backAt, 0.3) + win(t, deployAt, deployedAt + 0.2, 0.3);
-      place(s.code, CODE_CARD.x, CODE_CARD.y, 1, P(t, c[0] + 0.4, 0.4) * (1 - 0.65 * down));
+      // the code card dims while the Worker restarts and no Worker runs it
+      const down = win(t, restartAt, backAt, 0.3);
+      const codeOn = P(t, c[0] + 0.4, 0.4) * (1 - 0.65 * down) * wkOn;
+      place(s.code, CODE_CARD.x + wkDx, CODE_CARD.y + wkDy, 1, codeOn);
 
       // code highlight: shipPackage, then the sleep line until the Worker lets go; on wake-up it replays from the
       // top to the sleep line (already fired), then runs askForReview

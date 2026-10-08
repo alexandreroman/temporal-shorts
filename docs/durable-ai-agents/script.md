@@ -26,7 +26,7 @@ The video explains to a non-technical audience, in seven topics:
 
 The budget numbers are deliberately illustrative ("in this example"):
 4 steps = 4 LLM calls. Chapters 6 and 7 crash at the same point: after
-step 3's result (the booking) is in APP MEMORY, before step 4's LLM call.
+step 3's result (the booking) is in CONTEXT, before step 4's LLM call.
 Without durable execution the restart re-runs those 3 steps, booking
 included, so 7 calls in total (3/7 ≈ 43% wasted); with Temporal the 3 saved
 steps are reused, so 4 calls and 1 booking.
@@ -114,20 +114,34 @@ the figures follow the step count if the scenario changes.
 
 - **1:47** Now the app running the agent crashes just before the invite goes
   out. Restarts, deploys, outages: it happens every day.
-  - Visuals: 4 steps; steps 1 to 3 complete, each adding 2 APP MEMORY blocks
+  - Visuals: 4 steps above APP INSTANCE A (RUNNING THE AGENT), which holds
+    the CONTEXT panel; steps 1 to 3 complete, each adding 2 memory blocks
     (each with its step icon, LLM blocks in UV, tool blocks in black), LLM
     CALLS BILLED counter (3), ticket "1 booking" once the booking result is
     in memory (6 blocks); step 4 (Invite) starts, then flash + bolt +
-    APP CRASH before its LLM call, Invite crossed out; tags RESTART / DEPLOY
-    / OUTAGE.
+    APP CRASH before its LLM call, Invite crossed out, A CRASHED with red
+    borders; tags RESTART / DEPLOY / OUTAGE.
 - **1:56** The context lived in the app's memory, not in the LLM. It's gone, so
   the agent has to start over.
-  - Visuals: The 6 memory blocks fall (booking result included), EMPTY,
-    "Start over" arrow from Invite back to Calendar.
+  - Visuals: The 6 memory blocks fall (booking result included), EMPTY.
+    Instance A greys, drops and fades with its memory; APP INSTANCE B slides
+    in to the same place with a pulsing violet glow, a NEW INSTANCE tag and
+    an empty memory, status STARTING OVER: no history to resume from. The
+    steps reset and a "Start over" arrow draws from Invite back to Calendar.
+    The tag and glow fade.
 - **2:03** Every LLM call is made, and paid for, a second time, just to rebuild
   the context. And the table gets booked twice.
-  - Visuals: Steps 1 to 3 re-run and refill the memory, counter 6 with
-    "+3 wasted", the booking runs again: "2 BOOKINGS!".
+  - Visuals: Instance B starts RUNNING THE AGENT again: steps 1 to 3
+    re-run and refill its memory. Each LLM call is billed again and hits
+    the counter: the number swells, the tile jolts
+    and flashes red with a red glow, and a red "+1 CALL" chip with a coin
+    pops out of its top and floats up as it fades; after the third, the
+    counter rests at 6 "+3 wasted" with a red border. The booking runs
+    again: once the last chip is gone, the ticket flies from under the
+    counter to the middle of the stage, between the steps and the panels,
+    growing to 1.5 times its size, then slams to "2 BOOKINGS!" (strong
+    swell, jolt, red glow) and a second ticket stacks behind it; both stay
+    there until the end of the chapter.
 
 ## 07 Durable Execution with Temporal
 
@@ -135,23 +149,27 @@ the figures follow the step count if the scenario changes.
   History of the agent, outside the app.
   - Visuals: Large Temporal logo flies into the header of a TEMPORAL panel
     ("outside the app") holding an empty EVENT HISTORY; on the left APP INSTANCE
-    A with its APP MEMORY, LLM CALLS BILLED at 0; the 4 step tiles on top.
+    A with its CONTEXT, LLM CALLS BILLED at 0; the 4 step tiles on top.
 - **2:21** After each LLM call or tool call, Temporal saves the result in the
   history before the agent moves on.
   - Visuals: Steps 1 to 3: for each row the app works (LLM rows bill a call), an
     LLM CALL or TOOL CALL card travels from the app to Temporal, the row appears
-    with SAVED, a block with the step icon joins APP MEMORY, only then the step
+    with SAVED, a block with the step icon joins CONTEXT, only then the step
     is checked; counter 3, ticket "1 booking".
 - **2:29** If the app crashes, another copy runs the agent again from the
   start.
   - Visuals: Step 4 starts, flash + shake, A CRASHED, memory blocks fall
-    (EMPTY), "APP CRASHED HERE" line under row 6 and tinted kept rows; APP
-    INSTANCE B takes over with an empty memory, steps reset, "From the start"
-    arrow, step 1 runs.
+    (EMPTY), "APP CRASHED HERE" line under row 6 and tinted kept rows. The dead
+    instance A greys, drops and fades with its CONTEXT; APP INSTANCE B slides
+    in to the same place with a pulsing violet glow and a "NEW INSTANCE" tag,
+    with an empty memory, and the steps reset. A violet "LUNCH AGENT" chip
+    flies from the first Event History row to B's status, which turns from
+    IDLE to TAKING OVER, as the "From the start" arrow draws; step 1 runs. The
+    tag and glow fade before the replay.
 - **2:34** For each saved step, Temporal returns the result from the
   history. The LLM isn't called again: the context is rebuilt for free.
   - Visuals: Replay: rows 1 to 6 highlighted in turn, tags REUSED, LLM CALL and
-    TOOL CALL cards travel back and refill APP MEMORY, steps re-check, counter
+    TOOL CALL cards travel back and refill CONTEXT, steps re-check, counter
     stays 3 with "NOT RE-BILLED"; tags "REUSED, NOT RE-BILLED" / "REUSED, NOT
     RE-RUN"; step 4 runs for real: counter 4, rows 7 and 8 SAVED, AGENT
     COMPLETE.
