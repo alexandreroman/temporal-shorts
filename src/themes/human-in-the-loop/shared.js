@@ -9,10 +9,10 @@ Object.assign(ICONS, {
   // a screen over a flat base line (agent-harness's `laptop` has a keyboard)
   laptopFlat: '<rect x="5" y="5" width="14" height="10"/><path d="M2.5 19h19"/>',
   clipboard: '<rect x="5" y="4.5" width="14" height="16.5"/><path d="M9 3h6v3H9zM8.5 13.5l2.5 2.5 4.5-5"/>',
-  pen: '<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3M13 20.5h8"/>',
-  bot: '<rect x="4" y="8" width="16" height="12"/><path d="M12 4.5V8M9 13h.01M15 13h.01M9.5 16.5h5"/>'
-    + '<circle cx="12" cy="3.5" r="1"/>',
   up: '<path d="M12 20V5M6 11l6-6 6 6"/>',
+  // an ID card: a portrait (head and shoulders) on the left, two text lines on the right
+  idCard: '<rect x="2.5" y="5" width="19" height="14"/><circle cx="8" cy="10.5" r="2"/>'
+    + '<path d="M4.5 16.5c0-2 1.6-3 3.5-3s3.5 1 3.5 3M14 10.5h4.5M14 14h4.5"/>',
 });
 
 // Content frame of every scene: inside the 80 px header margins, zones 40 px apart

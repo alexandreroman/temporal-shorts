@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=durable-execution` for the live values; the start
-times below are a snapshot from 2026-10-06.
+times below are a snapshot from 2026-10-07.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -83,7 +83,7 @@ money is tracked by a CARD CHARGED counter in dollars.
   - Visuals: The steps run in turn (spinner, then neon check); as each
     runs, a link draws down to its service (PAYMENTS, WAREHOUSE, CARRIER,
     EMAIL) and a dot carries the call there and back.
-- **0:24** For a developer, it's a short function: four calls, in order.
+- **0:25** For a developer, it's a short function: four calls, in order.
   Simple, as long as nothing fails.
   - Visuals: Order card and services fade; the code card appears above the
     row, a highlight walks its four `await` lines and each line runs its
@@ -91,7 +91,7 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 ## 02 When a step fails
 
-- **0:32** But in real life, things fail: networks drop, services time out,
+- **0:33** But in real life, things fail: networks drop, services time out,
   servers restart for a deploy.
   - Visuals: Step row; under it, two equal tiles, each under two steps: the
     ORDER #1042 status (PENDING) and the CARD CHARGED counter ($0); red
@@ -102,7 +102,7 @@ money is tracked by a CARD CHARGED counter in dollars.
   - Visuals: Charge card runs and checks, counter $42; Reserve item runs,
     red flash + shake + bolt, SERVER CRASH; Reserve item fails, status
     "PAID, NOT SHIPPED" in red with a STUCK note.
-- **0:47** Restart it from the top, and the card is charged a second time.
+- **0:48** Restart it from the top, and the card is charged a second time.
   The customer pays twice.
   - Visuals: Red "Start over" arrow back to Charge card, steps and status
     reset and re-run, counter $84 in red with "CHARGED TWICE!".
@@ -114,7 +114,7 @@ money is tracked by a CARD CHARGED counter in dollars.
   - Visuals: The code card ("BUSINESS LOGIC") in the middle; plumbing tiles
     pop in left and right, each wired to it: RETRY LOOPS, STATUS TABLE,
     MESSAGE QUEUE, TIMERS, CLEANUP JOBS, RECOVERY SCRIPTS.
-- **1:03** Soon the plumbing outweighs the business logic, and every corner
+- **1:04** Soon the plumbing outweighs the business logic, and every corner
   case is a new bug to chase.
   - Visuals: LINES OF CODE bar: BUSINESS LOGIC (neon) stays thin while
     PLUMBING (red) grows; red bug badges pop on four plumbing tiles.
@@ -264,9 +264,23 @@ bright red to green.
     Automatic retries / Survives crashes / Waits for days / Full
     visibility.
 
+## 10 What you can build
+
+- **3:16** Order #1042 is one example: any process that must run to the end
+  fits a Workflow.
+  - Visuals: 4 use-case tiles pop in one at a time, each with an example
+    in slate under the label: MONEY TRANSFERS (dollar coin) "debit, credit,
+    never twice" / SUBSCRIPTIONS (calendar) "bill every month, for years" /
+    DATA PIPELINES (table) "a nightly batch resumes" / CLOUD PROVISIONING
+    (cloud) "a cluster comes up in steps".
+- **3:22** Money transfers, subscriptions, data pipelines, cloud
+  provisioning: a crash never leaves any of them half done.
+  - Visuals: The full row; each tile lights up in turn as the subtitle
+    names it.
+
 ## Outro
 
-- **3:16** Durable Execution: your code runs to completion, whatever fails
+- **3:32** Durable Execution: your code runs to completion, whatever fails
   along the way.
   - Visuals: The 4 step tiles joined by links, each with a neon check
     badge, title "Durable Execution", tagline "YOUR CODE RUNS TO

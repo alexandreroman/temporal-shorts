@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=human-in-the-loop` for the live values; the start
-times below are a snapshot from 2026-10-06.
+times below are a snapshot from 2026-10-07.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -126,14 +126,24 @@ the laptop, NOTIFY Sam.
   - Visuals: 4 benefit tiles land one at a time across the frame, each
     lighting up as it lands: WAITS FOR DAYS (hourglass) / SURVIVES RESTARTS
     (restart arrow) / NO STEP REDONE (check) / SENDS REMINDERS (bell).
-- **2:12** Approvals, reviews, signatures, an AI agent asking before it acts:
-  the same pattern fits them all.
-  - Visuals: The benefit tiles fade out; 4 use-case tiles pop in one at a
-    time in their places: Approvals / Reviews / Signatures / AI agent checks.
+
+## 07 What you can build
+
+- **2:13** Sam's laptop is one case: any step where a person decides fits the
+  same pattern.
+  - Visuals: 4 use-case tiles pop in one at a time across the frame, in the
+    recap's slots, each with an example in slate under the label: FRAUD
+    REVIEWS (flag) "a flagged payment waits" / IDENTITY CHECKS (ID card)
+    "an analyst verifies an ID" / DEPLOY APPROVALS (upload arrow) "a release
+    waits for a go" / AI AGENT APPROVALS (robot) "actions, tool calls".
+- **2:19** Fraud reviews, identity checks, deploy approvals, an AI agent's
+  tool calls: the Workflow waits for a person.
+  - Visuals: The full row; each tile lights up in turn as the subtitle
+    names it.
 
 ## Outro
 
-- **2:22** Temporal Workflows wait for people as long as it takes, and pick
+- **2:28** Temporal Workflows wait for people as long as it takes, and pick
   up right where they left off.
   - Visuals: Person avatar with a neon check badge, title
     "Human-in-the-Loop", tagline "WAITS AS LONG AS IT TAKES", Temporal
