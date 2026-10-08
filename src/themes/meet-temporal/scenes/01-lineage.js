@@ -11,8 +11,8 @@
   const YEAR_Y = LINE.y - 70; // 18 px above the founders' faces
   const MARK_SIZE = 56;
   // a face alone sits centered on its milestone; two faces together sit either side of it (Maxim left, Samar
-  // right), 24 px apart, so the milestone's dot shows between them
-  const PAIR_DX = MARK_SIZE / 2 + 12;
+  // right), 44 px apart, so the milestone's dot shows isolated between them
+  const PAIR_DX = MARK_SIZE / 2 + 22;
   const PAIR_SIDE = [-1, 1];
   const PAIR_RANGE = 160; // how close (px) the faces must be to start making room for each other
   // the heading: large in the middle first, then at the top of the composition
