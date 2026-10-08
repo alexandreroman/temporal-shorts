@@ -148,6 +148,7 @@ function startPlayer() {
   addEventListener('pagehide', () => {
     try { sessionStorage.setItem(STATE_KEY, JSON.stringify({ time, playing, speed, presenter, held })); } catch {}
   });
+  // A reload keeps the restored position over the URL's #t=, so a hot reload after an edit stays where the viewer is.
   if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
     try {
       const saved = JSON.parse(sessionStorage.getItem(STATE_KEY));
@@ -160,8 +161,26 @@ function startPlayer() {
         subtitlesShown = !presenter;
       }
     } catch {}
+  } else {
+    // Paused, to inspect that frame: Space plays on.
+    const start = parseTimeFragment(location.hash);
+    if (start !== null) {
+      time = clamp(start, 0, TOTAL);
+      playing = false;
+    }
   }
   ambient = time;
+
+  // The time of a `#t=<time>` URL fragment, in seconds: `70`, `70.5`, or `m:ss` as in the time label (`1:10`,
+  // `1:10.5`). Null when missing or invalid. A fragment, unlike ?t= (the frozen frame-capture mode, see boot()).
+  function parseTimeFragment(hash) {
+    const match = /^#t=(?:(\d+):)?(\d+(?:\.\d+)?)$/.exec(hash);
+    if (!match) return null;
+    const seconds = Number(match[2]);
+    if (match[1] === undefined) return seconds;
+    if (seconds >= 60) return null;
+    return Number(match[1]) * 60 + seconds;
+  }
 
   function formatTime(seconds) {
     const s = Math.floor(seconds);
@@ -518,6 +537,13 @@ function startPlayer() {
   });
   document.addEventListener('mousemove', wake);
   document.addEventListener('fullscreenchange', updateFullscreenButton);
+  // An edited #t= in an open tab jumps there, paused, as on opening.
+  addEventListener('hashchange', () => {
+    const t = parseTimeFragment(location.hash);
+    if (t === null) return;
+    playing = false;
+    seek(t);
+  });
 
   setIcon(homeLink, 'home', 'All videos');
   setLabel(speedButton, 'Speed');

@@ -34,3 +34,4 @@
 - [Custom domain](references/project_custom-domain.md) — durable.withtemporal.dev, Cloudflare CNAME to Pages, DNS only, shared zone
 - [Social preview images stay current](references/feedback_social-previews.md) — `make social` + commit PNGs on intro, title or home changes
 - [Themes: shared anatomy and stories](references/project_theme-anatomy.md) — structure, layout, subtitles, vocabulary, docs, per-theme stories
+- [Player time links](references/project_player-time-link.md) — `#t=` opens the player paused there; `?t=` stays frame capture

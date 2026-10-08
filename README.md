@@ -205,6 +205,14 @@ F = fullscreen.
 needed), on port 8000 by default (`CASPER_PORT` in a Casper workspace);
 override it with `make serve PORT=9000`.
 
+A `#t=<time>` fragment opens a player paused at that time, in seconds
+(`70`, `70.5`) or `m:ss` as in the time label (`1:10`, `1:10.5`), for
+example `http://localhost:8000/themes/human-in-the-loop/#t=70`; Space plays
+on. Editing the fragment in an open tab jumps there, paused. An invalid
+value is ignored, and a reload keeps the current position over the
+fragment. Not to be confused with `?t=<seconds>`, the frozen frame of
+frame capture, without the player.
+
 `make serve` hot-reloads: edit a file in `src/` and the server rebuilds the
 pages, then every open tab reloads by itself and a player resumes at the
 same position (a manual reload resumes too; each page keeps its own
