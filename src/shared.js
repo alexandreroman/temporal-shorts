@@ -24,6 +24,17 @@ function iconTile(p, icon, label, w, h, col = C.ink, opts = {}) {
     alignItems: 'center', justifyContent: 'center',
   });
 }
+// Use-case tile ("What you can build"): an iconTile with one short example line under its label, in smaller
+// lowercase slate mono ("charge, refund, transfer"), which sets it apart from the recap's benefit tiles.
+// opts: those of iconTile, plus exampleFont and exampleGap (font of the example line and gap above it).
+function useCaseTile(p, icon, label, example, w, h, opts = {}) {
+  const { exampleFont = 18, exampleGap = 12, ...tileOpts } = opts;
+  const tile = iconTile(p, icon, label, w, h, C.ink, tileOpts);
+  tile.insertAdjacentHTML('beforeend',
+    `<div class="mono" style="font-size:${exampleFont}px;color:var(--slate);white-space:nowrap;`
+    + `margin-top:${exampleGap}px">${example}</div>`);
+  return tile;
+}
 // Mono label with a 22 px slate icon, at the top left corner of a panel; css: its position (left, top, ...)
 const panelLabel = (icon, text, css) => '<div class="lbl" style="position:absolute;display:flex;gap:10px;'
   + `align-items:center;${css}">${ICON(icon, 22, C.slate, 1.8)} ${text}</div>`;

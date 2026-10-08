@@ -50,10 +50,15 @@ the visuals belong to each theme (last section).
 - Chapters: `chapter` and `title` drive the `NN / TITLE` header and the
   segment bars; titles are short sentence-case phrases ("When a step
   fails").
-- Recap: the last numbered chapter is **What you get**, in its own scene
-  file right before the outro. Recap tiles and subtitles live there, never
-  in a topic chapter, so every chapter title stays true to its content;
-  topic lists in `script.md` leave it out.
+- Recap: **What you get** has its own scene file after the topic
+  chapters. Recap tiles and subtitles live there, never in a topic
+  chapter, so every chapter title stays true to its content.
+- Use cases: in durable-execution, human-in-the-loop and
+  durable-ai-agents, a **What you can build** chapter follows the recap,
+  right before the outro: 4 `useCaseTile`s (icon, label, slate example
+  line) land during the first of 2 subtitles ("<running example> is one
+  example: any … fits"), each lit as the second names it. agent-harness
+  ends on its recap. Topic lists in `script.md` leave out both chapters.
 - Outro: `makeEndCard(root, title, tagline, { pill })` in every theme,
   same sizes everywhere: the theme name as title, cased as on its home
   card ("Durable AI Agents"), a violet uppercase tagline stating the
@@ -191,8 +196,9 @@ CLAUDE.md; a section below and the card order in
   fragile (ch2); the Workflow waits on one line with no code running,
   Temporal keeps the history outside the app (ch3); the decision arrives
   as a Signal, any copy replays and resumes after the wait (ch4); durable
-  timers drive reminders and escalation (ch5); recap, then the use cases
-  the pattern fits: approvals, reviews, signatures, AI agent checks (ch6).
+  timers drive reminders and escalation (ch5); recap (ch6); the use cases
+  the pattern fits: approvals, reviews, signatures, and AI agent approvals,
+  a user confirming an agent's action or tool call (ch7).
 - Ch3 and ch4 share the durable-ai-agents ch7 layout: step row on top, app
   panel with a WORKFLOW card left, TEMPORAL panel with the Event History
   right. Replayed rows get REPLAYED, the Signal row keeps SAVED; "WAITING

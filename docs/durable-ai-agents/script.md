@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=durable-ai-agents` for the live values; the start
-times below are a snapshot from 2026-10-06.
+times below are a snapshot from 2026-10-07.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -164,8 +164,22 @@ the figures follow the step count if the scenario changes.
     tiles: Saved steps reused / Automatic retries / Waits for humans / Full
     visibility.
 
+## 09 What you can build
+
+- **2:53** Lunch with Marie is one example: any agent that works through many
+  steps needs Durable Execution.
+  - Visuals: 4 use-case tiles pop in one at a time, each with its examples
+    in slate under the label: CUSTOMER SUPPORT (person) "answers, refunds,
+    follow-ups" / RESEARCH (magnifier) "hours of reading, one report" /
+    DOCUMENTS (page) "invoices, contracts, claims" / CODING AGENTS (code)
+    "plan, edit, test, repeat".
+- **3:00** Customer support, research, documents, coding: the longer the
+  task, the more a crash would cost.
+  - Visuals: The full row; each tile lights up in turn as the subtitle
+    names it.
+
 ## Outro
 
-- **2:53** Durable AI agents keep their progress and your budget.
+- **3:08** Durable AI agents keep their progress and your budget.
   - Visuals: LLM orb, title "Durable AI Agents", tagline "KEEP THEIR
     PROGRESS AND YOUR BUDGET", Temporal logo.
