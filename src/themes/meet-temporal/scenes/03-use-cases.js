@@ -3,7 +3,7 @@
 {
   // A hub-and-spoke map: the Temporal symbol in the middle, four spokes out to four category hubs, each hub with
   // its three examples as icon bubbles fanned out on its outer side
-  const CENTER = { x: 960, y: 524 };
+  const CENTER = { x: 960, y: 515 };
   const SYMBOL_SIZE = 190;
   const HUB_SIZE = 150;
   const BUBBLE = { size: 90, r: 155 }; // bubble size and distance from its hub
@@ -11,10 +11,10 @@
   // hubs at the four diagonals; `angles`: directions of the hub's three bubbles, away from the center (degrees,
   // clockwise from the x axis)
   const HUBS = [
-    { name: 'Process', x: 640, y: 374, angles: [170, 230, 290] },
-    { name: 'Lifecycle', x: 1280, y: 374, angles: [250, 310, 10] },
-    { name: 'Operational', x: 640, y: 674, angles: [190, 130, 70] },
-    { name: 'AI', x: 1280, y: 674, angles: [110, 50, 350] },
+    { name: 'Process', x: 640, y: 380, angles: [170, 230, 290] },
+    { name: 'Lifecycle', x: 1280, y: 380, angles: [250, 310, 10] },
+    { name: 'Operational', x: 640, y: 650, angles: [190, 130, 70] },
+    { name: 'AI', x: 1280, y: 650, angles: [110, 50, 350] },
   ];
   // the examples of each hub, [icon, label], in the order of its angles
   const EXAMPLES = [

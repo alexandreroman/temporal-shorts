@@ -146,6 +146,6 @@ const AGENT_HANDOFF = {
 };
 const AGENT_LLM = { size: 130, seed: 0.37 }; // the LLM node's size in chapter 4, and the blink phase of both orbs
 // The halo around the bubble at the cut: its size on screen (diameter, px) and opacity, the same on both sides
-const HANDOFF_HALO = { size: 440, o: 0.8 };
+const HANDOFF_HALO = { size: 360, o: 0.8 };
 const HALO_BACKGROUND = 'radial-gradient(circle, rgba(182,100,255,.4) 0%, rgba(68,76,231,.15) 45%, '
   + 'rgba(68,76,231,0) 70%)';

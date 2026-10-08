@@ -3,21 +3,21 @@
 {
   // Three tiles on top (open source, Temporal 1.0, self-hosted), then the Temporal Cloud diagram: your environment
   // on the left, Temporal Cloud on the right, a one-way arrow between them
-  const TOP = { y: 205, w: 520, h: 120, xs: [380, 960, 1540] };
+  const TOP = { y: 212, w: 520, h: 120, xs: [380, 960, 1540] };
   const PRODUCT = [
     { name: 'Open source', note: 'MIT license' },
     { name: 'Temporal 1.0', note: '2020' },
     { name: 'Self-hosted', note: 'On your own servers' },
   ];
-  const YOURS = { x: 410, y: 610, w: 580, h: 560 };
-  const CLOUD = { x: 1450, y: 610, w: 700, h: 560 };
+  const YOURS = { x: 410, y: 605, w: 580, h: 540 };
+  const CLOUD = { x: 1450, y: 605, w: 700, h: 540 };
   const ARROW = { x0: YOURS.x + YOURS.w / 2, x1: CLOUD.x - CLOUD.w / 2, y: 560 };
   const ARROW_X = (ARROW.x0 + ARROW.x1) / 2;
   const APP = { x: YOURS.x, y: 590, w: 500, h: 360 };
   const SERVICE = { x: CLOUD.x, y: 475, w: 620, h: 170 };
   const BARS = ['Security & compliance', 'Control plane & scale', 'High availability'];
   const BAR = { y0: 600, gap: 62, w: 620, h: 50 };
-  const NEVER_Y = 836;
+  const NEVER_Y = 826;
   const PACKETS = 4; // data packets flowing out along the arrow
   const SECRET = 'card: $42'; // the data that leaves your environment, encrypted on the way
   const GLYPHS = '#%&@$*+=?/<>{}';

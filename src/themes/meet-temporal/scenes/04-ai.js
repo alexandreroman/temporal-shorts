@@ -6,13 +6,13 @@
   const LOOP = AGENT_LOOP;
   const LLM_AT = { x: LOOP.cx, y: LOOP.cy - LOOP.r }; // the THINK node, where the carried glow condenses
   const WAIT_Y = LOOP.cy + 275; // the "waits for a person" tag, under the loop
-  const PANEL = { x: 560, y: 520, w: 800, h: 740 };
+  const PANEL = { x: 560, y: 515, w: 800, h: 730 };
   const SIDE = { x: 1460, w: 560 };
   const BILL_Y = 380, PROGRESS_Y = 610;
   const TOTAL_STEPS = 6;
   const COMET = 6; // sparks trailing the token
   const SHARDS_PER_ARC = 4; // the pieces each arc breaks into at the crash
-  const RING_R = 338; // the Temporal ring that wraps the durable loop
+  const RING_R = 330; // the Temporal ring that wraps the durable loop
   const TRACK_W = 370; // progress bar track, in px: the fill rests on whole pixels
   const COMPANIES = ['OpenAI · Codex', 'Cursor', 'Lovable', 'Replit'];
   const COMPANY = { y0: 370, gap: 80, w: SIDE.w };
