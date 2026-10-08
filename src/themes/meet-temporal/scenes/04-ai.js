@@ -163,6 +163,8 @@
         return shard;
       }));
       s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(s.loopLayer, 16 - 2 * k, '219,255,75'));
+      // the token and its comet pass under the nodes, THINK's face included: moved before the first node, in order
+      [s.loop.token, ...s.comet].forEach(e => s.loopLayer.insertBefore(e, s.loop.think.root));
       s.wait = E(root, `${ICON('user', 22, C.violet, 2)}<span>Waits for a person</span>`, 'pill violet', {
         display: 'flex', alignItems: 'center', gap: '10px',
       });
@@ -376,10 +378,10 @@
         // the loop dims while its durable app is down
         o: 1 - 0.6 * win(t, crash2, bOn + 0.4, 0.3),
       });
+      // AGENTIC LOOP fades with the failed run after PLAY and stays hidden through the durable run: its spot is
+      // for the durable run's tags (WITH TEMPORAL, the crash, NEW APP INSTANCE, AGENT COMPLETE)
       if (t >= clearAt) {
-        // AGENTIC LOOP gives way to the crash tag and the NEW APP INSTANCE tag, then to AGENT COMPLETE
-        s.loop.center.style.opacity = (parseFloat(s.loop.center.style.opacity)
-          * (1 - win(t, crash2, replay[0] + 0.2, 0.2)) * (1 - P(t, complete, 0.3))).toFixed(3);
+        s.loop.center.style.opacity = (parseFloat(s.loop.center.style.opacity) * (1 - P(t, clearAt, 0.5))).toFixed(3);
       }
       // the token stops dead where the crash caught it, then fades out as the loop breaks
       if (crashed) {
@@ -576,8 +578,8 @@
       place(s.without, DL.x, DL.y - 25, wo, clamp(wo * 2) * (1 - P(t, vcrAt - 0.2, 0.3)));
       const wi = P(t, durableIn + 0.8, 0.45, backOut);
       place(s.withT, DL.x, DL.y - 25, wi, clamp(wi * 2) * (1 - P(t, crash2 - 0.4, 0.3)));
-      // AGENTIC LOOP gives way to either tag
-      if ((t >= withoutAt && t < vcrAt) || (t >= durableIn + 0.8 && t < crash2)) s.loop.center.style.opacity = 0;
+      // AGENTIC LOOP gives way to WITHOUT TEMPORAL until the rewind
+      if (t >= withoutAt && t < vcrAt) s.loop.center.style.opacity = 0;
 
       // the VCR rewind: REWIND blinks in the corner over a timecode running backwards, noise bands roll over the
       // stage with scanlines and a color fringe; then the tape stops (a jolt) and PLAY shows for a moment
