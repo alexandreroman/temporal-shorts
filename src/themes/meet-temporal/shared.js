@@ -49,6 +49,13 @@ function hash(n) {
   return x - Math.floor(x);
 }
 
+// Text with its first `n` characters swapped for glyphs picked by a hash of `frame`: encrypted or corrupted text
+const GLYPHS = '#%&@$*+=?/<>{}';
+function scramble(text, n, frame) {
+  return [...text].map((ch, i) => (i < n && ch !== ' ' ? GLYPHS[Math.floor(hash(i * 31 + frame) * GLYPHS.length)]
+    : ch)).join('');
+}
+
 // Camera of a scene: a full-stage layer that holds the scene's elements, so the whole composition can be scaled and
 // moved around the stage center. Build the scene's elements in it.
 function makeCamera(root) {

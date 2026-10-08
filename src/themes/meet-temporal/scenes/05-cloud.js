@@ -20,16 +20,9 @@
   const NEVER_Y = 826;
   const PACKETS = 4; // data packets flowing out along the arrow
   const SECRET = 'card: $42'; // the data that leaves your environment, encrypted on the way
-  const GLYPHS = '#%&@$*+=?/<>{}';
   const DATA_LANDING = { x: SERVICE.x, y: SERVICE.y + 48 }; // inside the Temporal Service box, under its title
   // the data's lane over the arrow: its 38 px chip clears the arrow's packets by 12 px
   const DATA_LANE = ARROW.y - 36;
-
-  // text with the first `n` characters (rounded) swapped for glyphs picked by a hash of the frame: encrypted text
-  function scramble(text, n, frame) {
-    return [...text].map((ch, i) => (i < n && ch !== ' ' ? GLYPHS[Math.floor(hash(i * 31 + frame) * GLYPHS.length)]
-      : ch)).join('');
-  }
 
   // Product tile: a name in the brand font and a mono note under it, centered
   function makeProductTile(root, { name, note }) {
