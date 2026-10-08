@@ -1,4 +1,4 @@
-// ===================== 7. TEMPORAL TODAY
+// ===================== 6. TEMPORAL TODAY
 // The block keeps every name declared in this file local to this scene.
 {
   // Two columns: customers and team on the left, valuation on the right
@@ -20,7 +20,7 @@
   const barH = value => Math.round(BAR.maxH * value / ROUNDS[LAST].value);
 
   scene({
-    chapter: 7, title: 'Temporal today',
+    chapter: 6, title: 'Temporal today',
     // the customers tile alone in the middle, then the whole layout as the chart comes in
     shift: (t, c) => pan(t, [430, 47], [[c[1], 0, -68]], 0.8),
     subs: [

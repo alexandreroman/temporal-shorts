@@ -5,6 +5,12 @@ Object.assign(ICONS, {
   car: '<path d="M3 17v-5l2.5-5.5h13L21 12v5z"/><path d="M3 12h18M5.5 17v2.5M18.5 17v2.5M6.5 14.5h2M15.5 14.5h2"/>',
   // a four-pointed spark and a small plus: AI
   sparkle: '<path d="M11 3l1.8 6.2L19 11l-6.2 1.8L11 19l-1.8-6.2L3 11l6.2-1.8z"/><path d="M19 16.5v5M16.5 19h5"/>',
+  // two stages joined by a pipe: a data pipeline
+  pipeline: '<rect x="2.5" y="4.5" width="7" height="6"/><rect x="14.5" y="13.5" width="7" height="6"/>'
+    + '<path d="M9.5 7.5h3.5v9h1.5"/>',
+  // a chip with its pins: model training
+  chip: '<rect x="6" y="6" width="12" height="12"/><rect x="10" y="10" width="4" height="4"/>'
+    + '<path d="M9 2.5v3.5M15 2.5v3.5M9 18v3.5M15 18v3.5M2.5 9h3.5M2.5 15h3.5M18 9h3.5M18 15h3.5"/>',
 });
 
 // Official photo of the two founders (https://temporal.io/about), 900x929 px. Resolved against src/, as LOGO:

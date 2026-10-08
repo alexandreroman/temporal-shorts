@@ -1,4 +1,4 @@
-// ===================== 6. OPEN SOURCE AND CLOUD
+// ===================== 5. OPEN SOURCE AND CLOUD
 // The block keeps every name declared in this file local to this scene.
 {
   // Three tiles on top (open source, Temporal 1.0, self-hosted), then the Temporal Cloud diagram: your environment
@@ -73,7 +73,7 @@
   }
 
   scene({
-    chapter: 6, title: 'Open source and Cloud',
+    chapter: 5, title: 'Open source and Cloud',
     // laid out centered at (960, 522) on the free band
     subs: [
       {

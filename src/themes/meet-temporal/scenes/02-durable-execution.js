@@ -1,4 +1,4 @@
-// ===================== 3. WHAT TEMPORAL DOES
+// ===================== 2. WHAT TEMPORAL DOES
 // The block keeps every name declared in this file local to this scene.
 {
   // The order of the series: its 4 steps as tiles, as lines in the app, and as rows of the Event History
@@ -66,7 +66,7 @@
   }
 
   scene({
-    chapter: 3, title: 'What Temporal does',
+    chapter: 2, title: 'What Temporal does',
     // laid out centered at (960, 522) on the free band
     subs: [
       {

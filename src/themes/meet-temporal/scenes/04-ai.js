@@ -1,4 +1,4 @@
-// ===================== 5. WHY IT MATTERS FOR AI
+// ===================== 4. WHY IT MATTERS FOR AI
 // The block keeps every name declared in this file local to this scene.
 {
   // The agentic loop on the left (think, act, observe, as in durable-ai-agents), the bill and the progress on the
@@ -34,7 +34,7 @@
   }
 
   scene({
-    chapter: 5, title: 'Why it matters for AI',
+    chapter: 4, title: 'Why it matters for AI',
     // the loop and the bill, then the durable loop and the companies: the pan runs as the bill fades out
     shift: (t, c) => pan(t, [-62, 14], [[c[2] + 0.2, 10, 0]], 0.6),
     subs: [
