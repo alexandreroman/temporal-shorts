@@ -34,6 +34,7 @@
     { company: null, name: null, detail: 'Open source, MIT license', year: '2019' },
   ];
   const LAST = MILESTONES.length - 1;
+  const FLY_D = 1.7; // duration of a face's flight onto the line, in seconds
   const TRAIL = [0.06, 0.12, 0.18]; // how far each ghost of a travelling face lags behind it, in seconds
 
   // Milestone tile: company on top, name in a two-line box (or the official logo), a rule, the detail at the bottom
@@ -61,7 +62,7 @@
   scene({
     chapter: 1, title: 'Where it comes from',
     // the heading plays before the first subtitle
-    pre: 2.0,
+    pre: 2.7,
     // the heading and the founders centered, then the whole timeline, laid out centered at (960, 522)
     shift: (t, c) => pan(t, [0, INTRO_DY], [[c[0] + 1.1, 0, 0]], 0.9),
     subs: [
@@ -93,7 +94,7 @@
         width: '700px', height: '700px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(182,100,255,.45) 0%, rgba(68,76,231,.18) 40%, rgba(68,76,231,0) 70%)',
       });
-      // "20 years" is put forward once the heading settles: a light runs through its letters (a copy of the words
+      // "20 years" is put forward while the heading is large: a light runs through its letters (a copy of the words
       // filled with a moving gradient), a glow blooms around them, they pop, and sparkles burst out
       s.heading = E(root,
         '<span class="key" style="position:relative;display:inline-block;color:var(--violet);'
@@ -151,19 +152,19 @@
       // the heading: large in the middle, its letters closing in from wide apart, sharpening and glowing as they
       // land; it holds, then shrinks up to the top as the founders come in
       const enter = P(t, 0.15, 1.0);
-      const settle = P(t, 1.7, 0.8);
+      const settle = P(t, 2.4, 0.8);
       const font = lerp(HEADING.big.font, HEADING.top.font, settle);
       s.heading.style.fontSize = font.toFixed(2) + 'px';
       s.heading.style.letterSpacing = (lerp(0.35, -0.02, ease(enter))).toFixed(4) + 'em';
       s.heading.style.filter = enter < 1 ? `blur(${((1 - enter) * 8).toFixed(2)}px)` : 'none';
-      const glow = win(t, 0.6, 1.8, 0.4);
+      const glow = win(t, 0.6, 1.3, 0.3);
       s.heading.style.textShadow = glow > 0 ? `0 0 ${Math.round(30 * glow)}px rgba(182,100,255,${(0.7 * glow)
         .toFixed(3)})` : 'none';
       place(s.heading, 960, Math.round(lerp(HEADING.big.y, HEADING.top.y, settle)), 1, clamp(enter * 1.5));
-      // once the heading has settled, "20 years" is put forward: a light sweeps through its letters, a glow blooms
-      // and settles to a faint lasting one, the words pop (anchored on their right, clear of "in the making") and
-      // sparkles burst out and fade
-      const highlight = c[0] + 2.9;
+      // while the heading is large, right after its entrance and before it shrinks, "20 years" is put forward: a
+      // light sweeps through its letters, a glow blooms and settles to a faint lasting one, the words pop (anchored
+      // on their right, clear of "in the making") and sparkles burst out and fade
+      const highlight = 1.2;
       const sweep = P(t, highlight, 0.7, x => x);
       s.key.shine.style.opacity = sweep > 0 && sweep < 1 ? 1 : 0;
       s.key.shine.style.backgroundPosition = `${lerp(100, 0, sweep).toFixed(2)}% 0`;
@@ -175,25 +176,29 @@
       s.sparkles.forEach(e => {
         const b = P(t, highlight + 0.25, 0.6, x => 1 - Math.pow(1 - x, 2));
         const o = b > 0 && b < 1 ? Math.min(1, (1 - b) * 1.6) : 0;
-        place(e, cx + Math.cos(e.angle) * e.dist * b, cy + Math.sin(e.angle) * e.dist * 0.6 * b, 1, o);
+        // the burst is sized for the large heading (its distances are given for a 64 px font)
+        const k = font / HEADING.top.font;
+        place(e, cx + Math.cos(e.angle) * e.dist * k * b, cy + Math.sin(e.angle) * e.dist * 0.6 * k * b, k, o);
       });
 
       // when each milestone lights up, as the founders reach it, then its tile rises
-      const tileIn = [c[0] + 3.6, c[1] + 1.6, c[2] + 1.3, c[3] + 1.8, c[4] + 1.8];
+      const tileIn = [c[0] + 4.0, c[1] + 1.6, c[2] + 1.3, c[3] + 1.8, c[4] + 1.8];
       // each founder: the face shows with its name at `show`, leaves at `fly` (the name fading), lands on its first
-      // milestone one second later, then travels the line ([at, milestone]). Maxim lands on 2004, Samar on 2009.
+      // milestone FLY_D seconds later, then travels the line ([at, milestone]). Maxim lands on 2004, Samar on 2009.
       const founders = [
         { show: c[0] + 0.1, fly: c[0] + 2.5, first: 0, route: [[c[1] + 0.3, 1], [c[3] + 0.5, 3], [c[4] + 0.6, 4]] },
         { show: c[0] + 0.3, fly: c[1] + 0.5, first: 1, route: [[c[2] + 0.3, 2], [c[3] + 0.5, 3], [c[4] + 0.6, 4]] },
       ];
-      // where a face's center of travel is at a time, and its size: the flight curves sideways at the face's height
-      // first, then down onto the line, under the heading; on the line it rides from milestone to milestone
+      // where a face's center of travel is at a time, and its size: the flight is one smooth arc (a quadratic curve
+      // through the corner above its landing) that heads sideways at the face's height, then curves down onto the
+      // line, under the heading, shrinking all the way; on the line the face rides from milestone to milestone
       const travelPos = (i, at) => {
         const { fly, first, route } = founders[i];
         const from = [INTRO.x[i], INTRO.y];
         const landing = [NODE_X[first], LINE.y];
-        if (at < fly + 1) {
-          const p = ease(clamp(at - fly));
+        if (at < fly + FLY_D) {
+          // a gentle sine ease in and out, so the face neither snaps away nor lands with a jolt
+          const p = (1 - Math.cos(Math.PI * clamp((at - fly) / FLY_D))) / 2;
           const bend = [landing[0], from[1]];
           return {
             x: lerp(lerp(from[0], bend[0], p), lerp(bend[0], landing[0], p), p),
@@ -211,7 +216,7 @@
         return { ...own, x: own.x + PAIR_SIDE[i] * PAIR_DX * near };
       };
       const marks = founders.map((_, i) => facePos(i, t));
-      const landed = i => t >= founders[i].fly + 1;
+      const landed = i => t >= founders[i].fly + FLY_D;
 
       s.faces.forEach((e, i) => {
         const { show } = founders[i];
@@ -220,7 +225,7 @@
         // the large face is the one shown until it lands; then the small one takes over on the line
         place(e, Math.round(m.x), Math.round(m.y), pop * m.size / INTRO.size, landed(i) ? 0 : clamp(pop * 2));
         place(s.marks[i], Math.round(m.x), Math.round(m.y), 1, landed(i) ? 1 : 0);
-        rise(s.names[i], nameX(i), INTRO.y, P(t, show + 0.2, 0.5) * (1 - P(t, founders[i].fly - 0.1, 0.3)), 12);
+        rise(s.names[i], nameX(i), INTRO.y, P(t, show + 0.2, 0.5) * (1 - P(t, founders[i].fly, 0.6)), 12);
         // the trail shows with the speed of the face
         const before = facePos(i, t - 0.1);
         const speed = t > founders[i].fly ? clamp(Math.hypot(m.x - before.x, m.y - before.y) / 30) : 0;
@@ -236,7 +241,7 @@
       // the travelled part reaches the founder furthest along
       const onLine = i => (landed(i) ? travelPos(i, t).x : NODE_X[0]);
       s.progress.style.width = Math.round(Math.max(onLine(0), onLine(1)) - LINE.x0) + 'px';
-      s.progress.style.opacity = P(t, founders[0].fly + 1, 0.4);
+      s.progress.style.opacity = P(t, founders[0].fly + FLY_D, 0.4);
 
       // Temporal arrives: bloom and ripples around its tile
       const arrive = tileIn[LAST];
