@@ -5,8 +5,8 @@
   // Traced from the brand artwork (a 1068x890 image): every point below is in that image's pixels, and ziggyPoint()
   // scales it onto the stage. The traced lines span x 89-762, y 131-766 of the image.
   const ART = { centerX: 425.5, top: 131, height: 635 };
-  const ZIGGY_HEIGHT = 390;
-  const ZIGGY_TOP = 196; // stage y of the artwork's top line
+  const ZIGGY_HEIGHT = 430;
+  const ZIGGY_TOP = 176; // stage y of the artwork's top line
   const ZIGGY_SCALE = ZIGGY_HEIGHT / ART.height;
   // Whole stage pixels, so the stars rest on whole pixels and the lines run through their centers
   const ziggyPoint = ([x, y]) => [
@@ -58,13 +58,6 @@
   const BRIGHT_STAR = { size: 10, rgb: '248,250,252' };
   const DIM_STAR = { size: 6, rgb: '232,234,255' };
 
-  // ---------- the founders, as two bright stars of the same sky, on either side of Ziggy
-  const FACE_SIZE = 110;
-  const FACE_X = [620, 1300]; // Maxim on the left, Samar on the right
-  const FACE_Y = 390; // level with Ziggy's middle
-  // The star of Ziggy each face links to: the raised front leg on the left, the back on the right
-  const FACE_LINK_STARS = [[101, 458], [718, 495]];
-
   // ---------- title: "Meet" and the official lockup, read as one title "Meet Temporal"
   // The lockup's viewBox is 1570x410 units (405 395 1570 410): its wordmark's capitals run from y 519 to the
   // baseline at y 684.7, and its symbol spans x 414-804, y 405-795.
@@ -87,7 +80,7 @@
   const TAGLINE_GAP = 23;
   const CARD_WIDTH = 800;
   const CARD_HEIGHT = LOCKUP_HEIGHT + TAGLINE_GAP + 32;
-  // The title sits 62 px under Ziggy's feet; with Ziggy above, the composition spans y 191-839, centered on 515
+  // The title sits 62 px under Ziggy's feet; with Ziggy above, the composition spans y 171-859, centered on 515
   const CARD_Y = ZIGGY_TOP + ZIGGY_HEIGHT + 3 + 62 + CARD_HEIGHT / 2;
 
   // ---------- timing (scene seconds)
@@ -100,8 +93,7 @@
   const FOLD_AT = 2.7;
   const FOLD_STEP = 0.1;
   const FOLD_D = 0.35;
-  const FACE_LINK_AT = 3.0;
-  const PULSE_AT = 3.5; // the constellation is complete: a glow sweeps across it, left to right
+  const PULSE_AT = 3.3; // the constellation is complete: a glow sweeps across it, left to right
   const PULSE_SWEEP = 0.5;
 
   const linear = p => p;
@@ -156,10 +148,6 @@
       }));
       s.eye = path(s.svg, polylinePath(EYE, true), LINE_COLOR, 2, false);
       s.folds = FOLDS.map(points => path(s.svg, polylinePath(points, false), LINE_COLOR, 2, false));
-      s.faceLinks = FACE_LINK_STARS.map((star, i) => {
-        const [x, y] = ziggyPoint(star);
-        return path(s.svg, `M ${FACE_X[i]} ${FACE_Y} L ${x} ${y}`, LINE_COLOR, 2, false);
-      });
 
       // seeded twinkle-in order: the stars sorted by a hash of their index, each appearing at its rank
       const byHash = STARS.map((_, i) => i).sort((a, b) => hash(a + 17) - hash(b + 17));
@@ -171,27 +159,18 @@
       });
       s.pen = makeSpark(root, 10, '248,250,252');
 
-      s.founders = FOUNDERS.map(f => {
-        const face = makeFace(root, f, FACE_SIZE);
-        face.style.boxShadow = '0 0 28px 6px rgba(182,100,255,.35)';
-        return face;
-      });
       s.card = makeTitleCard(root, 'DURABLE EXECUTION FOR APPS AND AI AGENTS');
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
       place(s.card, 960, CARD_Y, 1, P(t, 0.3, 0.8));
-      s.founders.forEach((e, i) => {
-        const p = P(t, 0.1 + i * 0.15, 0.7, backOut);
-        place(e, FACE_X[i], FACE_Y, p, clamp(p * 2));
-      });
 
       // the glow pulse: 0 before and after, 1 as it passes the stage x `x`
       const [left] = ziggyPoint([89, 0]), [right] = ziggyPoint([762, 0]);
       const pulseAt = x => Math.max(0, 1 - Math.abs(t - PULSE_AT - PULSE_SWEEP * (x - left) / (right - left)) / 0.3);
 
       // lines: the outline at a steady pace with a spark on its pen, its branches as the pen passes them, then
-      // the eye and the folds, and last the links that join the founders to Ziggy
+      // the eye and the folds
       const lineOpacity = lerp(LINE_OPACITY, 1, pulseAt(960));
       const outlineProgress = P(t, OUTLINE_AT, OUTLINE_D, linear);
       draw(s.outline, outlineProgress, lineOpacity);
@@ -199,7 +178,6 @@
       s.branches.forEach(b => draw(b.line, P(t, b.at, BRANCH_D, linear), lineOpacity));
       draw(s.eye, P(t, EYE_AT, FOLD_D), lineOpacity);
       s.folds.forEach((l, i) => draw(l, P(t, FOLD_AT + i * FOLD_STEP, FOLD_D), lineOpacity));
-      s.faceLinks.forEach((l, i) => draw(l, P(t, FACE_LINK_AT + i * 0.1, 0.4), LINE_OPACITY));
 
       // stars: each pops in bright, then settles into a gentle twinkle (ambient, G); the pulse swells them
       s.stars.forEach((star, i) => {

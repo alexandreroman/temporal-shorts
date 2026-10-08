@@ -231,8 +231,8 @@ CLAUDE.md; a section below and the card order in
 - Ch2 is the short series arc: steps run strictly one after the other,
   each saved before the next starts.
 - Outro departs from `makeEndCard`: a constellation of Ziggy, Temporal's
-  mascot (a tardigrade), drawn star by star then line by line, with the
-  founders' faces on either side linked to it; the title is "Meet"
+  mascot (a tardigrade), drawn star by star then line by line, with no
+  founder faces; the title is "Meet"
   followed by the official lockup (no logo below the tagline), "Meet"
   matching the wordmark's size and baseline.
 - Motion goes beyond the series framework: cinematic, creative animations
