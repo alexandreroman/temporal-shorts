@@ -45,6 +45,11 @@ make serve                   # hot-reload home page on CASPER_PORT, else 8000
 make clean                   # delete output/ (every generated file)
 ```
 
+After a visual change, give the user a link to the changed moment:
+`http://localhost:${CASPER_PORT:-8000}/themes/<theme>/#t=<seconds>`, with
+times from `make timeline THEME=<theme>` (scene and cue starts). `#t=`
+opens the live player paused there; `?t=` is the frozen capture frame.
+
 `preview` requires `THEME`. Each MP4 or SRT rebuilds only when the shared
 sources or its own theme change (see README.md); `-B` forces a rebuild.
 
