@@ -209,10 +209,13 @@ CLAUDE.md; a section below and the card order in
 - No "What you get" recap: a short company introduction, the outro sums
   up. Six chapters: Where it comes from (the video opens straight on
   the founders' timeline, no separate founders chapter), What Temporal
-  does, Where Temporal is used, Why it matters for AI, Open source and
-  Cloud, Temporal today. Source material includes a Temporal
-  deck from the user (slides 3, 5, 6, 7; its slide 4, customer proof
-  points, stays out). Simple Workflow Service is dated 2009, the launch
+  does, Where Temporal is used, Why it matters for AI, How Temporal
+  Cloud works, Temporal today. Source material includes a Temporal deck
+  from the user (/tmp/meet-temporal.pdf: slide 3 use cases, slide 5
+  timeline, slide 6 "Temporal Cloud: how does it work?", which ch5
+  reproduces: your app and Workflow code on the open source SDK in your
+  environment, the Temporal Service and its internals run by Temporal;
+  slide 4, customer proof points, stays out). Simple Workflow Service is dated 2009, the launch
   Max and Samar led.
 - Founders are told by their careers only, never by country of origin:
   Maxim Fateev (co-founder, CTO) and Samar Abbas (co-founder, CEO).

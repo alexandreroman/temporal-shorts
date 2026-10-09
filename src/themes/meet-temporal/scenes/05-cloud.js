@@ -1,187 +1,235 @@
-// ===================== 5. OPEN SOURCE AND CLOUD
+// ===================== 5. HOW TEMPORAL CLOUD WORKS
 // The block keeps every name declared in this file local to this scene.
 {
-  // Three tiles on top (open source, Temporal 1.0, self-hosted), then the Temporal Cloud diagram: your environment
-  // on the left, Temporal Cloud on the right, a one-way arrow between them
-  const TOP = { y: 212, w: 520, h: 120, xs: [380, 960, 1540] };
-  const PRODUCT = [
-    { name: 'Open source', note: 'MIT license' },
-    { name: 'Temporal 1.0', note: '2020' },
-    { name: 'Self-hosted', note: 'On your own servers' },
-  ];
-  // the diagram runs from 40 px under the tiles to the content frame's bottom (y 312 to 880)
-  const YOURS = { x: 410, y: 596, w: 580, h: 568 };
-  const CLOUD = { x: 1450, y: 596, w: 700, h: 568 };
-  const ARROW = { x0: YOURS.x + YOURS.w / 2, x1: CLOUD.x - CLOUD.w / 2, y: 560 };
-  const ARROW_X = (ARROW.x0 + ARROW.x1) / 2;
-  // your app, 40 px inside your environment's sides and 40 px clear of its two labels
-  const APP = { x: YOURS.x, y: 596, w: 500, h: 400 };
-  // inside Temporal Cloud, 40 px from its sides and bottom: the Temporal Service box 24 px under the header, the
-  // three bars 24 px under it, NEVER SEES YOUR CODE 32 px under them
-  const SERVICE = { x: CLOUD.x, y: 475, w: 620, h: 170 };
-  const BARS = ['Security & compliance', 'Control plane & scale', 'High availability'];
-  const BAR = { y0: 609, gap: 62, w: 620, h: 50 };
-  const NEVER_Y = 815;
-  const PACKETS = 4; // data packets flowing out along the arrow
-  const SECRET = 'card: $42'; // the data that leaves your environment, encrypted on the way
-  const DATA_LANDING = { x: SERVICE.x, y: SERVICE.y + 48 }; // inside the Temporal Service box, under its title
-  // the data's lane over the arrow: its 38 px chip clears the arrow's packets by 12 px
-  const DATA_LANE = ARROW.y - 36;
+  // Two zones side by side, as in Temporal's deck: on the left, your application with its Workflow, managed by you
+  // in your environment; on the right, the Temporal Service with its internals, managed by Temporal in Temporal's
+  // environment; an arrow from the app to the service. Stage pixels: the zones share their top and bottom (y 150 to
+  // 880) and span x 140 to 1780
+  const YOURS = { x: 420, y: 515, w: 560, h: 730 };
+  const CLOUD = { x: 1320, y: 515, w: 920, h: 730 };
+  // each zone's caption, 24 px above its bottom
+  const CAPTION_BOTTOM = 24;
+  // your app, 32 px inside your zone: its header, then the Workflow card 24 px inside it, its activity rows, and the
+  // SDK chip 24 px under the card and above the panel's bottom
+  const APP = { x: YOURS.x, top: YOURS.y - YOURS.h / 2 + 32, w: YOURS.w - 64 };
+  const CARD = { left: 24, top: 76, w: APP.w - 48 };
+  const ROW = { top: 66, h: 72, gap: 22, inset: 20 };
+  CARD.h = ROW.top + 4 * ROW.h + 3 * ROW.gap + 24;
+  const CHIP_H = 48;
+  APP.h = CARD.top + CARD.h + 24 + CHIP_H + 24;
+  APP.y = APP.top + APP.h / 2;
+  // the order of chapter 2, its steps run as the Workflow's activities
+  const ACTIVITIES = [['cart', 'take the order'], ['card', 'charge the card'], ['box', 'ship the package'],
+    ['mail', 'email the receipt']];
+  // the Temporal Service, 40 px inside its zone under the logo: its title, the Front End bar, then the five
+  // internals, the dispatch links between them (LINK_GAP high), all 24 px inside the box
+  const SERVICE = { x: CLOUD.x, top: CLOUD.y - CLOUD.h / 2 + 78, w: CLOUD.w - 80 };
+  const FRONT = { top: 80, h: 52 };
+  const LINK_GAP = 36;
+  // the five internals span the Front End bar's width (the box's inner width, inside its 1.5 px borders, less 24 px
+  // on each side): 5 x 145 + 4 x 16 = 789 px
+  const PART = { top: FRONT.top + FRONT.h + LINK_GAP, h: 112, gap: 16, w: 145 };
+  SERVICE.h = PART.top + PART.h + 24;
+  SERVICE.y = SERVICE.top + SERVICE.h / 2;
+  const PARTS = [['book', ['History', 'Service']], ['retry', ['Matching', 'Service']], ['gear', ['Worker', 'Service']],
+    ['search', ['Elasticsearch']], ['db', ['DB']]];
+  // the four built-in qualities under the service box, 24 px under it, 14 px apart; the last ends at y 798, level
+  // with your app's bottom, 35 px above the captions
+  const BARS = ['Security & compliance', 'Custom persistence', 'Control plane & scale', 'High availability'];
+  const BAR = { h: 50, gap: 14 };
+  BAR.y0 = SERVICE.top + SERVICE.h + 24 + BAR.h / 2;
+  // the arrow from the app's edge to a connector dot on the service box's edge, level with the Front End bar
+  const ARROW = { x0: APP.x + APP.w / 2 + 8, x1: SERVICE.x - SERVICE.w / 2, y: SERVICE.top + FRONT.top + FRONT.h / 2 };
+  const DOT = 18;
+  // stage points of the service internals
+  const partX = i => SERVICE.x - SERVICE.w / 2 + 1.5 + 24 + PART.w / 2 + i * (PART.w + PART.gap);
+  const FRONT_BOTTOM = SERVICE.top + FRONT.top + FRONT.h;
+  const PART_TOP = SERVICE.top + PART.top;
+  // each run of an activity: its row lights, a request runs along the arrow, then (once the service shows) into the
+  // Front End, which dispatches it to the History Service and to one more internal (its index in PARTS)
+  const RUN = { step: 1.1, light: 0.9, send: 0.25, travel: 0.55 };
+  const DISPATCH_TO = [1, 2, 3, 4];
 
-  // Product tile: a name in the brand font and a mono note under it, centered
-  function makeProductTile(root, { name, note }) {
-    return E(root,
-      `<div style="font-size:38px;letter-spacing:-.5px;line-height:1.1">${name}</div>`
-      + `<div class="lbl" style="font-size:18px;margin-top:10px">${note}</div>`,
-      'tile', {
-        width: TOP.w + 'px', height: TOP.h + 'px', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-      });
+  // A zone: a caption at its bottom; the outline is dashed slate for yours, UV for Temporal's
+  function makeZone(root, zone, caption, mine) {
+    const look = mine
+      ? { border: '2px dashed ' + C.slate, background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)' }
+      : { borderColor: C.uv, background: '#17182A' };
+    const e = E(root,
+      (mine ? '' : `<img src="${LOGO}" style="position:absolute;left:24px;top:20px;height:34px;display:block">`)
+      + `<div class="cap lbl" style="position:absolute;left:0;right:0;bottom:${CAPTION_BOTTOM}px;text-align:center;`
+      + `font-size:18px;color:var(--ink)">${caption}</div>`,
+      mine ? '' : 'tile', { width: zone.w + 'px', height: zone.h + 'px', ...look });
+    e.cap = e.querySelector('.cap');
+    return e;
   }
-  // Your environment: a dashed slate zone, labelled on top and at the bottom
-  function makeYourZone(root) {
-    return E(root,
-      '<div class="lbl" style="position:absolute;left:24px;top:20px;padding-left:0;font-size:18px">'
-      + 'Your environment</div>'
-      + '<div class="lbl" style="position:absolute;left:0;right:0;bottom:22px;font-size:18px;text-align:center;'
-      + 'color:var(--ink)">Your app, your code</div>',
-      '', {
-        width: YOURS.w + 'px', height: YOURS.h + 'px', border: '2px dashed ' + C.slate, borderRadius: 'var(--r)',
-        background: 'rgba(148,163,184,.04)',
-      });
-  }
-  // Your app: an app panel with a small Workflow card (a title and four step bars) and the SDK chip under it
+  // Your application: an app panel with a Workflow card of four activity rows and the SDK chip
   function makeYourApp(root) {
-    const app = makeAppPanel(root, 'YOUR APP', APP.w, APP.h, { font: 20, statusFont: 16, statusTop: 24 });
-    const bars = [0, 1, 2, 3].map(i => `<i style="position:absolute;left:24px;top:${62 + i * 42}px;width:`
-      + `${[220, 260, 190, 240][i]}px;height:14px;border-radius:3px;background:${C.uvTint}"></i>`).join('');
+    const app = makeAppPanel(root, 'YOUR APPLICATION', APP.w, APP.h, { font: 20, statusFont: 16, statusTop: 24 });
     app.insertAdjacentHTML('beforeend',
-      '<div style="position:absolute;left:24px;right:24px;top:76px;height:236px;background:rgba(248,250,252,.03);'
-      + `border:1.5px solid ${C.line};border-radius:var(--r)">`
-      + panelLabel('code', 'Workflow', 'left:20px;top:14px;padding-left:0') + bars + '</div>'
-      + '<div class="pill uv" style="position:absolute;left:24px;right:24px;bottom:20px;text-align:center;'
-      + 'font-size:18px;line-height:24px">Temporal SDK · open source</div>');
+      `<div style="position:absolute;left:${CARD.left}px;top:${CARD.top}px;width:${CARD.w}px;height:${CARD.h}px;`
+      + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
+      + panelLabel('code', 'Workflow', 'left:20px;top:18px;padding-left:0') + '</div>'
+      + `<div class="pill uv" style="position:absolute;left:24px;right:24px;bottom:24px;height:${CHIP_H}px;`
+      + 'padding-top:0;padding-bottom:0;line-height:45px;text-align:center;font-size:18px">'
+      + 'Temporal SDK · open source</div>');
+    const card = app.lastElementChild.previousElementSibling;
+    app.rows = ACTIVITIES.map(([icon, text], i) => E(card,
+      `${ICON(icon, 28, C.ink, 1.7)}<span style="flex:1;margin-left:16px">${text}</span>`
+      + '<span class="lbl" style="font-size:13px">Activity</span>',
+      'mono', {
+        left: ROW.inset + 'px', top: (ROW.top + i * (ROW.h + ROW.gap)) + 'px',
+        width: (CARD.w - 2 * ROW.inset - 3) + 'px',
+        height: ROW.h + 'px', display: 'flex', alignItems: 'center', padding: '0 18px', fontSize: '22px',
+        whiteSpace: 'nowrap', border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)',
+      }));
     return app;
   }
-  // Temporal Cloud: UV zone with the official logo and a "Cloud" label in its header
-  function makeCloudZone(root) {
-    return E(root,
-      `<img src="${LOGO}" style="position:absolute;left:24px;top:20px;height:34px;display:block">`
-      + '<div class="lbl" style="position:absolute;right:24px;top:26px;font-size:18px;color:var(--ink)">Cloud</div>',
-      'tile', { width: CLOUD.w + 'px', height: CLOUD.h + 'px', borderColor: C.uv, background: '#17182A' });
+  // The Temporal Service box: its title, the Front End bar and the five internals (an icon and a label each)
+  function makeService(root) {
+    const box = E(root,
+      '<div style="position:absolute;left:0;right:0;top:20px;text-align:center;font-size:34px;letter-spacing:-.5px;'
+      + 'line-height:40px">Temporal Service</div>',
+      '', {
+        width: SERVICE.w + 'px', height: SERVICE.h + 'px', background: 'rgba(68,76,231,.16)',
+        border: '1.5px solid ' + C.uv, borderRadius: 'var(--r)',
+      });
+    box.front = E(box, 'Front End Service', 'mono', {
+      left: '24px', top: FRONT.top + 'px', width: (SERVICE.w - 51) + 'px', height: FRONT.h + 'px',
+      lineHeight: (FRONT.h - 3) + 'px', textAlign: 'center', fontSize: '18px', letterSpacing: '.12em',
+      paddingLeft: '.12em', textTransform: 'uppercase', background: '#20224A', border: '1.5px solid ' + C.uv,
+      borderRadius: 'var(--rs)',
+    });
+    box.parts = PARTS.map(([icon, lines], i) => E(box,
+      `${ICON(icon, 30, C.ink, 1.7)}<div style="margin-top:10px;line-height:18px">${lines.join('<br>')}</div>`,
+      'mono', {
+        left: (24 + i * (PART.w + PART.gap)) + 'px', top: PART.top + 'px', width: PART.w + 'px', height: PART.h + 'px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: '14px',
+        letterSpacing: '.06em', textTransform: 'uppercase', textAlign: 'center', background: '#20224A',
+        border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)',
+      }));
+    return box;
   }
+  // A built-in quality: a UV bar, dim until it lights, with a neon check at its right
+  const makeBar = (root, text) => {
+    const e = E(root,
+      `<span>${text}</span><div class="ck" style="position:absolute;right:20px;top:${(BAR.h - 26) / 2}px;opacity:0">`
+      + `${ICON('check', 26, C.neon, 2.6)}</div>`,
+      'mono', {
+        width: SERVICE.w + 'px', height: BAR.h + 'px', lineHeight: BAR.h + 'px', textAlign: 'center',
+        fontSize: '18px', letterSpacing: '.12em', paddingLeft: '.12em', textTransform: 'uppercase',
+        color: '#FFFFFF', borderRadius: 'var(--rs)',
+      });
+    e.ck = e.querySelector('.ck');
+    return e;
+  };
 
   scene({
-    chapter: 5, title: 'Open source and Cloud',
+    chapter: 5, title: 'How Temporal Cloud works',
     holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
-    // laid out centered at (960, 522) on the free band
     subs: [
       {
-        text: "Temporal is open source: Temporal 1.0 shipped in 2020, and anyone can run it on their own servers.",
+        text: "With Temporal Cloud, your Workflow code keeps running in your environment, on the open source SDK.",
         after: 0.4,
       },
+      // the first run of the four activities ends before the service shows
       {
-        text: "Temporal Cloud runs the service for you. Your code stays in your environment: Temporal never sees it.",
-        after: 0.6,
+        text: "Temporal's team manages the Temporal Service, so you don't run a complex, highly available cluster.",
+        after: 2.0,
       },
-      { text: "Connections only go out from your side, and data stays encrypted end to end.", after: 1.4 },
+      // the second run, through the service, ends before the bars light
+      { text: "Security, compliance, scale and high availability come built in.", after: 1.4 },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-      s.product = PRODUCT.map(item => makeProductTile(root, item));
-      s.yours = makeYourZone(root);
+      s.yours = makeZone(root, YOURS, 'Managed by you, in your environment', true);
       s.app = makeYourApp(root);
-      s.cloud = makeCloudZone(root);
-      s.service = E(root, 'Temporal Service', '', {
-        width: SERVICE.w + 'px', height: SERVICE.h + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontSize: '40px', letterSpacing: '-.5px', background: 'rgba(68,76,231,.22)',
-        paddingBottom: '50px', // the title sits in the upper part, the encrypted data lands under it
-        border: '1.5px solid ' + C.uv, borderRadius: 'var(--r)',
-      });
-      s.bars = BARS.map(text => E(root, text, 'mono', {
-        width: BAR.w + 'px', height: BAR.h + 'px', lineHeight: BAR.h + 'px', textAlign: 'center',
-        fontSize: '18px', letterSpacing: '.12em', paddingLeft: '.12em', textTransform: 'uppercase',
-        background: C.uv, color: '#FFFFFF', borderRadius: 'var(--rs)',
-      }));
-      s.never = tag(root, 'Never sees your code', 'neon');
+      s.cloud = makeZone(root, CLOUD, "Managed by Temporal, in Temporal's environment", false);
+      s.service = makeService(root);
+      s.bars = BARS.map(text => makeBar(root, text));
       s.svg = svgLayer(root);
-      s.arrow = path(s.svg, `M ${ARROW.x0 + 16} ${ARROW.y} L ${ARROW.x1 - 14} ${ARROW.y}`, C.ink, 3);
-      s.outbound = E(root, 'Outbound only', 'lbl', { color: 'var(--ink)', fontSize: '18px' });
-      s.mtls = E(root, 'mTLS', 'lbl', { fontSize: '15px' });
-      // the lock's shackle is its own path, so it can snap shut
-      s.encrypted = E(root,
-        `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${C.neon}" stroke-width="2"`
-        + ' stroke-linecap="square" style="display:block;overflow:visible"><rect x="5" y="11" width="14" height="10"/>'
-        + '<path d="M12 15v2"/><path class="shackle" d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
-        + '<span>End-to-end encryption</span>',
-        'pill neon solid', { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' });
-      s.shackle = s.encrypted.querySelector('.shackle');
-      // data packets flowing out, an inbound attempt bounced back, and a piece of data encrypted on its way
-      s.packets = Array.from({ length: PACKETS }, () => makeSpark(root, 10, '219,255,75'));
-      s.inbound = makeSpark(root, 14, '255,90,95');
-      s.block = E(root, ICON('x', 30, C.red, 3));
-      s.data = E(root, SECRET, 'mono', {
-        fontSize: '20px', padding: '6px 12px', background: C.uvTint, color: '#141414', borderRadius: 'var(--rs)',
-        whiteSpace: 'nowrap',
+      s.arrow = path(s.svg, `M ${ARROW.x0} ${ARROW.y} L ${ARROW.x1 - DOT / 2 - 10} ${ARROW.y}`, C.ink, 3);
+      s.dot = E(root, '', '', {
+        width: DOT + 'px', height: DOT + 'px', borderRadius: '50%', background: '#17182A',
+        border: '3px solid ' + C.ink,
       });
+      // the dispatch links, from the Front End's bottom to the top of each internal
+      s.links = PARTS.map((_, i) => path(s.svg, `M ${partX(i)} ${FRONT_BOTTOM + 4} L ${partX(i)} ${PART_TOP - 4}`,
+        C.violet, 2, false));
+      // a request per run along the arrow, and its two dispatches inside the service
+      s.requests = [0, 1, 2, 3, 4, 5, 6, 7].map(() => makeSpark(root, 14, '219,255,75'));
+      s.dispatches = [0, 1, 2, 3].map(() => [makeSpark(root, 12, '182,100,255'), makeSpark(root, 12, '182,100,255')]);
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
-      // open source first, then Temporal 1.0, then running it yourself, as the subtitle reads them
-      const productIn = [c[0] + 0.4, c[0] + 1.8, c[0] + 4.4];
-      s.product.forEach((e, i) => rise(e, TOP.xs[i], TOP.y, P(t, productIn[i], 0.5)));
+      // c[0]: your zone, your app and its Workflow, then the arrow; the four activities run, each sending a request
+      // out; c[1]: the Temporal Service and its internals, then the activities run again, each request dispatched
+      // inside; c[2]: the four built-in qualities light one by one
+      rise(s.yours, YOURS.x, YOURS.y, P(t, c[0] + 0.2, 0.6));
+      rise(s.app, APP.x, APP.y, P(t, c[0] + 0.5, 0.5), 16);
+      s.app.rows.forEach((r, i) => showRow(r, P(t, c[0] + 0.9 + i * 0.15, 0.35), 26, true));
+      s.yours.cap.style.opacity = P(t, c[0] + 1.6, 0.4);
+      draw(s.arrow, P(t, c[0] + 2.0, 0.6));
+      place(s.dot, ARROW.x1, ARROW.y, P(t, c[0] + 2.4, 0.3, backOut), P(t, c[0] + 2.4, 0.2));
 
-      // Temporal Cloud runs the service, then your environment keeps your code
-      rise(s.cloud, CLOUD.x, CLOUD.y, P(t, c[1] + 0.3, 0.6));
-      rise(s.service, SERVICE.x, SERVICE.y, P(t, c[1] + 0.7, 0.5), 16);
-      s.bars.forEach((e, i) => rise(e, CLOUD.x, BAR.y0 + i * BAR.gap, P(t, c[1] + 1.0 + i * 0.2, 0.45), 16));
-      rise(s.yours, YOURS.x, YOURS.y, P(t, c[1] + 2.2, 0.6));
-      rise(s.app, APP.x, APP.y, P(t, c[1] + 2.5, 0.5), 16);
-      const np = P(t, c[1] + 4.6, 0.45, backOut);
-      place(s.never, CLOUD.x, NEVER_Y, np, clamp(np * 2));
-
-      // the one-way connection, from your side out to Temporal Cloud, then encryption end to end
-      draw(s.arrow, P(t, c[2] + 0.3, 0.7));
-      // the labels sit under the arrow, so the data crossing above it never passes over them
-      place(s.outbound, ARROW_X, ARROW.y + 25, 1, P(t, c[2] + 0.8, 0.4));
-      place(s.mtls, ARROW_X, ARROW.y + 54, 1, P(t, c[2] + 1.1, 0.4));
-      const ep = P(t, c[2] + 3.0, 0.45, backOut);
-      place(s.encrypted, ARROW_X, ARROW.y + 130, ep, clamp(ep * 2));
-      // the lock snaps shut as the tag lands
-      const snap = P(t, c[2] + 3.4, 0.2, easeIn);
-      s.shackle.setAttribute('transform', `translate(0 ${(-4 * (1 - snap)).toFixed(2)})`);
-
-      // once the arrow is drawn, packets flow out continuously (ambient loop, driven by G)
-      const flowing = P(t, c[2] + 1.0, 0.4);
-      s.packets.forEach((e, k) => {
-        const phase = (G * 0.7 + k / PACKETS) % 1;
-        const x = lerp(ARROW.x0 + 24, ARROW.x1 - 30, phase);
-        place(e, x, ARROW.y, 1, flowing * Math.min(1, phase * 8, (1 - phase) * 8));
+      const runs = [
+        ...[0, 1, 2, 3].map(k => ({ at: c[0] + 2.9 + k * RUN.step, k, inside: false })),
+        ...[0, 1, 2, 3].map(k => ({ at: c[1] + 3.0 + k * RUN.step, k, inside: true })),
+      ];
+      const running = runs.some(r => t >= r.at && t < r.at + RUN.light);
+      setAppStatus(s.app, running ? 'RUNNING' : '', running ? 'running' : 'idle');
+      s.app.rows.forEach((row, i) => {
+        const lit = runs.some(r => r.k === i && t >= r.at && t < r.at + RUN.light);
+        row.style.borderColor = lit ? C.violet : C.line;
+        row.style.background = lit ? 'rgba(182,100,255,.2)' : 'transparent';
       });
-      // an inbound attempt from Temporal Cloud bounces off your environment's edge
-      const inbound = c[2] + 1.4;
-      const go = P(t, inbound, 0.6, easeIn), back = P(t, inbound + 0.6, 0.5);
-      const ix = lerp(lerp(ARROW.x1 - 20, ARROW.x0 + 20, go), ARROW.x1 - 120, back);
-      place(s.inbound, ix, ARROW.y + 84, 1, win(t, inbound, inbound + 1.0, 0.15));
-      const bp = P(t, inbound + 0.6, 0.3, backOut);
-      place(s.block, ARROW.x0 + 16, ARROW.y + 84, bp, win(t, inbound + 0.6, inbound + 1.6, 0.2));
+      runs.forEach((r, n) => {
+        sparkOnPath(s.requests[n], s.arrow, P(t, r.at + RUN.send, RUN.travel, x => x));
+        if (!r.inside) return;
+        // the request lands on the Front End, which dispatches it to History and to one more internal
+        const out = r.at + RUN.send + RUN.travel;
+        const [toHistory, toOther] = s.dispatches[r.k];
+        sparkOnPath(toHistory, s.links[0], P(t, out + 0.1, 0.35, x => x));
+        sparkOnPath(toOther, s.links[DISPATCH_TO[r.k]], P(t, out + 0.1, 0.35, x => x));
+      });
 
-      // a piece of data leaves your app and crosses over, encrypted as it leaves your environment; it stays
-      // encrypted in Temporal Cloud
-      const sent = c[2] + 2.2;
-      const dp = P(t, sent, 1.4);
-      // it rises out of the app into a lane just above the arrow (DATA_LANE), crosses over in it, and drifts into
-      // the Temporal Service box
-      const dx = lerp(APP.x + 100, DATA_LANDING.x, dp);
-      const lift = (1 - Math.cos(Math.PI * clamp((dx - APP.x - 100) / (ARROW.x0 - 10 - APP.x - 100)))) / 2;
-      const dy = lerp(lerp(APP.y + 20, DATA_LANE, lift), DATA_LANDING.y, clamp((dx - ARROW.x1) / (DATA_LANDING.x
-        - ARROW.x1)));
-      const encrypted = clamp((dx - (ARROW.x0 - 40)) / 120);
-      // the glyphs flicker on the ambient clock G counted from the scene's start (equal to t in rendered frames),
-      // so the live player sees a still scene once the data has landed
-      s.data.textContent = scramble(SECRET, Math.round(encrypted * SECRET.length), Math.floor((G - this.start) * 20));
-      s.data.style.background = encrypted > 0.5 ? C.neonTint : C.uvTint;
-      place(s.data, Math.round(dx), Math.round(dy), 1, P(t, sent - 0.2, 0.3) * (1 - P(t, c[2] + 5.2, 0.4)));
+      // the Temporal Service, managed by Temporal; its internals pop in one by one, then the links draw
+      rise(s.cloud, CLOUD.x, CLOUD.y, P(t, c[1] + 0.2, 0.6));
+      rise(s.service, SERVICE.x, SERVICE.y, P(t, c[1] + 0.6, 0.5), 16);
+      const front = s.service.front;
+      front.style.opacity = P(t, c[1] + 1.0, 0.35);
+      const landed = runs.filter(r => r.inside).map(r => r.at + RUN.send + RUN.travel);
+      const flash = Math.max(0, ...landed.map(at => win(t, at - 0.05, at + 0.3, 0.1)));
+      front.style.boxShadow = flash > 0 ? `0 0 ${Math.round(18 * flash)}px rgba(219,255,75,${(0.5 * flash).toFixed(3)})`
+        : '';
+      s.service.parts.forEach((e, i) => {
+        const p = P(t, c[1] + 1.3 + i * 0.15, 0.4, backOut);
+        e.style.opacity = clamp(p * 2);
+        e.style.transform = `scale(${p.toFixed(4)})`;
+        // an internal glows violet as a dispatch lands on it
+        const hits = runs.filter(r => r.inside && (i === 0 || DISPATCH_TO[r.k] === i))
+          .map(r => r.at + RUN.send + RUN.travel + 0.45);
+        const glow = Math.max(0, ...hits.map(at => win(t, at - 0.05, at + 0.3, 0.1)));
+        e.style.borderColor = glow > 0.5 ? C.violet : C.line;
+      });
+      s.links.forEach((l, i) => draw(l, P(t, c[1] + 2.2 + i * 0.08, 0.3), 0.8));
+      // the two captions contrast who manages what: yours, then Temporal's, each swelling as it shows
+      s.cloud.cap.style.opacity = P(t, c[1] + 1.9, 0.4);
+      s.yours.cap.style.transform = `scale(${swell(t, c[1] + 2.4, 0.08)})`;
+      s.cloud.cap.style.transform = `scale(${swell(t, c[1] + 2.9, 0.08)})`;
+
+      // the built-in qualities: dim bars once the service shows, each lit in turn with a glow and a check
+      s.bars.forEach((e, i) => {
+        rise(e, SERVICE.x, BAR.y0 + i * (BAR.h + BAR.gap), P(t, c[1] + 2.0 + i * 0.1, 0.4), 12);
+        const at = c[2] + 0.5 + i * 0.7;
+        const lit = P(t, at, 0.3);
+        e.style.background = `rgba(68,76,231,${(0.25 + 0.75 * lit).toFixed(3)})`;
+        e.style.color = lit > 0.5 ? '#FFFFFF' : C.slate;
+        const glow = win(t, at, at + 0.6, 0.15);
+        e.style.boxShadow = glow > 0 ? `0 0 ${Math.round(24 * glow)}px rgba(68,76,231,${(0.8 * glow).toFixed(3)})`
+          : '';
+        e.ck.style.opacity = P(t, at + 0.15, 0.25);
+      });
     }
   });
 }

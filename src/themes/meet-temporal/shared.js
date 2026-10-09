@@ -11,6 +11,9 @@ Object.assign(ICONS, {
   // a chip with its pins: model training
   chip: '<rect x="6" y="6" width="12" height="12"/><rect x="10" y="10" width="4" height="4"/>'
     + '<path d="M9 2.5v3.5M15 2.5v3.5M9 18v3.5M15 18v3.5M2.5 9h3.5M2.5 15h3.5M18 9h3.5M18 15h3.5"/>',
+  // a database cylinder: its top, sides and a band
+  db: '<ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/>'
+    + '<path d="M4.5 5.5v13c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-13M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/>',
 });
 
 // Official photo of the two founders (https://temporal.io/about), 900x929 px. Resolved against src/, as LOGO:
@@ -47,13 +50,6 @@ function makeFace(p, founder, size) {
 function hash(n) {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
   return x - Math.floor(x);
-}
-
-// Text with its first `n` characters swapped for glyphs picked by a hash of `frame`: encrypted or corrupted text
-const GLYPHS = '#%&@$*+=?/<>{}';
-function scramble(text, n, frame) {
-  return [...text].map((ch, i) => (i < n && ch !== ' ' ? GLYPHS[Math.floor(hash(i * 31 + frame) * GLYPHS.length)]
-    : ch)).join('');
 }
 
 // Camera of a scene: a full-stage layer that holds the scene's elements, so the whole composition can be scaled and

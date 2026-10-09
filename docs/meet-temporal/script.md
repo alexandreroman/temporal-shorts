@@ -33,8 +33,10 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ### Sources
 
-- Temporal deck provided by the user (slides 3, 5, 6, 7): the use case
-  categories, the 20-year timeline, Temporal Cloud and its security
+- Temporal deck provided by the user (slides 3, 5, 7): the use case
+  categories, the 20-year timeline, Temporal Cloud's security
+- Temporal deck provided by the user, slide 6 ("Temporal Cloud: how does it
+  work?"): the two zones of chapter 05 and the service's internals
 - https://docs.temporal.io/cloud/security (the Temporal Cloud claims of
   chapter 05)
 - https://temporal.io/blog/samars-journey
@@ -204,27 +206,34 @@ and each chapter has a cinematic moment, listed in its visuals.
   and Replit rely on it too.
   - Visuals: The completed state holds.
 
-## 05 Open source and Cloud
+## 05 How Temporal Cloud works
 
-- **2:00** Temporal is open source: Temporal 1.0 shipped in 2020, and anyone
-  can run it on their own servers.
-  - Visuals: Three tiles across the top, one by one: "Open source" (MIT
-    LICENSE), "Temporal 1.0" (2020), "Self-hosted" (ON YOUR OWN SERVERS).
-- **2:08** Temporal Cloud runs the service for you. Your code stays in your
-  environment: Temporal never sees it.
-  - Visuals: On the right, TEMPORAL CLOUD (UV border, official logo):
-    "Temporal Service" and three bars SECURITY & COMPLIANCE, CONTROL PLANE
-    & SCALE, HIGH AVAILABILITY; on the left, YOUR ENVIRONMENT (dashed slate
-    border, "YOUR APP, YOUR CODE"): YOUR APP with a small Workflow card and
-    TEMPORAL SDK · OPEN SOURCE; then NEVER SEES YOUR CODE.
-- **2:16** Connections only go out from your side, and data stays encrypted
-  end to end.
-  - Visuals: A one-way arrow draws from your environment to Temporal Cloud,
-    OUTBOUND ONLY, mTLS; neon packets flow out along it; an inbound attempt
-    from the cloud bounces off your side (red cross). A piece of data,
-    "card: $42", leaves your app, scrambles into glyphs as it leaves your
-    environment and lands encrypted in the Temporal Service; END-TO-END
-    ENCRYPTION, its lock snapping shut.
+- **2:00** With Temporal Cloud, your Workflow code keeps running in your
+  environment, on the open source SDK.
+  - Visuals: As on slide 6 of Temporal's deck. On the left, a dashed slate
+    zone: YOUR APPLICATION, a Workflow card listing the order of chapter 02
+    as four activity rows (take the order, charge the card, ship the
+    package, email the receipt, each tagged ACTIVITY) and a TEMPORAL SDK ·
+    OPEN SOURCE chip; the zone caption reads MANAGED BY YOU, IN YOUR
+    ENVIRONMENT. An arrow draws from the app to a connector dot, then the
+    Workflow runs: each activity lights in turn and sends a neon request
+    along the arrow.
+- **2:08** Temporal's team manages the Temporal Service, so you don't run a
+  complex, highly available cluster.
+  - Visuals: On the right, a UV zone with the official Temporal logo: the
+    Temporal Service box, its FRONT END SERVICE bar on the arrow's dot, and
+    under it five internals that pop in one by one: HISTORY SERVICE,
+    MATCHING SERVICE, WORKER SERVICE, ELASTICSEARCH and DB (a database
+    cylinder), joined to the Front End by violet links. Four dim bars
+    appear under the box, and the caption MANAGED BY TEMPORAL, IN
+    TEMPORAL'S ENVIRONMENT; the two captions swell in turn, you then
+    Temporal. The Workflow runs again: each request lands on the Front End,
+    which glows and dispatches it to the History Service and one more
+    internal, each glowing violet as it arrives.
+- **2:17** Security, compliance, scale and high availability come built in.
+  - Visuals: The four bars light one by one, each with a UV glow and a neon
+    check: SECURITY & COMPLIANCE, CUSTOM PERSISTENCE, CONTROL PLANE & SCALE,
+    HIGH AVAILABILITY.
 
 ## 06 Temporal today
 
@@ -233,7 +242,7 @@ and each chapter has a cinematic moment, listed in its visuals.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **2:31** In September 2026, investors valued Temporal at $12.55 billion.
+- **2:32** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
