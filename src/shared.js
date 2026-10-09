@@ -61,9 +61,8 @@ function useCaseTile(p, icon, label, example, w, h) {
     + `${example}</div>`);
   return tile;
 }
-// x of the center of tile i (0 to 3) of a row of 4 tiles like USE_CASE_ROW, centered on x 960; pitch: the spacing
-// of a row with other tiles
-const useCaseX = (i, pitch = USE_CASE_ROW.pitch) => 960 + (i - 1.5) * pitch;
+// x of the center of tile i (0 to 3) of a row of 4 tiles spaced like USE_CASE_ROW, centered on x 960
+const useCaseX = i => 960 + (i - 1.5) * USE_CASE_ROW.pitch;
 // The "What you can build" chapter of an explainer, its scene before the outro: chapter, its number; uses, the
 // [icon, label, example] of each of the 4 useCaseTiles of USE_CASE_ROW; subs, its 2 subtitles. The tiles pop in
 // one at a time, 0.8 s apart from c[0] + firstAt, while subtitle 1 reads; subtitle 2 names them in order, and each
