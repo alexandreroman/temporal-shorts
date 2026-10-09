@@ -1,5 +1,5 @@
 // ===================== 8. WHAT YOU GET
-// The payoff: the budget saved in this example, then the other benefits, one tile at a time.
+// The payoff: the LLM calls saved in this example, then the other benefits, one tile at a time.
 // The block keeps every name declared in this file local to this scene.
 {
   const BENEFITS = [
@@ -23,7 +23,7 @@
     build(root, s) {
       s.budget = E(root,
         `<div style="display:flex;align-items:center;gap:26px">${ICON('coin', 76, C.neon, 1.6)}<div>`
-        + '<div style="font-size:60px;line-height:1.1">43% less LLM spend '
+        + '<div style="font-size:60px;line-height:1.1">43% fewer LLM calls '
         + '<span class="lbl" style="font-size:20px">in this example</span></div>'
         + '<div class="mono" style="font-size:30px;letter-spacing:.06em;color:var(--slate);margin-top:10px">'
         + '<span style="color:var(--neon)">4</span> vs 7 LLM calls</div></div></div>');
