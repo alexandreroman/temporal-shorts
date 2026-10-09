@@ -269,6 +269,13 @@ const LUNCH_STEPS = [
   { icon: 'food', label: 'Booking', action: 'Book a table', tool: 'Booking', result: 'table for 2, confirmed' },
   { icon: 'mail', label: 'Invite', action: 'Invite Marie', tool: 'Email', result: 'invite sent' },
 ];
+// The agent's Event History of the lunch: the LLM call of each step (its action, lowercase), then its tool result
+const LUNCH_HISTORY = LUNCH_STEPS.flatMap(step => [
+  `LLM call: ${step.action[0].toLowerCase()}${step.action.slice(1)}`, `${step.tool}: ${step.result}`,
+]);
+// Whether row i of LUNCH_HISTORY (or context block i, see makeMemBlocks) holds an LLM call; the others hold a tool
+// result
+const isLLMRow = i => i % 2 === 0;
 // The agent's goal and its steps: the user's goal card (YOU), then one row per step (icon, action, a neon result
 // line and a check, both hidden until the step is done); w: their width
 function makeStepList(root, goalText, steps, w = 640) {
@@ -312,11 +319,11 @@ function makeMemory(p, w, h, { label = 'Context', labelAt = [22, 16], emptyText 
   e.empty = e.querySelector('.empty');
   return e;
 }
-// context blocks held by the app: LLM results and tool results alternate, two per step of LUNCH_STEPS, each
+// context blocks held by the app, one per row of LUNCH_HISTORY: LLM results and tool results alternate, each
 // centring the icon of its step (same colours as the Event History rows)
 function makeMemBlocks(p, n, w, h) {
   return Array.from({ length: n }, (_, i) => {
-    const isTool = i % 2 === 1;
+    const isTool = !isLLMRow(i);
     const icon = ICON(LUNCH_STEPS[Math.floor(i / 2)].icon, Math.round(h / 2), isTool ? '#141414' : C.uv, 1.8);
     const b = E(p, icon, '', {
       width: w + 'px', height: h + 'px', background: isTool ? C.neonTint : C.uvTint, borderRadius: 'var(--rs)',
@@ -523,6 +530,7 @@ function makeTemporalPanel(p, w, h, { logoAt = null, noteAt, font = 16, note = '
 // ---------- Event History card
 // White card with an EVENT HISTORY header (headerFont, its icon 4 px larger, headerTop px from the card top),
 // numbered rows and one status tag per row. rowsHtml: HTML of each row, after its number. Options:
+// - uvRow(i): whether row i reads in UV (a model call, a Signal), the others in black
 // - w, h: card size; rowTop(i): top of row i; font: row text size; rowH: row height with its text centered (null:
 //   the height of the text); padY: vertical padding of a row
 // - tagTop(i): top of the tag of row i; tagRight: its right margin; tag: statusTag options
@@ -533,8 +541,8 @@ function makeTemporalPanel(p, w, h, { logoAt = null, noteAt, font = 16, note = '
 // Returns the card with rows, tags, kept and cut (crash), scan, rowTop and scanDy.
 function makeHistoryCard(p, rowsHtml, opts) {
   const {
-    w, h, headerFont = 18, headerTop = headerFont + 2, rowTop, font = 22, rowH = null, padY = 4, tagTop,
-    tagRight = 36, tag = {}, crash = null, scanH = null, scanDy = rowH ? (rowH - scanH) / 2 : 0,
+    w, h, headerFont = 18, headerTop = headerFont + 2, uvRow = () => false, rowTop, font = 22, rowH = null,
+    padY = 4, tagTop, tagRight = 36, tag = {}, crash = null, scanH = null, scanDy = rowH ? (rowH - scanH) / 2 : 0,
   } = opts;
   const card = E(p,
     `<div class="mono" style="position:absolute;left:26px;top:${headerTop}px;font-size:${headerFont}px;`
@@ -562,7 +570,8 @@ function makeHistoryCard(p, rowsHtml, opts) {
     });
   }
   card.rows = rowsHtml.map((html, i) => {
-    const row = E(card, `<span style="color:#8A93A6;display:inline-block;width:34px">${i + 1}</span>${html}`,
+    const text = uvRow(i) ? `<span style="color:${C.uv}">${html}</span>` : html;
+    const row = E(card, `<span style="color:#8A93A6;display:inline-block;width:34px">${i + 1}</span>${text}`,
       'mono', {
         left: '26px', top: rowTop(i) + 'px', width: (w - 52) + 'px', fontSize: font + 'px', whiteSpace: 'nowrap',
         padding: `${padY}px 10px`,
@@ -602,6 +611,13 @@ function makeResultCard(p, uv = true, label = 'RESULT') {
     background: uv ? C.uvTint : C.neonTint, color: '#141414', padding: '6px 14px',
     borderLeft: `5px solid ${uv ? C.uv : C.neonDark}`, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
   });
+}
+// Result card of a model call (UV, labelled modelLabel) or of a tool call (green, TOOL CALL); w: a fixed width, the
+// label centered in it (null: as wide as the label)
+function makeCallCard(p, isModelCall, { modelLabel = 'LLM CALL', w = null } = {}) {
+  const e = makeResultCard(p, isModelCall, isModelCall ? modelLabel : 'TOOL CALL');
+  if (w) Object.assign(e.style, { width: w + 'px', textAlign: 'center' });
+  return e;
 }
 
 // ---------- counter tile

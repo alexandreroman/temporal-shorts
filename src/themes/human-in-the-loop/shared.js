@@ -264,10 +264,9 @@ const ROW_TAG_KINDS = { 'SAVED': 'saved', 'REPLAYED': 'reused', 'STILL WAITING':
 // makeHistoryCard with this theme's sizes: numbered rows (Signal rows in UV) and one status tag per row;
 // scanH: height of the row highlight, null for none
 function makeHistory(p, rows, w, h, scanH = null) {
-  const rowsHtml = rows.map(txt => `<span style="color:${txt.startsWith('Signal') ? C.uv : '#141414'}">${txt}</span>`);
-  return makeHistoryCard(p, rowsHtml, {
-    w, h, headerFont: 20, rowTop, font: 23, rowH: HROW.h, tagTop: i => rowTop(i) + 4,
-    tag: { font: 18, pad: '4px 12px', icon: 18, border: false }, scanH,
+  return makeHistoryCard(p, rows, {
+    uvRow: i => rows[i].startsWith('Signal'), w, h, headerFont: 20, rowTop, font: 23, rowH: HROW.h,
+    tagTop: i => rowTop(i) + 4, tag: { font: 18, pad: '4px 12px', icon: 18, border: false }, scanH,
   });
 }
 // The laptop order history of chapters 3 and 4, with a scan highlight for the replay, the pulsing line shown in

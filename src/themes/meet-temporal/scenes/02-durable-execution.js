@@ -95,8 +95,7 @@
       s.A = makeStepsApp(root, 'APP INSTANCE A');
       s.B = makeStepsApp(root, 'APP INSTANCE B');
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { logoAt: [24, 20], noteAt: [24, 25], font: 18 });
-      const rowsHtml = HISTORY.map(text => `<span style="color:#141414">${text}</span>`);
-      s.jr = makeHistoryCard(root, rowsHtml, {
+      s.jr = makeHistoryCard(root, HISTORY, {
         w: HIST.w, h: HIST.h, headerFont: 20, rowTop, font: 23, rowH: HROW.h, tagTop: i => rowTop(i) + 6,
         tag: { font: 18, pad: '4px 12px', icon: 18, border: false },
         crash: {

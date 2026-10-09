@@ -51,11 +51,6 @@
   const HOLD = 0.6, FLIGHT = 0.7;
   // the replay hands back one saved row a second
   const REPLAY_STEP = 1.0;
-  // the Event History rows: the LLM call of each step, then its tool's result
-  const HISTORY = LUNCH_STEPS.flatMap(step => [
-    `LLM call: ${step.action[0].toLowerCase()}${step.action.slice(1)}`, `${step.tool}: ${step.result}`,
-  ]);
-  const isLLM = i => i % 2 === 0;
   // stage-free row geometry: the middle of row i, and where a result card lands on it and leaves it: by its left
   // end, in the gutter, the card's right edge 6 px left of the row's number, so it never covers the row's text
   const rowMid = i => HIST.y - HIST.h / 2 + HIST.row0 + i * HIST.gap + HIST.rowH / 2;
@@ -140,9 +135,8 @@
       // Temporal with the Event History, outside the app (rows 1 to 6 survive the crash), the result cards between
       // the loop and the history, the pills under it, the crash marks and the takeover tag
       s.outside = makeTemporalPanel(root, OUTSIDE.w, OUTSIDE.h, { logoAt: [24, 20], noteAt: [24, 25], font: 18 });
-      const rowsHtml = HISTORY.map((text, i) => `<span style="color:${isLLM(i) ? C.uv : '#141414'}">${text}</span>`);
-      s.history = makeHistoryCard(root, rowsHtml, {
-        w: HIST.w, h: HIST.h, headerTop: HIST_PAD, rowTop: i => HIST.row0 + i * HIST.gap, font: 22,
+      s.history = makeHistoryCard(root, LUNCH_HISTORY, {
+        uvRow: isLLMRow, w: HIST.w, h: HIST.h, headerTop: HIST_PAD, rowTop: i => HIST.row0 + i * HIST.gap, font: 22,
         rowH: HIST.rowH, tagTop: i => HIST.row0 + (HIST.rowH - 28) / 2 + i * HIST.gap, tagRight: HIST_PAD,
         tag: { border: false },
         // the kept block runs from 6 px above row 1 to 4 px under row 6; the crash line sits halfway to row 7
@@ -154,13 +148,9 @@
         scanH: HIST.rowH + 8,
       });
       // both kinds of card as wide, so they line up by their right edge in the gutter
-      const callCard = i => {
-        const e = makeResultCard(root, isLLM(i), isLLM(i) ? 'LLM CALL' : 'TOOL CALL');
-        Object.assign(e.style, { width: CARD_W + 'px', textAlign: 'center' });
-        return e;
-      };
-      s.saveCards = HISTORY.map((_, i) => callCard(i));
-      s.reuseCards = HISTORY.slice(0, 6).map((_, i) => callCard(i));
+      const callCard = i => makeCallCard(root, isLLMRow(i), { w: CARD_W });
+      s.saveCards = LUNCH_HISTORY.map((_, i) => callCard(i));
+      s.reuseCards = LUNCH_HISTORY.slice(0, 6).map((_, i) => callCard(i));
       // the pills under the history, each a fixed even width, so it rests on whole pixels centered
       const pill = (text, kind, w) => {
         const e = tag(root, text, kind);
@@ -202,7 +192,7 @@
       const inviteAt = replay[5] + REPLAY_STEP + 0.4, complete = inviteAt + D_TURN.d + 0.2;
       const stepAt = [...runAt, inviteAt];
       // when each history row is written, its card landing on it
-      const saved = HISTORY.map((_, i) => stepAt[Math.floor(i / 2)] + (isLLM(i) ? D_TURN.llm : D_TURN.tool));
+      const saved = LUNCH_HISTORY.map((_, i) => stepAt[Math.floor(i / 2)] + (isLLMRow(i) ? D_TURN.llm : D_TURN.tool));
       const [ax, ay] = shakeAt(t, crashAt);
 
       // the token runs one turn of the loop per step, think -> act -> observe
@@ -292,7 +282,7 @@
       const [thx, thy] = durablePos(s.loop.pos(LOOP_DEG.think)), [acx, acy] = durablePos(s.loop.pos(LOOP_DEG.act));
       s.saveCards.forEach((e, i) => {
         const leave = saved[i] - FLIGHT - 0.1;
-        const [fx, fy] = isLLM(i) ? [thx, thy] : [acx, acy];
+        const [fx, fy] = isLLMRow(i) ? [thx, thy] : [acx, acy];
         fly(e, t, leave, fx, fy, leave + 0.1, FLIGHT, CARD_X, rowMid(i), saved[i] + 0.1, CARD_X, rowMid(i));
       });
       // the replay: each saved row, highlighted, hands its result back from its left end to B, where it lands as
@@ -309,7 +299,7 @@
       s.history.tags.forEach((e, i) => {
         const isReused = i < 6 && t >= reusedAt(i);
         const opacity = P(t, saved[i], 0.25);
-        if (isReused) placeStatusTag(e, t, reusedLabel(isLLM(i)), 'reused', opacity, reusedAt(i));
+        if (isReused) placeStatusTag(e, t, reusedLabel(isLLMRow(i)), 'reused', opacity, reusedAt(i));
         else placeStatusTag(e, t, 'SAVED', 'saved', opacity, saved[i]);
       });
       // the row being written or replayed is highlighted: HOLD after it is saved, most of its second on the replay

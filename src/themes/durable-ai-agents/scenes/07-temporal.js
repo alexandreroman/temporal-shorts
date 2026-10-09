@@ -5,13 +5,6 @@
 // start, gets every saved result back from the history (no LLM call billed again), then runs the last step.
 // The block keeps every name declared in this file local to this scene.
 {
-  // Event History rows: the LLM call of each step (its action, lowercase), then its tool result
-  const JR = STEPS.flatMap(step => [
-    `LLM call: ${step.action[0].toLowerCase()}${step.action.slice(1)}`, `${step.tool}: ${step.result}`,
-  ]);
-  const isLLM = i => i % 2 === 0;
-  // result card of row i, labeled with the kind of call it comes from, as in the subtitle
-  const makeCallCard = (root, i) => makeResultCard(root, isLLM(i), isLLM(i) ? 'LLM CALL' : 'TOOL CALL');
   // Chapter 7 layout: app on the left, Temporal on the right, both 30 px under the step tiles; the "From the start"
   // arc and its label use the 58 px above the tiles. The instance panel (x 80-925) ends under the Restaurant tile's
   // right edge and the TEMPORAL panel (x 995-1840) starts under the Booking tile's left edge; half-pixel centers
@@ -75,14 +68,15 @@
       // Temporal side: the Event History lives in Temporal, outside the app (the logo flies into the header)
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { noteAt: [24, 24] });
       // rows 1-6 survive the crash: tinted block + crash line under them
-      const rowsHtml = JR.map((txt, i) => `<span style="color:${isLLM(i) ? C.uv : '#141414'}">${txt}</span>`);
-      s.jr = makeHistoryCard(root, rowsHtml, {
-        w: HIST.w, h: 440, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44, tag: { border: false },
+      s.history = makeHistoryCard(root, LUNCH_HISTORY, {
+        uvRow: isLLMRow, w: HIST.w, h: 440, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44,
+        tag: { border: false },
         crash: { keptTop: 64, keptH: 262, cutTop: 330, label: 'APP CRASHED HERE', labelX: '66%', labelFont: 13 },
         scanH: 42, scanDy: -2,
       });
-      s.saveCards = JR.map((_, i) => makeCallCard(root, i));
-      s.reuseCards = JR.slice(0, 6).map((_, i) => makeCallCard(root, i));
+      // result cards labeled with the kind of call they come from, as in the subtitle
+      s.saveCards = LUNCH_HISTORY.map((_, i) => makeCallCard(root, isLLMRow(i)));
+      s.reuseCards = LUNCH_HISTORY.slice(0, 6).map((_, i) => makeCallCard(root, isLLMRow(i)));
       // the agent itself, handed to instance B
       s.handChip = makeHandOffCard(root, 'LUNCH AGENT');
       s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w);
@@ -113,7 +107,7 @@
       const logoX = TEMPORAL.x - TEMPORAL.w / 2 + 85;
       place(s.logo, lerp(960, logoX, fl), lerp(540, 325, fl), logoScale, clamp(lp * 2));
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 2.4, 0.5));
-      place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 2.6, 0.5));
+      place(s.history, HIST.x, HIST.y, 1, P(t, c[0] + 2.6, 0.5));
 
       // steps
       const states = [0, 1, 2, 3].map(i => {
@@ -189,16 +183,16 @@
       });
 
       // Event History rows and their status tags
-      markCrash(s.jr, t, crashAt);
-      s.jr.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
-      s.jr.tags.forEach((e, i) => {
+      markCrash(s.history, t, crashAt);
+      s.history.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
+      s.history.tags.forEach((e, i) => {
         const isReused = i < 6 && t >= reused[i], isTold = i < 6 && t >= told[i];
-        const label = isTold ? reusedLabel(isLLM(i)) : isReused ? 'REUSED' : 'SAVED';
+        const label = isTold ? reusedLabel(isLLMRow(i)) : isReused ? 'REUSED' : 'SAVED';
         const switchedAt = isTold ? told[i] : isReused ? reused[i] : saved[i];
         placeStatusTag(e, t, label, isTold || isReused ? 'reused' : 'saved', P(t, saved[i], 0.25), switchedAt);
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 0.4);
-      scanRow(s.jr, scanning);
+      scanRow(s.history, scanning);
       place(s.done, DONE_X, 795, P(t, saved[7] + 0.5, 0.45, backOut), P(t, saved[7] + 0.5, 0.35));
       placeFlash(s.flash, t, crashAt);
       // takeover: NEW INSTANCE pops on B once it is almost in place and is gone by c[3]; Temporal hands it the agent,

@@ -20,7 +20,7 @@
   ];
   const isModel = i => STEPS[i].icon === 'agent';
   // result card of step i, labeled with the kind of call it comes from, as in the subtitle
-  const makeCallCard = (root, i) => makeResultCard(root, isModel(i), isModel(i) ? 'MODEL CALL' : 'TOOL CALL');
+  const makeStepCard = (root, i) => makeCallCard(root, isModel(i), { modelLabel: 'MODEL CALL' });
   // Layout: step tiles on top; the app and its counters on the left, Temporal and its Event History on the right.
   // The step row spans exactly the width of the components below it, from LEFT to RIGHT. On the content frame
   // y 150-880: the step row's top at 150, the panels 86 px below it, the counters and the TEMPORAL panel ending at 880.
@@ -93,17 +93,16 @@
       // Temporal side, outside the app: native-size logo header (whole pixels, never scaled) and the Event History
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { logoAt: [28, 30], noteAt: [28, 36] });
       // rows 1-4 survive the crash: tinted block + crash line under them
-      const rowsHtml = STEPS.map((st, i) => `<span style="color:${isModel(i) ? C.uv : '#141414'}">${st.row}</span>`);
-      s.jr = makeHistoryCard(root, rowsHtml, {
-        w: HIST.w, h: HIST.h, rowTop, tagTop: i => rowTop(i) + 5,
+      s.jr = makeHistoryCard(root, STEPS.map(st => st.row), {
+        uvRow: isModel, w: HIST.w, h: HIST.h, rowTop, tagTop: i => rowTop(i) + 5,
         crash: {
           keptTop: rowTop(0) - 8, keptH: 3 * HIST.rowGap + 54, cutTop: rowTop(4) - 8,
           label: 'APP CRASHED HERE', labelX: '56%', labelFont: 13,
         },
         scanH: 42, scanDy: -2,
       });
-      s.saveCards = STEPS.map((_, i) => makeCallCard(root, i));
-      s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeCallCard(root, i));
+      s.saveCards = STEPS.map((_, i) => makeStepCard(root, i));
+      s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeStepCard(root, i));
       // the agent's Workflow, handed to instance B
       s.handCard = makeHandOffCard(root, 'AGENT WORKFLOW');
       s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w, NEW_TAG.h);
