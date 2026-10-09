@@ -50,8 +50,6 @@
   // under the peak, 20 px above the tiles (as "From the start" in chapter 7)
   const REDO = { from: [colX(3), STEPS_TOP - 10], ctrl: [960, STEPS_TOP - 108], to: [colX(0), STEPS_TOP - 15] };
   const REDO_LABEL_Y = STEPS_TOP - 33;
-  // memory blocks left-aligned like chapter 7's slots: 20 px panel margin, then 76 px blocks every 88 px (12 px gaps)
-  const memSlot = i => MEM.x - MEM.w / 2 + 20 + 76 / 2 + i * 88;
   // NEW INSTANCE: centered on the top edge of instance B's panel (the Restaurant column's axis), well clear of its
   // name and its STARTING OVER status. Fixed even width: it rests on whole pixels (solid: the panel border does not
   // show through).
@@ -85,7 +83,7 @@
       s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
       s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);
       s.mem = makeMemory(root, MEM.w, MEM.h);
-      s.mblocks = makeMemBlocks(root, 6, 76, 56);
+      s.mblocks = makeMemBlocks(root, 6, MEM_BLOCK.w, MEM_BLOCK.h);
       s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w);
       s.bill = makeBill(root, COL.w);
       s.bill.n.style.transformOrigin = '50% 60%';
@@ -184,7 +182,7 @@
       const add1 = [0.8, 1.3, 1.9, 2.4, 3.0, 3.5].map(x => c[0] + x);
       const add2 = [0.6, 0.9, 1.4, 1.7, 2.3, 2.6].map(x => c[2] + x);
       const arrive = placeTakeover(s, t, {
-        app: APP, mem: MEM, memSlot, shake: [sx, sy], aIn: backPop(t, 0.3), runAt: c[0] + 0.3, crashAt,
+        app: APP, mem: MEM, shake: [sx, sy], aIn: backPop(t, 0.3), runAt: c[0] + 0.3, crashAt,
         emptyAt: c[1] + 1.2, aDrop, bIn, memIn: P(t, 0.5, 0.45),
         blockA: i => [P(t, add1[i], 0.35, backOut), P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn)],
         blockB: i => P(t, add2[i], 0.35, backOut),

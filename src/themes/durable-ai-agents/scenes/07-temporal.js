@@ -11,8 +11,8 @@
   // put their odd widths on whole pixels. Under the instance panel, the bill on the left (x 80-460); on its right,
   // the booking ticket on the bill's top edge and AGENT COMPLETE on its bottom edge, centered in the space left.
   const APP = { x: 502.5, y: 445, w: 845, h: 310 };
-  // context panel, 24 px inside the instance panel, and its 8 block slots, 21 px from each side
-  const MEM = { x: 502.5, y: 469, w: 797, h: 210, slot0: 163, slotGap: 97, slotY: 484 };
+  // context panel, 24 px inside the instance panel (x 104-901), and the line of its 8 blocks
+  const MEM = { x: 502.5, y: 469, w: 797, h: 210, slotY: 484 };
   // TEMPORAL panel, holding the Event History card (x 1015-1820); the card and its rows (call cards land 110 px
   // inside its left edge)
   const TEMPORAL = { x: 1417.5, y: 555, w: 845, h: 530 };
@@ -25,7 +25,8 @@
   const NEW_TAG = { x: 562, y: APP.y - APP.h / 2 + 16, w: 240 };
   // the agent chip flies from the first Event History row to instance B's status, 100 px from the panel's right edge
   const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 36 };
-  const memSlot = i => MEM.slot0 + i * MEM.slotGap;
+  // x of context block i, where the LLM CALL and TOOL CALL cards leave and land
+  const blockX = i => memSlot(MEM.x - MEM.w / 2, i);
   const rowY = i => HIST.row0 + i * HIST.rowGap;
   // the big intro logo flies into the TEMPORAL panel header from c[0] + FLIGHT.at, for FLIGHT.d seconds
   const FLIGHT = { at: 1.9, d: 0.8 };
@@ -60,7 +61,7 @@
       s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
       s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);
       s.mem = makeMemory(root, MEM.w, MEM.h);
-      s.mblocks = makeMemBlocks(root, 8, 76, 56);
+      s.mblocks = makeMemBlocks(root, 8, MEM_BLOCK.w, MEM_BLOCK.h);
       s.bill = makeBill(root);
       s.ticket = makeTicket(root);
       // Temporal side: the Event History lives in Temporal, outside the app (the logo flies into the header)
@@ -124,7 +125,7 @@
       // panel is filled as results are saved, emptied by the crash and refilled from the history; B's blocks are
       // empty until the replay.
       const arrive = placeTakeover(s, t, {
-        app: APP, mem: MEM, memSlot, shake: [sx, sy], aIn: backPop(t, c[0] + 2.3, 0.5), runAt: write[0], crashAt,
+        app: APP, mem: MEM, shake: [sx, sy], aIn: backPop(t, c[0] + 2.3, 0.5), runAt: write[0], crashAt,
         emptyAt: crashAt + 1.1, aDrop, bIn, memIn: P(t, c[0] + 2.5, 0.45),
         blockA: i => [i < 6 ? P(t, saved[i], 0.35, backOut) : 0, P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn)],
         blockB: i => P(t, i < 6 ? replay[i] + 0.33 : saved[i], 0.35, backOut),
@@ -151,11 +152,11 @@
       // LLM CALL and TOOL CALL cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {
         const w = write[i];
-        fly(e, t, w + 0.35, memSlot(i), MEM.slotY, w + 0.4, 0.4, HIST.cardX, rowY(i), w + 0.8, HIST.cardX, rowY(i));
+        fly(e, t, w + 0.35, blockX(i), MEM.slotY, w + 0.4, 0.4, HIST.cardX, rowY(i), w + 0.8, HIST.cardX, rowY(i));
       });
       s.reuseCards.forEach((e, i) => {
         const q = replay[i];
-        fly(e, t, q, HIST.cardX, rowY(i), q + 0.05, 0.28, memSlot(i), MEM.slotY, q + 0.33, memSlot(i), MEM.slotY);
+        fly(e, t, q, HIST.cardX, rowY(i), q + 0.05, 0.28, blockX(i), MEM.slotY, q + 0.33, blockX(i), MEM.slotY);
       });
 
       // Event History rows and their status tags

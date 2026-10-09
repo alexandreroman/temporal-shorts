@@ -54,6 +54,13 @@ function makeApp(parent) {
 }
 
 // ===================== shared by chapters 6 and 7 (crash vs Durable Execution)
+// Context blocks (makeMemBlocks in src/shared.js): left-aligned in the context panel, `margin` px from its left
+// edge, `gap` px apart
+const MEM_BLOCK = { w: 76, h: 56, margin: 20, gap: 12 };
+// x of the center of context block i, in a context panel whose left edge is at panelLeft
+function memSlot(panelLeft, i) {
+  return panelLeft + MEM_BLOCK.margin + MEM_BLOCK.w / 2 + i * (MEM_BLOCK.w + MEM_BLOCK.gap);
+}
 // LLM calls billed: a counter tile with a strip of 8 cells, one per call; w: width in px, 330 or more for the strip
 // to fit
 function makeBill(p, w = 380) {
@@ -76,11 +83,11 @@ function setBill(b, n, wasted, note = wasted ? `+${wasted} wasted` : '') {
 // it greys, drops and fades out with its context panel. A new copy, instance B, slides in to the same place at bIn,
 // the panel with it. The scene sets B's status.
 // s: the scene's instance panels A and B, its context panel mem and blocks mblocks. app, mem: the centers of the
-// instance and context panels, mem.slotY the line of the blocks and memSlot(i) the x of block i. aIn: A's pop-in
+// instance and context panels, mem.w the context panel's width and mem.slotY the line of its blocks. aIn: A's pop-in
 // (a backPop); memIn: the context panel's fade-in; blockA(i): [grow, fall] of A's block i; blockB(i): the grow of B's.
 // Returns B's arrivingInstance: its dx moves what slides in with it.
 function placeTakeover(s, t, opts) {
-  const { app, mem, memSlot, shake: [sx, sy], aIn, runAt, crashAt, emptyAt, aDrop, bIn, memIn, blockA, blockB } = opts;
+  const { app, mem, shake: [sx, sy], aIn, runAt, crashAt, emptyAt, aDrop, bIn, memIn, blockA, blockB } = opts;
   const dead = t >= crashAt;
   const leave = leavingInstance(t, aDrop);
   place(s.A, app.x + sx, app.y + sy + leave.dy, aIn.s, aIn.o * leave.o);
@@ -97,11 +104,12 @@ function placeTakeover(s, t, opts) {
   s.mem.style.filter = rider.grey;
   // the blocks of A have all fallen before A leaves
   s.mblocks.forEach((b, i) => {
+    const x = memSlot(mem.x - mem.w / 2, i);
     if (rider.onB) {
-      placeMemBlock(b, memSlot(i), mem.slotY, blockB(i), 0);
+      placeMemBlock(b, x, mem.slotY, blockB(i), 0);
     } else {
       const [grow, fall] = blockA(i);
-      placeMemBlock(b, memSlot(i), mem.slotY, grow, fall, { dx: sx, dy: sy });
+      placeMemBlock(b, x, mem.slotY, grow, fall, { dx: sx, dy: sy });
     }
   });
   return arrive;
