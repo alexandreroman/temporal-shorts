@@ -222,7 +222,12 @@ below and the card order in [Home page design](feedback_home-page.md).
   (src/assets/languages/, sources and licenses in its README.md).
 - Ch6 figures are dated (Series E, September 2026: $12.55B valuation,
   4,300+ paying customers, 570 employees): refresh them with each funding
-  announcement. Ch4 names OpenAI (Codex), Cursor, Lovable, Replit.
+  announcement. The valuation chart shows every round with a reported
+  valuation: Series A (Oct 2020, "~$75M", a PitchBook estimate, the tilde
+  marking it), B (Feb 2022, $1.5B), B-Prime (Feb 2023, $1.5B), C, D, E;
+  the seed has no reported valuation. The "×8" multiple runs from Feb
+  2022, the first officially reported valuation. Ch4 names OpenAI (Codex),
+  Cursor, Lovable, Replit.
 - Ch4 shows only the durable agent: an AI agent run with Temporal that
   crashes in production; the Event History keeps every step, a new app
   instance replays it and finishes, ending on NO PROGRESS LOST and NO
