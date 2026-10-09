@@ -133,8 +133,9 @@
         after: 4.3,
       },
       {
-        text: "Loops, conditions and parallel calls all run inside the script, in one turn.",
-        after: 1.1,
+        text: 'Parallel calls and the logic between them run inside the script, as one tool call.',
+        // the best: $480 pill lands at c[2] + 4.65 and reads for about 2 s before c[3]
+        after: 0.725,
       },
       {
         text: "Every call stays durable, gated and visible, and the whole script takes one round trip, not three.",
