@@ -144,13 +144,6 @@
     return e;
   };
 
-  // place() anchored on the element's left edge, so a label keeps its gap to the arrow it follows
-  const placeLeft = (e, x, y, o) => {
-    e.style.transform = `translate(${x}px,${y}px) translateY(-50%)`;
-    e.style.opacity = clamp(o);
-    e.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
-  };
-
   scene({
     chapter: 8, title: 'Typed sessions',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
@@ -160,7 +153,8 @@
     shift: (t, c) => pan(t, [960 - CODE.x, 0], [[c[1], 0, 0]], 1.0),
     subs: [
       {
-        text: "The harness generates <b>TypeScript types</b> from your agent's Python class: its state and its messages.",
+        text: "The harness generates <b>TypeScript types</b> from your agent's Python class: "
+          + 'its state and its messages.',
         // the last line pair lights at c[0] + 6.7 and reads for 2 s before the UI window enters
         after: 1.8,
       },

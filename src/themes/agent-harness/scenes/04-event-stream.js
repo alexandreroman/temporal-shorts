@@ -46,8 +46,8 @@
   const MARK_TAGS = [['HUMAN', 'wait'], ['COST', 'reused']];
   const LAST_ROW = ROWS.length - 1;
 
-  const chipCss = (type, fontSize) => ({
-    ...EVENT_TYPES[type], fontSize, letterSpacing: '.1em', padding: '4px 10px 4px calc(10px + .1em)',
+  const chipCss = type => ({
+    ...EVENT_TYPES[type], fontSize: '16px', letterSpacing: '.1em', padding: '4px 10px 4px calc(10px + .1em)',
     border: '1.5px solid', borderRadius: '4px', whiteSpace: 'nowrap',
   });
   // Console row chip and tag text: a 22 px line makes them 32 px tall with their padding and border (the 1.5 px
@@ -71,7 +71,8 @@
     shift: (t, c) => pan(t, [370, 0], [[c[1], 0, 0]], 0.9),
     subs: [
       {
-        text: "Every agent publishes the same <b>event stream</b>: turns, model calls, tool calls, approvals and token usage.",
+        text: 'Every agent publishes the same <b>event stream</b>: '
+          + 'turns, model calls, tool calls, approvals and token usage.',
         after: 1.2,
       },
       {
@@ -94,7 +95,7 @@
       Object.assign(s.same.style, { fontSize: '18px', lineHeight: '24px' });
       s.chips = Array.from({ length: CHIP_POOL }, (_, k) => {
         const type = TYPE_ORDER[k % TYPE_ORDER.length];
-        return E(root, type, 'mono', chipCss(type, '16px'));
+        return E(root, type, 'mono', chipCss(type));
       });
       // the agent tiles sit above the chips, so a chip slides out from under its tile
       s.agents = SDKS.map(sdk => E(root,

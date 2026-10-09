@@ -1,8 +1,8 @@
 // ===================== 9. WHAT YOU GET
-// The recap: one tile per feature the video presents, landing one at a time.
+// The recap: six tiles, the main features the video presents, landing one at a time.
 // The block keeps every name declared in this file local to this scene.
 {
-  // Recap tiles, one chapter each: 3 columns x 2 rows (x 140-1780), 40 px gutters, centered on (960, 522) in the
+  // Recap tiles, the six main features: 3 columns x 2 rows (x 140-1780), 40 px gutters, centered on (960, 522) in the
   // content frame (y 150-880), within the centering tolerance of its middle, y 515; they land 1 s apart
   const RECAP = [
     ['retry', 'Survives crashes'], ['stream', 'Event stream'], ['layers', 'Typed subagents'],
@@ -31,7 +31,7 @@
       s.recap = RECAP.map(([icon, label]) => makeRecapTile(root, icon, label));
     },
     update(t, c, s) {
-      // one tile per feature, 1 s apart; each lights up as it lands
+      // one tile per main feature, 1 s apart; each lights up as it lands
       s.recap.forEach((e, i) => {
         const at = c[0] + 0.7 + i;
         const p = backPop(t, at);

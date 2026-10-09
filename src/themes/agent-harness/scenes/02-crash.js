@@ -116,7 +116,6 @@
       // then A leaves (aDrop), B arrives (bIn, the reset of the step row) and Temporal hands it the Workflow: the card
       // leaves the history at handOff and reaches B's status at takeOver
       const aDrop = aOut + 0.25, bIn = aDrop + 0.6, handOff = bIn + 0.9, takeOver = handOff + 0.55;
-      const reset = bIn;
       // c[3]: B replays rows 1-4 one by one, then step 5 runs for real
       const replay = [0, 1, 2, 3].map(i => c[3] + 0.5 + i * 1.2);
       run.push(c[3] + 5.4);
@@ -131,9 +130,9 @@
       // the failure builds up before the crash: A's border and status flicker red, the running chip jitters
       const glitch = crashGlitch(t, crashAt);
 
-      // steps: before the reset, instance A runs them; after it, rows 1-4 re-check without running
+      // steps: instance A runs them; once B arrives, rows 1-4 re-check without running
       const states = STEPS.map((_, i) => {
-        if (t < reset) {
+        if (onA) {
           if (i === 4) return dead ? 3 : t >= firstTry ? 1 : 0;
           return t >= saved[i] + 0.1 ? 2 : t >= run[i] ? 1 : 0;
         }
@@ -175,7 +174,7 @@
       // step 5 on instance A falls with the crash
       const fall = P(t, crashAt + 0.1, 0.6, easeIn);
       s.chips.forEach((e, i) => {
-        if (i === 4 && t < reset) {
+        if (i === 4 && onA) {
           const x = APP.x + ax + glitch.dx;
           place(e, x, APP.chipY + ay + fall * 120, 1, win(t, firstTry, aOut, 0.15) * (1 - fall), fall * -12);
         } else {
@@ -183,9 +182,9 @@
         }
       });
       // label over the chip: the step number, or where its result comes from during the replay
-      const replaying = t >= reset && t < rerun;
+      const replaying = !onA && t < rerun;
       let step;
-      if (t < reset) step = t >= firstTry ? 4 : Math.max(0, run.filter(r => t >= r).length - 1);
+      if (onA) step = t >= firstTry ? 4 : Math.max(0, run.filter(r => t >= r).length - 1);
       else step = replaying ? Math.max(0, replay.filter(q => t >= q).length - 1) : 4;
       s.chipLbl.textContent = replaying ? `Step ${step + 1}: from the history` : `Step ${step + 1} of 5`;
       s.chipLbl.style.color = replaying ? C.violet : C.slate;

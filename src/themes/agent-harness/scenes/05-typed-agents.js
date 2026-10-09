@@ -129,7 +129,8 @@
     // laid out at final positions on the grid (x 140-1780), so no offset is needed
     subs: [
       {
-        text: "An agent is more than text in, text out: it exposes <b>typed operations</b>, with their inputs and outputs.",
+        text: 'An agent is more than text in, text out: '
+          + 'it exposes <b>typed operations</b>, with their inputs and outputs.',
         after: 1.0,
       },
       {
@@ -137,7 +138,8 @@
         after: 2.1,
       },
       {
-        text: "To use it, the parent starts TravelAgent as a <b>child workflow</b>: a new instance with its own history.",
+        text: 'To use it, the parent starts TravelAgent as a <b>child workflow</b>: '
+          + 'a new instance with its own history.',
         after: 0.6,
       },
       {
