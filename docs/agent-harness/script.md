@@ -89,7 +89,7 @@ Lisbon.
     shows ENDED.
 - **0:48** Each model or tool call is one step. A turn runs until the agent
   is idle: often many steps.
-  - Visuals: the frame gives way to a comparison: AN LLM CALL, ONE STEP
+  - Visuals: the frame gives way to a comparison: A MODEL CALL, ONE STEP
     (`text in` → Model → `text out`, deliberately short) above A TURN, UNTIL
     THE AGENT IS IDLE AGAIN: from the user message to the reply, Model,
     `search_flights`, Model, `search_hotels`, Model appear one by one,

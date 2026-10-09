@@ -93,7 +93,7 @@
   const reply2Y = COL.top + CARD_H.reply1 + COL.gap + CARD_H.reply2 / 2;
   // the turn badge sits on the header's center line, right-aligned on the header's margin inside the frame
   const BADGE_RIGHT = FRAME.x1 - 26;
-  // c[4] compares one LLM call (top row) with one turn (bottom row), on the content frame (x 140 to 1780,
+  // c[4] compares one model call (top row) with one turn (bottom row), on the content frame (x 140 to 1780,
   // y 150 to 880). Headings on the left edge; the turn runs from the message card to the reply card, its model
   // calls on one line and its tool calls on a lower one, a bracket under the whole turn. Chips and cards have
   // even heights, so their whole-pixel centers rest on whole pixels
@@ -281,8 +281,8 @@
       Object.assign(s.status.style, {
         position: 'relative', opacity: 1, width: '124px', height: '32px', justifyContent: 'center',
       });
-      // c[4]: one LLM call, a compact strip on the top row, deliberately short against the long turn row below
-      s.callHead = makeHeading(root, 'An LLM call', 'One step', CMP.head1Top);
+      // c[4]: one model call, a compact strip on the top row, deliberately short against the long turn row below
+      s.callHead = makeHeading(root, 'A model call', 'One step', CMP.head1Top);
       const codeText = text => `<span class="mono" style="font-size:22px;color:var(--slate)">${text}</span>`;
       s.callStrip = E(root, codeText('text in') + inlineArrow(64, C.slate), '', {
         left: CMP.left + 'px', top: CMP.stripTop + 'px', height: CMP.stripH + 'px',
@@ -402,7 +402,7 @@
       const p2 = backPop(t, b2 + BEAT.msg);
       place(s.msg2, COL.left, msg2Y, p2.s, p2.o * out);
       draw(s.in2, P(t, b2 + BEAT.arrow, 0.4), out);
-      // c[4]: the LLM call row, then the turn row: each call pops after the link leading to it, then the reply.
+      // c[4]: the model call row, then the turn row: each call pops after the link leading to it, then the reply.
       // c[5]: each call streams live as soon as it is saved, then the reply, and the bracket closes under the turn.
       // All of it fades out at c[6]
       const cmpO = 1 - P(t, c[6], 0.4);
