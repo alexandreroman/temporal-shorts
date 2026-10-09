@@ -354,9 +354,9 @@ function startPlayer() {
   // stop that much earlier, strictly before that animation: a step such as `t >= at` already shows at `at`.
   // Each scene, the last included, then holds just before its fade-out (`fadeOut`, SCENE_FADE by default, as in
   // renderAt), so the hold shows it fully visible; a scene whose ending animation should play straight into the
-  // next scene sets `holdBeforeEnd` (seconds) to hold that much before its end instead, before that animation
-  // starts. When the scene stops changing well before a stop, the player jumps to it as soon as the picture
-  // freezes (see skipStillToStop()).
+  // next scene sets `holdBeforeEnd` (seconds, or (c, dur) => seconds, resolved by buildAll()) to hold that much
+  // before its end instead, before that animation starts. When the scene stops changing well before a stop, the
+  // player jumps to it as soon as the picture freezes (see skipStillToStop()).
   const presenterStops = [];
   for (const sc of scenes) {
     for (const sub of sc.subs.slice(1)) presenterStops.push(sub.start - (sub.stopLead ?? 0));

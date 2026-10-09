@@ -328,8 +328,9 @@ editing different scenes never touch the same file.
   set `stopLead` on that subtitle to move its stop that many seconds
   earlier, just before the animation (`stopLead: 0.4` for an animation at
   `c[1] - 0.35`). A scene whose ending animation should play straight into
-  the next scene sets `holdBeforeEnd` (seconds before its end) to hold
-  there instead, before that animation starts. A step whose picture stays
+  the next scene sets `holdBeforeEnd` (seconds before its end, or
+  `(c, dur) => seconds` from its cues and duration) to hold there instead,
+  before that animation starts. A step whose picture stays
   still from one stop to the next is empty: the player plays through it
   rather than holding the same picture twice, and Left steps back over
   it. Only the live player reads these: rendered frames do not change.
@@ -341,8 +342,9 @@ editing different scenes never touch the same file.
 - Fades: every scene fades in and out over 0.5 s; the optional `fadeIn` and
   `fadeOut` set other durations, for a cut that continues one motion across
   two scenes (meet-temporal zooms into the AI hub this way). A chapter scene's
-  header fades with the scene; the optional `headerOutAt` (scene time)
-  fades it out earlier, over 0.4 s, for an ending that plays without it.
+  header fades with the scene; the optional `headerOutAt` (scene time, or
+  `(c, dur) => time`) fades it out earlier, over 0.4 s, for an ending that
+  plays without it.
 - Chapter title: `title` next to `chapter` on the chapter's scene: each
   chapter is one scene, numbered 1, 2, 3... in playing order. The header
   and the progress segments are derived from them; a theme without chapters

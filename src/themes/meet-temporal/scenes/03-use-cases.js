@@ -72,6 +72,11 @@
     chapter: 3, title: 'Where Temporal is used',
     // a hard cut: the AI hub turns into the next chapter's first frame
     fadeOut: 0,
+    // presenter mode holds on the settled map just before AI invades the screen, then plays the swell, the morph
+    // and the cut in one go
+    holdBeforeEnd: (c, dur) => dur - (c[1] + SWELL_AT),
+    // the chapter header fades out as AI invades the screen: the swell and the morph play with no header
+    headerOutAt: c => c[1] + SWELL_AT,
     // laid out centered at (960, 522) on the free band
     subs: [
       {
@@ -82,11 +87,6 @@
       { text: "Teams also run infrastructure, data pipelines and, more and more, AI on Temporal.", after: 3.0 },
     ],
     build(stage, s) {
-      // presenter mode holds on the settled map just before AI invades the screen, then plays the swell, the
-      // morph and the cut in one go (the timeline is laid out before build runs)
-      this.holdBeforeEnd = this.dur - (this.cues[1] + SWELL_AT);
-      // the chapter header fades out as AI invades the screen: the swell and the morph play with no header
-      this.headerOutAt = this.cues[1] + SWELL_AT;
       const root = s.cam = makeCamera(stage);
       s.glow = E(root, '', '', {
         width: '620px', height: '620px', borderRadius: '50%',

@@ -262,6 +262,11 @@ function buildAll() {
       t = s.end + 0.25 + (s.after ?? 0);
     }
     sc.end = t + (sc.post ?? 0.35); sc.dur = sc.end - sc.start; T = sc.end;
+    // `holdBeforeEnd` (see player.js) and `headerOutAt` (see renderAt()) are seconds, or (c, dur) => seconds when
+    // they follow the scene's cues c: resolved here, once the timings are known
+    for (const name of ['holdBeforeEnd', 'headerOutAt']) {
+      if (typeof sc[name] === 'function') sc[name] = sc[name](sc.cues, sc.dur);
+    }
     sc.root = document.createElement('div'); sc.root.className = 'scene';
     stage.insertBefore(sc.root, hdr);
     sc.el = {};
@@ -308,7 +313,7 @@ function renderAt(t, g = t) {
   const mark = document.getElementById('mark');
   if (cur && cur.chapter) {
     const lt = t - cur.start;
-    // optional `headerOutAt`: the scene time at which the header fades out early, over 0.4 s
+    // optional `headerOutAt`: the scene time at which the header fades out early, over 0.4 s (see buildAll())
     const headerOut = cur.headerOutAt === undefined ? 1 : 1 - P(lt, cur.headerOutAt, 0.4);
     hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4)) * headerOut;
     const firstStart = chapterScenes[0].start;
