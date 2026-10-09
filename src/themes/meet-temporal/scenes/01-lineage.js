@@ -22,7 +22,10 @@
   // the outer side (Maxim's on the left, Samar's on the right)
   const INTRO = { y: 380, size: 140, x: [760, 1160] };
   const NAME = { w: 340, gap: 24 };
-  const nameX = i => INTRO.x[i] + (i === 0 ? -1 : 1) * (INTRO.size / 2 + NAME.gap + NAME.w / 2);
+  // as the timeline comes in, the faces and names move up out of its way, the faces shrinking: their bottom then
+  // clears the years by 47 px
+  const LIFTED = { y: 318, size: 90 };
+  const nameX = (i, size) => INTRO.x[i] + (i === 0 ? -1 : 1) * (size / 2 + NAME.gap + NAME.w / 2);
   // company (null for the Temporal logo), name, detail and year of each milestone
   const MILESTONES = [
     { company: 'Amazon', name: 'Simple Queue<br>Service', detail: 'Tech lead: Maxim', year: '2004' },
@@ -136,7 +139,10 @@
       // the fork: a thin arch from Cadence's milestone to Temporal's, labelled FORK at its top
       s.fork = path(s.svg, `M ${FORK.x0} ${FORK.y} Q ${(FORK.x0 + FORK.x1) / 2} ${FORK.top} ${FORK.x1} ${FORK.y}`,
         C.violet, 2, true);
-      s.forkLabel = E(root, 'Fork', 'lbl', { fontSize: '14px', color: C.violet, letterSpacing: '.14em' });
+      s.forkLabel = E(root, 'Fork', 'mono', {
+        fontSize: '18px', lineHeight: '24px', color: C.violet, letterSpacing: '.14em', paddingLeft: '.14em',
+        textTransform: 'uppercase',
+      });
       s.names = FOUNDERS.map((f, i) => makeNameLabel(root, f, i === 0 ? 'right' : 'left'));
       // faint violet discs trailing each face while it travels
       s.ghosts = FOUNDERS.map(() => TRAIL.map(() => E(root, '', '', {
@@ -206,9 +212,14 @@
       // where a face is at a time, and its size: the flight is one smooth arc (a quadratic curve through the corner
       // above its landing) that heads sideways at the face's height, then curves down onto the line, under the
       // heading, shrinking all the way; on the line the face moves from place to place
+      // the faces' lift, done before the milestones' years appear
+      const lift = at => ease(P(at, c[1], 0.6));
+      const introY = at => lerp(INTRO.y, LIFTED.y, lift(at));
+      const introSize = at => lerp(INTRO.size, LIFTED.size, lift(at));
       const facePos = (i, at) => {
         const { fly, first, route } = founders[i];
-        const from = [INTRO.x[i], INTRO.y];
+        const from = [INTRO.x[i], introY(Math.min(at, fly))];
+        const fromSize = introSize(Math.min(at, fly));
         const landing = [slotX(first), LINE.y];
         if (at < fly + FLY_D) {
           const p = sine((at - fly) / FLY_D);
@@ -216,7 +227,7 @@
           return {
             x: lerp(lerp(from[0], bend[0], p), lerp(bend[0], landing[0], p), p),
             y: lerp(lerp(from[1], bend[1], p), lerp(bend[1], landing[1], p), p),
-            size: lerp(INTRO.size, MARK_SIZE, p),
+            size: lerp(fromSize, MARK_SIZE, p),
           };
         }
         let x = landing[0];
@@ -243,7 +254,8 @@
         // the large face is the one shown until it lands; then the small one takes over on the line
         place(e, Math.round(m.x), Math.round(m.y), pop * m.size / INTRO.size, landed(i) ? 0 : clamp(pop * 2));
         place(s.marks[i], Math.round(m.x), Math.round(m.y), 1, landed(i) ? 1 : 0);
-        rise(s.names[i], nameX(i), INTRO.y, P(t, show + 0.2, 0.5) * (1 - P(t, founders[i].fly, 0.6)), 12);
+        rise(s.names[i], Math.round(nameX(i, introSize(t))), Math.round(introY(t)),
+          P(t, show + 0.2, 0.5) * (1 - P(t, founders[i].fly, 0.6)), 12);
         // the trail shows with the speed of the face
         const before = facePos(i, t - 0.1);
         const speed = t > founders[i].fly ? clamp(Math.hypot(m.x - before.x, m.y - before.y) / 30) : 0;
@@ -275,7 +287,8 @@
       });
       // the fork, drawn once the founders reach 2019, just before Temporal's tile lights
       draw(s.fork, P(t, c[3] + 1.3, 0.7));
-      place(s.forkLabel, (FORK.x0 + FORK.x1) / 2, (FORK.y + FORK.top) / 2 - 20, 1, P(t, c[3] + 1.7, 0.4));
+      // on top of the arch's apex (halfway to its control point), 10 px clear of it
+      place(s.forkLabel, (FORK.x0 + FORK.x1) / 2, (FORK.y + FORK.top) / 2 - 22, 1, P(t, c[3] + 1.4, 0.3));
       NODE_X.forEach((x, k) => {
         const lit = t >= tileIn[k] - 0.4;
         s.nodes[k].style.background = lit ? C.violet : '#141414';
