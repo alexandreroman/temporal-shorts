@@ -26,9 +26,6 @@
   const BOLT = { x: 725, y: 426, size: 130 };
   const CRASH_TAG = { x: 717, y: 558, w: 310, h: 66 };
   // the takeover (see TAKEOVER): the dead Worker A drops 40 px, its bottom staying 10 px above the counter row
-  // NEW WORKER: astride the top edge of Worker B's panel, centered on it, clear of its name and status; fixed even
-  // width, so it rests on whole pixels (solid: the panel border does not show through)
-  const NEW_TAG = { x: EH.worker.x, y: EH.worker.y - EH.worker.h / 2, w: 200 };
   // the Workflow chip flies from the "Workflow started" history row to Worker B's status, at the panel's top right
   const STATUS_AT = { x: workerRight - 100, y: EH.worker.y - EH.worker.h / 2 + 36 };
   scene({
@@ -62,7 +59,7 @@
       s.saveChips = [SHIP, EMAIL].map(() => makeResultCard(root));
       // the Workflow itself, handed to Worker B
       s.handChip = makeHandOffCard(root, 'WORKFLOW #1042');
-      s.newWorker = makeNewTag(root, 'New Worker', NEW_TAG.w);
+      s.newWorker = makeNewTag(root, 'New Worker', EH.newTag.w);
       s.done = tag(root, 'Workflow complete', 'neon');
       // dark like the SAVED tags, as it sits on the light history card
       s.done.style.background = C.bg;
@@ -188,7 +185,7 @@
       placeCrashMarks(s.crash, t, crashAt, tagAt, aOut, sx, sy);
       // takeover: NEW WORKER pops on Worker B once it is almost in place and leaves before the replay; Temporal hands
       // it the Workflow, a chip from the "Workflow started" row to its status, which then reads TAKING OVER
-      placeNewTag(s.newWorker, t, bIn + 0.5, c[1] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y);
+      placeNewTag(s.newWorker, t, bIn + 0.5, c[1] - 0.4, EH.newTag.x + arrive.dx, EH.newTag.y);
       flyChip(s.handChip, t, handOff, EH.rowStartX, ehRowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });

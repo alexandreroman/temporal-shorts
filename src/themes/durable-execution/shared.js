@@ -48,12 +48,14 @@ const WORKFLOWS_TS = [
 // Index of the `await` line of step i (ORDER_STEPS[i]) in a list of code lines
 const awaitLine = (lines, i) => lines.findIndex(line => line.includes(`await ${ORDER_STEPS[i].fn}(`));
 // Light syntax coloring of one plain TypeScript line (no HTML): keywords UV, strings violet, called function names
-// bold, punctuation slate (angle brackets escaped), everything else (names, types) default ink
+// bold, comments and punctuation slate (angle brackets escaped), everything else (names, types) default ink
 function highlightJs(line) {
-  const token = /('[^']*')|\b(export|async|function|await|const|typeof)\b|([A-Za-z_]\w*)(?=[(<])|([(){}<>:;,.=])/g;
+  const token =
+    /('[^']*')|(\/\/.*)|\b(export|async|function|await|const|typeof)\b|([A-Za-z_]\w*)(?=[(<])|([(){}<>:;,.=])/g;
   const escaped = { '<': '&lt;', '>': '&gt;' };
-  return line.replace(token, (m, str, kw, fn, punct) => {
+  return line.replace(token, (m, str, comment, kw, fn, punct) => {
     if (str) return `<span style="color:${C.violet}">${str}</span>`;
+    if (comment) return `<span style="color:#7C8698">${comment}</span>`;
     if (kw) return `<span style="color:${C.uv}">${kw}</span>`;
     if (fn) return `<span style="font-weight:700">${fn}</span>`;
     return `<span style="color:#7C8698">${escaped[punct] || punct}</span>`;
@@ -210,6 +212,10 @@ const EH = {
   lineEndX: 816, // RESULT chips leave and reach the code near the card's right edge (72 px inside it)
   spinX: 858, // running spinner, at the right end of the highlighted line (30 px from the card's right edge)
   rowStartX: 1208, // RESULT chips reach and leave the history at the start of the row text (120 px into the card)
+  // NEW WORKER tag of the takeovers (chapters 6 and 8): astride the top edge of the Worker panel (y 176), centered
+  // on it, clear of its name and status; fixed even width, so it rests on whole pixels (solid: the panel border does
+  // not show through)
+  newTag: { x: 520, y: 176, w: 200 },
 };
 // Stage y of code line i and of history row i (rows below the crash line sit EH.crashGap lower)
 const ehLineY = i => EH.worker.y + EH.code.dy - (EH.code.padY * 2 + WORKFLOW_CODE.length * EH.code.lineH) / 2
