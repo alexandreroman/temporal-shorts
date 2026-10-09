@@ -7,7 +7,11 @@ const backOut = p => {
   const c1 = 1.70158, c3 = c1 + 1;
   return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
 };
-const P = (t, a, d, f = ease) => f(clamp((t - a) / d));
+// Progress from 0 to 1 over the d seconds after `a`, eased by f; with d <= 0, a step at `a` (a hard cut)
+function P(t, a, d, f = ease) {
+  if (d <= 0) return f(t >= a ? 1 : 0);
+  return f(clamp((t - a) / d));
+}
 const lerp = (a, b, p) => a + (b - a) * p;
 const win = (t, a, b, f = 0.4) => P(t, a, f) * (1 - P(t, b, f)); // visible between a and b
 // Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it

@@ -71,7 +71,7 @@
   scene({
     chapter: 3, title: 'Where Temporal is used',
     // a hard cut: the AI hub turns into the next chapter's first frame
-    fadeOut: 0.001,
+    fadeOut: 0,
     // laid out centered at (960, 522) on the free band
     subs: [
       {

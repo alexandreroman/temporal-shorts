@@ -65,7 +65,7 @@
   scene({
     chapter: 4, title: 'Why it matters for AI',
     holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
-    fadeIn: 0.001, // a hard cut: the previous chapter ends on this chapter's first frame
+    fadeIn: 0, // a hard cut: the previous chapter ends on this chapter's first frame
     shift: AGENT_START.shift,
     subs: [
       // the loop and the panels enter, the goal shows, then the first of three slow turns, each step saved in the
