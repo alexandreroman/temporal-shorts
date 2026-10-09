@@ -10,8 +10,6 @@ Object.assign(ICONS, {
 });
 // The 4 steps of the lunch booking (LUNCH_STEPS in src/shared.js)
 const STEPS = LUNCH_STEPS;
-// The steps as [icon, label], for makeStepRow
-const STEP_TILES = STEPS.map(step => [step.icon, step.label]);
 
 // The agent's goal and its steps: the user's goal card (YOU), then one row per step (icon, action, a neon result
 // line and a check, both hidden until the step is done); w: their width

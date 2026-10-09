@@ -27,8 +27,6 @@ const ORDER_STEPS = [
   { icon: 'truck', label: 'Ship package', fn: 'shipPackage', service: 'Carrier', result: 'tracking 1Z-48' },
   { icon: 'mail', label: 'Email receipt', fn: 'emailReceipt', service: 'Email', result: 'receipt sent' },
 ];
-// The 4 steps of the order as [icon, label], for makeStepRow
-const ORDER_TILES = ORDER_STEPS.map(step => [step.icon, step.label]);
 
 // ---------- code card: white card showing a few lines of TypeScript, one div per line
 // Card height = 2 * padY + lines * lineH (256 px for the 6 lines of the order code).

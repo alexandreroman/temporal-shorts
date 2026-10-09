@@ -19,7 +19,10 @@ Object.assign(ICONS, {
 const FRAME = { x0: 80, x1: 1840, gap: 40 };
 
 // The 4 steps of the laptop order, used by chapters 1, 3 and 4
-const STEPS = [['clipboard', 'Check'], ['user', 'Approval'], ['cart', 'Order'], ['mail', 'Notify']];
+const STEPS = [
+  { icon: 'clipboard', label: 'Check' }, { icon: 'user', label: 'Approval' }, { icon: 'cart', label: 'Order' },
+  { icon: 'mail', label: 'Notify' },
+];
 // Shared step row geometry, so the same tiles sit at the same place in every chapter that shows them:
 // the row spans the content frame, CHECK's left edge and NOTIFY's right edge on its edges
 const ROW = { w: 344, h: 140 };

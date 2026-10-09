@@ -55,7 +55,7 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.order = makeOrderCard(root);
-      s.steps = makeStepRow(root, s.svg, ORDER_TILES, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
+      s.steps = makeStepRow(root, s.svg, ORDER_STEPS, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       const [y0, y1] = SERVICE_LINK;
       s.links = s.steps.xs.map(x => path(s.svg, `M ${x} ${y0} L ${x} ${y1}`, C.line, 2, false));
       s.dots = s.steps.xs.map(() => makeGlowDot(root, 14, RGB.uv));

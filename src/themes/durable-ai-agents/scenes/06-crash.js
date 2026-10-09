@@ -80,7 +80,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, STEP_TILES, colX(0), PITCH, STEPS_Y, TILE.w, TILE.h);
+      s.steps = makeStepRow(root, s.svg, STEPS, colX(0), PITCH, STEPS_Y, TILE.w, TILE.h);
       // the app instance holding the memory, then the new copy that takes its place after the crash
       s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
       s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);

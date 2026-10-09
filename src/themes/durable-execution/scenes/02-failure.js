@@ -147,7 +147,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, ORDER_TILES, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
+      s.steps = makeStepRow(root, s.svg, ORDER_STEPS, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       s.status = makeStatusTile(root);
       // same size and centered contents as the status tile
       s.charge = makeCharge(root, BOTTOM.w, true);

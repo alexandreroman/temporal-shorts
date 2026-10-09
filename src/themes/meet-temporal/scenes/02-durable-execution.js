@@ -2,7 +2,10 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // The order of the series: its 4 steps as tiles, as lines in the app, and as rows of the Event History
-  const STEPS = [['cart', 'Order'], ['card', 'Charge'], ['box', 'Ship'], ['mail', 'Email']];
+  const STEPS = [
+    { icon: 'cart', label: 'Order' }, { icon: 'card', label: 'Charge' }, { icon: 'box', label: 'Ship' },
+    { icon: 'mail', label: 'Email' },
+  ];
   const LINES = ['take the order', 'charge the card', 'ship the package', 'email the receipt'];
   const HISTORY = ['Order #1042 received', 'Card charged: $42', 'Package shipped', 'Receipt emailed'];
   // Layout on the free band: the step row on top, the app panel on the left and the TEMPORAL panel on the right

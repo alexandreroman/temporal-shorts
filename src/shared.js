@@ -187,11 +187,12 @@ function stepState(e, st) {
 function stepLinks(svg, xs, y, w) {
   return xs.slice(1).map((x, i) => path(svg, `M ${xs[i] + w / 2 + 2} ${y} L ${x - w / 2 - 2} ${y}`, C.line, 2, false));
 }
-// steps: [icon, label] of each tile; the tiles sit on the line y, from x0 every gap px, joined by thin links
+// steps: { icon, label } of each tile (more fields are ignored); the tiles sit on the line y, from x0 every gap px,
+// joined by thin links
 function makeStepRow(root, svg, steps, x0, gap, y, w, h) {
   const xs = steps.map((_, i) => x0 + i * gap);
   const links = stepLinks(svg, xs, y, w);
-  const tiles = steps.map(([icon, label]) => makeStep(root, icon, label, w, h));
+  const tiles = steps.map(({ icon, label }) => makeStep(root, icon, label, w, h));
   return { xs, y, tiles, links };
 }
 // states: one setState value per tile; tiles pop in from a, links draw just after; (dx, dy): shake; o: opacity

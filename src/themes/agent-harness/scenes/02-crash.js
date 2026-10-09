@@ -46,10 +46,7 @@
   const rowY = i => HIST.y - HIST.h / 2 + rowTop(i) + 18; // on the stage, where result cards land
 
   // the step tiles in a row joined by thin links, with this turn's five steps
-  const makeTurnRow = (root, svg) => {
-    const steps = STEPS.map(st => [st.icon, st.label]);
-    return makeStepRow(root, svg, steps, LEFT + ROW.w / 2, ROW_GAP, ROW.y, ROW.w, ROW.h);
-  };
+  const makeTurnRow = (root, svg) => makeStepRow(root, svg, STEPS, LEFT + ROW.w / 2, ROW_GAP, ROW.y, ROW.w, ROW.h);
   // counter tile at a fixed height, its content centered vertically, so both columns end on the same line
   const makeTallCounter = (p, label) => {
     const e = makeCounter(p, label, COUNTER.w, { h: COUNTER.h });

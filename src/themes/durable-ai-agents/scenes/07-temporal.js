@@ -54,7 +54,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, STEP_TILES, 465, 330, 208, 260, 104);
+      s.steps = makeStepRow(root, s.svg, STEPS, 465, 330, 208, 260, 104);
       s.restart = path(s.svg, 'M 1440 148 Q 960 48 480 148', C.violet, 3);
       s.restartL = E(root, 'From the start', 'lbl', { color: C.violet });
       // app side, mirroring chapter 6: instance panel, its context, the LLM bill and the booking
