@@ -145,22 +145,14 @@ function setSymbolDraw(e, draw, fill) {
 }
 
 // ===================== hand-off from chapter 3 (the AI hub) to chapter 4 (the agentic loop)
-// Chapter 4's agentic loop: the geometry it is built with, and where it shows for the whole chapter (`place`: its
-// center on the stage and its scale, so it never moves, from the cut to the end), and the chapter's camera shift.
-// The scale gives the LLM node an even whole size (112 px), so it rests on whole pixels
-const AGENT_LOOP = { cx: 560, cy: 540, r: 220 };
-const AGENT_PLACE = { x: 520, y: 489, k: 112 / 130 };
-const AGENT_START = { shift: [0, 0] };
-// the LLM node's size as built in chapter 4, and the blink phase of both orbs
-const AGENT_LLM = { size: 130, seed: 0.37 };
+// Chapter 4's agentic loop, in place for the whole chapter, so it never moves from the cut to the end: its center
+// on the stage, its radius and the size of its nodes, even, so they rest on whole pixels
+const AGENT_LOOP = { cx: 520, cy: 489, r: 190, node: 112 };
+// the blink phase of both LLM orbs, chapter 3's and chapter 4's
+const AGENT_LLM_SEED = 0.37;
 // The stage point where chapter 4's LLM node (THINK, on top of the loop) shows, and its size there: chapter 3's AI
-// hub turns into that LLM node, so the same bubble carries across the cut. Rounded, as chapter 4 snaps its nodes to
-// whole pixels
-const AGENT_HANDOFF = {
-  x: Math.round(AGENT_PLACE.x + AGENT_START.shift[0]),
-  y: Math.round(AGENT_PLACE.y - AGENT_LOOP.r * AGENT_PLACE.k + AGENT_START.shift[1]),
-  size: AGENT_LLM.size * AGENT_PLACE.k,
-};
+// hub turns into that LLM node, so the same bubble carries across the cut
+const AGENT_HANDOFF = { x: AGENT_LOOP.cx, y: AGENT_LOOP.cy - AGENT_LOOP.r, size: AGENT_LOOP.node };
 // The halo around the bubble at the cut: its size on screen (diameter, px) and opacity, the same on both sides
 const HANDOFF_HALO = { size: 300, o: 0.8 };
 const HALO_BACKGROUND = `radial-gradient(circle, rgba(${RGB.violet},.4) 0%, rgba(${RGB.uv},.15) 45%, `

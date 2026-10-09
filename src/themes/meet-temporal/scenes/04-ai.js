@@ -4,22 +4,13 @@
   // The agentic loop (think, act, observe, as in durable-ai-agents) runs durably in an app instance, its steps
   // saved in an Event History outside the app, as in durable-ai-agents chapter 7: a crash in production, a new
   // instance takes over and replays the history, nothing is lost and no LLM call is paid twice
+  // the loop sits in its app panel for the whole chapter, about 40 px clear of its header and of the context strip
   const LOOP = AGENT_LOOP;
   const COMET = 6; // sparks trailing the token
-  // the loop shows at 86% of its size for the whole chapter, in its app panel, about 40 px clear of its header and
-  // of the context strip (stage pixels)
-  const DL = AGENT_PLACE;
-  // a point of the loop (from s.loop.pos) where it shows on the stage of the scene
-  const durablePos = ([x, y]) => [DL.x + (x - LOOP.cx) * DL.k, DL.y + (y - LOOP.cy) * DL.k];
-  // a point of the loop moved to the nearest one that shows on a whole pixel of the stage
-  const snapToPixel = ([x, y]) => [
-    LOOP.cx + (Math.round(DL.x + (x - LOOP.cx) * DL.k) - DL.x) / DL.k,
-    LOOP.cy + (Math.round(DL.y + (y - LOOP.cy) * DL.k) - DL.y) / DL.k,
-  ];
 
   // Stage pixels. The app panel spans the content frame (y 150 to 880) around the loop, x 140 to 900; the Temporal
   // panel, as high, starts one GUTTER right of it, 840 px wide (x 940 to 1780)
-  const APP = { x: DL.x, y: 515, w: 760, h: 730 };
+  const APP = { x: LOOP.cx, y: 515, w: 760, h: 730 };
   const GUTTER = 40;
   // Under the loop in the app panel, 24 px from its sides and bottom (as its header): the agent's goal, then in its
   // place the AGENT CONTEXT strip. Inside it, padY from its top and bottom: the label row (its label and, on B,
@@ -60,7 +51,6 @@
   scene({
     chapter: 4, title: 'Why it matters for AI',
     fadeIn: 0, // a hard cut: the previous chapter ends on this chapter's first frame
-    shift: AGENT_START.shift,
     subs: [
       // the loop and the panels enter, the goal shows, then the first of three slow turns, each step saved in the
       // history and added to the agent's context
@@ -108,23 +98,14 @@
       Object.assign(s.restored.style, {
         left: 'auto', right: (MEM.pad - 1) + 'px', top: MEM.padY + 'px', transformOrigin: 'right center',
       });
-      // the loop, its arcs and its token's tail on one layer, scaled as a whole
-      s.loopLayer = E(root, '', '', {
-        width: '1920px', height: '1080px', transformOrigin: `${LOOP.cx}px ${LOOP.cy}px`, opacity: 1,
-      });
-      s.svg = svgLayer(s.loopLayer);
+      s.svg = svgLayer(root);
       // THINK blinks as the orb the previous chapter's AI hub turned into
-      s.loop = makeAgentLoop(s.loopLayer, s.svg, LOOP.cx, LOOP.cy, LOOP.r, { seed: AGENT_LLM.seed });
-      // the nodes and labels at the nearest point that the layer's scale takes to a whole screen pixel, so the
-      // tiles rest on whole pixels: ACT and OBSERVE sit at fractional points of the circle
-      s.loop.nodePos = deg => snapToPixel(s.loop.pos(deg));
-      // A transparent outline widens what Chromium repaints when a tile's opacity changes: in the scaled layer the
-      // tile's anti-aliased edge spills one pixel outside the box it repaints, and would keep the dimmed paint of
-      // an earlier frame, so a frame would depend on the frames rendered before it
-      [s.loop.act, s.loop.observe].forEach(e => { e.style.outline = '3px solid transparent'; });
-      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(s.loopLayer, 16 - 2 * k, RGB.neon));
+      s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy, LOOP.r, { seed: AGENT_LLM_SEED, node: LOOP.node });
+      // the nodes and labels on whole pixels: ACT and OBSERVE sit at fractional points of the circle
+      s.loop.nodePos = deg => s.loop.pos(deg).map(Math.round);
+      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(root, 16 - 2 * k, RGB.neon));
       // the token and its comet pass under the nodes, THINK's face included: moved before the first node, in order
-      [s.loop.token, ...s.comet].forEach(e => s.loopLayer.insertBefore(e, s.loop.think.root));
+      [s.loop.token, ...s.comet].forEach(e => root.insertBefore(e, s.loop.think.root));
       // the agent's goal, under the loop before the context strip, a fixed whole size, so it rests on whole pixels
       s.goal = makeCard(root, 'Book lunch with Marie on Thursday.', 'user', null, MEM.w);
       // as wide as the strip that takes its place (cards are 640 px at most)
@@ -160,8 +141,8 @@
       });
       // the tags in the loop's middle sit 30 px above it, clear of the ACT and OBSERVE tiles
       // the bolt in the panel's top right, clear of its status and of THINK
-      s.crash = makeCrashMarks(root, 'App crash', { x: DL.x + 230, y: DL.y - 210, size: 110 },
-        { x: DL.x, y: DL.y - 30, w: 280 });
+      s.crash = makeCrashMarks(root, 'App crash', { x: LOOP.cx + 230, y: LOOP.cy - 210, size: 110 },
+        { x: LOOP.cx, y: LOOP.cy - 30, w: 280 });
       s.newTag = makeNewTag(root, 'New app instance', 300);
       s.flash = makeFlash(root);
       s.complete = tag(root, 'Agent complete', 'neon solid');
@@ -172,7 +153,7 @@
       // its halo; no entrance zoom, so the node never moves: the halo fades into the LLM's own glow and the rest of
       // the loop emerges around it, then the app panel and Temporal with its Event History enter
       setCamera(s.cam, t, this.dur, { enter: 1 });
-      place(s.carry, ...durablePos(s.loop.nodePos(LOOP_DEG.think)), 1, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
+      place(s.carry, ...s.loop.nodePos(LOOP_DEG.think), 1, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
       const loopAt = c[0] + 0.1;
       // three turns, one step each, every LLM call and tool result saved (the card leaves the loop, lands on its
       // row, the row turns SAVED); the first starts once the loop is drawn and the goal has shown, and ends before
@@ -213,11 +194,9 @@
         place(e, x, y, 1, 0.55 - 0.08 * k);
       });
       s.svg.style.transform = `translate(${ax}px,${ay}px)`;
-      // the loop sits in its place for the whole chapter, at 86% of its size
-      s.loopLayer.style.transform = `translate(${DL.x - LOOP.cx}px,${DL.y - LOOP.cy}px) scale(${DL.k})`;
       // under the loop: the agent's goal, then the context strip in its place
       const gp = backPop(t, c[0] + 0.6);
-      place(s.goal, DL.x, MEM_Y, gp.s, gp.o * (1 - P(t, c[0] + 3.4, 0.3)));
+      place(s.goal, LOOP.cx, MEM_Y, gp.s, gp.o * (1 - P(t, c[0] + 3.4, 0.3)));
 
       // The app instances: A runs the loop, crashes before the invite and leaves; B slides into its place, replays
       // the history, then runs the invite
@@ -234,7 +213,7 @@
       // AGENT COMPLETE shows in the loop: the status just reads DONE
       else setAppStatus(s.appB, 'DONE', 'idle');
       setArrivalGlow(s.appB, t, bOn, bOn + 1.6);
-      placeNewTag(s.newTag, t, bOn + 0.3, replay[0], DL.x + arriving.dx, DL.y - 25);
+      placeNewTag(s.newTag, t, bOn + 0.3, replay[0], LOOP.cx + arriving.dx, LOOP.cy - 25);
 
       // The agent's context, in each instance's strip, which moves with its panel. In A, a block per row as the row
       // is saved; at the crash A's blocks fall and CONTEXT LOST shows until A leaves. B arrives with an empty
@@ -266,14 +245,14 @@
       placeCrashMarks(s.crash, t, crashAt, crashAt + 0.3, aOut, ax, ay);
       placeFlash(s.flash, t, crashAt);
       const cp = backPop(t, complete);
-      place(s.complete, DL.x, DL.y - 25, cp.s, cp.o);
+      place(s.complete, LOOP.cx, LOOP.cy - 25, cp.s, cp.o);
 
       // Temporal, outside the app, with the Event History: untouched by the crash
       place(s.outside, OUTSIDE.x, OUTSIDE.y, 1, P(t, loopAt + 0.4, 0.5));
       place(s.history, HIST.x, HIST.y, 1, P(t, loopAt + 0.6, 0.5));
       // each result leaves the loop (an LLM call from THINK, a tool result from ACT just after the token passes
       // it), flies to its row's left end and is absorbed there as the row is written
-      const [thx, thy] = durablePos(s.loop.pos(LOOP_DEG.think)), [acx, acy] = durablePos(s.loop.pos(LOOP_DEG.act));
+      const [thx, thy] = s.loop.pos(LOOP_DEG.think), [acx, acy] = s.loop.pos(LOOP_DEG.act);
       s.saveCards.forEach((e, i) => {
         const leave = saved[i] - FLIGHT - 0.1;
         const [fx, fy] = isLLMRow(i) ? [thx, thy] : [acx, acy];

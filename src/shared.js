@@ -257,11 +257,11 @@ const LOOP_DEG = { think: -90, act: 30, observe: 150 };
 // The agentic loop on a circle of radius r centered on (cx, cy): THINK (the LLM orb) on top, ACT (neon play tile)
 // and OBSERVE (eye tile, UV border) below, slate arcs with arrow heads between them, the node labels, an
 // "Agentic loop" label in the middle and the neon token. The arcs go in svg. Returns the loop, with pos(deg), the
-// point at an angle on the circle, and nodePos(deg), where a node and its label sit (pos; a scene that scales the
-// loop can replace it to keep the tiles on whole pixels). Option: `seed`, the blink phase of the THINK orb (see
-// makeLLM()).
-function makeAgentLoop(root, svg, cx, cy, r = 220, { seed } = {}) {
-  const loop = { cx, cy };
+// point at an angle on the circle, and nodePos(deg), where a node and its label sit (pos; a scene can replace it to
+// keep the tiles on whole pixels). Options: `seed`, the blink phase of the THINK orb (see makeLLM()); `node`, the
+// size of the nodes in px.
+function makeAgentLoop(root, svg, cx, cy, r = 220, { seed, node = 130 } = {}) {
+  const loop = { cx, cy, node };
   loop.pos = deg => {
     const a = deg * Math.PI / 180;
     return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
@@ -275,9 +275,9 @@ function makeAgentLoop(root, svg, cx, cy, r = 220, { seed } = {}) {
   const { think, act, observe } = LOOP_DEG;
   const arcPaths = [arcD(think + 27, act - 27), arcD(act + 27, observe - 27), arcD(observe + 27, think + 360 - 27)];
   loop.arcs = arcPaths.map(d => path(svg, d, C.slate, 2.5));
-  loop.think = makeLLM(root, 130, '', { seed });
-  loop.act = iconTile(root, 'play', '', 130, 130, C.neon); loop.act.style.borderColor = C.neon;
-  loop.observe = iconTile(root, 'eye', '', 130, 130, C.ink); loop.observe.style.borderColor = C.uv;
+  loop.think = makeLLM(root, node, '', { seed });
+  loop.act = iconTile(root, 'play', '', node, node, C.neon); loop.act.style.borderColor = C.neon;
+  loop.observe = iconTile(root, 'eye', '', node, node, C.ink); loop.observe.style.borderColor = C.uv;
   loop.labels = ['Think', 'Act', 'Observe'].map(text => E(root, text, 'lbl', { color: 'var(--ink)' }));
   loop.center = E(root, 'Agentic<br>loop', 'lbl', {
     textAlign: 'center', color: 'var(--ink)', fontSize: '24px', lineHeight: 1.4,
@@ -300,10 +300,11 @@ function placeAgentLoop(loop, t, a, opts = {}) {
     place(e, x + dx, y + dy, p.s * (1 + 0.12 * near(d)), p.o * o);
   });
   llmState(loop.think, { think: near(LOOP_DEG.think) > 0.2 ? 1 : 0, look: 0.5 });
-  // THINK's label sits left of the orb, the others under their tiles
+  // THINK's label sits left of the orb, the others under their tiles, centered 33 px below their bottom edge
   const [tx, ty] = loop.nodePos(LOOP_DEG.think), [ax, ay] = loop.nodePos(LOOP_DEG.act);
   const [ox, oy] = loop.nodePos(LOOP_DEG.observe);
-  const labelAt = [[tx - 130, ty], [ax, ay + 98], [ox, oy + 98]];
+  const below = loop.node / 2 + 33;
+  const labelAt = [[tx - loop.node, ty], [ax, ay + below], [ox, oy + below]];
   loop.labels.forEach((e, i) => place(e, labelAt[i][0] + dx, labelAt[i][1] + dy, 1, P(t, a + 0.3 + i * 0.2, 0.4) * o));
   loop.arcs.forEach((arc, i) => draw(arc, P(t, a + 0.7 + i * 0.3, 0.45), o));
   place(loop.center, loop.cx + dx, loop.cy + dy, 1, P(t, centerAt, 0.5) * centerO * o);

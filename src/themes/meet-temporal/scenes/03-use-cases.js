@@ -110,7 +110,7 @@
       s.bubbles = EXAMPLES.map((examples, i) => examples.map((example, k) => makeBubble(root, example,
         HUBS[i].angles[k])));
       // the LLM orb the AI hub turns into: the next chapter's LLM node, same size and blink
-      s.llm = makeLLM(root, AGENT_LLM.size, '', { seed: AGENT_LLM.seed });
+      s.llm = makeLLM(root, AGENT_HANDOFF.size, '', { seed: AGENT_LLM_SEED });
     },
     update(t, c, s) {
       // at the end AI invades the screen, then turns into the next chapter's LLM node: the rest of the map fades
@@ -129,7 +129,7 @@
       const y = lerp(lerp(ai.y, 540, swellP), AGENT_HANDOFF.y, contract);
       const size = lerp(lerp(HUB_SIZE, FULL_SCREEN, swellP), llmSize, contract);
       const orb = P(t, morphAt + 2.4, 0.6);
-      place(s.llm.root, x, y, size / AGENT_LLM.size, orb);
+      place(s.llm.root, x, y, size / llmSize, orb);
       llmState(s.llm, { look: 0.5 });
       // the halo grows with the hub (HANDOFF_HALO.size at the LLM's size), washing the stage violet
       place(s.halo, x, y, size / llmSize, P(t, morphAt, 0.5) * HANDOFF_HALO.o);
