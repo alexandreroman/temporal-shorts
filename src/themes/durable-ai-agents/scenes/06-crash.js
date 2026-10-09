@@ -183,43 +183,24 @@
       place(s.ticketBack, ticketX + stackOffset, ticketY - stackOffset, TICKET_CENTER.scale * (1 + slam),
         clamp(stack * 3));
 
-      // app instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
-      const aIn = P(t, 0.3, 0.45, backOut);
-      const leave = leavingInstance(t, aDrop);
-      place(s.A, APP.x + sx, APP.y + sy + leave.dy, aIn, clamp(aIn * 2) * leave.o);
-      if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
-      else setAppStatus(s.A, 'RUNNING THE AGENT', t >= c[0] + 0.3 ? 'running' : 'idle');
-      // a new copy, instance B, slides in from the left once A is gone, its border glowing violet while it arrives,
-      // gone as the rerun starts. No Event History hands it anything: it starts over from scratch, idle until the
-      // rerun
-      const arrive = arrivingInstance(t, bIn);
-      place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
+      // app instance A runs, crashes, then leaves like a dead machine, and instance B takes its place. The context
+      // panel is filled by the first run, emptied by the crash and refilled by the rerun.
+      const add1 = [0.8, 1.3, 1.9, 2.4, 3.0, 3.5].map(x => c[0] + x);
+      const add2 = [0.6, 0.9, 1.4, 1.7, 2.3, 2.6].map(x => c[2] + x);
+      const arrive = placeTakeover(s, t, {
+        app: APP, mem: MEM, memSlot, shake: [sx, sy], aIn: P(t, 0.3, 0.45, backOut), runAt: c[0] + 0.3, crashAt,
+        emptyAt: c[1] + 1.2, aDrop, bIn, memIn: P(t, 0.5, 0.45),
+        blockA: i => [P(t, add1[i], 0.35, backOut), P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn)],
+        blockB: i => P(t, add2[i], 0.35, backOut),
+      });
+      // instance B's border glows violet while it arrives, gone as the rerun starts. No Event History hands it
+      // anything: it starts over from scratch, idle until the rerun
       if (t < c[2] + 0.2) setAppStatus(s.B, 'STARTING OVER', 'idle');
       else setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
       setArrivalGlow(s.B, t, bIn, c[2] - 0.3);
       // NEW INSTANCE pops on B once it is almost in place and is gone at c[2], before the rerun, so a presenter hold
       // there shows the glow and the tag at rest
       placeNewTag(s.newTag, t, newAt, c[2] - 0.3, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
-
-      // context: filled by the first run, emptied by the crash, refilled by the rerun. The panel moves with the
-      // instance on screen (A, then B), so it never floats without its app; both are gone when it switches.
-      const rider = takeoverRider(t, aDrop, bIn, [sx, sy]);
-      place(s.mem, MEM.x + rider.dx, MEM.y + rider.dy, 1, P(t, 0.5, 0.45) * rider.o);
-      s.mem.style.borderColor = dead && !bHere ? C.red : C.line;
-      s.mem.empty.style.opacity = bHere ? 0 : P(t, c[1] + 1.2, 0.4);
-      s.A.style.filter = rider.grey;
-      s.mem.style.filter = rider.grey;
-      // the blocks of A have all fallen before A leaves; B's stay empty until the rerun
-      const add1 = [0.8, 1.3, 1.9, 2.4, 3.0, 3.5].map(x => c[0] + x);
-      const add2 = [0.6, 0.9, 1.4, 1.7, 2.3, 2.6].map(x => c[2] + x);
-      s.mblocks.forEach((b, i) => {
-        if (!bHere) {
-          const fall = P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn);
-          placeMemBlock(b, memSlot(i), MEM.slotY, P(t, add1[i], 0.35, backOut), fall, { dx: sx, dy: sy });
-        } else {
-          placeMemBlock(b, memSlot(i), MEM.slotY, P(t, add2[i], 0.35, backOut), 0);
-        }
-      });
 
       placeFlash(s.flash, t, crashAt);
       const bp = P(t, crashAt, 0.35, backOut);

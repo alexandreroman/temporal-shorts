@@ -47,6 +47,41 @@ function setBill(b, n, wasted, note = wasted ? `+${wasted} wasted` : '') {
   b.note.textContent = note;
   b.cells.forEach((q, i) => q.style.background = i < n ? (i >= n - wasted ? C.red : C.uv) : 'rgba(248,250,252,.08)');
 }
+// The crash and the takeover of chapters 6 and 7. App instance A runs the agent from runAt, crashes at crashAt
+// (CRASHED, a red context panel, EMPTY from emptyAt), shaken by [sx, sy], then leaves like a dead machine from aDrop:
+// it greys, drops and fades out with its context panel. A new copy, instance B, slides in to the same place at bIn,
+// the panel with it. The scene sets B's status.
+// s: the scene's instance panels A and B, its context panel mem and blocks mblocks. app, mem: the centers of the
+// instance and context panels, mem.slotY the line of the blocks and memSlot(i) the x of block i. aIn: A's pop-in
+// progress; memIn: the context panel's fade-in; blockA(i): [grow, fall] of A's block i; blockB(i): the grow of B's.
+// Returns B's arrivingInstance: its dx moves what slides in with it.
+function placeTakeover(s, t, opts) {
+  const { app, mem, memSlot, shake: [sx, sy], aIn, runAt, crashAt, emptyAt, aDrop, bIn, memIn, blockA, blockB } = opts;
+  const dead = t >= crashAt;
+  const leave = leavingInstance(t, aDrop);
+  place(s.A, app.x + sx, app.y + sy + leave.dy, aIn, clamp(aIn * 2) * leave.o);
+  if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
+  else setAppStatus(s.A, 'RUNNING THE AGENT', t >= runAt ? 'running' : 'idle');
+  const arrive = arrivingInstance(t, bIn);
+  place(s.B, app.x + arrive.dx, app.y, 1, arrive.o);
+  // the context panel moves with the instance on screen (A, then B), so it never floats without its app
+  const rider = takeoverRider(t, aDrop, bIn, [sx, sy]);
+  place(s.mem, mem.x + rider.dx, mem.y + rider.dy, 1, memIn * rider.o);
+  s.mem.style.borderColor = dead && !rider.onB ? C.red : C.line;
+  s.mem.empty.style.opacity = rider.onB ? 0 : P(t, emptyAt, 0.4);
+  s.A.style.filter = rider.grey;
+  s.mem.style.filter = rider.grey;
+  // the blocks of A have all fallen before A leaves
+  s.mblocks.forEach((b, i) => {
+    if (rider.onB) {
+      placeMemBlock(b, memSlot(i), mem.slotY, blockB(i), 0);
+    } else {
+      const [grow, fall] = blockA(i);
+      placeMemBlock(b, memSlot(i), mem.slotY, grow, fall, { dx: sx, dy: sy });
+    }
+  });
+  return arrive;
+}
 function makeTicket(p) {
   const e = E(p,
     `<div style="display:flex;align-items:center;gap:12px">${ICON('ticket', 34, C.ink, 1.6)}`

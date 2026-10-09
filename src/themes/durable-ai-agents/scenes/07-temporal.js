@@ -123,42 +123,22 @@
       draw(s.restart, P(t, handOff, 0.8), 1 - P(t, c[3] + 0.3, 0.4));
       place(s.restartL, 960, 123, 1, P(t, handOff + 0.4, 0.35) * (1 - P(t, c[3] + 0.3, 0.4)));
 
-      // app instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
-      const aIn = P(t, c[0] + 2.3, 0.5, backOut);
-      const leave = leavingInstance(t, aDrop);
-      place(s.A, APP.x + sx, APP.y + sy + leave.dy, aIn, clamp(aIn * 2) * leave.o);
-      if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
-      else setAppStatus(s.A, 'RUNNING THE AGENT', t >= write[0] ? 'running' : 'idle');
-      // a new copy, instance B, slides in from the left once A is gone, its border glowing violet while it arrives
-      // and takes over, gone by c[3]; IDLE until the agent chip reaches it
-      const bHere = t >= bIn;
-      const arrive = arrivingInstance(t, bIn);
-      place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
+      // app instance A runs, crashes, then leaves like a dead machine, and instance B takes its place. The context
+      // panel is filled as results are saved, emptied by the crash and refilled from the history; B's blocks are
+      // empty until the replay.
+      const arrive = placeTakeover(s, t, {
+        app: APP, mem: MEM, memSlot, shake: [sx, sy], aIn: P(t, c[0] + 2.3, 0.5, backOut), runAt: write[0], crashAt,
+        emptyAt: crashAt + 1.1, aDrop, bIn, memIn: P(t, c[0] + 2.5, 0.45),
+        blockA: i => [i < 6 ? P(t, saved[i], 0.35, backOut) : 0, P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn)],
+        blockB: i => P(t, i < 6 ? replay[i] + 0.33 : saved[i], 0.35, backOut),
+      });
+      // instance B's border glows violet while it arrives and takes over, gone by c[3]; IDLE until the agent chip
+      // reaches it
       if (t < takeOver) setAppStatus(s.B, 'IDLE', 'stopped');
       else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', t >= rerun ? 'running' : 'idle');
       else if (t < told[0]) setAppStatus(s.B, 'REPLAYING…', 'running');
       else setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
       setArrivalGlow(s.B, t, bIn, c[3] - 0.3);
-
-      // context: filled as results are saved, emptied by the crash, refilled from the history. The panel moves
-      // with the instance on screen (A, then B), so it never floats without its app; both are gone when it switches.
-      const rider = takeoverRider(t, aDrop, bIn, [sx, sy]);
-      place(s.mem, MEM.x + rider.dx, MEM.y + rider.dy, 1, P(t, c[0] + 2.5, 0.45) * rider.o);
-      s.mem.style.borderColor = dead && !bHere ? C.red : C.line;
-      s.mem.empty.style.opacity = bHere ? 0 : P(t, crashAt + 1.1, 0.4);
-      s.A.style.filter = rider.grey;
-      s.mem.style.filter = rider.grey;
-      // the blocks of A have all fallen before A leaves; B's are empty until the replay
-      s.mblocks.forEach((b, i) => {
-        if (!bHere) {
-          const grow = i < 6 ? P(t, saved[i], 0.35, backOut) : 0;
-          const fall = P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn);
-          placeMemBlock(b, memSlot(i), MEM.slotY, grow, fall, { dx: sx, dy: sy });
-        } else {
-          const back = i < 6 ? replay[i] + 0.33 : saved[i];
-          placeMemBlock(b, memSlot(i), MEM.slotY, P(t, back, 0.35, backOut), 0);
-        }
-      });
 
       // LLM call counter: only the 4 real calls are billed; the replay costs nothing
       const calls = [0, 2, 4, 6].filter(i => t >= write[i]).length;
