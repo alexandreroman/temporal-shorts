@@ -166,8 +166,7 @@
         sparks: SPARKS.map(() => svgLine(s.svg, 3)),
       }));
       s.bolt = E(root, ICON('bolt', 100, C.red, 1.6));
-      s.crash = tag(root, 'Server crash', 'red big');
-      Object.assign(s.crash.style, { width: '310px', height: '66px', textAlign: 'center' });
+      s.crash = fixedTag(root, 'Server crash', 'red big', 310, 66);
       s.flash = makeFlash(root);
       const [x0, x1] = s.steps.xs, top = ROW.y - ROW.h / 2 - 6;
       s.redo = path(s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`, C.red, 3);

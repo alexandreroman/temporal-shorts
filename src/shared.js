@@ -16,6 +16,14 @@ const assetUrl = path => new URL(path, SRC_BASE).href;
 // Official Temporal logo (white horizontal lockup)
 const LOGO = assetUrl('assets/temporal-logo-horizontal-light-cropped.svg');
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
+// A tag of a fixed even width w (and height h if given), its label centered in it. The .1em letter spacing gives
+// fractional natural widths: with an even size, a tag centered on a whole pixel rests on whole pixels.
+function fixedTag(p, html, cls, w, h = null) {
+  const e = tag(p, html, cls);
+  Object.assign(e.style, { width: w + 'px', textAlign: 'center' });
+  if (h) e.style.height = h + 'px';
+  return e;
+}
 // icon + label centred in the tile (label null for an icon alone); padding-left offsets the trailing
 // letter-spacing. Options: size and stroke of the icon, font of the label and gap above it; a tile over 130 px
 // high gets a larger icon and label by default.
@@ -328,17 +336,14 @@ function glitchPanel(panel, glitch) {
   panel.style.borderColor = C.red;
   panel.st.style.color = C.red;
 }
-// Crash marks on a crashed panel: a red bolt (bolt: { x, y, size }) and a solid red tag, e.g. 'App crash'
-// (crashTag: { x, y, w, h }, h optional). Even sizes keep the tag on whole pixels once centered (the .1em letter
-// spacing gives fractional widths); solid, so nothing under it shows through.
+// Crash marks on a crashed panel: a red bolt (bolt: { x, y, size }) and a solid red fixedTag, e.g. 'App crash'
+// (crashTag: { x, y, w, h }, h optional); solid, so nothing under it shows through.
 function makeCrashMarks(root, label, bolt, crashTag) {
-  const marks = {
-    bolt: E(root, ICON('bolt', bolt.size, C.red, 1.6)), tag: tag(root, label, 'red big solid'),
+  return {
+    bolt: E(root, ICON('bolt', bolt.size, C.red, 1.6)),
+    tag: fixedTag(root, label, 'red big solid', crashTag.w, crashTag.h),
     boltSpot: bolt, tagSpot: crashTag,
   };
-  Object.assign(marks.tag.style, { width: crashTag.w + 'px', textAlign: 'center' });
-  if (crashTag.h) marks.tag.style.height = crashTag.h + 'px';
-  return marks;
 }
 // The bolt strikes at crashAt, the tag pops in at tagAt once it has landed; both leave from outAt. (dx, dy): the
 // shake of the crashed side.
@@ -390,14 +395,9 @@ function setArrivalGlow(panel, t, at, out) {
   panel.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(182,100,255,${(0.6 * k).toFixed(3)})`;
   panel.style.borderColor = C.violet;
 }
-// "New Worker" or "New instance" tag on the new instance, violet and solid (the panel border does not show
-// through); fixed even width w (and height h if given), so it rests on whole pixels once centered
-function makeNewTag(root, label, w, h = null) {
-  const e = tag(root, label, 'violet solid');
-  Object.assign(e.style, { width: w + 'px', textAlign: 'center' });
-  if (h) e.style.height = h + 'px';
-  return e;
-}
+// "New Worker" or "New instance" fixedTag on the new instance, violet and solid (the panel border does not show
+// through)
+const makeNewTag = (root, label, w, h = null) => fixedTag(root, label, 'violet solid', w, h);
 // The tag pops in at `at` and fades out from `out` within 0.3 s, at (x, y): add the arriving panel's dx to x so it
 // slides in with it. s: its scale, popIn's bump by default
 function placeNewTag(e, t, at, out, x, y, s = null) {

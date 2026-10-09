@@ -152,16 +152,11 @@
       s.saveCards = LUNCH_HISTORY.map((_, i) => callCard(i));
       s.reuseCards = LUNCH_HISTORY.slice(0, 6).map((_, i) => callCard(i));
       // the pills under the history, each a fixed even width, so it rests on whole pixels centered
-      const pill = (text, kind, w) => {
-        const e = tag(root, text, kind);
-        Object.assign(e.style, { width: w + 'px', textAlign: 'center' });
-        return e;
-      };
-      s.savedNote = pill('Saved outside the app', 'uv', 380);
-      s.keptNote = pill('History kept', 'uv', 240);
+      s.savedNote = fixedTag(root, 'Saved outside the app', 'uv', 380);
+      s.keptNote = fixedTag(root, 'History kept', 'uv', 240);
       // the outcome, two neon pills with a soft glow
       s.outcome = ['No progress lost', 'No tokens wasted'].map(text => {
-        const e = pill(text, 'neon solid', PILL.w);
+        const e = fixedTag(root, text, 'neon solid', PILL.w);
         e.style.boxShadow = '0 0 28px rgba(219,255,75,.35)';
         return e;
       });

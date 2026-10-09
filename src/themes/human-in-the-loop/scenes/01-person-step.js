@@ -58,8 +58,7 @@
       s.card = makeApprovalCard(root, APPROVAL_CARD.k);
       s.clock = makeWaitClock(root, 'Waiting for Maria');
       // equal widths, so the column of reasons has straight edges
-      s.why = ['In meetings', 'Traveling', 'On vacation'].map(l => tag(root, l));
-      s.why.forEach(e => Object.assign(e.style, { width: WHY_W + 'px', textAlign: 'center' }));
+      s.why = ['In meetings', 'Traveling', 'On vacation'].map(l => fixedTag(root, l, '', WHY_W));
     },
     update(t, c, s) {
       const checkOn = c[1] + 0.6, checked = c[1] + 1.5, askOn = c[1] + 1.6, waitOn = c[1] + 4.6;

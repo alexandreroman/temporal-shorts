@@ -52,11 +52,7 @@
       s.clock = makeWaitClock(root, 'Waiting for Maria');
       s.temporal = makeWfTemporalPanel(root);
       s.history = makeOrderHistory(root);
-      s.causes = HITS.map(h => {
-        const e = tag(root, h.label);
-        Object.assign(e.style, { width: TAG_W + 'px', textAlign: 'center' });
-        return e;
-      });
+      s.causes = HITS.map(h => fixedTag(root, h.label, '', TAG_W));
       // a neon ring round the Event History card, 10 px out, each time a hit leaves it untouched
       s.ring = E(root, '', '', {
         width: (HIST.w + 20) + 'px', height: (HIST.h + 20) + 'px', border: '2px solid ' + C.neon,

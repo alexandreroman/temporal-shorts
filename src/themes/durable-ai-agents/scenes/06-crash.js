@@ -111,10 +111,8 @@
       s.bolt = E(root, ICON('bolt', 150, C.red, 1.6));
       s.flash = makeFlash(root);
       // APP CRASH as wide as the right column; the causes share one even width, centered under their tiles
-      s.crash = tag(root, 'App crash', 'red big');
-      Object.assign(s.crash.style, { width: COL.w + 'px', textAlign: 'center' });
-      s.causes = ['Restart', 'Deploy', 'Outage'].map(l => tag(root, l));
-      s.causes.forEach(e => Object.assign(e.style, { width: CAUSE_W + 'px', textAlign: 'center' }));
+      s.crash = fixedTag(root, 'App crash', 'red big', COL.w);
+      s.causes = ['Restart', 'Deploy', 'Outage'].map(l => fixedTag(root, l, '', CAUSE_W));
       s.redo = path(s.svg, `M ${REDO.from} Q ${REDO.ctrl} ${REDO.to}`, C.red, 3);
       // fixed even width: centered, the label rests on whole pixels
       s.redoL = E(root, 'Start over', 'lbl', { color: C.red, width: '148px', textAlign: 'center' });

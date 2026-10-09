@@ -183,9 +183,9 @@
       s.teamNum = makeNumber(root, 140);
       s.teamLabel = makeLabel(root, 'Employees');
       // the stamp: neon, a fixed even width, so it rests on whole pixels
-      s.stamp = tag(root, '×2 in a year', 'neon solid big');
       // sized to its text (307 px with its padding) with a margin
-      Object.assign(s.stamp.style, { width: '316px', textAlign: 'center', boxShadow: '0 0 30px rgba(219,255,75,.4)' });
+      s.stamp = fixedTag(root, '×2 in a year', 'neon solid big', 316);
+      s.stamp.style.boxShadow = '0 0 30px rgba(219,255,75,.4)';
 
       // beat 2: the links under the chips, the symbol, the chips, and the filter that draws the logos in ink
       s.links = svgLayer(root);
@@ -253,8 +253,8 @@
       s.bracketEnds = ['$1.5B', '$12.55B'].map(text => E(root, text, 'mono', {
         width: '80px', fontSize: '16px', lineHeight: '20px', color: C.slate, whiteSpace: 'nowrap',
       }));
-      s.aiTag = tag(root, 'Core infrastructure for AI', 'neon solid');
-      Object.assign(s.aiTag.style, { width: '440px', textAlign: 'center', boxShadow: '0 0 26px rgba(219,255,75,.3)' });
+      s.aiTag = fixedTag(root, 'Core infrastructure for AI', 'neon solid', 440);
+      s.aiTag.style.boxShadow = '0 0 26px rgba(219,255,75,.3)';
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
