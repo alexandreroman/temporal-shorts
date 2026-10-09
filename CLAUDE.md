@@ -70,7 +70,9 @@ workspaces run `make setup` automatically.
 - `src/`: the animations, one file per concern so parallel edits rarely
   conflict:
   - `index.html`, `home.css`, `home.js`: home page, one card per theme,
-    linking to `themes/<theme>/`; `home.js` draws its star field
+    linking to `themes/<theme>/`; `make html` drops a card with the
+    `hidden` attribute from the built page, so the theme is unlisted but
+    still built and reachable by its URL; `home.js` draws its star field
   - `social.html`: link preview card of the home page: the home page
     lockup (`.brand` in `home.css`) at a larger `--logo`, above a still
     step chain of the durable-execution intro, on the home page
@@ -107,7 +109,8 @@ workspaces run `make setup` automatically.
   the per-theme scripts require `--theme` (no default). The HTML build
   adds the Open Graph and X card tags and a canonical link only when the
   `SITE_URL` environment variable (or make variable) holds the site's root
-  URL: local builds have none
+  URL: local builds have none; it drops the home page cards that carry
+  the `hidden` attribute
 - `.github/workflows/pages.yml`: on push to `main`, downloads the fonts,
   runs `make html` with `SITE_URL` set to the Pages URL given by
   `actions/configure-pages` (no domain in the repository) and deploys
