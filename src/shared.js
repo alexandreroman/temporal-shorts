@@ -10,6 +10,19 @@ const C = {
 // live in subfolders. Inlined in a built page, the script has no src and the path is already a data: URI.
 const LOGO = new URL('assets/temporal-logo-horizontal-light-cropped.svg',
   document.currentScript.src || document.baseURI).href;
+// Official Temporal symbol alone (white), resolved like LOGO
+const SYMBOL = new URL('assets/temporal-symbol-light-cropped.svg',
+  document.currentScript.src || document.baseURI).href;
+// Extra stroke icons used by two or more themes (24 grid), in the hand-drawn style of engine.js
+Object.assign(ICONS, {
+  cart: '<path d="M2 4h3l2.5 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
+  card: '<rect x="2.5" y="5" width="19" height="14"/><path d="M2.5 9.5h19M6 15h5"/>',
+  box: '<path d="M12 3l8.5 4.5v9L12 21l-8.5-4.5v-9z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9M7.8 5.3l8.5 4.5"/>',
+  lock: '<rect x="5" y="11" width="14" height="10"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/>',
+  food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
+  coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.9-1.7-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.8 6 1.5 6 4.3'
+    + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
+});
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
 // icon + label centred in the tile (label null for an icon alone); padding-left offsets the trailing
 // letter-spacing. Options: size and stroke of the icon, font of the label and gap above it; a tile over 130 px
@@ -84,6 +97,17 @@ function makeEndCard(root, title, tagline, opts = {}) {
   }
   html += `<img src="${LOGO}" style="height:70px;display:block;margin:${logoGap}px auto 0">`;
   return E(root, html, '', { textAlign: 'center' });
+}
+// Round avatar of a person: a person icon in a circle of size px with a ring, and a label under it (null or ''
+// for none); place() centers the circle
+function makeAvatar(p, label, size, ring = C.violet) {
+  return E(p,
+    `<div style="width:${size}px;height:${size}px;border-radius:50%;border:2px solid ${ring};`
+    + 'background:var(--surface);display:flex;align-items:center;justify-content:center">'
+    + `${ICON('user', Math.round(size / 2), C.ink, 1.6)}</div>`
+    + (label ? `<div class="lbl" style="position:absolute;left:50%;top:calc(100% + 16px);transform:translateX(-50%);`
+      + `color:var(--ink)">${label}</div>` : ''),
+    '', { width: size + 'px', height: size + 'px' });
 }
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
 function rise(e, x, y, p, d = 24) {
@@ -172,6 +196,143 @@ const makeToken = root => E(root, '', '', {
   width: '22px', height: '22px', background: C.neon, boxShadow: '0 0 22px 6px rgba(219,255,75,.45)',
   borderRadius: '5px',
 });
+
+// ---------- agentic loop: think, act, observe
+// Angle of each node on the loop circle, in degrees from the x axis (clockwise on screen)
+const LOOP_DEG = { think: -90, act: 30, observe: 150 };
+// The agentic loop on a circle of radius r centered on (cx, cy): THINK (the LLM orb) on top, ACT (neon play tile)
+// and OBSERVE (eye tile, UV border) below, slate arcs with arrow heads between them, the node labels, an
+// "Agentic loop" label in the middle and the neon token. The arcs go in svg. Returns the loop, with pos(deg), the
+// point at an angle on the circle, nodePos(deg), where a node and its label sit (pos; a scene that scales the
+// loop can replace it to keep the tiles on whole pixels), and arcPaths, the d of each arc (to draw them again in
+// another color).
+function makeAgentLoop(root, svg, cx, cy, r = 220) {
+  const loop = { cx, cy, r };
+  loop.pos = deg => {
+    const a = deg * Math.PI / 180;
+    return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+  };
+  loop.nodePos = loop.pos;
+  const arcD = (d0, d1) => {
+    const [x0, y0] = loop.pos(d0), [x1, y1] = loop.pos(d1);
+    return `M ${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1}`;
+  };
+  // each arc stops 27 degrees short of the nodes it joins
+  const { think, act, observe } = LOOP_DEG;
+  loop.arcPaths = [arcD(think + 27, act - 27), arcD(act + 27, observe - 27), arcD(observe + 27, think + 360 - 27)];
+  loop.arcs = loop.arcPaths.map(d => path(svg, d, C.slate, 2.5));
+  loop.think = makeLLM(root, 130, '');
+  loop.act = iconTile(root, 'play', '', 130, 130, C.neon); loop.act.style.borderColor = C.neon;
+  loop.observe = iconTile(root, 'eye', '', 130, 130, C.ink); loop.observe.style.borderColor = C.uv;
+  loop.labels = ['Think', 'Act', 'Observe'].map(text => E(root, text, 'lbl', { color: 'var(--ink)' }));
+  loop.center = E(root, 'Agentic<br>loop', 'lbl', {
+    textAlign: 'center', color: 'var(--ink)', fontSize: '24px', lineHeight: 1.4,
+  });
+  loop.token = makeToken(root);
+  return loop;
+}
+// Places the loop at time t: its nodes pop in from `a`, 0.2 s apart, then their labels and the arcs. Options:
+// - deg: angle of the token on the loop (null hides it); the node it passes swells by 12%, the LLM thinks near it
+// - thinkIn: when THINK pops in (default `a`); before the start of the scene to show it from the first frame
+// - centerAt: when the "Agentic loop" label fades in; centerO: its opacity (0 to 1), e.g. while another label shows
+// - o: opacity of the whole loop; arcO: opacity of the arcs; q: the LLM's question mark (0 to 1)
+// - dx, dy: offset of the nodes and labels (a shake)
+// Seconds after `a` (see placeAgentLoop) at which every node, label and arc of the loop is fully drawn: the last arc
+// starts drawing 1.3 s in, for 0.45 s
+const AGENT_LOOP_DRAWN = 1.75;
+function placeAgentLoop(loop, t, a, opts = {}) {
+  const { deg = null, centerAt, centerO = 1, o = 1, arcO = 1, q = 0, dx = 0, dy = 0, thinkIn = a } = opts;
+  const near = d => deg === null ? 0 : Math.max(0, 1 - Math.abs((((deg - d) % 360) + 540) % 360 - 180) / 30);
+  const nodes = [[loop.think.root, LOOP_DEG.think], [loop.act, LOOP_DEG.act], [loop.observe, LOOP_DEG.observe]];
+  nodes.forEach(([e, d], i) => {
+    const [x, y] = loop.nodePos(d), p = P(t, i === 0 ? thinkIn : a + i * 0.2, 0.5, backOut);
+    place(e, x + dx, y + dy, p * (1 + 0.12 * near(d)), clamp(p * 2) * o);
+  });
+  llmState(loop.think, { think: near(LOOP_DEG.think) > 0.2 ? 1 : 0, look: 0.5, q });
+  // THINK's label sits left of the orb, the others under their tiles
+  const [tx, ty] = loop.nodePos(LOOP_DEG.think), [ax, ay] = loop.nodePos(LOOP_DEG.act);
+  const [ox, oy] = loop.nodePos(LOOP_DEG.observe);
+  const labelAt = [[tx - 130, ty], [ax, ay + 98], [ox, oy + 98]];
+  loop.labels.forEach((e, i) => place(e, labelAt[i][0] + dx, labelAt[i][1] + dy, 1, P(t, a + 0.3 + i * 0.2, 0.4) * o));
+  loop.arcs.forEach((arc, i) => draw(arc, P(t, a + 0.7 + i * 0.3, 0.45), arcO * o));
+  place(loop.center, loop.cx + dx, loop.cy + dy, 1, P(t, centerAt, 0.5) * centerO * o);
+  if (deg === null) {
+    place(loop.token, 0, 0, 1, 0);
+  } else {
+    const [x, y] = loop.pos(deg);
+    place(loop.token, x, y, 1, o);
+  }
+}
+
+// The agent's example task, lunch with Marie: each step's tile icon and label, its action in the step list, then
+// the tool it calls and that tool's result
+const LUNCH_STEPS = [
+  { icon: 'cal', label: 'Calendar', action: 'Check the calendar', tool: 'Calendar', result: 'Thu 12:30 is free' },
+  { icon: 'search', label: 'Restaurant', action: 'Find a restaurant', tool: 'Search', result: 'Chez Paulette' },
+  { icon: 'food', label: 'Booking', action: 'Book a table', tool: 'Booking', result: 'table for 2, confirmed' },
+  { icon: 'mail', label: 'Invite', action: 'Invite Marie', tool: 'Email', result: 'invite sent' },
+];
+// The agent's goal and its steps: the user's goal card (YOU), then one row per step (icon, action, a neon result
+// line and a check, both hidden until the step is done); w: their width
+function makeStepList(root, goalText, steps, w = 640) {
+  const goal = makeCard(root, goalText, 'user', null, w);
+  const rows = steps.map(step => {
+    const row = E(root,
+      `${ICON(step.icon, 36, C.ink, 1.6)}<div style="flex:1;margin-left:18px">`
+      + `<div style="font-size:27px">${step.action}</div>`
+      + `<div class="res mono" style="font-size:18px;color:var(--neon);opacity:0">${step.result}</div></div>`
+      + `<div class="ck" style="opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`,
+      'tile', {
+        width: w + 'px', height: '88px', display: 'flex', alignItems: 'center', padding: '0 22px', textAlign: 'left',
+      });
+    row.res = row.querySelector('.res'); row.ck = row.querySelector('.ck'); return row;
+  });
+  return { goal, rows };
+}
+// Places the goal card at (x, goalY), popping in at goalAt, and the rows from rowY, `gap` apart. Row i slides in
+// half a second into its turn (turnStarts[i]), shows its result and its check at the end of the turn, and has a
+// violet border while its turn runs (`turn` seconds); o: opacity of the whole list
+function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts, turn = 1.5, o = 1 }) {
+  place(list.goal, x, goalY, P(t, goalAt, 0.45, backOut), P(t, goalAt, 0.4) * o);
+  list.rows.forEach((r, i) => {
+    const a = turnStarts[i], pr = P(t, a + 0.5, 0.35);
+    place(r, x, rowY + i * gap, 1, pr * o);
+    r.style.transform += ` translateX(${(1 - pr) * 40}px)`;
+    r.res.style.opacity = P(t, a + 1.05, 0.3); r.ck.style.opacity = P(t, a + 1.15, 0.25);
+    r.style.borderColor = (t > a && t < a + turn) ? C.violet : C.line;
+  });
+}
+
+// CONTEXT panel: the agent's context, held in the app's memory, with a red note (EMPTY by default) for when a
+// crash wipes it. Its icon is a page, as durable-ai-agents chapter 3 draws the context window. Options: label, the
+// panel's label, its top left corner at labelAt ([left, top], px); emptyText, the note
+function makeMemory(p, w, h, { label = 'Context', labelAt = [22, 16], emptyText = 'EMPTY' } = {}) {
+  const e = E(p,
+    panelLabel('book', label, `left:${labelAt[0]}px;top:${labelAt[1]}px`)
+    + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;`
+    + `font-size:26px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">${emptyText}</div>`,
+    'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
+  e.empty = e.querySelector('.empty');
+  return e;
+}
+// context blocks held by the app: LLM results and tool results alternate, two per step of LUNCH_STEPS, each
+// centring the icon of its step (same colours as the Event History rows)
+function makeMemBlocks(p, n, w, h) {
+  return Array.from({ length: n }, (_, i) => {
+    const isTool = i % 2 === 1;
+    const icon = ICON(LUNCH_STEPS[Math.floor(i / 2)].icon, Math.round(h / 2), isTool ? '#141414' : C.uv, 1.8);
+    const b = E(p, icon, '', {
+      width: w + 'px', height: h + 'px', background: isTool ? C.neonTint : C.uvTint, borderRadius: 'var(--rs)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    });
+    b.tilt = isTool ? 40 : -35;
+    return b;
+  });
+}
+// grow: pop-in progress; fall: crash progress (the block drops, tilts and fades)
+function placeMemBlock(b, x, y, grow, fall, dx = 0, dy = 0, o = 1) {
+  place(b, x + dx, y + fall * 300 + dy, grow, clamp(grow * 2) * (1 - fall) * o, fall * b.tilt);
+}
 
 // ---------- crash and takeover effects
 // screen shake around a crash, as [dx, dy]
@@ -353,8 +514,8 @@ function makeTemporalPanel(p, w, h, { logoAt = null, noteAt, font = 16, note = '
 }
 
 // ---------- Event History card
-// White card with an EVENT HISTORY header (headerFont, its icon 4 px larger), numbered rows and one status tag per
-// row. rowsHtml: HTML of each row, after its number. Options:
+// White card with an EVENT HISTORY header (headerFont, its icon 4 px larger, headerTop px from the card top),
+// numbered rows and one status tag per row. rowsHtml: HTML of each row, after its number. Options:
 // - w, h: card size; rowTop(i): top of row i; font: row text size; rowH: row height with its text centered (null:
 //   the height of the text); padY: vertical padding of a row
 // - tagTop(i): top of the tag of row i; tagRight: its right margin; tag: statusTag options
@@ -364,11 +525,11 @@ function makeTemporalPanel(p, w, h, { logoAt = null, noteAt, font = 16, note = '
 // Returns the card with rows, tags, kept and cut (crash) and scan.
 function makeHistoryCard(p, rowsHtml, opts) {
   const {
-    w, h, headerFont = 18, rowTop, font = 22, rowH = null, padY = 4, tagTop, tagRight = 36, tag = {},
-    crash = null, scanH = null,
+    w, h, headerFont = 18, headerTop = headerFont + 2, rowTop, font = 22, rowH = null, padY = 4, tagTop,
+    tagRight = 36, tag = {}, crash = null, scanH = null,
   } = opts;
   const card = E(p,
-    `<div class="mono" style="position:absolute;left:26px;top:${headerFont + 2}px;font-size:${headerFont}px;`
+    `<div class="mono" style="position:absolute;left:26px;top:${headerTop}px;font-size:${headerFont}px;`
     + 'letter-spacing:.14em;color:#141414;display:flex;gap:10px;align-items:center">'
     + `${ICON('book', headerFont + 4, '#141414', 1.8)} EVENT HISTORY</div>`,
     'paper', { width: w + 'px', height: h + 'px' });

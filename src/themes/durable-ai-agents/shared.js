@@ -3,19 +3,13 @@
 Object.assign(ICONS, {
   sun: '<circle cx="12" cy="12" r="4"/>'
     + '<path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
-  food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
   // a lead bot (antenna, eyes) linked to two helper boxes below it: several agents working together
   agentTeam: '<rect x="7" y="4" width="10" height="7"/><path d="M12 1.5V4M10 7.5h.01M14 7.5h.01'
     + 'M12 11v2.5M6 16v-2.5h12V16"/><rect x="2.5" y="16" width="7" height="5.5"/>'
     + '<rect x="14.5" y="16" width="7" height="5.5"/>',
 });
-// The 4 steps of the lunch booking: tile icon and label, the action of chapter 5, then the tool and its result
-const STEPS = [
-  { icon: 'cal', label: 'Calendar', action: 'Check the calendar', tool: 'Calendar', result: 'Thu 12:30 is free' },
-  { icon: 'search', label: 'Restaurant', action: 'Find a restaurant', tool: 'Search', result: 'Chez Paulette' },
-  { icon: 'food', label: 'Booking', action: 'Book a table', tool: 'Booking', result: 'table for 2, confirmed' },
-  { icon: 'mail', label: 'Invite', action: 'Invite Marie', tool: 'Email', result: 'invite sent' },
-];
+// The 4 steps of the lunch booking (LUNCH_STEPS in src/shared.js)
+const STEPS = LUNCH_STEPS;
 // The steps as [icon, label], for makeStepRow
 const STEP_TILES = STEPS.map(step => [step.icon, step.label]);
 
@@ -34,35 +28,6 @@ function makeApp(parent) {
 }
 
 // ===================== shared by chapters 6 and 7 (crash vs Durable Execution)
-// CONTEXT panel: the agent's context, held in the app's memory, with an EMPTY note for when a crash wipes it.
-// Its icon is a page, as chapter 3 draws the context window.
-function makeMemory(p, w, h) {
-  const e = E(p,
-    panelLabel('book', 'Context', 'left:22px;top:16px')
-    + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;`
-    + 'font-size:26px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>',
-    'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
-  e.empty = e.querySelector('.empty');
-  return e;
-}
-// context blocks held by the app: LLM results and tool results alternate,
-// two per step, each centring the icon of its step (same colours as the Event History rows)
-function makeMemBlocks(p, n, w, h) {
-  return Array.from({ length: n }, (_, i) => {
-    const isTool = i % 2 === 1;
-    const icon = ICON(STEPS[Math.floor(i / 2)].icon, Math.round(h / 2), isTool ? '#141414' : C.uv, 1.8);
-    const b = E(p, icon, '', {
-      width: w + 'px', height: h + 'px', background: isTool ? C.neonTint : C.uvTint, borderRadius: 'var(--rs)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    });
-    b.tilt = isTool ? 40 : -35;
-    return b;
-  });
-}
-// grow: pop-in progress; fall: crash progress (the block drops, tilts and fades)
-function placeMemBlock(b, x, y, grow, fall, dx = 0, dy = 0, o = 1) {
-  place(b, x + dx, y + fall * 300 + dy, grow, clamp(grow * 2) * (1 - fall) * o, fall * b.tilt);
-}
 // LLM calls billed: a counter tile (red note) with a strip of 8 cells, one per call; w: width in px, 330 or more
 // for the strip to fit
 function makeBill(p, w = 380) {

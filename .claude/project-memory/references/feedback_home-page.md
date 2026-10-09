@@ -12,11 +12,13 @@ The theme picker (`src/index.html`, `src/home.css`) follows these rules:
 - Cards sit in a flexible grid (auto-fit columns, equal row heights) that
   takes any number of videos: adding a card needs no CSS change.
 - Card size is responsive: columns are at least 260 px wide and stretch to
-  share the available width. With 4 cards: 4 in a row from a ~1220 px
-  window (so at 1280 and 1920 px), 3+1 from ~910 px, 2x2 from ~590 px,
-  1 column on phones. Padding and icon scale with `clamp()`.
-- Card order: Introduction to Durable Execution, Human-in-the-Loop, Durable
-  AI Agents, Temporal Agent Harness.
+  share the available width. With 5 cards: 5 in a row from a ~1530 px
+  window (so at 1920 px), 4+1 from ~1220 px (so at 1280 px), 3+2 from
+  ~910 px, 2 columns from ~590 px, 1 column on phones. Padding and icon
+  scale with `clamp()`.
+- Card order: Meet Temporal (the entry point for newcomers, with a
+  handshake icon), Introduction to Durable Execution, Human-in-the-Loop,
+  Durable AI Agents, Temporal Agent Harness.
 - A theme is unlisted by adding the standard `hidden` attribute to its card
   in `src/index.html`: `make html` (`scripts/build_html.py`) drops the card
   from the built home page, so the page holds no link to the theme, and the

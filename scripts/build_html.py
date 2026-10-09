@@ -32,6 +32,7 @@ SOCIAL_IMAGE_WIDTH, SOCIAL_IMAGE_HEIGHT = 1200, 630
 MIME_TYPES = {
     ".woff2": "font/woff2",
     ".svg": "image/svg+xml",
+    ".jpg": "image/jpeg",
 }
 
 # Relative to the stylesheet, as the browser resolves them.
@@ -39,7 +40,8 @@ FONT_URL = re.compile(r"url\((fonts/[^)]+)\)")
 # Paths are relative to the page, e.g. ../../engine.js or scenes/01-llm-call.js in a theme page.
 SCRIPT_TAG = re.compile(r'<script src="([^"]+)"></script>')
 STYLESHEET_TAG = re.compile(r'<link rel="stylesheet" href="([^"]+)">')
-ASSET_REF = re.compile(r"assets/[\w.-]+")
+# an asset file, in src/assets/ or one of its folders (assets/languages/go.svg)
+ASSET_REF = re.compile(r"assets/[\w.-]+(?:/[\w.-]+)*")
 DATA_URI = re.compile(r"data:[^\"')\s]+")
 TITLE_TAG = re.compile(r"<title>(.*?)</title>", re.DOTALL)
 DESCRIPTION_TAG = re.compile(r'<meta name="description" content="([^"]*)">')

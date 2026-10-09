@@ -61,8 +61,9 @@ HOME_SOURCES := src/index.html src/home.css src/home.js
 # The fonts are git-ignored: their version stamp, written by fonts.sh, stands for them. As a prerequisite, it
 # downloads them on the first build after a clone, even without `make setup`, and again when fonts.sh pins a new one.
 FONTS := src/fonts/.version
-# Inputs shared by every theme. The wildcards pick up new scripts, stylesheets and assets.
-SHARED_SOURCES := $(filter-out $(HOME_SOURCES),$(wildcard src/*.js src/*.css src/assets/*)) \
+# Inputs shared by every theme. The wildcards pick up new scripts, stylesheets and assets (and the files in the
+# asset folders, e.g. src/assets/languages/).
+SHARED_SOURCES := $(filter-out $(HOME_SOURCES),$(wildcard src/*.js src/*.css src/assets/* src/assets/*/*)) \
                   $(FONTS) scripts/common.py
 # The live player never changes a frame or a subtitle: editing it must not invalidate an MP4 or an SRT.
 VIDEO_SOURCES := $(filter-out src/player.js,$(SHARED_SOURCES))

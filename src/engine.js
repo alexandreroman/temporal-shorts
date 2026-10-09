@@ -263,7 +263,9 @@ function renderAt(t, g = t) {
     cur = sc;
     sc.root.style.display = 'block';
     const lt = t - sc.start;
-    const o = P(lt, 0, 0.5) * (1 - P(lt, sc.dur - 0.5, 0.5));
+    // optional `fadeIn` and `fadeOut`: the durations of the scene's fades, 0.5 s by default
+    const fadeIn = sc.fadeIn ?? 0.5, fadeOut = sc.fadeOut ?? 0.5;
+    const o = P(lt, 0, fadeIn) * (1 - P(lt, sc.dur - fadeOut, fadeOut));
     sc.root.style.opacity = o;
     // optional `shift`: [dx, dy] or (t, c) => [dx, dy], centers the composition in the content frame (y 150-880,
     // middle 515)
@@ -287,7 +289,9 @@ function renderAt(t, g = t) {
   const mark = document.getElementById('mark');
   if (cur && cur.chapter) {
     const lt = t - cur.start;
-    hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4));
+    // optional `headerOutAt`: the scene time at which the header fades out early, over 0.4 s
+    const headerOut = cur.headerOutAt === undefined ? 1 : 1 - P(lt, cur.headerOutAt, 0.4);
+    hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4)) * headerOut;
     const chapterScenes = scenes.filter(sc => sc.chapter);
     const firstStart = chapterScenes[0].start;
     const lastEnd = chapterScenes[chapterScenes.length - 1].end;

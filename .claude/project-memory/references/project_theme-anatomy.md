@@ -77,6 +77,7 @@ the visuals belong to each theme (last section).
     call ("AI agent approvals", "chatbots with human approval").
   - The user picks the use cases: propose 2 or 3 sets of 4 tiles, with
     examples, before building the chapter.
+- meet-temporal has neither chapter (see its section below).
 - Outro: `makeEndCard(root, title, tagline, { pill })` in every theme,
   same sizes everywhere: the theme name as title, cased as on its home
   card ("Durable AI Agents"), a violet uppercase tagline stating the
@@ -195,6 +196,63 @@ CLAUDE.md; a section below and the card order in
 [Home page design](feedback_home-page.md).
 
 ## Per theme
+
+### meet-temporal
+
+- For people who have never heard of Temporal: the founders and where
+  they come from, the lineage, what Temporal does, Temporal today, why it
+  matters for AI. Length is no constraint: every beat gets the time it
+  needs to read (held states, slow dramatic moments) rather than being
+  rushed to save seconds. Every fact is sourced
+  (`### Sources` in `script.md`); unsourced claims stay out (founders'
+  degrees, customers named only by investors, a Cloud GA date).
+- No "What you get" recap: a short company introduction, the outro sums
+  up. Six chapters: Where it comes from (the video opens straight on
+  the founders' timeline, no separate founders chapter), What Temporal
+  does, Where Temporal is used, Why it matters for AI, How Temporal
+  Cloud works, Temporal today. Source material includes a Temporal deck
+  from the user (/tmp/meet-temporal.pdf: slide 3 use cases, slide 5
+  timeline, slides 6-7 on Temporal Cloud; slide 4, customer proof
+  points, stays out). Ch5 makes three points without service internals:
+  Workers run the customer's code in their environment (Temporal Cloud
+  holds no app code), Temporal Cloud orchestrates Workflows and
+  Activities and persists their history, and payloads are encrypted
+  with the customer's keys (Data Converter) so Temporal never sees them;
+  connections are outbound only (mTLS or PrivateLink). Its right zone is
+  titled with the lockup followed by "Cloud". Simple Workflow Service is dated 2009, the launch
+  Max and Samar led.
+- Founders are told by their careers only, never by country of origin:
+  Maxim Fateev (co-founder, CTO) and Samar Abbas (co-founder, CEO).
+  Lineage: 2004 Simple
+  Queue Service (Maxim tech lead), 2009 Simple Workflow Service, 2014
+  Durable Task Framework (Microsoft, base of Azure Durable Functions), 2015
+  Cadence (Uber, open source 2017), 2019 Temporal (MIT). Ch1 opens on
+  "20 YEARS IN THE MAKING" in large type, which shrinks into the heading
+  (no year beside it) as the timeline draws in. The founders appear as
+  faces cropped from the official photo (`src/assets/temporal-founders.jpg`,
+  temporal.io/about), never the full photo. Third-party companies and AI
+  frameworks appear as text, never as logos; programming languages show
+  their official logos (src/assets/languages/, sources and licenses in
+  its README.md).
+- Ch6 figures are dated (Series E, September 2026: $12.55B valuation,
+  4,300+ paying customers, 570 employees): refresh them with each funding
+  announcement. Ch4 names OpenAI (Codex), Cursor, Lovable, Replit.
+- Ch4 shows only the durable agent: an AI agent run with Temporal that
+  crashes in production; the Event History keeps every step, a new app
+  instance replays it and finishes, ending on NO PROGRESS LOST and NO
+  TOKENS WASTED. There is no "without Temporal" run in this theme.
+- Ch2 is the short series arc: steps run strictly one after the other,
+  each saved before the next starts.
+- Outro departs from `makeEndCard`: a constellation of Ziggy, Temporal's
+  mascot (a tardigrade), drawn star by star then line by line, with no
+  founder faces; the title is "Meet"
+  followed by the official lockup (no logo below the tagline), "Meet"
+  matching the wordmark's size and baseline.
+- Motion goes beyond the series framework: cinematic, creative animations
+  (stroke drawing, camera moves, trails, glitch crashes, particles, 3D
+  flips, scrambles), at least one strong moment per chapter, still
+  on-brand and deterministic. Engine additions stay opt-in, the other
+  themes render unchanged.
 
 ### durable-execution
 

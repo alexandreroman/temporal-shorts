@@ -5,7 +5,6 @@ Object.assign(ICONS, {
   db: '<ellipse cx="12" cy="5.5" rx="7.5" ry="2.5"/><path d="M4.5 5.5v13c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-13'
     + 'M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/>',
   flag: '<path d="M5 21V3M5 4h13l-3 4.5 3 4.5H5"/>',
-  cart: '<path d="M2 4h3l2.5 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
   // a screen over a flat base line (agent-harness's `laptop` has a keyboard)
   laptopFlat: '<rect x="5" y="5" width="14" height="10"/><path d="M2.5 19h19"/>',
   clipboard: '<rect x="5" y="4.5" width="14" height="16.5"/><path d="M9 3h6v3H9zM8.5 13.5l2.5 2.5 4.5-5"/>',
@@ -60,16 +59,6 @@ function placeLaptopRow(row, t, a, states, dx = 0, dy = 0) {
 // ===================== people and the approval request
 // Avatar of a person in the scenes: its size, and how far the circle sits above the line its label is centered on
 const AVATAR = { size: 140, dy: 21 };
-// Round avatar with a person icon and a label under it; place() centers the circle
-function makeAvatar(p, label, size, ring = C.violet) {
-  return E(p,
-    `<div style="width:${size}px;height:${size}px;border-radius:50%;border:2px solid ${ring};`
-    + 'background:var(--surface);display:flex;align-items:center;justify-content:center">'
-    + `${ICON('user', Math.round(size / 2), C.ink, 1.6)}</div>`
-    + (label ? `<div class="lbl" style="position:absolute;left:50%;top:calc(100% + 16px);transform:translateX(-50%);`
-      + `color:var(--ink)">${label}</div>` : ''),
-    '', { width: size + 'px', height: size + 'px' });
-}
 // Face of an analog clock as SVG markup: 12 ticks, hour, minute and seconds hands (see setClock)
 function clockFace(size, col = C.ink) {
   const ticks = Array.from({ length: 12 }, (_, i) => {
