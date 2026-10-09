@@ -145,8 +145,7 @@
         { x: LOOP.cx, y: LOOP.cy - 30, w: 280 });
       s.newTag = makeNewTag(root, 'New app instance', 300);
       s.flash = makeFlash(root);
-      s.complete = tag(root, 'Agent complete', 'neon solid');
-      s.complete.style.width = '256px'; // even, so it rests on whole pixels once centered
+      s.complete = fixedTag(root, 'Agent complete', 'neon solid', 256);
     },
     update(t, c, s) {
       // the scene opens on the LLM node the previous chapter's AI hub turned into, at its final place and size, with
