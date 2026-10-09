@@ -53,12 +53,14 @@ the visuals belong to each theme (last section).
   the recap, right before the outro (`NN-use-cases.js`); a product
   presentation (agent-harness) ends on its recap. Topic lists in
   `script.md` leave out both chapters.
-  - 4 `useCaseTile`s (icon, uppercase label, lowercase slate example
-    line) land during the first of 2 subtitles ("<running example> is one
-    example: any … fits"); the second names the 4 tiles in order and ends
-    on the benefit; each tile lights (UV border) as its name is read:
-    `NAMED_AT` offsets from `c[1]` = name position at 16 characters per
-    second + 0.3 s, the last one lit `LAST_LIT` 1.2 s.
+  - The scene is one `useCaseScene({ chapter, uses, namedAt, subs })`
+    call (`src/shared.js`). 4 `useCaseTile`s (icon, uppercase label,
+    lowercase slate example line) land during the first of 2 subtitles
+    ("<running example> is one example: any … fits"); the second names the
+    4 tiles in order and ends on the benefit; each tile lights (UV border)
+    as its name is read: `namedAt` offsets from `c[1]` = name position at
+    16 characters per second + 0.3 s, the last one lit for `lastLit`
+    (1.2 s).
   - Tiles are concrete use cases, named scenarios matched to the audience
     ("Fraud reviews", "Money transfers", "Deep research"), never generic
     actions or broad categories ("Approvals", "Payments", "Documents").
