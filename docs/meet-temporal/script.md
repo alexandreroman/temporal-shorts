@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=meet-temporal` for the live values; the start
-times below are a snapshot from 2026-10-08.
+times below are a snapshot from 2026-10-09.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -27,9 +27,11 @@ The format is a short company introduction, not an explainer: there is no
 in plain text, with no third-party logos; LLM providers are named by
 company, never by model.
 
-This theme moves more than the others: every scene zooms through at its
-cuts (it grows from 94% as it fades in and on to 106% as it fades out),
-and each chapter has a cinematic moment, listed in its visuals.
+This theme moves more than the others: the scenes zoom through at their
+cuts (a scene grows from 94% as it fades in and on to 106% as it fades
+out; the intro and chapter 04 open with no zoom, and chapter 03 ends on a
+hard cut with none), and each chapter has a cinematic moment, listed in
+its visuals.
 
 ### Sources
 
@@ -59,18 +61,29 @@ and each chapter has a cinematic moment, listed in its visuals.
 - https://temporal.io/about (also the source of the founders' photo,
   `src/assets/temporal-founders.jpg`: "Portrait of Temporal Co-Founders,
   Maxim Fateev and Samar Abbas")
-- https://temporal.io/blog/oss-startups-podcast
-- https://dev.to/codestorypodcast/s8-e28-maxim-fateev-temporal
+- https://temporal.io/blog/oss-startups-podcast (Maxim tech lead of
+  Simple Workflow Service and of the messaging backend behind Simple
+  Queue Service, Samar's Durable Task Framework at Microsoft, adopted as
+  Azure Durable Functions, both at Uber from 2015: chapter 01)
 - https://www.uber.com/en-US/blog/open-source-orchestration-tool-cadence-overview/
-- https://temporal.io/blog/temporal-v1-announcement
+  (Cadence, Uber's orchestration engine, with Maxim and Samar on its team:
+  chapter 01)
 - https://temporal.io/news/temporal-raises-550m-at-a-12-55b-valuation
+  (Series E, September 2026: $12.55B valuation, more than 4,300 paying
+  customers, 570 employees, about double a year before, OpenAI, Cursor
+  and Lovable among the companies named: chapters 04 and 06)
 - https://am.gs.com/en-us/institutions/news/press-release/2026/temporal-raises-550m-ai-infrastructure-demand
   (Goldman Sachs Alternatives: AI infrastructure demand, chapter 06)
 - https://temporal.io/blog/temporal-raises-usd300m-series-d-at-a-usd5b-valuation
+  (Series D, February 2026, $5B: chapter 06)
 - https://techcrunch.com/2025/03/31/temporal-lands-146-million-at-a-flat-valuation-eyes-agentic-ai-expansion
+  (Series C, March 2025, $1.72B: chapter 06)
 - https://sdtimes.com/temporal-io-raises-103-million-series-b-company-valuation-passes-1-5-billion/
-- https://temporal.io/blog/improving-java-sdk-codex-openai
+  (Series B, February 2022, $1.5B: chapter 06)
+- https://temporal.io/blog/improving-java-sdk-codex-openai (Codex runs on
+  Temporal: chapter 04)
 - https://temporal.io/resources/case-studies/replit-uses-temporal-to-power-replit-agent-reliably-at-scale
+  (Replit Agent runs on Temporal: chapter 04)
 
 ## Intro
 
@@ -129,8 +142,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     runs as a neon pulse along a cable into the history, where rows 1
     "Order #1042 received" and 2 "Card charged: $42" are SAVED; step 3
     starts.
-- **0:46** If the app crashes, a new copy of the app starts and takes
-  over.
+- **0:46** If the app crashes, another copy of the app takes over.
   - Visuals: Crash during SHIP: a glitch (color fringes, torn bars,
     scanlines), shake, red flash; APP INSTANCE A CRASHED, its lines fall
     out, EMPTY, "APP CRASHED HERE" under the saved rows; A stays on screen,
@@ -172,28 +184,26 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 04 Why it matters for AI
 
-- **1:17** AI agents are long processes too: many LLM calls, tools to run,
+- **1:18** AI agents are long processes too: many LLM calls, tools to run,
   and waits for a person.
-  - Visuals: The chapter opens on that same LLM orb and its halo, already
-    at its final place: the halo fades into the LLM's own glow while the
-    rest of the agentic loop of Durable AI Agents emerges around it, at 86%
-    of its size: THINK (the LLM orb) on top, ACT (neon play tile) and
-    OBSERVE (eye tile) below. APP INSTANCE A frames it, and TEMPORAL
-    ("OUTSIDE THE APP") with an empty EVENT HISTORY enters on the right;
-    the two panels share their top and bottom edges, 40 px apart. Under the
-    loop, the goal card "Book lunch with Marie on Thursday." (YOU) shows,
-    then an AGENT CONTEXT strip in its place, inside the app panel. The
-    agent runs
-    its first step, slowly (3.2 s a turn): a neon token with a comet tail
-    runs round the loop, passing under the nodes; its LLM call, an "LLM
-    CALL" card, leaves THINK, flies to the history and docks at its row's
-    left end, never over the row's text; the row "LLM call: check the
-    calendar" is written and turns SAVED, highlighted for a moment, and
-    "SAVED OUTSIDE THE APP" shows under the history; then a "TOOL CALL"
-    card leaves ACT as the token passes it, and "Calendar: Thu 12:30 is
-    free" is saved the same way. Each saved row also adds a block to the
-    agent's context, with its step's icon: UV-tinted for an LLM call,
-    neon-tinted for a tool result.
+  - Visuals: The chapter opens on that same LLM orb and its halo, already at its
+    final place: the halo fades into the LLM's own glow while the rest of the
+    agentic loop of Durable AI Agents emerges around it, with smaller nodes:
+    THINK (the LLM orb) on top, ACT (neon play tile) and OBSERVE (eye tile)
+    below. APP INSTANCE A frames it, and TEMPORAL ("OUTSIDE THE APP") with an
+    empty EVENT HISTORY enters on the right; the two panels share their top and
+    bottom edges, 40 px apart. Under the loop, the goal card "Book lunch with
+    Marie on Thursday." (YOU) shows, then an AGENT CONTEXT strip in its place,
+    inside the app panel. The agent runs its first step, slowly (3.2 s a turn):
+    a neon token with a comet tail runs round the loop, passing under the nodes;
+    its LLM call, an "LLM CALL" card, leaves THINK, flies to the history and
+    docks at its row's left end, never over the row's text; the row "LLM call:
+    check the calendar" is written and turns SAVED, highlighted for a moment,
+    and "SAVED OUTSIDE THE APP" shows under the history; then a "TOOL CALL" card
+    leaves ACT as the token passes it, and "Calendar: Thu 12:30 is free" is
+    saved the same way. Each saved row also adds a block to the agent's context,
+    with its step's icon: UV-tinted for an LLM call, neon-tinted for a tool
+    result.
 - **1:24** With Temporal, every step the agent takes is saved in an Event
   History, outside the app.
   - Visuals: Steps 2 and 3 run the same way: "LLM call: find a
@@ -217,22 +227,22 @@ and each chapter has a cinematic moment, listed in its visuals.
     pace: rows 7 "LLM call: invite Marie" and 8 "Email: invite sent" are
     saved and add their two blocks, and AGENT COMPLETE shows in the
     loop.
-- **1:46** No progress is lost and no tokens are wasted: no LLM call is
-  paid twice.
+- **1:46** No progress is lost and no tokens are wasted: no finished LLM
+  call is paid twice.
   - Visuals: Under the history, two compact neon pills with a soft glow
     pop in turn, side by side: NO PROGRESS LOST, then NO TOKENS WASTED.
-- **1:52** That's why OpenAI built Codex on Temporal, and Cursor, Lovable
+- **1:53** That's why OpenAI built Codex on Temporal, and Cursor, Lovable
   and Replit rely on it too.
   - Visuals: The completed state holds.
 
 ## 05 How Temporal Cloud works
 
-- **2:01** With Temporal Cloud, your Workers run your Workflow and Activity
+- **2:02** With Temporal Cloud, your Workers run your Workflow and Activity
   code in your own environment.
   - Visuals: As on slides 6 and 7 of Temporal's deck, two zones of equal
     width from the start. On the left, YOUR ENVIRONMENT (dashed slate):
     three Workers spread evenly, each an app panel with its code (WORKER 1
-    the order Workflow, WORKER 2 and 3 the chargeCard and shipPackage
+    the OrderWorkflow Workflow, WORKER 2 and 3 the chargeCard and shipPackage
     Activities), wired to a DATA CONVERTER level with WORKER 2 (a neon lock,
     a key and YOUR KEYS); caption YOUR CODE RUNS HERE. A connection draws
     from the converter to a dot on Temporal Cloud's edge, labelled OUTBOUND
@@ -243,7 +253,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     ACTIVITY DATA, NEVER YOUR CODE. The Workers poll out to Temporal Cloud
     one after the other (a violet pulse that lights the orchestration
     block) and read POLLING.
-- **2:10** Temporal Cloud orchestrates your Workflows and Activities, and
+- **2:11** Temporal Cloud orchestrates your Workflows and Activities, and
   persists their history.
   - Visuals: Slowly, a beat at a time, one task at a time in the queue;
     PERSISTENCE records each event the moment it happens, as a simplified
@@ -257,26 +267,28 @@ and each chapter has a cinematic moment, listed in its visuals.
     stops at `await chargeCard(o)`: WAITING, the line faintly lit. Its
     request, a violet "schedule chargeCard" card, travels out over the
     converter into the queue, where the chargeCard task appears: event 2,
-    chargeCard SCHEDULED. The task is dispatched to WORKER 2, event 3,
-    chargeCard STARTED (no payload), and WORKER 2 runs it.
-- **2:24** Data is encrypted with your own keys before it leaves your
-  environment: Temporal never sees your payloads.
-  - Visuals: The rest dims for a close-up: the chargeCard result, "card:
-    $42", leaves WORKER 2 in clear and holds over the Data Converter, in
-    full view; the lock opens, the key glows, the lock snaps shut and the
-    text scrambles in place, once, into the ciphertext "9f3a…c21e", which
-    then stays fixed as it crosses over slowly and lands as event 4,
-    chargeCard COMPLETED, with that same chip. NEVER SEES YOUR PAYLOADS
-    pops on the history and holds. Then the Workflow takes over again: a new
-    OrderWorkflow task resumes WORKER 1 where it paused, its highlight
-    moving on to `await shipPackage(o)`, WAITING; "schedule shipPackage"
-    reaches the queue, event 5, shipPackage SCHEDULED; the task is
-    dispatched to WORKER 3, event 6, shipPackage STARTED, runs, and its
-    result lands as event 7, shipPackage COMPLETED. A last OrderWorkflow
-    task resumes WORKER 1 past its last line: the Workflow returns, DONE,
-    event 8, OrderWorkflow COMPLETED. The history shows its last five
-    events: before events 6, 7 and 8 land, the list scrolls up one row, the
-    oldest rows fading out at its top edge, the numbers counting on.
+    chargeCard SCHEDULED. The task is dispatched to WORKER 2, which runs
+    it.
+- **2:25** You can encrypt data with your own keys before it leaves:
+  Temporal never sees your payloads.
+  - Visuals: The rest dims for a close-up: the chargeCard result, "card: $42",
+    leaves WORKER 2 in clear and holds over the Data Converter, in full view;
+    the lock opens, the key glows, the lock snaps shut and the text scrambles in
+    place, once, into the ciphertext "9f3a…c21e", which then stays fixed as it
+    crosses over slowly. As it reaches Temporal Cloud, event 3, chargeCard
+    STARTED (no payload), lands, as Temporal writes an Activity's start only
+    once the Activity closes; the payload then lands as event 4, chargeCard
+    COMPLETED, with that same chip. NEVER SEES YOUR PAYLOADS pops on the history
+    and holds. Then the Workflow takes over again: a new OrderWorkflow task
+    resumes WORKER 1 where it paused, its highlight moving on to `await
+    shipPackage(o)`, WAITING; "schedule shipPackage" reaches the queue, event 5,
+    shipPackage SCHEDULED; the task is dispatched to WORKER 3, which runs it; as
+    its result reaches Temporal Cloud, event 6, shipPackage STARTED, lands, then
+    the result lands as event 7, shipPackage COMPLETED. A last OrderWorkflow
+    task resumes WORKER 1 past its last line: the Workflow returns, DONE, event
+    8, OrderWorkflow COMPLETED. The history shows its last five events: before
+    events 6, 7 and 8 land, the list scrolls up one row, the oldest rows fading
+    out at its top edge, the numbers counting on.
 
 ## 06 Temporal today
 
@@ -291,7 +303,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     column each dot splits in two, the count climbing to 570, and a neon
     ×2 IN A YEAR stamp slams on. Then every dot flows into the outline of
     the Temporal symbol, which takes their place in the middle.
-- **3:13** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
+- **3:14** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
   PHP, Ruby and Rust.
   - Visuals: Eight rounded logo tiles, each the language's logo alone in
     monochrome ink, spiral out of the symbol one after the other in
@@ -299,7 +311,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     pop and a thin UV link back to the symbol. Once all have landed, the
     ring turns slowly round the symbol, the tiles upright, the links
     following them.
-- **3:20** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
+- **3:21** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
   SDK, Pydantic AI, Google ADK, LangGraph, and more.
   - Visuals: Under the ring, in the same rounded tile style, two rows of
     three tiles appear one by one with a calm pop: OpenAI Agents SDK, Vercel
@@ -315,7 +327,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     flash bloom, shockwave rings and sparks. The camera pulls back to the
     whole climb on the right, and "$12.55B" holds huge on the left,
     VALUATION · SEPTEMBER 2026 under it.
-- **3:36** That's more than 8 times its 2022 value: investors see it as core
+- **3:37** That's more than 8 times its 2022 value: investors see it as core
   infrastructure for AI.
   - Visuals: On the settled chart, dashed guides run from the FEB 2022 and
     SEP 2026 points to a vertical bracket on the right of the climb, which
@@ -327,8 +339,8 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **3:45** Temporal keeps code running whatever fails, from everyday apps
-  to AI agents.
+- **3:46** Temporal keeps code running through crashes and outages, from
+  everyday apps to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,
     around the body, along the feet, then the eye and the folds of its
