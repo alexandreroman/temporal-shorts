@@ -191,7 +191,6 @@
 
   scene({
     chapter: 5, title: 'How Temporal Cloud works',
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     subs: [
       {
         text: "With Temporal Cloud, your Workers run your Workflow and Activity code in your own environment.",

@@ -10,7 +10,6 @@
   const PARTICLES = 40;
   scene({
     pre: 1.0,
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     shift: [-150, 82],
     subs: [
       { text: "Many apps you use every day run on Temporal. What is it, and where does it come from?", after: 0.5 },

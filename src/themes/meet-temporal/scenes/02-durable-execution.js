@@ -45,7 +45,6 @@
 
   scene({
     chapter: 2, title: 'What Temporal does',
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     // laid out centered at (960, 515) on the free band, inside the content frame (y 155 to 875)
     subs: [
       {

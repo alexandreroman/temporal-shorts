@@ -128,7 +128,6 @@
 
   scene({
     pre: 0.4, post: 2.6,
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     subs: [
       { text: "Temporal keeps code running whatever fails, from everyday apps to AI agents." },
     ],

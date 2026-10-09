@@ -64,7 +64,6 @@
 
   scene({
     chapter: 1, title: 'Where it comes from',
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     // the heading plays before the first subtitle
     pre: 2.0,
     // the heading and the founders centered, then the whole timeline (laid out centered at (960, 524)), raised

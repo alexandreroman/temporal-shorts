@@ -137,7 +137,6 @@
 
   scene({
     chapter: 6, title: 'Temporal today',
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     subs: [
       // the waves and the count, the team doubling, then the dots condense into the symbol
       { text: "Today, more than 4,300 companies pay for Temporal, and the team has doubled in a year.", after: 9.6 },
