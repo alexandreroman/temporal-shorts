@@ -226,9 +226,8 @@
       s.view = E(s.pers, '', '', {
         left: VIEW.left + 'px', top: VIEW.top + 'px', width: VIEW.w + 'px', height: VIEW.h + 'px',
         overflow: 'hidden', maskImage: `linear-gradient(to bottom, transparent 0, #000 ${VIEW.first}px)`,
-        webkitMaskImage: `linear-gradient(to bottom, transparent 0, #000 ${VIEW.first}px)`,
+        webkitMaskImage: `linear-gradient(to bottom, transparent 0, #000 ${VIEW.first}px)`, opacity: 1,
       });
-      s.view.style.opacity = 1;
       s.rows = HISTORY.map((row, i) => makeRow(s.view, i, row));
       s.svg = svgLayer(root);
       // the wires from each Worker to the Data Converter, the connection out, and the routes the data takes: from

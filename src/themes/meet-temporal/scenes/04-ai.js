@@ -111,9 +111,8 @@
       });
       // the loop, its arcs and its token's tail on one layer, scaled as a whole
       s.loopLayer = E(root, '', '', {
-        width: '1920px', height: '1080px', transformOrigin: `${LOOP.cx}px ${LOOP.cy}px`,
+        width: '1920px', height: '1080px', transformOrigin: `${LOOP.cx}px ${LOOP.cy}px`, opacity: 1,
       });
-      s.loopLayer.style.opacity = 1;
       s.svg = svgLayer(s.loopLayer);
       // THINK blinks as the orb the previous chapter's AI hub turned into
       s.loop = makeAgentLoop(s.loopLayer, s.svg, LOOP.cx, LOOP.cy, LOOP.r, { seed: AGENT_LLM.seed });

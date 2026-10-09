@@ -135,11 +135,7 @@
   // inline style of an absolutely positioned static part (plain div in its parent's HTML)
   const at = (left, top) => `position:absolute;left:${left}px;top:${top}px;`;
   // a part that update() changes, positioned on whole pixels inside its parent and visible
-  const part = (parent, html, css = {}, cls = '') => {
-    const e = E(parent, html, cls, css);
-    e.style.opacity = 1;
-    return e;
-  };
+  const part = (parent, html, css = {}, cls = '') => E(parent, html, cls, { ...css, opacity: 1 });
   const link = text => `<span style="text-decoration:underline;text-underline-offset:4px;`
     + `text-decoration-thickness:1px">${text}</span>`;
   // a small rounded count next to a tab name, e.g. Event History (29)

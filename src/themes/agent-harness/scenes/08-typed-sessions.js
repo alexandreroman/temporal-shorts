@@ -91,8 +91,8 @@
       + `<div style="position:absolute;left:0;right:0;top:${CODE.head}px;border-top:1.5px solid ${C.line}"></div>`,
       'tile', { width: CODE.w + 'px', height: h + 'px', textAlign: 'left' });
     // line highlights sit in a layer under the code lines
-    const highlights = E(e, '', '', { left: '0', top: '0' });
-    highlights.style.opacity = 1; // E() hides what it creates; the layer stays on, each highlight fades on its own
+    // the layer stays on, each highlight fades on its own
+    const highlights = E(e, '', '', { left: '0', top: '0', opacity: 1 });
     e.highlight = ([first, last], tint, color) => E(highlights, '', '', {
       left: '12px', top: (CODE.lineTop + first * CODE.lineH) + 'px', width: (CODE.w - 24) + 'px',
       height: ((last - first + 1) * CODE.lineH) + 'px', background: tint, borderLeft: '3px solid ' + color,

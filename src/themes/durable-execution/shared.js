@@ -78,16 +78,12 @@ function makeCodeCard(parent, opts = {}) {
   card.bar = E(card, '', '', {
     left: '8px', width: (w - 16) + 'px', height: lineH + 'px', borderRadius: 'var(--rs)',
   });
-  card.lines = lines.map((src, i) => {
-    const e = E(card,
-      `<span style="display:inline-block;width:${gutter}px;color:#B4BCCB">${i + 1}</span>${highlightJs(src)}`,
-      'mono', {
-        left: padX + 'px', top: (padY + i * lineH) + 'px', height: lineH + 'px',
-        lineHeight: lineH + 'px', fontSize: font + 'px', whiteSpace: 'pre',
-      });
-    e.style.opacity = 1;
-    return e;
-  });
+  card.lines = lines.map((src, i) => E(card,
+    `<span style="display:inline-block;width:${gutter}px;color:#B4BCCB">${i + 1}</span>${highlightJs(src)}`,
+    'mono', {
+      left: padX + 'px', top: (padY + i * lineH) + 'px', height: lineH + 'px',
+      lineHeight: lineH + 'px', fontSize: font + 'px', whiteSpace: 'pre', opacity: 1,
+    }));
   card.hdr = null;
   if (header) {
     // a tab standing on the top edge, so showing it never moves the code; the file name follows it, in slate

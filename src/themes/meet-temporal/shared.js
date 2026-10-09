@@ -66,9 +66,7 @@ function hash(n) {
 // Camera of a scene: a full-stage layer that holds the scene's elements, so the whole composition can be scaled and
 // moved around the stage center. Build the scene's elements in it.
 function makeCamera(root) {
-  const cam = E(root, '', 'cam', { width: '1920px', height: '1080px', transformOrigin: '960px 540px' });
-  cam.style.opacity = 1;
-  return cam;
+  return E(root, '', 'cam', { width: '1920px', height: '1080px', transformOrigin: '960px 540px', opacity: 1 });
 }
 // Zoom-through between scenes: the composition grows from `enter` (0.94; 1 for none) to 1 over enterD seconds as
 // the scene fades in, and on to 1.06 as it fades out (dur: the scene duration). scale, dx, dy: an extra camera move

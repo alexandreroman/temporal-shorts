@@ -59,12 +59,14 @@ function drawStars(sky, seed) {
 }
 drawStars(document.getElementById('sky'), 7);
 
+// A div of class `abs cls` holding html, with the css styles, appended to parent. It starts hidden, for place() or
+// an opacity to show it, unless css sets its opacity (opacity: 1 for a layer or a part always shown).
 function E(parent, html = '', cls = '', css = {}) {
   const e = document.createElement('div');
   e.className = 'abs ' + cls;
   e.innerHTML = html;
-  Object.assign(e.style, css);
   e.style.opacity = 0;
+  Object.assign(e.style, css);
   parent.appendChild(e);
   return e;
 }
