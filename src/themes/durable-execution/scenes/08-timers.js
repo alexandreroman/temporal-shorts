@@ -15,8 +15,8 @@
   const SHIP_LINE = 0, SLEEP_LINE = 2, REVIEW_LINE = 3;
   const ROWS = [
     `${uvName('shipPackage')}: tracking 1Z-48`,
-    'TimerStarted: 30 days',
-    'TimerFired',
+    'Timer started: 30 days',
+    'Timer fired',
     `${uvName('askForReview')}: review requested`,
   ];
   const SHIP_ROW = 0, STARTED_ROW = 1, FIRED_ROW = 2, REVIEW_ROW = 3;
@@ -231,12 +231,12 @@
       const written = [shipSaved, timerSaved, firedSaved, reviewSaved];
       written.forEach((at, i) => {
         showHistoryRow(s.hist, i, P(t, at - 0.1, 0.3));
-        // TimerStarted bumps again as the Worker restarts: it stays in the history
+        // "Timer started" bumps again as the Worker restarts: it stays in the history
         const bump = i === STARTED_ROW ? bumpAt(t, at) + bumpAt(t, restartAt) + bumpAt(t, deployAt) : bumpAt(t, at);
         setHistoryTag(s.hist, i, 'SAVED', 'saved', P(t, at, 0.25), bump);
       });
-      // the TimerStarted row stays lit while the Worker comes and goes; then the replay reads the history: the
-      // shipPackage row, then TimerFired (the sleep returns at once)
+      // the "Timer started" row stays lit while the Worker comes and goes; then the replay reads the history: the
+      // shipPackage row, then "Timer fired" (the sleep returns at once)
       const replayRow = t < replaySleep ? SHIP_ROW : FIRED_ROW;
       if (t < fireAt) scanRow(s.hist, STARTED_ROW, 0.6 * win(t, c[1] + 0.4, fireAt - 0.3, 0.4));
       else scanRow(s.hist, replayRow, win(t, replayAt, runAt, 0.15));
