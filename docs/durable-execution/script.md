@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=durable-execution` for the live values; the start
-times below are a snapshot from 2026-10-07.
+times below are a snapshot from 2026-10-09.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -296,16 +296,16 @@ bright red to green.
     pop in one at a time, each with an example in slate under the label:
     MONEY TRANSFERS (dollar coin) "debit, credit, never twice" /
     SUBSCRIPTIONS (calendar) "bill every month, for years" / DATA PIPELINES
-    (table) "a nightly batch resumes" / CLOUD PROVISIONING (cloud) "a
-    cluster comes up in steps".
-- **3:22** Money transfers, subscriptions, data pipelines, cloud
-  provisioning: a crash never leaves any of them half done.
+    (table) "a nightly batch resumes" / AI AGENTS (robot) "a long task
+    survives crashes".
+- **3:22** Money transfers, subscriptions, data pipelines, AI agents: a
+  crash never leaves any of them half done.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **3:32** Durable Execution: your code runs to completion, whatever fails
+- **3:31** Durable Execution: your code runs to completion, whatever fails
   along the way.
   - Visuals: The 4 step tiles joined by links, each with a neon check
     badge, title "Durable Execution", tagline "YOUR CODE RUNS TO

@@ -221,8 +221,9 @@ CLAUDE.md; a section below and the card order in
   plumbing Temporal removes (ch3 tiles: retry loops, status table, message
   queue, timers, cleanup jobs, recovery scripts).
 - Ch10 use cases, in order: money transfers (coin, "debit, credit, never
-  twice"), subscriptions (calendar), data pipelines (table), cloud
-  provisioning (cloud, "a cluster comes up in steps").
+  twice"), subscriptions (calendar), data pipelines (table), AI agents
+  (bot, "a long task survives crashes"). AI agents is a required use case
+  in this theme: it matters most to the audience, and it closes the list.
 
 ### human-in-the-loop
 
