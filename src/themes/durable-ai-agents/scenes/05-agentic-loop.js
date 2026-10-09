@@ -19,7 +19,7 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy);
-      s.list = makeStepList(root, "Book lunch with Marie on Thursday.", STEPS);
+      s.list = makeStepList(root, "Book lunch with Marie on Thursday.", LUNCH_STEPS);
       s.exit = tag(root, 'Goal reached', 'neon');
       const pill = (cls, text) => `<span class="pill ${cls}" style="position:static">${text}</span>`;
       s.formula = E(root, '<div style="display:flex;align-items:center;gap:22px;font-size:40px">'

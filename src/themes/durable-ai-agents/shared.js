@@ -8,9 +8,6 @@ Object.assign(ICONS, {
     + 'M12 11v2.5M6 16v-2.5h12V16"/><rect x="2.5" y="16" width="7" height="5.5"/>'
     + '<rect x="14.5" y="16" width="7" height="5.5"/>',
 });
-// The 4 steps of the lunch booking (LUNCH_STEPS in src/shared.js)
-const STEPS = LUNCH_STEPS;
-
 // The agent's goal and its steps: the user's goal card (YOU), then one row per step (icon, action, a neon result
 // line and a check, both hidden until the step is done); w: their width
 function makeStepList(root, goalText, steps, w = 640) {

@@ -54,7 +54,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, STEPS, 465, 330, 208, 260, 104);
+      s.steps = makeStepRow(root, s.svg, LUNCH_STEPS, 465, 330, 208, 260, 104);
       s.restart = makeRestartArc(root, s.svg, 'M 1440 148 Q 960 48 480 148', 'From the start', C.violet);
       // app side, mirroring chapter 6: instance panel, its context, the LLM bill and the booking
       s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
@@ -89,7 +89,7 @@
       // c[2]: the crash; once the memory blocks have fallen, instance A leaves (aDrop) and instance B arrives (bIn),
       // and the steps reset; Temporal hands B the agent: the chip leaves the history at handOff, as the "From the
       // start" arc draws, and reaches B's status at takeOver; step 1 runs again at rerun
-      const crashAt = c[2] + 0.8, aDrop = crashAt + 1.6, bIn = aDrop + 0.6, reset = bIn;
+      const crashAt = c[2] + 0.8, aDrop = crashAt + 1.6, bIn = aDrop + 0.6;
       const handOff = bIn + 0.7, takeOver = handOff + 0.55, rerun = takeOver + 0.3;
       // replay: saved rows 1-6 are handed back one by one, then their tags explain why it matters;
       // the replay ends at told[0]
@@ -109,7 +109,7 @@
 
       // steps
       const states = [0, 1, 2, 3].map(i => {
-        if (t < reset) {
+        if (t < bIn) {
           if (i === 3) return dead ? 3 : t >= c[2] + 0.2 ? 1 : 0;
           return t >= saved[2 * i + 1] + 0.1 ? 2 : t >= write[2 * i] ? 1 : 0;
         }
