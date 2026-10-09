@@ -457,7 +457,7 @@
       // encrypted once, there: the text scrambles while the lock snaps, then freezes as the ciphertext that row 4's
       // chip shows; it stays the same as it crosses and lands
       const encrypted = P(t, snap, 0.6);
-      const frame = Math.floor((G - this.start) * 20);
+      const frame = Math.floor(ambientTime(this) * 20);
       let text = SECRET;
       if (encrypted >= 1) text = CIPHER;
       else if (encrypted > 0) text = scrambleHex(SECRET, Math.round(encrypted * SECRET.length), frame);

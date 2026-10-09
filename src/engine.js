@@ -24,7 +24,20 @@ function pan(t, from, stops, d) {
   for (const [a, sx, sy, sd = d] of stops) { const p = P(t, a, sd); x = lerp(x, sx, p); y = lerp(y, sy, p); }
   return [x, y];
 }
+// Point at u (0 to 1) of the cubic Bezier curve of control points [p0, p1, p2, p3], each one [x, y]
+function bezier([p0, p1, p2, p3], u) {
+  const v = 1 - u;
+  const at = k => v * v * v * p0[k] + 3 * v * v * u * p1[k] + 3 * v * u * u * p2[k] + u * u * u * p3[k];
+  return [at(0), at(1)];
+}
 let G = 0; // global time
+// Ambient clock of a scene: G counted from the scene's start, so it equals the scene time t in frozen frames.
+// Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G keeps real time while t
+// slows down at 0.5x, and the player only counts the story moving on t as motion. Call it from update()
+// as ambientTime(this). Story animations stay on t.
+function ambientTime(sc) {
+  return G - sc.start;
+}
 
 const stage = document.getElementById('stage');
 

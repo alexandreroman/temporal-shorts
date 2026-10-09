@@ -61,10 +61,6 @@
       + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
       + `background:${css.background};color:${type === 'TOKENS' ? '#5B6475' : css.color}">${type}</span>`;
   };
-  const cubic = (a, b, c, d, u) => {
-    const v = 1 - u;
-    return v * v * v * a + 3 * v * v * u * b + 3 * v * u * u * c + u * u * u * d;
-  };
 
   scene({
     chapter: 4, title: 'One event stream',
@@ -198,9 +194,7 @@
         let x, y;
         if (g < leave + CHIP_MERGE) {
           const u = lerp(MERGE_FROM, 1, clamp((g - leave) / CHIP_MERGE));
-          const [p0, p1, p2, p3] = guide(k % 3);
-          x = cubic(p0[0], p1[0], p2[0], p3[0], u);
-          y = cubic(p0[1], p1[1], p2[1], p3[1], u);
+          [x, y] = bezier(guide(k % 3), u);
         } else {
           x = lerp(LANE.entry, LANE.exit, clamp((g - leave - CHIP_MERGE) / CHIP_LANE));
           y = LANE.y;

@@ -24,11 +24,3 @@ function callCard(p, name, arg = '', cls = '') {
   e.arg = e.querySelector('.arg');
   return e;
 }
-
-// Ambient clock of a scene: G counted from the scene's start, so it equals the scene time t in frozen frames.
-// Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G keeps real time while t
-// slows down at 0.5x, and the player only counts the story moving on t as motion. Call it from update()
-// as ambientTime(this). Story animations stay on t.
-function ambientTime(sc) {
-  return G - sc.start;
-}

@@ -104,10 +104,6 @@
     [[520, -20], [700, -30], [860, -120], [1000, -290]],
     [[1000, -290], [1100, -410], [1200, -700], [1260, -1000]],
   ];
-  const bezier = ([a, b, c2, d], u) => {
-    const v = 1 - u;
-    return [0, 1].map(k => v * v * v * a[k] + 3 * v * v * u * b[k] + 3 * v * u * u * c2[k] + u * u * u * d[k]);
-  };
   const HEAD = [1100, 640];
   // at rest: the whole chart at 55% on the right (its middle at screen x 1360), the value on the left, clear of it
   const REST = { at: [630, -500], scale: 0.55, x: 1290, valueX: 560 };
