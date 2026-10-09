@@ -39,7 +39,7 @@
     ['APPROVAL', 'book_flight: needs approval'],
     ['APPROVAL', 'approved by a human'],
     ['TOOL', 'tool book_flight · done'],
-    ['TOKENS', 'turn ended · 2,140 tokens'],
+    ['TURN', 'turn total · 2,140 tokens'],
   ];
   const HUMAN_ROW = 4, TOTAL_ROW = 6;
   // status tags of the HUMAN_ROW and TOTAL_ROW marks, as [label, statusTag kind]
@@ -59,7 +59,7 @@
     return `<span class="mono" style="display:inline-block;width:132px;text-align:center;font-size:16px;`
       + `line-height:${CONSOLE_LINE}px;`
       + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
-      + `background:${css.background};color:${type === 'TOKENS' ? C.slateDark : css.color}">${type}</span>`;
+      + `background:${css.background};color:${css.color}">${type}</span>`;
   };
 
   scene({
