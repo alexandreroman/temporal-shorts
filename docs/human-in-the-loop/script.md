@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=human-in-the-loop` for the live values; the start
-times below are a snapshot from 2026-10-07.
+times below are a snapshot from 2026-10-09.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -36,10 +36,11 @@ the laptop, NOTIFY Sam.
     card ("New laptop for Sam", "$2,400", "SENT BY SAM"), centered.
 - **0:18** The app checks the request, then asks Maria, the manager, to
   approve it. Now it waits for an answer.
-  - Visuals: The request card flies into the CHECK tile, which runs and is
-    checked; APPROVAL runs; the approval request card flies from the
-    APPROVAL tile to Maria ("MARIA, MANAGER"); the APPROVAL tile turns
-    WAITING (flipping hourglass).
+  - Visuals: Sam and the rule pill fade; the request card flies into the
+    CHECK tile, which runs and is checked; APPROVAL runs; the approval
+    request card flies from the APPROVAL tile to Maria ("MARIA, MANAGER");
+    the APPROVAL tile waits, violet with a flipping hourglass, and a violet
+    WAITING label appears under it, where the rule pill stood.
 - **0:26** Maria may answer in two minutes, or in three days: busy in
   meetings, traveling, or on vacation.
   - Visuals: Clock with fast-spinning hands, day counter DAY 1 to DAY 3
@@ -94,8 +95,8 @@ the laptop, NOTIFY Sam.
 
 ## 04 The decision arrives
 
-- **1:29** On day three, Maria taps Approve. Temporal delivers the decision
-  to the Workflow as a Signal.
+- **1:29** On day three, Maria taps Approve. Temporal records the decision
+  in the history as a Signal.
   - Visuals: Day counter DAY 3; Maria and the approval card in the left
     column, tap on Approve (it turns "Approved"); a "SIGNAL: APPROVED" pill
     flies into the Event History; row 4 "Signal: approved by Maria" SAVED,
@@ -131,10 +132,10 @@ the laptop, NOTIFY Sam.
 ## 06 What you get
 
 - **2:04** The Workflow waits for days with no code running, survives
-  restarts and deploys, and never redoes a step.
+  restarts and deploys, and never redoes a saved step.
   - Visuals: 4 tall benefit tiles land one at a time across the frame, each
     lighting up as it lands: WAITS FOR DAYS (hourglass) / SURVIVES RESTARTS
-    (restart arrow) / NO STEP REDONE (check) / SENDS REMINDERS (bell).
+    (restart arrow) / SAVED STEPS KEPT (check) / SENDS REMINDERS (bell).
 
 ## 07 What you can build
 
