@@ -21,7 +21,7 @@
     text: '#FBFBFA', dim: '#C3C2BB', link: '#8DA4EF', navActive: '#1C202D',
     primary: '#3A5BC7', outline: '#334CA2', tabLine: '#3952A8',
     chip: '#2A2A2A', chipEdge: '#504D4C', json: '#1E1E1E', jsonEdge: '#4A4746',
-    green: '#30A46C', greenEdge: '#218358', startIcon: '#84A7F0', startEdge: '#4E6084', retryIcon: '#EDF2FE',
+    green: '#30A46C', greenEdge: '#218358', startIcon: '#84A7F0', retryIcon: '#EDF2FE',
   };
   // Status badges: small, fully rounded, mono uppercase, a thin border
   const STATUS = {
@@ -162,9 +162,9 @@
     letterSpacing: '.06em', textTransform: 'uppercase', whiteSpace: 'nowrap', flex: 'none',
     ...(width ? { width: width + 'px' } : {}),
   });
-  const makeBadge = (parent, status = null, width = null, css = {}) => {
+  const makeBadge = (parent, status, width = null, css = {}) => {
     const e = part(parent, '', { ...badgeCss(width), ...css }, 'mono');
-    if (status) setBadge(e, status);
+    setBadge(e, status);
     return e;
   };
   const setBadge = (e, status, pop = 0) => {
@@ -734,8 +734,8 @@
       s.ring.style.transform = `translate(${px - ringSize / 2}px,${py - ringSize / 2}px)`;
       s.ring.style.opacity = t >= ringAt ? 0.9 * (1 - ring) : 0;
 
-      // ---- c[1]: order-1042: the chart sweeps through the run in time order on "every Activity" (each label,
-      // with its duration, shows as its bar ends), then the crash annotation on "the retry after the crash"
+      // ---- c[1]: order-1042: the chart sweeps through the run in time order on "every Activity" (each name
+      // label shows as its bar ends), then the crash annotation on "the retry after the crash"
       const tl = s.timeline;
       setTimeline(tl, ORDER_1042.runtime * P(t, c[1] + 1.8, 2.2, linear));
       s.order1042.end.textContent = dateTime(ORDER_1042.start + ORDER_1042.runtime);
