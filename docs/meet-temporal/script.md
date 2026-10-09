@@ -230,30 +230,36 @@ and each chapter has a cinematic moment, listed in its visuals.
     block) and read POLLING.
 - **2:10** Temporal Cloud orchestrates your Workflows and Activities, and
   persists their history.
-  - Visuals: Slowly, a beat at a time, one task at a time in the queue. Row
-    1, "OrderWorkflow · started", is persisted, its payload a locked,
-    encrypted chip. The OrderWorkflow task leaves the queue, flies to the
-    dot, back along the connection, over the Data Converter and down to
-    WORKER 1, which runs the Workflow from the top, its code lit a line at a
-    time, and stops at `await chargeCard(o)`: WAITING, the line faintly lit.
-    Its request, a violet "schedule chargeCard" card, travels out over the
-    converter and along the connection into the queue, where the chargeCard
-    task appears; it is dispatched to WORKER 2, which runs it.
+  - Visuals: Slowly, a beat at a time, one task at a time in the queue;
+    PERSISTENCE records each event the moment it happens, as a simplified
+    Event History, each new row glowing as it lands, events with data
+    showing a locked, encrypted payload chip. Event 1, "OrderWorkflow ·
+    started". The OrderWorkflow task leaves the queue, flies to the dot,
+    back along the connection, over the Data Converter and down to WORKER 1,
+    which runs the Workflow from the top, its code lit a line at a time, and
+    stops at `await chargeCard(o)`: WAITING, the line faintly lit. Its
+    request, a violet "schedule chargeCard" card, travels out over the
+    converter into the queue, where the chargeCard task appears: event 2,
+    "chargeCard · scheduled". The task is dispatched to WORKER 2, event 3,
+    "chargeCard · started" (no payload), and WORKER 2 runs it.
 - **2:24** Data is encrypted with your own keys before it leaves your
   environment: Temporal never sees your payloads.
   - Visuals: The rest dims for a close-up: the chargeCard result, "card:
     $42", leaves WORKER 2 in clear and holds over the Data Converter, in
     full view; the lock opens, the key glows, the lock snaps shut and the
-    text scrambles in place into hex digits; the encrypted payload crosses
-    over slowly and lands as row 2, "chargeCard · completed". NEVER SEES
-    YOUR PAYLOADS pops on the history and holds. Then the Workflow takes
-    over again: a new OrderWorkflow task resumes WORKER 1 where it paused,
-    its highlight moving on to `await shipPackage(o)`, WAITING; "schedule
-    shipPackage" travels to the queue, the shipPackage task runs on WORKER
-    3 and its result lands as row 3, "shipPackage · completed". A last
-    OrderWorkflow task resumes WORKER 1 past its last line: the Workflow
-    returns, DONE, and row 4, "OrderWorkflow · completed", is persisted,
-    encrypted too.
+    text scrambles in place, once, into the ciphertext "9f3a…c21e", which
+    then stays fixed as it crosses over slowly and lands as event 4,
+    "chargeCard · completed", with that same chip. NEVER SEES YOUR PAYLOADS
+    pops on the history and holds. Then the Workflow takes over again: a new
+    OrderWorkflow task resumes WORKER 1 where it paused, its highlight
+    moving on to `await shipPackage(o)`, WAITING; "schedule shipPackage"
+    reaches the queue, event 5, "shipPackage · scheduled"; the task is
+    dispatched to WORKER 3, event 6, "shipPackage · started", runs, and its
+    result lands as event 7, "shipPackage · completed". A last OrderWorkflow
+    task resumes WORKER 1 past its last line: the Workflow returns, DONE,
+    event 8, "OrderWorkflow · completed". The history shows its last five
+    events: before events 6, 7 and 8 land, the list scrolls up one row, the
+    oldest rows fading out at its top edge, the numbers counting on.
 
 ## 06 Temporal today
 
@@ -262,7 +268,7 @@ and each chapter has a cinematic moment, listed in its visuals.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **3:04** In September 2026, investors valued Temporal at $12.55 billion.
+- **3:05** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
