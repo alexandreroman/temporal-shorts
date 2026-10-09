@@ -133,7 +133,7 @@
       s.tiles = MILESTONES.map(m => makeMilestone(root, m));
       // Temporal stands out: UV border, a UV tint and a soft glow
       Object.assign(s.tiles[LAST].style, {
-        borderColor: C.uv, background: '#1D1E3A', boxShadow: `0 0 48px rgba(${RGB.uv},.35)`,
+        borderColor: C.uv, background: 'var(--uv-solid)', boxShadow: `0 0 48px rgba(${RGB.uv},.35)`,
       });
       s.ripples = makeRipples(root, 3, RGB.violet);
       // the fork: a thin arch from Cadence's milestone to Temporal's, labelled FORK at its top

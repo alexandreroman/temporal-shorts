@@ -671,7 +671,7 @@ function makeHistoryCard(p, rowsHtml, opts) {
     });
     card.cut = E(card,
       `<span class="mono" style="position:absolute;left:${crash.labelX};top:-10px;transform:translateX(-50%);`
-      + `background:#F8FAFC;padding:0 10px;font-size:${crash.labelFont}px;line-height:18px;letter-spacing:.12em;`
+      + `background:${C.ink};padding:0 10px;font-size:${crash.labelFont}px;line-height:18px;letter-spacing:.12em;`
       + `color:${C.red};white-space:nowrap">${crash.label}</span>`,
       '', {
         left: '26px', top: crash.cutTop + 'px', width: (w - 52) + 'px', height: '0',

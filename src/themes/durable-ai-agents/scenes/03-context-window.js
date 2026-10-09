@@ -78,7 +78,7 @@
         if (m.question) {
           // the NEW highlight sits behind the text, its violet bar in the block's left padding
           row.innerHTML = `<div class="hl" style="position:absolute;left:-10px;right:-6px;top:0;bottom:0;`
-            + `background:#F2E6FF;border-left:4px solid ${C.violet};border-radius:var(--rs)">`
+            + `background:${C.violetTint};border-left:4px solid ${C.violet};border-radius:var(--rs)">`
             + '<div style="position:absolute;right:12px;top:0;bottom:0;display:flex;align-items:center;'
             + `font-size:14px;letter-spacing:.12em;color:${C.slateDark}">NEW</div></div>`;
         }

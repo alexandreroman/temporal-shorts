@@ -25,7 +25,7 @@
       s.tag1 = tag(root, 'Call 1'); s.tag2 = tag(root, 'Call 2');
       const bubble = `<span class="mono" style="font-size:26px;color:${C.bg}">Alex</span><div class="wipe"></div>`;
       s.bub = E(root, bubble, '', {
-        background: '#F8FAFC', padding: '10px 24px', overflow: 'hidden', borderRadius: 'var(--rs)',
+        background: C.ink, padding: '10px 24px', overflow: 'hidden', borderRadius: 'var(--rs)',
       });
       s.wipe = s.bub.querySelector('.wipe');
       Object.assign(s.wipe.style, { position: 'absolute', left: 0, top: 0, bottom: 0, width: '0%', background: C.uv });

@@ -420,7 +420,7 @@
           const pts = curvePoints(i, i < seg ? 1 : u);
           cg.shadowColor = `rgba(${RGB.violet},.9)`;
           cg.shadowBlur = 18;
-          cg.strokeStyle = i === 2 ? '#DBFF4B' : '#B664FF';
+          cg.strokeStyle = i === 2 ? C.neon : C.violet;
           cg.lineWidth = i === 2 ? 5 : 4;
           cg.beginPath();
           pts.forEach(([x, y], n) => (n ? cg.lineTo(x, y) : cg.moveTo(x, y)));
@@ -433,7 +433,7 @@
           if (t < reached - 0.05) return;
           const [x, y] = toScreen(round.at);
           const fl = win(t, reached, reached + 0.5, 0.1);
-          cg.fillStyle = i === 3 ? '#DBFF4B' : '#F8FAFC';
+          cg.fillStyle = i === 3 ? C.neon : C.ink;
           cg.beginPath(); cg.arc(x, y, 7 + 8 * fl, 0, Math.PI * 2); cg.fill();
           if (fl > 0) {
             cg.strokeStyle = `rgba(${RGB.neon},${(0.8 * fl).toFixed(3)})`;

@@ -35,7 +35,7 @@
       s.bundle = E(root,
         `<div class="mono" style="font-size:15px;letter-spacing:.12em;color:${C.slateDark};margin-bottom:8px">`
         + 'FULL CONTEXT</div>'
-        + bar(C.uvTint, 260) + bar('#F2E6FF', 200) + bar('#E4F78F', 230),
+        + bar(C.uvTint, 260) + bar(C.violetTint, 200) + bar('#E4F78F', 230),
         'paper', { padding: '12px 20px', borderLeft: '6px solid ' + C.uv });
       s.tag = tag(root, 'Call 2');
       s.ans = makeCard(root, "It's 18°C and sunny in Paris!", 'llm');

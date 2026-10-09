@@ -46,7 +46,7 @@ function makeApp(parent) {
    <div class="app-win">
      <div class="app-bar"><i></i><i></i><i></i></div>
      <div class="app-lines"><b style="width:70%"></b><b style="width:45%"></b><b style="width:60%"></b></div>
-     <div class="app-gear">${ICON('gear', 46, '#F8FAFC')}</div>
+     <div class="app-gear">${ICON('gear', 46, C.ink)}</div>
    </div>
    <div class="under-label">APP</div>`, 'app');
   root.gear = root.querySelector('.app-gear');
