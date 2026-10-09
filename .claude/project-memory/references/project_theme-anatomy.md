@@ -299,8 +299,9 @@ below and the card order in [Home page design](feedback_home-page.md).
   after a crash another copy re-runs from the start and Temporal hands
   back every saved result (no LLM call, CONTEXT rebuilt for free), then
   the first unsaved step runs. The LLM CALLS BILLED counter stays put
-  during replay; the recap states "43% less LLM spend, in this example"
-  (`### Budget figure` in `script.md`).
+  during replay; the recap states "43% fewer LLM calls, in this example"
+  (`### Budget figure` in `script.md`): it counts calls, not spend, as
+  the wasted calls are the early ones with the smallest context.
 - Ch7 mirrors ch6: same step tiles, CONTEXT panel and LLM CALLS BILLED
   counter, plus a TEMPORAL panel holding the Event History. Rows get SAVED
   when written; "APP CRASHED HERE" and a tinted block mark the rows that
@@ -310,7 +311,8 @@ below and the card order in [Home page design](feedback_home-page.md).
   (UV icon for LLM, black icon for tool).
 - Ch3 context window: messages slide in one by one; the Size gauge moves
   with each row but fills as the square of the page fill, since every call
-  resends the whole history plus instructions; FULL pops as the page fills.
+  resends the whole history plus instructions: the quadratic growth of the
+  context size is the point of the gauge; FULL pops as the page fills.
   A fixed-width token counter, "billed so far", bottom aligned with the
   page, shows with the gauge and follows it (12,400 at FULL); each step
   plays a money-spent effect (coin bump, a coin flying off in a direction
