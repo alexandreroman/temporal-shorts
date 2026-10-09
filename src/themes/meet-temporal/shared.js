@@ -17,6 +17,8 @@ Object.assign(ICONS, {
   key: '<circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21M17.5 12v3.5M20.5 12v2.5"/>',
 });
 
+// Official Temporal symbol alone (white)
+const SYMBOL = assetUrl('assets/temporal-symbol-light-cropped.svg');
 // Official photo of the two founders (https://temporal.io/about), 900x929 px
 const PHOTO = { url: assetUrl('assets/temporal-founders.jpg'), w: 900, h: 929 };
 

@@ -59,6 +59,17 @@ function placeLaptopRow(row, t, a, states, dx = 0, dy = 0) {
 // ===================== people and the approval request
 // Avatar of a person in the scenes: its size, and how far the circle sits above the line its label is centered on
 const AVATAR = { size: 140, dy: 21 };
+// Round avatar of a person: a person icon in a circle of size px with a ring, and a label under it (null or ''
+// for none); place() centers the circle
+function makeAvatar(p, label, size, ring = C.violet) {
+  return E(p,
+    `<div style="width:${size}px;height:${size}px;border-radius:50%;border:2px solid ${ring};`
+    + 'background:var(--surface);display:flex;align-items:center;justify-content:center">'
+    + `${ICON('user', Math.round(size / 2), C.ink, 1.6)}</div>`
+    + (label ? `<div class="lbl" style="position:absolute;left:50%;top:calc(100% + 16px);transform:translateX(-50%);`
+      + `color:var(--ink)">${label}</div>` : ''),
+    '', { width: size + 'px', height: size + 'px' });
+}
 // Face of an analog clock as SVG markup: 12 ticks, hour, minute and seconds hands (see setClock)
 function clockFace(size, col = C.ink) {
   const ticks = Array.from({ length: 12 }, (_, i) => {

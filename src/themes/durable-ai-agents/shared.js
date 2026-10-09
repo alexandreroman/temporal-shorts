@@ -13,6 +13,37 @@ const STEPS = LUNCH_STEPS;
 // The steps as [icon, label], for makeStepRow
 const STEP_TILES = STEPS.map(step => [step.icon, step.label]);
 
+// The agent's goal and its steps: the user's goal card (YOU), then one row per step (icon, action, a neon result
+// line and a check, both hidden until the step is done); w: their width
+function makeStepList(root, goalText, steps, w = 640) {
+  const goal = makeCard(root, goalText, 'user', null, w);
+  const rows = steps.map(step => {
+    const row = E(root,
+      `${ICON(step.icon, 36, C.ink, 1.6)}<div style="flex:1;margin-left:18px">`
+      + `<div style="font-size:27px">${step.action}</div>`
+      + `<div class="res mono" style="font-size:18px;color:var(--neon);opacity:0">${step.result}</div></div>`
+      + `<div class="ck" style="opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`,
+      'tile', {
+        width: w + 'px', height: '88px', display: 'flex', alignItems: 'center', padding: '0 22px', textAlign: 'left',
+      });
+    row.res = row.querySelector('.res'); row.ck = row.querySelector('.ck'); return row;
+  });
+  return { goal, rows };
+}
+// Places the goal card at (x, goalY), popping in at goalAt, and the rows from rowY, `gap` apart. Row i slides in
+// half a second into its turn (turnStarts[i]), shows its result and its check at the end of the turn, and has a
+// violet border while its turn runs (`turn` seconds); o: opacity of the whole list
+function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts, turn = 1.5, o = 1 }) {
+  place(list.goal, x, goalY, P(t, goalAt, 0.45, backOut), P(t, goalAt, 0.4) * o);
+  list.rows.forEach((r, i) => {
+    const a = turnStarts[i], pr = P(t, a + 0.5, 0.35);
+    place(r, x, rowY + i * gap, 1, pr * o);
+    r.style.transform += ` translateX(${(1 - pr) * 40}px)`;
+    r.res.style.opacity = P(t, a + 1.05, 0.3); r.ck.style.opacity = P(t, a + 1.15, 0.25);
+    r.style.borderColor = (t > a && t < a + turn) ? C.violet : C.line;
+  });
+}
+
 // The app of chapters 1, 2 and 4: a window with a gear that gearSpin() turns while the app works.
 // Its .app* styles are in this theme's index.html.
 function makeApp(parent) {

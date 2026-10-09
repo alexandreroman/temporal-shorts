@@ -15,8 +15,6 @@ const SRC_BASE = document.currentScript.src || document.baseURI;
 const assetUrl = path => new URL(path, SRC_BASE).href;
 // Official Temporal logo (white horizontal lockup)
 const LOGO = assetUrl('assets/temporal-logo-horizontal-light-cropped.svg');
-// Official Temporal symbol alone (white)
-const SYMBOL = assetUrl('assets/temporal-symbol-light-cropped.svg');
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
 // icon + label centred in the tile (label null for an icon alone); padding-left offsets the trailing
 // letter-spacing. Options: size and stroke of the icon, font of the label and gap above it; a tile over 130 px
@@ -91,17 +89,6 @@ function makeEndCard(root, title, tagline, opts = {}) {
   }
   html += `<img src="${LOGO}" style="height:70px;display:block;margin:${logoGap}px auto 0">`;
   return E(root, html, '', { textAlign: 'center' });
-}
-// Round avatar of a person: a person icon in a circle of size px with a ring, and a label under it (null or ''
-// for none); place() centers the circle
-function makeAvatar(p, label, size, ring = C.violet) {
-  return E(p,
-    `<div style="width:${size}px;height:${size}px;border-radius:50%;border:2px solid ${ring};`
-    + 'background:var(--surface);display:flex;align-items:center;justify-content:center">'
-    + `${ICON('user', Math.round(size / 2), C.ink, 1.6)}</div>`
-    + (label ? `<div class="lbl" style="position:absolute;left:50%;top:calc(100% + 16px);transform:translateX(-50%);`
-      + `color:var(--ink)">${label}</div>` : ''),
-    '', { width: size + 'px', height: size + 'px' });
 }
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
 function rise(e, x, y, p, d = 24) {
@@ -270,37 +257,6 @@ const LUNCH_HISTORY = LUNCH_STEPS.flatMap(step => [
 // Whether row i of LUNCH_HISTORY (or context block i, see makeMemBlocks) holds an LLM call; the others hold a tool
 // result
 const isLLMRow = i => i % 2 === 0;
-// The agent's goal and its steps: the user's goal card (YOU), then one row per step (icon, action, a neon result
-// line and a check, both hidden until the step is done); w: their width
-function makeStepList(root, goalText, steps, w = 640) {
-  const goal = makeCard(root, goalText, 'user', null, w);
-  const rows = steps.map(step => {
-    const row = E(root,
-      `${ICON(step.icon, 36, C.ink, 1.6)}<div style="flex:1;margin-left:18px">`
-      + `<div style="font-size:27px">${step.action}</div>`
-      + `<div class="res mono" style="font-size:18px;color:var(--neon);opacity:0">${step.result}</div></div>`
-      + `<div class="ck" style="opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`,
-      'tile', {
-        width: w + 'px', height: '88px', display: 'flex', alignItems: 'center', padding: '0 22px', textAlign: 'left',
-      });
-    row.res = row.querySelector('.res'); row.ck = row.querySelector('.ck'); return row;
-  });
-  return { goal, rows };
-}
-// Places the goal card at (x, goalY), popping in at goalAt, and the rows from rowY, `gap` apart. Row i slides in
-// half a second into its turn (turnStarts[i]), shows its result and its check at the end of the turn, and has a
-// violet border while its turn runs (`turn` seconds); o: opacity of the whole list
-function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts, turn = 1.5, o = 1 }) {
-  place(list.goal, x, goalY, P(t, goalAt, 0.45, backOut), P(t, goalAt, 0.4) * o);
-  list.rows.forEach((r, i) => {
-    const a = turnStarts[i], pr = P(t, a + 0.5, 0.35);
-    place(r, x, rowY + i * gap, 1, pr * o);
-    r.style.transform += ` translateX(${(1 - pr) * 40}px)`;
-    r.res.style.opacity = P(t, a + 1.05, 0.3); r.ck.style.opacity = P(t, a + 1.15, 0.25);
-    r.style.borderColor = (t > a && t < a + turn) ? C.violet : C.line;
-  });
-}
-
 // Red note, e.g. EMPTY, centered across a panel or a card that a crash empties, its top `top` px from the box's;
 // hidden until its opacity is set (class empty)
 const emptyNote = (top, text = 'EMPTY', font = 30) => '<div class="empty mono" style="position:absolute;left:0;'
