@@ -76,7 +76,7 @@
   const LOCKUP_MARGIN = Math.round(MEET_GAP - (MEET_WIDTH - 2.382 * MEET_FONT) - (414 - 405) * LOCKUP_UNIT);
   const TITLE_WIDTH = Math.ceil((MEET_WIDTH + LOCKUP_MARGIN + LOCKUP_WIDTH) / 2) * 2;
   // The tagline's capitals start 8 px below its 32 px line box top: 23 px between the title and the tagline
-  // leave 34 px of clear space under the symbol, as under the descender of the former text title
+  // leave 34 px of clear space under the symbol
   const TAGLINE_GAP = 23;
   const CARD_WIDTH = 800;
   const CARD_HEIGHT = LOCKUP_HEIGHT + TAGLINE_GAP + 32;

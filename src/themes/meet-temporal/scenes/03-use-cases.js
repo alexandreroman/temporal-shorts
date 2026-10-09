@@ -77,7 +77,6 @@
     holdBeforeEnd: (c, dur) => dur - (c[1] + SWELL_AT),
     // the chapter header fades out as AI invades the screen: the swell and the morph play with no header
     headerOutAt: c => c[1] + SWELL_AT,
-    // laid out centered at (960, 522) on the free band
     subs: [
       {
         text: "A <b>Workflow</b> is any process that must finish correctly: payments, orders, bookings, subscriptions.",
@@ -140,8 +139,6 @@
       place(s.glow, CENTER.x, CENTER.y, 1 + 0.05 * Math.sin(G * 1.5), P(t, c[0] + 0.2, 0.6) * rest);
       const spokeAt = i => c[0] + 0.5 + i * 0.18;
       HUBS.forEach((hub, i) => {
-        // everything but the AI hub fades as the camera zooms in
-        const o = i === AI ? 1 : rest;
         const prog = P(t, spokeAt(i), 0.5);
         draw(s.spokes[i], prog, rest);
         sparkOnPath(s.pulses[i], s.spokes[i], prog);
@@ -162,7 +159,8 @@
           hub.style.background = light > 0
             ? `radial-gradient(circle at 50% 42%, rgba(${RGB.violet},${light.toFixed(3)}), ${C.uv} 70%)` : C.uv;
         } else {
-          place(s.hubs[i], hub.x, hub.y, hp.s, hp.o * o);
+          // everything but the AI hub fades as AI invades the screen
+          place(s.hubs[i], hub.x, hub.y, hp.s, hp.o * rest);
         }
         s.bubbles[i].forEach((b, k) => {
           const [bx, by] = bubbleAt(hub, k);

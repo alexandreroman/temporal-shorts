@@ -440,10 +440,8 @@
       // it to the dot, then onto its row's payload
       const pop = backPop(t, out, 0.4);
       const wireStart = [WORKER.x + WORKER.w / 2, workerY(1)];
-      const gate = GATE;
-      const lineStart = LINE_START;
-      const legs = [[leaveAt, wireStart, gate, atGate - leaveAt],
-        [crossAt, gate, lineStart, 0.5], [crossAt + 0.5, lineStart, [DOT.x, DOT.y], atDot - crossAt - 0.5],
+      const legs = [[leaveAt, wireStart, GATE, atGate - leaveAt],
+        [crossAt, GATE, LINE_START, 0.5], [crossAt + 0.5, LINE_START, [DOT.x, DOT.y], atDot - crossAt - 0.5],
         [atDot, [DOT.x, DOT.y], [PAYLOAD_X, rowY(3)], landed - atDot]];
       let [sx, sy] = wireStart;
       legs.forEach(([at, from, to, d]) => {
@@ -452,11 +450,10 @@
         sx = lerp(from[0], to[0], f); sy = lerp(from[1], to[1], f);
       });
       const drop = P(t, atDot, landed - atDot);
-      // encrypted at the gate as the lock snaps shut: the text scrambles in place
       // encrypted once, there: the text scrambles while the lock snaps, then freezes as the ciphertext that row 4's
       // chip shows; it stays the same as it crosses and lands
       const encrypted = P(t, snap, 0.6);
-      const frame = Math.floor(ambientTime(this) * 20);
+      const frame = Math.floor(t * 20);
       let text = SECRET;
       if (encrypted >= 1) text = CIPHER;
       else if (encrypted > 0) text = scrambleHex(SECRET, Math.round(encrypted * SECRET.length), frame);

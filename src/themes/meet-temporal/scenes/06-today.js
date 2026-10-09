@@ -3,8 +3,8 @@
 {
   // Three beats. The customers: one dot per paying customer ignites in waves over the band while a counter rolls to
   // 4,300+; then the team, a block of 285 dots that split in two, 570. All the dots then condense into the Temporal
-  // symbol. The SDKs: their eight languages orbit out of the symbol onto an inner ring, five AI frameworks plug in on
-  // an outer one. The valuation: the camera rides a rising line over a grid, through its funding rounds, up to
+  // symbol. The SDKs: their eight languages orbit out of the symbol onto a ring, five AI frameworks plug in as a row
+  // of tiles under it. The valuation: the camera rides a rising line over a grid, through its funding rounds, up to
   // $12.55B. Stage pixels; the content frame runs from y 150 to 880
 
   // ---------- beat 1: customers and team, drawn on a canvas over the band (it counts as the beat's content)
@@ -149,7 +149,6 @@
           + "LangGraph, and more.",
         after: 1.2,
       },
-      // the climb, the arrival, the hold on $12.55B
       // the climb and the arrival; the chart settles before the next subtitle
       { text: "In September 2026, investors valued Temporal at $12.55 billion.", after: 1.8 },
       // on the settled chart, a bracket from 2022 to 2026, ×8; then, by the value, CORE INFRASTRUCTURE FOR AI
@@ -357,7 +356,7 @@
         // a spiral: from the symbol, sweeping 70 degrees as it moves out
         const a = Math.atan2((ty - SYM.y) / RING.ry, (tx - SYM.x) / RING.rx) - (1 - p) * 70 * Math.PI / 180;
         const x = SYM.x + RING.rx * p * Math.cos(a), y = SYM.y + RING.ry * p * Math.sin(a);
-        const landed = P(t, langAt(k) + 0.8, 0.01);
+        const landed = t > langAt(k) + 0.8;
         const [ex, ey] = away(landed ? tx : x, landed ? ty : y);
         place(e, Math.round(ex), Math.round(ey), lerp(0.4, 1, p) * swell(t, langAt(k) + 0.8, 0.12),
           clamp(p * 3) * (1 - exit));
