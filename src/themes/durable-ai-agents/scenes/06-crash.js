@@ -112,9 +112,9 @@
       // APP CRASH as wide as the right column; the causes share one even width, centered under their tiles
       s.crash = fixedTag(root, 'App crash', 'red big', COL.w);
       s.causes = ['Restart', 'Deploy', 'Outage'].map(l => fixedTag(root, l, '', CAUSE_W));
-      s.redo = path(s.svg, `M ${REDO.from} Q ${REDO.ctrl} ${REDO.to}`, C.red, 3);
-      // fixed even width: centered, the label rests on whole pixels
-      s.redoL = E(root, 'Start over', 'lbl', { color: C.red, width: '148px', textAlign: 'center' });
+      // the label at a fixed even width: centered, it rests on whole pixels
+      s.redo = makeRestartArc(root, s.svg, `M ${REDO.from} Q ${REDO.ctrl} ${REDO.to}`, 'Start over', C.red,
+        { width: '148px', textAlign: 'center' });
     },
     update(t, c, s) {
       const crashAt = c[0] + 3.9;
@@ -207,8 +207,7 @@
         const p = backPop(t, c[0] + 4.8 + i * 0.3, 0.4);
         place(e, colX(i), TAGS_Y, p.s, p.o * (1 - P(t, c[1], 0.35)));
       });
-      draw(s.redo, P(t, startOver, 0.8), 1 - P(t, c[2] + 3.0, 0.4));
-      place(s.redoL, 960, REDO_LABEL_Y, 1, P(t, startOver + 0.5, 0.35) * (1 - P(t, c[2] + 3.0, 0.4)));
+      placeRestartArc(s.redo, t, startOver, 960, REDO_LABEL_Y, { o: 1 - P(t, c[2] + 3.0, 0.4) });
     }
   });
 }

@@ -52,11 +52,9 @@
     build(root, s) {
       s.svg = svgLayer(root);
       const y1 = ehLineY(0), yShip = ehLineY(ehStepLine(SHIP));
-      s.restart = path(s.svg, `M ${ARC.x0} ${yShip} C ${ARC.bulge} ${yShip}, ${ARC.bulge} ${y1}, ${ARC.x1} ${y1}`,
-        C.violet, 3);
-      s.restartL = E(root, 'From the<br>start', 'lbl', {
-        color: C.violet, fontSize: '16px', lineHeight: '22px', textAlign: 'center',
-      });
+      s.restart = makeRestartArc(root, s.svg,
+        `M ${ARC.x0} ${yShip} C ${ARC.bulge} ${yShip}, ${ARC.bulge} ${y1}, ${ARC.x1} ${y1}`, 'From the<br>start',
+        C.violet, { fontSize: '16px', lineHeight: '22px', textAlign: 'center' });
       s.shot = makeEventHistoryShot(root, ['WORKER A', 'WORKER B']);
       // the retry travels like a RESULT chip, from Temporal to the Worker, labelled RETRY
       s.retryChip = makeResultCard(root, true, 'RETRY');
@@ -151,8 +149,8 @@
       setCodeSpinner(shot, line, spinning, lineSx + glitch.dx, lineSy);
       // "From the start": drawn as the highlight jumps back, gone once the replay starts
       const arcOut = 1 - P(t, replay[0] - 0.3, 0.3);
-      draw(s.restart, P(t, jump, 0.6), arcOut);
-      place(s.restartL, (workerRight + temporalLeft) / 2, ehLineY(0) - 56, 1, P(t, jump + 0.4, 0.35) * arcOut);
+      placeRestartArc(s.restart, t, jump, (workerRight + temporalLeft) / 2, ehLineY(0) - 56,
+        { d: 0.6, labelDelay: 0.4, o: arcOut });
 
       // chips: the RETRY from the empty shipPackage row to its line; RESULT chips back from the history to the code
       // when replaying, to the history when running for real

@@ -55,8 +55,7 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.steps = makeStepRow(root, s.svg, STEPS, 465, 330, 208, 260, 104);
-      s.restart = path(s.svg, 'M 1440 148 Q 960 48 480 148', C.violet, 3);
-      s.restartL = E(root, 'From the start', 'lbl', { color: C.violet });
+      s.restart = makeRestartArc(root, s.svg, 'M 1440 148 Q 960 48 480 148', 'From the start', C.violet);
       // app side, mirroring chapter 6: instance panel, its context, the LLM bill and the booking
       s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
       s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);
@@ -119,8 +118,7 @@
         return t >= replay[2 * i + 1] + 0.35 ? 2 : t >= start ? 1 : 0;
       });
       placeStepRow(s.steps, t, c[0] + 2.5, states, sx, sy);
-      draw(s.restart, P(t, handOff, 0.8), 1 - P(t, c[3] + 0.3, 0.4));
-      place(s.restartL, 960, 123, 1, P(t, handOff + 0.4, 0.35) * (1 - P(t, c[3] + 0.3, 0.4)));
+      placeRestartArc(s.restart, t, handOff, 960, 123, { labelDelay: 0.4, o: 1 - P(t, c[3] + 0.3, 0.4) });
 
       // app instance A runs, crashes, then leaves like a dead machine, and instance B takes its place. The context
       // panel is filled as results are saved, emptied by the crash and refilled from the history; B's blocks are

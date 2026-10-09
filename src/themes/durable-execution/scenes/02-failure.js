@@ -169,8 +169,8 @@
       s.crash = fixedTag(root, 'Server crash', 'red big', 310, 66);
       s.flash = makeFlash(root);
       const [x0, x1] = s.steps.xs, top = ROW.y - ROW.h / 2 - 6;
-      s.redo = path(s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`, C.red, 3);
-      s.redoL = E(root, 'Start over', 'lbl', { color: C.red, width: '148px', height: '26px', textAlign: 'center' });
+      s.redo = makeRestartArc(root, s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`,
+        'Start over', C.red, { width: '148px', height: '26px', textAlign: 'center' });
     },
     update(t, c, s) {
       const crashAt = c[1] + 2.4, stuck = c[1] + 3.8, restart = c[2] + 1.2;
@@ -236,8 +236,7 @@
       place(s.bolt, s.steps.xs[1], TOP_Y, popIn(t, crashAt).s, win(t, crashAt, crashAt + 1.5, 0.2));
       place(s.crash, CRASH_X, TOP_Y, popIn(t, crashAt + 0.1, 0.08).s, win(t, crashAt + 0.1, c[2] + 0.3, 0.25));
       // restart: "Start over" arrow back to the first step, kept until the end
-      draw(s.redo, P(t, c[2] + 0.3, 0.8));
-      place(s.redoL, (s.steps.xs[0] + s.steps.xs[1]) / 2, ROW.y - ROW.h / 2 - 6 - 65 - 36, 1, P(t, c[2] + 0.8, 0.35));
+      placeRestartArc(s.redo, t, c[2] + 0.3, (s.steps.xs[0] + s.steps.xs[1]) / 2, ROW.y - ROW.h / 2 - 6 - 65 - 36);
     }
   });
 }

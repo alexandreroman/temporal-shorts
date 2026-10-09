@@ -419,6 +419,18 @@ function placeCrashMarks(marks, t, crashAt, tagAt, outAt, dx = 0, dy = 0) {
   place(marks.tag, tagSpot.x + dx, tagSpot.y + dy, P(t, tagAt, 0.35, backOut), tagOn);
 }
 
+// Arrow back to the first step when a run starts over: an arc (d, the SVG path, drawn in svg) in color, C.red when
+// the work is done again, C.violet for a replay, with its label (HTML; css: its extra styles, e.g. a fixed width)
+function makeRestartArc(root, svg, d, label, color, css = {}) {
+  return { arc: path(svg, d, color, 3), label: E(root, label, 'lbl', { color, ...css }) };
+}
+// The arc draws from `at` within d seconds, its label at (x, y) fades in labelDelay seconds later; o: the opacity of
+// both
+function placeRestartArc(restart, t, at, x, y, { d = 0.8, labelDelay = 0.5, o = 1 } = {}) {
+  draw(restart.arc, P(t, at, d), o);
+  place(restart.label, x, y, 1, P(t, at + labelDelay, 0.35) * o);
+}
+
 // Takeover: a dead (or retired) app instance or Worker leaves, and a new one slides in to its place. Offsets in
 // whole pixels: the old one drops 40 px, the new one arrives from 160 px to the left of its resting place.
 const TAKEOVER = { drop: 40, arrive: -160 };
