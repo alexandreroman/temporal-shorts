@@ -15,6 +15,8 @@ Workflows to everyone: developers new to Temporal
 and tech-curious viewers alike. The code on screen is real Temporal
 TypeScript SDK code, kept short.
 
+### Running example
+
 One example runs through the whole video: online order #1042, $42, four
 steps, each calling another service:
 
@@ -24,6 +26,8 @@ steps, each calling another service:
 | Reserve item  | `reserveItem`  | `box`   | Warehouse | item reserved    |
 | Ship package  | `shipPackage`  | `truck` | Carrier   | tracking 1Z-48   |
 | Email receipt | `emailReceipt` | `mail`  | Email     | receipt sent     |
+
+### Code on screen
 
 The code, shown in a white code card. Chapters 1 to 3 (before Temporal)
 show ordinary code:
@@ -37,10 +41,11 @@ async function placeOrder(order: Order) {
 }
 ```
 
-From chapter 4 on, the card carries a WORKFLOW tab and a `workflows.ts`
-label. Chapter 4 shows the excerpt: the Activities obtained with
-`proxyActivities`, then the Workflow, an exported async function. Chapters
-5 and 6 show the Workflow alone, from `export async function` on:
+From the second subtitle of chapter 4 on, the card carries a WORKFLOW tab
+and a `workflows.ts` label. Chapter 4 shows the excerpt below: the
+Activities obtained with `proxyActivities`, then the Workflow, an exported
+async function. Chapters 5 and 6 show the Workflow alone, from
+`export async function` on.
 
 ```ts
 const { chargeCard, reserveItem, shipPackage, emailReceipt } =
@@ -58,9 +63,11 @@ export async function placeOrder(order: Order) {
 
 Chapter 8 adds a durable timer, `await sleep('30 days');`.
 
-Vocabulary: before Temporal enters (chapters 1 to 3) the machine running the
-code is "the server"; from chapter 5 on it is "the Worker". The order's
-money is tracked by a CARD CHARGED counter in dollars.
+### Vocabulary
+
+Before Temporal enters (chapters 1 to 3) the machine running the code is
+"the server"; from chapter 5 on it is "the Worker". The order's money is
+tracked by a CARD CHARGED counter in dollars.
 
 ## Intro
 
@@ -129,18 +136,19 @@ money is tracked by a CARD CHARGED counter in dollars.
 
 - **1:12** Durable Execution takes another path: your code runs to
   completion, even when servers fail.
-  - Visuals: Temporal logo; the `workflows.ts` card alone, a highlight
-    walks the Workflow, a neon RUNS TO COMPLETION badge; a barrage of red
-    bolts hits the card from the right, the left and both top corners,
-    then a bigger one from the right: each sparks red at its impact, jolts
-    the card a few pixels and lights a neon ring around it, then bounces
-    off, spinning. The card stays intact.
+  - Visuals: Temporal logo; the code card alone, a highlight walks the
+    Workflow, a neon RUNS TO COMPLETION badge; a barrage of red bolts hits
+    the card from the right, the left and both top corners, then a bigger
+    one from the right: each sparks red at its impact, jolts the card a
+    few pixels and lights a neon ring around it, then bounces off,
+    spinning. The card stays intact.
 - **1:19** With Temporal, you write the process as a Workflow, and each
   step that calls a service as an Activity.
-  - Visuals: The card slides left, the badge with it; the `proxyActivities`
-    declaration lights up while each `await` line links to an ACTIVITY tile
-    on the right (Charge card, Reserve item, Ship package, Email receipt),
-    each linked to its service.
+  - Visuals: The card slides left, the badge with it, and its WORKFLOW tab
+    and `workflows.ts` label show; the `proxyActivities` declaration lights
+    up while each `await` line links to an ACTIVITY tile on the right
+    (Charge card, Reserve item, Ship package, Email receipt), each linked
+    to its service.
 - **1:27** If an Activity fails, Temporal retries it automatically, with
   growing delays, until it succeeds.
   - Visuals: Charge card and Reserve item check; Ship package fails
@@ -248,7 +256,8 @@ bright red to green.
     Event History count reads 17 while `shipPackage` retries (no event per
     failed attempt), 23 once it completes (its ActivityTaskStarted and
     ActivityTaskCompleted, a Workflow Task, then `emailReceipt` scheduled)
-    and 29 once the Workflow completes.
+    and 29 once the Workflow completes; the Pending Activities count reads
+    1 until `emailReceipt` ends.
 
 ## 08 Durable timers
 
@@ -259,11 +268,11 @@ bright red to green.
     `askForReview`, above a WORKER STATUS block; right, the TEMPORAL panel
     with an EVENT HISTORY card and a DURABLE TIMER block. shipPackage runs,
     row "shipPackage: tracking 1Z-48" SAVED; a START TIMER chip saves row
-    "TimerStarted: 30 days"; DAY 1 / 30, SLEEPING; the Worker shows FREE
+    "Timer started: 30 days"; DAY 1 / 30, SLEEPING; the Worker shows FREE
     FOR OTHER WORK.
 - **2:52** The timer is saved in the Event History, so Worker restarts and
   deploys during the wait don't lose it.
-  - Visuals: The timer ticks day by day to day 30 while the TimerStarted
+  - Visuals: The timer ticks day by day to day 30 while the "Timer started"
     row stays lit; the Worker shows RESTARTING…, then DEPLOYING V2…. WORKER
     A (VERSION 1), retired, drops and fades out with its code card and
     status block. A new machine, WORKER B (VERSION 2), slides in from the
@@ -274,17 +283,18 @@ bright red to green.
     the Temporal side stays still.
 - **2:59** On day 30, Temporal wakes the Workflow up: a Worker replays its
   history and runs the next line.
-  - Visuals: TIME IS UP, row "TimerFired" SAVED; a WAKE UP chip flies to
+  - Visuals: TIME IS UP, row "Timer fired" SAVED; a WAKE UP chip flies to
     the sleep line; Worker B shows REPLAYING… as the highlight walks the
     code with the history rows, then RUNNING on `askForReview`, row
     "askForReview: review requested" SAVED.
 
 ## 09 What you get
 
-- **3:08** You write the business logic. Temporal handles retries, state
-  and recovery, with full visibility.
+- **3:08** You write the business logic. Temporal handles retries, crashes
+  and waits, with full visibility.
   - Visuals: "You write the business logic", Temporal logo + a slate
-    "HANDLES THE REST" sized to its wordmark, then 4 identical tiles:
+    "HANDLES THE REST" sized to its wordmark, then 4 identical tiles, as
+    wide as the use cases' row, each popping in as the subtitle names it:
     Automatic retries / Survives crashes / Waits for days / Full
     visibility.
 
