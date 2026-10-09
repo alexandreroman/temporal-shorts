@@ -63,9 +63,7 @@
       s.wait = E(root,
         '<div class="lbl" style="font-size:16px">Durable wait</div>'
         + '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px">'
-        + `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="${C.violet}" stroke-width="1.8"`
-        + ' stroke-linecap="square" style="display:block"><circle cx="12" cy="12" r="9"/>'
-        + '<path class="mh" d="M12 12V5.5"/><path class="hh" d="M12 12h4"/></svg>'
+        + ICON('clockHands', 30, C.violet)
         + `<span class="mono" style="font-size:22px;letter-spacing:.06em;color:${C.violet}">WAITING `
         + '<span class="d" style="display:inline-block;min-width:6.6ch;text-align:left"></span></span></div>',
         'tile', {
@@ -73,7 +71,6 @@
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         });
       s.waitD = s.wait.querySelector('.d');
-      s.minute = s.wait.querySelector('.mh'); s.hour = s.wait.querySelector('.hh');
       // in the card's flow, under the clock
       s.free = statusTag(s.wait);
       Object.assign(s.free.style, { position: 'relative', marginTop: '12px' });
@@ -109,8 +106,7 @@
       place(s.wait, COL.x, WAIT.y - 12 * (1 - waitIn), 1, waitIn);
       const race = clamp((t - c[1] - 1.0) / 2.8);
       s.waitD.textContent = WAITS[Math.min(WAITS.length - 1, Math.floor(race * WAITS.length))];
-      s.minute.setAttribute('transform', `rotate(${race * 360 * 12} 12 12)`);
-      s.hour.setAttribute('transform', `rotate(${race * 360} 12 12)`);
+      setClockHands(s.wait, race);
       setStatus(s.free, 'NO COMPUTE HELD', 'ok');
       popScale(s.free, backPop(t, c[1] + 1.5, 0.5));
       fly(s.result, t, resultAt, COL.x, ARROW.bottom - 30, resultAt + 0.3, 0.8, COL.x, ARROW.top + 30,

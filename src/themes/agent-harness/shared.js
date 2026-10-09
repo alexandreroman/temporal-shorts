@@ -12,6 +12,8 @@ Object.assign(ICONS, {
   layers: '<path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"/>',
   stream: '<path d="M3 7h11M3 12h17M3 17h11M17 9l3 3-3 3"/>',
   cloud: '<path d="M7 19h10.5a4.5 4.5 0 0 0 .4-9A6 6 0 0 0 6.3 11.6 3.8 3.8 0 0 0 7 19z"/>',
+  // a clock whose two hands turn, the minute hand up and the hour hand at 3 o'clock at rest (see setClockHands)
+  clockHands: '<circle cx="12" cy="12" r="9"/><path class="mh" d="M12 12V5.5"/><path class="hh" d="M12 12h4"/>',
   agent: '<rect x="4" y="8" width="16" height="12" rx="3"/><circle cx="12" cy="3.8" r="1.3"/>'
     + '<path d="M12 5.1V8M9 12.5v2M15 12.5v2"/>',
 });
@@ -31,4 +33,10 @@ function callCard(p, name, arg = '', cls = '') {
 function popScale(e, pop) {
   e.style.transform = `scale(${pop.s})`;
   e.style.opacity = pop.o;
+}
+// Turns the hands of the clockHands icon in e: the hour hand by `turns` full turns, the minute hand twelve times as
+// fast
+function setClockHands(e, turns) {
+  e.querySelector('.mh').setAttribute('transform', `rotate(${turns * 360 * 12} 12 12)`);
+  e.querySelector('.hh').setAttribute('transform', `rotate(${turns * 360} 12 12)`);
 }

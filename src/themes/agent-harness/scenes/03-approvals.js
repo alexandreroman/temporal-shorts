@@ -135,9 +135,7 @@
       s.wait = E(root,
         '<div class="lbl" style="font-size:16px">Durable wait</div>'
         + '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:10px">'
-        + `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="${C.violet}" stroke-width="1.8"`
-        + ' stroke-linecap="square" style="display:block"><circle cx="12" cy="12" r="9"/>'
-        + '<path class="mh" d="M12 12V5.5"/><path class="hh" d="M12 12h4"/></svg>'
+        + ICON('clockHands', 30, C.violet)
         + `<span class="mono" style="font-size:22px;letter-spacing:.06em;color:${C.violet}">WAITING `
         + '<span class="d" style="display:inline-block;min-width:6.6ch;text-align:left"></span></span></div>',
         'tile', {
@@ -145,7 +143,6 @@
           display: 'flex', flexDirection: 'column', justifyContent: 'center',
         });
       s.waitD = s.wait.querySelector('.d');
-      s.minute = s.wait.querySelector('.mh'); s.hour = s.wait.querySelector('.hh');
       s.pause = E(root, ICON('pause', 22, C.violet, 1.8), '', {
         width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: 'var(--violet-solid)', border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)',
@@ -272,8 +269,7 @@
       // the waiting time races from minutes to days; the clock hands spin with it
       const race = clamp((t - c[1] - 1.2) / 2.8);
       s.waitD.textContent = WAITS[Math.min(WAITS.length - 1, Math.floor(race * WAITS.length))];
-      s.minute.setAttribute('transform', `rotate(${race * 360 * 12} 12 12)`);
-      s.hour.setAttribute('transform', `rotate(${race * 360} 12 12)`);
+      setClockHands(s.wait, race);
       draw(s.ask, P(t, c[1] + 1.0, 0.6), 1 - P(t, approved + 0.1, 0.3));
 
       // c[2] to c[4]: the AUTO MODE judge docks on the gate; it weighs each hotel parked in front of the gate
