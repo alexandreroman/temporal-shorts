@@ -110,18 +110,14 @@
   };
   const HEAD = [1100, 640];
   // at rest: the whole chart at 55% on the right (its middle at screen x 1360), the value on the left, clear of it
-  const REST = { at: [630, -500], scale: 0.55, x: 1360, valueX: 600 };
-  // On the settled chart (screen pixels), a bracket arching over the climb from FEB 2022 to SEP 2026, on the
-  // upper left side of it, 80 px off the straight line between them at its apex; its label 100 px further out,
-  // clear of the arch, the line and the value
-  const BRACKET = { from: [1013.5, 790], to: [1706.5, 240], bulge: 160, labelOut: 100 };
-  BRACKET.mid = [(BRACKET.from[0] + BRACKET.to[0]) / 2, (BRACKET.from[1] + BRACKET.to[1]) / 2];
-  {
-    const dx = BRACKET.to[0] - BRACKET.from[0], dy = BRACKET.to[1] - BRACKET.from[1], L = Math.hypot(dx, dy);
-    BRACKET.normal = [dy / L, -dx / L].map(v => -Math.abs(v));
-  }
-  BRACKET.ctrl = BRACKET.mid.map((v, k) => v + BRACKET.normal[k] * BRACKET.bulge);
-  BRACKET.label = BRACKET.mid.map((v, k) => Math.round(v + BRACKET.normal[k] * (BRACKET.bulge / 2 + BRACKET.labelOut)));
+  const REST = { at: [630, -500], scale: 0.55, x: 1290, valueX: 560 };
+  // On the settled chart (screen pixels), a vertical measuring bracket right of the SEP 2026 point, from the 2022
+  // value's height (the line's start) up to the $12.55B point's, with dashed guides from both points; its label
+  // rotated beside its middle, its end values to its right
+  const FEB22 = [Math.round(REST.x + (0 - REST.at[0]) * REST.scale), Math.round(515 + (0 - REST.at[1]) * REST.scale)];
+  const SEP26 = [Math.round(REST.x + (1260 - REST.at[0]) * REST.scale),
+    Math.round(515 + (-1000 - REST.at[1]) * REST.scale)];
+  const BRACKET = { x: SEP26[0] + 54, bottom: FEB22[1], top: SEP26[1], tick: 10 };
   const GRID = 80;
   const STARS = Array.from({ length: 220 }, (_, i) => ({
     x: hash(i * 5 + 11) * 1920, y: hash(i * 5 + 12) * 1080, r: 0.6 + hash(i * 5 + 13) * 1.4,
@@ -241,14 +237,26 @@
         'tile', { width: '176px', height: '104px', padding: '12px 0', textAlign: 'center', background: '#17182A' }));
       s.value = makeNumber(root, 200);
       s.valueLabel = makeLabel(root, 'Valuation · September 2026');
-      // the ×8 bracket, its pulse and its label; the AI tag under the value, a fixed even width
-      s.bracket = path(s.links, `M ${BRACKET.from.join(' ')} Q ${BRACKET.ctrl.join(' ')} ${BRACKET.to.join(' ')}`,
-        C.violet, 2.5, true);
+      // the ×8 bracket: its dashed guides, its line drawn bottom to top with an arrowhead, its ticks, its pulse, its
+      // label and its end values; the AI tag under the value, a fixed even width
+      const guide = (x0, y, x1) => {
+        const g = path(s.links, `M ${x0} ${y} L ${x1} ${y}`, C.slate, 1.5, false);
+        g.setAttribute('stroke-dasharray', '5 7');
+        return g;
+      };
+      s.guides = [guide(FEB22[0] + 16, BRACKET.bottom, BRACKET.x), guide(SEP26[0] + 16, BRACKET.top, BRACKET.x)];
+      s.bracket = path(s.links, `M ${BRACKET.x} ${BRACKET.bottom} L ${BRACKET.x} ${BRACKET.top + 4}`, C.violet, 2.5,
+        true);
+      s.bracketTick = path(s.links, `M ${BRACKET.x - BRACKET.tick} ${BRACKET.bottom} L ${BRACKET.x + BRACKET.tick} `
+        + `${BRACKET.bottom}`, C.violet, 2.5, false);
       s.bracketPulse = makeSpark(root, 14, '182,100,255');
       s.bracketLabel = E(root, '×8 since 2022', 'mono', {
         fontSize: '22px', lineHeight: '28px', letterSpacing: '.12em', paddingLeft: '.12em', textTransform: 'uppercase',
         color: C.ink, whiteSpace: 'nowrap',
       });
+      s.bracketEnds = ['$1.5B', '$12.55B'].map(text => E(root, text, 'mono', {
+        width: '80px', fontSize: '16px', lineHeight: '20px', color: C.slate, whiteSpace: 'nowrap',
+      }));
       s.aiTag = tag(root, 'Core infrastructure for AI', 'neon solid');
       Object.assign(s.aiTag.style, { width: '440px', textAlign: 'center', boxShadow: '0 0 26px rgba(219,255,75,.3)' });
     },
@@ -488,10 +496,17 @@
       // c[4]: the ×8 bracket draws over the climb with a pulse, its label pops; then the AI tag, as the subtitle
       // reaches its phrase
       const bracketAt = c[4] + 0.5;
-      draw(s.bracket, P(t, bracketAt, 0.9));
-      sparkOnPath(s.bracketPulse, s.bracket, P(t, bracketAt, 0.9, x => x));
+      s.guides.forEach(g => { g.style.opacity = (0.8 * P(t, bracketAt - 0.3, 0.4)).toFixed(3); });
+      draw(s.bracketTick, P(t, bracketAt - 0.1, 0.2));
+      // the pulse rides the head of the line as it draws
+      const bracketP = P(t, bracketAt, 0.9);
+      draw(s.bracket, bracketP);
+      sparkOnPath(s.bracketPulse, s.bracket, bracketP);
       const bl = popIn(t, bracketAt + 0.8);
-      place(s.bracketLabel, ...BRACKET.label, bl.s, bl.o);
+      // rotated, reading bottom to top, its middle 34 px right of the bracket
+      place(s.bracketLabel, BRACKET.x + 34, Math.round((BRACKET.top + BRACKET.bottom) / 2), bl.s, bl.o, -90);
+      s.bracketEnds.forEach((e, k) => place(e, BRACKET.x + 22 + 40, k ? BRACKET.top : BRACKET.bottom, 1,
+        P(t, bracketAt + (k ? 0.9 : 0), 0.3)));
       const ai = P(t, c[4] + 2.8, 0.45, backOut);
       place(s.aiTag, REST.valueX, 690, ai, clamp(ai * 2));
     }

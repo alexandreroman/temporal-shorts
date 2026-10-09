@@ -317,9 +317,11 @@ and each chapter has a cinematic moment, listed in its visuals.
     VALUATION · SEPTEMBER 2026 under it.
 - **3:36** That's more than 8 times its 2022 value: investors see it as core
   infrastructure for AI.
-  - Visuals: On the settled chart, a violet arch draws over the climb from
-    FEB 2022 to SEP 2026 with a pulse running along it, and "×8 SINCE 2022"
-    pops above its apex. Then, as the subtitle reaches its phrase, a neon
+  - Visuals: On the settled chart, dashed guides run from the FEB 2022 and
+    SEP 2026 points to a vertical bracket on the right of the climb, which
+    draws from the 2022 level up to the $12.55B level with a pulse and an
+    arrowhead, "$1.5B" and "$12.55B" at its ends and "×8 SINCE 2022" beside
+    its middle, reading upward. Then, as the subtitle reaches its phrase, a neon
     CORE INFRASTRUCTURE FOR AI tag pops under VALUATION · SEPTEMBER 2026,
     and the whole holds.
 
