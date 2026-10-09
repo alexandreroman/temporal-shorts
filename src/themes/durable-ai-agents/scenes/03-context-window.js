@@ -147,18 +147,15 @@
       const app = partAt.map(at => P(t, at, 0.5));
       // parts 0 and 1 are the two blocks, then one part per message row
       const rowApp = app.slice(2);
-      const slideIn = (el, a) => {
-        el.style.opacity = a; el.style.transform = `translateX(${(1 - a) * 80}px)`;
-      };
       // grown, the history keeps the 20 px bottom margin of the 600 px sheet
       Object.assign(s.instr.style, { top: '20px', height: '74px' });
-      slideIn(s.instr, app[0]);
-      slideIn(s.hist, app[1]);
+      showRow(s.instr, app[0], 80);
+      showRow(s.hist, app[1], 80);
       // the HISTORY block arrives with its label only; each message pushes its bottom down
       let y = 28;
       s.rows.forEach((r, i) => {
         r.row.style.top = y + 'px';
-        slideIn(r.row, rowApp[i]);
+        showRow(r.row, rowApp[i], 80);
         y += ROW * rowApp[i];
       });
       s.hist.style.top = '104px'; s.hist.style.height = (y + 8) + 'px';
