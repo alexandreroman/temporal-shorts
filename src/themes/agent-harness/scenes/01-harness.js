@@ -169,8 +169,9 @@
         after: 1.9,
       },
       {
-        text: "An LLM call is one <b>step</b>. A turn lasts until the agent is idle again: often many model and tool calls.",
-        after: 2.5,
+        text: 'Each model or tool call is one <b>step</b>. A turn runs until the agent is idle: often many steps.',
+        // the reply card lands at c[4] + 7.95 and reads for about 1.7 s before c[5]
+        after: 3.125,
       },
       {
         text: "The harness saves each call as it completes, and streams every step of the turn live.",
