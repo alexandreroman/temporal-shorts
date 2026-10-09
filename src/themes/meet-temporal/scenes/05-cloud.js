@@ -17,7 +17,7 @@
   const workerY = k => WORKER.top + WORKER.h / 2 + k * (WORKER.h + WORKER.gap);
   const CODE = { top: 58, h: 104, inset: 24, line: 28 };
   const WORKERS = [
-    ['workflow order(o)', '  await chargeCard(o)', '  await shipPackage(o)'],
+    ['workflow OrderWorkflow(o)', '  await chargeCard(o)', '  await shipPackage(o)'],
     ['activity chargeCard(o)', '  return charge(o.card)'],
     ['activity shipPackage(o)', '  return ship(o.address)'],
   ];
@@ -193,7 +193,8 @@
     chapter: 5, title: 'How Temporal Cloud works',
     subs: [
       {
-        text: "With Temporal Cloud, your Workers run your Workflow and Activity code in your own environment.",
+        text: "With <b>Temporal Cloud</b>, your <b>Workers</b> run your Workflow and Activity code "
+          + "in your own environment.",
         // the three polls, one after the other, then the two captions
         after: 2.9,
       },
@@ -201,10 +202,9 @@
       { text: "Temporal Cloud orchestrates your Workflows and Activities, and persists their history.", after: 7.6 },
       // the close-up of the second task's result, then the last two tasks run and persist
       {
-        text: "Data is encrypted with your own keys before it leaves your environment: "
-          + "Temporal never sees your payloads.",
+        text: "You can encrypt data with your own keys before it leaves: Temporal never sees your payloads.",
         // the close-up, then the Workflow resumes, schedules shipPackage, which runs, and completes
-        after: 24.8,
+        after: 25.7,
       },
     ],
     build(stage, s) {

@@ -129,7 +129,7 @@
   scene({
     pre: 0.4, post: 2.6,
     subs: [
-      { text: "Temporal keeps code running whatever fails, from everyday apps to AI agents." },
+      { text: "Temporal keeps code running through crashes and outages, from everyday apps to AI agents." },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);

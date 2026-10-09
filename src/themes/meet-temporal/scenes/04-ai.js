@@ -3,7 +3,7 @@
 {
   // The agentic loop (think, act, observe, as in durable-ai-agents) runs durably in an app instance, its steps
   // saved in an Event History outside the app, as in durable-ai-agents chapter 7: a crash in production, a new
-  // instance takes over and replays the history, nothing is lost and no LLM call is paid twice
+  // instance takes over and replays the history, nothing is lost and no finished LLM call is paid twice
   // the loop sits in its app panel for the whole chapter, about 40 px clear of its header and of the context strip
   const LOOP = AGENT_LOOP;
   const COMET = 6; // sparks trailing the token
@@ -59,7 +59,7 @@
         after: 0.4,
       },
       {
-        text: "With Temporal, every step the agent takes is saved in an Event History, outside the app.",
+        text: "With Temporal, every step the agent takes is saved in an <b>Event History</b>, outside the app.",
         after: 0.7,
       },
       // the crash, held with the history kept and A's context lost, the takeover, the replay row by row that
@@ -70,7 +70,7 @@
         after: 8.1,
       },
       // NO PROGRESS LOST, then NO TOKENS WASTED
-      { text: "No progress is lost and no tokens are wasted: no LLM call is paid twice.", after: 0.4 },
+      { text: "No progress is lost and no tokens are wasted: no finished LLM call is paid twice.", after: 0.4 },
       { text: "That's why OpenAI built Codex on Temporal, and Cursor, Lovable and Replit rely on it too.", after: 1.4 },
     ],
     build(stage, s) {

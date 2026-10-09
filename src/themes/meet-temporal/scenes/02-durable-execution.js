@@ -52,7 +52,7 @@
           + "and Temporal records each one outside the app.",
         after: 0.4,
       },
-      { text: "If the app crashes, a new copy of the app starts and takes over.", after: 0.6 },
+      { text: "If the app crashes, another copy of the app takes over.", after: 1.2 },
       {
         text: "It gets the saved results back from the history, then picks up where it left off. No progress is lost.",
         after: 1.2,
