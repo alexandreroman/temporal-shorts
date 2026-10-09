@@ -9,10 +9,11 @@ subtitles) about [Temporal](https://temporal.io).
 Each video is a theme:
 
 - **Meet Temporal** (`meet-temporal`): for everyone who has never heard of
-  Temporal, who created it, Maxim Fateev and Samar Abbas, and where they
-  come from; its lineage, from Amazon Simple Workflow Service to the
-  Microsoft Durable Task Framework, Uber Cadence and Temporal, founded in
-  October 2019; where Temporal stands today, and why it matters for AI.
+  Temporal, its creators, Maxim Fateev and Samar Abbas, and its lineage,
+  from Amazon Simple Workflow Service to the Microsoft Durable Task
+  Framework, Uber Cadence and Temporal, founded in 2019; then what Temporal
+  does, where it is used, why it matters for AI, how Temporal Cloud works
+  and where Temporal stands today.
 - **Introduction to Durable Execution** (`durable-execution`): for
   everyone, the principles of Durable Execution with Temporal Workflows:
   [Workflows](https://docs.temporal.io/workflows),
@@ -26,15 +27,15 @@ Each video is a theme:
   audience, how an AI agent works, and why it needs Durable Execution with
   Temporal.
 - **Temporal Agent Harness** (`agent-harness`): for developers, the
-  experimental
-  [project of the same name](https://github.com/temporal-community/temporal-agent-harness):
-  AI agents that run as durable Temporal Workflows while you keep your AI
-  SDK, with human approvals, one event stream, typed subagents and Code
-  Mode.
+  experimental [project of the same name][agent-harness]: AI agents that
+  run as durable Temporal Workflows while you keep your AI SDK, with human
+  approvals, one event stream, typed subagents and Code Mode.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal hands back the saved results from the Event
 History](preview.png)
+
+[agent-harness]: https://github.com/temporal-community/temporal-agent-harness
 
 ## Getting started
 
@@ -76,7 +77,8 @@ src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
 src/home.css, home.js  home page styles and star field
 src/social.html        home link preview card, captured by make social
 src/social.png         link preview image of the home page (make social)
-src/assets/            official Temporal logo (white horizontal lockup)
+src/assets/            Temporal lockup and symbol, founders' photo, language
+                       logos (see src/assets/languages/README.md)
 src/fonts/             brand fonts (downloaded by make), see
                        src/fonts/README.md
 scripts/               setup, fonts, render, preview, timeline, layout
@@ -120,7 +122,8 @@ it is missing. Once the virtualenv exists, these six targets rerun
 changes, so that a pinned Playwright upgrade also brings its Chromium build;
 this alone does not rebuild an up-to-date MP4 or SRT. Override the
 interpreter with `PY`, for example `make html PY=python`: no automatic setup
-then. Every target downloads the brand fonts first when they are missing.
+then. Every target that needs the brand fonts downloads them first when
+they are missing.
 
 `timeline`, `layout`, `render` and `srt` cover every theme; `timeline` and
 `layout` print each one under a `== <theme> ==` header. Set the `THEME`
@@ -169,8 +172,11 @@ The MP4 is H.264 ready for web streaming: its index sits at the start of the
 file (faststart), with a keyframe every 2 seconds and a bitrate capped at
 8 Mbit/s.
 
-To check a single frame, run `make preview THEME=durable-ai-agents T=140`:
-it writes the frame at 140 s to `output/preview.png`.
+`make preview THEME=<theme> T="<times>"` writes a contact sheet of those
+moments to `output/preview.png`. To check a single frame at full size, add
+`--full` to the times: `make preview THEME=durable-ai-agents T="140 --full"`
+writes the frame at 140 s to `output/frame_0140.00.png`, one file per
+timestamp.
 
 `make layout` (`scripts/layout_check.py`) checks the vertical layout rule
 shared by every theme. Each scene keeps its resting content inside the
@@ -196,44 +202,38 @@ theme, `output/themes/<theme>/index.html`: `output/` mirrors `src/`, so the
 links between the pages are the same in both. The home page links to each
 theme folder, `themes/<theme>/`, which only an HTTP server resolves to its
 `index.html`: `make serve` is the only way to view the home page and the
-players. Each player has its scripts, fonts and logo inlined, so it needs no
-other file. The animation fits the window, its starry background and glow
-filling the window whatever its shape, and plays once, unless loop is
-enabled (it is off by default); the controls (home, play/pause, seek bar,
-time, speed, loop, subtitles, presenter mode, fullscreen) hide after a few
-seconds of playback and come back when the mouse moves. Each control shows
-its name and shortcut on hover. The home button goes back to the home page
-(`/`). Playback runs at 1x by default; the speed button switches between 1x
-and 0.5x. At 0.5x, only the still moments between animations stretch, which
-leaves time to explain the screen; the animations keep their normal speed.
-Subtitles are shown by default; the CC button hides or shows them. Presenter
-mode hides the subtitles, plays at 0.5x and holds at each subtitle cue after
-the first of a scene, before that cue's animations begin, and again just
-before each scene fades out, with a faint pause mark in the top-right
-corner while it holds; once the picture stands still until the next hold,
-it jumps straight to it. Space, Right, PageDown or the play button resumes.
-In presenter mode, a step runs from one pause to the next. Right releases
-a pause, so the transition plays, or else jumps to the next pause and holds
-there. Left plays the previous step, which ends at the current pause, or
-restarts the current step if more than 2 s in; it lands playing, so the
-step plays and holds again at its end. PageUp/PageDown act as Left/Right.
-These keys leave the controls hidden, so a clicker keeps the screen clean.
-Shortcuts: Space = play/pause, Left/Right or PageUp/PageDown =
-previous/next section (Left first restarts the current section if more
-than 2 s in), or previous/next step in presenter mode, S = speed 1x/0.5x,
-L = loop on/off, C = subtitles on/off, P = presenter mode on/off,
-F = fullscreen.
+players. Each player has its styles, scripts, fonts and images inlined, so
+it needs no other file. The animation fits the window, its starry
+background and glow filling the window whatever its shape, and plays once,
+unless loop is enabled (it is off by default); the controls (home,
+play/pause, seek bar, time, speed, loop, subtitles, presenter mode,
+fullscreen) hide after a few seconds of playback and come back when the
+mouse moves. Each control shows its name and shortcut on hover. The home
+button goes back to the home page (`/`). Playback runs at 1x by default; the
+speed button switches between 1x and 0.5x. At 0.5x, only the still moments
+between animations stretch, which leaves time to explain the screen; the
+animations keep their normal speed. Subtitles are shown by default; the CC
+button hides or shows them. Presenter mode hides the subtitles, plays at
+0.5x and holds at each subtitle cue after the first of a scene, before that
+cue's animations begin, and again just before each scene fades out, with a
+faint pause mark in the top-right corner while it holds; once the picture
+stands still until the next hold, it jumps straight to it. Space, Right,
+PageDown or the play button resumes. In presenter mode, a step runs from one
+pause to the next. Right releases a pause, so the transition plays, or else
+jumps to the next pause and holds there. Left plays the previous step, which
+ends at the current pause, or restarts the current step if more than 2 s in;
+it lands playing, so the step plays and holds again at its end.
+PageUp/PageDown act as Left/Right. These keys leave the controls hidden, so
+a clicker keeps the screen clean. Shortcuts: Space = play/pause, Left/Right
+or PageUp/PageDown = previous/next section (Left first restarts the current
+section if more than 2 s in), or previous/next step in presenter mode,
+S = speed 1x/0.5x, L = loop on/off, C = subtitles on/off, P = presenter
+mode on/off, F = fullscreen.
 
 `make serve` serves the home page on `/` and each player on
 `/themes/<theme>/`, over HTTP on `127.0.0.1` (rebuilding them first if
 needed), on port 8000 by default (`CASPER_PORT` in a Casper workspace);
 override it with `make serve PORT=9000`.
-
-`make html` drops a home page card with the `hidden` attribute from the built
-home page, so the page holds no link to that theme; the theme is unlisted,
-but its player is still built, deployed and reachable at `themes/<theme>/`.
-The home page `<meta name="description">` names the themes and is edited by
-hand.
 
 A `#t=<time>` fragment opens a player paused at that time, in seconds
 (`70`, `70.5`) or `m:ss` as in the time label (`1:10`, `1:10.5`), for
@@ -283,8 +283,31 @@ header (`.brand` in `home.css`) scaled up, above the order steps of the
 Durable Execution intro, on the home page background (`home.css`,
 `home.js`). `make social` writes the images with Playwright; they are
 committed, so `make html` and CI only copy them next to the built pages.
-Run `make social` and commit the images after changing an intro scene, a
-page title, `src/social.html`, the home page lockup or its background.
+Nothing in the build detects a stale image, so any change to what an image
+shows comes with a `make social` run and the updated PNGs, in the same
+commit:
+
+- an intro scene (`scenes/00-intro.js`): its title card, texts, layout or
+  the timing of its first subtitle (the capture time is the end of that
+  subtitle)
+- a shared visual drawn on a title card: `makeTitleBlock`, the logo, the
+  star field, the brand colors in `src/styles.css` or `src/shared.js`, the
+  fonts
+- the home card: `src/social.html` (its texts and layout) and what it
+  shares with the home page: the "Temporal shorts" lockup (`.home .brand`
+  in `src/home.css`, which the card scales with `--logo`), the background
+  (`src/home.css`, the star field of `src/home.js`), the brand styles,
+  fonts and logo; the markup and theme cards of `src/index.html` do not
+  appear in the image
+- an icon of the order steps (`card`, `box`, `truck`, `mail`) or of the
+  `check` and `retry` badges: `src/social.html` holds inline copies of
+  their paths, to update with their source (`ICONS` in `src/engine.js`,
+  `src/themes/durable-execution/shared.js`)
+- a page `<title>` or `<meta name="description">`: check that the image
+  still matches the text
+- a new theme: `make html` fails without its `social.png`
+
+Look at each changed PNG before committing it.
 
 ### Editing
 
@@ -293,10 +316,12 @@ editing different scenes never touch the same file.
 
 - Subtitle text: `subs` of the relevant scene. The duration adapts to the
   text length and shifts everything after it; check with
-  `make timeline THEME=<theme>`, then `make preview THEME=<theme>`.
+  `make timeline THEME=<theme>`, then
+  `make preview THEME=<theme> T="<times>"`.
 - Animation: the scene's `update(t, c, s)` function, where `t` is the scene's
   local time and `c[i]` the moment subtitle `i` starts. Every animation is
-  keyed to these cues.
+  keyed to these cues. Continuous ambient loops (spinners, blinks, dashed
+  flows) read the ambient clock `G`, never `t`: 0.5x slows `t` only.
 - Presenter stops: presenter mode holds at each cue but the first of a
   scene, and at the end of each scene, just before its fade-out (`fadeOut`,
   0.5 s by default). If a cue's animation starts a little before its cue,
@@ -346,9 +371,13 @@ editing different scenes never touch the same file.
    `<meta name="description">` and its list of scene scripts. The new
    folder is a theme as soon as its page exists: `--theme` and
    `THEME=<theme>` accept it, and `make html` builds it.
-2. Create `src/themes/<theme>/scenes/` with the scene files.
+2. Create `src/themes/<theme>/scenes/` with the scene files, and
+   `src/themes/<theme>/shared.js` for the helpers of the theme alone,
+   loaded right after `../../shared.js`.
 3. Add a card linking to `themes/<theme>/` in `src/index.html`; the cards
-   wrap and keep the same size, with no CSS change. To keep the theme
+   wrap and keep the same size, with no CSS change. Its icon animates on
+   hover: give it an animation in `src/home.css`, next to those of the
+   other cards. To keep the theme
    unlisted, add the `hidden` attribute to its card
    (`<a class="theme" href="themes/<theme>/" hidden>`): `make html` drops
    the card from the built home page, so the page holds no link to the
@@ -356,7 +385,9 @@ editing different scenes never touch the same file.
    `themes/<theme>/`. The home page `<meta name="description">` names the
    themes: edit it by hand.
 4. Write the script in `docs/<theme>/script.md`.
-5. Run `make social` and commit `src/themes/<theme>/social.png`: the HTML
+5. Add the theme to the theme lists at the top of `README.md` and
+   `CLAUDE.md`.
+6. Run `make social` and commit `src/themes/<theme>/social.png`: the HTML
    build needs it.
 
 Videos have no maximum length; `make timeline THEME=<theme>` reports it.
@@ -388,8 +419,9 @@ which a project site under `<user>.github.io/<repository>/` breaks.
 The link preview tags hold absolute URLs, as social networks require. The
 workflow takes the site URL from the Pages configuration
 (`actions/configure-pages`, custom domain included) and passes it to the
-build as `SITE_URL`, so no domain is written in the repository. Pull
-request builds skip that step: their pages have no link preview tags.
+build as `SITE_URL`, so no domain is written in the build or the
+workflow. Pull request builds skip that step: their pages have no link
+preview tags.
 
 ## Contributing
 

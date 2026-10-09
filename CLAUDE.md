@@ -5,9 +5,10 @@ from a deterministic HTML animation. Each video is a theme:
 
 - `meet-temporal`: Meet Temporal, a video that introduces Temporal to
   everyone who has never heard of it: its creators, Maxim Fateev and Samar
-  Abbas, its lineage from Amazon Simple Workflow Service through the
-  Microsoft Durable Task Framework and Uber Cadence, Temporal today, and
-  why it matters for AI
+  Abbas, and its lineage from Amazon Simple Workflow Service through the
+  Microsoft Durable Task Framework and Uber Cadence, then what it does,
+  where it is used, why it matters for AI, Temporal Cloud and Temporal
+  today
 - `durable-execution`: Introduction to Durable Execution, a video that
   shows everyone the principles of Durable Execution with Temporal
   Workflows
@@ -66,7 +67,7 @@ moment. `?t=` is the frozen capture frame, without the player.
 sources or its own theme change (see README.md); `-B` forces a rebuild.
 
 In Casper (`.casper.json`), Run (`casper run`) serves the home page and the
-HTML players on `CASPER_PORT` (8000 in the primary workspace), Render
+HTML players on `CASPER_PORT` (8000 where it is unset), Render
 (`casper run render`) renders every theme into `output/<theme>.mp4`; new
 workspaces run `make setup` automatically.
 
@@ -114,15 +115,14 @@ workspaces run `make setup` automatically.
   the per-theme scripts require `--theme` (no default). The HTML build
   adds the Open Graph and X card tags and a canonical link only when the
   `SITE_URL` environment variable (or make variable) holds the site's root
-  URL: local builds have none; it drops the home page cards that carry
-  the `hidden` attribute
+  URL: local builds have none
 - `.github/workflows/pages.yml`: on push to `main`, downloads the fonts,
   runs `make html` with `SITE_URL` set to the Pages URL given by
-  `actions/configure-pages` (no domain in the repository) and deploys
-  `output/` to GitHub Pages (no video, no SRT); served at a domain root,
-  as the player's home button links to `/`. Pull requests to `main` run
-  the build only, without the Pages step, so with no social tags, and no
-  deploy: the pages are attached to the run as an artifact
+  `actions/configure-pages` (no domain in the build or the workflow) and
+  deploys `output/` to GitHub Pages (no video, no SRT); served at a domain
+  root, as the player's home button links to `/`. Pull requests to `main`
+  run the build only, without the Pages step, so with no social tags, and
+  no deploy: the pages are attached to the run as an artifact
 - `docs/<theme>/script.md`: full script of a theme: subtitles, timings,
   visuals
 - `output/`: generated `<theme>.srt`, `<theme>.mp4`, and the HTML pages
@@ -181,7 +181,8 @@ not shared with the team.
   comments, commit messages. No em dash in subtitles or on-screen labels.
 - Videos have no maximum length (`make timeline THEME=<theme>` reports
   it). Key every animation to `c[i]` (subtitle start) so timings follow
-  text changes.
+  text changes. Continuous ambient loops (spinners, blinks, dashed flows)
+  read the ambient clock `G`, never `t`: 0.5x slows `t` only.
 - Keep rendering deterministic (no `Math.random`): parallel workers render
   segments independently.
 - Use classic `<script src>` tags, not ES modules: Playwright opens
@@ -189,10 +190,7 @@ not shared with the team.
   `type="module"`.
 - New scene: add a file in `src/themes/<theme>/scenes/` and one `<script>`
   line in `src/themes/<theme>/index.html`, in playing order.
-- New theme: folder `src/themes/<theme>/` with its page `index.html` (with
-  `<title>` and `<meta name="description">`) and its scenes, a card linking
-  to `themes/<theme>/` in `src/index.html`, `docs/<theme>/script.md`, and
-  its `social.png` from `make social`.
+- New theme: follow the checklist in README.md, "Add a theme".
 - Relative URLs must work from `src/` and `output/` alike: theme pages
   live two folders below the home page. Link to folders
   (`themes/<theme>/`): `make serve` is the only way to view the HTML pages.
