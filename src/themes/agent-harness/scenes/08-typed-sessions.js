@@ -14,7 +14,8 @@
 
   // The agent's Python class (top of the column) and the TypeScript generated from it (bottom of the column).
   // Same names as chapter 5 (TravelAgent, plan_trip, PlanTrip, Itinerary); the state follows the harness's
-  // HarnessState / agent.state() API and the TypeScript the shape harness-codegen writes (handlers and states).
+  // HarnessState / agent.state() API and the TypeScript the shape harness-codegen writes (initData, null for an
+  // agent without init data, then handlers and states).
   const PYTHON = [
     'class Trip(HarnessState):',
     '    items: list[Item] = []',
@@ -33,6 +34,7 @@
     '  total_usd: number;',
     '}',
     'export interface TravelAgent {',
+    '  initData: null;',
     '  handlers: { plan_trip: { input: PlanTrip; output: Itinerary } };',
     '  states: { trip: Trip };',
     '}',
@@ -47,8 +49,8 @@
   // the state model, the observable state, the message handler
   const PAIRS = [
     { py: [0, 2], ts: [0, 3] },
-    { py: [6, 6], ts: [6, 6] },
-    { py: [8, 9], ts: [5, 5] },
+    { py: [6, 6], ts: [7, 7] },
+    { py: [8, 9], ts: [6, 6] },
   ];
   // the Trip fields the UI binds to, in the TypeScript card
   const TS_ITEMS = 1, TS_TOTAL = 2;
