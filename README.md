@@ -343,9 +343,10 @@ editing different scenes never touch the same file.
   two scenes (meet-temporal zooms into the AI hub this way). A chapter scene's
   header fades with the scene; the optional `headerOutAt` (scene time)
   fades it out earlier, over 0.4 s, for an ending that plays without it.
-- Chapter title: `title` next to `chapter` on the first scene of the chapter.
-  The header and the progress segments are derived from it; a theme without
-  chapters shows neither.
+- Chapter title: `title` next to `chapter` on the chapter's scene: each
+  chapter is one scene, numbered 1, 2, 3... in playing order. The header
+  and the progress segments are derived from them; a theme without chapters
+  shows neither.
 - New scene: create a file in `src/themes/<theme>/scenes/` that calls
   `scene({...})` inside a `{ ... }` block, so its helpers stay local to the
   file. Then add one `<script src="scenes/...">` line to

@@ -234,18 +234,18 @@ function scene(def) { scenes.push(def); }
 const SCENE_FADE = 0.5;
 function autoDur(text) { return clamp(text.replace(/<[^>]+>/g,'').length / 16 + 0.6, 2.4, 8); }
 
-// CHAPTERS[n - 1] is the title of chapter n, filled by buildAll() from the `title` of the chapter's first scene.
-const CHAPTERS = [];
+// The chapter scenes, in playing order: each chapter is one scene, which sets `chapter` (its number) and `title`.
+// Filled by buildAll(); the intro and the outro have no chapter.
+let chapterScenes = [];
 
 function collectChapters() {
-  for (const sc of scenes) {
-    if (sc.chapter && sc.title) CHAPTERS[sc.chapter - 1] = sc.title;
-  }
-  for (const sc of scenes) {
-    if (sc.chapter && !CHAPTERS[sc.chapter - 1]) {
-      throw new Error(`Chapter ${sc.chapter} has no title: set \`title\` on its first scene`);
+  chapterScenes = scenes.filter(sc => sc.chapter);
+  chapterScenes.forEach((sc, i) => {
+    if (sc.chapter !== i + 1) {
+      throw new Error(`Chapter ${sc.chapter} plays as chapter ${i + 1}: number the chapter scenes 1, 2, 3... in order`);
     }
-  }
+    if (!sc.title) throw new Error(`Chapter ${sc.chapter} has no title: set \`title\` next to \`chapter\``);
+  });
 }
 
 function buildAll() {
@@ -270,7 +270,7 @@ function buildAll() {
   window.TOTAL = T;
   // header
   const segs = document.getElementById('segs');
-  segs.innerHTML = CHAPTERS.map(() => '<i><b></b></i>').join('');
+  segs.innerHTML = chapterScenes.map(() => '<i><b></b></i>').join('');
 }
 
 // `g` is the ambient clock (G) driving continuous loops such as spinners and blinks; scenes animate on `t`.
@@ -301,9 +301,9 @@ function renderAt(t, g = t) {
     const so = P(t, st.start, 0.18, linear) * (1 - P(t, st.end - 0.18, 0.18, linear));
     sub.parentNode.style.opacity = so;
   } else sub.parentNode.style.opacity = 0;
-  // header, which fades in and out with each chapter scene, and the Temporal symbol, which stays fully visible
-  // across chapter scene changes: it fades in with the first chapter scene and out with the last one, with the same
-  // fades as their scene roots
+  // header, which fades in and out with each chapter, and the Temporal symbol, which stays fully visible across
+  // chapter changes: it fades in with the first chapter and out with the last one, with the same fades as their
+  // scene roots
   const hdr = document.getElementById('hdr');
   const mark = document.getElementById('mark');
   if (cur && cur.chapter) {
@@ -311,12 +311,11 @@ function renderAt(t, g = t) {
     // optional `headerOutAt`: the scene time at which the header fades out early, over 0.4 s
     const headerOut = cur.headerOutAt === undefined ? 1 : 1 - P(lt, cur.headerOutAt, 0.4);
     hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4)) * headerOut;
-    const chapterScenes = scenes.filter(sc => sc.chapter);
     const firstStart = chapterScenes[0].start;
     const lastEnd = chapterScenes[chapterScenes.length - 1].end;
     mark.style.opacity = P(t, firstStart, 0.5) * (1 - P(t, lastEnd - 0.5, 0.5));
     hdr.querySelector('.num').textContent = String(cur.chapter).padStart(2, '0');
-    hdr.querySelector('.ttl').textContent = CHAPTERS[cur.chapter - 1];
+    hdr.querySelector('.ttl').textContent = cur.title;
   } else {
     hdr.style.opacity = 0;
     mark.style.opacity = 0;
@@ -326,12 +325,7 @@ function renderAt(t, g = t) {
   segs.forEach((b, i) => {
     let f = 0;
     if (i + 1 < chap) f = 1;
-    else if (i + 1 === chap) {
-      // progress inside chapter (may span multiple scenes)
-      const cs = scenes.filter(s => s.chapter === chap);
-      const a = cs[0].start, z = cs[cs.length - 1].end;
-      f = clamp((t - a) / (z - a));
-    }
+    else if (i + 1 === chap) f = clamp((t - cur.start) / cur.dur);
     // whole pixels of the 56 px segment (#segs i in styles.css): a fractional edge varies from run to run
     b.style.width = Math.round(f * 56) + 'px';
   });
