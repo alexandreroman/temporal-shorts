@@ -46,12 +46,9 @@
   // 0 -> 1 -> 0 over [at, at + d]
   const bump = (t, at, d) => Math.sin(Math.PI * clamp((t - at) / d));
 
-  // status tag under a call, a little larger than the shared one: 'ok' (allowed, approved, done), 'denied' or 'wait'
-  const makeTag = p => {
-    const e = statusTag(p);
-    Object.assign(e.style, { fontSize: '17px', paddingLeft: 'calc(10px + .1em)' });
-    return e;
-  };
+  // statusTag options of the tag under a call, a little larger than the shared one; its left padding offsets the
+  // trailing letter spacing. Kinds: 'ok' (allowed, approved, done), 'denied' or 'wait'
+  const CALL_TAG = { font: 17, pad: '4px 10px 4px calc(10px + .1em)' };
 
   scene({
     chapter: 3, title: 'Human approvals',
@@ -172,7 +169,7 @@
         Object.assign(e.style, { width: CALL_W + 'px', textAlign: 'center' });
         return e;
       });
-      s.tags = s.calls.map(() => makeTag(root));
+      s.tags = s.calls.map(() => statusTag(root, CALL_TAG));
     },
     update(t, c, s) {
       // c[0]: the two searches pop next to the agent and cross the gate one after the other; book_flight stops

@@ -280,9 +280,9 @@
         });
       s.turnN = s.badge.querySelector('.n');
       // a fixed-size tag in the badge's row, so the row keeps its width as the status changes
-      s.status = statusTag(s.badge.firstChild);
+      s.status = statusTag(s.badge.firstChild, { font: 16 });
       Object.assign(s.status.style, {
-        position: 'relative', opacity: 1, fontSize: '16px', width: '124px', height: '32px', justifyContent: 'center',
+        position: 'relative', opacity: 1, width: '124px', height: '32px', justifyContent: 'center',
       });
       // c[4]: one LLM call, a compact strip on the top row, deliberately short against the long turn row below
       s.callHead = makeHeading(root, 'An LLM call', 'One step', CMP.head1Top);
@@ -306,8 +306,8 @@
       [s.turnMsg, s.turnReply].forEach(e => { e.style.width = CMP.cardW + 'px'; });
       s.calls = TURN_CALLS.map(([name, cls]) => callCard(root, name, '', cls));
       s.saved = TURN_CALLS.map(() => {
-        const e = statusTag(root);
-        Object.assign(e.style, { fontSize: '16px', height: CMP.statusH + 'px' });
+        const e = statusTag(root, { font: 16 });
+        e.style.height = CMP.statusH + 'px';
         return e;
       });
       // opaque violet tint, so the bracket line does not show through the pill

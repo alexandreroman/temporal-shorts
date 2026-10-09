@@ -145,12 +145,12 @@
           display: 'flex', alignItems: 'center', height: CONSOLE.rowH + 'px',
         }));
       s.tags = [HUMAN_ROW, TOTAL_ROW].map(i => {
-        const e = statusTag(s.console);
+        const e = statusTag(s.console, { font: 16 });
         // centered on its row
         Object.assign(e.style, {
           left: 'auto', right: '28px',
           top: (CONSOLE.row0 + (CONSOLE.rowH - CONSOLE_TAG_H) / 2 + i * CONSOLE.rowGap) + 'px',
-          fontSize: '16px', lineHeight: CONSOLE_LINE + 'px', transformOrigin: 'right center',
+          lineHeight: CONSOLE_LINE + 'px', transformOrigin: 'right center',
         });
         return e;
       });
