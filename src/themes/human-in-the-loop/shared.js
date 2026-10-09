@@ -101,8 +101,10 @@ function setClock(root, hours, blur = 0) {
   seconds.setAttribute('transform', `rotate(${(G * 6) % 360} 50 50)`);
   seconds.style.opacity = 1 - blur;
 }
-// The approval card in the scenes: its scale k (see makeApprovalCard) and its width at that scale
-const APPROVAL_CARD = { k: 1.2, w: 480 };
+// The approval card in the scenes: its scale k (see makeApprovalCard) and its width at that scale, rounded as
+// makeApprovalCard rounds it
+const APPROVAL_CARD = { k: 1.2 };
+APPROVAL_CARD.w = Math.round(400 * APPROVAL_CARD.k);
 // White approval request card with a ticking mini clock, Approve (brand UV) and Reject (outline) buttons.
 // k scales every size natively (fonts, paddings, width; 400 px wide at 1), so a larger card stays sharp at rest.
 function makeApprovalCard(p, k) {

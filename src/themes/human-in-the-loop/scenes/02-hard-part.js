@@ -18,13 +18,35 @@
     ['clock', 'Scheduled jobs', LINE.x1 - TILE.bandW / 2, BAND_Y, TILE.bandW],
     ['code', 'Resume code', FRAME.x1 - TILE.w / 2, APP.y, TILE.w],
   ];
+  // Edges the tangled links join: the app's, and each plumbing tile's
+  const APP_EDGE = { left: APP.x - APP.w / 2, right: APP.x + APP.w / 2, bottom: APP.y + APP.h / 2 };
+  const [DB, FLAGS, JOBS, RESUME] = PLUMBING.map(([, , x, y, w]) => ({
+    x, y, left: x - w / 2, right: x + w / 2, top: y - TILE.h / 2, bottom: y + TILE.h / 2,
+  }));
+  // S-curve that leaves (x0, y0) and reaches (x1, y1) horizontally
+  const sideCurve = (x0, y0, x1, y1) => {
+    const mx = (x0 + x1) / 2;
+    return `M ${x0} ${y0} C ${mx} ${y0}, ${mx} ${y1}, ${x1} ${y1}`;
+  };
+  // S-curve that leaves (x0, y0) and reaches (x1, y1) vertically
+  const upCurve = (x0, y0, x1, y1) => {
+    const my = (y0 + y1) / 2;
+    return `M ${x0} ${y0} C ${x0} ${my}, ${x1} ${my}, ${x1} ${y1}`;
+  };
+  // Long sweep that drops from (x0, y0), then comes into (x1, y1) from x0's side
+  const sweep = (x0, y0, x1, y1) => {
+    const lead = x1 > x0 ? -160 : 160;
+    return `M ${x0} ${y0} C ${x0} ${y0 + 198}, ${x1 + lead} ${y1 - 82}, ${x1} ${y1}`;
+  };
+  // The side tiles reach the app's sides 68 px off its middle; the band tiles cross to the app's bottom edge, 150 px
+  // either side of its center; the long sweeps run from under the side tiles to the band, between its two tiles
   const LINKS = [
-    'M 420 412 C 490 412, 490 480, 560 480',
-    'M 1500 412 C 1430 412, 1430 344, 1360 344',
-    'M 710 672 C 710 652, 1110 652, 1110 632',
-    'M 1210 672 C 1210 652, 810 652, 810 632',
-    'M 250 502 C 250 700, 900 680, 1060 762',
-    'M 1670 502 C 1670 700, 1020 680, 860 762',
+    sideCurve(DB.right, DB.y, APP_EDGE.left, APP.y + 68),
+    sideCurve(RESUME.left, RESUME.y, APP_EDGE.right, APP.y - 68),
+    upCurve(FLAGS.x, FLAGS.top, APP.x + 150, APP_EDGE.bottom),
+    upCurve(JOBS.x, JOBS.top, APP.x - 150, APP_EDGE.bottom),
+    sweep(DB.x, DB.bottom, JOBS.left, BAND_Y),
+    sweep(RESUME.x, RESUME.bottom, FLAGS.right, BAND_Y),
   ];
   const BROKEN_LINKS = [2, 4]; // turn red with the failures
   // red tags 40 px under the side tiles they belong to
