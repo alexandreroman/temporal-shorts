@@ -298,12 +298,12 @@ and each chapter has a cinematic moment, listed in its visuals.
     ring turns slowly round the symbol, the tiles upright, the links
     following them.
 - **3:20** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
-  SDK, Pydantic AI, Google ADK, LangGraph.
+  SDK, Pydantic AI, Google ADK, LangGraph, and more.
   - Visuals: Under the ring, in the same rounded tile style, two rows of
     three tiles appear one by one with a calm pop: OpenAI Agents SDK, Vercel
     AI SDK, Pydantic AI, Google ADK, LangGraph (each with a violet sparkle),
     and a dashed "and more" tile with a plus, last, glowing softly.
-- **3:29** In September 2026, investors valued Temporal at $12.55 billion.
+- **3:30** In September 2026, investors valued Temporal at $12.55 billion.
   - Visuals: The chips and the symbol fall away as the camera starts to
     rise over a dark grid and parallax stars, riding the head of a glowing
     line: it reaches FEB 2022 $1.5B (Series B), MAR 2025 $1.72B (Series C)
