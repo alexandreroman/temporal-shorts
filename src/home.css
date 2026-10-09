@@ -1,4 +1,5 @@
-/* Home page: theme picker. Loaded after styles.css, which provides the fonts and the :root brand variables.
+/* Home page: theme picker. Loaded after styles.css, which provides the fonts, the :root brand variables (--glow
+   included) and the star rule (.home .sky i).
    Every rule is scoped to .home or to classes the video stage never uses, so neither page affects the other. */
 .home{
   min-height:100vh;font-family:'Brand',sans-serif;color:var(--ink);
@@ -6,11 +7,10 @@
 }
 .home .sky,.home .glow{position:fixed;pointer-events:none}
 .home .sky{inset:0}
-.home .sky i{position:absolute;width:2px;height:2px;background:var(--ink);border-radius:50%}
 /* Same glow as the stage band: anchored to the bottom edge, fading out with no hard edge. */
 .home .glow{
   left:-10%;right:-10%;bottom:0;height:min(520px,60vh);
-  background:radial-gradient(ellipse at 50% 100%,rgba(182,100,255,.20), rgba(68,76,231,.12) 40%, rgba(20,20,20,0) 70%);
+  background:var(--glow);
 }
 .home main{position:relative;width:100%;max-width:1720px;padding:36px clamp(20px,4vw,60px) 96px}
 .home header{text-align:center;margin-bottom:56px}
