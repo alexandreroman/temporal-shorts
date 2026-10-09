@@ -345,8 +345,8 @@
       place(s.symbolGlow, ...away(SYM.x, SYM.y), 1 + 0.04 * Math.sin(G * 1.6), symO * 0.9);
       const langAt = k => c[1] + 0.6 + k * 0.45;
       // once all have landed, the ring turns slowly clockwise, gathering speed over 3 s (keyed to t)
-      const orbitAt = langAt(LANGUAGES.length - 1) + 1.0;
-      const spin = Math.max(0, t - orbitAt);
+      const spinFrom = langAt(LANGUAGES.length - 1) + 1.0;
+      const spin = Math.max(0, t - spinFrom);
       const rot = (spin < 3 ? spin * spin / 6 : spin - 1.5) * 2 * Math.PI / ORBIT;
       s.langs.forEach((e, k) => {
         const p = ease(P(t, langAt(k), 0.8));
