@@ -211,7 +211,7 @@
       [[s.billed, billedGlow, notBilled], [s.booked, bookedGlow, 0]].forEach(([e, g, hint]) => {
         e.n.style.color = g > 0.5 ? C.neon : C.ink;
         e.style.borderColor = g > 0.5 || hint > 0.5 ? C.neon : C.line;
-        e.style.boxShadow = `0 0 ${Math.round(28 * g)}px rgba(219,255,75,${(0.3 * g).toFixed(2)})`;
+        e.style.boxShadow = `0 0 ${Math.round(28 * g)}px rgba(${RGB.neon},${(0.3 * g).toFixed(2)})`;
       });
       // the number pops when it changes (the model calls are saved far apart, so their swells never overlap)
       const billedSwell = Math.max(...[0, 2, 4].map(i => swell(t, saved[i], 0.12)));

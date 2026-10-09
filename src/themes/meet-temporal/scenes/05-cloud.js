@@ -125,7 +125,7 @@
     w.insertAdjacentHTML('beforeend',
       `<div class="code mono" style="position:absolute;left:${CODE.inset}px;right:${CODE.inset}px;top:${CODE.top}px;`
       + `height:${CODE.h}px;padding:10px ${CODE.inset - 1.5}px;font-size:19px;line-height:${CODE.line}px;`
-      + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--rs)">${code}</div>`);
+      + `background:rgba(${RGB.ink},.03);border:1.5px solid ${C.line};border-radius:var(--rs)">${code}</div>`);
     w.code = w.querySelector('.code');
     w.lines = [...w.code.children];
     return w;
@@ -154,15 +154,15 @@
     // the scan line that sweeps across the tile as data goes through it, behind the tile's text
     e.scan = E(e, '', '', {
       width: '3px', height: (CONV.h - 3) + 'px', zIndex: -1, background: C.neon,
-      boxShadow: '0 0 12px 3px rgba(219,255,75,.45)',
+      boxShadow: `0 0 12px 3px rgba(${RGB.neon},.45)`,
     });
     return e;
   }
   // A block of Temporal Cloud: its label (an icon and a name) at its top left, top px from its top
   const makeBlock = (root, icon, name, h, top = 20) => E(root,
     panelLabel(icon, name, `left:22px;top:${top}px`), 'tile', {
-      width: BLOCK.w + 'px', height: h + 'px', textAlign: 'left', background: 'rgba(68,76,231,.12)',
-      borderColor: 'rgba(68,76,231,.6)',
+      width: BLOCK.w + 'px', height: h + 'px', textAlign: 'left', background: `rgba(${RGB.uv},.12)`,
+      borderColor: `rgba(${RGB.uv},.6)`,
     });
   // A history row: its number, its name on the left, then two fixed columns on the right: its state, a quiet slate
   // label right-aligned 20 px left of the payload column, and its payload, encrypted (an empty slot for an event
@@ -171,7 +171,7 @@
     const chip = payload === null ? '<span style="flex:none;width:210px"></span>'
       : '<span class="pl" style="flex:none;display:flex;align-items:center;justify-content:center;gap:8px;'
         + 'width:210px;height:40px;'
-        + `background:rgba(182,100,255,.16);color:${C.violet};border-radius:var(--rs);font-size:18px">`
+        + `background:rgba(${RGB.violet},.16);color:${C.violet};border-radius:var(--rs);font-size:18px">`
         + `${ICON('lock', 18, C.violet, 2)}${payload}</span>`;
     // the state's trailing letter spacing is pulled back, so its last letter ends on the column's edge
     const label = `<span style="flex:none;width:130px;margin-right:20px;text-align:right;font-size:16px;`
@@ -182,7 +182,7 @@
       + label + chip,
       'mono', {
         width: VIEW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center',
-        padding: '0 20px 0 20px', fontSize: '22px', whiteSpace: 'nowrap', background: 'rgba(248,250,252,.03)',
+        padding: '0 20px 0 20px', fontSize: '22px', whiteSpace: 'nowrap', background: `rgba(${RGB.ink},.03)`,
         border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)',
       });
     e.pl = e.querySelector('.pl');
@@ -254,16 +254,16 @@
         fontSize: '17px', padding: '8px 14px', background: '#3A2766', color: C.ink,
         border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
-      s.polls = WORKERS.map(() => makeSpark(root, 12, '182,100,255'));
+      s.polls = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       // on a Worker's wire, a task or a schedule request travels as a violet spark, so no card ever covers the
       // Workers' text: the cards only travel on the connection, and pass under the Data Converter
-      s.taskSparks = TASKS.map(() => makeSpark(root, 12, '182,100,255'));
-      s.scheduleSparks = SCHEDULES.map(() => makeSpark(root, 12, '182,100,255'));
+      s.taskSparks = TASKS.map(() => makeSpark(root, 12, RGB.violet));
+      s.scheduleSparks = SCHEDULES.map(() => makeSpark(root, 12, RGB.violet));
       // shipPackage's result and the Workflow's completion, flying back as sparks
-      s.results = [0, 1].map(() => makeSpark(root, 14, '219,255,75'));
+      s.results = [0, 1].map(() => makeSpark(root, 14, RGB.neon));
       // the close-up: one result, in clear, then encrypted
       s.secret = E(root, SECRET, 'mono', {
-        fontSize: '20px', padding: '6px 14px', background: C.uvTint, color: '#141414', borderRadius: 'var(--rs)',
+        fontSize: '20px', padding: '6px 14px', background: C.uvTint, color: C.bg, borderRadius: 'var(--rs)',
         whiteSpace: 'nowrap',
       });
       // the Data Converter over everything that goes through it but the close-up's payload, which pauses over it
@@ -329,7 +329,7 @@
       rise(s.orch, BLOCK.x, ORCH.top + ORCH.h / 2, P(t, c[0] + 0.9, 0.5), 16);
       rise(s.pers, BLOCK.x, PERS.top + PERS.h / 2, P(t, c[0] + 1.1, 0.5), 16);
       const polled = Math.max(0, ...WORKERS.map((_, k) => win(t, pollAt(k) + 1.15, pollAt(k) + 1.6, 0.1)));
-      s.orch.style.borderColor = polled > 0.5 ? C.violet : 'rgba(68,76,231,.6)';
+      s.orch.style.borderColor = polled > 0.5 ? C.violet : `rgba(${RGB.uv},.6)`;
       // the close-up of c[2], slowly: chargeCard's result comes out of WORKER 2, goes to the Data Converter's gate,
       // just above it, and holds there in clear; the lock opens, the key glows and the lock snaps shut, the text
       // scrambling in place; then it leaves encrypted, crosses over and lands in its row
@@ -398,14 +398,14 @@
       else setAppStatus(w1, 'DONE', 'idle');
       w1.code.style.borderColor = lit >= 0 || (t >= a4 && t < done) ? C.violet : t >= done ? C.neon : C.line;
       w1.lines.forEach((e, j) => {
-        e.style.background = j === lit ? 'rgba(182,100,255,.28)' : j === paused ? 'rgba(182,100,255,.12)' : '';
+        e.style.background = j === lit ? `rgba(${RGB.violet},.28)` : j === paused ? `rgba(${RGB.violet},.12)` : '';
       });
       [[1, a1, leaveAt], [2, a3, r3]].forEach(([k, at, until]) => {
         const w = s.workers[k], running = t >= at && t < until;
         setAppStatus(w, running ? 'RUNNING' : t >= pollAt(k) ? 'POLLING' : '', running ? 'running' : 'idle');
         w.code.style.borderColor = running ? C.violet : C.line;
         const line = running ? Math.min(1, Math.floor((t - at) / TRIP.step)) : -1;
-        w.lines.forEach((e, j) => { e.style.background = j === line ? 'rgba(182,100,255,.28)' : ''; });
+        w.lines.forEach((e, j) => { e.style.background = j === line ? `rgba(${RGB.violet},.28)` : ''; });
       });
       // shipPackage's result and the Workflow's completion run back as sparks, over the gate, into their rows
       [[r3, 2, 6], [done, 0, 7]].forEach(([at, k, row], j) => {
@@ -428,7 +428,7 @@
         place(e, VIEW.w / 2 + Math.round((1 - rp) * 26), Math.round((rowInView(i) - scroll) * 100) / 100, 1, rp);
         const lit = win(t, rowAt[i], rowAt[i] + 0.7, 0.15) > 0.5;
         e.style.borderColor = lit ? C.violet : C.line;
-        if (e.pl) e.pl.style.boxShadow = lit ? '0 0 16px rgba(182,100,255,.6)' : '';
+        if (e.pl) e.pl.style.boxShadow = lit ? `0 0 16px rgba(${RGB.violet},.6)` : '';
       });
 
       // the close-up of c[2]: the rest dims while the payload makes its journey
@@ -488,7 +488,7 @@
       s.conv.shackle.setAttribute('transform', `translate(0 ${(-4 * open).toFixed(2)})`);
       s.conv.key.style.transform = `scale(${swell(t, snap - 0.25, 0.5)})`;
       const glow = Math.max(pulse * 0.7, win(t, snap - 0.1, snap + 0.5, 0.15));
-      s.conv.style.boxShadow = glow > 0 ? `0 0 ${Math.round(24 * glow)}px rgba(219,255,75,${(0.45 * glow).toFixed(3)})`
+      s.conv.style.boxShadow = glow > 0 ? `0 0 ${Math.round(24 * glow)}px rgba(${RGB.neon},${(0.45 * glow).toFixed(3)})`
         : '';
       // Temporal Cloud never sees your payloads, held
       setStatus(s.never, 'NEVER SEES YOUR PAYLOADS', 'ok');

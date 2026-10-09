@@ -90,7 +90,8 @@
       const root = s.cam = makeCamera(stage);
       s.glow = E(root, '', '', {
         width: '620px', height: '620px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,100,255,.35) 0%, rgba(68,76,231,.12) 45%, rgba(68,76,231,0) 70%)',
+        background: `radial-gradient(circle, rgba(${RGB.violet},.35) 0%, `
+          + `rgba(${RGB.uv},.12) 45%, rgba(${RGB.uv},0) 70%)`,
       });
       // the AI hub's halo, which travels with it at the end
       s.halo = E(root, '', '', {
@@ -102,7 +103,7 @@
       // hub to bubble links, redrawn every frame as the bubbles float
       s.links = HUBS.map(() => [0, 1, 2].map(() => path(s.svg, 'M 0 0 L 1 1', C.line, 1.5, false)));
       s.symbol = E(root, `<img src="${SYMBOL}" style="width:${SYMBOL_SIZE}px;height:${SYMBOL_SIZE}px;display:block">`);
-      s.pulses = HUBS.map(() => makeSpark(root, 16, '182,100,255'));
+      s.pulses = HUBS.map(() => makeSpark(root, 16, RGB.violet));
       s.hubs = HUBS.map(hub => makeHub(root, hub.name));
       // the AI hub's two words: WORKFLOWS fades as AI invades the screen, AI alone re-centering in the disc
       s.aiWord = s.hubs[AI].querySelector('b');
@@ -159,7 +160,7 @@
           hub.style.color = `rgba(255,255,255,${(1 - P(t, morphAt + 1.8, 0.5)).toFixed(3)})`;
           const light = swellP * (1 - contract) * 0.55;
           hub.style.background = light > 0
-            ? `radial-gradient(circle at 50% 42%, rgba(182,100,255,${light.toFixed(3)}), ${C.uv} 70%)` : C.uv;
+            ? `radial-gradient(circle at 50% 42%, rgba(${RGB.violet},${light.toFixed(3)}), ${C.uv} 70%)` : C.uv;
         } else {
           place(s.hubs[i], hub.x, hub.y, hp, clamp(hp * 2) * o);
         }

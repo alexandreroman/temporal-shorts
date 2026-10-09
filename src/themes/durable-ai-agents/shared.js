@@ -63,7 +63,7 @@ function makeApp(parent) {
 // to fit
 function makeBill(p, w = 380) {
   const e = makeCounter(p, 'LLM calls billed', w, { h: 200 });
-  const cell = '<i style="display:block;width:30px;height:16px;background:rgba(248,250,252,.08);'
+  const cell = `<i style="display:block;width:30px;height:16px;background:rgba(${RGB.ink},.08);`
     + 'border-radius:3px"></i>';
   e.insertAdjacentHTML('beforeend',
     `<div class="sq" style="display:flex;gap:6px;margin-top:10px">${cell.repeat(8)}</div>`);
@@ -74,7 +74,7 @@ function makeBill(p, w = 380) {
 // else neon
 function setBill(b, n, wasted, note = wasted ? `+${wasted} wasted` : '') {
   setCounter(b, n, note, { noteColor: wasted ? C.red : C.neon, numColor: wasted ? C.red : C.ink });
-  b.cells.forEach((q, i) => q.style.background = i < n ? (i >= n - wasted ? C.red : C.uv) : 'rgba(248,250,252,.08)');
+  b.cells.forEach((q, i) => q.style.background = i < n ? (i >= n - wasted ? C.red : C.uv) : `rgba(${RGB.ink},.08)`);
 }
 // The crash and the takeover of chapters 6 and 7. App instance A runs the agent from runAt, crashes at crashAt
 // (CRASHED, a red context panel, EMPTY from emptyAt), shaken by [sx, sy], then leaves like a dead machine from aDrop:

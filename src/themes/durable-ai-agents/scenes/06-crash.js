@@ -58,7 +58,7 @@
   const NEW_TAG = { x: APP.x, y: APP_TOP, w: 240 };
   // Red glow around a tile, k from 0 (none) to 1
   const redGlow = (e, k, blur) => {
-    const glow = `0 0 ${Math.round(blur * k)}px ${Math.round(4 * k)}px rgba(255,90,95,${(0.5 * k).toFixed(3)})`;
+    const glow = `0 0 ${Math.round(blur * k)}px ${Math.round(4 * k)}px rgba(${RGB.red},${(0.5 * k).toFixed(3)})`;
     e.style.boxShadow = k > 0 ? glow : '';
   };
   scene({

@@ -3,10 +3,10 @@
 {
   // one color per event type, the same on the dark stage and on the white console
   const EVENT_TYPES = {
-    TURN: { background: C.slate, color: '#141414', borderColor: C.slate },
+    TURN: { background: C.slate, color: C.bg, borderColor: C.slate },
     MODEL: { background: C.uv, color: '#FFFFFF', borderColor: C.uv },
-    TOOL: { background: C.ink, color: '#141414', borderColor: '#5B6475' },
-    APPROVAL: { background: C.violet, color: '#141414', borderColor: C.violet },
+    TOOL: { background: C.ink, color: C.bg, borderColor: C.slateDark },
+    APPROVAL: { background: C.violet, color: C.bg, borderColor: C.violet },
     TOKENS: { background: 'transparent', color: C.slate, borderColor: C.slate },
   };
   const TYPE_ORDER = ['TURN', 'MODEL', 'TOOL', 'APPROVAL', 'TOKENS'];
@@ -59,7 +59,7 @@
     return `<span class="mono" style="display:inline-block;width:132px;text-align:center;font-size:16px;`
       + `line-height:${CONSOLE_LINE}px;`
       + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
-      + `background:${css.background};color:${type === 'TOKENS' ? '#5B6475' : css.color}">${type}</span>`;
+      + `background:${css.background};color:${type === 'TOKENS' ? C.slateDark : css.color}">${type}</span>`;
   };
 
   scene({
@@ -115,7 +115,7 @@
       // console: a white card with mono event rows, a LIVE / REPLAY badge and a replay bar
       s.console = E(root,
         '<div class="mono" style="position:absolute;left:28px;top:26px;font-size:20px;letter-spacing:.14em;'
-        + `display:flex;gap:12px;align-items:center">${ICON('eye', 24, '#141414', 1.8)} CONSOLE</div>`,
+        + `display:flex;gap:12px;align-items:center">${ICON('eye', 24, C.bg, 1.8)} CONSOLE</div>`,
         'paper', { width: CONSOLE.w + 'px', height: CONSOLE.h + 'px' });
       const badgeCss = color => ({
         left: 'auto', right: '24px', top: '22px', display: 'flex', alignItems: 'center', gap: '8px',
@@ -124,19 +124,19 @@
       });
       s.live = E(s.console,
         `<span class="dot" style="width:10px;height:10px;border-radius:50%;background:${C.red}"></span>LIVE`,
-        'mono', { ...badgeCss(C.red), background: 'rgba(255,90,95,.1)' });
+        'mono', { ...badgeCss(C.red), background: `rgba(${RGB.red},.1)` });
       s.live.dot = s.live.querySelector('.dot');
       s.replay = E(s.console, `${ICON('play', 14, C.uv, 2.4)}REPLAY`, 'mono',
-        { ...badgeCss(C.uv), background: 'rgba(68,76,231,.1)' });
+        { ...badgeCss(C.uv), background: `rgba(${RGB.uv},.1)` });
       s.marks = [HUMAN_ROW, TOTAL_ROW].map(i => E(s.console, '', '', {
         left: '14px', top: (CONSOLE.row0 - 4 + i * CONSOLE.rowGap) + 'px', width: (CONSOLE.w - 28) + 'px',
         height: (CONSOLE.rowH + 8) + 'px', borderRadius: 'var(--rs)',
-        background: i === HUMAN_ROW ? 'rgba(182,100,255,.16)' : 'rgba(68,76,231,.12)',
+        background: i === HUMAN_ROW ? `rgba(${RGB.violet},.16)` : `rgba(${RGB.uv},.12)`,
         borderLeft: `4px solid ${i === HUMAN_ROW ? C.violet : C.uv}`,
       }));
       s.scan = E(s.console, '', '', {
         left: '14px', width: (CONSOLE.w - 28) + 'px', height: (CONSOLE.rowH + 8) + 'px',
-        background: 'rgba(68,76,231,.2)', borderRadius: 'var(--rs)',
+        background: `rgba(${RGB.uv},.2)`, borderRadius: 'var(--rs)',
       });
       s.rows = ROWS.map(([type, text], i) => E(s.console,
         `${chipHtml(type)}<span style="margin-left:20px;${i === TOTAL_ROW ? 'font-weight:700' : ''}">${text}</span>`,

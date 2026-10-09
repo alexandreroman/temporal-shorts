@@ -62,7 +62,7 @@
     + `text-transform:uppercase;color:var(--slate)">${name}</span>`,
     '', {
       width: SERVICE.w + 'px', height: SERVICE.h + 'px', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', gap: '12px', border: '1.5px solid #4B5363', borderRadius: 'var(--rs)',
+      justifyContent: 'center', gap: '12px', border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
     });
   // attempt marker: the attempt number while it runs, then a red x or a neon check
   const makeAttempt = (p, n) => {
@@ -72,7 +72,7 @@
       + `<span class="ok" style="position:absolute">${ICON('check', 20, C.neon, 2.6)}</span>`,
       '', {
         width: MARK + 'px', height: MARK + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#141414', border: '2px solid ' + C.violet, borderRadius: '50%',
+        background: C.bg, border: '2px solid ' + C.violet, borderRadius: '50%',
       });
     e.n = e.querySelector('.n'); e.ko = e.querySelector('.ko'); e.ok = e.querySelector('.ok');
     return e;
@@ -219,7 +219,7 @@
         setCodeLine(s.card, 0, win(t, c[1] + 2.3, c[1] + 6.0, 0.3), RUNNING, DECLARATION_LINES);
       } else {
         const waiting = active === SHIP && stepStates[SHIP] === 3;
-        const color = waiting ? 'rgba(255,90,95,.3)' : RUNNING;
+        const color = waiting ? `rgba(${RGB.red},.3)` : RUNNING;
         const line = awaitLine(WORKFLOWS_TS, Math.max(active, 0));
         setCodeLine(s.card, line, win(t, run[0], run[3] + 0.8, 0.25), color);
       }

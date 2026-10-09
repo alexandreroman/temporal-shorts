@@ -1,9 +1,16 @@
 // ===================== shared helpers (brand style, used by two or more themes)
+// Brand colors as RGB triplets, for translucent tints and glows: `rgba(${RGB.violet},.2)`
+const RGB = { ink: '248,250,252', uv: '68,76,231', violet: '182,100,255', neon: '219,255,75', red: '255,90,95' };
+// Brand colors; those that src/styles.css also declares share the name of its CSS variable (--bg: C.bg)
 const C = {
   uv: '#444CE7', violet: '#B664FF', neon: '#DBFF4B', red: '#FF5A5F', ink: '#F8FAFC', slate: '#94A3B8', line: '#3A4150',
+  // Space Black: the stage background, and the text on white cards
+  bg: '#141414',
+  // a dark slate for labels on white cards, a lighter rule for pill borders and dashed frames on the stage
+  slateDark: '#5B6475', lineLight: '#4B5363',
   // on white cards: light UV and neon tints (model and tool results), a darker neon for lines, the violet highlight,
   // a light violet tint (a Workflow handed to a new instance)
-  uvTint: '#E6E7FC', neonTint: '#F3FBD2', neonDark: '#9DB82A', highlight: 'rgba(182,100,255,.28)',
+  uvTint: '#E6E7FC', neonTint: '#F3FBD2', neonDark: '#9DB82A', highlight: `rgba(${RGB.violet},.28)`,
   violetTint: '#F2E6FF',
 };
 // URL of this script, in src/: asset URLs resolve against it, not against the page, as theme pages live in
@@ -60,7 +67,7 @@ const panelLabel = (icon, text, css) => '<div class="lbl" style="position:absolu
 // Violet spinner ring of size px, its track at alpha; css: extra styles (position, opacity). Spin it with a
 // rotate() transform.
 const spinnerRing = (size, alpha = 0.3, css = '') => `<div class="spin" style="${css}width:${size}px;`
-  + `height:${size}px;border:3px solid rgba(182,100,255,${alpha});border-top-color:${C.violet};border-radius:50%">`
+  + `height:${size}px;border:3px solid rgba(${RGB.violet},${alpha});border-top-color:${C.violet};border-radius:50%">`
   + '</div>';
 
 // ---------- title and end cards
@@ -182,7 +189,7 @@ function showRow(e, p, dx = 26, round = false) {
 }
 // Neon token that runs round an agentic loop
 const makeToken = root => E(root, '', '', {
-  width: '22px', height: '22px', background: C.neon, boxShadow: '0 0 22px 6px rgba(219,255,75,.45)',
+  width: '22px', height: '22px', background: C.neon, boxShadow: `0 0 22px 6px rgba(${RGB.neon},.45)`,
   borderRadius: '5px',
 });
 
@@ -291,7 +298,7 @@ function makeMemory(p, w, h, { label = 'Context', labelAt = [22, 16], emptyText 
 function makeMemBlocks(p, n, w, h) {
   return Array.from({ length: n }, (_, i) => {
     const isTool = !isLLMRow(i);
-    const icon = ICON(LUNCH_STEPS[Math.floor(i / 2)].icon, Math.round(h / 2), isTool ? '#141414' : C.uv, 1.8);
+    const icon = ICON(LUNCH_STEPS[Math.floor(i / 2)].icon, Math.round(h / 2), isTool ? C.bg : C.uv, 1.8);
     const b = E(p, icon, '', {
       width: w + 'px', height: h + 'px', background: isTool ? C.neonTint : C.uvTint, borderRadius: 'var(--rs)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -392,7 +399,7 @@ function setArrivalGlow(panel, t, at, out) {
   }
   const pulse = 0.5 + 0.5 * Math.sin(G * Math.PI * 2.4);
   const blur = Math.round(20 + 16 * pulse), spread = Math.round(2 + 4 * pulse);
-  panel.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(182,100,255,${(0.6 * k).toFixed(3)})`;
+  panel.style.boxShadow = `0 0 ${blur}px ${spread}px rgba(${RGB.violet},${(0.6 * k).toFixed(3)})`;
   panel.style.borderColor = C.violet;
 }
 // "New Worker" or "New instance" fixedTag on the new instance, violet and solid (the panel border does not show
@@ -430,11 +437,11 @@ function statusTag(p, { font = 15, pad = '4px 10px', icon = 16, border = true } 
 // cross), reused (white on UV), wait (violet outline), waiting (white on violet, with an hourglass) and closed
 // (slate outline)
 const STATUS_KINDS = {
-  saved: { background: '#141414', color: C.neon, borderColor: 'transparent', icon: ['check', C.neon, 2.6] },
-  ok: { background: 'rgba(219,255,75,.08)', color: C.neon, borderColor: C.neon, icon: ['check', C.neon, 2.6] },
-  denied: { background: 'rgba(255,90,95,.1)', color: C.red, borderColor: C.red, icon: ['x', C.red, 2.6] },
+  saved: { background: C.bg, color: C.neon, borderColor: 'transparent', icon: ['check', C.neon, 2.6] },
+  ok: { background: `rgba(${RGB.neon},.08)`, color: C.neon, borderColor: C.neon, icon: ['check', C.neon, 2.6] },
+  denied: { background: `rgba(${RGB.red},.1)`, color: C.red, borderColor: C.red, icon: ['x', C.red, 2.6] },
   reused: { background: C.uv, color: '#FFFFFF', borderColor: 'transparent' },
-  wait: { background: 'rgba(182,100,255,.14)', color: C.violet, borderColor: C.violet },
+  wait: { background: `rgba(${RGB.violet},.14)`, color: C.violet, borderColor: C.violet },
   waiting: { background: C.violet, color: '#FFFFFF', borderColor: 'transparent', icon: ['hourglass', '#FFFFFF', 2.2] },
   closed: { background: 'transparent', color: C.slate, borderColor: C.slate },
 };
@@ -508,7 +515,7 @@ function makeLinesApp(p, name, w, h, lines, opts) {
   const cardW = w - 48, cardH = h - cardTop - 24;
   app.insertAdjacentHTML('beforeend',
     `<div style="position:absolute;left:24px;top:${cardTop}px;width:${cardW}px;height:${cardH}px;`
-    + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
+    + `background:rgba(${RGB.ink},.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
     + panelLabel('code', label, 'left:20px;top:16px;padding-left:0') + emptyNote(emptyTop) + '</div>');
   app.card = app.lastElementChild;
   app.empty = app.card.querySelector('.empty');
@@ -535,7 +542,7 @@ function setCardLine(app, i, state, fall = 0) {
   const line = app.lines[i];
   const running = state === 'running';
   line.tx.style.color = state === 'todo' ? C.slate : C.ink;
-  line.style.background = running ? 'rgba(182,100,255,.2)' : 'transparent';
+  line.style.background = running ? `rgba(${RGB.violet},.2)` : 'transparent';
   line.style.borderLeftColor = running ? C.violet : 'transparent';
   line.ok.style.opacity = state === 'done' ? 1 : 0;
   fallOut(line, fall, line.tilt);
@@ -579,13 +586,13 @@ function makeHistoryCard(p, rowsHtml, opts) {
   } = opts;
   const card = E(p,
     `<div class="mono" style="position:absolute;left:26px;top:${headerTop}px;font-size:${headerFont}px;`
-    + 'letter-spacing:.14em;color:#141414;display:flex;gap:10px;align-items:center">'
-    + `${ICON('book', headerFont + 4, '#141414', 1.8)} EVENT HISTORY</div>`,
+    + `letter-spacing:.14em;color:${C.bg};display:flex;gap:10px;align-items:center">`
+    + `${ICON('book', headerFont + 4, C.bg, 1.8)} EVENT HISTORY</div>`,
     'paper', { width: w + 'px', height: h + 'px' });
   if (crash) {
     card.kept = E(card, '', '', {
       left: '14px', top: crash.keptTop + 'px', width: (w - 28) + 'px', height: crash.keptH + 'px',
-      background: 'rgba(68,76,231,.08)', borderLeft: '4px solid ' + C.uv, borderRadius: 'var(--rs)',
+      background: `rgba(${RGB.uv},.08)`, borderLeft: '4px solid ' + C.uv, borderRadius: 'var(--rs)',
     });
     card.cut = E(card,
       `<span class="mono" style="position:absolute;left:${crash.labelX};top:-10px;transform:translateX(-50%);`
@@ -641,7 +648,7 @@ function markCrash(card, t, crashAt) {
 function makeResultCard(p, uv = true, label = 'RESULT') {
   const text = `<span class="mono" style="font-size:15px;letter-spacing:.12em;padding-left:.12em">${label}</span>`;
   return E(p, text, '', {
-    background: uv ? C.uvTint : C.neonTint, color: '#141414', padding: '6px 14px',
+    background: uv ? C.uvTint : C.neonTint, color: C.bg, padding: '6px 14px',
     borderLeft: `5px solid ${uv ? C.uv : C.neonDark}`, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
   });
 }

@@ -22,7 +22,7 @@
         + `background:${C.red};transform:rotate(-35deg)"></div>`;
       s.no = ['sun', 'mail'].map(n => E(root, ICON(n, 54, C.slate, 1.6) + strike));
       s.box = E(root, '', '', {
-        width: '1000px', height: '210px', border: '1.5px dashed #4B5363', borderRadius: 'var(--r)',
+        width: '1000px', height: '210px', border: `1.5px dashed ${C.lineLight}`, borderRadius: 'var(--r)',
       });
       s.boxL = E(root, 'Available tools', 'lbl');
       const tools = [['sun', 'Weather'], ['cal', 'Calendar'], ['mail', 'Email'], ['search', 'Web search']];
@@ -33,7 +33,7 @@
       const bar = (color, width) =>
         `<div style="height:12px;background:${color};margin:6px 0;width:${width}px;border-radius:3px"></div>`;
       s.bundle = E(root,
-        '<div class="mono" style="font-size:15px;letter-spacing:.12em;color:#5B6475;margin-bottom:8px">'
+        `<div class="mono" style="font-size:15px;letter-spacing:.12em;color:${C.slateDark};margin-bottom:8px">`
         + 'FULL CONTEXT</div>'
         + bar(C.uvTint, 260) + bar('#F2E6FF', 200) + bar('#E4F78F', 230),
         'paper', { padding: '12px 20px', borderLeft: '6px solid ' + C.uv });

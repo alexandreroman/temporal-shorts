@@ -19,7 +19,7 @@
     const ripple = 0.06 * Math.sin(d * 22);
     return {
       x, y, off: IGNITE_D * clamp(0.82 * d + ripple + 0.12 * hash(i * 3 + 3)),
-      rgb: hash(i * 7) < 0.55 ? '248,250,252' : hash(i * 7) < 0.85 ? '182,100,255' : '68,76,231',
+      rgb: hash(i * 7) < 0.55 ? RGB.ink : hash(i * 7) < 0.85 ? RGB.violet : RGB.uv,
     };
   });
   const OFFSETS = DOTS.map(dot => dot.off).sort((a, b) => a - b);
@@ -126,7 +126,7 @@
   // A number in the brand font with a violet glow, centered on its box
   const makeNumber = (root, font) => E(root, '', '', {
     fontSize: font + 'px', fontWeight: 700, lineHeight: 1, letterSpacing: '-.02em', whiteSpace: 'nowrap',
-    fontVariantNumeric: 'tabular-nums', color: C.ink, textShadow: '0 0 40px rgba(182,100,255,.65)',
+    fontVariantNumeric: 'tabular-nums', color: C.ink, textShadow: `0 0 40px rgba(${RGB.violet},.65)`,
   });
   const makeLabel = (root, text) => E(root, text, 'lbl', { fontSize: '24px', color: C.slate, whiteSpace: 'nowrap' });
   // A chip: its content centered, a fixed size; css: its colors
@@ -164,10 +164,10 @@
       s.chart.appendChild(s.chartCanvas);
       s.bloom = E(root, '', '', {
         width: '2400px', height: '1400px',
-        background: 'radial-gradient(circle at center, rgba(255,255,255,.85) 0, rgba(182,100,255,.45) 18%, '
-          + 'rgba(68,76,231,.15) 36%, rgba(68,76,231,0) 60%)',
+        background: `radial-gradient(circle at center, rgba(255,255,255,.85) 0, rgba(${RGB.violet},.45) 18%, `
+          + `rgba(${RGB.uv},.15) 36%, rgba(${RGB.uv},0) 60%)`,
       });
-      s.rings = makeRipples(root, 3, '219,255,75');
+      s.rings = makeRipples(root, 3, RGB.neon);
       // beat 1's canvas over the band
       s.dotsCanvas = document.createElement('canvas');
       s.dotsCanvas.width = BAND.w; s.dotsCanvas.height = BAND.h;
@@ -175,8 +175,8 @@
       s.dots.appendChild(s.dotsCanvas);
       s.burst = E(root, '', '', {
         width: '900px', height: '900px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(219,255,75,.5) 0, rgba(182,100,255,.25) 35%, '
-          + 'rgba(182,100,255,0) 70%)',
+        background: `radial-gradient(circle, rgba(${RGB.neon},.5) 0, rgba(${RGB.violet},.25) 35%, `
+          + `rgba(${RGB.violet},0) 70%)`,
       });
       s.custNum = makeNumber(root, 200);
       s.custLabel = makeLabel(root, 'Paying customers');
@@ -185,7 +185,7 @@
       // the stamp: neon, a fixed even width, so it rests on whole pixels
       // sized to its text (307 px with its padding) with a margin
       s.stamp = fixedTag(root, '×2 in a year', 'neon solid big', 316);
-      s.stamp.style.boxShadow = '0 0 30px rgba(219,255,75,.4)';
+      s.stamp.style.boxShadow = `0 0 30px rgba(${RGB.neon},.4)`;
 
       // beat 2: the links under the chips, the symbol, the chips, and the filter that draws the logos in ink
       s.links = svgLayer(root);
@@ -212,7 +212,8 @@
       root.appendChild(s.inkDefs);
       s.symbolGlow = E(root, '', '', {
         width: '460px', height: '460px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,100,255,.35) 0, rgba(68,76,231,.12) 45%, rgba(68,76,231,0) 70%)',
+        background: `radial-gradient(circle, rgba(${RGB.violet},.35) 0, `
+          + `rgba(${RGB.uv},.12) 45%, rgba(${RGB.uv},0) 70%)`,
       });
       s.symbol = E(root, `<img src="${SYMBOL}" style="width:${SYMBOL_SIZE}px;height:${SYMBOL_SIZE}px;display:block">`);
       // the logo alone, the subtitle names the language; whole-pixel sizes keep its edges crisp
@@ -245,7 +246,7 @@
         true);
       s.bracketTick = path(s.links, `M ${BRACKET.x - BRACKET.tick} ${BRACKET.bottom} L ${BRACKET.x + BRACKET.tick} `
         + `${BRACKET.bottom}`, C.violet, 2.5, false);
-      s.bracketPulse = makeSpark(root, 14, '182,100,255');
+      s.bracketPulse = makeSpark(root, 14, RGB.violet);
       s.bracketLabel = E(root, '×8 since 2022', 'mono', {
         fontSize: '22px', lineHeight: '28px', letterSpacing: '.12em', paddingLeft: '.12em', textTransform: 'uppercase',
         color: C.ink, whiteSpace: 'nowrap',
@@ -254,7 +255,7 @@
         width: '80px', fontSize: '16px', lineHeight: '20px', color: C.slate, whiteSpace: 'nowrap',
       }));
       s.aiTag = fixedTag(root, 'Core infrastructure for AI', 'neon solid', 440);
-      s.aiTag.style.boxShadow = '0 0 26px rgba(219,255,75,.3)';
+      s.aiTag.style.boxShadow = `0 0 26px rgba(${RGB.neon},.3)`;
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
@@ -301,7 +302,7 @@
             const x = lerp(lerp(x0, x1, sp), sx, f) - BAND_LEFT, y = lerp(y1, sy, f) - BAND_TOP;
             const pop = P(t, teamIn + 0.4 * hash(n), 0.3);
             g.globalAlpha = teamO * pop;
-            g.fillStyle = half ? 'rgb(219,255,75)' : 'rgb(248,250,252)';
+            g.fillStyle = half ? `rgb(${RGB.neon})` : `rgb(${RGB.ink})`;
             const r = sp > 0 && sp < 1 ? 4 : 3;
             g.fillRect(x - r / 2, y - r / 2, r, r);
           });
@@ -371,7 +372,7 @@
       });
       // the last one, and more, glows softly as it arrives
       const more = win(t, aiAt(AI.length) + 0.2, aiAt(AI.length) + 1.4, 0.4);
-      s.ais[AI.length].style.boxShadow = more > 0 ? `0 0 ${Math.round(30 * more)}px rgba(182,100,255,${
+      s.ais[AI.length].style.boxShadow = more > 0 ? `0 0 ${Math.round(30 * more)}px rgba(${RGB.violet},${
         (0.5 * more).toFixed(3)})` : '';
 
       // ---------- beat 3
@@ -420,7 +421,7 @@
         const drawn = [0, 1, 2].filter(i => i < seg || (i === seg && t >= segs[0][0]));
         drawn.forEach(i => {
           const pts = curvePoints(i, i < seg ? 1 : u);
-          cg.shadowColor = 'rgba(182,100,255,.9)';
+          cg.shadowColor = `rgba(${RGB.violet},.9)`;
           cg.shadowBlur = 18;
           cg.strokeStyle = i === 2 ? '#DBFF4B' : '#B664FF';
           cg.lineWidth = i === 2 ? 5 : 4;
@@ -438,7 +439,7 @@
           cg.fillStyle = i === 3 ? '#DBFF4B' : '#F8FAFC';
           cg.beginPath(); cg.arc(x, y, 7 + 8 * fl, 0, Math.PI * 2); cg.fill();
           if (fl > 0) {
-            cg.strokeStyle = `rgba(219,255,75,${(0.8 * fl).toFixed(3)})`;
+            cg.strokeStyle = `rgba(${RGB.neon},${(0.8 * fl).toFixed(3)})`;
             cg.lineWidth = 3;
             cg.beginPath(); cg.arc(x, y, 14 + 40 * (1 - fl), 0, Math.PI * 2); cg.stroke();
           }
@@ -448,8 +449,8 @@
           const [hx, hy] = toScreen(head);
           const glow = cg.createRadialGradient(hx, hy, 0, hx, hy, 46);
           glow.addColorStop(0, 'rgba(255,255,255,.95)');
-          glow.addColorStop(0.3, 'rgba(219,255,75,.6)');
-          glow.addColorStop(1, 'rgba(219,255,75,0)');
+          glow.addColorStop(0.3, `rgba(${RGB.neon},.6)`);
+          glow.addColorStop(1, `rgba(${RGB.neon},0)`);
           cg.fillStyle = glow;
           cg.beginPath(); cg.arc(hx, hy, 46, 0, Math.PI * 2); cg.fill();
         }
@@ -460,7 +461,7 @@
           if (age <= 0 || age >= sp.life) return;
           const at = a => [px + Math.cos(sp.a) * sp.v * a, py + Math.sin(sp.a) * sp.v * a + 380 * a * a];
           const [x0, y0] = at(Math.max(0, age - 0.06)), [x1, y1] = at(age);
-          cg.strokeStyle = `rgba(219,255,75,${(1 - age / sp.life).toFixed(3)})`;
+          cg.strokeStyle = `rgba(${RGB.neon},${(1 - age / sp.life).toFixed(3)})`;
           cg.lineWidth = 2.5;
           cg.beginPath(); cg.moveTo(x0, y0); cg.lineTo(x1, y1); cg.stroke();
         });

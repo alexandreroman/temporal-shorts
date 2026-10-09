@@ -7,7 +7,7 @@
     const e = iconTile(p, icon, null, ROW.size, ROW.size);
     e.insertAdjacentHTML('beforeend',
       '<div class="ok" style="position:absolute;right:-16px;top:-16px;width:38px;height:38px;display:flex;'
-      + `align-items:center;justify-content:center;background:#141414;border:1.5px solid ${C.neon};`
+      + `align-items:center;justify-content:center;background:${C.bg};border:1.5px solid ${C.neon};`
       + `border-radius:var(--rs)">${ICON('check', 24, C.neon, 2.6)}</div>`);
     e.ok = e.querySelector('.ok');
     return e;

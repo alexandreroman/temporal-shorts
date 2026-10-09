@@ -606,7 +606,7 @@
   // ---------- mouse pointer (its tip at the top left corner of the element) and its click ring
   const makePointer = win => E(win,
     '<svg width="30" height="36" viewBox="0 0 20 24" style="display:block"><path d="M2 2v17l4.5-4 3 7 3-1.3-2.9-6.7'
-    + `h5.9z" fill="${C.ink}" stroke="#141414" stroke-width="1.4" stroke-linejoin="round"/></svg>`);
+    + `h5.9z" fill="${C.ink}" stroke="${C.bg}" stroke-width="1.4" stroke-linejoin="round"/></svg>`);
   const makeClickRing = win => part(win, '', { border: `2px solid ${C.ink}`, borderRadius: '50%' });
   // where the pointer tip clicks, in window pixels: just below the middle of a row's Workflow ID on the list, on
   // the Back to Workflows link or on the Timeline tab of a Workflow page

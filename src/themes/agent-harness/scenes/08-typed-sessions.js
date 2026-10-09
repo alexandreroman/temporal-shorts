@@ -104,7 +104,7 @@
     }));
     return e;
   };
-  const PAIR_TINT = 'rgba(182,100,255,.16)', BIND_TINT = 'rgba(68,76,231,.24)';
+  const PAIR_TINT = `rgba(${RGB.violet},.16)`, BIND_TINT = `rgba(${RGB.uv},.24)`;
 
   // binding badge on the UI: the field of the agent's typed state shown there (e.g. trip.items)
   const badgeHtml = (cls, field) => `<span class="${cls} pill uv" style="text-transform:none;letter-spacing:.02em;`
@@ -200,7 +200,7 @@
       s.linkL = E(root, 'Typed session', 'lbl', { fontSize: '16px', color: C.ink });
       s.pulse = E(root, '', '', {
         width: '14px', height: '14px', background: C.uv, borderRadius: '3px',
-        boxShadow: '0 0 14px 4px rgba(68,76,231,.6)',
+        boxShadow: `0 0 14px 4px rgba(${RGB.uv},.6)`,
       });
       // the typed SDKs: one row under the window, its content pushed to the box's right edge, which sits on the
       // window's right edge; a box of fixed even width rests on whole pixels (its content is about 428 px wide)

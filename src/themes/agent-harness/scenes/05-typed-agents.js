@@ -17,7 +17,7 @@
   // center of row i, measured from the card's center
   const rowDy = i => CARD.pad + CARD.head + CARD.rule + CARD.cols + CARD.rowGap
     + i * (CARD.rowH + CARD.rowGap) + CARD.rowH / 2 - CARD_H / 2;
-  const ROW_BG = 'rgba(248,250,252,.04)';
+  const ROW_BG = `rgba(${RGB.ink},.04)`;
   const ROW_CSS = `display:flex;align-items:center;height:${CARD.rowH}px;margin-top:${CARD.rowGap}px;padding:0 16px;`
     + `border:1.5px solid transparent;border-radius:var(--rs);background:${ROW_BG}`;
 
@@ -88,7 +88,7 @@
       + `<span class="mono" style="flex:1;font-size:22px;white-space:nowrap">${signature}</span>`
       + '<span class="mono" style="width:40px;text-align:center;font-size:22px;color:var(--slate)">→</span>'
       + `<span style="width:${outW}px"><span class="mono" style="font-size:22px;padding:2px 10px;border-radius:4px;`
-      + `border:1.5px solid ${C.uv};background:rgba(68,76,231,.18)">${out}</span></span></div>`).join('');
+      + `border:1.5px solid ${C.uv};background:rgba(${RGB.uv},.18)">${out}</span></span></div>`).join('');
     const cols = `<span style="flex:1">INPUT</span><span style="width:${outW + 40}px;padding-left:40px">OUTPUT</span>`;
     return makeAgentCard(p, 'TravelAgent', 'Operations', cols, rows, TRAVEL.w);
   };
@@ -99,7 +99,7 @@
       + '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px">'
       + '<b class="mono" style="font-size:22px;line-height:26px">travel_plan_trip</b>'
       + '<span class="from mono" style="display:inline-block;font-size:16px;line-height:20px;letter-spacing:.06em;'
-      + `padding:2px 8px;border-radius:4px;border:1.5px solid ${C.uv};background:rgba(68,76,231,.16);`
+      + `padding:2px 8px;border-radius:4px;border:1.5px solid ${C.uv};background:rgba(${RGB.uv},.16);`
       + 'color:var(--slate);transform-origin:left center">'
       + 'FROM <span style="color:var(--ink)">TravelAgent</span></span></div>'
       + `<span class="ok" style="margin-left:auto;display:flex">${ICON('check', 28, C.neon, 2.6)}</span></div>`
@@ -113,14 +113,14 @@
   // Its height is 12 + 28 + 6 + 28 per field + 14 px (VALUE.requestH, VALUE.resultH).
   const makeValueCard = (p, label, title, fields, accent) => E(p,
     '<div style="display:flex;align-items:baseline;gap:12px;line-height:28px">'
-    + `<span class="mono" style="font-size:16px;letter-spacing:.12em;color:#5B6475">${label}</span>`
+    + `<span class="mono" style="font-size:16px;letter-spacing:.12em;color:${C.slateDark}">${label}</span>`
     + `<b class="mono" style="font-size:22px">${title}</b></div>`
     + `<div class="mono" style="font-size:20px;line-height:28px;margin-top:6px">${fields}</div>`,
     'paper', {
       width: VALUE.w + 'px', padding: '12px 20px 14px', whiteSpace: 'nowrap', borderLeft: `6px solid ${accent}`,
       boxShadow: '0 10px 30px rgba(0,0,0,.45)',
     });
-  const field = (name, value) => `<span style="color:#5B6475">${name}:</span> ${value}`;
+  const field = (name, value) => `<span style="color:${C.slateDark}">${name}:</span> ${value}`;
 
   scene({
     chapter: 5, title: 'Typed, composable agents',
@@ -272,8 +272,8 @@
       const working = win(t, landed + 0.15, answered + 0.2, 0.2);
       const travelPlan = s.travel.rows[0];
       travelPlan.style.borderColor = working > 0.5 ? C.violet : 'transparent';
-      travelPlan.style.background = working > 0 ? `rgba(182,100,255,${(0.16 * working).toFixed(3)})` : ROW_BG;
-      travelPlan.style.boxShadow = `0 0 ${Math.round(22 * working)}px rgba(182,100,255,${(0.35 * working).toFixed(2)})`;
+      travelPlan.style.background = working > 0 ? `rgba(${RGB.violet},${(0.16 * working).toFixed(3)})` : ROW_BG;
+      travelPlan.style.boxShadow = `0 0 ${Math.round(22 * working)}px rgba(${RGB.violet},${(0.35 * working).toFixed(2)})`;
 
       // step 4: the typed result comes back and the tool row checks
       const received = answered + 1.5;
@@ -295,7 +295,7 @@
       // the card is live (UV border and glow) from the start until it is closed (its content dims, see phase 1)
       const live = P(t, started + 0.3, 0.4) * (1 - closed);
       s.travel.style.borderColor = mix(C.line, C.uv, live);
-      s.travel.style.boxShadow = `0 0 ${Math.round(28 * live)}px rgba(68,76,231,${(0.35 * live).toFixed(2)})`;
+      s.travel.style.boxShadow = `0 0 ${Math.round(28 * live)}px rgba(${RGB.uv},${(0.35 * live).toFixed(2)})`;
     }
   });
 }

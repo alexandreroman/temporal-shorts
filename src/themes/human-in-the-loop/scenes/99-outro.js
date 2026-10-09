@@ -11,7 +11,7 @@
       s.t = makeEndCard(root, 'Human-in-the-Loop', 'WAITS AS LONG AS IT TAKES');
       s.person = makeAvatar(root, '', 120);
       // neon check badge on the person: the decision is in
-      s.badge = E(root, ICON('check', 26, '#141414', 3), '', {
+      s.badge = E(root, ICON('check', 26, C.bg, 3), '', {
         width: '44px', height: '44px', background: C.neon, borderRadius: '50%', display: 'flex',
         alignItems: 'center', justifyContent: 'center',
       });

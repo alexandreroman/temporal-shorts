@@ -34,7 +34,7 @@
       s.days = [0, 1, 2, 3, 4, 5].map(d => E(root, 'Day ' + d, 'lbl', { fontSize: '22px' }));
       s.marker = E(root, ICON('hourglass', 30, C.ink, 2), '', {
         width: '54px', height: '54px', background: C.violet, borderRadius: '50%', display: 'flex',
-        alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 22px 6px rgba(182,100,255,.4)',
+        alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 22px 6px rgba(${RGB.violet},.4)`,
       });
       s.events = EVENTS.map(([, icon, label]) => ({
         tile: iconTile(root, icon, null, 124, 124, C.ink, { size: 58, stroke: 1.6 }),

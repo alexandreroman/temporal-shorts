@@ -78,23 +78,23 @@
       const doneTop = rowTop(HISTORY.length - 1) + HROW.h + (HIST.h - rowTop(HISTORY.length - 1) - HROW.h - DONE_H) / 2;
       s.history.done = E(s.history, `${ICON('check', 24, C.neon, 2.6)} ORDER COMPLETE`, 'mono', {
         left: '50%', top: doneTop + 'px', width: '270px', height: DONE_H + 'px', fontSize: '20px',
-        letterSpacing: '.12em', color: C.neon, background: '#141414', padding: '0 18px 0 16px',
+        letterSpacing: '.12em', color: C.neon, background: C.bg, padding: '0 18px 0 16px',
         borderRadius: 'var(--rs)', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center',
       });
       // each result runs as a neon pulse along a cable into the history; replayed results run back in violet
       s.cableSvg = svgLayer(root);
       s.cables = STEPS.map((_, i) => path(s.cableSvg, cableD(i), C.violet, 2, false));
-      s.pulses = STEPS.map(() => makeSpark(root, 16, '219,255,75'));
-      s.backPulses = [0, 1].map(() => makeSpark(root, 16, '182,100,255'));
+      s.pulses = STEPS.map(() => makeSpark(root, 16, RGB.neon));
+      s.backPulses = [0, 1].map(() => makeSpark(root, 16, RGB.violet));
       s.newTag = tag(root, 'New app instance', 'violet solid');
       // instance B boots behind a scanline
       s.bootLine = E(root, '', '', {
-        width: APP.w + 'px', height: '3px', background: C.violet, boxShadow: '0 0 18px 4px rgba(182,100,255,.6)',
+        width: APP.w + 'px', height: '3px', background: C.violet, boxShadow: `0 0 18px 4px rgba(${RGB.violet},.6)`,
       });
       s.flash = makeFlash(root);
       // the crash glitch: torn horizontal bars and scanlines over the whole stage
       s.glitchBars = Array.from({ length: GLITCH_BARS }, (_, j) => E(root, '', '', {
-        width: '1920px', background: j % 2 ? 'rgba(68,76,231,.45)' : 'rgba(255,90,95,.45)',
+        width: '1920px', background: j % 2 ? `rgba(${RGB.uv},.45)` : `rgba(${RGB.red},.45)`,
       }));
       s.scanlines = E(root, '', '', {
         width: '2400px', height: '1400px',
@@ -201,8 +201,8 @@
       const frame = Math.floor(t * 24);
       const k = win(t, crashAt - 0.02, crashAt + 0.55, 0.05) * (0.5 + 0.5 * hash(frame));
       const fringe = Math.round(2 + 10 * k * hash(frame + 1));
-      s.cam.style.filter = k > 0.01 ? `drop-shadow(${fringe}px 0 0 rgba(255,90,95,.8)) `
-        + `drop-shadow(${-fringe}px 0 0 rgba(68,76,231,.8))` : 'none';
+      s.cam.style.filter = k > 0.01 ? `drop-shadow(${fringe}px 0 0 rgba(${RGB.red},.8)) `
+        + `drop-shadow(${-fringe}px 0 0 rgba(${RGB.uv},.8))` : 'none';
       s.glitchBars.forEach((e, j) => {
         // hidden outside the glitch, and left in place there, so the scene stays still for the live player
         if (k <= 0.01) {

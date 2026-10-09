@@ -55,7 +55,7 @@
   ];
   const LINE_COLOR = 'rgba(180,185,255,.7)';
   const LINE_OPACITY = 0.86; // at rest about rgba(180,185,255,.6); the glow pulse brings the lines to full
-  const BRIGHT_STAR = { size: 10, rgb: '248,250,252' };
+  const BRIGHT_STAR = { size: 10, rgb: RGB.ink };
   const DIM_STAR = { size: 6, rgb: '232,234,255' };
 
   // ---------- title: "Meet" and the official lockup, read as one title "Meet Temporal"
@@ -137,7 +137,7 @@
       // a soft violet glow behind Ziggy, lit by the pulse once the constellation is complete
       s.halo = E(root, '', '', {
         width: '640px', height: '520px', borderRadius: '50%',
-        background: 'radial-gradient(closest-side, rgba(68,76,231,.32), rgba(68,76,231,0))',
+        background: `radial-gradient(closest-side, rgba(${RGB.uv},.32), rgba(${RGB.uv},0))`,
       });
       s.svg = svgLayer(root);
       s.outline = path(s.svg, polylinePath(OUTLINE, true), LINE_COLOR, 2, false);
@@ -156,7 +156,7 @@
         return { e: makeSpark(root, look.size, look.rgb), x: sx, y: sy, bright,
           at: STARS_AT + byHash.indexOf(i) * STAR_STEP };
       });
-      s.pen = makeSpark(root, 10, '248,250,252');
+      s.pen = makeSpark(root, 10, RGB.ink);
 
       s.card = makeTitleCard(root, 'DURABLE EXECUTION FOR APPS AND AI AGENTS');
     },

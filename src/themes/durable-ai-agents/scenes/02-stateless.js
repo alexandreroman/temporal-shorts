@@ -23,7 +23,7 @@
       s.u2 = makeCard(root, "What's my name?", 'user');
       s.r2 = makeCard(root, "I don't know. You haven't told me.", 'bad');
       s.tag1 = tag(root, 'Call 1'); s.tag2 = tag(root, 'Call 2');
-      const bubble = '<span class="mono" style="font-size:26px;color:#141414">Alex</span><div class="wipe"></div>';
+      const bubble = `<span class="mono" style="font-size:26px;color:${C.bg}">Alex</span><div class="wipe"></div>`;
       s.bub = E(root, bubble, '', {
         background: '#F8FAFC', padding: '10px 24px', overflow: 'hidden', borderRadius: 'var(--rs)',
       });
@@ -31,7 +31,7 @@
       Object.assign(s.wipe.style, { position: 'absolute', left: 0, top: 0, bottom: 0, width: '0%', background: C.uv });
       s.bubT = E(root, 'not kept', 'lbl', { color: C.red });
       s.sl = tag(root, 'Stateless', 'violet big');
-      const who = name => `<span style='color:#5B6475'>${name}</span>`;
+      const who = name => `<span style='color:${C.slateDark}'>${name}</span>`;
       const history = `${who('YOU')}&nbsp;&nbsp;&nbsp;Hi, I'm Alex.<br>${who('MODEL')} Nice to meet you, Alex!<br>`
         + `${who('YOU')}&nbsp;&nbsp;&nbsp;What's my name?`;
       s.hist = makeCard(root, history, 'user', 'FULL HISTORY', 560);

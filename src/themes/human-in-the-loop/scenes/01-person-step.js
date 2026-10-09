@@ -18,11 +18,11 @@
   const SAM_X = SAM_LEFT + AVATAR.size / 2, REQ_X = SAM_LEFT + AVATAR.size + FRAME.gap + APPROVAL_CARD.w / 2;
   // White purchase request card, in the style of the approval card, without buttons
   const makeRequestCard = p => E(p,
-    '<div class="mono" style="font-size:19px;letter-spacing:.12em;color:#5B6475">PURCHASE REQUEST</div>'
+    `<div class="mono" style="font-size:19px;letter-spacing:.12em;color:${C.slateDark}">PURCHASE REQUEST</div>`
     + '<div><div style="font-size:36px">New laptop for Sam</div>'
     + '<div style="font-size:65px;line-height:1.1;font-weight:700;letter-spacing:-1px">$2,400</div></div>'
     + `<div class="mono" style="display:flex;align-items:center;gap:12px;font-size:19px;`
-    + `letter-spacing:.1em;color:#5B6475">${ICON('user', 24, '#5B6475', 1.8)} SENT BY SAM</div>`,
+    + `letter-spacing:.1em;color:${C.slateDark}">${ICON('user', 24, C.slateDark, 1.8)} SENT BY SAM</div>`,
     'paper', {
       width: APPROVAL_CARD.w + 'px', height: CARD_H + 'px', padding: '24px 31px 28px',
       display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderLeft: '7px solid ' + C.violet,

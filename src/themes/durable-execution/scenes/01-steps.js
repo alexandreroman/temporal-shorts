@@ -77,7 +77,7 @@
       place(s.order, 960, ORDER_Y, op, clamp(op * 2) * (1 - out));
       s.order.style.borderColor = t >= press ? C.uv : C.line;
       s.order.buy.style.transform = `scale(${1 - 0.1 * win(t, press - 0.12, press + 0.05, 0.12)})`;
-      s.order.buy.style.background = t >= press ? C.uv : 'rgba(68,76,231,.15)';
+      s.order.buy.style.background = t >= press ? C.uv : `rgba(${RGB.uv},.15)`;
       s.order.buy.style.boxShadow = t >= press ? `0 0 ${Math.round(24 * (1 - P(t, press, 0.8)))}px ${C.uv}` : 'none';
       // steps: first run in c[1], reset when the code card arrives, then run again line by line in c[2]
       const codeIn = c[2] + 0.4;
@@ -99,7 +99,7 @@
         // busy while it handles the call, then all four light up together on "Each step calls another service"
         const busy = t >= a + 0.45 && t < a + RUN_D;
         const all = win(t, c[1] + 4.8 + i * 0.12, c[1] + 6.2, 0.3);
-        e.style.borderColor = busy || all > 0.5 ? C.uv : '#4B5363';
+        e.style.borderColor = busy || all > 0.5 ? C.uv : C.lineLight;
         const down = P(t, a + 0.3, 0.25, linear), up = P(t, a + 0.6, 0.25, linear);
         const y = lerp(lerp(SERVICE_LINK[0], SERVICE_LINK[1], down), SERVICE_LINK[0], up);
         place(s.dots[i], x, y, 1, win(t, a + 0.3, a + 0.85, 0.05));

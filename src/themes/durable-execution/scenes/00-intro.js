@@ -72,7 +72,7 @@
         // brief glow as the pulse lands: red when the step fails, neon when it passes
         const landed = failed ? LOOP.arrive[i] : hitAt(i);
         const g = win(u, landed, landed + 0.15, 0.15);
-        const rgb = failed ? '255,90,95' : '219,255,75';
+        const rgb = failed ? RGB.red : RGB.neon;
         e.style.boxShadow = g > 0.01 ? `0 0 ${Math.round(30 * g)}px rgba(${rgb},${(0.5 * g).toFixed(3)})` : 'none';
         // badge: the check pops in and fades with the reset; the cross and the retry arrow show while they last
         const b = s.badges[i];

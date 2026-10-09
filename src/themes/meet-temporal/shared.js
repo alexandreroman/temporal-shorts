@@ -81,8 +81,8 @@ function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enter
   cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
 }
 
-// Glowing dot of light, size px wide, in a color (an rgb triplet such as '219,255,75'); place() centers it
-const makeSpark = (p, size = 14, rgb = '248,250,252') => E(p, '', '', {
+// Glowing dot of light, size px wide, in a color (an RGB triplet, e.g. RGB.neon); place() centers it
+const makeSpark = (p, size = 14, rgb = RGB.ink) => E(p, '', '', {
   width: size + 'px', height: size + 'px', borderRadius: '50%', background: `rgb(${rgb})`,
   boxShadow: `0 0 ${size}px ${Math.round(size / 2)}px rgba(${rgb},.55)`,
 });
@@ -166,5 +166,5 @@ const AGENT_HANDOFF = {
 };
 // The halo around the bubble at the cut: its size on screen (diameter, px) and opacity, the same on both sides
 const HANDOFF_HALO = { size: 300, o: 0.8 };
-const HALO_BACKGROUND = 'radial-gradient(circle, rgba(182,100,255,.4) 0%, rgba(68,76,231,.15) 45%, '
-  + 'rgba(68,76,231,0) 70%)';
+const HALO_BACKGROUND = `radial-gradient(circle, rgba(${RGB.violet},.4) 0%, rgba(${RGB.uv},.15) 45%, `
+  + `rgba(${RGB.uv},0) 70%)`;

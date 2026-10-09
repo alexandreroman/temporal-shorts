@@ -16,6 +16,8 @@
 :root{
   --bg:#141414;--ink:#F8FAFC;--slate:#94A3B8;--line:#3A4150;--uv:#444CE7;--violet:#B664FF;--neon:#DBFF4B;--red:#FF5A5F;
   --surface:#1B1B1F;--r:10px;--rs:6px;
+  /* a dark slate for labels on white cards, a lighter rule for pill borders */
+  --slate-dark:#5B6475;--line-light:#4B5363;
   /* the .pill tints composited over --bg: solid fills for what sits on a line, which must not show through */
   --uv-solid:#1D1E3A;--violet-solid:#2B1F35;--red-solid:#2B1B1C;--neon-solid:#242718;
   /* the violet glow at the bottom of the stage (#band) and of the home page (.glow in home.css) */
@@ -86,7 +88,7 @@ html,body{margin:0;background:var(--bg)}
   max-width:640px;background:var(--ink);color:var(--bg);padding:12px 22px 14px;border-left:6px solid var(--violet);
   border-radius:var(--r);
 }
-.card .who{font-family:'Mono';font-size:16px;letter-spacing:.12em;color:#5B6475;margin-bottom:4px}
+.card .who{font-family:'Mono';font-size:16px;letter-spacing:.12em;color:var(--slate-dark);margin-bottom:4px}
 .card .txt{font-family:'Mono';font-size:27px;line-height:1.35}
 .k-llm{border-left-color:var(--uv)} .k-tool{border-left-color:var(--neon)}
 .k-bad{border-left-color:var(--red)}
@@ -94,7 +96,7 @@ html,body{margin:0;background:var(--bg)}
    big 40 + 24 + 2 = 66 px, so a pill centered on a whole pixel rests on whole pixels */
 .pill{
   white-space:nowrap;line-height:30px;padding:9px 18px 9px calc(18px + .1em);background:rgba(248,250,252,.04);
-  border:1.5px solid #4B5363;
+  border:1.5px solid var(--line-light);
   font-family:'Mono';font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
   border-radius:var(--rs);
 }

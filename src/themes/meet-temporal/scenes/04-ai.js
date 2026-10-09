@@ -124,7 +124,7 @@
       // tile's anti-aliased edge spills one pixel outside the box it repaints, and would keep the dimmed paint of
       // an earlier frame, so a frame would depend on the frames rendered before it
       [s.loop.act, s.loop.observe].forEach(e => { e.style.outline = '3px solid transparent'; });
-      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(s.loopLayer, 16 - 2 * k, '219,255,75'));
+      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(s.loopLayer, 16 - 2 * k, RGB.neon));
       // the token and its comet pass under the nodes, THINK's face included: moved before the first node, in order
       [s.loop.token, ...s.comet].forEach(e => s.loopLayer.insertBefore(e, s.loop.think.root));
       // the agent's goal, under the loop before the context strip, a fixed whole size, so it rests on whole pixels
@@ -157,7 +157,7 @@
       // the outcome, two neon pills with a soft glow
       s.outcome = ['No progress lost', 'No tokens wasted'].map(text => {
         const e = fixedTag(root, text, 'neon solid', PILL.w);
-        e.style.boxShadow = '0 0 28px rgba(219,255,75,.35)';
+        e.style.boxShadow = `0 0 28px rgba(${RGB.neon},.35)`;
         return e;
       });
       // the tags in the loop's middle sit 30 px above it, clear of the ACT and OBSERVE tiles

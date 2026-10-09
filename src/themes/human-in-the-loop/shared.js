@@ -108,16 +108,16 @@ function makeApprovalCard(p, k) {
     + `padding:${px(12)} 0 ${px(13)};border-radius:var(--rs)`;
   const e = E(p,
     '<div style="display:flex;justify-content:space-between;align-items:center">'
-    + `<span class="mono" style="font-size:${px(16)};letter-spacing:.12em;color:#5B6475">APPROVAL REQUEST</span>`
-    + `<div class="clk">${clockFace(Math.round(34 * k), '#141414')}</div></div>`
+    + `<span class="mono" style="font-size:${px(16)};letter-spacing:.12em;color:${C.slateDark}">APPROVAL REQUEST</span>`
+    + `<div class="clk">${clockFace(Math.round(34 * k), C.bg)}</div></div>`
     + `<div style="font-size:${px(30)};margin-top:${px(14)}">New laptop for Sam</div>`
     + `<div style="font-size:${px(54)};line-height:1.1;font-weight:700;letter-spacing:-1px">$2,400</div>`
     + `<div style="display:flex;gap:${px(14)};margin-top:${px(22)}">`
     + `<div class="ap" style="${button};background:${C.uv};color:#FFFFFF">`
     + '<div class="ring" style="position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;'
-    + 'border-radius:50%;background:rgba(248,250,252,.55);opacity:0"></div>'
+    + `border-radius:50%;background:rgba(${RGB.ink},.55);opacity:0"></div>`
     + '<span class="apt" style="position:relative;display:inline-flex;align-items:center;gap:8px">Approve</span></div>'
-    + `<div class="rj" style="${button};border:1.5px solid #9AA3B5;color:#141414">Reject</div></div>`,
+    + `<div class="rj" style="${button};border:1.5px solid #9AA3B5;color:${C.bg}">Reject</div></div>`,
     'paper', {
       width: px(400), padding: `${px(20)} ${px(26)} ${px(26)}`, borderLeft: `${px(6)} solid ${C.violet}`,
     });
@@ -134,10 +134,10 @@ function tapApprove(card, t, at) {
   const label = approved ? 'approved' : 'approve';
   if (card._l !== label) {
     card._l = label;
-    card.apt.innerHTML = approved ? ICON('check', 24, '#141414', 2.6) + 'Approved' : 'Approve';
+    card.apt.innerHTML = approved ? ICON('check', 24, C.bg, 2.6) + 'Approved' : 'Approve';
   }
   card.ap.style.background = approved ? C.neon : C.uv;
-  card.ap.style.color = approved ? '#141414' : '#FFFFFF';
+  card.ap.style.color = approved ? C.bg : '#FFFFFF';
   // pressed in, then a small bounce as it turns approved
   const press = win(t, at - 0.1, at + 0.1, 0.1), bounce = win(t, at + 0.15, at + 0.4, 0.15);
   card.ap.style.transform = `scale(${1 - 0.06 * press + 0.06 * bounce})`;
@@ -209,7 +209,7 @@ function makeWorkflowApp(p, name) {
   // under the lines
   app.empty.insertAdjacentHTML('beforebegin',
     `<div class="cur" style="position:absolute;left:12px;width:${w - 74}px;height:${WF.h + 2}px;`
-    + `background:rgba(182,100,255,.2);border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`);
+    + `background:rgba(${RGB.violet},.2);border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`);
   app.cur = app.card.querySelector('.cur');
   app.lines.forEach(line => {
     line.insertAdjacentHTML('beforeend',
@@ -275,7 +275,7 @@ function makeOrderHistory(p) {
   history.wait.hg = history.wait.querySelector('.hg');
   history.done = E(history, `${ICON('check', 24, C.neon, 2.6)} WORKFLOW COMPLETE`, 'mono', {
     left: '50%', top: (rowTop(HISTORY.length - 1) + HROW.h + 26) + 'px', fontSize: '20px', letterSpacing: '.12em',
-    color: C.neon, background: '#141414', padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)',
+    color: C.neon, background: C.bg, padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)',
     display: 'flex', gap: '10px', alignItems: 'center',
   });
   return history;

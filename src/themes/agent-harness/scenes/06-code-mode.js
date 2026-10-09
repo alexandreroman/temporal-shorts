@@ -173,7 +173,7 @@
         'tile', { width: CODE.w + 'px', height: CODE.h + 'px', textAlign: 'left' });
       // the run highlight sits behind the code lines
       s.hl = E(s.code, '', '', {
-        left: '12px', width: (CODE.w - 24) + 'px', background: 'rgba(182,100,255,.16)',
+        left: '12px', width: (CODE.w - 24) + 'px', background: `rgba(${RGB.violet},.16)`,
         borderLeft: '3px solid ' + C.violet, borderRadius: 'var(--rs)',
       });
       s.lines = SCRIPT.map((_, i) => {

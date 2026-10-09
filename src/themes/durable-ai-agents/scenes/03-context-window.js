@@ -40,7 +40,7 @@
       s.svg = svgLayer(root);
       s.cone = document.createElementNS(SVGNS, 'polygon');
       s.cone.setAttribute('points', '1480,445 1085,185 1085,775');
-      s.cone.setAttribute('fill', 'rgba(182,100,255,0.13)');
+      s.cone.setAttribute('fill', `rgba(${RGB.violet},0.13)`);
       s.svg.appendChild(s.cone);
       s.sheet = E(root, '', 'paper', { width: '640px', height: '600px', overflow: 'hidden' });
       s.sheetT = E(root, 'Context window', 'lbl', { color: 'var(--ink)', fontSize: '22px' });
@@ -48,9 +48,9 @@
         const b = document.createElement('div');
         Object.assign(b.style, {
           position: 'absolute', left: '20px', width: '600px', background: col, borderLeft: `6px solid ${bar}`,
-          padding: '8px 16px', overflow: 'hidden', color: '#141414', borderRadius: 'var(--rs)',
+          padding: '8px 16px', overflow: 'hidden', color: C.bg, borderRadius: 'var(--rs)',
         });
-        b.innerHTML = `<div class="mono" style="font-size:14px;letter-spacing:.12em;color:#5B6475">${who}</div>`
+        b.innerHTML = `<div class="mono" style="font-size:14px;letter-spacing:.12em;color:${C.slateDark}">${who}</div>`
           + `<div class="mono" style="font-size:21px;line-height:1.45">${html}</div>`;
         s.sheet.appendChild(b); return b;
       };
@@ -77,7 +77,7 @@
           row.innerHTML = `<div class="hl" style="position:absolute;left:-10px;right:-6px;top:0;bottom:0;`
             + `background:#F2E6FF;border-left:4px solid ${C.violet};border-radius:var(--rs)">`
             + '<div style="position:absolute;right:12px;top:0;bottom:0;display:flex;align-items:center;'
-            + 'font-size:14px;letter-spacing:.12em;color:#5B6475">NEW</div></div>';
+            + `font-size:14px;letter-spacing:.12em;color:${C.slateDark}">NEW</div></div>`;
         }
         const text = document.createElement('div');
         text.style.position = 'relative';
@@ -87,7 +87,7 @@
         return { row, hl: row.querySelector('.hl') };
       });
       s.gauge = E(root, '<div class="f" style="position:absolute;left:0;right:0;bottom:0"></div>', '', {
-        width: '22px', height: '600px', background: 'rgba(248,250,252,.08)', border: '1.5px solid ' + C.line,
+        width: '22px', height: '600px', background: `rgba(${RGB.ink},.08)`, border: '1.5px solid ' + C.line,
         overflow: 'hidden', borderRadius: 'var(--rs)',
       });
       s.gf = s.gauge.querySelector('.f');
@@ -97,7 +97,9 @@
       s.g1 = E(root,
         `<div class="mono" style="font-size:22px">Yesterday's email</div>`
         + '<div class="lbl" style="font-size:15px;margin-top:4px">not in context</div>',
-        '', { border: '1.5px dashed #4B5363', padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)' });
+        '', {
+          border: `1.5px dashed ${C.lineLight}`, padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)',
+        });
       s.bill = E(root,
         '<div style="display:flex;align-items:center;gap:16px">'
         + `<div class="coin">${ICON('coin', 46, C.neon, 1.6)}</div><div>`
@@ -107,7 +109,7 @@
         + '<div class="lbl" style="font-size:16px;margin-top:6px;color:var(--neon)">billed so far</div>'
         + '</div></div>',
         '', {
-          padding: '16px 22px', border: '1.5px solid ' + C.neon, background: 'rgba(219,255,75,.06)',
+          padding: '16px 22px', border: '1.5px solid ' + C.neon, background: `rgba(${RGB.neon},.06)`,
           borderRadius: 'var(--r)',
         });
       s.tok = s.bill.querySelector('.tok');
@@ -119,7 +121,7 @@
         pagePx += px;
         // 36 px icon, a 27 px coin, centered on the big coin (1.5 px border + 22 px padding + 23 px)
         const coin = E(s.bill, ICON('coin', 36, C.neon, 1.8), '', { left: '28.5px', top: 'calc(50% - 18px)' });
-        coin.querySelector('circle').setAttribute('fill', 'rgba(219,255,75,.2)');
+        coin.querySelector('circle').setAttribute('fill', `rgba(${RGB.neon},.2)`);
         const plus = E(s.bill, '+' + gain.toLocaleString('en-US'), 'mono', {
           left: 'calc(100% + 20px)', top: '14px', fontSize: '22px', color: C.neon, whiteSpace: 'nowrap',
         });

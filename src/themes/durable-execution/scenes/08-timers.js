@@ -106,7 +106,7 @@
       + 'style="font-variant-numeric:tabular-nums"></span>'
       + `<span class="mono" style="font-size:38px;color:var(--slate)"> / ${DAYS}</span></div></div>`
       + `<div style="position:absolute;left:26px;top:196px;width:${BAR_W}px;height:12px;border-radius:6px;`
-      + 'background:rgba(248,250,252,.12);overflow:hidden"><div class="bar" style="height:100%;border-radius:6px">'
+      + `background:rgba(${RGB.ink},.12);overflow:hidden"><div class="bar" style="height:100%;border-radius:6px">`
       + '</div></div>',
       'tile', { width: HIST_CARD.w + 'px', height: BLOCK.h + 'px', textAlign: 'left' });
     e.hand = e.querySelector('.hand'); e.n = e.querySelector('.n'); e.bar = e.querySelector('.bar');
@@ -139,7 +139,7 @@
       s.code.hdr.style.opacity = 1;
       s.code.lines[1].style.color = '#7C8698'; // the comment line, slate like the punctuation
       const check = ICON('check', 20, C.neon, 2.6);
-      s.checks = [SHIP_LINE, SLEEP_LINE, REVIEW_LINE].map(i => makeLineBadge(s.code, i, check, '#141414'));
+      s.checks = [SHIP_LINE, SLEEP_LINE, REVIEW_LINE].map(i => makeLineBadge(s.code, i, check, C.bg));
       s.sleeping = makeLineBadge(s.code, SLEEP_LINE, ICON('clock', 20, '#FFFFFF', 2.2), C.uv);
       s.spin = makeLineBadge(s.code, 0, spinnerRing(26), 'none');
       s.status = makeStatusBlock(root);

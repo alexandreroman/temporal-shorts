@@ -58,20 +58,20 @@
       s.restart = tag(root, 'Restart', 'red'); s.deploy = tag(root, 'Deploy');
       s.marker = E(root, '', '', {
         width: '24px', height: '24px', background: C.violet, borderRadius: '50%',
-        boxShadow: '0 0 18px 4px rgba(182,100,255,.45)',
+        boxShadow: `0 0 18px 4px rgba(${RGB.violet},.45)`,
       });
       s.app = makeAppPanel(root, 'APP', APP.w, APP.h, APP_TEXT_LARGE);
       // the memory card never moves: it is part of the panel's HTML, and only its chips are animated elements
       s.app.insertAdjacentHTML('beforeend',
         `<div class="tile" style="position:absolute;left:24px;top:76px;width:${APP.w - 48}px;height:${APP.h - 100}px;`
-        + 'text-align:left;background:rgba(248,250,252,.03)">'
+        + `text-align:left;background:rgba(${RGB.ink},.03)">`
         + panelLabel('server', 'App memory', 'left:20px;top:16px;padding-left:0')
         // EMPTY and REQUEST LOST, like the chips, sit in the middle of the space under the APP MEMORY label
         + emptyNote(129) + '</div>');
       s.mem = s.app.lastElementChild;
       s.empty = s.mem.querySelector('.empty');
       s.chips = CHIPS.map((txt, i) => E(s.mem, txt, 'mono', {
-        left: '24px', top: (99 + i * 66) + 'px', fontSize: '24px', color: '#141414', background: C.uvTint,
+        left: '24px', top: (99 + i * 66) + 'px', fontSize: '24px', color: C.bg, background: C.uvTint,
         padding: '10px 16px', borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
       s.lost = tag(root, 'Request lost', 'red big');

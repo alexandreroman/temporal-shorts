@@ -190,7 +190,7 @@
       // created first, so the frame tint stays under the arcs and the loop
       s.frameBg = E(root, '', '', {
         left: x0 + 'px', top: y0 + 'px', width: (x1 - x0) + 'px', height: (y1 - y0) + 'px',
-        background: 'rgba(68,76,231,.07)', borderRadius: 'var(--r)',
+        background: `rgba(${RGB.uv},.07)`, borderRadius: 'var(--r)',
       });
       s.svg = svgLayer(root);
       s.arcs = NODES.map((_, i) => path(s.svg, arcD(i), C.slate, 2.5, true));
@@ -226,7 +226,7 @@
       // header on whole pixels at native size: official logo, a thin rule, then the label
       s.header = E(root,
         `<img src="${LOGO}" style="height:32px;display:block">`
-        + '<div style="width:1.5px;height:26px;background:#4B5363"></div>'
+        + `<div style="width:1.5px;height:26px;background:${C.lineLight}"></div>`
         + '<span class="lbl" style="color:var(--ink)">Agent harness</span>',
         '', {
           left: (x0 + 26) + 'px', top: (y0 + 22) + 'px',

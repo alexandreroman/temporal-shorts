@@ -104,7 +104,7 @@
         const base = s.A.style.borderColor; // as set by setAppStatus for this frame
         s.A.style.borderColor = `color-mix(in srgb, ${C.red} ${Math.round(flicker * 100)}%, ${base})`;
       }
-      s.A.style.boxShadow = flicker > 0 ? `inset 0 0 0 1000px rgba(255,90,95,${0.16 * flicker})` : '';
+      s.A.style.boxShadow = flicker > 0 ? `inset 0 0 0 1000px rgba(${RGB.red},${0.16 * flicker})` : '';
 
       // the clock starts with the wait: days fly by to DAY 2, rest, then on to DAY 3 through the deploys and
       // restarts; at rest only its seconds hand moves

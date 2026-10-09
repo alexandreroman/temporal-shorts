@@ -107,7 +107,7 @@
       s.rule = E(root, `<div>${autoRule('approve: hotel under $500')}${autoRule('deny: hotel over $5,000')}</div>`,
         'mono', {
           width: GATE.w + 'px', height: RULE_CARD.h + 'px', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', fontSize: '20px', background: C.ink, color: '#141414',
+          justifyContent: 'center', fontSize: '20px', background: C.ink, color: C.bg,
           borderLeft: '5px solid ' + C.uv, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
         });
       // rule lines, in order: approve, deny
@@ -213,7 +213,7 @@
         || (t >= bigParked && t < drop + 0.4);
       const ruleLit = [searchLit(0), searchLit(1), flightWaits || hotelAsks];
       s.ruleRows.forEach((row, i) => {
-        const litColor = i < 2 ? 'rgba(219,255,75,.12)' : 'rgba(182,100,255,.18)';
+        const litColor = i < 2 ? `rgba(${RGB.neon},.12)` : `rgba(${RGB.violet},.18)`;
         row.style.background = ruleLit[i] ? litColor : 'transparent';
       });
       const tp = P(t, c[0] + 0.4, 0.5, backOut);
@@ -290,8 +290,8 @@
       // its rules slide out from under it; the rule behind a verdict lights up
       const rp = P(t, c[2] + 0.8, 0.4);
       s.rule.style.borderLeftColor = judgeColor === C.line ? C.uv : judgeColor;
-      s.ruleLines[0].style.background = judgeOk ? 'rgba(219,255,75,.6)' : 'transparent';
-      s.ruleLines[1].style.background = judgeDenies ? 'rgba(255,90,95,.3)' : 'transparent';
+      s.ruleLines[0].style.background = judgeOk ? `rgba(${RGB.neon},.6)` : 'transparent';
+      s.ruleLines[1].style.background = judgeDenies ? `rgba(${RGB.red},.3)` : 'transparent';
       place(s.rule, GATE.x, RULE_CARD.y0 + RULE_CARD.h / 2 - 12 * (1 - rp), 1, rp);
 
       const h0 = placeCall(3, hotelPop, [toPark(hotelPop), ...through(cross[3], 1)], 'uv');

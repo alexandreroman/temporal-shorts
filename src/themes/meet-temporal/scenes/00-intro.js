@@ -21,11 +21,12 @@
         'THE STORY OF DURABLE EXECUTION');
       s.glow = E(root, '', '', {
         width: '560px', height: '560px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,100,255,.30) 0%, rgba(68,76,231,.12) 40%, rgba(68,76,231,0) 68%)',
+        background: `radial-gradient(circle, rgba(${RGB.violet},.30) 0%, `
+          + `rgba(${RGB.uv},.12) 40%, rgba(${RGB.uv},0) 68%)`,
       });
       // stars that converge on the symbol as it draws itself: each starts at a hashed angle and distance
       s.particles = Array.from({ length: PARTICLES }, (_, i) => {
-        const e = makeSpark(root, 4 + Math.round(hash(i * 3) * 5), i % 3 ? '248,250,252' : '182,100,255');
+        const e = makeSpark(root, 4 + Math.round(hash(i * 3) * 5), i % 3 ? RGB.ink : RGB.violet);
         e.angle = hash(i * 3 + 1) * Math.PI * 2;
         e.dist = 420 + hash(i * 3 + 2) * 520;
         e.delay = hash(i * 7) * 0.7;
@@ -38,7 +39,7 @@
         ghosts: TRAIL.map(() => E(root, ICON(n, 50, C.violet, 1.6))),
       }));
       s.symbol = makeDrawnSymbol(root, SYMBOL_SIZE);
-      s.ripples = makeRipples(root, 2, '182,100,255');
+      s.ripples = makeRipples(root, 2, RGB.violet);
     },
     update(t, c, s) {
       // a slow push-in until the title card settles, then the zoom-through into chapter 1

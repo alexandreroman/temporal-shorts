@@ -67,7 +67,7 @@
       s.newWorker = makeNewTag(root, 'New Worker', NEW_TAG.w);
       s.done = tag(root, 'Workflow complete', 'neon');
       // dark like the SAVED tags, as it sits on the light history card
-      s.done.style.background = '#141414';
+      s.done.style.background = C.bg;
       s.crash = makeCrashMarks(root, 'Worker crash', BOLT, CRASH_TAG);
       s.flash = makeFlash(root);
     },
