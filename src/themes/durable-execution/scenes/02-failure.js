@@ -149,12 +149,8 @@
       s.svg = svgLayer(root);
       s.steps = makeStepRow(root, s.svg, ORDER_TILES, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       s.status = makeStatusTile(root);
-      s.charge = makeCharge(root);
       // same size and centered contents as the status tile
-      s.charge.style.width = BOTTOM.w + 'px';
-      s.charge.style.textAlign = 'center';
-      s.charge.querySelector('.lbl').style.justifyContent = 'center';
-      s.charge.w.style.paddingLeft = '.1em';
+      s.charge = makeCharge(root, BOTTOM.w, true);
       s.causes = CAUSES.map(cause => {
         const e = tag(root, `${ICON(cause.icon, 24, C.red, 2)}${cause.label}`, 'red');
         // one fixed whole-pixel size for the three tags, centered on their links: equal gaps between them
@@ -230,8 +226,8 @@
       place(s.status, BOTTOM.statusX + sx, BOTTOM_Y + sy, stp * (1 + 0.06 * stuckPop), clamp(stp * 2));
       // card charged: $42 when Charge card completes, $84 when it completes a second time
       const paid1 = r1[0][1], paid2 = r2[0][1], twice = t >= paid2;
-      if (twice) setCharge(s.charge, 84, 'CHARGED TWICE!', C.red, C.red);
-      else setCharge(s.charge, t >= paid1 ? 42 : 0);
+      if (twice) setCounter(s.charge, '$84', 'CHARGED TWICE!', { noteColor: C.red, numColor: C.red });
+      else setCounter(s.charge, t >= paid1 ? '$42' : '$0');
       s.charge.style.borderColor = twice ? C.red : C.line;
       const bump = bumpAt(t, paid1) + bumpAt(t, paid2);
       const cp = P(t, 0.4, 0.45, backOut);

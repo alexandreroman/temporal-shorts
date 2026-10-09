@@ -698,19 +698,37 @@ function makeCallCard(p, isModelCall, { modelLabel = 'LLM CALL', w = null } = {}
 }
 
 // ---------- counter tile
-// Small label, big number and a short mono note next to it (e.g. MODEL CALLS BILLED: 3); w: width in px
-function makeCounter(p, label, w) {
-  const e = E(p,
-    `<div class="lbl" style="font-size:16px">${label}</div>`
-    + '<div style="display:flex;align-items:baseline;gap:14px;margin-top:6px">'
-    + '<div class="n" style="font-size:84px;line-height:1">0</div>'
-    + '<div class="note mono" style="font-size:20px;letter-spacing:.08em;white-space:nowrap"></div></div>',
-    'tile', { width: w + 'px', textAlign: 'left', padding: '18px 24px' });
+// Counter tile: a small label, a big number and a short mono note (e.g. MODEL CALLS BILLED: 3 NOT RE-BILLED); w:
+// its width in px. Options:
+// - icon: a slate icon before the label
+// - noteBelow: the note on its own line under the number (by default it sits next to the number, on its baseline)
+// - h: a fixed height in px (null: the height of the content)
+// - center: the label, the number and the note centered (by default left-aligned)
+function makeCounter(p, label, w, { icon = null, noteBelow = false, h = null, center = false } = {}) {
+  const justify = center ? ';justify-content:center' : '';
+  let html = icon
+    ? `<div class="lbl" style="font-size:16px;display:flex;gap:10px;align-items:center${justify}">`
+      + `${ICON(icon, 22, C.slate, 1.8)} ${label}</div>`
+    : `<div class="lbl" style="font-size:16px">${label}</div>`;
+  if (noteBelow) {
+    // padding-left offsets the trailing letter spacing of a centered note
+    html += '<div class="n" style="font-size:84px;line-height:1;margin-top:10px">0</div>'
+      + '<div class="note mono" style="font-size:18px;letter-spacing:.1em;margin-top:12px;white-space:nowrap'
+      + `${center ? ';padding-left:.1em' : ''}"></div>`;
+  } else {
+    html += `<div style="display:flex;align-items:baseline;gap:14px;margin-top:6px${justify}">`
+      + '<div class="n" style="font-size:84px;line-height:1">0</div>'
+      + '<div class="note mono" style="font-size:20px;letter-spacing:.08em;white-space:nowrap"></div></div>';
+  }
+  const e = E(p, html, 'tile', {
+    width: w + 'px', textAlign: center ? 'center' : 'left', padding: noteBelow ? '20px 24px' : '18px 24px',
+  });
+  if (h) e.style.height = h + 'px';
   e.n = e.querySelector('.n'); e.note = e.querySelector('.note');
   return e;
 }
-// note: neon line next to the number, '' for none
-function setCounter(e, n, note = '') {
-  e.n.textContent = n;
-  e.note.textContent = note; e.note.style.color = C.neon;
+// n: the number (or its text, e.g. '$42'); note: the note, '' for none
+function setCounter(e, n, note = '', { noteColor = C.neon, numColor = C.ink } = {}) {
+  e.n.textContent = n; e.n.style.color = numColor;
+  e.note.textContent = note; e.note.style.color = noteColor;
 }

@@ -38,7 +38,7 @@
         code: P(t, c[0] + 1.4, 0.45), charge: P(t, c[0] + 1.7, 0.45), order: P(t, c[0] + 1.9, 0.45),
         temporal: P(t, c[0] + 2.8, 0.5), hist: P(t, c[0] + 3.1, 0.5), chargePop,
       });
-      setCharge(shot.charge, t >= saved[0] ? 42 : 0);
+      setCounter(shot.charge, t >= saved[0] ? '$42' : '$0');
       setOrderStatus(shot.order, 'PENDING');
 
       // code highlight: the function header, then each await line once the previous result is saved

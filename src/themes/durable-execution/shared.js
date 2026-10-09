@@ -110,21 +110,10 @@ function setCodeLine(card, i, o, color = C.highlight, n = 1) {
   card.bar.style.opacity = clamp(o);
 }
 
-// ---------- CARD CHARGED counter (340 x 200 tile)
-function makeCharge(p) {
-  const e = E(p,
-    '<div class="lbl" style="font-size:16px;display:flex;gap:10px;align-items:center">'
-    + `${ICON('card', 22, C.slate, 1.8)} Card charged</div>`
-    + '<div class="n" style="font-size:84px;line-height:1;margin-top:10px">$0</div>'
-    + '<div class="w mono" style="font-size:18px;letter-spacing:.1em;margin-top:12px;white-space:nowrap"></div>',
-    'tile', { width: '340px', height: '200px', textAlign: 'left', padding: '20px 24px' });
-  e.n = e.querySelector('.n'); e.w = e.querySelector('.w');
-  return e;
-}
-// note: small line under the amount, e.g. 'CHARGED TWICE!' (red) or 'NOT RE-CHARGED' (neon); '' hides it
-function setCharge(e, dollars, note = '', noteColor = C.red, numColor = C.ink) {
-  e.n.textContent = '$' + dollars; e.n.style.color = numColor;
-  e.w.textContent = note; e.w.style.color = noteColor;
+// ---------- CARD CHARGED counter: w x 200 px, its note under the amount (see setCounter), e.g. 'CHARGED TWICE!'
+// (red) or 'NOT RE-CHARGED' (neon); center: contents centered
+function makeCharge(p, w, center = false) {
+  return makeCounter(p, 'Card charged', w, { icon: 'card', noteBelow: true, h: 200, center });
 }
 
 // ---------- order status pill: "ORDER #1042 | PENDING"
@@ -248,8 +237,7 @@ function makeEventHistoryShot(root, workerNames) {
   shot.code.hdr.style.opacity = 1;
   shot.spin = E(root, spinnerRing(26));
   shot.spin.ring = shot.spin.firstChild;
-  shot.charge = makeCharge(root);
-  shot.charge.style.width = EH.charge.w + 'px';
+  shot.charge = makeCharge(root, EH.charge.w);
   shot.order = makeOrderStatus(root);
   shot.order.style.width = EH.order.w + 'px';
   shot.temporal = makeTemporalPanel(root, EH.temporal.w, EH.temporal.h, TEMPORAL_HEADER);

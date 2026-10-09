@@ -28,12 +28,10 @@ function makeApp(parent) {
 }
 
 // ===================== shared by chapters 6 and 7 (crash vs Durable Execution)
-// LLM calls billed: a counter tile (red note) with a strip of 8 cells, one per call; w: width in px, 330 or more
-// for the strip to fit
+// LLM calls billed: a counter tile with a strip of 8 cells, one per call; w: width in px, 330 or more for the strip
+// to fit
 function makeBill(p, w = 380) {
-  const e = makeCounter(p, 'LLM calls billed', w);
-  e.style.height = '200px';
-  e.note.style.color = C.red;
+  const e = makeCounter(p, 'LLM calls billed', w, { h: 200 });
   const cell = '<i style="display:block;width:30px;height:16px;background:rgba(248,250,252,.08);'
     + 'border-radius:3px"></i>';
   e.insertAdjacentHTML('beforeend',
@@ -41,10 +39,10 @@ function makeBill(p, w = 380) {
   e.cells = e.querySelectorAll('.sq i');
   return e;
 }
-// n calls billed, the last `wasted` of them in red; note: the text next to the number
+// n calls billed, the last `wasted` of them in red; note: the text next to the number, red while calls are wasted,
+// else neon
 function setBill(b, n, wasted, note = wasted ? `+${wasted} wasted` : '') {
-  b.n.textContent = n; b.n.style.color = wasted ? C.red : C.ink;
-  b.note.textContent = note;
+  setCounter(b, n, note, { noteColor: wasted ? C.red : C.neon, numColor: wasted ? C.red : C.ink });
   b.cells.forEach((q, i) => q.style.background = i < n ? (i >= n - wasted ? C.red : C.uv) : 'rgba(248,250,252,.08)');
 }
 // The crash and the takeover of chapters 6 and 7. App instance A runs the agent from runAt, crashes at crashAt

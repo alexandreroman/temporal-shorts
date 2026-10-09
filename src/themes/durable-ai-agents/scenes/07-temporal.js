@@ -63,7 +63,6 @@
       s.mem = makeMemory(root, MEM.w, MEM.h);
       s.mblocks = makeMemBlocks(root, 8, 76, 56);
       s.bill = makeBill(root);
-      s.bill.note.style.color = C.neon;
       s.ticket = makeTicket(root);
       // Temporal side: the Event History lives in Temporal, outside the app (the logo flies into the header)
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { noteAt: [24, 24] });

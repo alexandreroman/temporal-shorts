@@ -126,7 +126,7 @@
       const parts = { code: rider.o, charge: 1, order: 1, temporal: 1, hist: 1, chargePop };
       placeEventHistoryShot(shot, parts, rider.dx, rider.dy);
       const note = t >= completed ? 'CHARGED ONCE' : t >= back[0] ? 'NOT RE-CHARGED' : '';
-      setCharge(shot.charge, 42, note, C.neon);
+      setCounter(shot.charge, '$42', note);
       shot.charge.style.borderColor = note ? C.neon : C.line;
       if (t >= completed) setOrderStatus(shot.order, 'COMPLETE', C.neon);
       else setOrderStatus(shot.order, 'PENDING');

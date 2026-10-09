@@ -52,10 +52,8 @@
   };
   // counter tile at a fixed height, its content centered vertically, so both columns end on the same line
   const makeTallCounter = (p, label) => {
-    const e = makeCounter(p, label, COUNTER.w);
-    Object.assign(e.style, {
-      height: COUNTER.h + 'px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
-    });
+    const e = makeCounter(p, label, COUNTER.w, { h: COUNTER.h });
+    Object.assign(e.style, { display: 'flex', flexDirection: 'column', justifyContent: 'center' });
     return e;
   };
 
