@@ -62,8 +62,9 @@
     holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     // the heading plays before the first subtitle
     pre: 2.7,
-    // the heading and the founders centered, then the whole timeline, laid out centered at (960, 522)
-    shift: (t, c) => pan(t, [0, INTRO_DY], [[c[0] + 1.1, 0, 0]], 0.9),
+    // the heading and the founders centered, then the whole timeline (laid out centered at (960, 524)), raised
+    // 9 px so it centers on 515
+    shift: (t, c) => pan(t, [0, INTRO_DY - 9], [[c[0] + 1.1, 0, -9]], 0.9),
     subs: [
       {
         text: "Meet Maxim Fateev and Samar Abbas. In 2004, Maxim led Amazon's Simple Queue Service.",

@@ -6,14 +6,21 @@
   const LINES = ['take the order', 'charge the card', 'ship the package', 'email the receipt'];
   const HISTORY = ['Order #1042 received', 'Card charged: $42', 'Package shipped', 'Receipt emailed'];
   // Layout on the free band: the step row on top, the app panel on the left and the TEMPORAL panel on the right
-  const ROW = { x0: 270, gap: 460, y: 222, w: 300, h: 120 };
-  const APP = { x: 510, y: 602, w: 780, h: 560 };
-  const TEMPORAL = { x: 1380, y: 602, w: 840, h: 560 };
+  const ROW = { x0: 270, gap: 460, y: 215, w: 300, h: 120 };
+  const APP = { x: 510, y: 595, w: 780, h: 560 };
+  const TEMPORAL = { x: 1380, y: 595, w: 840, h: 560 };
   const HIST = { x: TEMPORAL.x, y: TEMPORAL.y + 25, w: TEMPORAL.w - 40, h: TEMPORAL.h - 90 };
   // the STEPS card inside the app panel, and its lines
   const CARD = { left: 24, top: 76, w: APP.w - 48, h: APP.h - 100 };
-  const LINE = { top: 70, gap: 86, h: 56 };
-  const HROW = { top: 80, gap: 62, h: 44 };
+  const LINE = { top: 62, gap: 80, h: 56 };
+  // the history rows level with the app's lines, as far apart: row i's middle on line i's, so each saved result
+  // runs straight across from its line to its row
+  // (the lines sit inside the STEPS card's border, 1.5 px, which renders as 2)
+  const LINE_MID_Y = APP.y - APP.h / 2 + CARD.top + 2 + LINE.top + LINE.h / 2;
+  const HROW = { gap: LINE.gap, h: 44 };
+  HROW.top = LINE_MID_Y - (HIST.y - HIST.h / 2) - HROW.h / 2;
+  // NEW APP INSTANCE in the STEPS card, centered in the space under the last line (stage y)
+  const NEW_TAG_Y = APP.y - APP.h / 2 + CARD.top + (LINE.top + 3 * LINE.gap + LINE.h + CARD.h) / 2;
   const rowTop = i => HROW.top + i * HROW.gap;
   // stage points where a saved result leaves the app (end of line i) and lands in the history (the tag slot of row i,
   // where its SAVED tag then appears)
@@ -68,7 +75,7 @@
   scene({
     chapter: 2, title: 'What Temporal does',
     holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
-    // laid out centered at (960, 522) on the free band
+    // laid out centered at (960, 515) on the free band, inside the content frame (y 155 to 875)
     subs: [
       {
         text: "The idea is <b>Durable Execution</b>: an app runs in steps, "
@@ -93,15 +100,19 @@
         w: HIST.w, h: HIST.h, headerFont: 20, rowTop, font: 23, rowH: HROW.h, tagTop: i => rowTop(i) + 6,
         tag: { font: 18, pad: '4px 12px', icon: 18, border: false },
         crash: {
-          keptTop: rowTop(0) - 8, keptH: HROW.gap + HROW.h + 16, cutTop: rowTop(2) - 10,
+          keptTop: rowTop(0) - 8, keptH: HROW.gap + HROW.h + 16, cutTop: rowTop(2) - (HROW.gap - HROW.h) / 2 - 1,
           label: 'APP CRASHED HERE', labelX: '66%', labelFont: 15,
         },
         scanH: HROW.h + 6,
       });
+      // ORDER COMPLETE in the space under the last row, as far from it as from the card's bottom; a fixed even
+      // width, so it rests on whole pixels centered
+      const DONE_H = 46;
+      const doneTop = rowTop(HISTORY.length - 1) + HROW.h + (HIST.h - rowTop(HISTORY.length - 1) - HROW.h - DONE_H) / 2;
       s.jr.done = E(s.jr, `${ICON('check', 24, C.neon, 2.6)} ORDER COMPLETE`, 'mono', {
-        left: '50%', top: (rowTop(HISTORY.length) + 34) + 'px', fontSize: '20px', letterSpacing: '.12em',
-        color: C.neon, background: '#141414', padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)',
-        display: 'flex', gap: '10px', alignItems: 'center',
+        left: '50%', top: doneTop + 'px', width: '270px', height: DONE_H + 'px', fontSize: '20px',
+        letterSpacing: '.12em', color: C.neon, background: '#141414', padding: '0 18px 0 16px',
+        borderRadius: 'var(--rs)', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center',
       });
       // each result runs as a neon pulse along a cable into the history; replayed results run back in violet
       s.cableSvg = svgLayer(root);
@@ -171,7 +182,7 @@
       place(s.bootLine, APP.x, APP.y - APP.h / 2 + boot * APP.h, 1, boot > 0 && boot < 1 ? 1 : 0);
       const tp = P(t, bOn + 0.6, 0.45, backOut);
       // the tag sits in the empty space at the bottom of B's STEPS card
-      place(s.newTag, APP.x, APP.y - APP.h / 2 + 500, tp, clamp(tp * 2) * (1 - P(t, c[2] + 0.2, 0.4)));
+      place(s.newTag, APP.x, NEW_TAG_Y, tp, clamp(tp * 2) * (1 - P(t, c[2] + 0.2, 0.4)));
       if (t < bOn + 1.0) setAppStatus(s.B, 'STARTING', 'idle');
       else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
       else if (t < rerun) setAppStatus(s.B, 'REPLAYING…', 'running');

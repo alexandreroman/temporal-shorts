@@ -9,15 +9,19 @@
     { name: 'Temporal 1.0', note: '2020' },
     { name: 'Self-hosted', note: 'On your own servers' },
   ];
-  const YOURS = { x: 410, y: 605, w: 580, h: 540 };
-  const CLOUD = { x: 1450, y: 605, w: 700, h: 540 };
+  // the diagram runs from 40 px under the tiles to the content frame's bottom (y 312 to 880)
+  const YOURS = { x: 410, y: 596, w: 580, h: 568 };
+  const CLOUD = { x: 1450, y: 596, w: 700, h: 568 };
   const ARROW = { x0: YOURS.x + YOURS.w / 2, x1: CLOUD.x - CLOUD.w / 2, y: 560 };
   const ARROW_X = (ARROW.x0 + ARROW.x1) / 2;
-  const APP = { x: YOURS.x, y: 590, w: 500, h: 360 };
+  // your app, 40 px inside your environment's sides and 40 px clear of its two labels
+  const APP = { x: YOURS.x, y: 596, w: 500, h: 400 };
+  // inside Temporal Cloud, 40 px from its sides and bottom: the Temporal Service box 24 px under the header, the
+  // three bars 24 px under it, NEVER SEES YOUR CODE 32 px under them
   const SERVICE = { x: CLOUD.x, y: 475, w: 620, h: 170 };
   const BARS = ['Security & compliance', 'Control plane & scale', 'High availability'];
-  const BAR = { y0: 600, gap: 62, w: 620, h: 50 };
-  const NEVER_Y = 826;
+  const BAR = { y0: 609, gap: 62, w: 620, h: 50 };
+  const NEVER_Y = 815;
   const PACKETS = 4; // data packets flowing out along the arrow
   const SECRET = 'card: $42'; // the data that leaves your environment, encrypted on the way
   const DATA_LANDING = { x: SERVICE.x, y: SERVICE.y + 48 }; // inside the Temporal Service box, under its title
@@ -49,10 +53,10 @@
   // Your app: an app panel with a small Workflow card (a title and four step bars) and the SDK chip under it
   function makeYourApp(root) {
     const app = makeAppPanel(root, 'YOUR APP', APP.w, APP.h, { font: 20, statusFont: 16, statusTop: 24 });
-    const bars = [0, 1, 2, 3].map(i => `<i style="position:absolute;left:24px;top:${56 + i * 32}px;width:`
+    const bars = [0, 1, 2, 3].map(i => `<i style="position:absolute;left:24px;top:${62 + i * 42}px;width:`
       + `${[220, 260, 190, 240][i]}px;height:14px;border-radius:3px;background:${C.uvTint}"></i>`).join('');
     app.insertAdjacentHTML('beforeend',
-      '<div style="position:absolute;left:24px;right:24px;top:76px;height:196px;background:rgba(248,250,252,.03);'
+      '<div style="position:absolute;left:24px;right:24px;top:76px;height:236px;background:rgba(248,250,252,.03);'
       + `border:1.5px solid ${C.line};border-radius:var(--r)">`
       + panelLabel('code', 'Workflow', 'left:20px;top:14px;padding-left:0') + bars + '</div>'
       + '<div class="pill uv" style="position:absolute;left:24px;right:24px;bottom:20px;text-align:center;'
