@@ -47,10 +47,7 @@ its visuals.
   chapter 06)
 - https://docs.temporal.io/ai (the AI framework integrations of chapter 06)
 - The languages' monochrome logos, chapter 06: see
-  `src/assets/languages/README.md` (Go and .NET white logos from their
-  brand pages; Python, TypeScript, PHP, Ruby and Rust from Simple Icons,
-  CC0; Java from devicon's java-plain, MIT, as Oracle publishes no reusable
-  logo file)
+  `src/assets/languages/README.md`
 - https://docs.temporal.io/cloud/security (the Temporal Cloud claims of
   chapter 05)
 - https://temporal.io/blog/samars-journey (Cadence became the standard way

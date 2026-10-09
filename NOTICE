@@ -41,6 +41,6 @@ src/assets/languages/java.svg comes from devicon
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE.
 
-The fonts downloaded by `make setup` (Instrument Sans, Noto Sans Mono) are
-distributed under the SIL Open Font License 1.1 and are not part of this
-repository.
+The fonts Instrument Sans and Noto Sans Mono, downloaded by `scripts/fonts.sh`
+(`make setup`, or any make target that needs them), are distributed under the
+SIL Open Font License 1.1 and are not part of this repository.
