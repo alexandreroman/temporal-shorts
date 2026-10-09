@@ -216,6 +216,8 @@ function typeWords(card, p) {
 // ---------- timeline
 const scenes = [];
 function scene(def) { scenes.push(def); }
+// Default duration of a scene's fade-in and fade-out, in seconds: a scene's `fadeIn` and `fadeOut` override it
+const SCENE_FADE = 0.5;
 function autoDur(text) { return clamp(text.replace(/<[^>]+>/g,'').length / 16 + 0.6, 2.4, 8); }
 
 // CHAPTERS[n - 1] is the title of chapter n, filled by buildAll() from the `title` of the chapter's first scene.
@@ -267,8 +269,7 @@ function renderAt(t, g = t) {
     cur = sc;
     sc.root.style.display = 'block';
     const lt = t - sc.start;
-    // optional `fadeIn` and `fadeOut`: the durations of the scene's fades, 0.5 s by default
-    const fadeIn = sc.fadeIn ?? 0.5, fadeOut = sc.fadeOut ?? 0.5;
+    const fadeIn = sc.fadeIn ?? SCENE_FADE, fadeOut = sc.fadeOut ?? SCENE_FADE;
     const o = P(lt, 0, fadeIn) * (1 - P(lt, sc.dur - fadeOut, fadeOut));
     sc.root.style.opacity = o;
     // optional `shift`: [dx, dy] or (t, c) => [dx, dy], centers the composition in the content frame (y 150-880,

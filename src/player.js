@@ -352,12 +352,11 @@ function startPlayer() {
   // first: animations are keyed to c[i] and still at rest there, so the hold shows the frame before the cue's
   // animations begin. A cue whose animation starts a little before it sets `stopLead` (seconds) to move its
   // stop that much earlier, strictly before that animation: a step such as `t >= at` already shows at `at`.
-  // Each scene, the last included, then holds just before its fade-out (`fadeOut`, 0.5 s by default, as in
+  // Each scene, the last included, then holds just before its fade-out (`fadeOut`, SCENE_FADE by default, as in
   // renderAt), so the hold shows it fully visible; a scene whose ending animation should play straight into the
   // next scene sets `holdBeforeEnd` (seconds) to hold that much before its end instead, before that animation
   // starts. When the scene stops changing well before a stop, the player jumps to it as soon as the picture
   // freezes (see skipStillToStop()).
-  const SCENE_FADE = 0.5;
   const presenterStops = [];
   for (const sc of scenes) {
     for (const sub of sc.subs.slice(1)) presenterStops.push(sub.start - (sub.stopLead ?? 0));
