@@ -90,17 +90,19 @@ workspaces run `make setup` automatically.
     scenes, then freezes on `?t=` or starts the player); chapter titles come
     from the scenes
   - `shared.js`: brand constants and components used by two or more
-    themes (`C`, `LOGO`, tiles, step rows, app and TEMPORAL panels, the
-    Event History card, status tags, crash and takeover effects, small
-    animation helpers, title and end cards)
+    themes (`C` and `RGB` colors, `assetUrl()` and `LOGO`, tiles, tags,
+    glows, step rows, app and TEMPORAL panels, the Event History card,
+    status tags, counters, crash and takeover effects, small animation
+    helpers, title and end cards); icons used by two or more themes are in
+    `ICONS` in `engine.js`, the others in their theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page; opens paused at a `#t=<time>` URL fragment
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
     ordered `<link>` / `<script>` list: shared files as `../../<file>`,
     the theme's own scripts relative to its folder, then `boot()`
   - `themes/<theme>/`: the theme's own scripts, e.g.
-    `themes/durable-ai-agents/shared.js` (`STEPS`, `makeApp`, the bill, the
-    takeover of chapters 6 and 7)
+    `themes/durable-ai-agents/shared.js` (`STEPS`, the step list,
+    `makeApp`, the bill, the takeover of chapters 6 and 7)
   - `social.png`, `themes/<theme>/social.png`: 1200x630 link preview
     image of each page (`social.html`, or the intro title card), written by
     `make social` and committed

@@ -358,15 +358,18 @@ editing different scenes never touch the same file.
 - Helpers: brand helpers for every theme go in `src/shared.js`; helpers used
   by one theme only go in `src/themes/<theme>/` (for example
   `src/themes/durable-ai-agents/shared.js`), loaded right after
-  `../../shared.js`.
+  `../../shared.js`. Icons follow the same rule: `ICONS` in
+  `src/engine.js` holds those of two or more themes, and a theme's
+  `shared.js` adds its own with `Object.assign(ICONS, {...})`.
 - Paths: a theme page loads the shared files with explicit relative paths
   (`../../styles.css`, `../../engine.js`) and its own scripts from its
   folder (`shared.js`, `scenes/...`). Asset URLs built in JavaScript come
   from `assetUrl('assets/...')` in `src/shared.js`: it resolves them against
   that script, not against the page, and the literal path lets the HTML
   build inline the file.
-- Colors, fonts, styles: `:root` and the CSS in `src/styles.css`, constant `C`
-  in `src/shared.js`.
+- Colors, fonts, styles: `:root` and the CSS in `src/styles.css`; in
+  JavaScript, the constants `C` (colors) and `RGB` (the brand colors as
+  triplets, for translucent tints and glows) in `src/shared.js`.
 
 ### Add a theme
 
