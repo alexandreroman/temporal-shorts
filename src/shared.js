@@ -342,9 +342,10 @@ function makeMemBlocks(p, n, w, h) {
     return b;
   });
 }
-// grow: pop-in progress; fall: crash progress (the block drops, tilts and fades)
-function placeMemBlock(b, x, y, grow, fall, dx = 0, dy = 0, o = 1) {
-  place(b, x + dx, y + fall * 300 + dy, grow, clamp(grow * 2) * (1 - fall) * o, fall * b.tilt);
+// grow: pop-in progress; fall: crash progress (the block drops `drop` px, tilts and fades). (dx, dy): an offset
+// (a shake, the panel's slide); o: opacity
+function placeMemBlock(b, x, y, grow, fall, { dx = 0, dy = 0, o = 1, drop = 300 } = {}) {
+  place(b, x + dx, y + fall * drop + dy, grow, clamp(grow * 2) * (1 - fall) * o, fall * b.tilt);
 }
 
 // ---------- crash and takeover effects

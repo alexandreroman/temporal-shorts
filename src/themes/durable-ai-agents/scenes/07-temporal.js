@@ -154,7 +154,8 @@
       s.mblocks.forEach((b, i) => {
         if (!bHere) {
           const grow = i < 6 ? P(t, saved[i], 0.35, backOut) : 0;
-          placeMemBlock(b, memSlot(i), MEM.slotY, grow, P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn), sx, sy);
+          const fall = P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn);
+          placeMemBlock(b, memSlot(i), MEM.slotY, grow, fall, { dx: sx, dy: sy });
         } else {
           const back = i < 6 ? replay[i] + 0.33 : saved[i];
           placeMemBlock(b, memSlot(i), MEM.slotY, P(t, back, 0.35, backOut), 0);

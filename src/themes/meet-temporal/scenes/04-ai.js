@@ -252,16 +252,17 @@
       s.memA.style.filter = s.appA.style.filter;
       s.memA.style.borderColor = t >= crashAt ? C.red : C.line;
       s.memA.empty.style.opacity = P(t, crashAt + 1.1, 0.4);
-      // the blocks drop half as far as placeMemBlock's 300 px, so they fade out before leaving the panel
+      // the blocks drop half as far as by default, so they fade out before leaving the panel
       s.blocksA.forEach((b, i) => {
         const fall = P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn);
-        placeMemBlock(b, memSlotX(i), MEM_SLOT_Y, P(t, saved[i] - 0.05, 0.35, backOut), fall, ax, ay - fall * 150);
+        const grow = P(t, saved[i] - 0.05, 0.35, backOut);
+        placeMemBlock(b, memSlotX(i), MEM_SLOT_Y, grow, fall, { dx: ax, dy: ay, drop: 150 });
       });
       const bO = t >= bOn ? arriving.o : 0;
       place(s.memB, APP.x + arriving.dx, MEM_Y, 1, bO);
       const landAt = i => (i < 6 ? replay[i] + 0.75 : saved[i] - 0.05);
       s.blocksB.forEach((b, i) => {
-        placeMemBlock(b, memSlotX(i), MEM_SLOT_Y, P(t, landAt(i), 0.35, backOut), 0, arriving.dx, 0, bO);
+        placeMemBlock(b, memSlotX(i), MEM_SLOT_Y, P(t, landAt(i), 0.35, backOut), 0, { dx: arriving.dx, o: bO });
       });
       // CONTEXT RESTORED once the last replayed block has landed, held
       const restoredAt = landAt(5) + 0.45;

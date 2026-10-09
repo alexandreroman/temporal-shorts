@@ -217,7 +217,7 @@
       s.mblocks.forEach((b, i) => {
         if (!bHere) {
           const fall = P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn);
-          placeMemBlock(b, memSlot(i), MEM.slotY, P(t, add1[i], 0.35, backOut), fall, sx, sy);
+          placeMemBlock(b, memSlot(i), MEM.slotY, P(t, add1[i], 0.35, backOut), fall, { dx: sx, dy: sy });
         } else {
           placeMemBlock(b, memSlot(i), MEM.slotY, P(t, add2[i], 0.35, backOut), 0);
         }
