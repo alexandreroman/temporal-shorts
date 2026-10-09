@@ -228,6 +228,10 @@ CLAUDE.md; a section below and the card order in
 - Ch6 figures are dated (Series E, September 2026: $12.55B valuation,
   4,300+ paying customers, 570 employees): refresh them with each funding
   announcement. Ch4 names OpenAI (Codex), Cursor, Lovable, Replit.
+- Ch4 shows only the durable agent: an AI agent run with Temporal that
+  crashes in production; the Event History keeps every step, a new app
+  instance replays it and finishes, ending on NO PROGRESS LOST and NO
+  TOKENS WASTED. There is no "without Temporal" run in this theme.
 - Ch2 is the short series arc: steps run strictly one after the other,
   each saved before the next starts.
 - Outro departs from `makeEndCard`: a constellation of Ziggy, Temporal's
