@@ -17,26 +17,20 @@ Object.assign(ICONS, {
   key: '<circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21M17.5 12v3.5M20.5 12v2.5"/>',
 });
 
-// Official photo of the two founders (https://temporal.io/about), 900x929 px. Resolved against src/, as LOGO:
-// this script lives two folders below it. In a built page the asset path is already a data: URI, which new URL()
-// keeps as is.
-const PHOTO = {
-  url: new URL('assets/temporal-founders.jpg', new URL('../../', document.currentScript.src || document.baseURI)).href,
-  w: 900, h: 929,
-};
+// Official photo of the two founders (https://temporal.io/about), 900x929 px
+const PHOTO = { url: assetUrl('assets/temporal-founders.jpg'), w: 900, h: 929 };
 
 // The languages of Temporal's SDKs, in the order chapter 6 reads them, each with its official logo (their sources
-// and licenses are in the README of their folder), resolved against src/ as PHOTO
-const ASSETS_BASE = new URL('../../', document.currentScript.src || document.baseURI);
+// and licenses are in the README of their folder)
 const LANGUAGES = [
-  ['Go', new URL('assets/languages/go.svg', ASSETS_BASE).href],
-  ['Java', new URL('assets/languages/java.svg', ASSETS_BASE).href],
-  ['Python', new URL('assets/languages/python.svg', ASSETS_BASE).href],
-  ['TypeScript', new URL('assets/languages/typescript.svg', ASSETS_BASE).href],
-  ['.NET', new URL('assets/languages/dotnet.svg', ASSETS_BASE).href],
-  ['PHP', new URL('assets/languages/php.svg', ASSETS_BASE).href],
-  ['Ruby', new URL('assets/languages/ruby.svg', ASSETS_BASE).href],
-  ['Rust', new URL('assets/languages/rust.svg', ASSETS_BASE).href],
+  ['Go', assetUrl('assets/languages/go.svg')],
+  ['Java', assetUrl('assets/languages/java.svg')],
+  ['Python', assetUrl('assets/languages/python.svg')],
+  ['TypeScript', assetUrl('assets/languages/typescript.svg')],
+  ['.NET', assetUrl('assets/languages/dotnet.svg')],
+  ['PHP', assetUrl('assets/languages/php.svg')],
+  ['Ruby', assetUrl('assets/languages/ruby.svg')],
+  ['Rust', assetUrl('assets/languages/rust.svg')],
 ];
 
 // The two founders, in the order the scenes introduce them; `face` is the center of the face in the photo (Samar

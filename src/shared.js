@@ -6,13 +6,17 @@ const C = {
   uvTint: '#E6E7FC', neonTint: '#F3FBD2', neonDark: '#9DB82A', highlight: 'rgba(182,100,255,.28)',
   violetTint: '#F2E6FF',
 };
-// Official Temporal logo (white horizontal lockup). Resolved against this script, not the page: theme pages
-// live in subfolders. Inlined in a built page, the script has no src and the path is already a data: URI.
-const LOGO = new URL('assets/temporal-logo-horizontal-light-cropped.svg',
-  document.currentScript.src || document.baseURI).href;
-// Official Temporal symbol alone (white), resolved like LOGO
-const SYMBOL = new URL('assets/temporal-symbol-light-cropped.svg',
-  document.currentScript.src || document.baseURI).href;
+// URL of this script, in src/: asset URLs resolve against it, not against the page, as theme pages live in
+// subfolders. Read while the script loads, the only time document.currentScript is set.
+const SRC_BASE = document.currentScript.src || document.baseURI;
+// URL of an asset file from its path relative to src/, written out in full as a string literal: scripts/build_html.py
+// finds that literal and swaps it for a data: URI in a built page, where the script has no src, and new URL() keeps
+// a data: URI as is.
+const assetUrl = path => new URL(path, SRC_BASE).href;
+// Official Temporal logo (white horizontal lockup)
+const LOGO = assetUrl('assets/temporal-logo-horizontal-light-cropped.svg');
+// Official Temporal symbol alone (white)
+const SYMBOL = assetUrl('assets/temporal-symbol-light-cropped.svg');
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
 // icon + label centred in the tile (label null for an icon alone); padding-left offsets the trailing
 // letter-spacing. Options: size and stroke of the icon, font of the label and gap above it; a tile over 130 px

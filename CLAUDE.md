@@ -196,9 +196,9 @@ not shared with the team.
   live two folders below the home page. Link to folders
   (`themes/<theme>/`): `make serve` is the only way to view the HTML pages.
   The one absolute link is the player's home button, `/`.
-  Resolve asset URLs built in JS against the script
-  (`document.currentScript.src`, see `LOGO`), not the page: Playwright
-  opens theme pages over `file://` to render frames.
+  Build asset URLs in JS with `assetUrl('assets/...')` (`src/shared.js`),
+  which resolves them against the script, not the page: Playwright opens
+  theme pages over `file://` to render frames.
 - Live-mode player code (`startPlayer()`, `.live` CSS) must never affect the
   frozen `?t=` mode: rendered frames must stay pixel-identical.
 - After changing an intro scene, a page title, `src/social.html` or the

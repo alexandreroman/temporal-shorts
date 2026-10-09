@@ -361,9 +361,10 @@ editing different scenes never touch the same file.
   `../../shared.js`.
 - Paths: a theme page loads the shared files with explicit relative paths
   (`../../styles.css`, `../../engine.js`) and its own scripts from its
-  folder (`shared.js`, `scenes/...`). A script that builds an asset URL
-  resolves it against itself, not against the page, like `LOGO` in
-  `src/shared.js`.
+  folder (`shared.js`, `scenes/...`). Asset URLs built in JavaScript come
+  from `assetUrl('assets/...')` in `src/shared.js`: it resolves them against
+  that script, not against the page, and the literal path lets the HTML
+  build inline the file.
 - Colors, fonts, styles: `:root` and the CSS in `src/styles.css`, constant `C`
   in `src/shared.js`.
 
