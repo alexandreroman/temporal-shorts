@@ -39,7 +39,7 @@
     subs: [
       {
         text: "<b>Durable Execution</b> with Temporal fixes this. "
-          + "Temporal keeps an Event History of the agent, outside the app.",
+          + "Temporal keeps an <b>Event History</b> of the agent, outside the app.",
         after: 0.3,
       },
       {
