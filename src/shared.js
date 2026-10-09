@@ -205,8 +205,8 @@ const LOOP_DEG = { think: -90, act: 30, observe: 150 };
 // "Agentic loop" label in the middle and the neon token. The arcs go in svg. Returns the loop, with pos(deg), the
 // point at an angle on the circle, nodePos(deg), where a node and its label sit (pos; a scene that scales the
 // loop can replace it to keep the tiles on whole pixels), and arcPaths, the d of each arc (to draw them again in
-// another color).
-function makeAgentLoop(root, svg, cx, cy, r = 220) {
+// another color). Option: `seed`, the blink phase of the THINK orb (see makeLLM()).
+function makeAgentLoop(root, svg, cx, cy, r = 220, { seed } = {}) {
   const loop = { cx, cy, r };
   loop.pos = deg => {
     const a = deg * Math.PI / 180;
@@ -221,7 +221,7 @@ function makeAgentLoop(root, svg, cx, cy, r = 220) {
   const { think, act, observe } = LOOP_DEG;
   loop.arcPaths = [arcD(think + 27, act - 27), arcD(act + 27, observe - 27), arcD(observe + 27, think + 360 - 27)];
   loop.arcs = loop.arcPaths.map(d => path(svg, d, C.slate, 2.5));
-  loop.think = makeLLM(root, 130, '');
+  loop.think = makeLLM(root, 130, '', { seed });
   loop.act = iconTile(root, 'play', '', 130, 130, C.neon); loop.act.style.borderColor = C.neon;
   loop.observe = iconTile(root, 'eye', '', 130, 130, C.ink); loop.observe.style.borderColor = C.uv;
   loop.labels = ['Think', 'Act', 'Observe'].map(text => E(root, text, 'lbl', { color: 'var(--ink)' }));

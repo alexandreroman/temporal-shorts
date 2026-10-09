@@ -120,7 +120,8 @@
       });
       s.loopLayer.style.opacity = 1;
       s.svg = svgLayer(s.loopLayer);
-      s.loop = makeAgentLoop(s.loopLayer, s.svg, LOOP.cx, LOOP.cy, LOOP.r);
+      // THINK blinks as the orb the previous chapter's AI hub turned into
+      s.loop = makeAgentLoop(s.loopLayer, s.svg, LOOP.cx, LOOP.cy, LOOP.r, { seed: AGENT_LLM.seed });
       // the nodes and labels at the nearest point that the layer's scale takes to a whole screen pixel, so the
       // tiles rest on whole pixels: ACT and OBSERVE sit at fractional points of the circle
       s.loop.nodePos = deg => snapToPixel(s.loop.pos(deg));
@@ -128,8 +129,6 @@
       // tile's anti-aliased edge spills one pixel outside the box it repaints, and would keep the dimmed paint of
       // an earlier frame, so a frame would depend on the frames rendered before it
       [s.loop.act, s.loop.observe].forEach(e => { e.style.outline = '3px solid transparent'; });
-      // the same blink as the orb the previous chapter's AI hub turned into
-      s.loop.think.seed = AGENT_LLM.seed;
       s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(s.loopLayer, 16 - 2 * k, '219,255,75'));
       // the token and its comet pass under the nodes, THINK's face included: moved before the first node, in order
       [s.loop.token, ...s.comet].forEach(e => s.loopLayer.insertBefore(e, s.loop.think.root));

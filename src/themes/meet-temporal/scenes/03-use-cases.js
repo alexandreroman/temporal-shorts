@@ -110,8 +110,7 @@
       s.bubbles = EXAMPLES.map((examples, i) => examples.map((example, k) => makeBubble(root, example,
         HUBS[i].angles[k])));
       // the LLM orb the AI hub turns into: the next chapter's LLM node, same size and blink
-      s.llm = makeLLM(root, AGENT_LLM.size, '');
-      s.llm.seed = AGENT_LLM.seed;
+      s.llm = makeLLM(root, AGENT_LLM.size, '', { seed: AGENT_LLM.seed });
     },
     update(t, c, s) {
       // at the end AI invades the screen, then turns into the next chapter's LLM node: the rest of the map fades

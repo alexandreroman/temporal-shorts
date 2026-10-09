@@ -175,7 +175,9 @@ function ICON(n, size, col, w = 1.8) {
 }
 
 // ---------- components
-function makeLLM(parent, size, label = 'LLM') {
+// Options: `seed`, the phase of the blink (0 to 4.3 s), to give two orbs the same blink; by default each orb
+// gets its own from a counter of the orbs built so far.
+function makeLLM(parent, size, label = 'LLM', { seed } = {}) {
   const root = E(parent, `
     <div class="llm-glow"></div>
     <div class="llm-body"></div>
@@ -185,6 +187,8 @@ function makeLLM(parent, size, label = 'LLM') {
     <div class="llm-q">?</div>
     ${label ? `<div class="llm-label">${label}</div>` : ''}`, 'llm');
   root.style.width = size + 'px'; root.style.height = size + 'px'; root.style.fontSize = (size / 10) + 'px';
+  // counted even with a `seed`, so the default seeds of the other orbs never depend on it
+  makeLLM.n = (makeLLM.n || 0) + 1;
   const o = {
     root,
     eyes: root.querySelectorAll('.llm-eye'),
@@ -192,7 +196,7 @@ function makeLLM(parent, size, label = 'LLM') {
     dots: root.querySelector('.llm-dots'),
     dotI: root.querySelectorAll('.llm-dots i'),
     q: root.querySelector('.llm-q'),
-    seed: ((makeLLM.n = (makeLLM.n || 0) + 1) * 1.37) % 3,
+    seed: seed ?? (makeLLM.n * 1.37) % 3,
   };
   return o;
 }
