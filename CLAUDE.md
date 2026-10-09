@@ -103,8 +103,9 @@ workspaces run `make setup` automatically.
     ordered `<link>` / `<script>` list: shared files as `../../<file>`,
     the theme's own scripts relative to its folder, then `boot()`
   - `themes/<theme>/`: the theme's own scripts, e.g.
-    `themes/durable-ai-agents/shared.js` (`STEPS`, the step list,
-    `makeApp`, the bill, the takeover of chapters 6 and 7)
+    `themes/durable-ai-agents/shared.js` (extra icons, the step list,
+    `makeApp`, the context block size `MEM_BLOCK`, the bill, the takeover
+    of chapters 6 and 7, the booking ticket)
   - `social.png`, `themes/<theme>/social.png`: 1200x630 link preview
     image of each page (`social.html`, or the intro title card), written by
     `make social` and committed
