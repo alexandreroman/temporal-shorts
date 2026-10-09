@@ -55,7 +55,7 @@
         + '<span class="mono" style="font-size:24px;letter-spacing:.08em">1 ORDER</span></div>',
         '', { padding: '12px 20px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
       s.temporal = makeWfTemporalPanel(root);
-      s.jr = makeOrderHistory(root);
+      s.history = makeOrderHistory(root);
       // the Workflow itself, handed to instance B
       s.handChip = makeHandOffCard(root, 'LAPTOP ORDER');
       s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w);
@@ -134,20 +134,20 @@
       // Rows 1 to 3 are replayed; the Signal arrived after them, so it is new to the Workflow: it keeps its SAVED
       // tag, which still pops when the row is read.
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, 1);
-      place(s.jr, HIST.x, HIST.y, 1, 1);
-      s.jr.rows.forEach((_, i) => {
-        showRow(s.jr.rows[i], i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
+      place(s.history, HIST.x, HIST.y, 1, 1);
+      s.history.rows.forEach((_, i) => {
+        showRow(s.history.rows[i], i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
         const isRead = i < 4 && t >= replay[i];
         const isReplayed = isRead && i < 3;
         const at = isRead ? replay[i] : saved[i];
-        setRowTag(s.jr, i, t, isReplayed ? 'REPLAYED' : 'SAVED', at, i < 3 ? 1 : P(t, saved[i], 0.25));
+        setRowTag(s.history, i, t, isReplayed ? 'REPLAYED' : 'SAVED', at, i < 3 ? 1 : P(t, saved[i], 0.25));
       });
-      setWaitLine(s.jr, 1 - P(t, signalIn - 0.2, 0.3));
+      setWaitLine(s.history, 1 - P(t, signalIn - 0.2, 0.3));
       const scanning = replay.findIndex(q => t >= q && t < q + 0.5);
-      scanRow(s.jr, scanning);
+      scanRow(s.history, scanning);
       const dp = P(t, complete, 0.45, backOut);
-      s.jr.done.style.opacity = clamp(dp * 2);
-      s.jr.done.style.transform = `translateX(-50%) scale(${dp})`;
+      s.history.done.style.opacity = clamp(dp * 2);
+      s.history.done.style.transform = `translateX(-50%) scale(${dp})`;
     }
   });
 }

@@ -95,7 +95,7 @@
       s.A = makeStepsApp(root, 'APP INSTANCE A');
       s.B = makeStepsApp(root, 'APP INSTANCE B');
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { logoAt: [24, 20], noteAt: [24, 25], font: 18 });
-      s.jr = makeHistoryCard(root, HISTORY, {
+      s.history = makeHistoryCard(root, HISTORY, {
         w: HIST.w, h: HIST.h, headerFont: 20, rowTop, font: 23, rowH: HROW.h, tagTop: i => rowTop(i) + 6,
         tag: { font: 18, pad: '4px 12px', icon: 18, border: false },
         crash: {
@@ -108,7 +108,7 @@
       // width, so it rests on whole pixels centered
       const DONE_H = 46;
       const doneTop = rowTop(HISTORY.length - 1) + HROW.h + (HIST.h - rowTop(HISTORY.length - 1) - HROW.h - DONE_H) / 2;
-      s.jr.done = E(s.jr, `${ICON('check', 24, C.neon, 2.6)} ORDER COMPLETE`, 'mono', {
+      s.history.done = E(s.history, `${ICON('check', 24, C.neon, 2.6)} ORDER COMPLETE`, 'mono', {
         left: '50%', top: doneTop + 'px', width: '270px', height: DONE_H + 'px', fontSize: '20px',
         letterSpacing: '.12em', color: C.neon, background: '#141414', padding: '0 18px 0 16px',
         borderRadius: 'var(--rs)', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center',
@@ -200,7 +200,7 @@
       // Temporal and its Event History, outside the app: untouched by the crash
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 0.6, 0.5));
       s.temporal.out.style.color = t >= c[0] + 5.0 ? C.ink : C.slate;
-      place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 0.8, 0.5));
+      place(s.history, HIST.x, HIST.y, 1, P(t, c[0] + 0.8, 0.5));
       // each result runs along its cable into the history, where its row is saved; during the replay the saved
       // results run back to app instance B
       s.cables.forEach((cable, i) => {
@@ -214,18 +214,18 @@
         }
       });
       HISTORY.forEach((_, i) => {
-        showRow(s.jr.rows[i], P(t, saved[i] - 0.1, 0.3));
+        showRow(s.history.rows[i], P(t, saved[i] - 0.1, 0.3));
         const isReplayed = i < 2 && t >= replay[i];
         const opacity = P(t, saved[i], 0.25);
-        if (isReplayed) placeStatusTag(s.jr.tags[i], t, 'REPLAYED', 'reused', opacity, replay[i]);
-        else placeStatusTag(s.jr.tags[i], t, 'SAVED', 'saved', opacity, saved[i]);
+        if (isReplayed) placeStatusTag(s.history.tags[i], t, 'REPLAYED', 'reused', opacity, replay[i]);
+        else placeStatusTag(s.history.tags[i], t, 'SAVED', 'saved', opacity, saved[i]);
       });
-      markCrash(s.jr, t, crashAt);
+      markCrash(s.history, t, crashAt);
       const scanning = replay.findIndex(q => t >= q - 0.2 && t < q + 0.7);
-      scanRow(s.jr, scanning);
+      scanRow(s.history, scanning);
       const dp = P(t, complete, 0.45, backOut);
-      s.jr.done.style.opacity = clamp(dp * 2);
-      s.jr.done.style.transform = `translateX(-50%) scale(${dp})`;
+      s.history.done.style.opacity = clamp(dp * 2);
+      s.history.done.style.transform = `translateX(-50%) scale(${dp})`;
       placeFlash(s.flash, t, crashAt);
 
       // the crash glitch: color fringes on the whole composition, torn bars and scanlines, re-drawn 24 times a

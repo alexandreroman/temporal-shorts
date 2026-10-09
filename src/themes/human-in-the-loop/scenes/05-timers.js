@@ -41,7 +41,7 @@
         tag: tag(root, label, 'violet'),
         stem: E(root, '', '', { width: '2px', height: '30px' }),
       }));
-      s.jr = makeHistory(root, TIMER_ROWS, CARD.w, CARD.h);
+      s.history = makeHistory(root, TIMER_ROWS, CARD.w, CARD.h);
       s.durable = tag(root, 'Timers are durable too', 'uv big');
     },
     update(t, c, s) {
@@ -73,11 +73,11 @@
       });
 
       // Temporal writes each timer to the Event History, so the timers survive restarts like the wait itself
-      place(s.jr, dayX(0) + CARD.w / 2, CARD.y, 1, P(t, c[0] + 0.2, 0.4));
+      place(s.history, dayX(0) + CARD.w / 2, CARD.y, 1, P(t, c[0] + 0.2, 0.4));
       const saved = [c[0] + 0.7, c[0] + 0.9, dayAt(2) + 0.2, dayAt(5) + 0.2];
       saved.forEach((at, i) => {
-        showRow(s.jr.rows[i], P(t, at - 0.1, 0.3));
-        setRowTag(s.jr, i, t, 'SAVED', at, P(t, at, 0.25));
+        showRow(s.history.rows[i], P(t, at - 0.1, 0.3));
+        setRowTag(s.history, i, t, 'SAVED', at, P(t, at, 0.25));
       });
       const dp = P(t, c[0] + 4.5, 0.45, backOut);
       place(s.durable, dayX(0) + CARD.w / 2, CARD.y + CARD.h / 2 + 63, dp, clamp(dp * 2));

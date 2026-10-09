@@ -93,7 +93,7 @@
       // Temporal side, outside the app: native-size logo header (whole pixels, never scaled) and the Event History
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { logoAt: [28, 30], noteAt: [28, 36] });
       // rows 1-4 survive the crash: tinted block + crash line under them
-      s.jr = makeHistoryCard(root, STEPS.map(st => st.row), {
+      s.history = makeHistoryCard(root, STEPS.map(st => st.row), {
         uvRow: isModel, w: HIST.w, h: HIST.h, rowTop, tagTop: i => rowTop(i) + 5,
         crash: {
           keptTop: rowTop(0) - 8, keptH: 3 * HIST.rowGap + 54, cutTop: rowTop(4) - 8,
@@ -230,7 +230,7 @@
 
       // Temporal panel: faded in at native size (no scale), so the header logo stays pixel-aligned
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 0.3, 0.5));
-      place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 0.45, 0.5));
+      place(s.history, HIST.x, HIST.y, 1, P(t, c[0] + 0.45, 0.5));
 
       // MODEL CALL and TOOL CALL cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {
@@ -244,16 +244,16 @@
       });
 
       // Event History rows and their status tags
-      markCrash(s.jr, t, crashAt);
-      s.jr.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
-      s.jr.tags.forEach((e, i) => {
+      markCrash(s.history, t, crashAt);
+      s.history.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
+      s.history.tags.forEach((e, i) => {
         const isReused = i < 4 && t >= replay[i] + 0.05, isTold = i < 4 && t >= told[i];
         const label = isTold ? reusedLabel(isModel(i)) : isReused ? 'REUSED' : 'SAVED';
         const switchedAt = isTold ? told[i] : isReused ? replay[i] + 0.05 : saved[i];
         placeStatusTag(e, t, label, isTold || isReused ? 'reused' : 'saved', P(t, saved[i], 0.25), switchedAt);
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 1.0);
-      scanRow(s.jr, scanning);
+      scanRow(s.history, scanning);
       // crash: red flash and a bolt strikes A's panel; once step 5's chip has mostly fallen out, APP CRASH stands
       // in the panel. Both shake with the app side and leave with A's CRASHED status, before A drops.
       placeFlash(s.flash, t, crashAt);

@@ -272,30 +272,30 @@ function makeHistory(p, rows, w, h, scanH = null) {
 // The laptop order history of chapters 3 and 4, with a scan highlight for the replay, the pulsing line shown in
 // the slot of row 4 while the Workflow waits for the Signal, and WORKFLOW COMPLETE 26 px under the rows
 function makeOrderHistory(p) {
-  const jr = makeHistory(p, HISTORY, HIST.w, HIST.h, HROW.h + 6);
+  const history = makeHistory(p, HISTORY, HIST.w, HIST.h, HROW.h + 6);
   // UV, as light violet is too faint on white
-  jr.wait = E(jr,
+  history.wait = E(history,
     `<span class="hg" style="display:inline-block">${ICON('hourglass', 22, C.uv, 2.2)}</span>`
     + '<span>WAITING FOR A SIGNAL</span>',
     'mono', {
       left: '74px', top: rowTop(3) + 'px', height: HROW.h + 'px', fontSize: '20px', fontWeight: 700,
       letterSpacing: '.12em', color: C.uv, padding: '0 10px', display: 'flex', gap: '12px', alignItems: 'center',
     });
-  jr.wait.hg = jr.wait.querySelector('.hg');
-  jr.done = E(jr, `${ICON('check', 24, C.neon, 2.6)} WORKFLOW COMPLETE`, 'mono', {
+  history.wait.hg = history.wait.querySelector('.hg');
+  history.done = E(history, `${ICON('check', 24, C.neon, 2.6)} WORKFLOW COMPLETE`, 'mono', {
     left: '50%', top: (rowTop(HISTORY.length - 1) + HROW.h + 26) + 'px', fontSize: '20px', letterSpacing: '.12em',
     color: C.neon, background: '#141414', padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)',
     display: 'flex', gap: '10px', alignItems: 'center',
   });
-  return jr;
+  return history;
 }
 // Status tag of row i, a key of ROW_TAG_KINDS; it pops when its label changes at `at`
-function setRowTag(jr, i, t, label, at, o) {
-  placeStatusTag(jr.tags[i], t, label, ROW_TAG_KINDS[label], o, at);
+function setRowTag(history, i, t, label, at, o) {
+  placeStatusTag(history.tags[i], t, label, ROW_TAG_KINDS[label], o, at);
 }
 // The "waiting for a Signal" line pulses while shown
-function setWaitLine(jr, o) {
-  jr.wait.style.opacity = o * (0.8 + 0.2 * Math.sin(G * 4)); // never below 0.6, so it stays readable
-  jr.wait.hg.style.transform = `rotate(${hourglassTurn()}deg)`;
+function setWaitLine(history, o) {
+  history.wait.style.opacity = o * (0.8 + 0.2 * Math.sin(G * 4)); // never below 0.6, so it stays readable
+  history.wait.hg.style.transform = `rotate(${hourglassTurn()}deg)`;
 }
 
