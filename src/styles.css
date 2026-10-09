@@ -79,7 +79,8 @@ html,body{margin:0;background:var(--bg)}
 }
 .llm-dots i{display:block;width:.55em;height:.55em;background:var(--uv);border-radius:2px}
 .llm-q{position:absolute;left:-1.2em;top:-1.6em;font-size:2.6em;font-weight:700;color:var(--neon);opacity:0}
-.llm-label{
+/* label centered under an element: the LLM orb, the app window of durable-ai-agents */
+.under-label{
   position:absolute;left:50%;top:calc(100% + 18px);transform:translateX(-50%);white-space:nowrap;
   font-family:'Mono';font-size:22px;letter-spacing:.12em;padding-left:.12em;color:var(--slate);
 }

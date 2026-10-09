@@ -189,7 +189,7 @@ function makeLLM(parent, size, label = 'LLM', { seed } = {}) {
     <div class="llm-eye r"><div class="pupil"></div></div>
     <div class="llm-dots"><i></i><i></i><i></i></div>
     <div class="llm-q">?</div>
-    ${label ? `<div class="llm-label">${label}</div>` : ''}`, 'llm');
+    ${label ? `<div class="under-label">${label}</div>` : ''}`, 'llm');
   root.style.width = size + 'px'; root.style.height = size + 'px'; root.style.fontSize = (size / 10) + 'px';
   // counted even with a `seed`, so the default seeds of the other orbs never depend on it
   makeLLM.n = (makeLLM.n || 0) + 1;

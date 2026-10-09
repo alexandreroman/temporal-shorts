@@ -45,7 +45,7 @@ function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts,
 }
 
 // The app of chapters 1, 2 and 4: a window with a gear that gearSpin() turns while the app works.
-// Its .app* styles are in this theme's index.html.
+// Its .app* styles are in this theme's index.html; its APP label is an .under-label (src/styles.css).
 function makeApp(parent) {
   const root = E(parent, `
    <div class="app-win">
@@ -53,7 +53,7 @@ function makeApp(parent) {
      <div class="app-lines"><b style="width:70%"></b><b style="width:45%"></b><b style="width:60%"></b></div>
      <div class="app-gear">${ICON('gear', 46, '#F8FAFC')}</div>
    </div>
-   <div class="app-label">APP</div>`, 'app');
+   <div class="under-label">APP</div>`, 'app');
   root.gear = root.querySelector('.app-gear');
   return root;
 }
