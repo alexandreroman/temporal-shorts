@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Download the brand fonts into src/fonts/. Run by setup.sh, and alone in CI, which builds only the HTML pages.
+# Download the brand fonts into src/fonts/. Run by setup.sh, and by make before any target that needs the fonts.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

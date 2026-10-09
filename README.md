@@ -399,10 +399,10 @@ project memory in `.claude/project-memory/`.
 
 The `.github/workflows/pages.yml` workflow publishes the home page and the
 players to [GitHub Pages](https://docs.github.com/en/pages) on every push to
-`main`, or on demand from the Actions tab (`workflow_dispatch`). It
-downloads the fonts (`scripts/fonts.sh`, the font step of `make setup`),
-runs `make html` with the runner's Python, then deploys `output/`. It
-builds no video and no subtitle file, so it needs neither Playwright nor
+`main`, or on demand from the Actions tab (`workflow_dispatch`). It runs
+`make html` with the runner's Python (make downloads the fonts first with
+`scripts/fonts.sh`, the font step of `make setup`), then deploys `output/`.
+It builds no video and no subtitle file, so it needs neither Playwright nor
 ffmpeg.
 
 Pull requests to `main` run the same build without deploying: the pages are

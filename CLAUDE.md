@@ -108,16 +108,16 @@ workspaces run `make setup` automatically.
     the first scene of a chapter sets `chapter` and `title`; `shift`
     (`[dx, dy]` or `(t, c) => [dx, dy]`, see `pan()`) centers the
     composition at (960, 515)
-- `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh`, CI
-  and any make target when the fonts are missing), frame preview, parallel
+- `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh` and
+  any make target when the fonts are missing), frame preview, parallel
   render, timeline, layout check (`layout_check.py`), SRT export, social
   preview images (`social_images.py`), standalone HTML build and server;
   the per-theme scripts require `--theme` (no default). The HTML build
   adds the Open Graph and X card tags and a canonical link only when the
   `SITE_URL` environment variable (or make variable) holds the site's root
   URL: local builds have none
-- `.github/workflows/pages.yml`: on push to `main`, downloads the fonts,
-  runs `make html` with `SITE_URL` set to the Pages URL given by
+- `.github/workflows/pages.yml`: on push to `main`, runs `make html`
+  (which downloads the fonts) with `SITE_URL` set to the Pages URL given by
   `actions/configure-pages` (no domain in the build or the workflow) and
   deploys `output/` to GitHub Pages (no video, no SRT); served at a domain
   root, as the player's home button links to `/`. Pull requests to `main`
