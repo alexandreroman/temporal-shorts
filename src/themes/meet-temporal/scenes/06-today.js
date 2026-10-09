@@ -80,7 +80,7 @@
     const a = LANG_DEG[k] * Math.PI / 180 + rot;
     return [Math.round(SYM.x + RING.rx * Math.cos(a)), Math.round(SYM.y + RING.ry * Math.sin(a))];
   };
-  // the five frameworks, then a sixth tile: more to come
+  // the five frameworks, then a sixth tile: and more
   const AI = ['OpenAI Agents SDK', 'Vercel AI SDK', 'Pydantic AI', 'Google ADK', 'LangGraph'];
   const AI_CHIP = { w: 340, h: 60, gapX: 32, gapY: 22 };
   const AI_Y = [741, 823];
@@ -142,7 +142,8 @@
       { text: "Its open source SDKs support Go, Java, Python, TypeScript, .NET, PHP, Ruby and Rust.", after: 1.0 },
       // the five AI frameworks, then a hold
       {
-        text: "And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI SDK, Pydantic AI, Google ADK, LangGraph.",
+        text: "And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI SDK, Pydantic AI, Google ADK, "
+          + "LangGraph, and more.",
         after: 1.2,
       },
       // the climb, the arrival, the hold on $12.55B
@@ -214,8 +215,8 @@
         + 'style="display:block;filter:url(#logo-ink)">', LANG_CHIP, { ...TILE, padding: '0' }));
       s.ais = AI.map(name => makeChip(root, `${ICON('sparkle', 24, C.violet, 1.8)}<span>${name}</span>`, AI_CHIP,
         TILE));
-      // more to come: the same tile, dashed and a little dimmer
-      s.ais.push(makeChip(root, `${ICON('plus', 24, C.violet, 2)}<span style="opacity:.75">more to come</span>`,
+      // and more: the same tile, dashed and a little dimmer
+      s.ais.push(makeChip(root, `${ICON('plus', 24, C.violet, 2)}<span style="opacity:.75">and more</span>`,
         AI_CHIP, { ...TILE, border: '1.5px dashed ' + C.uv }));
 
       // beat 3's labels: the rounds, then the valuation
@@ -340,7 +341,7 @@
         const [ex, ey] = away(AI_AT[j][0], AI_AT[j][1] + rise);
         place(e, Math.round(ex), Math.round(ey), pop.s, pop.o * (1 - exit));
       });
-      // the last one, more to come, glows softly as it arrives
+      // the last one, and more, glows softly as it arrives
       const more = win(t, aiAt(AI.length) + 0.2, aiAt(AI.length) + 1.4, 0.4);
       s.ais[AI.length].style.boxShadow = more > 0 ? `0 0 ${Math.round(30 * more)}px rgba(182,100,255,${
         (0.5 * more).toFixed(3)})` : '';
