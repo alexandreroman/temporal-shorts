@@ -174,12 +174,10 @@ function makeHistory(p, rows, w, h, crashRow = null, crashGap = 0) {
   }
   // tags 24 px from the card's right edge, 10 px inside the tinted kept block: REUSED, NOT RE-RUN keeps about
   // 20 px from the longest row text it sits on (shipPackage: tracking 1Z-48)
-  const card = makeHistoryCard(p, rows, {
+  return makeHistoryCard(p, rows, {
     w, h, rowTop, rowH: HIST.rowGap, padY: 0, tagTop: i => rowTop(i) + HIST.rowGap / 2, tagRight: 24,
     tag: { border: false }, crash, scanH: HIST.rowGap,
   });
-  card.rowTop = rowTop;
-  return card;
 }
 // Row i slides in from the right with progress p, on whole pixels
 const showHistoryRow = (hist, i, p) => showRow(hist.rows[i], p, 26, true);
@@ -191,8 +189,6 @@ function setHistoryTag(hist, i, label, kind, o, pop = 0) {
   e.style.opacity = clamp(o);
   e.style.transform = `translateY(-50%) scale(${1 + 0.14 * pop})`;
 }
-// Highlight row i with opacity o, below the crash line for the rows under it
-const setHistoryScan = (hist, i, o) => setScan(hist, hist.rowTop(i), o);
 
 // ---------- one shot for chapters 5 and 6: Worker panel with the code card on the left, CARD CHARGED counter
 // and order status under it, TEMPORAL panel with the Event History on the right, with room under its rows for the

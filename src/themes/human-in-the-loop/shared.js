@@ -290,10 +290,6 @@ function makeOrderHistory(p) {
   });
   return jr;
 }
-// Highlight row i during the replay; null hides the highlight
-function scanRow(jr, i) {
-  setScan(jr, rowTop(i ?? 0) - 3, i === null ? 0 : 1);
-}
 // Status tag of row i, a key of ROW_TAG_KINDS; it pops when its label changes at `at`
 function setRowTag(jr, i, t, label, at, o) {
   const e = jr.tags[i];

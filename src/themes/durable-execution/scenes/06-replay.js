@@ -187,7 +187,7 @@
       // the replayed row lights up while its result goes back (the windows never overlap)
       const scans = replay.map((q, i) => win(t, q + 0.15, back[i], 0.15));
       const lit = Math.max(0, scans.findIndex(o => o > 0));
-      setHistoryScan(hist, ehStepRow(lit), Math.max(...scans));
+      scanRow(hist, ehStepRow(lit), Math.max(...scans));
 
       const dp = popIn(t, completed + 0.4, 0.08);
       place(s.done, EH.temporal.x, EH.doneY, dp.s, dp.o);

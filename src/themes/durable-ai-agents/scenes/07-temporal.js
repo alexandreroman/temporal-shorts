@@ -79,7 +79,7 @@
       s.jr = makeHistoryCard(root, rowsHtml, {
         w: HIST.w, h: 440, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44, tag: { border: false },
         crash: { keptTop: 64, keptH: 262, cutTop: 330, label: 'APP CRASHED HERE', labelX: '66%', labelFont: 13 },
-        scanH: 42,
+        scanH: 42, scanDy: -2,
       });
       s.saveCards = JR.map((_, i) => makeCallCard(root, i));
       s.reuseCards = JR.slice(0, 6).map((_, i) => makeCallCard(root, i));
@@ -201,7 +201,7 @@
         e.style.transform = `scale(${swell(t, switchedAt, 0.14)})`;
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 0.4);
-      setScan(s.jr, 68 + Math.max(0, scanning) * 44, scanning >= 0 ? 1 : 0);
+      scanRow(s.jr, scanning);
       place(s.done, DONE_X, 795, P(t, saved[7] + 0.5, 0.45, backOut), P(t, saved[7] + 0.5, 0.35));
       placeFlash(s.flash, t, crashAt);
       // takeover: NEW INSTANCE pops on B once it is almost in place and is gone by c[3]; Temporal hands it the agent,

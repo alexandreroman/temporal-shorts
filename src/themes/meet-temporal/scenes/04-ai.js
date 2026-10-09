@@ -317,7 +317,7 @@
       const savingRow = saved.findIndex(at => t >= at && t < at + HOLD);
       const replayRow = replay.findIndex(q => t >= q && t < q + REPLAY_STEP - 0.2);
       const scanning = savingRow >= 0 ? savingRow : replayRow;
-      setScan(s.history, HIST.row0 - 4 + Math.max(0, scanning) * HIST.gap, scanning >= 0 ? 1 : 0);
+      scanRow(s.history, scanning);
 
       // the slot under the history: SAVED OUTSIDE THE APP at the first save, HISTORY KEPT through the crash, then
       // the outcome, NO PROGRESS LOST and NO TOKENS WASTED, side by side, one after the other, held

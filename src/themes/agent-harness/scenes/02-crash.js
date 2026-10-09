@@ -100,7 +100,7 @@
           keptTop: rowTop(0) - 8, keptH: 3 * HIST.rowGap + 54, cutTop: rowTop(4) - 8,
           label: 'APP CRASHED HERE', labelX: '56%', labelFont: 13,
         },
-        scanH: 42,
+        scanH: 42, scanDy: -2,
       });
       s.saveCards = STEPS.map((_, i) => makeCallCard(root, i));
       s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeCallCard(root, i));
@@ -257,7 +257,7 @@
         e.style.transform = `scale(${swell(t, switchedAt, 0.14)})`;
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 1.0);
-      setScan(s.jr, rowTop(Math.max(0, scanning)) - 2, scanning >= 0 ? 1 : 0);
+      scanRow(s.jr, scanning);
       // crash: red flash and a bolt strikes A's panel; once step 5's chip has mostly fallen out, APP CRASH stands
       // in the panel. Both shake with the app side and leave with A's CRASHED status, before A drops.
       placeFlash(s.flash, t, crashAt);

@@ -249,8 +249,8 @@
       // the TimerStarted row stays lit while the Worker comes and goes; then the replay reads the history: the
       // shipPackage row, then TimerFired (the sleep returns at once)
       const replayRow = t < replaySleep ? SHIP_ROW : FIRED_ROW;
-      if (t < fireAt) setHistoryScan(s.hist, STARTED_ROW, 0.6 * win(t, c[1] + 0.4, fireAt - 0.3, 0.4));
-      else setHistoryScan(s.hist, replayRow, win(t, replayAt, runAt, 0.15));
+      if (t < fireAt) scanRow(s.hist, STARTED_ROW, 0.6 * win(t, c[1] + 0.4, fireAt - 0.3, 0.4));
+      else scanRow(s.hist, replayRow, win(t, replayAt, runAt, 0.15));
 
       // durable timer: day 1 once saved, resting until c[1]; then one tick per day until day 30, when it fires. On
       // each tick the day changes, the hand turns once and the bar grows a step, then all rest until the next tick

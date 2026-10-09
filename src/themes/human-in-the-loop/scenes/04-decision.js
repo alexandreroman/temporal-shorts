@@ -144,7 +144,7 @@
       });
       setWaitLine(s.jr, 1 - P(t, signalIn - 0.2, 0.3));
       const scanning = replay.findIndex(q => t >= q && t < q + 0.5);
-      scanRow(s.jr, scanning >= 0 ? scanning : null);
+      scanRow(s.jr, scanning);
       const dp = P(t, complete, 0.45, backOut);
       s.jr.done.style.opacity = clamp(dp * 2);
       s.jr.done.style.transform = `translateX(-50%) scale(${dp})`;

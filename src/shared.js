@@ -518,12 +518,13 @@ function makeTemporalPanel(p, w, h, { logoAt = null, noteAt, font = 16, note = '
 // - tagTop(i): top of the tag of row i; tagRight: its right margin; tag: statusTag options
 // - crash: { keptTop, keptH, cutTop, label, labelX, labelFont }, the tinted block over the rows that survive a
 //   crash and the dashed line under them, labelled at labelX (a CSS left); null for none (see markCrash)
-// - scanH: height of the row highlight (see setScan), null for none
-// Returns the card with rows, tags, kept and cut (crash) and scan.
+// - scanH: height of the row highlight (see scanRow), null for none; scanDy: its top, from the top of its row
+//   (default: centered on rows of height rowH, else level with them)
+// Returns the card with rows, tags, kept and cut (crash), scan, rowTop and scanDy.
 function makeHistoryCard(p, rowsHtml, opts) {
   const {
     w, h, headerFont = 18, headerTop = headerFont + 2, rowTop, font = 22, rowH = null, padY = 4, tagTop,
-    tagRight = 36, tag = {}, crash = null, scanH = null,
+    tagRight = 36, tag = {}, crash = null, scanH = null, scanDy = rowH ? (rowH - scanH) / 2 : 0,
   } = opts;
   const card = E(p,
     `<div class="mono" style="position:absolute;left:26px;top:${headerTop}px;font-size:${headerFont}px;`
@@ -566,12 +567,16 @@ function makeHistoryCard(p, rowsHtml, opts) {
     });
     return e;
   });
+  card.rowTop = rowTop;
+  card.scanDy = scanDy;
   return card;
 }
-// Moves the row highlight of an Event History card to `top` (px from the card top), with opacity o
-function setScan(card, top, o) {
-  card.scan.style.top = top + 'px';
-  card.scan.style.opacity = clamp(o);
+// Highlights row i of an Event History card with opacity o; i null or negative hides the highlight, parked on row 1
+// so that a frame never depends on the frames drawn before it
+function scanRow(card, i, o = 1) {
+  const shown = i !== null && i >= 0;
+  card.scan.style.top = (card.rowTop(shown ? i : 0) + card.scanDy) + 'px';
+  card.scan.style.opacity = shown ? clamp(o) : 0;
 }
 // Crash marks of an Event History card after a crash at crashAt: the crash line shows first, then the tinted block
 // over the rows that survive it

@@ -223,7 +223,7 @@
       });
       markCrash(s.jr, t, crashAt);
       const scanning = replay.findIndex(q => t >= q - 0.2 && t < q + 0.7);
-      setScan(s.jr, rowTop(Math.max(0, scanning)) - 3, scanning >= 0 ? 1 : 0);
+      scanRow(s.jr, scanning);
       const dp = P(t, complete, 0.45, backOut);
       s.jr.done.style.opacity = clamp(dp * 2);
       s.jr.done.style.transform = `translateX(-50%) scale(${dp})`;
