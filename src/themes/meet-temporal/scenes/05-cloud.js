@@ -77,22 +77,10 @@
   const arriveAt = d => d + TRIP.toDot + TRIP.route;
   // a Worker's edge, where data leaves it and tasks reach it
   const workerEdge = k => [WORKER.x + WORKER.w / 2, workerY(k)];
-  // the gate just above the Data Converter, where data passes over it in full view, and the connection's start
+  // the gate just above the Data Converter, where the close-up's payload pauses over it in full view, and the
+  // connection's start, where it goes on
   const GATE = [CONV.x, CONV.y - CONV.h / 2 - 34];
   const LINE_START = [CONV.x + CONV.w / 2 + 40, CONV.y];
-  // a point at progress f (0 to 1, eased) along straight legs joining points, each leg taking its share of the length
-  function pointOnLegs(points, f) {
-    const lens = points.slice(1).map((pt, i) => Math.hypot(pt[0] - points[i][0], pt[1] - points[i][1]));
-    let d = ease(clamp(f)) * lens.reduce((a, b) => a + b, 0);
-    for (let i = 0; i < lens.length; i++) {
-      if (d <= lens[i] || i === lens.length - 1) {
-        const u = lens[i] ? Math.min(1, d / lens[i]) : 1;
-        return [lerp(points[i][0], points[i + 1][0], u), lerp(points[i][1], points[i + 1][1], u)];
-      }
-      d -= lens[i];
-    }
-    return points[points.length - 1];
-  }
   const HEX = '0123456789abcdef';
   // text with its first n characters swapped for hex digits picked by a hash of frame: encrypted data
   const scrambleHex = (text, n, frame) => [...text].map((ch, i) => (i < n && ch !== ' '
@@ -261,6 +249,10 @@
         border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
       s.polls = WORKERS.map(() => makeSpark(root, 12, '182,100,255'));
+      // on a Worker's wire, a task or a schedule request travels as a violet spark, so no card ever covers the
+      // Workers' text: the cards only travel on the connection, and pass under the Data Converter
+      s.taskSparks = TASKS.map(() => makeSpark(root, 12, '182,100,255'));
+      s.scheduleSparks = SCHEDULES.map(() => makeSpark(root, 12, '182,100,255'));
       // shipPackage's result and the Workflow's completion, flying back as sparks
       s.results = [0, 1].map(() => makeSpark(root, 14, '219,255,75'));
       // the close-up: one result, in clear, then encrypted
@@ -268,10 +260,14 @@
         fontSize: '20px', padding: '6px 14px', background: C.uvTint, color: '#141414', borderRadius: 'var(--rs)',
         whiteSpace: 'nowrap',
       });
+      // the Data Converter over everything that goes through it but the close-up's payload, which pauses over it
+      root.insertBefore(s.conv, s.secret);
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
       const routePoint = (k, p) => s.routes[k].getPointAtLength(s.routes[k]._L * clamp(p));
+      // whether progress p of route k is still on its Worker's wire, before the Data Converter's left edge
+      const onWirePart = (k, p) => routePoint(k, p).x < CONV.x - CONV.w / 2;
 
       // c[0]: both zones, your Workers and their code, the Data Converter and the connection out; each Worker
       // polls Temporal Cloud; the captions: your code runs here, none on Temporal's side
@@ -334,25 +330,28 @@
         const k = TASKS[i][1], pop = popIn(t, queued[i]);
         const toDot = P(t, dispatch[i], TRIP.toDot, ease), along = P(t, dispatch[i] + TRIP.toDot, TRIP.route);
         let [x, y] = QUEUE, scale = pop.s;
+        // back along the connection, straight under the Data Converter, then on along its Worker's wire as a spark
+        const onWire = along > 0 && onWirePart(k, 1 - ease(along));
         if (along > 0) {
-          // back along the connection, over the Data Converter's gate (never across its box), then to its Worker
-          [x, y] = pointOnLegs([[DOT.x, DOT.y], LINE_START, GATE, workerEdge(k)], along);
-          scale = 0.8;
+          const pt = routePoint(k, 1 - ease(along));
+          x = pt.x; y = pt.y; scale = 0.8;
         } else if (toDot > 0) {
           x = lerp(QUEUE[0], DOT.x, toDot); y = lerp(QUEUE[1], DOT.y, toDot); scale = lerp(1, 0.8, toDot);
         }
-        const o = t < queued[i] || along >= 1 ? 0 : pop.o;
+        const o = t < queued[i] || along >= 1 || onWire ? 0 : pop.o;
         place(e, Math.round(x * 100) / 100, Math.round(y * 100) / 100, scale, o);
+        place(s.taskSparks[i], x, y, 1, onWire && along < 1 ? 1 : 0);
       });
-      // the Workflow's schedule requests: out of WORKER 1 as it pauses, from just right of it, over the gate, along
-      // the connection, then into the queue, where the Activity task takes their place
+      // the Workflow's schedule requests: out of WORKER 1 as it pauses, a spark along its wire, a card from under the
+      // Data Converter on along the connection, then into the queue, where the Activity task takes their place
       s.schedules.forEach((e, j) => {
         const at = [p0, p2][j];
-        const start = [WORKER.x + WORKER.w / 2 + 130, workerY(0)];
-        const f = P(t, at, TRIP.back, x => x), g = P(t, at + TRIP.back, TRIP.toQueue, ease);
-        let [x, y] = pointOnLegs([start, GATE, LINE_START, [DOT.x, DOT.y]], f);
+        const f = P(t, at, TRIP.back, ease), g = P(t, at + TRIP.back, TRIP.toQueue, ease);
+        const pt = routePoint(0, f), onWire = onWirePart(0, f);
+        let [x, y] = [pt.x, pt.y];
         if (g > 0) { x = lerp(DOT.x, QUEUE[0], g); y = lerp(DOT.y, QUEUE[1], g); }
-        const o = t < at ? 0 : P(t, at, 0.3) * (1 - P(t, at + toQueue - 0.15, 0.2));
+        place(s.scheduleSparks[j], x, y, 1, t >= at && f < 1 && onWire ? 1 : 0);
+        const o = t < at || onWire ? 0 : 1 - P(t, at + toQueue - 0.15, 0.2);
         place(e, Math.round(x), Math.round(y), 1, o);
       });
       // The Workers. WORKER 1 runs the Workflow a line at a time: from the top to `await chargeCard`, where it waits;
@@ -389,8 +388,8 @@
           return;
         }
         if (into <= 0) {
-          const [x, y] = pointOnLegs([workerEdge(k), GATE, LINE_START, [DOT.x, DOT.y]], back);
-          place(e, x, y, 1, Math.min(1, back * 6));
+          const pt = routePoint(k, back);
+          place(e, pt.x, pt.y, 1, Math.min(1, back * 6));
         } else {
           place(e, lerp(DOT.x, PAYLOAD_X, into), lerp(DOT.y, rowY(row), into), 1, 1 - into * 0.5);
         }
