@@ -198,10 +198,7 @@
       s.planner = makePlanner(root);
       s.link = path(s.svg, `M ${LINK.from} ${LINK.y} L ${LINK.to} ${LINK.y}`, C.uv, 3, true);
       s.linkL = E(root, 'Typed session', 'lbl', { fontSize: '16px', color: C.ink });
-      s.pulse = E(root, '', '', {
-        width: '14px', height: '14px', background: C.uv, borderRadius: '3px',
-        boxShadow: `0 0 14px 4px rgba(${RGB.uv},.6)`,
-      });
+      s.pulse = makeGlowDot(root, 14, RGB.uv, { radius: '3px', spread: 4, alpha: 0.6 });
       // the typed SDKs: one row under the window, its content pushed to the box's right edge, which sits on the
       // window's right edge; a box of fixed even width rests on whole pixels (its content is about 428 px wide)
       s.sdkRow = E(root,

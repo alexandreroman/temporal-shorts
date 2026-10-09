@@ -81,11 +81,10 @@ function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enter
   cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
 }
 
-// Glowing dot of light, size px wide, in a color (an RGB triplet, e.g. RGB.neon); place() centers it
-const makeSpark = (p, size = 14, rgb = RGB.ink) => E(p, '', '', {
-  width: size + 'px', height: size + 'px', borderRadius: '50%', background: `rgb(${rgb})`,
-  boxShadow: `0 0 ${size}px ${Math.round(size / 2)}px rgba(${rgb},.55)`,
-});
+// Spark: a makeGlowDot with a wide soft halo, size px wide, in a color (an RGB triplet, e.g. RGB.neon)
+function makeSpark(p, size = 14, rgb = RGB.ink) {
+  return makeGlowDot(p, size, rgb, { spread: Math.round(size / 2), alpha: 0.55 });
+}
 // Puts a spark on the head of a path drawn to prog (0 to 1): it shows only while the path draws
 function sparkOnPath(spark, pathEl, prog, dx = 0, dy = 0) {
   if (prog <= 0 || prog >= 1) {

@@ -56,10 +56,7 @@
       s.restartM = E(root, '', '', { width: '2px', height: '40px', background: C.red });
       s.deployM = E(root, '', '', { width: '2px', height: '40px', background: C.slate });
       s.restart = tag(root, 'Restart', 'red'); s.deploy = tag(root, 'Deploy');
-      s.marker = E(root, '', '', {
-        width: '24px', height: '24px', background: C.violet, borderRadius: '50%',
-        boxShadow: `0 0 18px 4px rgba(${RGB.violet},.45)`,
-      });
+      s.marker = makeGlowDot(root, 24, RGB.violet, { blur: 18, spread: 4, alpha: 0.45 });
       s.app = makeAppPanel(root, 'APP', APP.w, APP.h, APP_TEXT_LARGE);
       // the memory card never moves: it is part of the panel's HTML, and only its chips are animated elements
       s.app.insertAdjacentHTML('beforeend',

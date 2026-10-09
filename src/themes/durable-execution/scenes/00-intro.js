@@ -46,9 +46,7 @@
         b.ok = b.querySelector('.ok'); b.ko = b.querySelector('.ko'); b.re = b.querySelector('.re');
         return b;
       });
-      s.dot = E(root, '', '', {
-        width: '18px', height: '18px', borderRadius: '50%', background: C.neon, boxShadow: `0 0 20px ${C.neon}`,
-      });
+      s.dot = makeGlowDot(root, 18, RGB.neon, { blur: 20 });
     },
     update(t, c, s) {
       rise(s.t, TITLE_X, CHAIN.y, P(t, 0.15, 0.9));

@@ -113,6 +113,14 @@ function glowShadow(rgb, k, { blur, alpha = 1, spread = 0 }) {
   const spreadPx = spread ? ` ${Math.round(spread * k)}px` : '';
   return `0 0 ${Math.round(blur * k)}px${spreadPx} rgba(${rgb},${(alpha * k).toFixed(3)})`;
 }
+// Glowing dot of light, size px wide, in a brand color (an RGB triplet); place() centers it. Options: radius, its CSS
+// border radius (round by default); blur (default: size), spread and alpha, its glow (see glowShadow)
+function makeGlowDot(p, size, rgb, { radius = '50%', blur = size, spread = 0, alpha = 1 } = {}) {
+  return E(p, '', '', {
+    width: size + 'px', height: size + 'px', borderRadius: radius, background: `rgb(${rgb})`,
+    boxShadow: glowShadow(rgb, 1, { blur, alpha, spread }),
+  });
+}
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
 function rise(e, x, y, p, d = 24) {
   place(e, x, y, 1, p);
@@ -196,10 +204,7 @@ function showRow(e, p, dx = 26, round = false) {
   e.style.transform = `translateX(${round ? Math.round(x) : x}px)`;
 }
 // Neon token that runs round an agentic loop
-const makeToken = root => E(root, '', '', {
-  width: '22px', height: '22px', background: C.neon, boxShadow: `0 0 22px 6px rgba(${RGB.neon},.45)`,
-  borderRadius: '5px',
-});
+const makeToken = root => makeGlowDot(root, 22, RGB.neon, { radius: '5px', spread: 6, alpha: 0.45 });
 
 // ---------- agentic loop: think, act, observe
 // Angle of each node on the loop circle, in degrees from the x axis (clockwise on screen)

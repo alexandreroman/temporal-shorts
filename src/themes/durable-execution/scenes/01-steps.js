@@ -58,9 +58,7 @@
       s.steps = makeStepRow(root, s.svg, ORDER_TILES, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       const [y0, y1] = SERVICE_LINK;
       s.links = s.steps.xs.map(x => path(s.svg, `M ${x} ${y0} L ${x} ${y1}`, C.line, 2, false));
-      s.dots = s.steps.xs.map(() => E(root, '', '', {
-        width: '14px', height: '14px', borderRadius: '50%', background: C.uv, boxShadow: `0 0 14px ${C.uv}`,
-      }));
+      s.dots = s.steps.xs.map(() => makeGlowDot(root, 14, RGB.uv));
       s.services = ORDER_STEPS.map(step => makeService(root, step.service));
       s.code = makeCodeCard(root, { w: ABOVE_W });
       s.done = tag(root, `${ICON('check', 28, C.neon, 2.6)}Order complete`, 'neon');
