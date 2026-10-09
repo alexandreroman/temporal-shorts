@@ -7,7 +7,8 @@ type: project
 # Player presenter mode
 
 The presenter mode of the live player (button and P key) is described in
-README.md (HTML pages, and Editing: Presenter stops). Two design choices
+README.md ("Home page and standalone HTML players"; "Editing", Presenter
+stops, which also sets the `stopLead` rule). Two design choices
 stay outside the README: while held, `playing` stays true and the ambient
 clock G keeps running; a hold that freezes a continuous motion crossing a
 cue (the agent-harness token loop in scene 1, the durable-execution timer
@@ -20,5 +21,5 @@ fully visible, never black. Keeping `playing` true lets the controls and
 cursor hide, so the audience sees a clean screen, while ambient loops stay
 alive.
 
-**How to apply:** an animation keyed before its cue (`c[i] - x`) needs a
-`stopLead` on that cue that puts the stop strictly before it.
+**How to apply:** keep a scene's stops at rest frames: an animation keyed
+before its cue gets a `stopLead` (README.md, Editing).
