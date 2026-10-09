@@ -73,7 +73,7 @@
         const landed = failed ? LOOP.arrive[i] : hitAt(i);
         const g = win(u, landed, landed + 0.15, 0.15);
         const rgb = failed ? RGB.red : RGB.neon;
-        e.style.boxShadow = g > 0.01 ? `0 0 ${Math.round(30 * g)}px rgba(${rgb},${(0.5 * g).toFixed(3)})` : 'none';
+        e.style.boxShadow = glowShadow(rgb, g, { blur: 30, alpha: 0.5 });
         // badge: the check pops in and fades with the reset; the cross and the retry arrow show while they last
         const b = s.badges[i];
         const pop = passed ? popIn(u, hitAt(i)) : { o: 1, s: 1 };

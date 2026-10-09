@@ -105,6 +105,14 @@ function makeEndCard(root, title, tagline, opts = {}) {
   html += `<img src="${LOGO}" style="height:70px;display:block;margin:${logoGap}px auto 0">`;
   return E(root, html, '', { textAlign: 'center' });
 }
+// Glow of a brand color round an element (box-shadow) or its text (text-shadow), of strength k from 0 to 1: blur
+// px wide at opacity alpha, and spread px wider than the element (box-shadow only); all three grow with k. '' for
+// none (k <= 0).
+function glowShadow(rgb, k, { blur, alpha = 1, spread = 0 }) {
+  if (k <= 0) return '';
+  const spreadPx = spread ? ` ${Math.round(spread * k)}px` : '';
+  return `0 0 ${Math.round(blur * k)}px${spreadPx} rgba(${rgb},${(alpha * k).toFixed(3)})`;
+}
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
 function rise(e, x, y, p, d = 24) {
   place(e, x, y, 1, p);

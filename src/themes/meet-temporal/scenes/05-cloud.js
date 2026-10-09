@@ -488,8 +488,7 @@
       s.conv.shackle.setAttribute('transform', `translate(0 ${(-4 * open).toFixed(2)})`);
       s.conv.key.style.transform = `scale(${swell(t, snap - 0.25, 0.5)})`;
       const glow = Math.max(pulse * 0.7, win(t, snap - 0.1, snap + 0.5, 0.15));
-      s.conv.style.boxShadow = glow > 0 ? `0 0 ${Math.round(24 * glow)}px rgba(${RGB.neon},${(0.45 * glow).toFixed(3)})`
-        : '';
+      s.conv.style.boxShadow = glowShadow(RGB.neon, glow, { blur: 24, alpha: 0.45 });
       // Temporal Cloud never sees your payloads, held
       setStatus(s.never, 'NEVER SEES YOUR PAYLOADS', 'ok');
       const np = popIn(t, c[2] + 7.9);

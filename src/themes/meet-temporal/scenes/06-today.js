@@ -372,8 +372,7 @@
       });
       // the last one, and more, glows softly as it arrives
       const more = win(t, aiAt(AI.length) + 0.2, aiAt(AI.length) + 1.4, 0.4);
-      s.ais[AI.length].style.boxShadow = more > 0 ? `0 0 ${Math.round(30 * more)}px rgba(${RGB.violet},${
-        (0.5 * more).toFixed(3)})` : '';
+      s.ais[AI.length].style.boxShadow = glowShadow(RGB.violet, more, { blur: 30, alpha: 0.5 });
 
       // ---------- beat 3
       // the timing of the climb: the grid and the first round, then each curve, the last one a surge

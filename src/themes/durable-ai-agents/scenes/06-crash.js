@@ -56,10 +56,9 @@
   // name and its STARTING OVER status. Fixed even width: it rests on whole pixels (solid: the panel border does not
   // show through).
   const NEW_TAG = { x: APP.x, y: APP_TOP, w: 240 };
-  // Red glow around a tile, k from 0 (none) to 1
-  const redGlow = (e, k, blur) => {
-    const glow = `0 0 ${Math.round(blur * k)}px ${Math.round(4 * k)}px rgba(${RGB.red},${(0.5 * k).toFixed(3)})`;
-    e.style.boxShadow = k > 0 ? glow : '';
+  // Red halo around a tile, k from 0 (none) to 1
+  const redHalo = (e, k, blur) => {
+    e.style.boxShadow = glowShadow(RGB.red, k, { blur, alpha: 0.5, spread: 4 });
   };
   scene({
     chapter: 6, title: 'When the agent crashes',
@@ -150,7 +149,7 @@
       const numberSwell = Math.max(...wastedAt.map(at => swell(t, at + 0.15, 0.3)));
       s.bill.n.style.transform = numberSwell > 1 ? `scale(${numberSwell.toFixed(3)})` : '';
       const billGlow = Math.max(...wastedAt.map(at => P(t, at, 0.08) * (1 - P(t, at + 0.15, 0.5))));
-      redGlow(s.bill, billGlow, 36);
+      redHalo(s.bill, billGlow, 36);
       s.bill.style.borderColor = billGlow > 0.1 || t >= wastedAt[2] ? C.red : '';
       // a "+1 call" chip pops out of the bill's top edge, on its right, floats up and fades before the next one
       s.chips.forEach((chip, i) => {
@@ -175,7 +174,7 @@
       const ticketX = lerp(TICKET.x, TICKET_CENTER.x, flightX) + sx + dampedShake(t, slamAt, 10, 0.4, 4);
       const ticketY = lerp(TICKET.y, TICKET_CENTER.y, flightY);
       place(s.ticket, ticketX, ticketY, tp * grow * (1 + slam), clamp(tp * 2));
-      redGlow(s.ticket, P(t, slamAt, 0.08) * (1 - P(t, slamAt + 0.2, 0.8)), 30);
+      redHalo(s.ticket, P(t, slamAt, 0.08) * (1 - P(t, slamAt + 0.2, 0.8)), 30);
       const stack = P(t, slamAt + 0.15, 0.4, backOut);
       const stackOffset = 16 * TICKET_CENTER.scale * stack;
       place(s.ticketBack, ticketX + stackOffset, ticketY - stackOffset, TICKET_CENTER.scale * (1 + slam),

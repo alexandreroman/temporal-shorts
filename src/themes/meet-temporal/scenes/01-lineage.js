@@ -165,8 +165,7 @@
       s.heading.style.letterSpacing = (lerp(0.35, -0.02, ease(enter))).toFixed(4) + 'em';
       s.heading.style.filter = enter < 1 ? `blur(${((1 - enter) * 8).toFixed(2)}px)` : 'none';
       const glow = win(t, 0.45, 1.0, 0.25);
-      s.heading.style.textShadow = glow > 0 ? `0 0 ${Math.round(30 * glow)}px rgba(${RGB.violet},${(0.7 * glow)
-        .toFixed(3)})` : 'none';
+      s.heading.style.textShadow = glowShadow(RGB.violet, glow, { blur: 30, alpha: 0.7 });
       place(s.heading, 960, Math.round(lerp(HEADING.big.y, HEADING.top.y, settle)), 1, clamp(enter * 1.5));
       // while the heading is large, right after its entrance and before it shrinks, "20 years" is put forward: a
       // light sweeps through its letters, a glow blooms and settles to a faint lasting one, the words pop (anchored
@@ -176,8 +175,7 @@
       s.key.shine.style.opacity = sweep > 0 && sweep < 1 ? 1 : 0;
       s.key.shine.style.backgroundPosition = `${lerp(100, 0, sweep).toFixed(2)}% 0`;
       const bloom = Math.max(win(t, highlight, highlight + 0.5, 0.25), 0.35 * P(t, highlight + 0.3, 0.5));
-      s.key.txt.style.textShadow = bloom > 0
-        ? `0 0 ${Math.round(28 * bloom)}px rgba(${RGB.violet},${(0.9 * bloom).toFixed(3)})` : '';
+      s.key.txt.style.textShadow = glowShadow(RGB.violet, bloom, { blur: 28, alpha: 0.9 });
       s.key.style.transform = `scale(${swell(t, highlight + 0.2, 0.06)})`;
       const cx = s.key.offsetWidth / 2, cy = s.key.offsetHeight / 2;
       s.sparkles.forEach(e => {

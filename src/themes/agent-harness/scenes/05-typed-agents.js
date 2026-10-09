@@ -273,7 +273,7 @@
       const travelPlan = s.travel.rows[0];
       travelPlan.style.borderColor = working > 0.5 ? C.violet : 'transparent';
       travelPlan.style.background = working > 0 ? `rgba(${RGB.violet},${(0.16 * working).toFixed(3)})` : ROW_BG;
-      travelPlan.style.boxShadow = `0 0 ${Math.round(22 * working)}px rgba(${RGB.violet},${(0.35 * working).toFixed(2)})`;
+      travelPlan.style.boxShadow = glowShadow(RGB.violet, working, { blur: 22, alpha: 0.35 });
 
       // step 4: the typed result comes back and the tool row checks
       const received = answered + 1.5;
@@ -295,7 +295,7 @@
       // the card is live (UV border and glow) from the start until it is closed (its content dims, see phase 1)
       const live = P(t, started + 0.3, 0.4) * (1 - closed);
       s.travel.style.borderColor = mix(C.line, C.uv, live);
-      s.travel.style.boxShadow = `0 0 ${Math.round(28 * live)}px rgba(${RGB.uv},${(0.35 * live).toFixed(2)})`;
+      s.travel.style.boxShadow = glowShadow(RGB.uv, live, { blur: 28, alpha: 0.35 });
     }
   });
 }
