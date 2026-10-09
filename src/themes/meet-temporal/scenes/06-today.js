@@ -44,11 +44,11 @@
 
   // ---------- the Temporal symbol at the middle, and the points of its outline the dots condense onto
   const SYMBOL_SIZE = 170;
-  // the SDK beat's composition, centered on 515: the ring of language tiles (y 157 to 677) around the symbol, then
-  // 32 px under it the AI framework tiles in two rows of three (y 709 to 873). The ring turns slowly once its tiles
-  // have landed; its radii keep at least 32 px between its tiles at every angle (34 px at the closest)
-  const SYM = { x: 960, y: 417 };
-  const RING = { rx: 330, ry: 210 };
+  // the SDK beat's composition, centered on 515: the ring of language tiles (y 177 to 639) around the symbol, then
+  // 72 px under it the AI framework tiles in two rows of three (y 711 to 853). The ring turns slowly once its tiles
+  // have landed; its radii keep at least 32 px between its tiles at every angle
+  const SYM = { x: 960, y: 408 };
+  const RING = { rx: 340, ry: 185 };
   // one turn of the ring, in seconds
   const ORBIT = 50;
   const SYMBOL_POINTS = (() => {
@@ -66,12 +66,12 @@
 
   // ---------- beat 2: the SDKs. Language tiles, a logo each, on an ellipse round the symbol, each linked to it,
   // then the AI framework tiles in two rows under it (centers, stage pixels)
-  const LANG_CHIP = { w: 100, h: 100 };
-  // each logo's size in its tile, matched by eye to an even visual weight: square marks about 56 px, wide marks up to
-  // 74 px wide, Java's tall cup 58 px tall; each size leaves even margins, so the logo rests on whole pixels
+  const LANG_CHIP = { w: 92, h: 92 };
+  // each logo's size in its tile, matched by eye to an even visual weight: square marks about 52 px, wide marks up to
+  // 68 px wide, Java's tall cup 54 px tall; each size leaves even margins, so the logo rests on whole pixels
   const LOGO_SIZE = {
-    'Go': [72, 28], 'Java': [44, 58], 'Python': [56, 56], 'TypeScript': [54, 54], '.NET': [72, 28], 'PHP': [74, 40],
-    'Ruby': [56, 56], 'Rust': [58, 58],
+    'Go': [66, 26], 'Java': [40, 54], 'Python': [52, 52], 'TypeScript': [50, 50], '.NET': [66, 26], 'PHP': [68, 36],
+    'Ruby': [52, 52], 'Rust': [54, 54],
   };
   // each tile's angle on the ring, clockwise from the top left, in reading order (degrees), and its place on the
   // ring turned by rot (radians), on whole pixels
@@ -82,8 +82,8 @@
   };
   // the five frameworks, then a sixth tile: more to come
   const AI = ['OpenAI Agents SDK', 'Vercel AI SDK', 'Pydantic AI', 'Google ADK', 'LangGraph'];
-  const AI_CHIP = { w: 340, h: 68, gapX: 32, gapY: 28 };
-  const AI_Y = [743, 839];
+  const AI_CHIP = { w: 340, h: 60, gapX: 32, gapY: 22 };
+  const AI_Y = [741, 823];
   const AI_AT = [...AI, 'more'].map((_, j) => [960 + (j % 3 - 1) * (AI_CHIP.w + AI_CHIP.gapX),
     AI_Y[Math.floor(j / 3)]]);
   // the tiles of both groups: one style, well rounded
