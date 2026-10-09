@@ -214,44 +214,47 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 - **2:00** With Temporal Cloud, your Workers run your Workflow and Activity
   code in your own environment.
-  - Visuals: As on slides 6 and 7 of Temporal's deck, both zones from the
-    start. On the left, YOUR ENVIRONMENT (dashed slate): three Workers, each
-    an app panel with its code (WORKER 1 the order Workflow, WORKER 2 and 3
-    the chargeCard and shipPackage Activities), wired to a DATA CONVERTER
-    (a neon lock, with a key and YOUR KEYS); caption YOUR CODE RUNS HERE. A
-    connection draws from the converter to a dot on Temporal Cloud's edge,
-    labelled OUTBOUND ONLY, mTLS OR PRIVATELINK. On the right, Temporal
-    Cloud, titled with the official logo followed by "Cloud", with its two
-    functions: ORCHESTRATION · TASKS, a task queue holding OrderWorkflow,
-    chargeCard, shipPackage and OrderWorkflow, and PERSISTENCE · ENCRYPTED,
-    an empty history; its caption reads ONLY WORKFLOW & ACTIVITY DATA, NEVER
-    YOUR CODE. Each Worker polls out to Temporal Cloud (a violet pulse that
-    lights the orchestration block) and reads POLLING.
-- **2:08** Temporal Cloud orchestrates your Workflows and Activities, and
+  - Visuals: As on slides 6 and 7 of Temporal's deck, two zones of equal
+    width from the start. On the left, YOUR ENVIRONMENT (dashed slate):
+    three Workers spread evenly, each an app panel with its code (WORKER 1
+    the order Workflow, WORKER 2 and 3 the chargeCard and shipPackage
+    Activities), wired to a DATA CONVERTER level with WORKER 2 (a neon lock,
+    a key and YOUR KEYS); caption YOUR CODE RUNS HERE. A connection draws
+    from the converter to a dot on Temporal Cloud's edge, labelled OUTBOUND
+    ONLY, mTLS OR PRIVATELINK. On the right, Temporal Cloud, titled with the
+    official logo followed by "Cloud", with its two functions: ORCHESTRATION
+    · TASK QUEUE, holding OrderWorkflow, chargeCard and shipPackage, and
+    PERSISTENCE, an empty history; its caption reads ONLY WORKFLOW &
+    ACTIVITY DATA, NEVER YOUR CODE. The Workers poll out to Temporal Cloud
+    one after the other (a violet pulse that lights the orchestration
+    block) and read POLLING.
+- **2:10** Temporal Cloud orchestrates your Workflows and Activities, and
   persists their history.
-  - Visuals: The first task
-    flies out of the queue, along the connection and through the Data
-    Converter to WORKER 1, which runs it; its result runs back the same way
-    and lands as row 1, "OrderWorkflow · started", its payload a locked,
-    encrypted chip. The chargeCard task then reaches WORKER 2.
-- **2:15** Data is encrypted with your own keys before it leaves your
+  - Visuals: Slowly, a beat at a time: the OrderWorkflow task leaves the
+    queue, flies to the dot, back along the connection, over the Data
+    Converter and down to WORKER 1, which runs it, its code lines lit one by
+    one; its result runs back the same way and lands as row 1,
+    "OrderWorkflow · started", its payload a locked, encrypted chip. The
+    queue moves up, and the chargeCard task reaches WORKER 2, which runs it.
+- **2:24** Data is encrypted with your own keys before it leaves your
   environment: Temporal never sees your payloads.
   - Visuals: The rest dims for a close-up: the chargeCard result, "card:
-    $42", leaves WORKER 2 in clear and enters the Data Converter, whose lock
-    opens and snaps shut on it; it leaves as scrambled hex digits, crosses
-    over and lands as row 2, "chargeCard · completed", payload encrypted.
-    NEVER SEES YOUR PAYLOADS pops on the history and holds. Then the last
-    two tasks run on WORKER 3 and WORKER 1, and rows 3 and 4 are persisted,
+    $42", leaves WORKER 2 in clear and holds over the Data Converter, in
+    full view; the lock opens, the key glows, the lock snaps shut and the
+    text scrambles in place into hex digits; the encrypted payload crosses
+    over slowly and lands as row 2, "chargeCard · completed". NEVER SEES
+    YOUR PAYLOADS pops on the history and holds. Then the shipPackage task
+    runs on WORKER 3, and row 3, "shipPackage · completed", is persisted,
     encrypted too.
 
 ## 06 Temporal today
 
-- **2:29** Today, more than 4,300 companies pay for it, including Netflix,
+- **2:43** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **2:36** In September 2026, investors valued Temporal at $12.55 billion.
+- **2:50** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
@@ -261,7 +264,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **2:45** Temporal keeps code running whatever fails, from everyday apps
+- **2:59** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,
