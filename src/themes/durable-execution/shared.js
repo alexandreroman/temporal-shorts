@@ -14,6 +14,10 @@ Object.assign(ICONS, {
   trash: '<path d="M4 6h16M9 6V3.5h6V6M6 6l1 15h10l1-15M10 10v7M14 10v7"/>',
   // a shield with a check, its point lower than agent-harness's `shield`
   shieldTall: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9.5C7.5 20 4 17 4 12V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  // Worker status icons of chapter 8: free (pauseLines, two lines where agent-harness's `pause` has two bars) and
+  // restarting (power); deploying a new version uses the engine's `upload`
+  pauseLines: '<path d="M8.5 5v14M15.5 5v14"/>',
+  power: '<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
 });
 
 // ---------- the running example: order #1042, four steps, each calling another service
@@ -268,9 +272,3 @@ function flyResultToHistory(chip, t, at, i) {
 function flyResultToCode(chip, t, at, i) {
   flyChip(chip, t, at, EH.rowStartX, ehRowY(ehStepRow(i)), EH.lineEndX, ehLineY(ehStepLine(i)));
 }
-// ---------- Worker status icons (chapter 8): free (pauseLines), restarting (power); deploying a new version uses
-// the engine's `upload`. pauseLines is drawn with two lines, agent-harness's `pause` with two bars
-Object.assign(ICONS, {
-  pauseLines: '<path d="M8.5 5v14M15.5 5v14"/>',
-  power: '<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
-});
