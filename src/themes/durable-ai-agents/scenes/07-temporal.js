@@ -174,7 +174,7 @@
       // takeover: NEW INSTANCE pops on B once it is almost in place and is gone by c[3]; Temporal hands it the agent,
       // a chip from the first history row to its status, which then reads TAKING OVER
       const newAt = bIn + 0.5;
-      placeNewTag(s.newTag, t, newAt, c[3] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
+      placeNewTag(s.newTag, t, newAt, c[3] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y);
       flyChip(s.handChip, t, handOff, HIST.cardX, rowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });

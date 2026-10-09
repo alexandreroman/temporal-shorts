@@ -476,10 +476,10 @@ function setArrivalGlow(panel, t, at, out) {
 // through)
 const makeNewTag = (root, label, w, h = null) => fixedTag(root, label, 'violet solid', w, h);
 // The tag pops in at `at` and fades out from `out` within 0.3 s, at (x, y): add the arriving panel's dx to x so it
-// slides in with it. s: its scale, popIn's bump by default
-function placeNewTag(e, t, at, out, x, y, s = null) {
+// slides in with it
+function placeNewTag(e, t, at, out, x, y) {
   const pop = popIn(t, at);
-  place(e, x, y, s ?? pop.s, pop.o * (1 - P(t, out, 0.3)));
+  place(e, x, y, pop.s, pop.o * (1 - P(t, out, 0.3)));
 }
 // The Workflow (or agent) that Temporal hands to the new instance: a result card in violet, labelled with its
 // name; fly it with flyChip from the history to the panel's status

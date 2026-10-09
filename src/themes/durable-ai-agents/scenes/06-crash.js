@@ -196,7 +196,7 @@
       setArrivalGlow(s.B, t, bIn, c[2] - 0.3);
       // NEW INSTANCE pops on B once it is almost in place and is gone at c[2], before the rerun, so a presenter hold
       // there shows the glow and the tag at rest
-      placeNewTag(s.newTag, t, newAt, c[2] - 0.3, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
+      placeNewTag(s.newTag, t, newAt, c[2] - 0.3, NEW_TAG.x + arrive.dx, NEW_TAG.y);
 
       placeFlash(s.flash, t, crashAt);
       const bp = P(t, crashAt, 0.35, backOut);
