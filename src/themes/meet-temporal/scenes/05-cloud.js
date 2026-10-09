@@ -51,7 +51,8 @@
   const VISIBLE = 5;
   // the middle of row i in the viewport, unscrolled
   const rowInView = i => VIEW.first + ROW.h / 2 + i * PITCH;
-  const PAYLOAD_X = BLOCK.x + BLOCK.w / 2 - 24 - 12 - 105; // the middle of a row's payload chip (210 px wide)
+  // the middle of a row's payload chip (210 px wide), 20 px inside the row's right border
+  const PAYLOAD_X = BLOCK.x + BLOCK.w / 2 - 24 - 1.5 - 20 - 105;
   // The tasks, in the order Temporal queues them, and the Worker each goes to: the Workflow task starts the
   // Workflow, which runs until it awaits chargeCard; the chargeCard task runs; a new Workflow task resumes the
   // Workflow until it awaits shipPackage; the shipPackage task runs; a last Workflow task resumes it to its end
@@ -65,11 +66,10 @@
   const CIPHER = '9f3a…c21e';
   // the Event History: each event as it happens, with its payload if it carries data (the Workflow's input, an
   // Activity's input or result), encrypted; an Activity's start carries none
-  const HISTORY = [['OrderWorkflow · started', '4be1…07da'], ['chargeCard · scheduled', 'c08d…5b17'],
-    ['chargeCard · started', null], ['chargeCard · completed', CIPHER],
-    ['shipPackage · scheduled', 'e6a2…3f90'], ['shipPackage · started', null],
-    ['shipPackage · completed', '2d7c…a913'],
-    ['OrderWorkflow · completed', '71b0…e5f4']];
+  const HISTORY = [['OrderWorkflow', 'started', '4be1…07da'], ['chargeCard', 'scheduled', 'c08d…5b17'],
+    ['chargeCard', 'started', null], ['chargeCard', 'completed', CIPHER],
+    ['shipPackage', 'scheduled', 'e6a2…3f90'], ['shipPackage', 'started', null],
+    ['shipPackage', 'completed', '2d7c…a913'], ['OrderWorkflow', 'completed', '71b0…e5f4']];
   // a task's trip, slow enough to follow: it flies from the queue to the connector dot, then along the connection,
   // over the Data Converter and down to its Worker; the Worker runs it a code line (step) at a time; what it sends
   // back (a schedule request or a result) goes the other way, then on to the queue or to its history row
@@ -168,19 +168,25 @@
       width: BLOCK.w + 'px', height: h + 'px', textAlign: 'left', background: 'rgba(68,76,231,.12)',
       borderColor: 'rgba(68,76,231,.6)',
     });
-  // A history row: its number, its event and its payload, encrypted (none for an event without data)
-  function makeRow(root, i, [event, payload]) {
-    const chip = payload === null ? ''
-      : '<span class="pl" style="display:flex;align-items:center;justify-content:center;gap:8px;width:210px;'
-        + 'height:40px;'
+  // A history row: its number, its name on the left, then two fixed columns on the right: its state, a quiet slate
+  // label right-aligned 20 px left of the payload column, and its payload, encrypted (an empty slot for an event
+  // without data)
+  function makeRow(root, i, [name, state, payload]) {
+    const chip = payload === null ? '<span style="flex:none;width:210px"></span>'
+      : '<span class="pl" style="flex:none;display:flex;align-items:center;justify-content:center;gap:8px;'
+        + 'width:210px;height:40px;'
         + `background:rgba(182,100,255,.16);color:${C.violet};border-radius:var(--rs);font-size:18px">`
         + `${ICON('lock', 18, C.violet, 2)}${payload}</span>`;
+    // the state's trailing letter spacing is pulled back, so its last letter ends on the column's edge
+    const label = `<span style="flex:none;width:130px;margin-right:20px;text-align:right;font-size:16px;`
+      + `letter-spacing:.12em;text-transform:uppercase;color:${C.slate}">`
+      + `<span style="margin-right:-.12em">${state}</span></span>`;
     const e = E(root,
-      `<span style="color:#6B7385;display:inline-block;width:34px">${i + 1}</span><span style="flex:1">${event}</span>`
-      + chip,
+      `<span style="color:#6B7385;display:inline-block;width:34px">${i + 1}</span><span style="flex:1">${name}</span>`
+      + label + chip,
       'mono', {
         width: VIEW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center',
-        padding: '0 12px 0 18px', fontSize: '22px', whiteSpace: 'nowrap', background: 'rgba(248,250,252,.03)',
+        padding: '0 20px 0 20px', fontSize: '22px', whiteSpace: 'nowrap', background: 'rgba(248,250,252,.03)',
         border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)',
       });
     e.pl = e.querySelector('.pl');
