@@ -3,23 +3,14 @@
 {
   // The agentic loop (think, act, observe, as in durable-ai-agents) runs durably in an app instance, its steps
   // saved in an Event History outside the app, as in durable-ai-agents chapter 7: a crash in production, a new
-  // instance takes over and replays the history, nothing is lost and no LLM call is paid twice
+  // instance takes over and replays the history, nothing is lost and no finished LLM call is paid twice
+  // the loop sits in its app panel for the whole chapter, about 40 px clear of its header and of the context strip
   const LOOP = AGENT_LOOP;
   const COMET = 6; // sparks trailing the token
-  // the loop shows at 86% of its size for the whole chapter, in its app panel, about 40 px clear of its header and
-  // of the context strip (stage pixels)
-  const DL = AGENT_PLACE;
-  // a point of the loop (from s.loop.pos) where it shows on the stage of the scene
-  const durablePos = ([x, y]) => [DL.x + (x - LOOP.cx) * DL.k, DL.y + (y - LOOP.cy) * DL.k];
-  // a point of the loop moved to the nearest one that shows on a whole pixel of the stage
-  const snapToPixel = ([x, y]) => [
-    LOOP.cx + (Math.round(DL.x + (x - LOOP.cx) * DL.k) - DL.x) / DL.k,
-    LOOP.cy + (Math.round(DL.y + (y - LOOP.cy) * DL.k) - DL.y) / DL.k,
-  ];
 
   // Stage pixels. The app panel spans the content frame (y 150 to 880) around the loop, x 140 to 900; the Temporal
   // panel, as high, starts one GUTTER right of it, 840 px wide (x 940 to 1780)
-  const APP = { x: DL.x, y: 515, w: 760, h: 730 };
+  const APP = { x: LOOP.cx, y: 515, w: 760, h: 730 };
   const GUTTER = 40;
   // Under the loop in the app panel, 24 px from its sides and bottom (as its header): the agent's goal, then in its
   // place the AGENT CONTEXT strip. Inside it, padY from its top and bottom: the label row (its label and, on B,
@@ -29,7 +20,7 @@
   MEM.blockTop = MEM.padY + MEM.rowH + MEM.padY;
   MEM.h = MEM.blockTop + MEM.bh + MEM.padY;
   const MEM_Y = APP.y + APP.h / 2 - 24 - MEM.h / 2;
-  const memSlotX = i => APP.x - MEM.w / 2 + MEM.pad + MEM.bw / 2 + i * (MEM.bw + MEM.gap);
+  const blockX = i => memSlotX(APP.x - MEM.w / 2, i, { w: MEM.bw, gap: MEM.gap, margin: MEM.pad });
   const MEM_SLOT_Y = MEM_Y - MEM.h / 2 + MEM.blockTop + MEM.bh / 2;
   // Inside the Temporal panel, under its header (70 px), the Event History card 20 px from the panel's sides, then
   // the slot of the pills (a callout at a time, then NO PROGRESS LOST and NO TOKENS WASTED side by side, PILL_GAP
@@ -51,11 +42,6 @@
   const HOLD = 0.6, FLIGHT = 0.7;
   // the replay hands back one saved row a second
   const REPLAY_STEP = 1.0;
-  // the Event History rows: the LLM call of each step, then its tool's result
-  const HISTORY = LUNCH_STEPS.flatMap(step => [
-    `LLM call: ${step.action[0].toLowerCase()}${step.action.slice(1)}`, `${step.tool}: ${step.result}`,
-  ]);
-  const isLLM = i => i % 2 === 0;
   // stage-free row geometry: the middle of row i, and where a result card lands on it and leaves it: by its left
   // end, in the gutter, the card's right edge 6 px left of the row's number, so it never covers the row's text
   const rowMid = i => HIST.y - HIST.h / 2 + HIST.row0 + i * HIST.gap + HIST.rowH / 2;
@@ -64,9 +50,7 @@
 
   scene({
     chapter: 4, title: 'Why it matters for AI',
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
-    fadeIn: 0.001, // a hard cut: the previous chapter ends on this chapter's first frame
-    shift: AGENT_START.shift,
+    fadeIn: 0, // a hard cut: the previous chapter ends on this chapter's first frame
     subs: [
       // the loop and the panels enter, the goal shows, then the first of three slow turns, each step saved in the
       // history and added to the agent's context
@@ -75,7 +59,7 @@
         after: 0.4,
       },
       {
-        text: "With Temporal, every step the agent takes is saved in an Event History, outside the app.",
+        text: "With Temporal, every step the agent takes is saved in an <b>Event History</b>, outside the app.",
         after: 0.7,
       },
       // the crash, held with the history kept and A's context lost, the takeover, the replay row by row that
@@ -86,7 +70,7 @@
         after: 8.1,
       },
       // NO PROGRESS LOST, then NO TOKENS WASTED
-      { text: "No progress is lost and no tokens are wasted: no LLM call is paid twice.", after: 0.4 },
+      { text: "No progress is lost and no tokens are wasted: no finished LLM call is paid twice.", after: 0.4 },
       { text: "That's why OpenAI built Codex on Temporal, and Cursor, Lovable and Replit rely on it too.", after: 1.4 },
     ],
     build(stage, s) {
@@ -97,8 +81,8 @@
         background: HALO_BACKGROUND,
       });
       // the app instances that run the loop: built first, so the loop and its arcs sit on top of them
-      s.appA = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
-      s.appB = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
+      s.appA = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h, APP_TEXT_LARGE);
+      s.appB = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h, APP_TEXT_LARGE);
       // each instance's AGENT CONTEXT strip: A's fills as the steps run and empties at the crash (CONTEXT LOST);
       // B's starts empty and the replay rebuilds it (CONTEXT RESTORED, then the invite adds its two blocks)
       const memory = () => makeMemory(root, MEM.w, MEM.h, {
@@ -114,25 +98,14 @@
       Object.assign(s.restored.style, {
         left: 'auto', right: (MEM.pad - 1) + 'px', top: MEM.padY + 'px', transformOrigin: 'right center',
       });
-      // the loop, its arcs and its token's tail on one layer, scaled as a whole
-      s.loopLayer = E(root, '', '', {
-        width: '1920px', height: '1080px', transformOrigin: `${LOOP.cx}px ${LOOP.cy}px`,
-      });
-      s.loopLayer.style.opacity = 1;
-      s.svg = svgLayer(s.loopLayer);
-      s.loop = makeAgentLoop(s.loopLayer, s.svg, LOOP.cx, LOOP.cy, LOOP.r);
-      // the nodes and labels at the nearest point that the layer's scale takes to a whole screen pixel, so the
-      // tiles rest on whole pixels: ACT and OBSERVE sit at fractional points of the circle
-      s.loop.nodePos = deg => snapToPixel(s.loop.pos(deg));
-      // A transparent outline widens what Chromium repaints when a tile's opacity changes: in the scaled layer the
-      // tile's anti-aliased edge spills one pixel outside the box it repaints, and would keep the dimmed paint of
-      // an earlier frame, so a frame would depend on the frames rendered before it
-      [s.loop.act, s.loop.observe].forEach(e => { e.style.outline = '3px solid transparent'; });
-      // the same blink as the orb the previous chapter's AI hub turned into
-      s.loop.think.seed = AGENT_LLM.seed;
-      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(s.loopLayer, 16 - 2 * k, '219,255,75'));
+      s.svg = svgLayer(root);
+      // THINK blinks as the orb the previous chapter's AI hub turned into
+      s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy, LOOP.r, { seed: AGENT_LLM_SEED, node: LOOP.node });
+      // the nodes and labels on whole pixels: ACT and OBSERVE sit at fractional points of the circle
+      s.loop.nodePos = deg => s.loop.pos(deg).map(Math.round);
+      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(root, 16 - 2 * k, RGB.neon));
       // the token and its comet pass under the nodes, THINK's face included: moved before the first node, in order
-      [s.loop.token, ...s.comet].forEach(e => s.loopLayer.insertBefore(e, s.loop.think.root));
+      [s.loop.token, ...s.comet].forEach(e => root.insertBefore(e, s.loop.think.root));
       // the agent's goal, under the loop before the context strip, a fixed whole size, so it rests on whole pixels
       s.goal = makeCard(root, 'Book lunch with Marie on Thursday.', 'user', null, MEM.w);
       // as wide as the strip that takes its place (cards are 640 px at most)
@@ -140,10 +113,9 @@
 
       // Temporal with the Event History, outside the app (rows 1 to 6 survive the crash), the result cards between
       // the loop and the history, the pills under it, the crash marks and the takeover tag
-      s.outside = makeTemporalPanel(root, OUTSIDE.w, OUTSIDE.h, { logoAt: [24, 20], noteAt: [24, 25], font: 18 });
-      const rowsHtml = HISTORY.map((text, i) => `<span style="color:${isLLM(i) ? C.uv : '#141414'}">${text}</span>`);
-      s.history = makeHistoryCard(root, rowsHtml, {
-        w: HIST.w, h: HIST.h, headerTop: HIST_PAD, rowTop: i => HIST.row0 + i * HIST.gap, font: 22,
+      s.outside = makeTemporalPanel(root, OUTSIDE.w, OUTSIDE.h, TEMPORAL_HEADER_LARGE);
+      s.history = makeHistoryCard(root, LUNCH_HISTORY, {
+        uvRow: isLLMRow, w: HIST.w, h: HIST.h, headerTop: HIST_PAD, rowTop: i => HIST.row0 + i * HIST.gap, font: 22,
         rowH: HIST.rowH, tagTop: i => HIST.row0 + (HIST.rowH - 28) / 2 + i * HIST.gap, tagRight: HIST_PAD,
         tag: { border: false },
         // the kept block runs from 6 px above row 1 to 4 px under row 6; the crash line sits halfway to row 7
@@ -155,42 +127,32 @@
         scanH: HIST.rowH + 8,
       });
       // both kinds of card as wide, so they line up by their right edge in the gutter
-      const callCard = i => {
-        const e = makeResultCard(root, isLLM(i), isLLM(i) ? 'LLM CALL' : 'TOOL CALL');
-        Object.assign(e.style, { width: CARD_W + 'px', textAlign: 'center' });
-        return e;
-      };
-      s.saveCards = HISTORY.map((_, i) => callCard(i));
-      s.reuseCards = HISTORY.slice(0, 6).map((_, i) => callCard(i));
+      const callCard = i => makeCallCard(root, isLLMRow(i), { w: CARD_W });
+      s.saveCards = LUNCH_HISTORY.map((_, i) => callCard(i));
+      s.reuseCards = LUNCH_HISTORY.slice(0, 6).map((_, i) => callCard(i));
       // the pills under the history, each a fixed even width, so it rests on whole pixels centered
-      const pill = (text, kind, w) => {
-        const e = tag(root, text, kind);
-        Object.assign(e.style, { width: w + 'px', textAlign: 'center' });
-        return e;
-      };
-      s.savedNote = pill('Saved outside the app', 'uv', 380);
-      s.keptNote = pill('History kept', 'uv', 240);
+      s.savedNote = fixedTag(root, 'Saved outside the app', 'uv', 380);
+      s.keptNote = fixedTag(root, 'History kept', 'uv', 240);
       // the outcome, two neon pills with a soft glow
       s.outcome = ['No progress lost', 'No tokens wasted'].map(text => {
-        const e = pill(text, 'neon solid', PILL.w);
-        e.style.boxShadow = '0 0 28px rgba(219,255,75,.35)';
+        const e = fixedTag(root, text, 'neon solid', PILL.w);
+        e.style.boxShadow = `0 0 28px rgba(${RGB.neon},.35)`;
         return e;
       });
       // the tags in the loop's middle sit 30 px above it, clear of the ACT and OBSERVE tiles
       // the bolt in the panel's top right, clear of its status and of THINK
-      s.crash = makeCrashMarks(root, 'App crash', { x: DL.x + 230, y: DL.y - 210, size: 110 },
-        { x: DL.x, y: DL.y - 30, w: 280 });
+      s.crash = makeCrashMarks(root, 'App crash', { x: LOOP.cx + 230, y: LOOP.cy - 210, size: 110 },
+        { x: LOOP.cx, y: LOOP.cy - 30, w: 280 });
       s.newTag = makeNewTag(root, 'New app instance', 300);
       s.flash = makeFlash(root);
-      s.complete = tag(root, 'Agent complete', 'neon solid');
-      s.complete.style.width = '256px'; // even, so it rests on whole pixels once centered
+      s.complete = fixedTag(root, 'Agent complete', 'neon solid', 256);
     },
     update(t, c, s) {
       // the scene opens on the LLM node the previous chapter's AI hub turned into, at its final place and size, with
       // its halo; no entrance zoom, so the node never moves: the halo fades into the LLM's own glow and the rest of
       // the loop emerges around it, then the app panel and Temporal with its Event History enter
       setCamera(s.cam, t, this.dur, { enter: 1 });
-      place(s.carry, ...durablePos(s.loop.nodePos(LOOP_DEG.think)), 1, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
+      place(s.carry, ...s.loop.nodePos(LOOP_DEG.think), 1, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
       const loopAt = c[0] + 0.1;
       // three turns, one step each, every LLM call and tool result saved (the card leaves the loop, lands on its
       // row, the row turns SAVED); the first starts once the loop is drawn and the goal has shown, and ends before
@@ -203,7 +165,7 @@
       const inviteAt = replay[5] + REPLAY_STEP + 0.4, complete = inviteAt + D_TURN.d + 0.2;
       const stepAt = [...runAt, inviteAt];
       // when each history row is written, its card landing on it
-      const saved = HISTORY.map((_, i) => stepAt[Math.floor(i / 2)] + (isLLM(i) ? D_TURN.llm : D_TURN.tool));
+      const saved = LUNCH_HISTORY.map((_, i) => stepAt[Math.floor(i / 2)] + (isLLMRow(i) ? D_TURN.llm : D_TURN.tool));
       const [ax, ay] = shakeAt(t, crashAt);
 
       // the token runs one turn of the loop per step, think -> act -> observe
@@ -231,11 +193,9 @@
         place(e, x, y, 1, 0.55 - 0.08 * k);
       });
       s.svg.style.transform = `translate(${ax}px,${ay}px)`;
-      // the loop sits in its place for the whole chapter, at 86% of its size
-      s.loopLayer.style.transform = `translate(${DL.x - LOOP.cx}px,${DL.y - LOOP.cy}px) scale(${DL.k})`;
       // under the loop: the agent's goal, then the context strip in its place
-      const gp = P(t, c[0] + 0.6, 0.45, backOut);
-      place(s.goal, DL.x, MEM_Y, gp, clamp(gp * 2) * (1 - P(t, c[0] + 3.4, 0.3)));
+      const gp = backPop(t, c[0] + 0.6);
+      place(s.goal, LOOP.cx, MEM_Y, gp.s, gp.o * (1 - P(t, c[0] + 3.4, 0.3)));
 
       // The app instances: A runs the loop, crashes before the invite and leaves; B slides into its place, replays
       // the history, then runs the invite
@@ -252,7 +212,7 @@
       // AGENT COMPLETE shows in the loop: the status just reads DONE
       else setAppStatus(s.appB, 'DONE', 'idle');
       setArrivalGlow(s.appB, t, bOn, bOn + 1.6);
-      placeNewTag(s.newTag, t, bOn + 0.3, replay[0], DL.x + arriving.dx, DL.y - 25);
+      placeNewTag(s.newTag, t, bOn + 0.3, replay[0], LOOP.cx + arriving.dx, LOOP.cy - 25);
 
       // The agent's context, in each instance's strip, which moves with its panel. In A, a block per row as the row
       // is saved; at the crash A's blocks fall and CONTEXT LOST shows until A leaves. B arrives with an empty
@@ -263,16 +223,17 @@
       s.memA.style.filter = s.appA.style.filter;
       s.memA.style.borderColor = t >= crashAt ? C.red : C.line;
       s.memA.empty.style.opacity = P(t, crashAt + 1.1, 0.4);
-      // the blocks drop half as far as placeMemBlock's 300 px, so they fade out before leaving the panel
+      // the blocks drop half as far as by default, so they fade out before leaving the panel
       s.blocksA.forEach((b, i) => {
         const fall = P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn);
-        placeMemBlock(b, memSlotX(i), MEM_SLOT_Y, P(t, saved[i] - 0.05, 0.35, backOut), fall, ax, ay - fall * 150);
+        const grow = P(t, saved[i] - 0.05, 0.35, backOut);
+        placeMemBlock(b, blockX(i), MEM_SLOT_Y, grow, fall, { dx: ax, dy: ay, drop: 150 });
       });
       const bO = t >= bOn ? arriving.o : 0;
       place(s.memB, APP.x + arriving.dx, MEM_Y, 1, bO);
       const landAt = i => (i < 6 ? replay[i] + 0.75 : saved[i] - 0.05);
       s.blocksB.forEach((b, i) => {
-        placeMemBlock(b, memSlotX(i), MEM_SLOT_Y, P(t, landAt(i), 0.35, backOut), 0, arriving.dx, 0, bO);
+        placeMemBlock(b, blockX(i), MEM_SLOT_Y, P(t, landAt(i), 0.35, backOut), 0, { dx: arriving.dx, o: bO });
       });
       // CONTEXT RESTORED once the last replayed block has landed, held
       const restoredAt = landAt(5) + 0.45;
@@ -282,43 +243,42 @@
       s.restored.style.transform = `scale(${rp.s})`;
       placeCrashMarks(s.crash, t, crashAt, crashAt + 0.3, aOut, ax, ay);
       placeFlash(s.flash, t, crashAt);
-      const cp = P(t, complete, 0.45, backOut);
-      place(s.complete, DL.x, DL.y - 25, cp, clamp(cp * 2));
+      const cp = backPop(t, complete);
+      place(s.complete, LOOP.cx, LOOP.cy - 25, cp.s, cp.o);
 
       // Temporal, outside the app, with the Event History: untouched by the crash
       place(s.outside, OUTSIDE.x, OUTSIDE.y, 1, P(t, loopAt + 0.4, 0.5));
       place(s.history, HIST.x, HIST.y, 1, P(t, loopAt + 0.6, 0.5));
       // each result leaves the loop (an LLM call from THINK, a tool result from ACT just after the token passes
       // it), flies to its row's left end and is absorbed there as the row is written
-      const [thx, thy] = durablePos(s.loop.pos(LOOP_DEG.think)), [acx, acy] = durablePos(s.loop.pos(LOOP_DEG.act));
+      const [thx, thy] = s.loop.pos(LOOP_DEG.think), [acx, acy] = s.loop.pos(LOOP_DEG.act);
       s.saveCards.forEach((e, i) => {
         const leave = saved[i] - FLIGHT - 0.1;
-        const [fx, fy] = isLLM(i) ? [thx, thy] : [acx, acy];
+        const [fx, fy] = isLLMRow(i) ? [thx, thy] : [acx, acy];
         fly(e, t, leave, fx, fy, leave + 0.1, FLIGHT, CARD_X, rowMid(i), saved[i] + 0.1, CARD_X, rowMid(i));
       });
       // the replay: each saved row, highlighted, hands its result back from its left end to B, where it lands as
       // a block of the agent's context
       s.reuseCards.forEach((e, i) => {
         const q = replay[i] + 0.15;
-        const [tx, ty] = [memSlotX(i), MEM_SLOT_Y];
+        const [tx, ty] = [blockX(i), MEM_SLOT_Y];
         fly(e, t, q, CARD_X, rowMid(i), q + 0.1, 0.55, tx, ty, q + 0.65, tx, ty);
       });
-      markCrash(s.history, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
+      markCrash(s.history, t, crashAt);
       s.history.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.05, 0.3)));
       // a row turns SAVED as it is written; on the replay its tag says the result is reused, not paid or run again
       const reusedAt = i => replay[i] + 0.25;
       s.history.tags.forEach((e, i) => {
         const isReused = i < 6 && t >= reusedAt(i);
-        if (isReused) setStatus(e, isLLM(i) ? 'REUSED, NOT RE-BILLED' : 'REUSED, NOT RE-RUN', 'reused');
-        else setStatus(e, 'SAVED', 'saved');
-        e.style.opacity = P(t, saved[i], 0.25);
-        e.style.transform = `scale(${swell(t, isReused ? reusedAt(i) : saved[i], 0.14)})`;
+        const opacity = P(t, saved[i], 0.25);
+        if (isReused) placeStatusTag(e, t, reusedLabel(isLLMRow(i)), 'reused', opacity, reusedAt(i));
+        else placeStatusTag(e, t, 'SAVED', 'saved', opacity, saved[i]);
       });
       // the row being written or replayed is highlighted: HOLD after it is saved, most of its second on the replay
       const savingRow = saved.findIndex(at => t >= at && t < at + HOLD);
       const replayRow = replay.findIndex(q => t >= q && t < q + REPLAY_STEP - 0.2);
       const scanning = savingRow >= 0 ? savingRow : replayRow;
-      setScan(s.history, HIST.row0 - 4 + Math.max(0, scanning) * HIST.gap, scanning >= 0 ? 1 : 0);
+      scanRow(s.history, scanning);
 
       // the slot under the history: SAVED OUTSIDE THE APP at the first save, HISTORY KEPT through the crash, then
       // the outcome, NO PROGRESS LOST and NO TOKENS WASTED, side by side, one after the other, held

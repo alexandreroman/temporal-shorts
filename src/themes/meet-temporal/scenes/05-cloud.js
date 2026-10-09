@@ -17,9 +17,9 @@
   const workerY = k => WORKER.top + WORKER.h / 2 + k * (WORKER.h + WORKER.gap);
   const CODE = { top: 58, h: 104, inset: 24, line: 28 };
   const WORKERS = [
-    ['workflow order(o)', '  await chargeCard(o)', '  await shipPackage(o)'],
-    ['activity chargeCard(o)', '  return charge(o.card)'],
-    ['activity shipPackage(o)', '  return ship(o.address)'],
+    ['workflow OrderWorkflow(o)', '  await ChargeCard(o)', '  await ShipPackage(o)'],
+    ['activity ChargeCard(o)', '  return charge(o.card)'],
+    ['activity ShipPackage(o)', '  return ship(o.address)'],
   ];
   // the Data Converter, 60 px right of the Workers (the wires' run), level with WORKER 2, where all data leaves and
   // comes back: 24 px from the zone's right border, so its name fits on one line
@@ -54,22 +54,22 @@
   // the middle of a row's payload chip (210 px wide), 20 px inside the row's right border
   const PAYLOAD_X = BLOCK.x + BLOCK.w / 2 - 24 - 1.5 - 20 - 105;
   // The tasks, in the order Temporal queues them, and the Worker each goes to: the Workflow task starts the
-  // Workflow, which runs until it awaits chargeCard; the chargeCard task runs; a new Workflow task resumes the
-  // Workflow until it awaits shipPackage; the shipPackage task runs; a last Workflow task resumes it to its end
-  const TASKS = [['OrderWorkflow', 0], ['chargeCard', 1], ['OrderWorkflow', 0], ['shipPackage', 2],
+  // Workflow, which runs until it awaits ChargeCard; the ChargeCard task runs; a new Workflow task resumes the
+  // Workflow until it awaits ShipPackage; the ShipPackage task runs; a last Workflow task resumes it to its end
+  const TASKS = [['OrderWorkflow', 0], ['ChargeCard', 1], ['OrderWorkflow', 0], ['ShipPackage', 2],
     ['OrderWorkflow', 0]];
   // the Workflow's requests to schedule its Activities, as it pauses on each await
-  const SCHEDULES = ['schedule chargeCard', 'schedule shipPackage'];
+  const SCHEDULES = ['schedule ChargeCard', 'schedule ShipPackage'];
   // the payload of the close-up, in clear, then encrypted
   const SECRET = 'card: $42';
-  // its ciphertext, as chargeCard's completed event shows it (as long as SECRET, so the card keeps its width)
+  // its ciphertext, as ChargeCard's completed event shows it (as long as SECRET, so the card keeps its width)
   const CIPHER = '9f3a…c21e';
-  // the Event History: each event as it happens, with its payload if it carries data (the Workflow's input, an
-  // Activity's input or result), encrypted; an Activity's start carries none
-  const HISTORY = [['OrderWorkflow', 'started', '4be1…07da'], ['chargeCard', 'scheduled', 'c08d…5b17'],
-    ['chargeCard', 'started', null], ['chargeCard', 'completed', CIPHER],
-    ['shipPackage', 'scheduled', 'e6a2…3f90'], ['shipPackage', 'started', null],
-    ['shipPackage', 'completed', '2d7c…a913'], ['OrderWorkflow', 'completed', '71b0…e5f4']];
+  // the Event History: each event, with its payload if it carries data (the Workflow's input, an Activity's input
+  // or result), encrypted; an Activity's start carries none
+  const HISTORY = [['OrderWorkflow', 'started', '4be1…07da'], ['ChargeCard', 'scheduled', 'c08d…5b17'],
+    ['ChargeCard', 'started', null], ['ChargeCard', 'completed', CIPHER],
+    ['ShipPackage', 'scheduled', 'e6a2…3f90'], ['ShipPackage', 'started', null],
+    ['ShipPackage', 'completed', '2d7c…a913'], ['OrderWorkflow', 'completed', '71b0…e5f4']];
   // a task's trip, slow enough to follow: it flies from the queue to the connector dot, then along the connection,
   // over the Data Converter and down to its Worker; the Worker runs it a code line (step) at a time; what it sends
   // back (a schedule request or a result) goes the other way, then on to the queue or to its history row
@@ -125,7 +125,7 @@
     w.insertAdjacentHTML('beforeend',
       `<div class="code mono" style="position:absolute;left:${CODE.inset}px;right:${CODE.inset}px;top:${CODE.top}px;`
       + `height:${CODE.h}px;padding:10px ${CODE.inset - 1.5}px;font-size:19px;line-height:${CODE.line}px;`
-      + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--rs)">${code}</div>`);
+      + `background:rgba(${RGB.ink},.03);border:1.5px solid ${C.line};border-radius:var(--rs)">${code}</div>`);
     w.code = w.querySelector('.code');
     w.lines = [...w.code.children];
     return w;
@@ -154,15 +154,15 @@
     // the scan line that sweeps across the tile as data goes through it, behind the tile's text
     e.scan = E(e, '', '', {
       width: '3px', height: (CONV.h - 3) + 'px', zIndex: -1, background: C.neon,
-      boxShadow: '0 0 12px 3px rgba(219,255,75,.45)',
+      boxShadow: `0 0 12px 3px rgba(${RGB.neon},.45)`,
     });
     return e;
   }
   // A block of Temporal Cloud: its label (an icon and a name) at its top left, top px from its top
   const makeBlock = (root, icon, name, h, top = 20) => E(root,
     panelLabel(icon, name, `left:22px;top:${top}px`), 'tile', {
-      width: BLOCK.w + 'px', height: h + 'px', textAlign: 'left', background: 'rgba(68,76,231,.12)',
-      borderColor: 'rgba(68,76,231,.6)',
+      width: BLOCK.w + 'px', height: h + 'px', textAlign: 'left', background: `rgba(${RGB.uv},.12)`,
+      borderColor: `rgba(${RGB.uv},.6)`,
     });
   // A history row: its number, its name on the left, then two fixed columns on the right: its state, a quiet slate
   // label right-aligned 20 px left of the payload column, and its payload, encrypted (an empty slot for an event
@@ -171,7 +171,7 @@
     const chip = payload === null ? '<span style="flex:none;width:210px"></span>'
       : '<span class="pl" style="flex:none;display:flex;align-items:center;justify-content:center;gap:8px;'
         + 'width:210px;height:40px;'
-        + `background:rgba(182,100,255,.16);color:${C.violet};border-radius:var(--rs);font-size:18px">`
+        + `background:rgba(${RGB.violet},.16);color:${C.violet};border-radius:var(--rs);font-size:18px">`
         + `${ICON('lock', 18, C.violet, 2)}${payload}</span>`;
     // the state's trailing letter spacing is pulled back, so its last letter ends on the column's edge
     const label = `<span style="flex:none;width:130px;margin-right:20px;text-align:right;font-size:16px;`
@@ -182,7 +182,7 @@
       + label + chip,
       'mono', {
         width: VIEW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center',
-        padding: '0 20px 0 20px', fontSize: '22px', whiteSpace: 'nowrap', background: 'rgba(248,250,252,.03)',
+        padding: '0 20px 0 20px', fontSize: '22px', whiteSpace: 'nowrap', background: `rgba(${RGB.ink},.03)`,
         border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)',
       });
     e.pl = e.querySelector('.pl');
@@ -191,10 +191,10 @@
 
   scene({
     chapter: 5, title: 'How Temporal Cloud works',
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     subs: [
       {
-        text: "With Temporal Cloud, your Workers run your Workflow and Activity code in your own environment.",
+        text: "With <b>Temporal Cloud</b>, your <b>Workers</b> run your Workflow and Activity code "
+          + "in your own environment.",
         // the three polls, one after the other, then the two captions
         after: 2.9,
       },
@@ -202,10 +202,9 @@
       { text: "Temporal Cloud orchestrates your Workflows and Activities, and persists their history.", after: 7.6 },
       // the close-up of the second task's result, then the last two tasks run and persist
       {
-        text: "Data is encrypted with your own keys before it leaves your environment: "
-          + "Temporal never sees your payloads.",
-        // the close-up, then the Workflow resumes, schedules shipPackage, which runs, and completes
-        after: 24.8,
+        text: "You can encrypt data with your own keys before it leaves: Temporal never sees your payloads.",
+        // the close-up, then the Workflow resumes, schedules ShipPackage, which runs, and completes
+        after: 25.7,
       },
     ],
     build(stage, s) {
@@ -226,15 +225,16 @@
       s.view = E(s.pers, '', '', {
         left: VIEW.left + 'px', top: VIEW.top + 'px', width: VIEW.w + 'px', height: VIEW.h + 'px',
         overflow: 'hidden', maskImage: `linear-gradient(to bottom, transparent 0, #000 ${VIEW.first}px)`,
-        webkitMaskImage: `linear-gradient(to bottom, transparent 0, #000 ${VIEW.first}px)`,
+        webkitMaskImage: `linear-gradient(to bottom, transparent 0, #000 ${VIEW.first}px)`, opacity: 1,
       });
-      s.view.style.opacity = 1;
       s.rows = HISTORY.map((row, i) => makeRow(s.view, i, row));
       s.svg = svgLayer(root);
       // the wires from each Worker to the Data Converter, the connection out, and the routes the data takes: from
       // a Worker's edge, through the converter, to the connector dot
-      const wire = k => `M ${WORKER.x + WORKER.w / 2} ${workerY(k)} C ${WORKER.x + WORKER.w / 2 + 30} ${workerY(k)},`
-        + ` ${CONV.x - CONV.w / 2 - 30} ${CONV.y}, ${CONV.x - CONV.w / 2} ${CONV.y}`;
+      const wire = k => {
+        const [x, y] = workerEdge(k);
+        return `M ${x} ${y} C ${x + 30} ${y}, ${CONV.x - CONV.w / 2 - 30} ${CONV.y}, ${CONV.x - CONV.w / 2} ${CONV.y}`;
+      };
       s.wires = WORKERS.map((_, k) => path(s.svg, wire(k), C.slate, 2, false));
       s.line = path(s.svg, `M ${CONV.x + CONV.w / 2} ${CONV.y} L ${DOT.x - DOT.size / 2 - 8} ${DOT.y}`, C.ink, 3);
       s.routes = WORKERS.map((_, k) => path(s.svg, `${wire(k)} L ${DOT.x} ${DOT.y}`, 'none', 1, false));
@@ -254,16 +254,16 @@
         fontSize: '17px', padding: '8px 14px', background: '#3A2766', color: C.ink,
         border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
-      s.polls = WORKERS.map(() => makeSpark(root, 12, '182,100,255'));
+      s.polls = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       // on a Worker's wire, a task or a schedule request travels as a violet spark, so no card ever covers the
       // Workers' text: the cards only travel on the connection, and pass under the Data Converter
-      s.taskSparks = TASKS.map(() => makeSpark(root, 12, '182,100,255'));
-      s.scheduleSparks = SCHEDULES.map(() => makeSpark(root, 12, '182,100,255'));
-      // shipPackage's result and the Workflow's completion, flying back as sparks
-      s.results = [0, 1].map(() => makeSpark(root, 14, '219,255,75'));
+      s.taskSparks = TASKS.map(() => makeSpark(root, 12, RGB.violet));
+      s.scheduleSparks = SCHEDULES.map(() => makeSpark(root, 12, RGB.violet));
+      // ShipPackage's result and the Workflow's completion, flying back as sparks
+      s.results = [0, 1].map(() => makeSpark(root, 14, RGB.neon));
       // the close-up: one result, in clear, then encrypted
       s.secret = E(root, SECRET, 'mono', {
-        fontSize: '20px', padding: '6px 14px', background: C.uvTint, color: '#141414', borderRadius: 'var(--rs)',
+        fontSize: '20px', padding: '6px 14px', background: C.uvTint, color: C.bg, borderRadius: 'var(--rs)',
         whiteSpace: 'nowrap',
       });
       // the Data Converter over everything that goes through it but the close-up's payload, which pauses over it
@@ -310,7 +310,7 @@
       place(s.outbound, LINE_X, CONV.y - 46, 1, P(t, c[0] + 2.6, 0.4));
       place(s.mtls, LINE_X, CONV.y + 58, 1, P(t, c[0] + 2.8, 0.4));
       s.polls.forEach((e, k) => {
-        const p = P(t, pollAt(k), 1.2, x => x);
+        const p = P(t, pollAt(k), 1.2, linear);
         if (p <= 0 || p >= 1) {
           place(e, 0, 0, 1, 0);
           return;
@@ -329,8 +329,8 @@
       rise(s.orch, BLOCK.x, ORCH.top + ORCH.h / 2, P(t, c[0] + 0.9, 0.5), 16);
       rise(s.pers, BLOCK.x, PERS.top + PERS.h / 2, P(t, c[0] + 1.1, 0.5), 16);
       const polled = Math.max(0, ...WORKERS.map((_, k) => win(t, pollAt(k) + 1.15, pollAt(k) + 1.6, 0.1)));
-      s.orch.style.borderColor = polled > 0.5 ? C.violet : 'rgba(68,76,231,.6)';
-      // the close-up of c[2], slowly: chargeCard's result comes out of WORKER 2, goes to the Data Converter's gate,
+      s.orch.style.borderColor = polled > 0.5 ? C.violet : `rgba(${RGB.uv},.6)`;
+      // the close-up of c[2], slowly: ChargeCard's result comes out of WORKER 2, goes to the Data Converter's gate,
       // just above it, and holds there in clear; the lock opens, the key glows and the lock snaps shut, the text
       // scrambling in place; then it leaves encrypted, crosses over and lands in its row
       const out = c[2] + 0.8, leaveAt = c[2] + 1.2, atGate = c[2] + 2.0, openAt = c[2] + 3.1, snap = c[2] + 3.6;
@@ -340,14 +340,16 @@
       // task appears; an Activity's result is persisted, and a new Workflow task is queued
       const toQueue = TRIP.back + TRIP.toQueue, toRow = TRIP.back + TRIP.toRow;
       const d0 = c[1] + 0.8, a0 = arriveAt(d0), p0 = a0 + 2 * TRIP.step;
-      // an Activity's scheduled and started events land 1.2 s apart, each a readable beat
+      // an Activity task waits 1.2 s in the queue, a readable beat after its scheduled event
       const q1 = p0 + toQueue, d1 = q1 + 1.2, a1 = arriveAt(d1);
       const q2 = landed + 0.6, d2 = q2 + 0.8, a2 = arriveAt(d2), p2 = a2 + 2 * TRIP.step;
       const q3 = p2 + toQueue, d3 = q3 + 1.2, a3 = arriveAt(d3), r3 = a3 + 2 * TRIP.step;
       const q4 = r3 + toRow + 0.6, d4 = q4 + 0.8, a4 = arriveAt(d4), done = a4 + TRIP.step + 0.3;
       const queued = [c[0] + 1.5, q1, q2, q3, q4], dispatch = [d0, d1, d2, d3, d4];
-      // each event at the moment it happens
-      const rowAt = [c[1] + 0.3, q1, d1, landed, q3, d3, r3 + toRow, done + toRow];
+      // each event at the moment Temporal writes it: an Activity's STARTED event only once its result reaches
+      // Temporal Cloud (at the connector dot), as Temporal records an Activity's start when the Activity closes,
+      // then its COMPLETED event as the result lands in its row
+      const rowAt = [c[1] + 0.3, q1, atDot, landed, q3, r3 + TRIP.back, r3 + toRow, done + toRow];
       // the history scrolls up one row, eased, before each event beyond the fifth lands: it rests on whole rows
       const scroll = PITCH * rowAt.slice(VISIBLE).map(at => P(t, at - 0.6, 0.45, ease)).reduce((a, b) => a + b, 0);
       const rowY = i => PERS.top + VIEW.top + rowInView(i) - scroll;
@@ -382,8 +384,8 @@
         place(e, Math.round(x), Math.round(y), 1, o);
         clipRightOfConverter(e, Math.round(x), 1);
       });
-      // The Workers. WORKER 1 runs the Workflow a line at a time: from the top to `await chargeCard`, where it waits;
-      // resumed, on to `await shipPackage`, where it waits again; resumed, past the last line: it returns, DONE. The
+      // The Workers. WORKER 1 runs the Workflow a line at a time: from the top to `await ChargeCard`, where it waits;
+      // resumed, on to `await ShipPackage`, where it waits again; resumed, past the last line: it returns, DONE. The
       // line it waits on stays faintly lit. WORKERs 2 and 3 run their Activity, a line at a time
       const lineOf = (at, first, n) => (t >= at && t < at + n * TRIP.step ? first + Math.floor((t - at) / TRIP.step)
         : -1);
@@ -398,19 +400,19 @@
       else setAppStatus(w1, 'DONE', 'idle');
       w1.code.style.borderColor = lit >= 0 || (t >= a4 && t < done) ? C.violet : t >= done ? C.neon : C.line;
       w1.lines.forEach((e, j) => {
-        e.style.background = j === lit ? 'rgba(182,100,255,.28)' : j === paused ? 'rgba(182,100,255,.12)' : '';
+        e.style.background = j === lit ? `rgba(${RGB.violet},.28)` : j === paused ? `rgba(${RGB.violet},.12)` : '';
       });
       [[1, a1, leaveAt], [2, a3, r3]].forEach(([k, at, until]) => {
         const w = s.workers[k], running = t >= at && t < until;
         setAppStatus(w, running ? 'RUNNING' : t >= pollAt(k) ? 'POLLING' : '', running ? 'running' : 'idle');
         w.code.style.borderColor = running ? C.violet : C.line;
         const line = running ? Math.min(1, Math.floor((t - at) / TRIP.step)) : -1;
-        w.lines.forEach((e, j) => { e.style.background = j === line ? 'rgba(182,100,255,.28)' : ''; });
+        w.lines.forEach((e, j) => { e.style.background = j === line ? `rgba(${RGB.violet},.28)` : ''; });
       });
-      // shipPackage's result and the Workflow's completion run back as sparks, over the gate, into their rows
+      // ShipPackage's result and the Workflow's completion run back as sparks, over the gate, into their rows
       [[r3, 2, 6], [done, 0, 7]].forEach(([at, k, row], j) => {
         const e = s.results[j];
-        const back = P(t, at, TRIP.back, x => x), into = P(t, at + TRIP.back, TRIP.toRow);
+        const back = P(t, at, TRIP.back, linear), into = P(t, at + TRIP.back, TRIP.toRow);
         if (back <= 0 || into >= 1) {
           place(e, 0, 0, 1, 0);
           return;
@@ -428,7 +430,7 @@
         place(e, VIEW.w / 2 + Math.round((1 - rp) * 26), Math.round((rowInView(i) - scroll) * 100) / 100, 1, rp);
         const lit = win(t, rowAt[i], rowAt[i] + 0.7, 0.15) > 0.5;
         e.style.borderColor = lit ? C.violet : C.line;
-        if (e.pl) e.pl.style.boxShadow = lit ? '0 0 16px rgba(182,100,255,.6)' : '';
+        if (e.pl) e.pl.style.boxShadow = lit ? `0 0 16px rgba(${RGB.violet},.6)` : '';
       });
 
       // the close-up of c[2]: the rest dims while the payload makes its journey
@@ -439,12 +441,10 @@
       // the payload's position, always on top of what it passes: out of WORKER 2's edge, up to the gate above the
       // Data Converter (the converter's lock and key in full view under it), down to the connection's start, along
       // it to the dot, then onto its row's payload
-      const pop = P(t, out, 0.4, backOut);
-      const wireStart = [WORKER.x + WORKER.w / 2, workerY(1)];
-      const gate = GATE;
-      const lineStart = LINE_START;
-      const legs = [[leaveAt, wireStart, gate, atGate - leaveAt],
-        [crossAt, gate, lineStart, 0.5], [crossAt + 0.5, lineStart, [DOT.x, DOT.y], atDot - crossAt - 0.5],
+      const pop = backPop(t, out, 0.4);
+      const wireStart = workerEdge(1);
+      const legs = [[leaveAt, wireStart, GATE, atGate - leaveAt],
+        [crossAt, GATE, LINE_START, 0.5], [crossAt + 0.5, LINE_START, [DOT.x, DOT.y], atDot - crossAt - 0.5],
         [atDot, [DOT.x, DOT.y], [PAYLOAD_X, rowY(3)], landed - atDot]];
       let [sx, sy] = wireStart;
       legs.forEach(([at, from, to, d]) => {
@@ -453,18 +453,17 @@
         sx = lerp(from[0], to[0], f); sy = lerp(from[1], to[1], f);
       });
       const drop = P(t, atDot, landed - atDot);
-      // encrypted at the gate as the lock snaps shut: the text scrambles in place
       // encrypted once, there: the text scrambles while the lock snaps, then freezes as the ciphertext that row 4's
       // chip shows; it stays the same as it crosses and lands
       const encrypted = P(t, snap, 0.6);
-      const frame = Math.floor((G - this.start) * 20);
+      const frame = Math.floor(t * 20);
       let text = SECRET;
       if (encrypted >= 1) text = CIPHER;
       else if (encrypted > 0) text = scrambleHex(SECRET, Math.round(encrypted * SECRET.length), frame);
       if (s.secret.textContent !== text) s.secret.textContent = text;
       s.secret.style.background = encrypted > 0.5 ? C.violetTint : C.uvTint;
-      const k3 = 1.1 * pop * (1 - 0.2 * drop);
-      place(s.secret, Math.round(sx), Math.round(sy), k3, clamp(pop * 2) * (1 - P(t, landed - 0.15, 0.2)));
+      const k3 = 1.1 * pop.s * (1 - 0.2 * drop);
+      place(s.secret, Math.round(sx), Math.round(sy), k3, pop.o * (1 - P(t, landed - 0.15, 0.2)));
       // The Data Converter reacts to everything that goes through it, for 0.44 s centered on the moment it is
       // inside the tile: its glow pulses, a scan line sweeps across it in the direction of travel, and its lock
       // clicks: outbound data is encrypted (the lock bumps), inbound data decrypted (the lock opens, then closes).
@@ -474,11 +473,11 @@
         ...dispatch.map((d, i) => ({ k: TASKS[i][1], start: d + TRIP.toDot, d: TRIP.route, map: u => 1 - ease(u),
           out: false })),
         ...[p0, p2].map(at => ({ k: 0, start: at, d: TRIP.back, map: ease, out: true })),
-        ...[[r3, 2], [done, 0]].map(([at, k]) => ({ k, start: at, d: TRIP.back, map: u => u, out: true })),
+        ...[[r3, 2], [done, 0]].map(([at, k]) => ({ k, start: at, d: TRIP.back, map: linear, out: true })),
       ].map(pass => ({ ...pass, mid: passMid(pass) }));
       const active = passes.find(pass => Math.abs(t - pass.mid) < 0.22);
       const pulse = active ? win(t, active.mid - 0.22, active.mid + 0.22, 0.12) : 0;
-      const sweep = active ? P(t, active.mid - 0.22, 0.44, x => x) : 0;
+      const sweep = active ? P(t, active.mid - 0.22, 0.44, linear) : 0;
       place(s.conv.scan, (active && active.out ? sweep : 1 - sweep) * (CONV.w - 6) + 1.5, (CONV.h - 3) / 2, 1,
         active ? pulse * 0.8 : 0);
       const decrypt = active && !active.out ? win(t, active.mid - 0.2, active.mid + 0.15, 0.1) : 0;
@@ -488,8 +487,7 @@
       s.conv.shackle.setAttribute('transform', `translate(0 ${(-4 * open).toFixed(2)})`);
       s.conv.key.style.transform = `scale(${swell(t, snap - 0.25, 0.5)})`;
       const glow = Math.max(pulse * 0.7, win(t, snap - 0.1, snap + 0.5, 0.15));
-      s.conv.style.boxShadow = glow > 0 ? `0 0 ${Math.round(24 * glow)}px rgba(219,255,75,${(0.45 * glow).toFixed(3)})`
-        : '';
+      s.conv.style.boxShadow = glowShadow(RGB.neon, glow, { blur: 24, alpha: 0.45 });
       // Temporal Cloud never sees your payloads, held
       setStatus(s.never, 'NEVER SEES YOUR PAYLOADS', 'ok');
       const np = popIn(t, c[2] + 7.9);

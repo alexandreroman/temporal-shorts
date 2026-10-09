@@ -19,12 +19,8 @@ The theme picker (`src/index.html`, `src/home.css`) follows these rules:
 - Card order: Meet Temporal (the entry point for newcomers, with a
   handshake icon), Introduction to Durable Execution, Human-in-the-Loop,
   Durable AI Agents, Temporal Agent Harness.
-- A theme is unlisted by adding the standard `hidden` attribute to its card
-  in `src/index.html`: `make html` (`scripts/build_html.py`) drops the card
-  from the built home page, so the page holds no link to the theme, and the
-  other cards fill the row. The theme is still built, rendered, deployed and
-  reachable at `themes/<theme>/`. The home page `<meta name="description">`
-  names the themes and is edited by hand.
+- The home page `<meta name="description">` names the themes and is
+  edited by hand.
 - Cards show no video duration.
 - The page text never calls the videos "silent" and never mentions sound or
   audio.

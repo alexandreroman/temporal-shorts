@@ -14,7 +14,8 @@
 
   // The agent's Python class (top of the column) and the TypeScript generated from it (bottom of the column).
   // Same names as chapter 5 (TravelAgent, plan_trip, PlanTrip, Itinerary); the state follows the harness's
-  // HarnessState / agent.state() API and the TypeScript the shape harness-codegen writes (handlers and states).
+  // HarnessState / agent.state() API and the TypeScript the shape harness-codegen writes (initData, null for an
+  // agent without init data, then handlers and states).
   const PYTHON = [
     'class Trip(HarnessState):',
     '    items: list[Item] = []',
@@ -33,6 +34,7 @@
     '  total_usd: number;',
     '}',
     'export interface TravelAgent {',
+    '  initData: null;',
     '  handlers: { plan_trip: { input: PlanTrip; output: Itinerary } };',
     '  states: { trip: Trip };',
     '}',
@@ -47,8 +49,8 @@
   // the state model, the observable state, the message handler
   const PAIRS = [
     { py: [0, 2], ts: [0, 3] },
-    { py: [6, 6], ts: [6, 6] },
-    { py: [8, 9], ts: [5, 5] },
+    { py: [6, 6], ts: [7, 7] },
+    { py: [8, 9], ts: [6, 6] },
   ];
   // the Trip fields the UI binds to, in the TypeScript card
   const TS_ITEMS = 1, TS_TOTAL = 2;
@@ -91,8 +93,8 @@
       + `<div style="position:absolute;left:0;right:0;top:${CODE.head}px;border-top:1.5px solid ${C.line}"></div>`,
       'tile', { width: CODE.w + 'px', height: h + 'px', textAlign: 'left' });
     // line highlights sit in a layer under the code lines
-    const highlights = E(e, '', '', { left: '0', top: '0' });
-    highlights.style.opacity = 1; // E() hides what it creates; the layer stays on, each highlight fades on its own
+    // the layer stays on, each highlight fades on its own
+    const highlights = E(e, '', '', { left: '0', top: '0', opacity: 1 });
     e.highlight = ([first, last], tint, color) => E(highlights, '', '', {
       left: '12px', top: (CODE.lineTop + first * CODE.lineH) + 'px', width: (CODE.w - 24) + 'px',
       height: ((last - first + 1) * CODE.lineH) + 'px', background: tint, borderLeft: '3px solid ' + color,
@@ -104,7 +106,7 @@
     }));
     return e;
   };
-  const PAIR_TINT = 'rgba(182,100,255,.16)', BIND_TINT = 'rgba(68,76,231,.24)';
+  const PAIR_TINT = `rgba(${RGB.violet},.16)`, BIND_TINT = `rgba(${RGB.uv},.24)`;
 
   // binding badge on the UI: the field of the agent's typed state shown there (e.g. trip.items)
   const badgeHtml = (cls, field) => `<span class="${cls} pill uv" style="text-transform:none;letter-spacing:.02em;`
@@ -144,18 +146,6 @@
     return e;
   };
 
-  // place() anchored on the element's left edge, so a label keeps its gap to the arrow it follows
-  const placeLeft = (e, x, y, o) => {
-    e.style.transform = `translate(${x}px,${y}px) translateY(-50%)`;
-    e.style.opacity = clamp(o);
-    e.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
-  };
-  // pops an element in place with a small overshoot
-  const popIn = (e, p) => {
-    e.style.opacity = clamp(p * 2);
-    e.style.transform = `scale(${p})`;
-  };
-
   scene({
     chapter: 8, title: 'Typed sessions',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
@@ -165,7 +155,8 @@
     shift: (t, c) => pan(t, [960 - CODE.x, 0], [[c[1], 0, 0]], 1.0),
     subs: [
       {
-        text: "The harness generates <b>TypeScript types</b> from your agent's Python class: its state and its messages.",
+        text: "The harness generates <b>TypeScript types</b> from your agent's Python class: "
+          + 'its state and its messages.',
         // the last line pair lights at c[0] + 6.7 and reads for 2 s before the UI window enters
         after: 1.8,
       },
@@ -198,10 +189,7 @@
       s.planner = makePlanner(root);
       s.link = path(s.svg, `M ${LINK.from} ${LINK.y} L ${LINK.to} ${LINK.y}`, C.uv, 3, true);
       s.linkL = E(root, 'Typed session', 'lbl', { fontSize: '16px', color: C.ink });
-      s.pulse = E(root, '', '', {
-        width: '14px', height: '14px', background: C.uv, borderRadius: '3px',
-        boxShadow: '0 0 14px 4px rgba(68,76,231,.6)',
-      });
+      s.pulse = makeGlowDot(root, 14, RGB.uv, { radius: '3px', spread: 4, alpha: 0.6 });
       // the typed SDKs: one row under the window, its content pushed to the box's right edge, which sits on the
       // window's right edge; a box of fixed even width rests on whole pixels (its content is about 428 px wide)
       s.sdkRow = E(root,
@@ -220,18 +208,18 @@
       }));
     },
     update(t, c, s) {
-      const pop = at => P(t, at, 0.5, backOut);
+      const pop = at => backPop(t, at, 0.5);
       const showLines = (card, at) => card.lines.forEach((line, i) => showRow(line, P(t, at + i * 0.08, 0.3), 16));
 
       // ---- c[0]: the Python class, then the TypeScript generated from it; matching lines light up pair by pair
       place(s.lblL, CODE.x, HEADING_Y, 1, P(t, c[0] + 0.1, 0.4));
       const pyIn = pop(c[0] + 0.2);
-      place(s.python, CODE.x, PY.y, pyIn, clamp(pyIn * 2));
+      place(s.python, CODE.x, PY.y, pyIn.s, pyIn.o);
       showLines(s.python, c[0] + 0.6);
       draw(s.gen, P(t, c[0] + 1.8, 0.5));
       placeLeft(s.genL, GEN.lblX, (GEN.top + GEN.bottom) / 2, P(t, c[0] + 2.0, 0.4));
       const tsIn = pop(c[0] + 2.4);
-      place(s.ts, CODE.x, TS.y, tsIn, clamp(tsIn * 2));
+      place(s.ts, CODE.x, TS.y, tsIn.s, tsIn.o);
       showLines(s.ts, c[0] + 2.8);
       // each pair reads about 1.4 s; the last one stays lit until the UI window starts to enter
       const pairStarts = [c[0] + 3.9, c[0] + 5.3, c[0] + 6.7];
@@ -245,7 +233,7 @@
       // ---- c[1]: the trip planner UI, its typed session with the generated types, then the fields it binds
       const uiIn = pop(c[1] + 0.5);
       place(s.lblR, UI.x, HEADING_Y, 1, P(t, c[1] + 0.5, 0.5));
-      place(s.planner, UI.x, UI.y, uiIn, clamp(uiIn * 2));
+      place(s.planner, UI.x, UI.y, uiIn.s, uiIn.o);
       s.planner.rows.forEach((row, i) => showRow(row, P(t, c[1] + 1.2 + i * 0.4, 0.4), 24));
       s.planner.foot.style.opacity = P(t, c[1] + 2.5, 0.4);
       draw(s.link, P(t, c[1] + 3.2, 0.6));
@@ -259,12 +247,12 @@
       // bindings: the rows read trip.items, then the total reads trip.total_usd; each lights its Trip field
       const itemsAt = c[1] + 4.4, totalAt = c[1] + 5.4;
       s.bindItems.style.opacity = P(t, itemsAt, 0.3);
-      popIn(s.planner.itemsBadge, pop(itemsAt + 0.1));
+      popScale(s.planner.itemsBadge, pop(itemsAt + 0.1));
       s.planner.rows.forEach(row => { row.style.borderColor = t >= itemsAt + 0.15 ? C.uv : C.line; });
       s.bindTotal.style.opacity = P(t, totalAt, 0.3);
-      popIn(s.planner.totalBadge, pop(totalAt + 0.1));
+      popScale(s.planner.totalBadge, pop(totalAt + 0.1));
       place(s.sdkRow, SDK_ROW.x, BOTTOM - UI.tagH / 2, 1, P(t, c[1] + 6.0, 0.4));
-      s.sdks.forEach((e, i) => popIn(e, pop(c[1] + 6.1 + i * 0.3)));
+      s.sdks.forEach((e, i) => popScale(e, pop(c[1] + 6.1 + i * 0.3)));
     }
   });
 }

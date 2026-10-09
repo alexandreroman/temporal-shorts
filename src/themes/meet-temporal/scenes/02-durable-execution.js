@@ -2,14 +2,17 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // The order of the series: its 4 steps as tiles, as lines in the app, and as rows of the Event History
-  const STEPS = [['cart', 'Order'], ['card', 'Charge'], ['box', 'Ship'], ['mail', 'Email']];
+  const STEPS = [
+    { icon: 'cart', label: 'Order' }, { icon: 'card', label: 'Charge' }, { icon: 'box', label: 'Ship' },
+    { icon: 'mail', label: 'Email' },
+  ];
   const LINES = ['take the order', 'charge the card', 'ship the package', 'email the receipt'];
   const HISTORY = ['Order #1042 received', 'Card charged: $42', 'Package shipped', 'Receipt emailed'];
   // Layout on the free band: the step row on top, the app panel on the left and the TEMPORAL panel on the right
   const ROW = { x0: 270, gap: 460, y: 215, w: 300, h: 120 };
   const APP = { x: 510, y: 595, w: 780, h: 560 };
   const TEMPORAL = { x: 1380, y: 595, w: 840, h: 560 };
-  const HIST = { x: TEMPORAL.x, y: TEMPORAL.y + 25, w: TEMPORAL.w - 40, h: TEMPORAL.h - 90 };
+  const HIST = historyInset(TEMPORAL);
   // the STEPS card inside the app panel, and its lines
   const CARD = { left: 24, top: 76, w: APP.w - 48, h: APP.h - 100 };
   const LINE = { top: 62, gap: 80, h: 56 };
@@ -34,47 +37,14 @@
   }
   const GLITCH_BARS = 7;
 
-  // App instance panel holding a STEPS card: one line per step, with a neon check once done
-  function makeStepsApp(root, name) {
-    const app = makeAppPanel(root, name, APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
-    app.insertAdjacentHTML('beforeend',
-      `<div style="position:absolute;left:${CARD.left}px;top:${CARD.top}px;width:${CARD.w}px;height:${CARD.h}px;`
-      + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
-      + panelLabel('code', 'Steps', 'left:20px;top:16px;padding-left:0')
-      + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${CARD.h / 2 - 20}px;text-align:center;`
-      + 'font-size:30px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div></div>');
-    const card = app.lastElementChild;
-    app.empty = card.querySelector('.empty');
-    app.lines = LINES.map((text, i) => {
-      const line = E(card,
-        `<span style="color:#6B7385;display:inline-block;width:38px">${i + 1}</span><span class="tx">${text}</span>`
-        + `<div class="ok" style="position:absolute;right:18px;top:${(LINE.h - 30) / 2}px">`
-        + `${ICON('check', 30, C.neon, 2.6)}</div>`,
-        'mono', {
-          left: '20px', top: (LINE.top + i * LINE.gap) + 'px', width: (CARD.w - 40) + 'px', height: LINE.h + 'px',
-          lineHeight: LINE.h + 'px', fontSize: '26px', whiteSpace: 'nowrap', paddingLeft: '14px',
-          borderRadius: 'var(--rs)', borderLeft: '4px solid transparent',
-        });
-      line.tx = line.querySelector('.tx'); line.ok = line.querySelector('.ok');
-      line.tilt = i % 2 ? 22 : -18;
-      return line;
-    });
-    return app;
-  }
-  // Line state: 0 to run (dim), 1 running (violet bar), 2 done (check); fall (0 to 1) drops it out on a crash
-  function setLine(app, i, state, fall = 0) {
-    const line = app.lines[i];
-    line.tx.style.color = state === 0 ? C.slate : C.ink;
-    line.style.background = state === 1 ? 'rgba(182,100,255,.2)' : 'transparent';
-    line.style.borderLeftColor = state === 1 ? C.violet : 'transparent';
-    line.ok.style.opacity = state === 2 ? 1 : 0;
-    line.style.opacity = 1 - fall;
-    line.style.transform = `translateY(${fall * 260}px) rotate(${fall * line.tilt}deg)`;
-  }
+  // App instance panel holding a STEPS card: one line per step, with a neon check once done; EMPTY in the middle
+  const makeStepsApp = (root, name) => makeLinesApp(root, name, APP.w, APP.h, LINES, {
+    label: 'Steps', cardTop: CARD.top, emptyTop: CARD.h / 2 - 20, line: LINE, font: 26, inset: 18,
+    check: { size: 30, right: 18 }, tilts: [-18, 22],
+  });
 
   scene({
     chapter: 2, title: 'What Temporal does',
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     // laid out centered at (960, 515) on the free band, inside the content frame (y 155 to 875)
     subs: [
       {
@@ -82,7 +52,7 @@
           + "and Temporal records each one outside the app.",
         after: 0.4,
       },
-      { text: "If the app crashes, a new copy of the app starts and takes over.", after: 0.6 },
+      { text: "If the app crashes, another copy of the app takes over.", after: 1.2 },
       {
         text: "It gets the saved results back from the history, then picks up where it left off. No progress is lost.",
         after: 1.2,
@@ -94,9 +64,8 @@
       s.steps = makeStepRow(root, s.svg, STEPS, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       s.A = makeStepsApp(root, 'APP INSTANCE A');
       s.B = makeStepsApp(root, 'APP INSTANCE B');
-      s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { logoAt: [24, 20], noteAt: [24, 25], font: 18 });
-      const rowsHtml = HISTORY.map(text => `<span style="color:#141414">${text}</span>`);
-      s.jr = makeHistoryCard(root, rowsHtml, {
+      s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, TEMPORAL_HEADER_LARGE);
+      s.history = makeHistoryCard(root, HISTORY, {
         w: HIST.w, h: HIST.h, headerFont: 20, rowTop, font: 23, rowH: HROW.h, tagTop: i => rowTop(i) + 6,
         tag: { font: 18, pad: '4px 12px', icon: 18, border: false },
         crash: {
@@ -109,25 +78,25 @@
       // width, so it rests on whole pixels centered
       const DONE_H = 46;
       const doneTop = rowTop(HISTORY.length - 1) + HROW.h + (HIST.h - rowTop(HISTORY.length - 1) - HROW.h - DONE_H) / 2;
-      s.jr.done = E(s.jr, `${ICON('check', 24, C.neon, 2.6)} ORDER COMPLETE`, 'mono', {
+      s.history.done = E(s.history, `${ICON('check', 24, C.neon, 2.6)} ORDER COMPLETE`, 'mono', {
         left: '50%', top: doneTop + 'px', width: '270px', height: DONE_H + 'px', fontSize: '20px',
-        letterSpacing: '.12em', color: C.neon, background: '#141414', padding: '0 18px 0 16px',
+        letterSpacing: '.12em', color: C.neon, background: C.bg, padding: '0 18px 0 16px',
         borderRadius: 'var(--rs)', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center',
       });
       // each result runs as a neon pulse along a cable into the history; replayed results run back in violet
       s.cableSvg = svgLayer(root);
       s.cables = STEPS.map((_, i) => path(s.cableSvg, cableD(i), C.violet, 2, false));
-      s.pulses = STEPS.map(() => makeSpark(root, 16, '219,255,75'));
-      s.backPulses = [0, 1].map(() => makeSpark(root, 16, '182,100,255'));
+      s.pulses = STEPS.map(() => makeSpark(root, 16, RGB.neon));
+      s.backPulses = [0, 1].map(() => makeSpark(root, 16, RGB.violet));
       s.newTag = tag(root, 'New app instance', 'violet solid');
       // instance B boots behind a scanline
       s.bootLine = E(root, '', '', {
-        width: APP.w + 'px', height: '3px', background: C.violet, boxShadow: '0 0 18px 4px rgba(182,100,255,.6)',
+        width: APP.w + 'px', height: '3px', background: C.violet, boxShadow: `0 0 18px 4px rgba(${RGB.violet},.6)`,
       });
       s.flash = makeFlash(root);
       // the crash glitch: torn horizontal bars and scanlines over the whole stage
       s.glitchBars = Array.from({ length: GLITCH_BARS }, (_, j) => E(root, '', '', {
-        width: '1920px', background: j % 2 ? 'rgba(68,76,231,.45)' : 'rgba(255,90,95,.45)',
+        width: '1920px', background: j % 2 ? `rgba(${RGB.uv},.45)` : `rgba(${RGB.red},.45)`,
       }));
       s.scanlines = E(root, '', '', {
         width: '2400px', height: '1400px',
@@ -161,15 +130,15 @@
       placeStepRow(s.steps, t, c[0] + 0.1, states, sx, sy);
 
       // app instance A runs the steps, then crashes: its lines fall out
-      const aIn = P(t, c[0] + 0.3, 0.5, backOut);
+      const aIn = backPop(t, c[0] + 0.3, 0.5);
       // once crashed it stays on screen, dead (red border, CRASHED, EMPTY), until B has arrived
-      place(s.A, APP.x + sx, APP.y + sy, aIn, clamp(aIn * 2) * (1 - 0.25 * P(t, crashAt + 0.8, 0.4))
+      place(s.A, APP.x + sx, APP.y + sy, aIn.s, aIn.o * (1 - 0.25 * P(t, crashAt + 0.8, 0.4))
         * (1 - P(t, aGone, 0.4)));
       if (crashed) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, t >= run[0] ? 'RUNNING' : '', t >= run[0] ? 'running' : 'idle');
       LINES.forEach((_, i) => {
-        const st = t >= done[i] ? 2 : t >= run[i] ? 1 : 0;
-        setLine(s.A, i, st, P(t, crashAt + 0.2 + i * 0.1, 0.8, easeIn));
+        const state = t >= done[i] ? 'done' : t >= run[i] ? 'running' : 'todo';
+        setCardLine(s.A, i, state, P(t, crashAt + 0.2 + i * 0.1, 0.8, easeIn));
       });
       s.A.empty.style.opacity = P(t, crashAt + 1.0, 0.3);
 
@@ -180,9 +149,9 @@
       place(s.B, APP.x, Math.round(APP.y + (1 - ease(arrive)) * 60), 1, t >= bOn ? clamp(arrive * 3) : 0);
       s.B.style.clipPath = `inset(0 0 ${((1 - boot) * 100).toFixed(2)}% 0)`;
       place(s.bootLine, APP.x, APP.y - APP.h / 2 + boot * APP.h, 1, boot > 0 && boot < 1 ? 1 : 0);
-      const tp = P(t, bOn + 0.6, 0.45, backOut);
+      const tp = backPop(t, bOn + 0.6);
       // the tag sits in the empty space at the bottom of B's STEPS card
-      place(s.newTag, APP.x, NEW_TAG_Y, tp, clamp(tp * 2) * (1 - P(t, c[2] + 0.2, 0.4)));
+      place(s.newTag, APP.x, NEW_TAG_Y, tp.s, tp.o * (1 - P(t, c[2] + 0.2, 0.4)));
       if (t < bOn + 1.0) setAppStatus(s.B, 'STARTING', 'idle');
       else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
       else if (t < rerun) setAppStatus(s.B, 'REPLAYING…', 'running');
@@ -191,17 +160,17 @@
       // steps 1 and 2 tick as their results come back, without running again
       LINES.forEach((_, i) => {
         if (i < 2) {
-          setLine(s.B, i, t >= replay[i] + 0.4 ? 2 : 0);
+          setCardLine(s.B, i, t >= replay[i] + 0.4 ? 'done' : 'todo');
           return;
         }
         const runAt = i === 2 ? rerun : run[3];
-        setLine(s.B, i, t >= done[i] ? 2 : t >= runAt ? 1 : 0);
+        setCardLine(s.B, i, t >= done[i] ? 'done' : t >= runAt ? 'running' : 'todo');
       });
 
       // Temporal and its Event History, outside the app: untouched by the crash
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 0.6, 0.5));
       s.temporal.out.style.color = t >= c[0] + 5.0 ? C.ink : C.slate;
-      place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 0.8, 0.5));
+      place(s.history, HIST.x, HIST.y, 1, P(t, c[0] + 0.8, 0.5));
       // each result runs along its cable into the history, where its row is saved; during the replay the saved
       // results run back to app instance B
       s.cables.forEach((cable, i) => {
@@ -215,18 +184,18 @@
         }
       });
       HISTORY.forEach((_, i) => {
-        showRow(s.jr.rows[i], P(t, saved[i] - 0.1, 0.3));
+        showRow(s.history.rows[i], P(t, saved[i] - 0.1, 0.3));
         const isReplayed = i < 2 && t >= replay[i];
-        setStatus(s.jr.tags[i], isReplayed ? 'REPLAYED' : 'SAVED', isReplayed ? 'reused' : 'saved');
-        s.jr.tags[i].style.opacity = P(t, saved[i], 0.25);
-        s.jr.tags[i].style.transform = `scale(${swell(t, isReplayed ? replay[i] : saved[i], 0.14)})`;
+        const opacity = P(t, saved[i], 0.25);
+        if (isReplayed) placeStatusTag(s.history.tags[i], t, 'REPLAYED', 'reused', opacity, replay[i]);
+        else placeStatusTag(s.history.tags[i], t, 'SAVED', 'saved', opacity, saved[i]);
       });
-      markCrash(s.jr, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
+      markCrash(s.history, t, crashAt);
       const scanning = replay.findIndex(q => t >= q - 0.2 && t < q + 0.7);
-      setScan(s.jr, rowTop(Math.max(0, scanning)) - 3, scanning >= 0 ? 1 : 0);
-      const dp = P(t, complete, 0.45, backOut);
-      s.jr.done.style.opacity = clamp(dp * 2);
-      s.jr.done.style.transform = `translateX(-50%) scale(${dp})`;
+      scanRow(s.history, scanning);
+      const dp = backPop(t, complete);
+      s.history.done.style.opacity = dp.o;
+      s.history.done.style.transform = `translateX(-50%) scale(${dp.s})`;
       placeFlash(s.flash, t, crashAt);
 
       // the crash glitch: color fringes on the whole composition, torn bars and scanlines, re-drawn 24 times a
@@ -234,8 +203,8 @@
       const frame = Math.floor(t * 24);
       const k = win(t, crashAt - 0.02, crashAt + 0.55, 0.05) * (0.5 + 0.5 * hash(frame));
       const fringe = Math.round(2 + 10 * k * hash(frame + 1));
-      s.cam.style.filter = k > 0.01 ? `drop-shadow(${fringe}px 0 0 rgba(255,90,95,.8)) `
-        + `drop-shadow(${-fringe}px 0 0 rgba(68,76,231,.8))` : 'none';
+      s.cam.style.filter = k > 0.01 ? `drop-shadow(${fringe}px 0 0 rgba(${RGB.red},.8)) `
+        + `drop-shadow(${-fringe}px 0 0 rgba(${RGB.uv},.8))` : 'none';
       s.glitchBars.forEach((e, j) => {
         // hidden outside the glitch, and left in place there, so the scene stays still for the live player
         if (k <= 0.01) {

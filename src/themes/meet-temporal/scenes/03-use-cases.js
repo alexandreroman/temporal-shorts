@@ -71,8 +71,12 @@
   scene({
     chapter: 3, title: 'Where Temporal is used',
     // a hard cut: the AI hub turns into the next chapter's first frame
-    fadeOut: 0.001,
-    // laid out centered at (960, 522) on the free band
+    fadeOut: 0,
+    // presenter mode holds on the settled map just before AI invades the screen, then plays the swell, the morph
+    // and the cut in one go
+    holdBeforeEnd: (c, dur) => dur - (c[1] + SWELL_AT),
+    // the chapter header fades out as AI invades the screen: the swell and the morph play with no header
+    headerOutAt: c => c[1] + SWELL_AT,
     subs: [
       {
         text: "A <b>Workflow</b> is any process that must finish correctly: payments, orders, bookings, subscriptions.",
@@ -82,15 +86,11 @@
       { text: "Teams also run infrastructure, data pipelines and, more and more, AI on Temporal.", after: 3.0 },
     ],
     build(stage, s) {
-      // presenter mode holds on the settled map just before AI invades the screen, then plays the swell, the
-      // morph and the cut in one go (the timeline is laid out before build runs)
-      this.holdBeforeEnd = this.dur - (this.cues[1] + SWELL_AT);
-      // the chapter header fades out as AI invades the screen: the swell and the morph play with no header
-      this.headerOutAt = this.cues[1] + SWELL_AT;
       const root = s.cam = makeCamera(stage);
       s.glow = E(root, '', '', {
         width: '620px', height: '620px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,100,255,.35) 0%, rgba(68,76,231,.12) 45%, rgba(68,76,231,0) 70%)',
+        background: `radial-gradient(circle, rgba(${RGB.violet},.35) 0%, `
+          + `rgba(${RGB.uv},.12) 45%, rgba(${RGB.uv},0) 70%)`,
       });
       // the AI hub's halo, which travels with it at the end
       s.halo = E(root, '', '', {
@@ -102,7 +102,7 @@
       // hub to bubble links, redrawn every frame as the bubbles float
       s.links = HUBS.map(() => [0, 1, 2].map(() => path(s.svg, 'M 0 0 L 1 1', C.line, 1.5, false)));
       s.symbol = E(root, `<img src="${SYMBOL}" style="width:${SYMBOL_SIZE}px;height:${SYMBOL_SIZE}px;display:block">`);
-      s.pulses = HUBS.map(() => makeSpark(root, 16, '182,100,255'));
+      s.pulses = HUBS.map(() => makeSpark(root, 16, RGB.violet));
       s.hubs = HUBS.map(hub => makeHub(root, hub.name));
       // the AI hub's two words: WORKFLOWS fades as AI invades the screen, AI alone re-centering in the disc
       s.aiWord = s.hubs[AI].querySelector('b');
@@ -110,8 +110,7 @@
       s.bubbles = EXAMPLES.map((examples, i) => examples.map((example, k) => makeBubble(root, example,
         HUBS[i].angles[k])));
       // the LLM orb the AI hub turns into: the next chapter's LLM node, same size and blink
-      s.llm = makeLLM(root, AGENT_LLM.size, '');
-      s.llm.seed = AGENT_LLM.seed;
+      s.llm = makeLLM(root, AGENT_HANDOFF.size, '', { seed: AGENT_LLM_SEED });
     },
     update(t, c, s) {
       // at the end AI invades the screen, then turns into the next chapter's LLM node: the rest of the map fades
@@ -130,7 +129,7 @@
       const y = lerp(lerp(ai.y, 540, swellP), AGENT_HANDOFF.y, contract);
       const size = lerp(lerp(HUB_SIZE, FULL_SCREEN, swellP), llmSize, contract);
       const orb = P(t, morphAt + 2.4, 0.6);
-      place(s.llm.root, x, y, size / AGENT_LLM.size, orb);
+      place(s.llm.root, x, y, size / llmSize, orb);
       llmState(s.llm, { look: 0.5 });
       // the halo grows with the hub (HANDOFF_HALO.size at the LLM's size), washing the stage violet
       place(s.halo, x, y, size / llmSize, P(t, morphAt, 0.5) * HANDOFF_HALO.o);
@@ -140,17 +139,15 @@
       place(s.glow, CENTER.x, CENTER.y, 1 + 0.05 * Math.sin(G * 1.5), P(t, c[0] + 0.2, 0.6) * rest);
       const spokeAt = i => c[0] + 0.5 + i * 0.18;
       HUBS.forEach((hub, i) => {
-        // everything but the AI hub fades as the camera zooms in
-        const o = i === AI ? 1 : rest;
         const prog = P(t, spokeAt(i), 0.5);
         draw(s.spokes[i], prog, rest);
         sparkOnPath(s.pulses[i], s.spokes[i], prog);
-        const hp = P(t, spokeAt(i) + 0.45, 0.5, backOut);
+        const hp = backPop(t, spokeAt(i) + 0.45, 0.5);
         if (i === AI) {
           // the hub follows the morph, fading as the orb takes over; its text fades before the orb's eyes come in,
           // and a violet light glows in it while it fills the stage
           const hub = s.hubs[i];
-          place(hub, x, y, hp * size / HUB_SIZE, clamp(hp * 2) * (1 - orb));
+          place(hub, x, y, hp.s * size / HUB_SIZE, hp.o * (1 - orb));
           // WORKFLOWS fades out as the hub swells, and AI slides down to the disc's center
           const alone = ease(P(t, morphAt, 0.8));
           const drop = Math.round((s.aiRest.offsetHeight + 4) / 2 * alone * 100) / 100;
@@ -160,24 +157,25 @@
           hub.style.color = `rgba(255,255,255,${(1 - P(t, morphAt + 1.8, 0.5)).toFixed(3)})`;
           const light = swellP * (1 - contract) * 0.55;
           hub.style.background = light > 0
-            ? `radial-gradient(circle at 50% 42%, rgba(182,100,255,${light.toFixed(3)}), ${C.uv} 70%)` : C.uv;
+            ? `radial-gradient(circle at 50% 42%, rgba(${RGB.violet},${light.toFixed(3)}), ${C.uv} 70%)` : C.uv;
         } else {
-          place(s.hubs[i], hub.x, hub.y, hp, clamp(hp * 2) * o);
+          // everything but the AI hub fades as AI invades the screen
+          place(s.hubs[i], hub.x, hub.y, hp.s, hp.o * rest);
         }
         s.bubbles[i].forEach((b, k) => {
           const [bx, by] = bubbleAt(hub, k);
           // a gentle float around its place (ambient, driven by G), each bubble on its own phase
           const phase = (i * 3 + k) * 1.9;
           const x = bx + FLOAT * Math.sin(G * 0.9 + phase), y = by + FLOAT * Math.cos(G * 0.7 + phase);
-          const bp = P(t, spokeAt(i) + 0.8 + k * 0.12, 0.45, backOut);
-          place(b, x, y, bp, clamp(bp * 2) * rest);
+          const bp = backPop(t, spokeAt(i) + 0.8 + k * 0.12);
+          place(b, x, y, bp.s, bp.o * rest);
           // the link from the hub's edge to the bubble's edge
           const d = Math.hypot(x - hub.x, y - hub.y);
           const ux = (x - hub.x) / d, uy = (y - hub.y) / d;
           const link = s.links[i][k];
           link.setAttribute('d', `M ${hub.x + ux * (HUB_SIZE / 2 + 6)} ${hub.y + uy * (HUB_SIZE / 2 + 6)} `
             + `L ${x - ux * (BUBBLE.size / 2 + 6)} ${y - uy * (BUBBLE.size / 2 + 6)}`);
-          link.style.opacity = clamp(bp * 2) * rest;
+          link.style.opacity = bp.o * rest;
         });
       });
     }

@@ -3,10 +3,10 @@
 {
   // one color per event type, the same on the dark stage and on the white console
   const EVENT_TYPES = {
-    TURN: { background: C.slate, color: '#141414', borderColor: C.slate },
+    TURN: { background: C.slate, color: C.bg, borderColor: C.slate },
     MODEL: { background: C.uv, color: '#FFFFFF', borderColor: C.uv },
-    TOOL: { background: C.ink, color: '#141414', borderColor: '#5B6475' },
-    APPROVAL: { background: C.violet, color: '#141414', borderColor: C.violet },
+    TOOL: { background: C.ink, color: C.bg, borderColor: C.slateDark },
+    APPROVAL: { background: C.violet, color: C.bg, borderColor: C.violet },
     TOKENS: { background: 'transparent', color: C.slate, borderColor: C.slate },
   };
   const TYPE_ORDER = ['TURN', 'MODEL', 'TOOL', 'APPROVAL', 'TOKENS'];
@@ -39,15 +39,15 @@
     ['APPROVAL', 'book_flight: needs approval'],
     ['APPROVAL', 'approved by a human'],
     ['TOOL', 'tool book_flight · done'],
-    ['TOKENS', 'turn ended · 2,140 tokens'],
+    ['TURN', 'turn total · 2,140 tokens'],
   ];
   const HUMAN_ROW = 4, TOTAL_ROW = 6;
   // status tags of the HUMAN_ROW and TOTAL_ROW marks, as [label, statusTag kind]
   const MARK_TAGS = [['HUMAN', 'wait'], ['COST', 'reused']];
   const LAST_ROW = ROWS.length - 1;
 
-  const chipCss = (type, fontSize) => ({
-    ...EVENT_TYPES[type], fontSize, letterSpacing: '.1em', padding: '4px 10px 4px calc(10px + .1em)',
+  const chipCss = type => ({
+    ...EVENT_TYPES[type], fontSize: '16px', letterSpacing: '.1em', padding: '4px 10px 4px calc(10px + .1em)',
     border: '1.5px solid', borderRadius: '4px', whiteSpace: 'nowrap',
   });
   // Console row chip and tag text: a 22 px line makes them 32 px tall with their padding and border (the 1.5 px
@@ -59,12 +59,7 @@
     return `<span class="mono" style="display:inline-block;width:132px;text-align:center;font-size:16px;`
       + `line-height:${CONSOLE_LINE}px;`
       + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
-      + `background:${css.background};color:${type === 'TOKENS' ? '#5B6475' : css.color}">${type}</span>`;
-  };
-  const linear = p => p;
-  const cubic = (a, b, c, d, u) => {
-    const v = 1 - u;
-    return v * v * v * a + 3 * v * v * u * b + 3 * v * u * u * c + u * u * u * d;
+      + `background:${css.background};color:${css.color}">${type}</span>`;
   };
 
   scene({
@@ -76,7 +71,8 @@
     shift: (t, c) => pan(t, [370, 0], [[c[1], 0, 0]], 0.9),
     subs: [
       {
-        text: "Every agent publishes the same <b>event stream</b>: turns, model calls, tool calls, approvals and token usage.",
+        text: 'Every agent publishes the same <b>event stream</b>: '
+          + 'turns, model calls, tool calls, approvals and token usage.',
         after: 1.2,
       },
       {
@@ -99,7 +95,7 @@
       Object.assign(s.same.style, { fontSize: '18px', lineHeight: '24px' });
       s.chips = Array.from({ length: CHIP_POOL }, (_, k) => {
         const type = TYPE_ORDER[k % TYPE_ORDER.length];
-        return E(root, type, 'mono', chipCss(type, '16px'));
+        return E(root, type, 'mono', chipCss(type));
       });
       // the agent tiles sit above the chips, so a chip slides out from under its tile
       s.agents = SDKS.map(sdk => E(root,
@@ -120,7 +116,7 @@
       // console: a white card with mono event rows, a LIVE / REPLAY badge and a replay bar
       s.console = E(root,
         '<div class="mono" style="position:absolute;left:28px;top:26px;font-size:20px;letter-spacing:.14em;'
-        + `display:flex;gap:12px;align-items:center">${ICON('eye', 24, '#141414', 1.8)} CONSOLE</div>`,
+        + `display:flex;gap:12px;align-items:center">${ICON('eye', 24, C.bg, 1.8)} CONSOLE</div>`,
         'paper', { width: CONSOLE.w + 'px', height: CONSOLE.h + 'px' });
       const badgeCss = color => ({
         left: 'auto', right: '24px', top: '22px', display: 'flex', alignItems: 'center', gap: '8px',
@@ -129,19 +125,19 @@
       });
       s.live = E(s.console,
         `<span class="dot" style="width:10px;height:10px;border-radius:50%;background:${C.red}"></span>LIVE`,
-        'mono', { ...badgeCss(C.red), background: 'rgba(255,90,95,.1)' });
+        'mono', { ...badgeCss(C.red), background: `rgba(${RGB.red},.1)` });
       s.live.dot = s.live.querySelector('.dot');
       s.replay = E(s.console, `${ICON('play', 14, C.uv, 2.4)}REPLAY`, 'mono',
-        { ...badgeCss(C.uv), background: 'rgba(68,76,231,.1)' });
+        { ...badgeCss(C.uv), background: `rgba(${RGB.uv},.1)` });
       s.marks = [HUMAN_ROW, TOTAL_ROW].map(i => E(s.console, '', '', {
         left: '14px', top: (CONSOLE.row0 - 4 + i * CONSOLE.rowGap) + 'px', width: (CONSOLE.w - 28) + 'px',
         height: (CONSOLE.rowH + 8) + 'px', borderRadius: 'var(--rs)',
-        background: i === HUMAN_ROW ? 'rgba(182,100,255,.16)' : 'rgba(68,76,231,.12)',
+        background: i === HUMAN_ROW ? `rgba(${RGB.violet},.16)` : `rgba(${RGB.uv},.12)`,
         borderLeft: `4px solid ${i === HUMAN_ROW ? C.violet : C.uv}`,
       }));
       s.scan = E(s.console, '', '', {
         left: '14px', width: (CONSOLE.w - 28) + 'px', height: (CONSOLE.rowH + 8) + 'px',
-        background: 'rgba(68,76,231,.2)', borderRadius: 'var(--rs)',
+        background: `rgba(${RGB.uv},.2)`, borderRadius: 'var(--rs)',
       });
       s.rows = ROWS.map(([type, text], i) => E(s.console,
         `${chipHtml(type)}<span style="margin-left:20px;${i === TOTAL_ROW ? 'font-weight:700' : ''}">${text}</span>`,
@@ -150,12 +146,12 @@
           display: 'flex', alignItems: 'center', height: CONSOLE.rowH + 'px',
         }));
       s.tags = [HUMAN_ROW, TOTAL_ROW].map(i => {
-        const e = statusTag(s.console);
+        const e = statusTag(s.console, { font: 16 });
         // centered on its row
         Object.assign(e.style, {
           left: 'auto', right: '28px',
           top: (CONSOLE.row0 + (CONSOLE.rowH - CONSOLE_TAG_H) / 2 + i * CONSOLE.rowGap) + 'px',
-          fontSize: '16px', lineHeight: CONSOLE_LINE + 'px', transformOrigin: 'right center',
+          lineHeight: CONSOLE_LINE + 'px', transformOrigin: 'right center',
         });
         return e;
       });
@@ -180,8 +176,8 @@
       const g = ambientTime(this);
       const flowIn = P(t, chipsFrom - 0.3, 0.3, linear);
       s.agents.forEach((e, i) => {
-        const p = P(t, c[0] + 0.1 + i * 0.4, 0.5, backOut);
-        place(e, AGENT.x, agentY(i), p, clamp(p * 2));
+        const p = backPop(t, c[0] + 0.1 + i * 0.4, 0.5);
+        place(e, AGENT.x, agentY(i), p.s, p.o);
         // the tile lights up as it emits a chip
         const sinceLast = (g - chipsFrom - i * CHIP_EVERY) % (3 * CHIP_EVERY);
         const emitting = t >= chipsFrom && g >= chipsFrom + i * CHIP_EVERY && sinceLast < 0.25;
@@ -190,8 +186,8 @@
       s.guides.forEach((line, i) => draw(line, P(t, c[0] + 1.8 + i * 0.1, 0.6)));
       place(s.lane, LANE.x, LANE.y, 1, P(t, c[0] + 1.9, 0.5));
       place(s.laneL, LANE.x, LANE.y - LANE.h / 2 - 34, 1, P(t, c[0] + 2.0, 0.5));
-      const sp = P(t, c[0] + 5.0, 0.45, backOut);
-      place(s.same, LANE.x, LANE.y + LANE.h / 2 + 46, sp, clamp(sp * 2));
+      const sp = backPop(t, c[0] + 5.0);
+      place(s.same, LANE.x, LANE.y + LANE.h / 2 + 46, sp.s, sp.o);
       s.chips.forEach((e, k) => {
         // the latest chip this element carries: k, k + CHIP_POOL, k + 2 * CHIP_POOL...
         const cycle = Math.max(0, Math.floor((g - chipsFrom - k * CHIP_EVERY) / (CHIP_POOL * CHIP_EVERY)));
@@ -199,9 +195,7 @@
         let x, y;
         if (g < leave + CHIP_MERGE) {
           const u = lerp(MERGE_FROM, 1, clamp((g - leave) / CHIP_MERGE));
-          const [p0, p1, p2, p3] = guide(k % 3);
-          x = cubic(p0[0], p1[0], p2[0], p3[0], u);
-          y = cubic(p0[1], p1[1], p2[1], p3[1], u);
+          [x, y] = bezier(guide(k % 3), u);
         } else {
           x = lerp(LANE.entry, LANE.exit, clamp((g - leave - CHIP_MERGE) / CHIP_LANE));
           y = LANE.y;
@@ -242,9 +236,7 @@
         const at = sweep + sweepD * row / LAST_ROW;
         s.marks[j].style.opacity = P(t, at, 0.3);
         const [label, kind] = MARK_TAGS[j];
-        setStatus(s.tags[j], label, kind);
-        s.tags[j].style.opacity = P(t, at, 0.25);
-        s.tags[j].style.transform = `scale(${swell(t, at, 0.14)})`;
+        placeStatusTag(s.tags[j], t, label, kind, P(t, at, 0.25), at);
       });
     }
   });

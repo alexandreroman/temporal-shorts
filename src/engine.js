@@ -1,5 +1,6 @@
 // ---------- helpers
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const linear = p => p;
 const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
 const easeIn = p => p * p * p;
 const easeOut = p => 1 - (1 - p) ** 3;
@@ -7,7 +8,11 @@ const backOut = p => {
   const c1 = 1.70158, c3 = c1 + 1;
   return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
 };
-const P = (t, a, d, f = ease) => f(clamp((t - a) / d));
+// Progress from 0 to 1 over the d seconds after `a`, eased by f; with d <= 0, a step at `a` (a hard cut)
+function P(t, a, d, f = ease) {
+  if (d <= 0) return f(t >= a ? 1 : 0);
+  return f(clamp((t - a) / d));
+}
 const lerp = (a, b, p) => a + (b - a) * p;
 const win = (t, a, b, f = 0.4) => P(t, a, f) * (1 - P(t, b, f)); // visible between a and b
 // Scale of a short swell when a value or status changes at `at`: 1 + amp at its peak, 1 outside it
@@ -19,7 +24,20 @@ function pan(t, from, stops, d) {
   for (const [a, sx, sy, sd = d] of stops) { const p = P(t, a, sd); x = lerp(x, sx, p); y = lerp(y, sy, p); }
   return [x, y];
 }
+// Point at u (0 to 1) of the cubic Bezier curve of control points [p0, p1, p2, p3], each one [x, y]
+function bezier([p0, p1, p2, p3], u) {
+  const v = 1 - u;
+  const at = k => v * v * v * p0[k] + 3 * v * v * u * p1[k] + 3 * v * u * u * p2[k] + u * u * u * p3[k];
+  return [at(0), at(1)];
+}
 let G = 0; // global time
+// Ambient clock of a scene: G counted from the scene's start, so it equals the scene time t in frozen frames.
+// Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G keeps real time while t
+// slows down at 0.5x, and the player only counts the story moving on t as motion. Call it from update()
+// as ambientTime(this). Story animations stay on t.
+function ambientTime(sc) {
+  return G - sc.start;
+}
 
 const stage = document.getElementById('stage');
 
@@ -41,12 +59,14 @@ function drawStars(sky, seed) {
 }
 drawStars(document.getElementById('sky'), 7);
 
+// A div of class `abs cls` holding html, with the css styles, appended to parent. It starts hidden, for place() or
+// an opacity to show it, unless css sets its opacity (opacity: 1 for a layer or a part always shown).
 function E(parent, html = '', cls = '', css = {}) {
   const e = document.createElement('div');
   e.className = 'abs ' + cls;
   e.innerHTML = html;
-  Object.assign(e.style, css);
   e.style.opacity = 0;
+  Object.assign(e.style, css);
   parent.appendChild(e);
   return e;
 }
@@ -137,7 +157,11 @@ const ICONS = {
     + '<circle cx="12" cy="3.5" r="1"/>',
   coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.9-1.7-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.8 6 1.5 6 4.3'
     + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
-  cloud: '<path d="M7 19h10.5a4.5 4.5 0 0 0 .4-9A6 6 0 0 0 6.3 11.6 3.8 3.8 0 0 0 7 19z"/>',
+  cart: '<path d="M2 4h3l2.5 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
+  card: '<rect x="2.5" y="5" width="19" height="14"/><path d="M2.5 9.5h19M6 15h5"/>',
+  box: '<path d="M12 3l8.5 4.5v9L12 21l-8.5-4.5v-9z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9M7.8 5.3l8.5 4.5"/>',
+  lock: '<rect x="5" y="11" width="14" height="10"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/>',
+  food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
   hourglass: '<path d="M6 3h12M6 21h12"/><path d="M8 3v3.5l4 5.5-4 5.5V21M16 3v3.5L12 12l4 5.5V21"/>'
     + '<path d="M10 18.5h4"/>',
   // 8 trapezoidal teeth (tips at r 10, root circle r 7) around a center hole; centered on (12, 12) for gearSpin()
@@ -157,7 +181,9 @@ function ICON(n, size, col, w = 1.8) {
 }
 
 // ---------- components
-function makeLLM(parent, size, label = 'LLM') {
+// Options: `seed`, the phase of the blink (0 to 4.3 s), to give two orbs the same blink; by default each orb
+// gets its own from a counter of the orbs built so far.
+function makeLLM(parent, size, label = 'LLM', { seed } = {}) {
   const root = E(parent, `
     <div class="llm-glow"></div>
     <div class="llm-body"></div>
@@ -165,8 +191,10 @@ function makeLLM(parent, size, label = 'LLM') {
     <div class="llm-eye r"><div class="pupil"></div></div>
     <div class="llm-dots"><i></i><i></i><i></i></div>
     <div class="llm-q">?</div>
-    ${label ? `<div class="llm-label">${label}</div>` : ''}`, 'llm');
+    ${label ? `<div class="under-label">${label}</div>` : ''}`, 'llm');
   root.style.width = size + 'px'; root.style.height = size + 'px'; root.style.fontSize = (size / 10) + 'px';
+  // counted even with a `seed`, so the default seeds of the other orbs never depend on it
+  makeLLM.n = (makeLLM.n || 0) + 1;
   const o = {
     root,
     eyes: root.querySelectorAll('.llm-eye'),
@@ -174,7 +202,7 @@ function makeLLM(parent, size, label = 'LLM') {
     dots: root.querySelector('.llm-dots'),
     dotI: root.querySelectorAll('.llm-dots i'),
     q: root.querySelector('.llm-q'),
-    seed: ((makeLLM.n = (makeLLM.n || 0) + 1) * 1.37) % 3,
+    seed: seed ?? (makeLLM.n * 1.37) % 3,
   };
   return o;
 }
@@ -212,20 +240,22 @@ function typeWords(card, p) {
 // ---------- timeline
 const scenes = [];
 function scene(def) { scenes.push(def); }
+// Default duration of a scene's fade-in and fade-out, in seconds: a scene's `fadeIn` and `fadeOut` override it
+const SCENE_FADE = 0.5;
 function autoDur(text) { return clamp(text.replace(/<[^>]+>/g,'').length / 16 + 0.6, 2.4, 8); }
 
-// CHAPTERS[n - 1] is the title of chapter n, filled by buildAll() from the `title` of the chapter's first scene.
-const CHAPTERS = [];
+// The chapter scenes, in playing order: each chapter is one scene, which sets `chapter` (its number) and `title`.
+// Filled by buildAll(); the intro and the outro have no chapter.
+let chapterScenes = [];
 
 function collectChapters() {
-  for (const sc of scenes) {
-    if (sc.chapter && sc.title) CHAPTERS[sc.chapter - 1] = sc.title;
-  }
-  for (const sc of scenes) {
-    if (sc.chapter && !CHAPTERS[sc.chapter - 1]) {
-      throw new Error(`Chapter ${sc.chapter} has no title: set \`title\` on its first scene`);
+  chapterScenes = scenes.filter(sc => sc.chapter);
+  chapterScenes.forEach((sc, i) => {
+    if (sc.chapter !== i + 1) {
+      throw new Error(`Chapter ${sc.chapter} plays as chapter ${i + 1}: number the chapter scenes 1, 2, 3... in order`);
     }
-  }
+    if (!sc.title) throw new Error(`Chapter ${sc.chapter} has no title: set \`title\` next to \`chapter\``);
+  });
 }
 
 function buildAll() {
@@ -242,6 +272,11 @@ function buildAll() {
       t = s.end + 0.25 + (s.after ?? 0);
     }
     sc.end = t + (sc.post ?? 0.35); sc.dur = sc.end - sc.start; T = sc.end;
+    // `holdBeforeEnd` (see player.js) and `headerOutAt` (see renderAt()) are seconds, or (c, dur) => seconds when
+    // they follow the scene's cues c: resolved here, once the timings are known
+    for (const name of ['holdBeforeEnd', 'headerOutAt']) {
+      if (typeof sc[name] === 'function') sc[name] = sc[name](sc.cues, sc.dur);
+    }
     sc.root = document.createElement('div'); sc.root.className = 'scene';
     stage.insertBefore(sc.root, hdr);
     sc.el = {};
@@ -250,7 +285,7 @@ function buildAll() {
   window.TOTAL = T;
   // header
   const segs = document.getElementById('segs');
-  segs.innerHTML = CHAPTERS.map(() => '<i><b></b></i>').join('');
+  segs.innerHTML = chapterScenes.map(() => '<i><b></b></i>').join('');
 }
 
 // `g` is the ambient clock (G) driving continuous loops such as spinners and blinks; scenes animate on `t`.
@@ -263,8 +298,7 @@ function renderAt(t, g = t) {
     cur = sc;
     sc.root.style.display = 'block';
     const lt = t - sc.start;
-    // optional `fadeIn` and `fadeOut`: the durations of the scene's fades, 0.5 s by default
-    const fadeIn = sc.fadeIn ?? 0.5, fadeOut = sc.fadeOut ?? 0.5;
+    const fadeIn = sc.fadeIn ?? SCENE_FADE, fadeOut = sc.fadeOut ?? SCENE_FADE;
     const o = P(lt, 0, fadeIn) * (1 - P(lt, sc.dur - fadeOut, fadeOut));
     sc.root.style.opacity = o;
     // optional `shift`: [dx, dy] or (t, c) => [dx, dy], centers the composition in the content frame (y 150-880,
@@ -279,25 +313,24 @@ function renderAt(t, g = t) {
   for (const sc of scenes) for (const s of sc.subs) if (t >= s.start && t < s.end) st = s;
   if (st) {
     sub.innerHTML = st.text;
-    const so = P(t, st.start, 0.18, x => x) * (1 - P(t, st.end - 0.18, 0.18, x => x));
+    const so = P(t, st.start, 0.18, linear) * (1 - P(t, st.end - 0.18, 0.18, linear));
     sub.parentNode.style.opacity = so;
   } else sub.parentNode.style.opacity = 0;
-  // header, which fades in and out with each chapter scene, and the Temporal symbol, which stays fully visible
-  // across chapter scene changes: it fades in with the first chapter scene and out with the last one, with the same
-  // fades as their scene roots
+  // header, which fades in and out with each chapter, and the Temporal symbol, which stays fully visible across
+  // chapter changes: it fades in with the first chapter and out with the last one, with the same fades as their
+  // scene roots
   const hdr = document.getElementById('hdr');
   const mark = document.getElementById('mark');
   if (cur && cur.chapter) {
     const lt = t - cur.start;
-    // optional `headerOutAt`: the scene time at which the header fades out early, over 0.4 s
+    // optional `headerOutAt`: the scene time at which the header fades out early, over 0.4 s (see buildAll())
     const headerOut = cur.headerOutAt === undefined ? 1 : 1 - P(lt, cur.headerOutAt, 0.4);
     hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4)) * headerOut;
-    const chapterScenes = scenes.filter(sc => sc.chapter);
     const firstStart = chapterScenes[0].start;
     const lastEnd = chapterScenes[chapterScenes.length - 1].end;
-    mark.style.opacity = P(t, firstStart, 0.5) * (1 - P(t, lastEnd - 0.5, 0.5));
+    mark.style.opacity = P(t, firstStart, SCENE_FADE) * (1 - P(t, lastEnd - SCENE_FADE, SCENE_FADE));
     hdr.querySelector('.num').textContent = String(cur.chapter).padStart(2, '0');
-    hdr.querySelector('.ttl').textContent = CHAPTERS[cur.chapter - 1];
+    hdr.querySelector('.ttl').textContent = cur.title;
   } else {
     hdr.style.opacity = 0;
     mark.style.opacity = 0;
@@ -307,12 +340,7 @@ function renderAt(t, g = t) {
   segs.forEach((b, i) => {
     let f = 0;
     if (i + 1 < chap) f = 1;
-    else if (i + 1 === chap) {
-      // progress inside chapter (may span multiple scenes)
-      const cs = scenes.filter(s => s.chapter === chap);
-      const a = cs[0].start, z = cs[cs.length - 1].end;
-      f = clamp((t - a) / (z - a));
-    }
+    else if (i + 1 === chap) f = clamp((t - cur.start) / cur.dur);
     // whole pixels of the 56 px segment (#segs i in styles.css): a fractional edge varies from run to run
     b.style.width = Math.round(f * 56) + 'px';
   });

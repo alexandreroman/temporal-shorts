@@ -48,7 +48,6 @@
     { tile: 4, dx: 104, dy: -14, angle: 25, at: 5.63 },
     { tile: 1, dx: -84, dy: -36, angle: -4, at: 5.74 },
   ];
-  const RED_RGB = '255,90,95'; // C.red, for translucent glows
 
   // Short decaying shake of an element hit at `at`, as [dx, dy] in px: five half swings of amp px across, four of
   // 0.4 amp up and down, within 0.35 s
@@ -73,7 +72,7 @@
   }
   // Red glow around a tile at flicker intensity k; '' leaves the tile's own style
   const redGlow = k => (k > 0
-    ? `0 0 0 2px rgba(${RED_RGB},${k.toFixed(3)}), 0 0 30px rgba(${RED_RGB},${(0.7 * k).toFixed(3)})`
+    ? `0 0 0 2px rgba(${RGB.red},${k.toFixed(3)}), 0 0 30px rgba(${RGB.red},${(0.7 * k).toFixed(3)})`
     : '');
 
   scene({
@@ -104,7 +103,7 @@
       s.bugs = BUGS.map(b => {
         const badge = E(root, ICON('bug', 30, C.red, 1.8), '', {
           width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: '#141414', border: '1.5px solid ' + C.red, borderRadius: '50%',
+          background: C.bg, border: '1.5px solid ' + C.red, borderRadius: '50%',
         });
         // only the bug turns, not the round badge around it
         badge.querySelector('svg').style.transform = `rotate(${b.angle}deg)`;
@@ -112,7 +111,7 @@
       });
       s.bar = E(root,
         '<div class="lbl" style="font-size:18px;text-align:center">Lines of code</div>'
-        + `<div style="position:relative;height:${BAR.h}px;margin-top:12px;background:rgba(248,250,252,.06);`
+        + `<div style="position:relative;height:${BAR.h}px;margin-top:12px;background:rgba(${RGB.ink},.06);`
         + 'border-radius:var(--rs);overflow:hidden">'
         + `<div class="biz" style="position:absolute;left:0;top:0;bottom:0;background:${C.neon}"></div>`
         + `<div class="plumb" style="position:absolute;left:${BAR.biz + BAR.gap}px;top:0;bottom:0;`
@@ -125,8 +124,8 @@
       s.bizL = s.bar.querySelector('.bizL'); s.plumbL = s.bar.querySelector('.plumbL');
     },
     update(t, c, s) {
-      const cp = P(t, c[0] + 0.1, 0.6, backOut);
-      place(s.card, CARD.x, CARD.y, cp, clamp(cp * 2));
+      const cp = backPop(t, c[0] + 0.1, 0.6);
+      place(s.card, CARD.x, CARD.y, cp.s, cp.o);
       place(s.cardL, CARD.x, CARD.y - s.card.h / 2 - 38, 1, P(t, c[0] + 0.5, 0.4));
 
       const landings = BUGS.map(b => c[1] + b.at); // when each bug badge lands, in scene time
@@ -135,11 +134,11 @@
       // bug lands, and jolts and flickers red with every bug that lands on it
       const tileJolts = PLUMBING.map((p, i) => {
         const at = c[0] + p.at;
-        const tp = P(t, at, 0.45, backOut);
+        const tp = backPop(t, at);
         const hits = landings.filter((_, k) => BUGS[k].tile === i);
         const buggy = hits.some(h => t >= h);
         const [dx, dy] = jolts(t, hits, 7);
-        place(s.tiles[i], tileX(p) + dx, tileY(p) + dy, tp, clamp(tp * 2));
+        place(s.tiles[i], tileX(p) + dx, tileY(p) + dy, tp.s, tp.o);
         s.tiles[i].style.borderColor = buggy ? C.red : C.line;
         s.tiles[i].style.boxShadow = redGlow(flicker(t, hits));
         s.wires[i].setAttribute('stroke', buggy ? C.red : C.slate);

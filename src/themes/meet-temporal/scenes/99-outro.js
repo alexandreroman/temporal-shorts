@@ -55,7 +55,7 @@
   ];
   const LINE_COLOR = 'rgba(180,185,255,.7)';
   const LINE_OPACITY = 0.86; // at rest about rgba(180,185,255,.6); the glow pulse brings the lines to full
-  const BRIGHT_STAR = { size: 10, rgb: '248,250,252' };
+  const BRIGHT_STAR = { size: 10, rgb: RGB.ink };
   const DIM_STAR = { size: 6, rgb: '232,234,255' };
 
   // ---------- title: "Meet" and the official lockup, read as one title "Meet Temporal"
@@ -76,7 +76,7 @@
   const LOCKUP_MARGIN = Math.round(MEET_GAP - (MEET_WIDTH - 2.382 * MEET_FONT) - (414 - 405) * LOCKUP_UNIT);
   const TITLE_WIDTH = Math.ceil((MEET_WIDTH + LOCKUP_MARGIN + LOCKUP_WIDTH) / 2) * 2;
   // The tagline's capitals start 8 px below its 32 px line box top: 23 px between the title and the tagline
-  // leave 34 px of clear space under the symbol, as under the descender of the former text title
+  // leave 34 px of clear space under the symbol
   const TAGLINE_GAP = 23;
   const CARD_WIDTH = 800;
   const CARD_HEIGHT = LOCKUP_HEIGHT + TAGLINE_GAP + 32;
@@ -96,7 +96,6 @@
   const PULSE_AT = 3.3; // the constellation is complete: a glow sweeps across it, left to right
   const PULSE_SWEEP = 0.5;
 
-  const linear = p => p;
   const polylinePath = (points, closed) =>
     'M ' + points.map(point => ziggyPoint(point).join(' ')).join(' L ') + (closed ? ' Z' : '');
   const distance = ([x1, y1], [x2, y2]) => Math.hypot(x2 - x1, y2 - y1);
@@ -129,16 +128,15 @@
 
   scene({
     pre: 0.4, post: 2.6,
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     subs: [
-      { text: "Temporal keeps code running whatever fails, from everyday apps to AI agents." },
+      { text: "Temporal keeps code running through crashes and outages, from everyday apps to AI agents." },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
       // a soft violet glow behind Ziggy, lit by the pulse once the constellation is complete
       s.halo = E(root, '', '', {
         width: '640px', height: '520px', borderRadius: '50%',
-        background: 'radial-gradient(closest-side, rgba(68,76,231,.32), rgba(68,76,231,0))',
+        background: `radial-gradient(closest-side, rgba(${RGB.uv},.32), rgba(${RGB.uv},0))`,
       });
       s.svg = svgLayer(root);
       s.outline = path(s.svg, polylinePath(OUTLINE, true), LINE_COLOR, 2, false);
@@ -157,7 +155,7 @@
         return { e: makeSpark(root, look.size, look.rgb), x: sx, y: sy, bright,
           at: STARS_AT + byHash.indexOf(i) * STAR_STEP };
       });
-      s.pen = makeSpark(root, 10, '248,250,252');
+      s.pen = makeSpark(root, 10, RGB.ink);
 
       s.card = makeTitleCard(root, 'DURABLE EXECUTION FOR APPS AND AI AGENTS');
     },
@@ -181,11 +179,11 @@
 
       // stars: each pops in bright, then settles into a gentle twinkle (ambient, G); the pulse swells them
       s.stars.forEach((star, i) => {
-        const appear = P(t, star.at, 0.35, backOut);
+        const appear = backPop(t, star.at, 0.35);
         const wave = Math.sin(G * 2.1 + i * 2.4);
         const twinkle = star.bright ? 0.85 + 0.15 * wave : 0.7 + 0.2 * wave;
-        const opacity = clamp(appear * 2) * lerp(1, twinkle, P(t, star.at + 0.2, 0.5));
-        place(star.e, star.x, star.y, appear * (1 + 0.6 * pulseAt(star.x)), opacity);
+        const opacity = appear.o * lerp(1, twinkle, P(t, star.at + 0.2, 0.5));
+        place(star.e, star.x, star.y, appear.s * (1 + 0.6 * pulseAt(star.x)), opacity);
       });
       place(s.halo, 960, ZIGGY_TOP + ZIGGY_HEIGHT / 2, 1, 0.3 * P(t, PULSE_AT, 0.4) + 0.18 * pulseAt(960));
     }

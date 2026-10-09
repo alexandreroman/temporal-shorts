@@ -50,16 +50,13 @@
   // under the peak, 20 px above the tiles (as "From the start" in chapter 7)
   const REDO = { from: [colX(3), STEPS_TOP - 10], ctrl: [960, STEPS_TOP - 108], to: [colX(0), STEPS_TOP - 15] };
   const REDO_LABEL_Y = STEPS_TOP - 33;
-  // memory blocks left-aligned like chapter 7's slots: 20 px panel margin, then 76 px blocks every 88 px (12 px gaps)
-  const memSlot = i => MEM.x - MEM.w / 2 + 20 + 76 / 2 + i * 88;
   // NEW INSTANCE: centered on the top edge of instance B's panel (the Restaurant column's axis), well clear of its
   // name and its STARTING OVER status. Fixed even width: it rests on whole pixels (solid: the panel border does not
   // show through).
   const NEW_TAG = { x: APP.x, y: APP_TOP, w: 240 };
-  // Red glow around a tile, k from 0 (none) to 1
-  const redGlow = (e, k, blur) => {
-    const glow = `0 0 ${Math.round(blur * k)}px ${Math.round(4 * k)}px rgba(255,90,95,${(0.5 * k).toFixed(3)})`;
-    e.style.boxShadow = k > 0 ? glow : '';
+  // Red halo around a tile, k from 0 (none) to 1
+  const redHalo = (e, k, blur) => {
+    e.style.boxShadow = glowShadow(RGB.red, k, { blur, alpha: 0.5, spread: 4 });
   };
   scene({
     chapter: 6, title: 'When the agent crashes',
@@ -74,19 +71,19 @@
         after: 0.4,
       },
       {
-        text: "Every LLM call is made, and paid for, a second time, just to rebuild the context. "
+        text: "The LLM calls are made, and paid for, a second time, just to rebuild the context. "
           + "And the table gets booked twice.",
         after: 1.2,
       },
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, STEP_TILES, colX(0), PITCH, STEPS_Y, TILE.w, TILE.h);
+      s.steps = makeStepRow(root, s.svg, LUNCH_STEPS, colX(0), PITCH, STEPS_Y, TILE.w, TILE.h);
       // the app instance holding the memory, then the new copy that takes its place after the crash
       s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
       s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);
       s.mem = makeMemory(root, MEM.w, MEM.h);
-      s.mblocks = makeMemBlocks(root, 6, 76, 56);
+      s.mblocks = makeMemBlocks(root, 6, MEM_BLOCK.w, MEM_BLOCK.h);
       s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w);
       s.bill = makeBill(root, COL.w);
       s.bill.n.style.transformOrigin = '50% 60%';
@@ -103,7 +100,6 @@
         justifyContent: 'center' };
       // the second booking: a blank copy of the ticket, stacked behind it once the table is booked twice
       s.ticketBack = makeTicket(root);
-      s.ticketBack.n.textContent = '2 BOOKINGS!';
       s.ticketBack.firstChild.style.visibility = 'hidden';
       Object.assign(s.ticketBack.style, ticketBox, { borderColor: C.red, background: 'var(--red-solid)' });
       s.ticket = makeTicket(root);
@@ -111,13 +107,11 @@
       s.bolt = E(root, ICON('bolt', 150, C.red, 1.6));
       s.flash = makeFlash(root);
       // APP CRASH as wide as the right column; the causes share one even width, centered under their tiles
-      s.crash = tag(root, 'App crash', 'red big');
-      Object.assign(s.crash.style, { width: COL.w + 'px', textAlign: 'center' });
-      s.causes = ['Restart', 'Deploy', 'Outage'].map(l => tag(root, l));
-      s.causes.forEach(e => Object.assign(e.style, { width: CAUSE_W + 'px', textAlign: 'center' }));
-      s.redo = path(s.svg, `M ${REDO.from} Q ${REDO.ctrl} ${REDO.to}`, C.red, 3);
-      // fixed even width: centered, the label rests on whole pixels
-      s.redoL = E(root, 'Start over', 'lbl', { color: C.red, width: '148px', textAlign: 'center' });
+      s.crash = fixedTag(root, 'App crash', 'red big', COL.w);
+      s.causes = ['Restart', 'Deploy', 'Outage'].map(l => fixedTag(root, l, '', CAUSE_W));
+      // the label at a fixed even width: centered, it rests on whole pixels
+      s.redo = makeRestartArc(root, s.svg, `M ${REDO.from} Q ${REDO.ctrl} ${REDO.to}`, 'Start over', C.red,
+        { width: '148px', textAlign: 'center' });
     },
     update(t, c, s) {
       const crashAt = c[0] + 3.9;
@@ -152,7 +146,7 @@
       const numberSwell = Math.max(...wastedAt.map(at => swell(t, at + 0.15, 0.3)));
       s.bill.n.style.transform = numberSwell > 1 ? `scale(${numberSwell.toFixed(3)})` : '';
       const billGlow = Math.max(...wastedAt.map(at => P(t, at, 0.08) * (1 - P(t, at + 0.15, 0.5))));
-      redGlow(s.bill, billGlow, 36);
+      redHalo(s.bill, billGlow, 36);
       s.bill.style.borderColor = billGlow > 0.1 || t >= wastedAt[2] ? C.red : '';
       // a "+1 call" chip pops out of the bill's top edge, on its right, floats up and fades before the next one
       s.chips.forEach((chip, i) => {
@@ -168,7 +162,7 @@
       s.ticket.n.textContent = two ? '2 BOOKINGS!' : '1 BOOKING';
       s.ticket.style.borderColor = two ? C.red : C.slate; s.ticket.n.style.color = two ? C.red : C.ink;
       s.ticket.style.background = two ? 'var(--red-solid)' : '';
-      const tp = P(t, c[0] + 3.5, 0.45, backOut);
+      const tp = backPop(t, c[0] + 3.5);
       // up to 1.4 within 0.08 s, then back to 1 with a small bounce below it
       const slam = 0.4 * P(t, slamAt, 0.08) * (1 - P(t, slamAt + 0.08, 0.5, backOut));
       const flightX = P(t, bookedTwiceAt, TICKET_FLIGHT, easeOut);
@@ -176,63 +170,41 @@
       const grow = lerp(1, TICKET_CENTER.scale, P(t, bookedTwiceAt, TICKET_FLIGHT));
       const ticketX = lerp(TICKET.x, TICKET_CENTER.x, flightX) + sx + dampedShake(t, slamAt, 10, 0.4, 4);
       const ticketY = lerp(TICKET.y, TICKET_CENTER.y, flightY);
-      place(s.ticket, ticketX, ticketY, tp * grow * (1 + slam), clamp(tp * 2));
-      redGlow(s.ticket, P(t, slamAt, 0.08) * (1 - P(t, slamAt + 0.2, 0.8)), 30);
+      place(s.ticket, ticketX, ticketY, tp.s * grow * (1 + slam), tp.o);
+      redHalo(s.ticket, P(t, slamAt, 0.08) * (1 - P(t, slamAt + 0.2, 0.8)), 30);
       const stack = P(t, slamAt + 0.15, 0.4, backOut);
       const stackOffset = 16 * TICKET_CENTER.scale * stack;
       place(s.ticketBack, ticketX + stackOffset, ticketY - stackOffset, TICKET_CENTER.scale * (1 + slam),
         clamp(stack * 3));
 
-      // app instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
-      const aIn = P(t, 0.3, 0.45, backOut);
-      const leave = leavingInstance(t, aDrop);
-      place(s.A, APP.x + sx, APP.y + sy + leave.dy, aIn, clamp(aIn * 2) * leave.o);
-      if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
-      else setAppStatus(s.A, 'RUNNING THE AGENT', t >= c[0] + 0.3 ? 'running' : 'idle');
-      // a new copy, instance B, slides in from the left once A is gone, its border glowing violet while it arrives,
-      // gone as the rerun starts. No Event History hands it anything: it starts over from scratch, idle until the
-      // rerun
-      const arrive = arrivingInstance(t, bIn);
-      place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
+      // app instance A runs, crashes, then leaves like a dead machine, and instance B takes its place. The context
+      // panel is filled by the first run, emptied by the crash and refilled by the rerun.
+      const add1 = [0.8, 1.3, 1.9, 2.4, 3.0, 3.5].map(x => c[0] + x);
+      const add2 = [0.6, 0.9, 1.4, 1.7, 2.3, 2.6].map(x => c[2] + x);
+      const arrive = placeTakeover(s, t, {
+        app: APP, mem: MEM, shake: [sx, sy], aIn: backPop(t, 0.3), runAt: c[0] + 0.3, crashAt,
+        emptyAt: c[1] + 1.2, aDrop, bIn, memIn: P(t, 0.5, 0.45),
+        blockA: i => [P(t, add1[i], 0.35, backOut), P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn)],
+        blockB: i => P(t, add2[i], 0.35, backOut),
+      });
+      // instance B's border glows violet while it arrives, gone as the rerun starts. No Event History hands it
+      // anything: it starts over from scratch, idle until the rerun
       if (t < c[2] + 0.2) setAppStatus(s.B, 'STARTING OVER', 'idle');
       else setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
       setArrivalGlow(s.B, t, bIn, c[2] - 0.3);
       // NEW INSTANCE pops on B once it is almost in place and is gone at c[2], before the rerun, so a presenter hold
       // there shows the glow and the tag at rest
-      placeNewTag(s.newTag, t, newAt, c[2] - 0.3, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
-
-      // context: filled by the first run, emptied by the crash, refilled by the rerun. The panel moves with the
-      // instance on screen (A, then B), so it never floats without its app; both are gone when it switches.
-      const memDx = bHere ? arrive.dx : sx, memDy = bHere ? 0 : sy + leave.dy;
-      const memOn = bHere ? arrive.o : leave.o;
-      place(s.mem, MEM.x + memDx, MEM.y + memDy, 1, P(t, 0.5, 0.45) * memOn);
-      s.mem.style.borderColor = dead && !bHere ? C.red : C.line;
-      s.mem.empty.style.opacity = bHere ? 0 : P(t, c[1] + 1.2, 0.4);
-      const greyed = bHere ? '' : leave.grey;
-      s.A.style.filter = greyed;
-      s.mem.style.filter = greyed;
-      // the blocks of A have all fallen before A leaves; B's stay empty until the rerun
-      const add1 = [0.8, 1.3, 1.9, 2.4, 3.0, 3.5].map(x => c[0] + x);
-      const add2 = [0.6, 0.9, 1.4, 1.7, 2.3, 2.6].map(x => c[2] + x);
-      s.mblocks.forEach((b, i) => {
-        if (!bHere) {
-          const fall = P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn);
-          placeMemBlock(b, memSlot(i), MEM.slotY, P(t, add1[i], 0.35, backOut), fall, sx, sy);
-        } else {
-          placeMemBlock(b, memSlot(i), MEM.slotY, P(t, add2[i], 0.35, backOut), 0);
-        }
-      });
+      placeNewTag(s.newTag, t, newAt, c[2] - 0.3, NEW_TAG.x + arrive.dx, NEW_TAG.y);
 
       placeFlash(s.flash, t, crashAt);
       const bp = P(t, crashAt, 0.35, backOut);
       place(s.bolt, BOLT.x, BOLT.y, bp, win(t, crashAt, crashAt + 1.5, 0.2));
       place(s.crash, COL.x, TAGS_Y, bp, win(t, crashAt + 0.1, c[1] + 0.3, 0.25));
       s.causes.forEach((e, i) => {
-        const p = P(t, c[0] + 4.8 + i * 0.3, 0.4, backOut);
-        place(e, colX(i), TAGS_Y, p, clamp(p * 2) * (1 - P(t, c[1], 0.35)));
+        const p = backPop(t, c[0] + 4.8 + i * 0.3, 0.4);
+        place(e, colX(i), TAGS_Y, p.s, p.o * (1 - P(t, c[1], 0.35)));
       });
-      draw(s.redo, P(t, startOver, 0.8), 1 - P(t, c[2] + 3.0, 0.4));
-      place(s.redoL, 960, REDO_LABEL_Y, 1, P(t, startOver + 0.5, 0.35) * (1 - P(t, c[2] + 3.0, 0.4)));
+      placeRestartArc(s.redo, t, startOver, 960, REDO_LABEL_Y, { o: 1 - P(t, c[2] + 3.0, 0.4) });
     }
   });
 }

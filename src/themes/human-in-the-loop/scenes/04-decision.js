@@ -28,7 +28,7 @@
     subs: [
       {
         text: "On day three, Maria taps Approve. "
-          + "Temporal delivers the decision to the Workflow as a <b>Signal</b>.",
+          + "Temporal records the decision in the history as a <b>Signal</b>.",
         after: 1.4,
       },
       {
@@ -55,7 +55,7 @@
         + '<span class="mono" style="font-size:24px;letter-spacing:.08em">1 ORDER</span></div>',
         '', { padding: '12px 20px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
       s.temporal = makeWfTemporalPanel(root);
-      s.jr = makeOrderHistory(root);
+      s.history = makeOrderHistory(root);
       // the Workflow itself, handed to instance B
       s.handChip = makeHandOffCard(root, 'LAPTOP ORDER');
       s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w);
@@ -83,10 +83,10 @@
 
       // Maria approves on the approval card, on day three
       const left = P(t, c[1], 0.4);
-      const mp = P(t, c[0] + 0.2, 0.5, backOut);
-      place(s.maria, MARIA.x, MARIA.y, mp, clamp(mp * 2) * (1 - left));
-      const kp = P(t, c[0] + 0.4, 0.5, backOut);
-      place(s.card, CARD.x, CARD.y, kp, clamp(kp * 2) * (1 - left));
+      const mp = backPop(t, c[0] + 0.2, 0.5);
+      place(s.maria, MARIA.x, MARIA.y, mp.s, mp.o * (1 - left));
+      const kp = backPop(t, c[0] + 0.4, 0.5);
+      place(s.card, CARD.x, CARD.y, kp.s, kp.o * (1 - left));
       tapApprove(s.card, t, tap);
       // the wait picks up a little after where chapter 3 left it; the clock rests, only its seconds hand moves
       const elapsed = DAY3_AFTERNOON;
@@ -123,31 +123,31 @@
       const lineDone = [replay[1], replay[2], replay[3], ordered, notified];
       lineDone.forEach((at, i) => {
         const current = cursorOn && Math.round(pos) === i;
-        setWfLine(s.B, i, t >= at ? 1 : current ? 3 : 0);
+        setWfLine(s.B, i, t >= at ? 'done' : current ? 'current' : 'todo');
       });
 
       // the order is placed once
-      const tp = P(t, ordered, 0.45, backOut);
-      place(s.ticket, TICKET_X, STRIP.y, tp, clamp(tp * 2));
+      const tp = backPop(t, ordered);
+      place(s.ticket, TICKET_X, STRIP.y, tp.s, tp.o);
 
       // Event History: rows 1 to 3 already saved, the Signal replaces the waiting line, then the last steps.
       // Rows 1 to 3 are replayed; the Signal arrived after them, so it is new to the Workflow: it keeps its SAVED
       // tag, which still pops when the row is read.
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, 1);
-      place(s.jr, HIST.x, HIST.y, 1, 1);
-      s.jr.rows.forEach((_, i) => {
-        showRow(s.jr.rows[i], i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
+      place(s.history, HIST.x, HIST.y, 1, 1);
+      s.history.rows.forEach((_, i) => {
+        showRow(s.history.rows[i], i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
         const isRead = i < 4 && t >= replay[i];
         const isReplayed = isRead && i < 3;
         const at = isRead ? replay[i] : saved[i];
-        setRowTag(s.jr, i, t, isReplayed ? 'REPLAYED' : 'SAVED', at, i < 3 ? 1 : P(t, saved[i], 0.25));
+        setRowTag(s.history, i, t, isReplayed ? 'REPLAYED' : 'SAVED', at, i < 3 ? 1 : P(t, saved[i], 0.25));
       });
-      setWaitLine(s.jr, 1 - P(t, signalIn - 0.2, 0.3));
+      setWaitLine(s.history, 1 - P(t, signalIn - 0.2, 0.3));
       const scanning = replay.findIndex(q => t >= q && t < q + 0.5);
-      scanRow(s.jr, scanning >= 0 ? scanning : null);
-      const dp = P(t, complete, 0.45, backOut);
-      s.jr.done.style.opacity = clamp(dp * 2);
-      s.jr.done.style.transform = `translateX(-50%) scale(${dp})`;
+      scanRow(s.history, scanning);
+      const dp = backPop(t, complete);
+      s.history.done.style.opacity = dp.o;
+      s.history.done.style.transform = `translateX(-50%) scale(${dp.s})`;
     }
   });
 }

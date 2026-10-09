@@ -10,7 +10,7 @@ import io
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import HEIGHT, PRELOAD_FONTS, SRC, WIDTH, open_page, theme_names, theme_page, warm_up
+from common import HEIGHT, SRC, WIDTH, check_fonts, launch_browser, open_page, theme_names, theme_page, warm_up
 from playwright.sync_api import sync_playwright
 from PIL import Image
 
@@ -46,12 +46,10 @@ def write_theme_image(pw, theme):
 def write_home_image(pw):
     """Capture the home card in a window of its own size: its star field is deterministic."""
     width, height = SOCIAL_SIZE
-    browser = pw.chromium.launch(args=["--force-color-profile=srgb", "--disable-gpu"])
+    browser = launch_browser(pw)
     page = browser.new_page(viewport={"width": width, "height": height})
     page.goto(HOME_CARD.as_uri())
-    loaded = page.evaluate(PRELOAD_FONTS)
-    if loaded < 4:
-        sys.exit(f"ERROR: only {loaded}/4 brand fonts loaded. Run `make setup` (fonts go in src/fonts/).")
+    check_fonts(page)
     png = page.screenshot()
     browser.close()
     save_social_image(png, SRC / "social.png")

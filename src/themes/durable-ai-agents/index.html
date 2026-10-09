@@ -8,17 +8,16 @@
 /* The app window of makeApp() (shared.js), used by this theme only */
 .app{width:300px;height:220px}
 .app-win{
-  position:absolute;inset:0;background:var(--surface);border:1.5px solid #4B5363;border-radius:var(--r);overflow:hidden;
+  position:absolute;inset:0;background:var(--surface);border:1.5px solid var(--line-light);border-radius:var(--r);
+  overflow:hidden;
 }
-.app-bar{height:32px;border-bottom:1.5px solid #4B5363;display:flex;gap:8px;align-items:center;padding-left:14px}
+.app-bar{
+  height:32px;border-bottom:1.5px solid var(--line-light);display:flex;gap:8px;align-items:center;padding-left:14px;
+}
 .app-bar i{width:9px;height:9px;background:var(--slate);opacity:.6;border-radius:2px}
 .app-lines{padding:24px 22px;display:flex;flex-direction:column;gap:16px}
 .app-lines b{display:block;height:10px;background:rgba(248,250,252,.18);border-radius:3px}
 .app-gear{position:absolute;right:18px;bottom:14px;opacity:.35}
-.app-label{
-  position:absolute;left:50%;top:calc(100% + 18px);transform:translateX(-50%);white-space:nowrap;
-  font-family:'Mono';font-size:22px;letter-spacing:.12em;padding-left:.12em;color:var(--slate);
-}
 </style>
 </head>
 <body>

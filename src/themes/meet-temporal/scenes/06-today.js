@@ -3,8 +3,8 @@
 {
   // Three beats. The customers: one dot per paying customer ignites in waves over the band while a counter rolls to
   // 4,300+; then the team, a block of 285 dots that split in two, 570. All the dots then condense into the Temporal
-  // symbol. The SDKs: their eight languages orbit out of the symbol onto an inner ring, five AI frameworks plug in on
-  // an outer one. The valuation: the camera rides a rising line over a grid, through its funding rounds, up to
+  // symbol. The SDKs: their eight languages orbit out of the symbol onto a ring, five AI frameworks plug in as a row
+  // of tiles under it. The valuation: the camera rides a rising line over a grid, through its funding rounds, up to
   // $12.55B. Stage pixels; the content frame runs from y 150 to 880
 
   // ---------- beat 1: customers and team, drawn on a canvas over the band (it counts as the beat's content)
@@ -19,7 +19,7 @@
     const ripple = 0.06 * Math.sin(d * 22);
     return {
       x, y, off: IGNITE_D * clamp(0.82 * d + ripple + 0.12 * hash(i * 3 + 3)),
-      rgb: hash(i * 7) < 0.55 ? '248,250,252' : hash(i * 7) < 0.85 ? '182,100,255' : '68,76,231',
+      rgb: hash(i * 7) < 0.55 ? RGB.ink : hash(i * 7) < 0.85 ? RGB.violet : RGB.uv,
     };
   });
   const OFFSETS = DOTS.map(dot => dot.off).sort((a, b) => a - b);
@@ -90,33 +90,41 @@
   const TILE = { background: '#17182A', color: C.ink, border: '1.5px solid ' + C.uv, fontSize: '24px', gap: '14px',
     padding: '0 24px', borderRadius: '22px' };
 
-  // ---------- beat 3: the valuation, drawn on a full-stage canvas. The rounds as world points (x right, y up the
-  // value), joined by three curves; the camera keeps the head of the line at HEAD while it climbs
+  // ---------- beat 3: the valuation, drawn on a full-stage canvas. Every round with a reported valuation as a world
+  // point (x right, y up the value, both scales shaped by hand), joined by one curve per step; the camera keeps the
+  // head of the line at HEAD while it climbs. The Series A valuation is a PitchBook estimate, not announced by
+  // Temporal: its tilde marks it, and the ×8 bracket starts from Feb 2022, the first announced valuation. Feb 2022
+  // and Feb 2023 share a value: their points sit 250 px apart, so their labels stay clear of each other
   const ROUNDS = [
+    { date: 'Oct 2020', value: 0.075, label: '~$75M', series: 'Series A', at: [-200, 150] },
     { date: 'Feb 2022', value: 1.5, label: '$1.5B', series: 'Series B', at: [0, 0] },
-    { date: 'Mar 2025', value: 1.72, label: '$1.72B', series: 'Series C', at: [520, -20] },
+    { date: 'Feb 2023', value: 1.5, label: '$1.5B', series: 'Series B-Prime', at: [250, 0] },
+    { date: 'Mar 2025', value: 1.72, label: '$1.72B', series: 'Series C', at: [560, -20] },
     { date: 'Feb 2026', value: 5, label: '$5B', series: 'Series D', at: [1000, -290] },
     { date: 'Sep 2026', value: 12.55, label: '$12.55B', series: 'Series E', at: [1260, -1000] },
   ];
+  const LAST = ROUNDS.length - 1;
   // each curve's control points, from one round to the next
   const CURVES = [
-    [[0, 0], [200, 0], [360, -10], [520, -20]],
-    [[520, -20], [700, -30], [860, -120], [1000, -290]],
+    [[-200, 150], [-110, 150], [-70, 0], [0, 0]],
+    [[0, 0], [80, 0], [170, 0], [250, 0]],
+    [[250, 0], [350, 0], [450, -10], [560, -20]],
+    [[560, -20], [740, -30], [900, -120], [1000, -290]],
     [[1000, -290], [1100, -410], [1200, -700], [1260, -1000]],
   ];
-  const bezier = ([a, b, c2, d], u) => {
-    const v = 1 - u;
-    return [0, 1].map(k => v * v * v * a[k] + 3 * v * v * u * b[k] + 3 * v * u * u * c2[k] + u * u * u * d[k]);
-  };
   const HEAD = [1100, 640];
-  // at rest: the whole chart at 55% on the right (its middle at screen x 1360), the value on the left, clear of it
-  const REST = { at: [630, -500], scale: 0.55, x: 1290, valueX: 560 };
-  // On the settled chart (screen pixels), a vertical measuring bracket right of the SEP 2026 point, from the 2022
-  // value's height (the line's start) up to the $12.55B point's, with dashed guides from both points; its label
-  // rotated beside its middle, its end values to its right
-  const FEB22 = [Math.round(REST.x + (0 - REST.at[0]) * REST.scale), Math.round(515 + (0 - REST.at[1]) * REST.scale)];
-  const SEP26 = [Math.round(REST.x + (1260 - REST.at[0]) * REST.scale),
-    Math.round(515 + (-1000 - REST.at[1]) * REST.scale)];
+  // at rest: the whole chart at 44% on the right, its middle (world x 530) at screen x 1319, the value on the left.
+  // The Oct 2020 point (x 998) keeps over 40 px clear of the value's right end (x 945), and the bracket's end
+  // values end left of x 1800
+  const REST = { at: [530, -425], scale: 0.44, x: 1319, valueX: 560 };
+  // a world point's place on the settled chart, on whole pixels
+  const atRest = ([wx, wy]) => [Math.round(REST.x + (wx - REST.at[0]) * REST.scale),
+    Math.round(515 + (wy - REST.at[1]) * REST.scale)];
+  // On the settled chart (screen pixels), a vertical measuring bracket right of the SEP 2026 point, from the Feb 2022
+  // value's height up to the $12.55B point's, with dashed guides from both points; its label rotated beside its
+  // middle, its end values to its right
+  const FEB22 = atRest(ROUNDS.find(round => round.date === 'Feb 2022').at);
+  const SEP26 = atRest(ROUNDS[LAST].at);
   const BRACKET = { x: SEP26[0] + 54, bottom: FEB22[1], top: SEP26[1], tick: 10 };
   const GRID = 80;
   const STARS = Array.from({ length: 220 }, (_, i) => ({
@@ -130,7 +138,7 @@
   // A number in the brand font with a violet glow, centered on its box
   const makeNumber = (root, font) => E(root, '', '', {
     fontSize: font + 'px', fontWeight: 700, lineHeight: 1, letterSpacing: '-.02em', whiteSpace: 'nowrap',
-    fontVariantNumeric: 'tabular-nums', color: C.ink, textShadow: '0 0 40px rgba(182,100,255,.65)',
+    fontVariantNumeric: 'tabular-nums', color: C.ink, textShadow: `0 0 40px rgba(${RGB.violet},.65)`,
   });
   const makeLabel = (root, text) => E(root, text, 'lbl', { fontSize: '24px', color: C.slate, whiteSpace: 'nowrap' });
   // A chip: its content centered, a fixed size; css: its colors
@@ -141,7 +149,6 @@
 
   scene({
     chapter: 6, title: 'Temporal today',
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     subs: [
       // the waves and the count, the team doubling, then the dots condense into the symbol
       { text: "Today, more than 4,300 companies pay for Temporal, and the team has doubled in a year.", after: 9.6 },
@@ -153,9 +160,8 @@
           + "LangGraph, and more.",
         after: 1.2,
       },
-      // the climb, the arrival, the hold on $12.55B
-      // the climb and the arrival; the chart settles before the next subtitle
-      { text: "In September 2026, investors valued Temporal at $12.55 billion.", after: 1.8 },
+      // the climb through the six rounds and the arrival; the chart settles before the next subtitle
+      { text: "In September 2026, investors valued Temporal at $12.55 billion.", after: 3.5 },
       // on the settled chart, a bracket from 2022 to 2026, ×8; then, by the value, CORE INFRASTRUCTURE FOR AI
       { text: "That's more than 8 times its 2022 value: investors see it as core infrastructure for AI.", after: 1.6 },
     ],
@@ -168,10 +174,10 @@
       s.chart.appendChild(s.chartCanvas);
       s.bloom = E(root, '', '', {
         width: '2400px', height: '1400px',
-        background: 'radial-gradient(circle at center, rgba(255,255,255,.85) 0, rgba(182,100,255,.45) 18%, '
-          + 'rgba(68,76,231,.15) 36%, rgba(68,76,231,0) 60%)',
+        background: `radial-gradient(circle at center, rgba(255,255,255,.85) 0, rgba(${RGB.violet},.45) 18%, `
+          + `rgba(${RGB.uv},.15) 36%, rgba(${RGB.uv},0) 60%)`,
       });
-      s.rings = makeRipples(root, 3, '219,255,75');
+      s.rings = makeRipples(root, 3, RGB.neon);
       // beat 1's canvas over the band
       s.dotsCanvas = document.createElement('canvas');
       s.dotsCanvas.width = BAND.w; s.dotsCanvas.height = BAND.h;
@@ -179,17 +185,17 @@
       s.dots.appendChild(s.dotsCanvas);
       s.burst = E(root, '', '', {
         width: '900px', height: '900px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(219,255,75,.5) 0, rgba(182,100,255,.25) 35%, '
-          + 'rgba(182,100,255,0) 70%)',
+        background: `radial-gradient(circle, rgba(${RGB.neon},.5) 0, rgba(${RGB.violet},.25) 35%, `
+          + `rgba(${RGB.violet},0) 70%)`,
       });
       s.custNum = makeNumber(root, 200);
       s.custLabel = makeLabel(root, 'Paying customers');
       s.teamNum = makeNumber(root, 140);
       s.teamLabel = makeLabel(root, 'Employees');
       // the stamp: neon, a fixed even width, so it rests on whole pixels
-      s.stamp = tag(root, '×2 in a year', 'neon solid big');
       // sized to its text (307 px with its padding) with a margin
-      Object.assign(s.stamp.style, { width: '316px', textAlign: 'center', boxShadow: '0 0 30px rgba(219,255,75,.4)' });
+      s.stamp = fixedTag(root, '×2 in a year', 'neon solid big', 316);
+      s.stamp.style.boxShadow = `0 0 30px rgba(${RGB.neon},.4)`;
 
       // beat 2: the links under the chips, the symbol, the chips, and the filter that draws the logos in ink
       s.links = svgLayer(root);
@@ -216,7 +222,8 @@
       root.appendChild(s.inkDefs);
       s.symbolGlow = E(root, '', '', {
         width: '460px', height: '460px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,100,255,.35) 0, rgba(68,76,231,.12) 45%, rgba(68,76,231,0) 70%)',
+        background: `radial-gradient(circle, rgba(${RGB.violet},.35) 0, `
+          + `rgba(${RGB.uv},.12) 45%, rgba(${RGB.uv},0) 70%)`,
       });
       s.symbol = E(root, `<img src="${SYMBOL}" style="width:${SYMBOL_SIZE}px;height:${SYMBOL_SIZE}px;display:block">`);
       // the logo alone, the subtitle names the language; whole-pixel sizes keep its edges crisp
@@ -230,7 +237,7 @@
         AI_CHIP, { ...TILE, border: '1.5px dashed ' + C.uv }));
 
       // beat 3's labels: the rounds, then the valuation
-      s.rounds = ROUNDS.slice(0, 3).map(round => E(root,
+      s.rounds = ROUNDS.slice(0, LAST).map(round => E(root,
         `<div class="lbl" style="font-size:16px;color:var(--slate)">${round.date}</div>`
         + `<div style="font-size:34px;font-weight:700;line-height:1.15;color:var(--ink)">${round.label}</div>`
         + `<div class="lbl" style="font-size:14px;color:var(--violet)">${round.series}</div>`,
@@ -249,7 +256,7 @@
         true);
       s.bracketTick = path(s.links, `M ${BRACKET.x - BRACKET.tick} ${BRACKET.bottom} L ${BRACKET.x + BRACKET.tick} `
         + `${BRACKET.bottom}`, C.violet, 2.5, false);
-      s.bracketPulse = makeSpark(root, 14, '182,100,255');
+      s.bracketPulse = makeSpark(root, 14, RGB.violet);
       s.bracketLabel = E(root, '×8 since 2022', 'mono', {
         fontSize: '22px', lineHeight: '28px', letterSpacing: '.12em', paddingLeft: '.12em', textTransform: 'uppercase',
         color: C.ink, whiteSpace: 'nowrap',
@@ -257,8 +264,8 @@
       s.bracketEnds = ['$1.5B', '$12.55B'].map(text => E(root, text, 'mono', {
         width: '80px', fontSize: '16px', lineHeight: '20px', color: C.slate, whiteSpace: 'nowrap',
       }));
-      s.aiTag = tag(root, 'Core infrastructure for AI', 'neon solid');
-      Object.assign(s.aiTag.style, { width: '440px', textAlign: 'center', boxShadow: '0 0 26px rgba(219,255,75,.3)' });
+      s.aiTag = fixedTag(root, 'Core infrastructure for AI', 'neon solid', 440);
+      s.aiTag.style.boxShadow = `0 0 26px rgba(${RGB.neon},.3)`;
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
@@ -305,7 +312,7 @@
             const x = lerp(lerp(x0, x1, sp), sx, f) - BAND_LEFT, y = lerp(y1, sy, f) - BAND_TOP;
             const pop = P(t, teamIn + 0.4 * hash(n), 0.3);
             g.globalAlpha = teamO * pop;
-            g.fillStyle = half ? 'rgb(219,255,75)' : 'rgb(248,250,252)';
+            g.fillStyle = half ? `rgb(${RGB.neon})` : `rgb(${RGB.ink})`;
             const r = sp > 0 && sp < 1 ? 4 : 3;
             g.fillRect(x - r / 2, y - r / 2, r, r);
           });
@@ -350,8 +357,8 @@
       place(s.symbolGlow, ...away(SYM.x, SYM.y), 1 + 0.04 * Math.sin(G * 1.6), symO * 0.9);
       const langAt = k => c[1] + 0.6 + k * 0.45;
       // once all have landed, the ring turns slowly clockwise, gathering speed over 3 s (keyed to t)
-      const orbitAt = langAt(LANGUAGES.length - 1) + 1.0;
-      const spin = Math.max(0, t - orbitAt);
+      const spinFrom = langAt(LANGUAGES.length - 1) + 1.0;
+      const spin = Math.max(0, t - spinFrom);
       const rot = (spin < 3 ? spin * spin / 6 : spin - 1.5) * 2 * Math.PI / ORBIT;
       s.langs.forEach((e, k) => {
         const p = ease(P(t, langAt(k), 0.8));
@@ -360,7 +367,7 @@
         // a spiral: from the symbol, sweeping 70 degrees as it moves out
         const a = Math.atan2((ty - SYM.y) / RING.ry, (tx - SYM.x) / RING.rx) - (1 - p) * 70 * Math.PI / 180;
         const x = SYM.x + RING.rx * p * Math.cos(a), y = SYM.y + RING.ry * p * Math.sin(a);
-        const landed = P(t, langAt(k) + 0.8, 0.01);
+        const landed = t > langAt(k) + 0.8;
         const [ex, ey] = away(landed ? tx : x, landed ? ty : y);
         place(e, Math.round(ex), Math.round(ey), lerp(0.4, 1, p) * swell(t, langAt(k) + 0.8, 0.12),
           clamp(p * 3) * (1 - exit));
@@ -375,14 +382,24 @@
       });
       // the last one, and more, glows softly as it arrives
       const more = win(t, aiAt(AI.length) + 0.2, aiAt(AI.length) + 1.4, 0.4);
-      s.ais[AI.length].style.boxShadow = more > 0 ? `0 0 ${Math.round(30 * more)}px rgba(182,100,255,${
-        (0.5 * more).toFixed(3)})` : '';
+      s.ais[AI.length].style.boxShadow = glowShadow(RGB.violet, more, { blur: 30, alpha: 0.5 });
 
       // ---------- beat 3
-      // the timing of the climb: the grid and the first round, then each curve, the last one a surge
+      // the timing of the climb, [start, duration, easing] per curve: the grid and the first round, the rise to Feb
+      // 2022 easing into it, the flat stretch and the next two curves at a steady pace, the last one a surge. The
+      // chart settles before the next subtitle
       const climb = c[3] + 0.6;
-      const segs = [[climb + 0.2, 1.4, ease], [climb + 1.6, 1.2, x => x], [climb + 2.8, 1.0, easeIn]];
-      const arrive = segs[2][0] + segs[2][1];
+      const segs = [
+        [climb + 0.1, 1.3, ease],
+        [climb + 1.4, 0.85, linear],
+        [climb + 2.25, 1.0, linear],
+        [climb + 3.25, 1.1, linear],
+        [climb + 4.35, 1.35, easeIn],
+      ];
+      const lastSeg = segs[segs.length - 1];
+      const arrive = lastSeg[0] + lastSeg[1];
+      // when the line reaches round i
+      const reachedAt = i => (i === 0 ? segs[0][0] : segs[i - 1][0] + segs[i - 1][1]);
       const settle = ease(P(t, arrive + 0.5, 1.3));
       let seg = 0, u = 0;
       segs.forEach(([at, d, fn], i) => {
@@ -421,13 +438,14 @@
         cg.lineCap = 'round';
         const curvePoints = (i, upTo) => Array.from({ length: 41 },
           (_, n) => toScreen(bezier(CURVES[i], upTo * n / 40)));
-        const drawn = [0, 1, 2].filter(i => i < seg || (i === seg && t >= segs[0][0]));
+        const surge = CURVES.length - 1;
+        const drawn = CURVES.map((_, i) => i).filter(i => i < seg || (i === seg && t >= segs[0][0]));
         drawn.forEach(i => {
           const pts = curvePoints(i, i < seg ? 1 : u);
-          cg.shadowColor = 'rgba(182,100,255,.9)';
+          cg.shadowColor = `rgba(${RGB.violet},.9)`;
           cg.shadowBlur = 18;
-          cg.strokeStyle = i === 2 ? '#DBFF4B' : '#B664FF';
-          cg.lineWidth = i === 2 ? 5 : 4;
+          cg.strokeStyle = i === surge ? C.neon : C.violet;
+          cg.lineWidth = i === surge ? 5 : 4;
           cg.beginPath();
           pts.forEach(([x, y], n) => (n ? cg.lineTo(x, y) : cg.moveTo(x, y)));
           cg.stroke();
@@ -435,14 +453,14 @@
         cg.shadowBlur = 0;
         // the rounds' markers, each flashing as the line reaches it
         ROUNDS.forEach((round, i) => {
-          const reached = i === 0 ? segs[0][0] : segs[i - 1][0] + segs[i - 1][1];
+          const reached = reachedAt(i);
           if (t < reached - 0.05) return;
           const [x, y] = toScreen(round.at);
           const fl = win(t, reached, reached + 0.5, 0.1);
-          cg.fillStyle = i === 3 ? '#DBFF4B' : '#F8FAFC';
+          cg.fillStyle = i === LAST ? C.neon : C.ink;
           cg.beginPath(); cg.arc(x, y, 7 + 8 * fl, 0, Math.PI * 2); cg.fill();
           if (fl > 0) {
-            cg.strokeStyle = `rgba(219,255,75,${(0.8 * fl).toFixed(3)})`;
+            cg.strokeStyle = `rgba(${RGB.neon},${(0.8 * fl).toFixed(3)})`;
             cg.lineWidth = 3;
             cg.beginPath(); cg.arc(x, y, 14 + 40 * (1 - fl), 0, Math.PI * 2); cg.stroke();
           }
@@ -452,32 +470,32 @@
           const [hx, hy] = toScreen(head);
           const glow = cg.createRadialGradient(hx, hy, 0, hx, hy, 46);
           glow.addColorStop(0, 'rgba(255,255,255,.95)');
-          glow.addColorStop(0.3, 'rgba(219,255,75,.6)');
-          glow.addColorStop(1, 'rgba(219,255,75,0)');
+          glow.addColorStop(0.3, `rgba(${RGB.neon},.6)`);
+          glow.addColorStop(1, `rgba(${RGB.neon},0)`);
           cg.fillStyle = glow;
           cg.beginPath(); cg.arc(hx, hy, 46, 0, Math.PI * 2); cg.fill();
         }
         // the arrival: sparks thrown out of the last round, falling and fading
-        const [px, py] = toScreen(ROUNDS[3].at);
+        const [px, py] = toScreen(ROUNDS[LAST].at);
         SPARKS.forEach(sp => {
           const age = t - arrive;
           if (age <= 0 || age >= sp.life) return;
           const at = a => [px + Math.cos(sp.a) * sp.v * a, py + Math.sin(sp.a) * sp.v * a + 380 * a * a];
           const [x0, y0] = at(Math.max(0, age - 0.06)), [x1, y1] = at(age);
-          cg.strokeStyle = `rgba(219,255,75,${(1 - age / sp.life).toFixed(3)})`;
+          cg.strokeStyle = `rgba(${RGB.neon},${(1 - age / sp.life).toFixed(3)})`;
           cg.lineWidth = 2.5;
           cg.beginPath(); cg.moveTo(x0, y0); cg.lineTo(x1, y1); cg.stroke();
         });
         cg.globalAlpha = 1;
       }
       place(s.chart, 960, 540, 1, chartO > 0 ? 1 : 0);
-      const [px, py] = toScreen(ROUNDS[3].at);
+      const [px, py] = toScreen(ROUNDS[LAST].at);
       place(s.bloom, px, py, 1, win(t, arrive - 0.05, arrive + 0.5, 0.15) * 0.9);
       placeRipples(s.rings, t, arrive, px, py, 40, 900);
       // the rounds' labels, above and left of their markers, flashing as the line reaches them; they fade near the
       // frame's edges as the camera moves on, and as the chart settles
       s.rounds.forEach((e, i) => {
-        const reached = i === 0 ? segs[0][0] : segs[i - 1][0] + segs[i - 1][1];
+        const reached = reachedAt(i);
         const [x, y] = toScreen(ROUNDS[i].at);
         const lx = x - 100, ly = y - 76;
         const edge = clamp((880 - (ly + 52)) / 60) * clamp((lx - 88 - 120) / 60) * clamp((ly - 52 - 150) / 40);
@@ -485,10 +503,11 @@
           * (1 - P(t, arrive + 0.3, 0.5)));
         e.style.borderColor = win(t, reached, reached + 0.6, 0.15) > 0.5 ? C.neon : C.line;
       });
-      // the value: racing with the head, blurred while it surges, then to the middle, big, with its label
-      const valueText = '$' + value.toFixed(2) + 'B';
+      // the value: racing with the head, blurred while it surges, then to the middle, big, with its label. Below a
+      // billion it counts in millions with the tilde of the Series A estimate it starts from
+      const valueText = value < 1 ? '~$' + Math.round(value * 1000) + 'M' : '$' + value.toFixed(2) + 'B';
       if (s.value.textContent !== valueText) s.value.textContent = valueText;
-      const speed = seg === 2 && t < arrive ? P(t, segs[2][0], segs[2][1], easeIn) : 0;
+      const speed = seg === segs.length - 1 && t < arrive ? P(t, lastSeg[0], lastSeg[1], easeIn) : 0;
       s.value.style.filter = speed > 0.05 ? `blur(${(2.5 * speed).toFixed(2)}px)` : '';
       place(s.value, Math.round(lerp(700, REST.valueX, settle) + kx), Math.round(lerp(300, 480, settle) + ky),
         lerp(0.5, 1, settle) * swell(t, arrive, 0.1), P(t, climb, 0.4));
@@ -507,8 +526,8 @@
       place(s.bracketLabel, BRACKET.x + 34, Math.round((BRACKET.top + BRACKET.bottom) / 2), bl.s, bl.o, -90);
       s.bracketEnds.forEach((e, k) => place(e, BRACKET.x + 22 + 40, k ? BRACKET.top : BRACKET.bottom, 1,
         P(t, bracketAt + (k ? 0.9 : 0), 0.3)));
-      const ai = P(t, c[4] + 2.8, 0.45, backOut);
-      place(s.aiTag, REST.valueX, 690, ai, clamp(ai * 2));
+      const ai = backPop(t, c[4] + 2.8);
+      place(s.aiTag, REST.valueX, 690, ai.s, ai.o);
     }
   });
 }

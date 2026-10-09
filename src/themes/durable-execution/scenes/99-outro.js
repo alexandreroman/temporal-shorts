@@ -7,7 +7,7 @@
     const e = iconTile(p, icon, null, ROW.size, ROW.size);
     e.insertAdjacentHTML('beforeend',
       '<div class="ok" style="position:absolute;right:-16px;top:-16px;width:38px;height:38px;display:flex;'
-      + `align-items:center;justify-content:center;background:#141414;border:1.5px solid ${C.neon};`
+      + `align-items:center;justify-content:center;background:${C.bg};border:1.5px solid ${C.neon};`
       + `border-radius:var(--rs)">${ICON('check', 24, C.neon, 2.6)}</div>`);
     e.ok = e.querySelector('.ok');
     return e;
@@ -26,11 +26,11 @@
     },
     update(t, c, s) {
       // the tiles' bottom edge sits as far above the title's letters as the tagline sits above the logo
-      place(s.t, 960, 560, 1, P(t, 0.3, 0.8));
+      placeEndCard(s.t, t);
       // tiles pop in one after the other, then each step gets its check
       s.tiles.forEach((e, i) => {
-        const p = P(t, 0.1 + i * 0.12, 0.45, backOut);
-        place(e, ROW.x0 + i * ROW.gap, ROW.y, p, clamp(p * 2));
+        const p = backPop(t, 0.1 + i * 0.12);
+        place(e, ROW.x0 + i * ROW.gap, ROW.y, p.s, p.o);
         const okAt = 0.8 + i * 0.25, ok = popIn(t, okAt);
         e.ok.style.opacity = ok.o;
         e.ok.style.transform = `scale(${ok.s})`;

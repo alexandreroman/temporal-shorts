@@ -1,5 +1,5 @@
 // ===================== 8. WHAT YOU GET
-// The payoff: the budget saved in this example, then the other benefits, one tile at a time.
+// The payoff: the LLM calls saved in this example, then the other benefits, one tile at a time.
 // The block keeps every name declared in this file local to this scene.
 {
   const BENEFITS = [
@@ -23,7 +23,7 @@
     build(root, s) {
       s.budget = E(root,
         `<div style="display:flex;align-items:center;gap:26px">${ICON('coin', 76, C.neon, 1.6)}<div>`
-        + '<div style="font-size:60px;line-height:1.1">43% less LLM spend '
+        + '<div style="font-size:60px;line-height:1.1">43% fewer LLM calls '
         + '<span class="lbl" style="font-size:20px">in this example</span></div>'
         + '<div class="mono" style="font-size:30px;letter-spacing:.06em;color:var(--slate);margin-top:10px">'
         + '<span style="color:var(--neon)">4</span> vs 7 LLM calls</div></div></div>');
@@ -37,8 +37,8 @@
       rise(s.budget, 960, BUDGET_Y, P(t, c[0] + 0.5, 0.6), 20);
       const at = [c[0] + 2.2, c[0] + 3.4, c[0] + 4.3, c[0] + 5.2];
       s.ben.forEach((e, i) => {
-        const p = P(t, at[i], 0.45, backOut);
-        place(e, 960 + (i - 1.5) * BEN.pitch, BEN.y, p, clamp(p * 2));
+        const p = backPop(t, at[i]);
+        place(e, useCaseX(i), BEN.y, p.s, p.o);
       });
     }
   });

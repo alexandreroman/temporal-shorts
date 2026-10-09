@@ -36,7 +36,7 @@ def built_page(source):
 THEMES = theme_names()
 
 # Resolves to the number of loaded font faces. A missing font file rejects its load: catch it so that
-# open_page() can report the count instead of a bare network error.
+# check_fonts() can report the count instead of a bare network error.
 PRELOAD_FONTS = """Promise.all(
   ['400 40px Brand', '700 40px Brand', '400 20px Mono', '700 20px Mono']
     .map(f => document.fonts.load(f).catch(() => []))
@@ -61,22 +61,33 @@ def page_url(theme):
     return theme_page(theme).as_uri()
 
 
+def launch_browser(pw):
+    """Headless Chromium with the settings of every capture: sRGB colors and no GPU, for identical pixels."""
+    return pw.chromium.launch(args=["--force-color-profile=srgb", "--disable-gpu"])
+
+
+def check_fonts(page):
+    """Wait for the four brand fonts of the page; exit with an error if any of them is missing."""
+    loaded = page.evaluate(PRELOAD_FONTS)
+    if loaded < 4:
+        sys.exit(f"ERROR: only {loaded}/4 brand fonts loaded. Run `make setup` (fonts go in src/fonts/).")
+
+
 def open_page(pw, theme):
     """Return (browser, page) for the theme, frozen at t=0; call renderAt(t) to move.
 
     Exit with an error if the page throws while loading, or the brand fonts or the Temporal symbol are
     missing. Errors thrown later by renderAt(t) surface as exceptions from page.evaluate().
     """
-    browser = pw.chromium.launch(args=["--force-color-profile=srgb", "--disable-gpu"])
+    browser = launch_browser(pw)
     page = browser.new_page(viewport={"width": WIDTH, "height": HEIGHT})
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.goto(page_url(theme) + "?t=0")
-    loaded = page.evaluate(PRELOAD_FONTS)
+    # goto() returns once the page has loaded, so every error thrown by its scripts is already reported.
     if errors:
         sys.exit("ERROR: JavaScript errors while loading the page:\n" + "\n".join(errors))
-    if loaded < 4:
-        sys.exit(f"ERROR: only {loaded}/4 brand fonts loaded. Run `make setup` (fonts go in src/fonts/).")
+    check_fonts(page)
     if not page.evaluate(PRELOAD_MARK):
         sys.exit("ERROR: the Temporal symbol (#mark in src/styles.css) did not load.")
     return browser, page

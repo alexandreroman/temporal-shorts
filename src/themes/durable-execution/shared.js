@@ -14,6 +14,10 @@ Object.assign(ICONS, {
   trash: '<path d="M4 6h16M9 6V3.5h6V6M6 6l1 15h10l1-15M10 10v7M14 10v7"/>',
   // a shield with a check, its point lower than agent-harness's `shield`
   shieldTall: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9.5C7.5 20 4 17 4 12V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  // Worker status icons of chapter 8: free (pauseLines, two lines where agent-harness's `pause` has two bars) and
+  // restarting (power); deploying a new version uses the engine's `upload`
+  pauseLines: '<path d="M8.5 5v14M15.5 5v14"/>',
+  power: '<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
 });
 
 // ---------- the running example: order #1042, four steps, each calling another service
@@ -23,8 +27,6 @@ const ORDER_STEPS = [
   { icon: 'truck', label: 'Ship package', fn: 'shipPackage', service: 'Carrier', result: 'tracking 1Z-48' },
   { icon: 'mail', label: 'Email receipt', fn: 'emailReceipt', service: 'Email', result: 'receipt sent' },
 ];
-// The 4 steps of the order as [icon, label], for makeStepRow
-const ORDER_TILES = ORDER_STEPS.map(step => [step.icon, step.label]);
 
 // ---------- code card: white card showing a few lines of TypeScript, one div per line
 // Card height = 2 * padY + lines * lineH (256 px for the 6 lines of the order code).
@@ -46,12 +48,14 @@ const WORKFLOWS_TS = [
 // Index of the `await` line of step i (ORDER_STEPS[i]) in a list of code lines
 const awaitLine = (lines, i) => lines.findIndex(line => line.includes(`await ${ORDER_STEPS[i].fn}(`));
 // Light syntax coloring of one plain TypeScript line (no HTML): keywords UV, strings violet, called function names
-// bold, punctuation slate (angle brackets escaped), everything else (names, types) default ink
+// bold, comments and punctuation slate (angle brackets escaped), everything else (names, types) default ink
 function highlightJs(line) {
-  const token = /('[^']*')|\b(export|async|function|await|const|typeof)\b|([A-Za-z_]\w*)(?=[(<])|([(){}<>:;,.=])/g;
+  const token =
+    /('[^']*')|(\/\/.*)|\b(export|async|function|await|const|typeof)\b|([A-Za-z_]\w*)(?=[(<])|([(){}<>:;,.=])/g;
   const escaped = { '<': '&lt;', '>': '&gt;' };
-  return line.replace(token, (m, str, kw, fn, punct) => {
+  return line.replace(token, (m, str, comment, kw, fn, punct) => {
     if (str) return `<span style="color:${C.violet}">${str}</span>`;
+    if (comment) return `<span style="color:#7C8698">${comment}</span>`;
     if (kw) return `<span style="color:${C.uv}">${kw}</span>`;
     if (fn) return `<span style="font-weight:700">${fn}</span>`;
     return `<span style="color:#7C8698">${escaped[punct] || punct}</span>`;
@@ -74,16 +78,12 @@ function makeCodeCard(parent, opts = {}) {
   card.bar = E(card, '', '', {
     left: '8px', width: (w - 16) + 'px', height: lineH + 'px', borderRadius: 'var(--rs)',
   });
-  card.lines = lines.map((src, i) => {
-    const e = E(card,
-      `<span style="display:inline-block;width:${gutter}px;color:#B4BCCB">${i + 1}</span>${highlightJs(src)}`,
-      'mono', {
-        left: padX + 'px', top: (padY + i * lineH) + 'px', height: lineH + 'px',
-        lineHeight: lineH + 'px', fontSize: font + 'px', whiteSpace: 'pre',
-      });
-    e.style.opacity = 1;
-    return e;
-  });
+  card.lines = lines.map((src, i) => E(card,
+    `<span style="display:inline-block;width:${gutter}px;color:#B4BCCB">${i + 1}</span>${highlightJs(src)}`,
+    'mono', {
+      left: padX + 'px', top: (padY + i * lineH) + 'px', height: lineH + 'px',
+      lineHeight: lineH + 'px', fontSize: font + 'px', whiteSpace: 'pre', opacity: 1,
+    }));
   card.hdr = null;
   if (header) {
     // a tab standing on the top edge, so showing it never moves the code; the file name follows it, in slate
@@ -110,21 +110,10 @@ function setCodeLine(card, i, o, color = C.highlight, n = 1) {
   card.bar.style.opacity = clamp(o);
 }
 
-// ---------- CARD CHARGED counter (340 x 200 tile)
-function makeCharge(p) {
-  const e = E(p,
-    '<div class="lbl" style="font-size:16px;display:flex;gap:10px;align-items:center">'
-    + `${ICON('card', 22, C.slate, 1.8)} Card charged</div>`
-    + '<div class="n" style="font-size:84px;line-height:1;margin-top:10px">$0</div>'
-    + '<div class="w mono" style="font-size:18px;letter-spacing:.1em;margin-top:12px;white-space:nowrap"></div>',
-    'tile', { width: '340px', height: '200px', textAlign: 'left', padding: '20px 24px' });
-  e.n = e.querySelector('.n'); e.w = e.querySelector('.w');
-  return e;
-}
-// note: small line under the amount, e.g. 'CHARGED TWICE!' (red) or 'NOT RE-CHARGED' (neon); '' hides it
-function setCharge(e, dollars, note = '', noteColor = C.red, numColor = C.ink) {
-  e.n.textContent = '$' + dollars; e.n.style.color = numColor;
-  e.w.textContent = note; e.w.style.color = noteColor;
+// ---------- CARD CHARGED counter: w x 200 px, its note under the amount (see setCounter), e.g. 'CHARGED TWICE!'
+// (red) or 'NOT RE-CHARGED' (neon); center: contents centered
+function makeCharge(p, w, center = false) {
+  return makeCounter(p, 'Card charged', w, { icon: 'card', noteBelow: true, h: 200, center });
 }
 
 // ---------- order status pill: "ORDER #1042 | PENDING"
@@ -174,12 +163,10 @@ function makeHistory(p, rows, w, h, crashRow = null, crashGap = 0) {
   }
   // tags 24 px from the card's right edge, 10 px inside the tinted kept block: REUSED, NOT RE-RUN keeps about
   // 20 px from the longest row text it sits on (shipPackage: tracking 1Z-48)
-  const card = makeHistoryCard(p, rows, {
+  return makeHistoryCard(p, rows, {
     w, h, rowTop, rowH: HIST.rowGap, padY: 0, tagTop: i => rowTop(i) + HIST.rowGap / 2, tagRight: 24,
     tag: { border: false }, crash, scanH: HIST.rowGap,
   });
-  card.rowTop = rowTop;
-  return card;
 }
 // Row i slides in from the right with progress p, on whole pixels
 const showHistoryRow = (hist, i, p) => showRow(hist.rows[i], p, 26, true);
@@ -191,8 +178,6 @@ function setHistoryTag(hist, i, label, kind, o, pop = 0) {
   e.style.opacity = clamp(o);
   e.style.transform = `translateY(-50%) scale(${1 + 0.14 * pop})`;
 }
-// Highlight row i with opacity o, below the crash line for the rows under it
-const setHistoryScan = (hist, i, o) => setScan(hist, hist.rowTop(i), o);
 
 // ---------- one shot for chapters 5 and 6: Worker panel with the code card on the left, CARD CHARGED counter
 // and order status under it, TEMPORAL panel with the Event History on the right, with room under its rows for the
@@ -227,6 +212,10 @@ const EH = {
   lineEndX: 816, // RESULT chips leave and reach the code near the card's right edge (72 px inside it)
   spinX: 858, // running spinner, at the right end of the highlighted line (30 px from the card's right edge)
   rowStartX: 1208, // RESULT chips reach and leave the history at the start of the row text (120 px into the card)
+  // NEW WORKER tag of the takeovers (chapters 6 and 8): astride the top edge of the Worker panel (y 176), centered
+  // on it, clear of its name and status; fixed even width, so it rests on whole pixels (solid: the panel border does
+  // not show through)
+  newTag: { x: 520, y: 176, w: 200 },
 };
 // Stage y of code line i and of history row i (rows below the crash line sit EH.crashGap lower)
 const ehLineY = i => EH.worker.y + EH.code.dy - (EH.code.padY * 2 + WORKFLOW_CODE.length * EH.code.lineH) / 2
@@ -252,8 +241,7 @@ function makeEventHistoryShot(root, workerNames) {
   shot.code.hdr.style.opacity = 1;
   shot.spin = E(root, spinnerRing(26));
   shot.spin.ring = shot.spin.firstChild;
-  shot.charge = makeCharge(root);
-  shot.charge.style.width = EH.charge.w + 'px';
+  shot.charge = makeCharge(root, EH.charge.w);
   shot.order = makeOrderStatus(root);
   shot.order.style.width = EH.order.w + 'px';
   shot.temporal = makeTemporalPanel(root, EH.temporal.w, EH.temporal.h, TEMPORAL_HEADER);
@@ -284,9 +272,3 @@ function flyResultToHistory(chip, t, at, i) {
 function flyResultToCode(chip, t, at, i) {
   flyChip(chip, t, at, EH.rowStartX, ehRowY(ehStepRow(i)), EH.lineEndX, ehLineY(ehStepLine(i)));
 }
-// ---------- Worker status icons (chapter 8): free (pauseLines), restarting (power); deploying a new version uses
-// the engine's `upload`. pauseLines is drawn with two lines, agent-harness's `pause` with two bars
-Object.assign(ICONS, {
-  pauseLines: '<path d="M8.5 5v14M15.5 5v14"/>',
-  power: '<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
-});

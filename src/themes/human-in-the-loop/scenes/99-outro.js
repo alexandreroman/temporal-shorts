@@ -11,18 +11,18 @@
       s.t = makeEndCard(root, 'Human-in-the-Loop', 'WAITS AS LONG AS IT TAKES');
       s.person = makeAvatar(root, '', 120);
       // neon check badge on the person: the decision is in
-      s.badge = E(root, ICON('check', 26, '#141414', 3), '', {
+      s.badge = E(root, ICON('check', 26, C.bg, 3), '', {
         width: '44px', height: '44px', background: C.neon, borderRadius: '50%', display: 'flex',
         alignItems: 'center', justifyContent: 'center',
       });
     },
     update(t, c, s) {
-      place(s.t, 960, 560, 1, P(t, 0.3, 0.8));
-      const p = P(t, 0.1, 0.7, backOut);
+      placeEndCard(s.t, t);
+      const p = backPop(t, 0.1, 0.7);
       // the same 76 px from the person to the title as from the tagline to the logo
-      place(s.person, 960, 266, p, clamp(p * 2));
-      const bp = P(t, 0.8, 0.45, backOut);
-      place(s.badge, 1003, 309, bp, clamp(bp * 2));
+      place(s.person, 960, 266, p.s, p.o);
+      const bp = backPop(t, 0.8);
+      place(s.badge, 1003, 309, bp.s, bp.o);
     }
   });
 }

@@ -6,7 +6,7 @@ type: project
 
 # Themes: shared anatomy and stories
 
-Every theme is a silent explainer in one series: burned-in subtitles, no
+Every theme is a short silent video in one series: burned-in subtitles, no
 soundtrack, Temporal brand (see [Temporal brand rules](project_brand.md)),
 delivered as a 1920x1080 30 fps MP4 plus an SRT. All themes follow the
 anatomy below; the story, the running example, the number of chapters and
@@ -23,12 +23,8 @@ the visuals belong to each theme (last section).
   `#segs`, `#mark`, `#subw > #sub`; scripts `../../engine.js`,
   `../../shared.js`, `shared.js`, scenes `00-intro.js` to `99-outro.js`,
   `../../player.js`, `boot()`.
-- `#mark` is the official Temporal symbol
-  (`assets/temporal-symbol-light-cropped.svg`), 32x32, left edge on the
-  chapter number (x 80), vertically centered on the subtitle box; fixed
-  position, also in the live player; fully visible across chapter scenes,
-  fading in with the first and out with the last, never on the intro or
-  outro. See [Official Temporal logo](reference_logo.md).
+- `#mark`, the corner symbol of chapter scenes: see
+  [Official Temporal logo](reference_logo.md).
 - Home card: `a.theme` > `.theme-icon` (24x24 stroke SVG with a comment
   naming what it shows and its hover animation), `.theme-title`,
   `.theme-text`; see [Home page design](feedback_home-page.md).
@@ -45,8 +41,8 @@ the visuals belong to each theme (last section).
   or format ("AN EXPLAINER FOR EVERYONE", "AN EXPERIMENTAL PROJECT"); the
   title is a question for explainers ("How does an AI agent work?") or
   the product name; the uppercase tagline ties the topic to Temporal. This
-  title card is the theme's `social.png`
-  ([Social preview images](feedback_social-previews.md)).
+  title card is the theme's `social.png` (README.md, Social link
+  previews).
 - Chapters: `chapter` and `title` drive the `NN / TITLE` header and the
   segment bars; titles are short sentence-case phrases ("When a step
   fails").
@@ -57,12 +53,14 @@ the visuals belong to each theme (last section).
   the recap, right before the outro (`NN-use-cases.js`); a product
   presentation (agent-harness) ends on its recap. Topic lists in
   `script.md` leave out both chapters.
-  - 4 `useCaseTile`s (icon, uppercase label, lowercase slate example
-    line) land during the first of 2 subtitles ("<running example> is one
-    example: any … fits"); the second names the 4 tiles in order and ends
-    on the benefit; each tile lights (UV border) as its name is read:
-    `NAMED_AT` offsets from `c[1]` = name position at 16 characters per
-    second + 0.3 s, the last one lit `LAST_LIT` 1.2 s.
+  - The scene is one `useCaseScene({ chapter, uses, namedAt, subs })`
+    call (`src/shared.js`). 4 `useCaseTile`s (icon, uppercase label,
+    lowercase slate example line) land during the first of 2 subtitles
+    ("<running example> is one example: any … fits"); the second names the
+    4 tiles in order and ends on the benefit; each tile lights (UV border)
+    as its name is read: `namedAt` offsets from `c[1]` = name position at
+    16 characters per second + 0.3 s, the last one lit for `lastLit`
+    (1.2 s).
   - Tiles are concrete use cases, named scenarios matched to the audience
     ("Fraud reviews", "Money transfers", "Deep research"), never generic
     actions or broad categories ("Approvals", "Payments", "Documents").
@@ -88,24 +86,19 @@ the visuals belong to each theme (last section).
   hold after the last subtitle), engine defaults in chapters.
   agent-harness is slower (below).
 - Animations key to `c[i]` and fit within their subtitle window (duration
-  plus `after`); `after` grows when they do not. Ambient loops read `G`.
+  plus `after`); `after` grows when they do not.
 
 ## Layout
 
-- Content frame, shared by every theme and scene: resting content stays
-  inside y 150-880 (730 px, middle 515), scene `shift` included: 66 px
-  under the header (bottom y 84), 80 px above the subtitles (top y 960),
-  so the content breathes. Only brief one-off effects (flash, glitch,
-  crash bolt, flying coin, a pop's overshoot) leave it. Horizontally,
-  compositions spread over about x 120-1800.
+- Content frame and `make layout`: see README.md. Only brief one-off
+  effects (flash, glitch, crash bolt, flying coin, a pop's overshoot)
+  leave the frame. Horizontally, compositions spread over about
+  x 120-1800.
 - Every scene spans at least 440 px (60 % of the frame), with generous
   gaps, not a compact cluster in the middle. A dense scene fits by
   tightening gaps first, then component heights (rows, panels, tiles);
   font sizes and CSS scaling stay untouched. A thin scene grows its
   tiles, type and gaps.
-- `make layout` (`scripts/layout_check.py`) measures each scene's content
-  box: OUT fails, THIN and OFF-CENTER warn. Every scene of every theme
-  passes; a new or edited scene passes before it ships.
 - Components share alignment lines, measured in the rendered DOM to the
   pixel: stacked ones share a left or right edge, side-by-side ones a top
   or bottom edge, equal relations get equal gaps; a component whose text
@@ -117,20 +110,20 @@ the visuals belong to each theme (last section).
 - Tags and labels keep about 20 px of clear space from their neighbors; a
   label beside the Temporal logo is never larger than its wordmark.
 - Centering: each composition is centered at (960, 515) within about
-  25 px, the middle of the content frame. The scene `shift` is a fixed whole-number `[dx, dy]`,
-  one compromise across phases, measured from the rendered content box;
+  25 px, the middle of the content frame. The scene `shift` is a fixed
+  whole-number `[dx, dy]`, one compromise across phases, measured from the
+  rendered content box;
   `pan(t, from, stops, d)` eases between offsets only where content
   already fades or moves. Brief one-off elements do not drive the offset;
   clearance above the subtitles beats exact centering. Full-screen
   flashes are oversized (`makeFlash`, 2400x1400).
-- Arrow heads follow [Arrow heads in Safari](project_arrow-heads-safari.md).
 
 ## Story beats and vocabulary
 
 - The Temporal arc repeats: the problem without Temporal (crash, lost
   progress, duplicated side effect, hand-built plumbing), then a Workflow,
   an Event History saved outside the app before the next step, a crash,
-  another instance replaying the history and resuming with no step redone.
+  another instance replaying the history and resuming with no saved step redone.
   A theme whose audience knows the problem opens on the solution.
 - Shared components carry it: step rows (`makeStepRow`, `makeStep`), app
   panel (`makeAppPanel`), TEMPORAL panel (`makeTemporalPanel`, "Outside the
@@ -182,72 +175,69 @@ the visuals belong to each theme (last section).
 
 Preview times come from `make timeline` and sit a second or more inside a
 subtitle window, never in a scene's fade-in. Check alignment on full-size
-frames (`make preview THEME=<theme> T="<t> --full"`). Capture noise is
-described in [Frame capture noise](project_frame-noise.md).
+frames (`--full`, see README.md). Capture noise is described in
+[Frame capture noise](project_frame-noise.md).
 
 ## Files a new theme touches
 
-Discovery is automatic (any `src/themes/*/index.html`): Makefile, scripts
-and CI need no change. By hand: `src/themes/<theme>/` (`index.html`,
-`shared.js`, `scenes/`, `social.png` from `make social`); `src/index.html`
-(card and home `<meta name="description">`); `src/home.css` (icon hover
-animation); `docs/<theme>/script.md`; the theme lists of README.md and
-CLAUDE.md; a section below and the card order in
-[Home page design](feedback_home-page.md).
+The checklist is README.md, "Add a theme". The memory side: a section
+below and the card order in [Home page design](feedback_home-page.md).
 
 ## Per theme
 
 ### meet-temporal
 
-- For people who have never heard of Temporal: the founders and where
-  they come from, the lineage, what Temporal does, Temporal today, why it
-  matters for AI. Length is no constraint: every beat gets the time it
-  needs to read (held states, slow dramatic moments) rather than being
-  rushed to save seconds. Every fact is sourced
-  (`### Sources` in `script.md`); unsourced claims stay out (founders'
-  degrees, customers named only by investors, a Cloud GA date).
+- For people who have never heard of Temporal: the founders and where they come
+  from, the lineage, what Temporal does, where it is used, why it matters for
+  AI, Temporal Cloud, Temporal today. Length is no constraint: every beat gets
+  the time it needs to read (held states, slow dramatic moments) rather than
+  being rushed to save seconds. Every fact is sourced (`### Sources` in
+  `script.md`); unsourced claims stay out (founders' degrees, customers named
+  only by investors, a Cloud GA date).
 - No "What you get" recap: a short company introduction, the outro sums
   up. Six chapters: Where it comes from (the video opens straight on
   the founders' timeline, no separate founders chapter), What Temporal
   does, Where Temporal is used, Why it matters for AI, How Temporal
   Cloud works, Temporal today. Source material includes a Temporal deck
-  from the user (/tmp/meet-temporal.pdf: slide 3 use cases, slide 5
+  from the user, not in the repository (slide 3 use cases, slide 5
   timeline, slides 6-7 on Temporal Cloud; slide 4, customer proof
   points, stays out). Ch5 makes three points without service internals:
   Workers run the customer's code in their environment (Temporal Cloud
   holds no app code), Temporal Cloud orchestrates Workflows and
-  Activities and persists their history, and payloads are encrypted
+  Activities and persists their history, and payloads can be encrypted
   with the customer's keys (Data Converter) so Temporal never sees them;
   connections are outbound only (mTLS or PrivateLink). Its right zone is
-  titled with the lockup followed by "Cloud". Simple Workflow Service is dated 2009, the launch
-  Max and Samar led.
-- Founders are told by their careers only, never by country of origin:
-  Maxim Fateev (co-founder, CTO) and Samar Abbas (co-founder, CEO).
-  Lineage: 2004 Simple
-  Queue Service (Maxim tech lead), 2009 Simple Workflow Service, 2014
+  titled with the lockup followed by "Cloud". Simple Workflow Service is
+  dated 2009, the launch Max and Samar led.
+- Founders are told by their careers only, never by country of origin: Maxim
+  Fateev (co-founder, CTO) and Samar Abbas (co-founder, CEO). Lineage: 2004
+  Simple Queue Service (Maxim tech lead), 2009 Simple Workflow Service, 2014
   Durable Task Framework (Microsoft, base of Azure Durable Functions), 2015
-  Cadence (Uber, open source 2017), 2019 Temporal (MIT). Ch1 opens on
-  "20 YEARS IN THE MAKING" in large type, which shrinks into the heading
-  (no year beside it) as the timeline draws in. The founders appear as
-  faces cropped from the official photo (`src/assets/temporal-founders.jpg`,
-  temporal.io/about), never the full photo. Third-party companies and AI
-  frameworks appear as text, never as logos; programming languages show
-  their official logos (src/assets/languages/, sources and licenses in
-  its README.md).
+  Cadence (Uber, open source 2017), 2019 Temporal (MIT). Ch1 opens on "20 YEARS
+  IN THE MAKING" in large type, which shrinks into the heading, where it stands
+  alone, as the timeline draws in. The founders appear as faces cropped from the
+  official photo (`src/assets/temporal-founders.jpg`, temporal.io/about), never
+  the full photo. Third-party companies and AI frameworks appear as text, never
+  as logos; programming languages show their official logos
+  (src/assets/languages/, sources and licenses in its README.md).
 - Ch6 figures are dated (Series E, September 2026: $12.55B valuation,
   4,300+ paying customers, 570 employees): refresh them with each funding
-  announcement. Ch4 names OpenAI (Codex), Cursor, Lovable, Replit.
+  announcement. The valuation chart shows every round with a reported
+  valuation: Series A (Oct 2020, "~$75M", a PitchBook estimate, the tilde
+  marking it), B (Feb 2022, $1.5B), B-Prime (Feb 2023, $1.5B), C, D, E;
+  the seed has no reported valuation. The "×8" multiple runs from Feb
+  2022, the first officially reported valuation. Ch4 names OpenAI (Codex),
+  Cursor, Lovable, Replit.
 - Ch4 shows only the durable agent: an AI agent run with Temporal that
   crashes in production; the Event History keeps every step, a new app
   instance replays it and finishes, ending on NO PROGRESS LOST and NO
-  TOKENS WASTED. There is no "without Temporal" run in this theme.
+  TOKENS WASTED. The theme shows the Temporal run only.
 - Ch2 is the short series arc: steps run strictly one after the other,
   each saved before the next starts.
 - Outro departs from `makeEndCard`: a constellation of Ziggy, Temporal's
-  mascot (a tardigrade), drawn star by star then line by line, with no
-  founder faces; the title is "Meet"
-  followed by the official lockup (no logo below the tagline), "Meet"
-  matching the wordmark's size and baseline.
+  mascot (a tardigrade), drawn star by star then line by line; the title
+  is "Meet" followed by the official lockup, "Meet" matching the
+  wordmark's size and baseline, and the tagline closes the card.
 - Motion goes beyond the series framework: cinematic, creative animations
   (stroke drawing, camera moves, trails, glitch crashes, particles, 3D
   flips, scrambles), at least one strong moment per chapter, still
@@ -256,7 +246,8 @@ CLAUDE.md; a section below and the card order in
 
 ### durable-execution
 
-- Introduction for everyone. Order #1042 for $42,
+- Introduction for everyone; its end card title is "Durable Execution",
+  the topic without the card's "Introduction to". Order #1042 for $42,
   four steps (`ORDER_STEPS`); vocabulary "the server" (ch1-3), then "the
   Worker" ("Outside the Workers").
 - Money is the stake: CARD CHARGED reads $84 "CHARGED TWICE!" without
@@ -292,7 +283,8 @@ CLAUDE.md; a section below and the card order in
   fragile (ch2); the Workflow waits on one line with no code running,
   Temporal keeps the history outside the app (ch3); the decision arrives
   as a Signal, any copy replays and resumes after the wait (ch4); durable
-  timers drive reminders and escalation (ch5); recap (ch6); the use cases
+  timers drive reminders and escalation (ch5, a single subtitle); recap
+  (ch6); the use cases
   the pattern fits: fraud reviews (flag), identity checks (ID card), deploy
   approvals (upload), and AI agent approvals, a person confirming an
   agent's action or tool call (ch7).
@@ -310,20 +302,22 @@ CLAUDE.md; a section below and the card order in
   step 4's LLM call. Ch7 teaches three ideas in order: Temporal keeps the
   history outside the app; each result is saved before the next step;
   after a crash another copy re-runs from the start and Temporal hands
-  back every saved result (no LLM call, APP MEMORY rebuilt for free), then
+  back every saved result (no LLM call, CONTEXT rebuilt for free), then
   the first unsaved step runs. The LLM CALLS BILLED counter stays put
-  during replay; the recap states "43% less LLM spend, in this example"
-  (`### Budget figure` in `script.md`).
-- Ch7 mirrors ch6: same step tiles, APP MEMORY panel and LLM CALLS BILLED
+  during replay; the recap states "43% fewer LLM calls, in this example"
+  (`### Budget figure` in `script.md`): it counts calls, not spend, as
+  the wasted calls are the early ones with the smallest context.
+- Ch7 mirrors ch6: same step tiles, CONTEXT panel and LLM CALLS BILLED
   counter, plus a TEMPORAL panel holding the Event History. Rows get SAVED
   when written; "APP CRASHED HERE" and a tinted block mark the rows that
   survive; replayed rows turn "REUSED, NOT RE-BILLED" (LLM) or "REUSED,
-  NOT RE-RUN" (tools). APP MEMORY blocks: 76x56 px, left-aligned 20 px
+  NOT RE-RUN" (tools). CONTEXT blocks: 76x56 px, left-aligned 20 px
   from the panel edge, 12 px apart, two per step in Event History colors
   (UV icon for LLM, black icon for tool).
 - Ch3 context window: messages slide in one by one; the Size gauge moves
   with each row but fills as the square of the page fill, since every call
-  resends the whole history plus instructions; FULL pops as the page fills.
+  resends the whole history plus instructions: the quadratic growth of the
+  context size is the point of the gauge; FULL pops as the page fills.
   A fixed-width token counter, "billed so far", bottom aligned with the
   page, shows with the gauge and follows it (12,400 at FULL); each step
   plays a money-spent effect (coin bump, a coin flying off in a direction
@@ -348,10 +342,11 @@ CLAUDE.md; a section below and the card order in
 - Ch3 auto mode shows its three verdicts: approve, deny (the call never
   runs, the reason goes back to the model) and escalate to a person. Ch7
   callback tools reach the user's laptop or a private network, and the
-  agent waits durably for the result without tying up compute (one target,
-  USER'S LAPTOP; no private network tile). Ch8 typed sessions shows the
+  agent waits durably for the result without tying up compute (one
+  callback target on screen: USER'S LAPTOP). Ch8 typed sessions shows the
   path agent Python class → generated TypeScript types → UI; on-screen
-  TypeScript follows the harness-codegen shape (`handlers: {name: {input;
+  TypeScript follows the harness-codegen shape (`initData` first, `null`
+  for an agent with no init data, then `handlers: {name: {input;
   output}}`, `states`). Ch9 is the recap.
 - The turn is the core concept (a message starts a turn, the developer's
   loop runs inside, the reply streams, the harness waits); ch1 introduces
@@ -363,11 +358,11 @@ CLAUDE.md; a section below and the card order in
 - Slower pacing: `pre: 1.5, post: 2.0` on chapters (intro `pre: 1.5`,
   outro `pre: 1.0, post: 3.0`), each state readable about 1.5 s, each
   result held 2 s before the next subtitle; up to 7 subtitles a chapter.
-- Grid: content frame x 140-1780, y 150-880; multi-zone scenes touch both
-  sides; tops, bottoms and headings aligned; gutters 40 px within a zone,
-  80-120 px between zones; elements at final positions, no `shift`; ch2 is
-  the model. Pans: ch1 (SDK tags fade), ch4 (console slides in), ch8 (code
-  column centered alone, then the UI window enters).
+- Grid: content frame x 140-1780, y 150-880; multi-zone scenes touch both sides;
+  tops, bottoms and headings aligned; gutters 40 px within a zone, 80-120 px
+  between zones; chapters place elements at final positions, with no fixed
+  `shift`; ch2 is the model. Pans: ch1 (SDK tags fade), ch4 (console slides in),
+  ch8 (code column centered alone, then the UI window enters).
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title

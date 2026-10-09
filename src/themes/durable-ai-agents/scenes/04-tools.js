@@ -22,7 +22,7 @@
         + `background:${C.red};transform:rotate(-35deg)"></div>`;
       s.no = ['sun', 'mail'].map(n => E(root, ICON(n, 54, C.slate, 1.6) + strike));
       s.box = E(root, '', '', {
-        width: '1000px', height: '210px', border: '1.5px dashed #4B5363', borderRadius: 'var(--r)',
+        width: '1000px', height: '210px', border: `1.5px dashed ${C.lineLight}`, borderRadius: 'var(--r)',
       });
       s.boxL = E(root, 'Available tools', 'lbl');
       const tools = [['sun', 'Weather'], ['cal', 'Calendar'], ['mail', 'Email'], ['search', 'Web search']];
@@ -33,9 +33,9 @@
       const bar = (color, width) =>
         `<div style="height:12px;background:${color};margin:6px 0;width:${width}px;border-radius:3px"></div>`;
       s.bundle = E(root,
-        '<div class="mono" style="font-size:15px;letter-spacing:.12em;color:#5B6475;margin-bottom:8px">'
+        `<div class="mono" style="font-size:15px;letter-spacing:.12em;color:${C.slateDark};margin-bottom:8px">`
         + 'FULL CONTEXT</div>'
-        + bar(C.uvTint, 260) + bar('#F2E6FF', 200) + bar('#E4F78F', 230),
+        + bar(C.uvTint, 260) + bar(C.violetTint, 200) + bar('#E4F78F', 230),
         'paper', { padding: '12px 20px', borderLeft: '6px solid ' + C.uv });
       s.tag = tag(root, 'Call 2');
       s.ans = makeCard(root, "It's 18°C and sunny in Paris!", 'llm');
@@ -49,23 +49,23 @@
       fly(s.q, t, c[0] + 0.3, 420, 190, c[0] + 0.6, 1.0, 960, 190);
       s.q.style.opacity *= 1 - P(t, c[2] + 0.4, 0.4);
       s.no.forEach((n, i) => {
-        const p = P(t, c[0] + 1.6 + i * 0.25, 0.45, backOut);
-        place(n, 1580 + i * 120, 570, p, clamp(p * 2) * (1 - P(t, c[0] + 3.4, 0.4)));
+        const p = backPop(t, c[0] + 1.6 + i * 0.25);
+        place(n, 1580 + i * 120, 570, p.s, p.o * (1 - P(t, c[0] + 3.4, 0.4)));
       });
       place(s.box, 960, 680, 1, P(t, c[0] + 2.8, 0.5)); place(s.boxL, 960, 552, 1, P(t, c[0] + 2.8, 0.5));
       const hl = win(t, c[1] + 1.2, c[2] + 0.2, 0.2);
       s.tiles.forEach((e, i) => {
-        const p = P(t, c[0] + 3.0 + i * 0.2, 0.45, backOut);
+        const p = backPop(t, c[0] + 3.0 + i * 0.2);
         e.style.borderColor = (i === 0 && hl > 0.5) ? C.neon : C.line;
-        place(e, 600 + i * 240, 680, p, clamp(p * 2));
+        place(e, 600 + i * 240, 680, p.s, p.o);
       });
       fly(s.req, t, c[1] + 1.2, 1330, 330, c[1] + 3.0, 0.8, 650, 330, c[2] + 0.0, 300, 330);
       draw(s.run, P(t, c[1] + 4.0, 0.5), 1 - P(t, c[2] + 0.2, 0.3));
       fly(s.res, t, c[1] + 4.8, 600, 620, c[1] + 5.2, 0.8, 660, 470, c[2] + 0.1, 300, 330);
       fly(s.bundle, t, c[2] + 0.5, 470, 330, c[2] + 0.9, 1.0, 1350, 330, c[2] + 1.8, 1640, 330);
       place(s.tag, lerp(470, 1350, P(t, c[2] + 0.9, 1.0)), 250, 1, win(t, c[2] + 0.5, c[2] + 1.9, 0.25));
-      const aa = P(t, c[2] + 3.0, 0.5, backOut);
-      place(s.ans, lerp(1350, 920, P(t, c[2] + 3.2, 0.9)), 330, aa, clamp(aa * 2));
+      const aa = backPop(t, c[2] + 3.0, 0.5);
+      place(s.ans, lerp(1350, 920, P(t, c[2] + 3.2, 0.9)), 330, aa.s, aa.o);
     }
   });
 }

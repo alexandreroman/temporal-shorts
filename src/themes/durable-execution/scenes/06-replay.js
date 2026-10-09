@@ -26,9 +26,6 @@
   const BOLT = { x: 725, y: 426, size: 130 };
   const CRASH_TAG = { x: 717, y: 558, w: 310, h: 66 };
   // the takeover (see TAKEOVER): the dead Worker A drops 40 px, its bottom staying 10 px above the counter row
-  // NEW WORKER: astride the top edge of Worker B's panel, centered on it, clear of its name and status; fixed even
-  // width, so it rests on whole pixels (solid: the panel border does not show through)
-  const NEW_TAG = { x: EH.worker.x, y: EH.worker.y - EH.worker.h / 2, w: 200 };
   // the Workflow chip flies from the "Workflow started" history row to Worker B's status, at the panel's top right
   const STATUS_AT = { x: workerRight - 100, y: EH.worker.y - EH.worker.h / 2 + 36 };
   scene({
@@ -52,23 +49,20 @@
     build(root, s) {
       s.svg = svgLayer(root);
       const y1 = ehLineY(0), yShip = ehLineY(ehStepLine(SHIP));
-      s.restart = path(s.svg, `M ${ARC.x0} ${yShip} C ${ARC.bulge} ${yShip}, ${ARC.bulge} ${y1}, ${ARC.x1} ${y1}`,
-        C.violet, 3);
-      s.restartL = E(root, 'From the<br>start', 'lbl', {
-        color: C.violet, fontSize: '16px', lineHeight: '22px', textAlign: 'center',
-      });
+      s.restart = makeRestartArc(root, s.svg,
+        `M ${ARC.x0} ${yShip} C ${ARC.bulge} ${yShip}, ${ARC.bulge} ${y1}, ${ARC.x1} ${y1}`, 'From the<br>start',
+        C.violet, { fontSize: '16px', lineHeight: '22px', textAlign: 'center' });
       s.shot = makeEventHistoryShot(root, ['WORKER A', 'WORKER B']);
       // the retry travels like a RESULT chip, from Temporal to the Worker, labelled RETRY
-      s.retryChip = makeResultCard(root);
-      s.retryChip.firstChild.textContent = 'RETRY';
+      s.retryChip = makeResultCard(root, true, 'RETRY');
       s.reuseChips = REUSED_LABELS.map(() => makeResultCard(root));
       s.saveChips = [SHIP, EMAIL].map(() => makeResultCard(root));
       // the Workflow itself, handed to Worker B
       s.handChip = makeHandOffCard(root, 'WORKFLOW #1042');
-      s.newWorker = makeNewTag(root, 'New Worker', NEW_TAG.w);
+      s.newWorker = makeNewTag(root, 'New Worker', EH.newTag.w);
       s.done = tag(root, 'Workflow complete', 'neon');
       // dark like the SAVED tags, as it sits on the light history card
-      s.done.style.background = '#141414';
+      s.done.style.background = C.bg;
       s.crash = makeCrashMarks(root, 'Worker crash', BOLT, CRASH_TAG);
       s.flash = makeFlash(root);
     },
@@ -103,14 +97,10 @@
       place(workerA, EH.worker.x + sx, EH.worker.y + sy + leave.dy, 1, leave.o);
       if (dead) setAppStatus(workerA, 'CRASHED', 'crashed');
       else setAppStatus(workerA, 'RUNNING', 'running');
-      if (glitch.red) {
-        workerA.style.borderColor = C.red;
-        workerA.st.style.color = C.red;
-      }
+      glitchPanel(workerA, glitch);
       workerA.st.style.opacity = 1 - P(t, aOut, 0.25);
       // a new machine, Worker B, slides in from the left once Worker A is gone, its border glowing violet while it
       // arrives and takes over; IDLE until the Workflow chip reaches it
-      const bHere = t >= bIn;
       const arrive = arrivingInstance(t, bIn);
       place(workerB, EH.worker.x + arrive.dx, EH.worker.y, 1, arrive.o);
       if (t < takeOver) setAppStatus(workerB, 'IDLE', 'stopped');
@@ -123,17 +113,15 @@
 
       // the code card moves with the Worker on screen (Worker A, then Worker B), so it never floats without a panel;
       // both are gone when it switches
-      const codeDx = bHere ? arrive.dx : sx, codeDy = bHere ? 0 : sy + leave.dy;
-      const codeOn = bHere ? arrive.o : leave.o;
-      const greyed = bHere ? '' : leave.grey;
-      workerA.style.filter = greyed;
-      shot.code.style.filter = greyed;
+      const rider = takeoverRider(t, aDrop, bIn, [sx, sy]);
+      workerA.style.filter = rider.grey;
+      shot.code.style.filter = rider.grey;
       // CARD CHARGED: $42 all along; the replay charges nothing, the order completes with one charge (each note pops)
       const chargePop = bumpAt(t, back[0]) + bumpAt(t, completed);
-      const parts = { code: codeOn, charge: 1, order: 1, temporal: 1, hist: 1, chargePop };
-      placeEventHistoryShot(shot, parts, codeDx, codeDy);
+      const parts = { code: rider.o, charge: 1, order: 1, temporal: 1, hist: 1, chargePop };
+      placeEventHistoryShot(shot, parts, rider.dx, rider.dy);
       const note = t >= completed ? 'CHARGED ONCE' : t >= back[0] ? 'NOT RE-CHARGED' : '';
-      setCharge(shot.charge, 42, note, C.neon);
+      setCounter(shot.charge, '$42', note);
       shot.charge.style.borderColor = note ? C.neon : C.line;
       if (t >= completed) setOrderStatus(shot.order, 'COMPLETE', C.neon);
       else setOrderStatus(shot.order, 'PENDING');
@@ -158,8 +146,8 @@
       setCodeSpinner(shot, line, spinning, lineSx + glitch.dx, lineSy);
       // "From the start": drawn as the highlight jumps back, gone once the replay starts
       const arcOut = 1 - P(t, replay[0] - 0.3, 0.3);
-      draw(s.restart, P(t, jump, 0.6), arcOut);
-      place(s.restartL, (workerRight + temporalLeft) / 2, ehLineY(0) - 56, 1, P(t, jump + 0.4, 0.35) * arcOut);
+      placeRestartArc(s.restart, t, jump, (workerRight + temporalLeft) / 2, ehLineY(0) - 56,
+        { d: 0.6, labelDelay: 0.4, o: arcOut });
 
       // chips: the RETRY from the empty shipPackage row to its line; RESULT chips back from the history to the code
       // when replaying, to the history when running for real
@@ -172,7 +160,7 @@
       // Event History: rows 1-3 kept through the crash, replayed rows 2 and 3 lit and re-tagged, then row 4 written
       // by the second attempt below the crash line, then rows 5 and 6
       const hist = shot.hist;
-      markCrash(hist, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
+      markCrash(hist, t, crashAt);
       const written = [-Infinity, -Infinity, -Infinity, retrySaved, saved, completed];
       hist.rows.forEach((_, i) => showHistoryRow(hist, i, P(t, written[i] - 0.1, 0.3)));
       hist.tags.forEach((_, i) => {
@@ -187,7 +175,7 @@
       // the replayed row lights up while its result goes back (the windows never overlap)
       const scans = replay.map((q, i) => win(t, q + 0.15, back[i], 0.15));
       const lit = Math.max(0, scans.findIndex(o => o > 0));
-      setHistoryScan(hist, ehStepRow(lit), Math.max(...scans));
+      scanRow(hist, ehStepRow(lit), Math.max(...scans));
 
       const dp = popIn(t, completed + 0.4, 0.08);
       place(s.done, EH.temporal.x, EH.doneY, dp.s, dp.o);
@@ -197,7 +185,7 @@
       placeCrashMarks(s.crash, t, crashAt, tagAt, aOut, sx, sy);
       // takeover: NEW WORKER pops on Worker B once it is almost in place and leaves before the replay; Temporal hands
       // it the Workflow, a chip from the "Workflow started" row to its status, which then reads TAKING OVER
-      placeNewTag(s.newWorker, t, bIn + 0.5, c[1] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y);
+      placeNewTag(s.newWorker, t, bIn + 0.5, c[1] - 0.4, EH.newTag.x + arrive.dx, EH.newTag.y);
       flyChip(s.handChip, t, handOff, EH.rowStartX, ehRowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });

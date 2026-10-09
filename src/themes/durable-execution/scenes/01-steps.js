@@ -55,12 +55,10 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.order = makeOrderCard(root);
-      s.steps = makeStepRow(root, s.svg, ORDER_TILES, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
+      s.steps = makeStepRow(root, s.svg, ORDER_STEPS, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       const [y0, y1] = SERVICE_LINK;
       s.links = s.steps.xs.map(x => path(s.svg, `M ${x} ${y0} L ${x} ${y1}`, C.line, 2, false));
-      s.dots = s.steps.xs.map(() => E(root, '', '', {
-        width: '14px', height: '14px', borderRadius: '50%', background: C.uv, boxShadow: `0 0 14px ${C.uv}`,
-      }));
+      s.dots = s.steps.xs.map(() => makeGlowDot(root, 14, RGB.uv));
       s.services = ORDER_STEPS.map(step => makeService(root, step.service));
       s.code = makeCodeCard(root, { w: ABOVE_W });
       s.done = tag(root, `${ICON('check', 28, C.neon, 2.6)}Order complete`, 'neon');
@@ -73,11 +71,11 @@
       // order card: pops in, its BUY button is pressed at `press`
       const press = c[0] + 1.5;
       const out = P(t, c[2], 0.4);
-      const op = P(t, c[0] + 0.1, 0.5, backOut);
-      place(s.order, 960, ORDER_Y, op, clamp(op * 2) * (1 - out));
+      const op = backPop(t, c[0] + 0.1, 0.5);
+      place(s.order, 960, ORDER_Y, op.s, op.o * (1 - out));
       s.order.style.borderColor = t >= press ? C.uv : C.line;
       s.order.buy.style.transform = `scale(${1 - 0.1 * win(t, press - 0.12, press + 0.05, 0.12)})`;
-      s.order.buy.style.background = t >= press ? C.uv : 'rgba(68,76,231,.15)';
+      s.order.buy.style.background = t >= press ? C.uv : `rgba(${RGB.uv},.15)`;
       s.order.buy.style.boxShadow = t >= press ? `0 0 ${Math.round(24 * (1 - P(t, press, 0.8)))}px ${C.uv}` : 'none';
       // steps: first run in c[1], reset when the code card arrives, then run again line by line in c[2]
       const codeIn = c[2] + 0.4;
@@ -99,8 +97,8 @@
         // busy while it handles the call, then all four light up together on "Each step calls another service"
         const busy = t >= a + 0.45 && t < a + RUN_D;
         const all = win(t, c[1] + 4.8 + i * 0.12, c[1] + 6.2, 0.3);
-        e.style.borderColor = busy || all > 0.5 ? C.uv : '#4B5363';
-        const down = P(t, a + 0.3, 0.25, x => x), up = P(t, a + 0.6, 0.25, x => x);
+        e.style.borderColor = busy || all > 0.5 ? C.uv : C.lineLight;
+        const down = P(t, a + 0.3, 0.25, linear), up = P(t, a + 0.6, 0.25, linear);
         const y = lerp(lerp(SERVICE_LINK[0], SERVICE_LINK[1], down), SERVICE_LINK[0], up);
         place(s.dots[i], x, y, 1, win(t, a + 0.3, a + 0.85, 0.05));
       });

@@ -1,7 +1,7 @@
 """Build every page of src/ into a self-contained file: output/themes/<theme>/index.html and output/index.html.
 
 Each theme page becomes a standalone HTML player, and src/index.html the home page that links to them. The
-stylesheets, scripts, fonts and logo of each page are inlined so it opens offline; a single player file plays
+stylesheets, scripts, fonts and images of each page are inlined so it opens offline; a single player file plays
 with no other file, while the home page links to the players below it: output/ mirrors src/, so the
 relative links stay the same. Each page's social.png, written by `make social`, is copied next to it. A home page
 card with the hidden attribute is dropped from the build: its theme is unlisted, but still built and reachable.
@@ -22,7 +22,7 @@ from html import escape, unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import HOME_PAGE, OUTPUT, SRC, built_page, page_sources
+from common import HOME_PAGE, SRC, built_page, page_sources
 
 SITE_NAME = "Temporal Shorts"
 # The preview image of a page lives next to it, in src/ and output/ alike, so its URL is the page URL + this name.

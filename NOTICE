@@ -3,10 +3,44 @@ Copyright 2026 Alexandre Roman
 
 This project is licensed under the Apache License, Version 2.0 (see LICENSE).
 
-The Temporal name and logo (src/assets/) are trademarks of Temporal
-Technologies Inc. They are not covered by the Apache License and are used
-here under the Temporal brand guidelines (https://temporal.io/brand).
+The Temporal name, logo and symbol (src/assets/temporal-*.svg) are
+trademarks of Temporal Technologies Inc. They are not covered by the Apache
+License and are used here under the Temporal brand guidelines
+(https://temporal.io/brand).
 
-The fonts downloaded by `make setup` (Instrument Sans, Noto Sans Mono) are
-distributed under the SIL Open Font License 1.1 and are not part of this
-repository.
+The photo of the founders (src/assets/temporal-founders.jpg) is
+(c) Temporal Technologies Inc., from https://temporal.io/about. It is not
+covered by the Apache License.
+
+The language logos (src/assets/languages/) are trademarks of their owners.
+They are not covered by the Apache License; the source and license of each
+file are listed in src/assets/languages/README.md.
+
+src/assets/languages/java.svg comes from devicon
+(https://github.com/devicons/devicon), under the MIT License:
+
+  The MIT License (MIT)
+
+  Copyright (c) 2015 konpa
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to
+  deal in the Software without restriction, including without limitation the
+  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+  sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE.
+
+The fonts Instrument Sans and Noto Sans Mono, downloaded by `scripts/fonts.sh`
+(`make setup`, or any make target that needs them), are distributed under the
+SIL Open Font License 1.1 and are not part of this repository.

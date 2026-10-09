@@ -5,25 +5,18 @@
 // start, gets every saved result back from the history (no LLM call billed again), then runs the last step.
 // The block keeps every name declared in this file local to this scene.
 {
-  // Event History rows: the LLM call of each step (its action, lowercase), then its tool result
-  const JR = STEPS.flatMap(step => [
-    `LLM call: ${step.action[0].toLowerCase()}${step.action.slice(1)}`, `${step.tool}: ${step.result}`,
-  ]);
-  const isLLM = i => i % 2 === 0;
-  // result card of row i, labeled with the kind of call it comes from, as in the subtitle
-  const makeCallCard = (root, i) => makeResultCard(root, isLLM(i), isLLM(i) ? 'LLM CALL' : 'TOOL CALL');
   // Chapter 7 layout: app on the left, Temporal on the right, both 30 px under the step tiles; the "From the start"
   // arc and its label use the 58 px above the tiles. The instance panel (x 80-925) ends under the Restaurant tile's
   // right edge and the TEMPORAL panel (x 995-1840) starts under the Booking tile's left edge; half-pixel centers
   // put their odd widths on whole pixels. Under the instance panel, the bill on the left (x 80-460); on its right,
   // the booking ticket on the bill's top edge and AGENT COMPLETE on its bottom edge, centered in the space left.
   const APP = { x: 502.5, y: 445, w: 845, h: 310 };
-  // context panel, 24 px inside the instance panel, and its 8 block slots, 21 px from each side
-  const MEM = { x: 502.5, y: 469, w: 797, h: 210, slot0: 163, slotGap: 97, slotY: 484 };
-  // TEMPORAL panel, 20 px around the Event History card (x 1015-1820); the card and its rows (call cards land 110 px
+  // context panel, 24 px inside the instance panel (x 104-901), and the line of its 8 blocks
+  const MEM = { x: 502.5, y: 469, w: 797, h: 210, slotY: 484 };
+  // TEMPORAL panel, holding the Event History card (x 1015-1820); the card and its rows (call cards land 110 px
   // inside its left edge)
   const TEMPORAL = { x: 1417.5, y: 555, w: 845, h: 530 };
-  const HIST = { x: 1417.5, y: 580, w: 805, cardX: 1125, row0: 447, rowGap: 44 };
+  const HIST = { ...historyInset(TEMPORAL), cardX: 1125, row0: 447, rowGap: 44 };
   // ticket and AGENT COMPLETE: between the bill's right edge and the instance panel's
   const DONE_X = 692;
   // NEW INSTANCE: on the top edge of instance B's panel, centered between its name and its TAKING OVER status
@@ -32,7 +25,8 @@
   const NEW_TAG = { x: 562, y: APP.y - APP.h / 2 + 16, w: 240 };
   // the agent chip flies from the first Event History row to instance B's status, 100 px from the panel's right edge
   const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 36 };
-  const memSlot = i => MEM.slot0 + i * MEM.slotGap;
+  // x of context block i, where the LLM CALL and TOOL CALL cards leave and land
+  const blockX = i => memSlotX(MEM.x - MEM.w / 2, i, MEM_BLOCK);
   const rowY = i => HIST.row0 + i * HIST.rowGap;
   // the big intro logo flies into the TEMPORAL panel header from c[0] + FLIGHT.at, for FLIGHT.d seconds
   const FLIGHT = { at: 1.9, d: 0.8 };
@@ -45,7 +39,7 @@
     subs: [
       {
         text: "<b>Durable Execution</b> with Temporal fixes this. "
-          + "Temporal keeps an Event History of the agent, outside the app.",
+          + "Temporal keeps an <b>Event History</b> of the agent, outside the app.",
         after: 0.3,
       },
       {
@@ -61,28 +55,27 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, STEP_TILES, 465, 330, 208, 260, 104);
-      s.restart = path(s.svg, 'M 1440 148 Q 960 48 480 148', C.violet, 3);
-      s.restartL = E(root, 'From the start', 'lbl', { color: C.violet });
+      s.steps = makeStepRow(root, s.svg, LUNCH_STEPS, 465, 330, 208, 260, 104);
+      s.restart = makeRestartArc(root, s.svg, 'M 1440 148 Q 960 48 480 148', 'From the start', C.violet);
       // app side, mirroring chapter 6: instance panel, its context, the LLM bill and the booking
       s.A = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h);
       s.B = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h);
       s.mem = makeMemory(root, MEM.w, MEM.h);
-      s.mblocks = makeMemBlocks(root, 8, 76, 56);
+      s.mblocks = makeMemBlocks(root, 8, MEM_BLOCK.w, MEM_BLOCK.h);
       s.bill = makeBill(root);
-      s.bill.note.style.color = C.neon;
       s.ticket = makeTicket(root);
       // Temporal side: the Event History lives in Temporal, outside the app (the logo flies into the header)
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { noteAt: [24, 24] });
       // rows 1-6 survive the crash: tinted block + crash line under them
-      const rowsHtml = JR.map((txt, i) => `<span style="color:${isLLM(i) ? C.uv : '#141414'}">${txt}</span>`);
-      s.jr = makeHistoryCard(root, rowsHtml, {
-        w: HIST.w, h: 440, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44, tag: { border: false },
+      s.history = makeHistoryCard(root, LUNCH_HISTORY, {
+        uvRow: isLLMRow, w: HIST.w, h: HIST.h, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44,
+        tag: { border: false },
         crash: { keptTop: 64, keptH: 262, cutTop: 330, label: 'APP CRASHED HERE', labelX: '66%', labelFont: 13 },
-        scanH: 42,
+        scanH: 42, scanDy: -2,
       });
-      s.saveCards = JR.map((_, i) => makeCallCard(root, i));
-      s.reuseCards = JR.slice(0, 6).map((_, i) => makeCallCard(root, i));
+      // result cards labeled with the kind of call they come from, as in the subtitle
+      s.saveCards = LUNCH_HISTORY.map((_, i) => makeCallCard(root, isLLMRow(i)));
+      s.reuseCards = LUNCH_HISTORY.slice(0, 6).map((_, i) => makeCallCard(root, isLLMRow(i)));
       // the agent itself, handed to instance B
       s.handChip = makeHandOffCard(root, 'LUNCH AGENT');
       s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w);
@@ -97,7 +90,7 @@
       // c[2]: the crash; once the memory blocks have fallen, instance A leaves (aDrop) and instance B arrives (bIn),
       // and the steps reset; Temporal hands B the agent: the chip leaves the history at handOff, as the "From the
       // start" arc draws, and reaches B's status at takeOver; step 1 runs again at rerun
-      const crashAt = c[2] + 0.8, aDrop = crashAt + 1.6, bIn = aDrop + 0.6, reset = bIn;
+      const crashAt = c[2] + 0.8, aDrop = crashAt + 1.6, bIn = aDrop + 0.6;
       const handOff = bIn + 0.7, takeOver = handOff + 0.55, rerun = takeOver + 0.3;
       // replay: saved rows 1-6 are handed back one by one, then their tags explain why it matters;
       // the replay ends at told[0]
@@ -113,11 +106,11 @@
       const logoX = TEMPORAL.x - TEMPORAL.w / 2 + 85;
       place(s.logo, lerp(960, logoX, fl), lerp(540, 325, fl), logoScale, clamp(lp * 2));
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 2.4, 0.5));
-      place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 2.6, 0.5));
+      place(s.history, HIST.x, HIST.y, 1, P(t, c[0] + 2.6, 0.5));
 
       // steps
       const states = [0, 1, 2, 3].map(i => {
-        if (t < reset) {
+        if (t < bIn) {
           if (i === 3) return dead ? 3 : t >= c[2] + 0.2 ? 1 : 0;
           return t >= saved[2 * i + 1] + 0.1 ? 2 : t >= write[2 * i] ? 1 : 0;
         }
@@ -126,46 +119,24 @@
         return t >= replay[2 * i + 1] + 0.35 ? 2 : t >= start ? 1 : 0;
       });
       placeStepRow(s.steps, t, c[0] + 2.5, states, sx, sy);
-      draw(s.restart, P(t, handOff, 0.8), 1 - P(t, c[3] + 0.3, 0.4));
-      place(s.restartL, 960, 123, 1, P(t, handOff + 0.4, 0.35) * (1 - P(t, c[3] + 0.3, 0.4)));
+      placeRestartArc(s.restart, t, handOff, 960, 123, { labelDelay: 0.4, o: 1 - P(t, c[3] + 0.3, 0.4) });
 
-      // app instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
-      const aIn = P(t, c[0] + 2.3, 0.5, backOut);
-      const leave = leavingInstance(t, aDrop);
-      place(s.A, APP.x + sx, APP.y + sy + leave.dy, aIn, clamp(aIn * 2) * leave.o);
-      if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
-      else setAppStatus(s.A, 'RUNNING THE AGENT', t >= write[0] ? 'running' : 'idle');
-      // a new copy, instance B, slides in from the left once A is gone, its border glowing violet while it arrives
-      // and takes over, gone by c[3]; IDLE until the agent chip reaches it
-      const bHere = t >= bIn;
-      const arrive = arrivingInstance(t, bIn);
-      place(s.B, APP.x + arrive.dx, APP.y, 1, arrive.o);
+      // app instance A runs, crashes, then leaves like a dead machine, and instance B takes its place. The context
+      // panel is filled as results are saved, emptied by the crash and refilled from the history; B's blocks are
+      // empty until the replay.
+      const arrive = placeTakeover(s, t, {
+        app: APP, mem: MEM, shake: [sx, sy], aIn: backPop(t, c[0] + 2.3, 0.5), runAt: write[0], crashAt,
+        emptyAt: crashAt + 1.1, aDrop, bIn, memIn: P(t, c[0] + 2.5, 0.45),
+        blockA: i => [i < 6 ? P(t, saved[i], 0.35, backOut) : 0, P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn)],
+        blockB: i => P(t, i < 6 ? replay[i] + 0.33 : saved[i], 0.35, backOut),
+      });
+      // instance B's border glows violet while it arrives and takes over, gone by c[3]; IDLE until the agent chip
+      // reaches it
       if (t < takeOver) setAppStatus(s.B, 'IDLE', 'stopped');
       else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', t >= rerun ? 'running' : 'idle');
       else if (t < told[0]) setAppStatus(s.B, 'REPLAYING…', 'running');
       else setAppStatus(s.B, 'RUNNING THE AGENT', 'running');
       setArrivalGlow(s.B, t, bIn, c[3] - 0.3);
-
-      // context: filled as results are saved, emptied by the crash, refilled from the history. The panel moves
-      // with the instance on screen (A, then B), so it never floats without its app; both are gone when it switches.
-      const memDx = bHere ? arrive.dx : sx, memDy = bHere ? 0 : sy + leave.dy;
-      const memOn = bHere ? arrive.o : leave.o;
-      place(s.mem, MEM.x + memDx, MEM.y + memDy, 1, P(t, c[0] + 2.5, 0.45) * memOn);
-      s.mem.style.borderColor = dead && !bHere ? C.red : C.line;
-      s.mem.empty.style.opacity = bHere ? 0 : P(t, crashAt + 1.1, 0.4);
-      const greyed = bHere ? '' : leave.grey;
-      s.A.style.filter = greyed;
-      s.mem.style.filter = greyed;
-      // the blocks of A have all fallen before A leaves; B's are empty until the replay
-      s.mblocks.forEach((b, i) => {
-        if (!bHere) {
-          const grow = i < 6 ? P(t, saved[i], 0.35, backOut) : 0;
-          placeMemBlock(b, memSlot(i), MEM.slotY, grow, P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn), sx, sy);
-        } else {
-          const back = i < 6 ? replay[i] + 0.33 : saved[i];
-          placeMemBlock(b, memSlot(i), MEM.slotY, P(t, back, 0.35, backOut), 0);
-        }
-      });
 
       // LLM call counter: only the 4 real calls are billed; the replay costs nothing
       const calls = [0, 2, 4, 6].filter(i => t >= write[i]).length;
@@ -175,39 +146,36 @@
       s.bill.style.borderColor = notBilled > 0.5 ? C.neon : C.line;
       place(s.bill, 270 + sx, 720 + sy, P(t, c[0] + 2.7, 0.45, backOut), P(t, c[0] + 2.7, 0.4));
       // the booking is made once and never repeated
-      const tp = P(t, saved[5], 0.45, backOut);
-      place(s.ticket, DONE_X, 648, tp * (1 + 0.15 * win(t, reused[5], reused[5] + 0.5, 0.2)), clamp(tp * 2));
+      const tp = backPop(t, saved[5]);
+      place(s.ticket, DONE_X, 648, tp.s * (1 + 0.15 * win(t, reused[5], reused[5] + 0.5, 0.2)), tp.o);
 
       // LLM CALL and TOOL CALL cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {
         const w = write[i];
-        fly(e, t, w + 0.35, memSlot(i), MEM.slotY, w + 0.4, 0.4, HIST.cardX, rowY(i), w + 0.8, HIST.cardX, rowY(i));
+        fly(e, t, w + 0.35, blockX(i), MEM.slotY, w + 0.4, 0.4, HIST.cardX, rowY(i), w + 0.8, HIST.cardX, rowY(i));
       });
       s.reuseCards.forEach((e, i) => {
         const q = replay[i];
-        fly(e, t, q, HIST.cardX, rowY(i), q + 0.05, 0.28, memSlot(i), MEM.slotY, q + 0.33, memSlot(i), MEM.slotY);
+        fly(e, t, q, HIST.cardX, rowY(i), q + 0.05, 0.28, blockX(i), MEM.slotY, q + 0.33, blockX(i), MEM.slotY);
       });
 
       // Event History rows and their status tags
-      markCrash(s.jr, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
-      s.jr.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
-      s.jr.tags.forEach((e, i) => {
+      markCrash(s.history, t, crashAt);
+      s.history.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
+      s.history.tags.forEach((e, i) => {
         const isReused = i < 6 && t >= reused[i], isTold = i < 6 && t >= told[i];
-        if (isTold) setStatus(e, isLLM(i) ? 'REUSED, NOT RE-BILLED' : 'REUSED, NOT RE-RUN', 'reused');
-        else if (isReused) setStatus(e, 'REUSED', 'reused');
-        else setStatus(e, 'SAVED', 'saved');
+        const label = isTold ? reusedLabel(isLLMRow(i)) : isReused ? 'REUSED' : 'SAVED';
         const switchedAt = isTold ? told[i] : isReused ? reused[i] : saved[i];
-        e.style.opacity = P(t, saved[i], 0.25);
-        e.style.transform = `scale(${swell(t, switchedAt, 0.14)})`;
+        placeStatusTag(e, t, label, isTold || isReused ? 'reused' : 'saved', P(t, saved[i], 0.25), switchedAt);
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 0.4);
-      setScan(s.jr, 68 + Math.max(0, scanning) * 44, scanning >= 0 ? 1 : 0);
+      scanRow(s.history, scanning);
       place(s.done, DONE_X, 795, P(t, saved[7] + 0.5, 0.45, backOut), P(t, saved[7] + 0.5, 0.35));
       placeFlash(s.flash, t, crashAt);
       // takeover: NEW INSTANCE pops on B once it is almost in place and is gone by c[3]; Temporal hands it the agent,
       // a chip from the first history row to its status, which then reads TAKING OVER
       const newAt = bIn + 0.5;
-      placeNewTag(s.newTag, t, newAt, c[3] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y, swell(t, newAt, 0.14));
+      placeNewTag(s.newTag, t, newAt, c[3] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y);
       flyChip(s.handChip, t, handOff, HIST.cardX, rowY(0), STATUS_AT.x, STATUS_AT.y);
     }
   });

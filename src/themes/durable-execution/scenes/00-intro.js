@@ -46,9 +46,7 @@
         b.ok = b.querySelector('.ok'); b.ko = b.querySelector('.ko'); b.re = b.querySelector('.re');
         return b;
       });
-      s.dot = E(root, '', '', {
-        width: '18px', height: '18px', borderRadius: '50%', background: C.neon, boxShadow: `0 0 20px ${C.neon}`,
-      });
+      s.dot = makeGlowDot(root, 18, RGB.neon, { blur: 20 });
     },
     update(t, c, s) {
       rise(s.t, TITLE_X, CHAIN.y, P(t, 0.15, 0.9));
@@ -59,8 +57,8 @@
       const fade = 1 - P(u, LOOP.reset, 0.4); // checks and neon links fade out before the next pass
       const hitAt = i => (i === LOOP.fail ? LOOP.pass : LOOP.arrive[i]); // when step i passes
       s.tiles.forEach((e, i) => {
-        const p = P(t, 0.5 + i * 0.15, 0.5, backOut);
-        place(e, CHAIN.x, tileY(i), p, clamp(p * 2));
+        const p = backPop(t, 0.5 + i * 0.15, 0.5);
+        place(e, CHAIN.x, tileY(i), p.s, p.o);
         const failed = i === LOOP.fail && u >= LOOP.arrive[i] && u < LOOP.retry;
         const retrying = i === LOOP.fail && u >= LOOP.retry && u < LOOP.pass;
         const passed = u >= hitAt(i);
@@ -72,8 +70,8 @@
         // brief glow as the pulse lands: red when the step fails, neon when it passes
         const landed = failed ? LOOP.arrive[i] : hitAt(i);
         const g = win(u, landed, landed + 0.15, 0.15);
-        const rgb = failed ? '255,90,95' : '219,255,75';
-        e.style.boxShadow = g > 0.01 ? `0 0 ${Math.round(30 * g)}px rgba(${rgb},${(0.5 * g).toFixed(3)})` : 'none';
+        const rgb = failed ? RGB.red : RGB.neon;
+        e.style.boxShadow = glowShadow(rgb, g, { blur: 30, alpha: 0.5 });
         // badge: the check pops in and fades with the reset; the cross and the retry arrow show while they last
         const b = s.badges[i];
         const pop = passed ? popIn(u, hitAt(i)) : { o: 1, s: 1 };

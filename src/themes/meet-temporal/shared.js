@@ -17,26 +17,22 @@ Object.assign(ICONS, {
   key: '<circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21M17.5 12v3.5M20.5 12v2.5"/>',
 });
 
-// Official photo of the two founders (https://temporal.io/about), 900x929 px. Resolved against src/, as LOGO:
-// this script lives two folders below it. In a built page the asset path is already a data: URI, which new URL()
-// keeps as is.
-const PHOTO = {
-  url: new URL('assets/temporal-founders.jpg', new URL('../../', document.currentScript.src || document.baseURI)).href,
-  w: 900, h: 929,
-};
+// Official Temporal symbol alone (white)
+const SYMBOL = assetUrl('assets/temporal-symbol-light-cropped.svg');
+// Official photo of the two founders (https://temporal.io/about), 900x929 px
+const PHOTO = { url: assetUrl('assets/temporal-founders.jpg'), w: 900, h: 929 };
 
 // The languages of Temporal's SDKs, in the order chapter 6 reads them, each with its official logo (their sources
-// and licenses are in the README of their folder), resolved against src/ as PHOTO
-const ASSETS_BASE = new URL('../../', document.currentScript.src || document.baseURI);
+// and licenses are in the README of their folder)
 const LANGUAGES = [
-  ['Go', new URL('assets/languages/go.svg', ASSETS_BASE).href],
-  ['Java', new URL('assets/languages/java.svg', ASSETS_BASE).href],
-  ['Python', new URL('assets/languages/python.svg', ASSETS_BASE).href],
-  ['TypeScript', new URL('assets/languages/typescript.svg', ASSETS_BASE).href],
-  ['.NET', new URL('assets/languages/dotnet.svg', ASSETS_BASE).href],
-  ['PHP', new URL('assets/languages/php.svg', ASSETS_BASE).href],
-  ['Ruby', new URL('assets/languages/ruby.svg', ASSETS_BASE).href],
-  ['Rust', new URL('assets/languages/rust.svg', ASSETS_BASE).href],
+  ['Go', assetUrl('assets/languages/go.svg')],
+  ['Java', assetUrl('assets/languages/java.svg')],
+  ['Python', assetUrl('assets/languages/python.svg')],
+  ['TypeScript', assetUrl('assets/languages/typescript.svg')],
+  ['.NET', assetUrl('assets/languages/dotnet.svg')],
+  ['PHP', assetUrl('assets/languages/php.svg')],
+  ['Ruby', assetUrl('assets/languages/ruby.svg')],
+  ['Rust', assetUrl('assets/languages/rust.svg')],
 ];
 
 // The two founders, in the order the scenes introduce them; `face` is the center of the face in the photo (Samar
@@ -70,26 +66,22 @@ function hash(n) {
 // Camera of a scene: a full-stage layer that holds the scene's elements, so the whole composition can be scaled and
 // moved around the stage center. Build the scene's elements in it.
 function makeCamera(root) {
-  const cam = E(root, '', 'cam', { width: '1920px', height: '1080px', transformOrigin: '960px 540px' });
-  cam.style.opacity = 1;
-  return cam;
+  return E(root, '', 'cam', { width: '1920px', height: '1080px', transformOrigin: '960px 540px', opacity: 1 });
 }
 // Zoom-through between scenes: the composition grows from `enter` (0.94; 1 for none) to 1 over enterD seconds as
 // the scene fades in, and on to 1.06 as it fades out (dur: the scene duration). scale, dx, dy: an extra camera move
 // of the scene, at rest 1, 0, 0 so that a resting frame sits on whole pixels.
-// The exit zoom runs over the scene's last CAMERA_EXIT seconds: scenes set `holdBeforeEnd: CAMERA_EXIT`, so the
-// presenter's end-of-scene stop falls just before it and the zoom plays with the fade into the next scene.
-const CAMERA_EXIT = 0.6;
+// The exit zoom runs over the scene's default fade-out (SCENE_FADE): the presenter's end-of-scene stop, at the start
+// of that fade, falls just before it, and the zoom plays with the fade into the next scene.
 function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enterD = 0.6, exit = 1.06 } = {}) {
-  const zoom = lerp(enter, 1, P(t, 0, enterD)) * lerp(1, exit, P(t, dur - CAMERA_EXIT, CAMERA_EXIT, easeIn));
+  const zoom = lerp(enter, 1, P(t, 0, enterD)) * lerp(1, exit, P(t, dur - SCENE_FADE, SCENE_FADE, easeIn));
   cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
 }
 
-// Glowing dot of light, size px wide, in a color (an rgb triplet such as '219,255,75'); place() centers it
-const makeSpark = (p, size = 14, rgb = '248,250,252') => E(p, '', '', {
-  width: size + 'px', height: size + 'px', borderRadius: '50%', background: `rgb(${rgb})`,
-  boxShadow: `0 0 ${size}px ${Math.round(size / 2)}px rgba(${rgb},.55)`,
-});
+// Spark: a makeGlowDot with a wide soft halo, size px wide, in a color (an RGB triplet, e.g. RGB.neon)
+function makeSpark(p, size = 14, rgb = RGB.ink) {
+  return makeGlowDot(p, size, rgb, { spread: Math.round(size / 2), alpha: 0.55 });
+}
 // Puts a spark on the head of a path drawn to prog (0 to 1): it shows only while the path draws
 function sparkOnPath(spark, pathEl, prog, dx = 0, dy = 0) {
   if (prog <= 0 || prog >= 1) {
@@ -104,9 +96,10 @@ function sparkOnPath(spark, pathEl, prog, dx = 0, dy = 0) {
 function makeRipples(p, n, rgb) {
   return Array.from({ length: n }, () => E(p, '', '', { borderRadius: '50%', border: `3px solid rgb(${rgb})` }));
 }
-function placeRipples(rings, t, at, x, y, size0, size1, d = 1.2) {
+// Each ring grows over d seconds, step seconds after the one before it
+function placeRipples(rings, t, at, x, y, size0, size1, { d = 1.2, step = 0.25 } = {}) {
   rings.forEach((e, i) => {
-    const p = P(t, at + i * 0.25, d, x => 1 - Math.pow(1 - x, 2));
+    const p = P(t, at + i * step, d, x => 1 - Math.pow(1 - x, 2));
     // sized, not scaled, so the ring keeps its 3 px line
     const size = Math.round(lerp(size0, size1, p) / 2) * 2;
     e.style.width = e.style.height = size + 'px';
@@ -152,23 +145,15 @@ function setSymbolDraw(e, draw, fill) {
 }
 
 // ===================== hand-off from chapter 3 (the AI hub) to chapter 4 (the agentic loop)
-// Chapter 4's agentic loop: the geometry it is built with, and where it shows for the whole chapter (`place`: its
-// center on the stage and its scale, so it never moves, from the cut to the end), and the chapter's camera shift.
-// The scale gives the LLM node an even whole size (112 px), so it rests on whole pixels
-const AGENT_LOOP = { cx: 560, cy: 540, r: 220 };
-const AGENT_PLACE = { x: 520, y: 489, k: 112 / 130 };
-const AGENT_START = { shift: [0, 0] };
-// the LLM node's size as built in chapter 4, and the blink phase of both orbs
-const AGENT_LLM = { size: 130, seed: 0.37 };
+// Chapter 4's agentic loop, in place for the whole chapter, so it never moves from the cut to the end: its center
+// on the stage, its radius and the size of its nodes, even, so they rest on whole pixels
+const AGENT_LOOP = { cx: 520, cy: 489, r: 190, node: 112 };
+// the blink phase of both LLM orbs, chapter 3's and chapter 4's
+const AGENT_LLM_SEED = 0.37;
 // The stage point where chapter 4's LLM node (THINK, on top of the loop) shows, and its size there: chapter 3's AI
-// hub turns into that LLM node, so the same bubble carries across the cut. Rounded, as chapter 4 snaps its nodes to
-// whole pixels
-const AGENT_HANDOFF = {
-  x: Math.round(AGENT_PLACE.x + AGENT_START.shift[0]),
-  y: Math.round(AGENT_PLACE.y - AGENT_LOOP.r * AGENT_PLACE.k + AGENT_START.shift[1]),
-  size: AGENT_LLM.size * AGENT_PLACE.k,
-};
+// hub turns into that LLM node, so the same bubble carries across the cut
+const AGENT_HANDOFF = { x: AGENT_LOOP.cx, y: AGENT_LOOP.cy - AGENT_LOOP.r, size: AGENT_LOOP.node };
 // The halo around the bubble at the cut: its size on screen (diameter, px) and opacity, the same on both sides
 const HANDOFF_HALO = { size: 300, o: 0.8 };
-const HALO_BACKGROUND = 'radial-gradient(circle, rgba(182,100,255,.4) 0%, rgba(68,76,231,.15) 45%, '
-  + 'rgba(68,76,231,0) 70%)';
+const HALO_BACKGROUND = `radial-gradient(circle, rgba(${RGB.violet},.4) 0%, rgba(${RGB.uv},.15) 45%, `
+  + `rgba(${RGB.uv},0) 70%)`;

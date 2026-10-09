@@ -20,7 +20,7 @@
   ];
   const isModel = i => STEPS[i].icon === 'agent';
   // result card of step i, labeled with the kind of call it comes from, as in the subtitle
-  const makeCallCard = (root, i) => makeResultCard(root, isModel(i), isModel(i) ? 'MODEL CALL' : 'TOOL CALL');
+  const makeStepCard = (root, i) => makeCallCard(root, isModel(i), { modelLabel: 'MODEL CALL' });
   // Layout: step tiles on top; the app and its counters on the left, Temporal and its Event History on the right.
   // The step row spans exactly the width of the components below it, from LEFT to RIGHT. On the content frame
   // y 150-880: the step row's top at 150, the panels 86 px below it, the counters and the TEMPORAL panel ending at 880.
@@ -46,16 +46,11 @@
   const rowY = i => HIST.y - HIST.h / 2 + rowTop(i) + 18; // on the stage, where result cards land
 
   // the step tiles in a row joined by thin links, with this turn's five steps
-  const makeTurnRow = (root, svg) => {
-    const steps = STEPS.map(st => [st.icon, st.label]);
-    return makeStepRow(root, svg, steps, LEFT + ROW.w / 2, ROW_GAP, ROW.y, ROW.w, ROW.h);
-  };
+  const makeTurnRow = (root, svg) => makeStepRow(root, svg, STEPS, LEFT + ROW.w / 2, ROW_GAP, ROW.y, ROW.w, ROW.h);
   // counter tile at a fixed height, its content centered vertically, so both columns end on the same line
   const makeTallCounter = (p, label) => {
-    const e = makeCounter(p, label, COUNTER.w);
-    Object.assign(e.style, {
-      height: COUNTER.h + 'px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
-    });
+    const e = makeCounter(p, label, COUNTER.w, { h: COUNTER.h });
+    Object.assign(e.style, { display: 'flex', flexDirection: 'column', justifyContent: 'center' });
     return e;
   };
 
@@ -93,17 +88,16 @@
       // Temporal side, outside the app: native-size logo header (whole pixels, never scaled) and the Event History
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { logoAt: [28, 30], noteAt: [28, 36] });
       // rows 1-4 survive the crash: tinted block + crash line under them
-      const rowsHtml = STEPS.map((st, i) => `<span style="color:${isModel(i) ? C.uv : '#141414'}">${st.row}</span>`);
-      s.jr = makeHistoryCard(root, rowsHtml, {
-        w: HIST.w, h: HIST.h, rowTop, tagTop: i => rowTop(i) + 5,
+      s.history = makeHistoryCard(root, STEPS.map(st => st.row), {
+        uvRow: isModel, w: HIST.w, h: HIST.h, rowTop, tagTop: i => rowTop(i) + 5,
         crash: {
           keptTop: rowTop(0) - 8, keptH: 3 * HIST.rowGap + 54, cutTop: rowTop(4) - 8,
           label: 'APP CRASHED HERE', labelX: '56%', labelFont: 13,
         },
-        scanH: 42,
+        scanH: 42, scanDy: -2,
       });
-      s.saveCards = STEPS.map((_, i) => makeCallCard(root, i));
-      s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeCallCard(root, i));
+      s.saveCards = STEPS.map((_, i) => makeStepCard(root, i));
+      s.reuseCards = STEPS.slice(0, 4).map((_, i) => makeStepCard(root, i));
       // the agent's Workflow, handed to instance B
       s.handCard = makeHandOffCard(root, 'AGENT WORKFLOW');
       s.newTag = makeNewTag(root, 'New instance', NEW_TAG.w, NEW_TAG.h);
@@ -122,7 +116,6 @@
       // then A leaves (aDrop), B arrives (bIn, the reset of the step row) and Temporal hands it the Workflow: the card
       // leaves the history at handOff and reaches B's status at takeOver
       const aDrop = aOut + 0.25, bIn = aDrop + 0.6, handOff = bIn + 0.9, takeOver = handOff + 0.55;
-      const reset = bIn;
       // c[3]: B replays rows 1-4 one by one, then step 5 runs for real
       const replay = [0, 1, 2, 3].map(i => c[3] + 0.5 + i * 1.2);
       run.push(c[3] + 5.4);
@@ -137,9 +130,9 @@
       // the failure builds up before the crash: A's border and status flicker red, the running chip jitters
       const glitch = crashGlitch(t, crashAt);
 
-      // steps: before the reset, instance A runs them; after it, rows 1-4 re-check without running
+      // steps: instance A runs them; once B arrives, rows 1-4 re-check without running
       const states = STEPS.map((_, i) => {
-        if (t < reset) {
+        if (onA) {
           if (i === 4) return dead ? 3 : t >= firstTry ? 1 : 0;
           return t >= saved[i] + 0.1 ? 2 : t >= run[i] ? 1 : 0;
         }
@@ -149,15 +142,12 @@
       placeStepRow(s.steps, t, c[0] + 0.2, states, ax, ay);
 
       // instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
-      const aIn = P(t, c[0] + 0.1, 0.5, backOut);
+      const aIn = backPop(t, c[0] + 0.1, 0.5);
       const leave = leavingInstance(t, aDrop);
-      place(s.A, APP.x + ax, APP.y + ay + leave.dy, aIn, clamp(aIn * 2) * leave.o);
+      place(s.A, APP.x + ax, APP.y + ay + leave.dy, aIn.s, aIn.o * leave.o);
       if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, 'RUNNING THE AGENT', t >= run[0] ? 'running' : 'idle');
-      if (glitch.red) {
-        s.A.style.borderColor = C.red;
-        s.A.st.style.color = C.red;
-      }
+      glitchPanel(s.A, glitch);
       s.A.st.style.opacity = 1 - P(t, aOut, 0.25);
       s.A.style.filter = leave.grey;
       // a new instance B slides in from the left once A is gone, its border glowing violet while it arrives and
@@ -184,7 +174,7 @@
       // step 5 on instance A falls with the crash
       const fall = P(t, crashAt + 0.1, 0.6, easeIn);
       s.chips.forEach((e, i) => {
-        if (i === 4 && t < reset) {
+        if (i === 4 && onA) {
           const x = APP.x + ax + glitch.dx;
           place(e, x, APP.chipY + ay + fall * 120, 1, win(t, firstTry, aOut, 0.15) * (1 - fall), fall * -12);
         } else {
@@ -192,9 +182,9 @@
         }
       });
       // label over the chip: the step number, or where its result comes from during the replay
-      const replaying = t >= reset && t < rerun;
+      const replaying = !onA && t < rerun;
       let step;
-      if (t < reset) step = t >= firstTry ? 4 : Math.max(0, run.filter(r => t >= r).length - 1);
+      if (onA) step = t >= firstTry ? 4 : Math.max(0, run.filter(r => t >= r).length - 1);
       else step = replaying ? Math.max(0, replay.filter(q => t >= q).length - 1) : 4;
       s.chipLbl.textContent = replaying ? `Step ${step + 1}: from the history` : `Step ${step + 1} of 5`;
       s.chipLbl.style.color = replaying ? C.violet : C.slate;
@@ -202,8 +192,8 @@
       const lblOff = P(t, crashAt + 0.1, 0.2);
       const lblOn = Math.max(win(t, run[0], aOut, 0.15) * (1 - lblOff), win(t, replay[0], doneAt - 0.45, 0.15));
       place(s.chipLbl, APP.x + ax, APP.lblY + ay, 1, lblOn);
-      const dp = P(t, doneAt, 0.45, backOut);
-      place(s.done, APP.x, (APP.lblY + APP.chipY) / 2, dp, clamp(dp * 2));
+      const dp = backPop(t, doneAt);
+      place(s.done, APP.x, (APP.lblY + APP.chipY) / 2, dp.s, dp.o);
 
       // counters: only the 3 real model calls are billed and the flight is booked once; the replay costs nothing
       const calls = [0, 2, 4].filter(i => t >= saved[i]).length;
@@ -217,21 +207,21 @@
       [[s.billed, billedGlow, notBilled], [s.booked, bookedGlow, 0]].forEach(([e, g, hint]) => {
         e.n.style.color = g > 0.5 ? C.neon : C.ink;
         e.style.borderColor = g > 0.5 || hint > 0.5 ? C.neon : C.line;
-        e.style.boxShadow = `0 0 ${Math.round(28 * g)}px rgba(219,255,75,${(0.3 * g).toFixed(2)})`;
+        e.style.boxShadow = glowShadow(RGB.neon, g, { blur: 28, alpha: 0.3 });
       });
       // the number pops when it changes (the model calls are saved far apart, so their swells never overlap)
       const billedSwell = Math.max(...[0, 2, 4].map(i => swell(t, saved[i], 0.12)));
       s.billed.n.style.transform = `scale(${billedSwell})`;
       s.booked.n.style.transform = `scale(${swell(t, saved[3], 0.12)})`;
-      const counterIn = i => P(t, c[0] + 0.5 + i * 0.12, 0.45, backOut);
       const counterX = [APP.x - APP.w / 2 + COUNTER.w / 2, APP.x + APP.w / 2 - COUNTER.w / 2];
       [s.billed, s.booked].forEach((e, i) => {
-        place(e, counterX[i] + ax, COUNTER.y + ay, counterIn(i), clamp(counterIn(i) * 2));
+        const pop = backPop(t, c[0] + 0.5 + i * 0.12);
+        place(e, counterX[i] + ax, COUNTER.y + ay, pop.s, pop.o);
       });
 
       // Temporal panel: faded in at native size (no scale), so the header logo stays pixel-aligned
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 0.3, 0.5));
-      place(s.jr, HIST.x, HIST.y, 1, P(t, c[0] + 0.45, 0.5));
+      place(s.history, HIST.x, HIST.y, 1, P(t, c[0] + 0.45, 0.5));
 
       // MODEL CALL and TOOL CALL cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {
@@ -245,19 +235,16 @@
       });
 
       // Event History rows and their status tags
-      markCrash(s.jr, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
-      s.jr.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
-      s.jr.tags.forEach((e, i) => {
+      markCrash(s.history, t, crashAt);
+      s.history.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
+      s.history.tags.forEach((e, i) => {
         const isReused = i < 4 && t >= replay[i] + 0.05, isTold = i < 4 && t >= told[i];
-        if (isTold) setStatus(e, isModel(i) ? 'REUSED, NOT RE-BILLED' : 'REUSED, NOT RE-RUN', 'reused');
-        else if (isReused) setStatus(e, 'REUSED', 'reused');
-        else setStatus(e, 'SAVED', 'saved');
+        const label = isTold ? reusedLabel(isModel(i)) : isReused ? 'REUSED' : 'SAVED';
         const switchedAt = isTold ? told[i] : isReused ? replay[i] + 0.05 : saved[i];
-        e.style.opacity = P(t, saved[i], 0.25);
-        e.style.transform = `scale(${swell(t, switchedAt, 0.14)})`;
+        placeStatusTag(e, t, label, isTold || isReused ? 'reused' : 'saved', P(t, saved[i], 0.25), switchedAt);
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 1.0);
-      setScan(s.jr, rowTop(Math.max(0, scanning)) - 2, scanning >= 0 ? 1 : 0);
+      scanRow(s.history, scanning);
       // crash: red flash and a bolt strikes A's panel; once step 5's chip has mostly fallen out, APP CRASH stands
       // in the panel. Both shake with the app side and leave with A's CRASHED status, before A drops.
       placeFlash(s.flash, t, crashAt);

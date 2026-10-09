@@ -43,15 +43,10 @@
   // and lands in its row LAND after `at`
   const through = (at, row) => [[at, EXIT_X, LANE, 0.8], [at + 0.65, TOOLS.rowX, TOOLS.rows[row], 0.7]];
   const GATE_HIT = 0.42, LAND = 1.4;
-  // 0 -> 1 -> 0 over [at, at + d]
-  const bump = (t, at, d) => Math.sin(Math.PI * clamp((t - at) / d));
 
-  // status tag under a call, a little larger than the shared one: 'ok' (allowed, approved, done), 'denied' or 'wait'
-  const makeTag = p => {
-    const e = statusTag(p);
-    Object.assign(e.style, { fontSize: '17px', paddingLeft: 'calc(10px + .1em)' });
-    return e;
-  };
+  // statusTag options of the tag under a call, a little larger than the shared one; its left padding offsets the
+  // trailing letter spacing. Kinds: 'ok' (allowed, approved, done), 'denied' or 'wait'
+  const CALL_TAG = { font: 17, pad: '4px 10px 4px calc(10px + .1em)' };
 
   scene({
     chapter: 3, title: 'Human approvals',
@@ -60,7 +55,8 @@
     // laid out in final coordinates: the gate column reserves the AUTO MODE space from the start
     subs: [
       {
-        text: "Some tool calls need a person's OK first, like a payment. The <b>approval policy</b> decides which ones.",
+        text: "Some tool calls need a person's OK first, like a payment. "
+          + 'The <b>approval policy</b> decides which ones.',
         after: 2.3,
       },
       {
@@ -110,7 +106,7 @@
       s.rule = E(root, `<div>${autoRule('approve: hotel under $500')}${autoRule('deny: hotel over $5,000')}</div>`,
         'mono', {
           width: GATE.w + 'px', height: RULE_CARD.h + 'px', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', fontSize: '20px', background: C.ink, color: '#141414',
+          justifyContent: 'center', fontSize: '20px', background: C.ink, color: C.bg,
           borderLeft: '5px solid ' + C.uv, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
         });
       // rule lines, in order: approve, deny
@@ -135,30 +131,11 @@
       s.approve = button('Approve'); s.deny = button('Deny');
 
       // durable wait: a clock racing through the waiting time, and a pause badge on the parked call
-      s.wait = E(root,
-        '<div class="lbl" style="font-size:16px">Durable wait</div>'
-        + '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:10px">'
-        + `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="${C.violet}" stroke-width="1.8"`
-        + ' stroke-linecap="square" style="display:block"><circle cx="12" cy="12" r="9"/>'
-        + '<path class="mh" d="M12 12V5.5"/><path class="hh" d="M12 12h4"/></svg>'
-        + `<span class="mono" style="font-size:22px;letter-spacing:.06em;color:${C.violet}">WAITING `
-        + '<span class="d" style="display:inline-block;min-width:6.6ch;text-align:left"></span></span></div>',
-        'tile', {
-          width: CALL_W + 'px', height: (WAIT.y1 - WAIT.y0) + 'px', borderColor: C.violet,
-          display: 'flex', flexDirection: 'column', justifyContent: 'center',
-        });
-      s.waitD = s.wait.querySelector('.d');
-      s.minute = s.wait.querySelector('.mh'); s.hour = s.wait.querySelector('.hh');
-      s.pause = E(root, ICON('pause', 22, C.violet, 1.8), '', {
-        width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'var(--violet-solid)', border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)',
-      });
-      // a denied call goes back to the agent, the reason as its result: a left arrow (its head filled explicitly,
-      // see arrowHead in engine.js) and a label
+      s.wait = makeWaitCard(root, CALL_W, WAIT.y1 - WAIT.y0);
+      s.pause = makePauseBadge(root);
+      // a denied call goes back to the agent, the reason as its result: a left arrow and a label
       s.reason = E(root,
-        `<svg width="36" height="14" viewBox="0 0 36 14" style="display:block">`
-        + `<path d="M10 7 H 34.5" stroke="${C.red}" stroke-width="2.5" stroke-linecap="round"/>`
-        + `<path d="M12 1.5 L0 7 L12 12.5 z" fill="${C.red}"/></svg>`
+        inlineArrow(36, C.red, true)
         + `<span class="lbl" style="font-size:18px;color:${C.red}">Reason sent to the model</span>`,
         '', { display: 'flex', alignItems: 'center', gap: '12px' });
 
@@ -172,7 +149,7 @@
         Object.assign(e.style, { width: CALL_W + 'px', textAlign: 'center' });
         return e;
       });
-      s.tags = s.calls.map(() => makeTag(root));
+      s.tags = s.calls.map(() => statusTag(root, CALL_TAG));
     },
     update(t, c, s) {
       // c[0]: the two searches pop next to the agent and cross the gate one after the other; book_flight stops
@@ -197,8 +174,8 @@
       const hotelWaits = t >= escalate && t < drop + 0.4;
 
       // agent, gate, tools, person
-      const ap = P(t, c[0], 0.6, backOut);
-      place(s.agent.root, AGENT.x, AGENT.y, ap, clamp(ap * 2));
+      const ap = backPop(t, c[0], 0.6);
+      place(s.agent.root, AGENT.x, AGENT.y, ap.s, ap.o);
       // the agent thinks before each call it sends, and once it has read why the suite was denied
       const think = win(t, c[0] + 0.6, pop[2], 0.3) + win(t, c[2] + 0.9, suitePop, 0.3)
         + win(t, backAtAgent, bigPop, 0.3);
@@ -206,9 +183,9 @@
       draw(s.lane, P(t, c[0] + 0.6, 0.6));
       const gateColor = crossing ? C.neon : (flightWaits || hotelWaits) ? C.violet : C.line;
       [s.gate, s.rules].forEach((e, i) => {
-        const p = P(t, c[0] + 0.2 + i * 0.1, 0.5, backOut);
+        const p = backPop(t, c[0] + 0.2 + i * 0.1, 0.5);
         e.style.borderColor = gateColor;
-        place(e, GATE.x, i === 0 ? POLICY.y0 + POLICY.h / 2 : RULES.y0 + RULES.h / 2, p, clamp(p * 2));
+        place(e, GATE.x, i === 0 ? POLICY.y0 + POLICY.h / 2 : RULES.y0 + RULES.h / 2, p.s, p.o);
       });
       // the rule a call matches lights up: each search its own ALLOW row, the bookings the ASK row
       const searchLit = i => t >= cross[i] + 0.2 && t < cross[i] + 1.2;
@@ -216,39 +193,39 @@
         || (t >= bigParked && t < drop + 0.4);
       const ruleLit = [searchLit(0), searchLit(1), flightWaits || hotelAsks];
       s.ruleRows.forEach((row, i) => {
-        const litColor = i < 2 ? 'rgba(219,255,75,.12)' : 'rgba(182,100,255,.18)';
+        const litColor = i < 2 ? `rgba(${RGB.neon},.12)` : `rgba(${RGB.violet},.18)`;
         row.style.background = ruleLit[i] ? litColor : 'transparent';
       });
-      const tp = P(t, c[0] + 0.4, 0.5, backOut);
-      place(s.tools, TOOLS.rowX, (TOOLS.y0 + TOOLS.y1) / 2, tp, clamp(tp * 2));
+      const tp = backPop(t, c[0] + 0.4, 0.5);
+      place(s.tools, TOOLS.rowX, (TOOLS.y0 + TOOLS.y1) / 2, tp.s, tp.o);
 
-      const yp = P(t, c[0] + 0.6, 0.5, backOut);
+      const yp = backPop(t, c[0] + 0.6, 0.5);
       const youWaits = (t >= c[1] + 1.4 && t < approve + 0.05) || t >= atYou;
       const youActs = t >= approve + 0.05 && t < cross[2];
       s.you.style.borderColor = youActs ? C.neon : youWaits ? C.violet : C.line;
-      place(s.you, YOU.x, YOU.y, yp, clamp(yp * 2));
+      place(s.you, YOU.x, YOU.y, yp.s, yp.o);
       const pressed = t >= approve + 0.05 && t < c[2] + 0.2;
       s.approve.className = 'abs pill' + (pressed ? ' neon' : '');
-      const bp = P(t, c[0] + 0.75, 0.45, backOut), dp = P(t, c[0] + 0.85, 0.45, backOut);
-      place(s.approve, YOU.buttonX, YOU.y - YOU.buttonDy, bp * (1 - 0.08 * bump(t, approve, 0.25)), clamp(bp * 2));
-      place(s.deny, YOU.buttonX, YOU.y + YOU.buttonDy, dp, clamp(dp * 2));
+      const bp = backPop(t, c[0] + 0.75), dp = backPop(t, c[0] + 0.85);
+      place(s.approve, YOU.buttonX, YOU.y - YOU.buttonDy, bp.s * (1 - 0.08 * bumpAt(t, approve)), bp.o);
+      place(s.deny, YOU.buttonX, YOU.y + YOU.buttonDy, dp.s, dp.o);
 
       // tool calls: pop out next to the agent, then follow their route; tags ride under them
       const placeCall = (i, appear, legs, cls, fade = Infinity) => {
-        const grow = P(t, appear, 0.45, backOut);
+        const grow = backPop(t, appear);
         const [x, y] = pan(t, FROM, legs);
-        const o = clamp(grow * 2) * (1 - P(t, fade, 0.4));
+        const o = grow.o * (1 - P(t, fade, 0.4));
         s.calls[i].className = 'abs pill solid ' + cls;
-        place(s.calls[i], x, y, grow, o);
+        place(s.calls[i], x, y, grow.s, o);
         return [x, y, o];
       };
       // the tag pops at popAt, swells briefly at swellAt (a status change), and hides from hideAt: it is
       // too wide to follow its call through the gate, so it pops again once the call has landed
       const placeTag = (i, [x, y, o], popAt, label, kind, swellAt = Infinity, hideAt = Infinity) => {
         setStatus(s.tags[i], label, kind);
-        const grow = P(t, popAt, 0.4, backOut);
-        const scale = grow * (1 + 0.12 * bump(t, swellAt, 0.3));
-        place(s.tags[i], x, y + TAG_DY, scale, o * clamp(grow * 2) * (1 - P(t, hideAt, 0.2)));
+        const grow = backPop(t, popAt, 0.4);
+        const scale = grow.s * (1 + 0.12 * bumpAt(t, swellAt));
+        place(s.tags[i], x, y + TAG_DY, scale, o * grow.o * (1 - P(t, hideAt, 0.2)));
       };
       // a call that stops in front of the gate: from the agent to the parking spot, 0.3 s after it pops
       const toPark = at => [at + 0.3, PARK.x, PARK.y, 0.8];
@@ -267,16 +244,13 @@
       else if (t < booked) placeTag(2, f2, parkFlight + 0.2, 'APPROVED', 'ok', approved, cross[2]);
       else placeTag(2, f2, booked, 'BOOKED', 'ok');
 
-      const pp = P(t, c[1] + 0.3, 0.45, backOut);
+      const pp = backPop(t, c[1] + 0.3);
       // the 44 px pause badge sits 8 px left of the parked call
-      place(s.pause, PARK.x - CALL_W / 2 - 30, PARK.y, pp, clamp(pp * 2) * (1 - P(t, approved, 0.3)));
-      const wp = P(t, c[1] + 0.6, 0.45, backOut);
-      place(s.wait, PARK.x, (WAIT.y0 + WAIT.y1) / 2, wp, clamp(wp * 2) * (1 - P(t, approved + 0.1, 0.3)));
+      place(s.pause, PARK.x - CALL_W / 2 - 30, PARK.y, pp.s, pp.o * (1 - P(t, approved, 0.3)));
+      const wp = backPop(t, c[1] + 0.6);
+      place(s.wait, PARK.x, (WAIT.y0 + WAIT.y1) / 2, wp.s, wp.o * (1 - P(t, approved + 0.1, 0.3)));
       // the waiting time races from minutes to days; the clock hands spin with it
-      const race = clamp((t - c[1] - 1.2) / 2.8);
-      s.waitD.textContent = WAITS[Math.min(WAITS.length - 1, Math.floor(race * WAITS.length))];
-      s.minute.setAttribute('transform', `rotate(${race * 360 * 12} 12 12)`);
-      s.hour.setAttribute('transform', `rotate(${race * 360} 12 12)`);
+      setWaitRace(s.wait, WAITS, clamp((t - c[1] - 1.2) / 2.8));
       draw(s.ask, P(t, c[1] + 1.0, 0.6), 1 - P(t, approved + 0.1, 0.3));
 
       // c[2] to c[4]: the AUTO MODE judge docks on the gate; it weighs each hotel parked in front of the gate
@@ -293,8 +267,8 @@
       // its rules slide out from under it; the rule behind a verdict lights up
       const rp = P(t, c[2] + 0.8, 0.4);
       s.rule.style.borderLeftColor = judgeColor === C.line ? C.uv : judgeColor;
-      s.ruleLines[0].style.background = judgeOk ? 'rgba(219,255,75,.6)' : 'transparent';
-      s.ruleLines[1].style.background = judgeDenies ? 'rgba(255,90,95,.3)' : 'transparent';
+      s.ruleLines[0].style.background = judgeOk ? `rgba(${RGB.neon},.6)` : 'transparent';
+      s.ruleLines[1].style.background = judgeDenies ? `rgba(${RGB.red},.3)` : 'transparent';
       place(s.rule, GATE.x, RULE_CARD.y0 + RULE_CARD.h / 2 - 12 * (1 - rp), 1, rp);
 
       const h0 = placeCall(3, hotelPop, [toPark(hotelPop), ...through(cross[3], 1)], 'uv');

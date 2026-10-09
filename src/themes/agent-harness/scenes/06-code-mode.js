@@ -11,10 +11,10 @@
   const toolY = i => TOP + LEFT.toolH / 2 + i * (LEFT.toolH + LEFT.toolGap);
   const ORB_Y = toolY(1);
   const ORB_EDGE = LEFT.orbX + LEFT.orbSize / 2 + 4, TOOL_EDGE = LEFT.toolX - LEFT.toolW / 2 - 4; // connector ends
-  // the 3 round trips, one per tool the script calls (tool index of each call), and their timing, from
-  // c[0] + TRIPS.at: the call travels for `out` seconds, waits `stay` seconds at the tool, and the result travels
-  // back for `out` seconds. The last result is back at c[0] + 5.95; the count of 3 then holds until c[1].
-  const TRIPS = { at: 1.0, gap: 1.9, out: 0.45, stay: 0.25, targets: [0, 1, 2] };
+  // the 3 round trips, trip i to tool i, and their timing, from c[0] + TRIPS.at: the call travels for `out`
+  // seconds, waits `stay` seconds at the tool, and the result travels back for `out` seconds. The last result is
+  // back at c[0] + 5.95; the count of 3 then holds until c[1].
+  const TRIPS = { at: 1.0, gap: 1.9, out: 0.45, stay: 0.25 };
   // "3 round trips" vs "1 round trip": two equal count tiles on the zones' bottom line (y 808-880), so the divider
   // runs between them: 3 ROUND TRIPS right-aligned with the tool tiles above it (x 460-700), 1 ROUND TRIP on the
   // left edge of the right zone (x 800-1040)
@@ -88,12 +88,6 @@
   // pill height, the pill rests on whole pixels
   const BEST_LEFT = CODE.textX + CODE.numW + lineLength(SCRIPT[MIN_LINE]) * CHAR_W + 28, BEST_H = 34;
 
-  // place() anchored on the element's left edge, so a pill keeps its gap to the code it follows
-  const placeLeft = (e, x, y, scale, o) => {
-    e.style.transform = `translate(${x}px,${y}px) translateY(-50%) scale(${scale})`;
-    e.style.opacity = clamp(o);
-    e.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
-  };
   // step tile whose label is a tool name in code font (iconTile uppercases its labels)
   const makeToolStep = (p, icon, name) => {
     const e = makeStep(p, icon, name, STEP.w, STEP.h);
@@ -139,8 +133,9 @@
         after: 4.3,
       },
       {
-        text: "Loops, conditions and parallel calls all run inside the script, in one turn.",
-        after: 1.1,
+        text: 'Parallel calls and the logic between them run inside the script, as one tool call.',
+        // the best: $480 pill lands at c[2] + 4.65 and reads for about 2 s before c[3]
+        after: 0.725,
       },
       {
         text: "Every call stays durable, gated and visible, and the whole script takes one round trip, not three.",
@@ -173,7 +168,7 @@
         'tile', { width: CODE.w + 'px', height: CODE.h + 'px', textAlign: 'left' });
       // the run highlight sits behind the code lines
       s.hl = E(s.code, '', '', {
-        left: '12px', width: (CODE.w - 24) + 'px', background: 'rgba(182,100,255,.16)',
+        left: '12px', width: (CODE.w - 24) + 'px', background: `rgba(${RGB.violet},.16)`,
         borderLeft: '3px solid ' + C.violet, borderRadius: 'var(--rs)',
       });
       s.lines = SCRIPT.map((_, i) => {
@@ -225,28 +220,28 @@
     update(t, c, s) {
       // ---- c[0], left: three round trips; c[1]: the whole side dims as Code Mode takes over
       const dim = lerp(1, 0.35, P(t, c[1], 0.5));
-      const leftIn = at => P(t, c[0] + at, 0.5, backOut);
+      const leftIn = at => backPop(t, c[0] + at, 0.5);
       place(s.lblL, LEFT.x, HEADING_Y, 1, P(t, c[0] + 0.1, 0.4) * dim);
       s.links.forEach((l, i) => draw(l, P(t, c[0] + 0.5 + i * 0.1, 0.4), dim));
       const orbIn = leftIn(0.1);
-      place(s.llm.root, LEFT.orbX, ORB_Y, orbIn, clamp(orbIn * 2) * dim);
+      place(s.llm.root, LEFT.orbX, ORB_Y, orbIn.s, orbIn.o * dim);
       s.tools.forEach((e, i) => {
         const p = leftIn(0.3 + i * 0.15);
-        place(e, LEFT.toolX, toolY(i), p, clamp(p * 2) * dim);
+        place(e, LEFT.toolX, toolY(i), p.s, p.o * dim);
       });
 
       // the call card goes out to a tool and comes back as a result, one tool at a time
-      const starts = TRIPS.targets.map((_, i) => c[0] + TRIPS.at + i * TRIPS.gap);
+      const starts = s.tools.map((_, i) => c[0] + TRIPS.at + i * TRIPS.gap);
       const returned = starts.map(a => a + 2 * TRIPS.out + TRIPS.stay);
       const trip = starts.findLastIndex(a => t >= a);
       let busyTool = -1;
       if (trip >= 0 && t < returned[trip] + 0.05) {
-        const a = starts[trip], target = TRIPS.targets[trip];
+        const a = starts[trip];
         const goingOut = t < a + TRIPS.out;
         const u = goingOut
           ? lerp(0.3, 0.75, P(t, a, TRIPS.out))
           : lerp(0.75, 0.3, P(t, a + TRIPS.out + TRIPS.stay, TRIPS.out));
-        const x = lerp(ORB_EDGE, TOOL_EDGE, u), y = lerp(ORB_Y, toolY(target), u);
+        const x = lerp(ORB_EDGE, TOOL_EDGE, u), y = lerp(ORB_Y, toolY(trip), u);
         if (s.trip._out !== goingOut) {
           s.trip._out = goingOut;
           s.trip.textContent = goingOut ? 'call' : 'result';
@@ -256,7 +251,7 @@
         }
         place(s.trip, x, y, 1, 1);
         // the tool lights up while the call reaches it, waits and turns back
-        if (t > a + TRIPS.out - 0.1 && t < a + TRIPS.out + TRIPS.stay + 0.1) busyTool = target;
+        if (t > a + TRIPS.out - 0.1 && t < a + TRIPS.out + TRIPS.stay + 0.1) busyTool = trip;
       } else place(s.trip, 0, 0, 1, 0);
       s.tools.forEach((e, i) => { e.style.borderColor = i === busyTool ? C.violet : C.line; });
       llmState(s.llm, { look: 0.8 });
@@ -269,17 +264,16 @@
       const counterIn = leftIn(0.7);
       const counterSwell = trips > 0 ? swell(t, returned[trips - 1], 0.1) : 1;
       const compare = P(t, c[3] + 5.2, 0.4);
-      place(s.counter, COUNT.x[0], COUNT.y, counterIn * counterSwell,
-        clamp(counterIn * 2) * lerp(dim, 1, compare));
+      place(s.counter, COUNT.x[0], COUNT.y, counterIn.s * counterSwell, counterIn.o * lerp(dim, 1, compare));
 
       // ---- c[1]: the divider draws down between the zones
       draw(s.divider, P(t, c[1] + 0.2, 0.6));
 
       // ---- c[1], right: the model writes the script instead, at a brisk but readable pace (about 45 characters a
       // second)
-      const codeIn = P(t, c[1] + 0.6, 0.6, backOut);
+      const codeIn = backPop(t, c[1] + 0.6, 0.6);
       place(s.lblR, CODE.x, HEADING_Y, 1, P(t, c[1] + 0.6, 0.5));
-      place(s.code, CODE.x, CODE.y, codeIn, clamp(codeIn * 2));
+      place(s.code, CODE.x, CODE.y, codeIn.s, codeIn.o);
       const typeStart = c[1] + 1.2, typeEnd = c[1] + 7.0;
       const shownPerLine = typedPerLine(Math.floor(TOTAL_CHARS * clamp((t - typeStart) / (typeEnd - typeStart))));
       shownPerLine.forEach((shown, i) => {
@@ -317,8 +311,8 @@
 
       // the tools the script calls
       s.steps.forEach((e, i) => {
-        const p = P(t, c[2] + 0.2 + i * 0.15, 0.5, backOut);
-        place(e, STEP.x[i], STEP.y, p, clamp(p * 2));
+        const p = backPop(t, c[2] + 0.2 + i * 0.15, 0.5);
+        place(e, STEP.x[i], STEP.y, p.s, p.o);
       });
       // both searches start at the same time
       draw(s.fanFlights, P(t, c[2] + 0.8, 0.5));
@@ -327,12 +321,12 @@
       stepState(s.steps[0], searchState);
       stepState(s.steps[1], searchState);
       // the cheapest flight is picked
-      const bestIn = P(t, c[2] + 4.2, 0.45, backOut);
-      placeLeft(s.best, BEST_LEFT, lineY(MIN_LINE), bestIn, clamp(bestIn * 2));
+      const bestIn = backPop(t, c[2] + 4.2);
+      placeLeft(s.best, BEST_LEFT, lineY(MIN_LINE), bestIn.o, bestIn.s);
 
       // ---- c[3]: book_flight passes the approval gate first
       draw(s.toGate, P(t, c[3] + 0.5, 0.4));
-      const gateIn = P(t, c[3] + 0.8, 0.45, backOut);
+      const gateIn = backPop(t, c[3] + 0.8);
       const approved = t >= c[3] + 2.1;
       const gateKey = approved ? 'ok' : 'wait';
       if (s.gate._k !== gateKey) {
@@ -342,27 +336,25 @@
           + (approved ? ICON('check', 20, C.neon, 2.6) + 'Approved' : ICON('lock', 20, C.violet, 2) + 'Approval')
           + '</span>';
       }
-      place(s.gate, STEP.x[2], RIGHT.gateY, gateIn * swell(t, c[3] + 2.1, 0.12), clamp(gateIn * 2));
+      place(s.gate, STEP.x[2], RIGHT.gateY, gateIn.s * swell(t, c[3] + 2.1, 0.12), gateIn.o);
       draw(s.fromGate, P(t, c[3] + 2.25, 0.3));
       stepState(s.steps[2], t >= c[3] + 3.9 ? 2 : t >= c[3] + 2.6 ? 1 : 0);
       // every call is saved as soon as it completes
       const savedAt = [c[2] + 2.8, c[2] + 2.8, c[3] + 4.0];
       s.saved.forEach((e, i) => {
         setStatus(e, 'SAVED', 'saved');
-        const p = P(t, savedAt[i], 0.4, backOut);
-        place(e, STEP.x[i], RIGHT.savedY, p, clamp(p * 2));
+        const p = backPop(t, savedAt[i], 0.4);
+        place(e, STEP.x[i], RIGHT.savedY, p.s, p.o);
       });
 
       // ---- c[3], payoff: the whole script ran in one round trip, against three one call at a time across the
       // divider
-      const oneTripIn = P(t, c[3] + 5.3, 0.45, backOut);
-      place(s.oneTrip, COUNT.x[1], COUNT.y, oneTripIn, clamp(oneTripIn * 2));
+      const oneTripIn = backPop(t, c[3] + 5.3);
+      place(s.oneTrip, COUNT.x[1], COUNT.y, oneTripIn.s, oneTripIn.o);
       // and what every call keeps, right after the payoff, centered on the count tile so the row reads as one line
       place(s.tagRow, (TAG_ROW.left + TAG_ROW.right) / 2, COUNT.y, 1, P(t, c[3] + 5.5, 0.4));
       s.tags.forEach((e, i) => {
-        const p = P(t, c[3] + 5.6 + i * 0.3, 0.45, backOut);
-        e.style.transform = `scale(${p})`;
-        e.style.opacity = clamp(p * 2);
+        popScale(e, backPop(t, c[3] + 5.6 + i * 0.3));
       });
     }
   });

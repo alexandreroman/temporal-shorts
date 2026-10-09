@@ -21,7 +21,7 @@
     text: '#FBFBFA', dim: '#C3C2BB', link: '#8DA4EF', navActive: '#1C202D',
     primary: '#3A5BC7', outline: '#334CA2', tabLine: '#3952A8',
     chip: '#2A2A2A', chipEdge: '#504D4C', json: '#1E1E1E', jsonEdge: '#4A4746',
-    green: '#30A46C', greenEdge: '#218358', startIcon: '#84A7F0', startEdge: '#4E6084', retryIcon: '#EDF2FE',
+    green: '#30A46C', greenEdge: '#218358', startIcon: '#84A7F0', retryIcon: '#EDF2FE',
   };
   // Status badges: small, fully rounded, mono uppercase, a thin border
   const STATUS = {
@@ -135,11 +135,7 @@
   // inline style of an absolutely positioned static part (plain div in its parent's HTML)
   const at = (left, top) => `position:absolute;left:${left}px;top:${top}px;`;
   // a part that update() changes, positioned on whole pixels inside its parent and visible
-  const part = (parent, html, css = {}, cls = '') => {
-    const e = E(parent, html, cls, css);
-    e.style.opacity = 1;
-    return e;
-  };
+  const part = (parent, html, css = {}, cls = '') => E(parent, html, cls, { ...css, opacity: 1 });
   const link = text => `<span style="text-decoration:underline;text-underline-offset:4px;`
     + `text-decoration-thickness:1px">${text}</span>`;
   // a small rounded count next to a tab name, e.g. Event History (29)
@@ -166,9 +162,9 @@
     letterSpacing: '.06em', textTransform: 'uppercase', whiteSpace: 'nowrap', flex: 'none',
     ...(width ? { width: width + 'px' } : {}),
   });
-  const makeBadge = (parent, status = null, width = null, css = {}) => {
+  const makeBadge = (parent, status, width = null, css = {}) => {
     const e = part(parent, '', { ...badgeCss(width), ...css }, 'mono');
-    if (status) setBadge(e, status);
+    setBadge(e, status);
     return e;
   };
   const setBadge = (e, status, pop = 0) => {
@@ -606,7 +602,7 @@
   // ---------- mouse pointer (its tip at the top left corner of the element) and its click ring
   const makePointer = win => E(win,
     '<svg width="30" height="36" viewBox="0 0 20 24" style="display:block"><path d="M2 2v17l4.5-4 3 7 3-1.3-2.9-6.7'
-    + `h5.9z" fill="${C.ink}" stroke="#141414" stroke-width="1.4" stroke-linejoin="round"/></svg>`);
+    + `h5.9z" fill="${C.ink}" stroke="${C.bg}" stroke-width="1.4" stroke-linejoin="round"/></svg>`);
   const makeClickRing = win => part(win, '', { border: `2px solid ${C.ink}`, borderRadius: '50%' });
   // where the pointer tip clicks, in window pixels: just below the middle of a row's Workflow ID on the list, on
   // the Back to Workflows link or on the Timeline tab of a Workflow page
@@ -738,10 +734,10 @@
       s.ring.style.transform = `translate(${px - ringSize / 2}px,${py - ringSize / 2}px)`;
       s.ring.style.opacity = t >= ringAt ? 0.9 * (1 - ring) : 0;
 
-      // ---- c[1]: order-1042: the chart sweeps through the run in time order on "every Activity" (each label,
-      // with its duration, shows as its bar ends), then the crash annotation on "the retry after the crash"
+      // ---- c[1]: order-1042: the chart sweeps through the run in time order on "every Activity" (each name
+      // label shows as its bar ends), then the crash annotation on "the retry after the crash"
       const tl = s.timeline;
-      setTimeline(tl, ORDER_1042.runtime * P(t, c[1] + 1.8, 2.2, x => x));
+      setTimeline(tl, ORDER_1042.runtime * P(t, c[1] + 1.8, 2.2, linear));
       s.order1042.end.textContent = dateTime(ORDER_1042.start + ORDER_1042.runtime);
       s.order1042.duration.textContent = duration(ORDER_1042.runtime);
       showAnnotation(s.crashNote, t, c[1] + 4.9);
@@ -764,7 +760,9 @@
       // completes (ActivityTaskStarted, ActivityTaskCompleted, a Workflow Task, emailReceipt scheduled), then the
       // Workflow complete (29)
       p45.tabCount('Event History').textContent = finished ? 29 : shipped ? 23 : 17;
-      p45.tabCount('Pending Activities').textContent = shipped ? 0 : 1;
+      // one Activity is pending until the last one, emailReceipt (scheduled as shipPackage completes), ends
+      const lastActivity = o45.activities[o45.activities.length - 1];
+      p45.tabCount('Pending Activities').textContent = now < lastActivity.to ? 1 : 0;
       // pending card: each failure raises the attempt count (it bumps) and shows the last failure; between attempts
       // the Activity waits, SCHEDULED, for its retry
       const failures = o45.attempts.filter(a => a !== last && now >= a.to);

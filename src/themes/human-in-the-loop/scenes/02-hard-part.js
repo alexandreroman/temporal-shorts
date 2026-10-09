@@ -18,13 +18,35 @@
     ['clock', 'Scheduled jobs', LINE.x1 - TILE.bandW / 2, BAND_Y, TILE.bandW],
     ['code', 'Resume code', FRAME.x1 - TILE.w / 2, APP.y, TILE.w],
   ];
+  // Edges the tangled links join: the app's, and each plumbing tile's
+  const APP_EDGE = { left: APP.x - APP.w / 2, right: APP.x + APP.w / 2, bottom: APP.y + APP.h / 2 };
+  const [DB, FLAGS, JOBS, RESUME] = PLUMBING.map(([, , x, y, w]) => ({
+    x, y, left: x - w / 2, right: x + w / 2, top: y - TILE.h / 2, bottom: y + TILE.h / 2,
+  }));
+  // S-curve that leaves (x0, y0) and reaches (x1, y1) horizontally
+  const sideCurve = (x0, y0, x1, y1) => {
+    const mx = (x0 + x1) / 2;
+    return `M ${x0} ${y0} C ${mx} ${y0}, ${mx} ${y1}, ${x1} ${y1}`;
+  };
+  // S-curve that leaves (x0, y0) and reaches (x1, y1) vertically
+  const upCurve = (x0, y0, x1, y1) => {
+    const my = (y0 + y1) / 2;
+    return `M ${x0} ${y0} C ${x0} ${my}, ${x1} ${my}, ${x1} ${y1}`;
+  };
+  // Long sweep that drops from (x0, y0), then comes into (x1, y1) from x0's side
+  const sweep = (x0, y0, x1, y1) => {
+    const lead = x1 > x0 ? -160 : 160;
+    return `M ${x0} ${y0} C ${x0} ${y0 + 198}, ${x1 + lead} ${y1 - 82}, ${x1} ${y1}`;
+  };
+  // The side tiles reach the app's sides 68 px off its middle; the band tiles cross to the app's bottom edge, 150 px
+  // either side of its center; the long sweeps run from under the side tiles to the band, between its two tiles
   const LINKS = [
-    'M 420 412 C 490 412, 490 480, 560 480',
-    'M 1500 412 C 1430 412, 1430 344, 1360 344',
-    'M 710 672 C 710 652, 1110 652, 1110 632',
-    'M 1210 672 C 1210 652, 810 652, 810 632',
-    'M 250 502 C 250 700, 900 680, 1060 762',
-    'M 1670 502 C 1670 700, 1020 680, 860 762',
+    sideCurve(DB.right, DB.y, APP_EDGE.left, APP.y + 68),
+    sideCurve(RESUME.left, RESUME.y, APP_EDGE.right, APP.y - 68),
+    upCurve(FLAGS.x, FLAGS.top, APP.x + 150, APP_EDGE.bottom),
+    upCurve(JOBS.x, JOBS.top, APP.x - 150, APP_EDGE.bottom),
+    sweep(DB.x, DB.bottom, JOBS.left, BAND_Y),
+    sweep(RESUME.x, RESUME.bottom, FLAGS.right, BAND_Y),
   ];
   const BROKEN_LINKS = [2, 4]; // turn red with the failures
   // red tags 40 px under the side tiles they belong to
@@ -56,23 +78,19 @@
       s.restartM = E(root, '', '', { width: '2px', height: '40px', background: C.red });
       s.deployM = E(root, '', '', { width: '2px', height: '40px', background: C.slate });
       s.restart = tag(root, 'Restart', 'red'); s.deploy = tag(root, 'Deploy');
-      s.marker = E(root, '', '', {
-        width: '24px', height: '24px', background: C.violet, borderRadius: '50%',
-        boxShadow: '0 0 18px 4px rgba(182,100,255,.45)',
-      });
-      s.app = makeAppPanel(root, 'APP', APP.w, APP.h, APP_TEXT);
+      s.marker = makeGlowDot(root, 24, RGB.violet, { blur: 18, spread: 4, alpha: 0.45 });
+      s.app = makeAppPanel(root, 'APP', APP.w, APP.h, APP_TEXT_LARGE);
       // the memory card never moves: it is part of the panel's HTML, and only its chips are animated elements
       s.app.insertAdjacentHTML('beforeend',
         `<div class="tile" style="position:absolute;left:24px;top:76px;width:${APP.w - 48}px;height:${APP.h - 100}px;`
-        + 'text-align:left;background:rgba(248,250,252,.03)">'
+        + `text-align:left;background:rgba(${RGB.ink},.03)">`
         + panelLabel('server', 'App memory', 'left:20px;top:16px;padding-left:0')
         // EMPTY and REQUEST LOST, like the chips, sit in the middle of the space under the APP MEMORY label
-        + '<div class="empty mono" style="position:absolute;left:0;right:0;top:129px;text-align:center;font-size:30px;'
-        + 'letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div></div>');
+        + emptyNote(129) + '</div>');
       s.mem = s.app.lastElementChild;
       s.empty = s.mem.querySelector('.empty');
       s.chips = CHIPS.map((txt, i) => E(s.mem, txt, 'mono', {
-        left: '24px', top: (99 + i * 66) + 'px', fontSize: '24px', color: '#141414', background: C.uvTint,
+        left: '24px', top: (99 + i * 66) + 'px', fontSize: '24px', color: C.bg, background: C.uvTint,
         padding: '10px 16px', borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
       s.lost = tag(root, 'Request lost', 'red big');
@@ -87,16 +105,15 @@
       const lineOut = P(t, c[1], 0.4);
 
       // the app waits with its request in memory; the restart wipes it
-      const ap = P(t, c[0] + 0.1, 0.6, backOut);
-      place(s.app, APP.x + sx, APP.y + sy, ap, clamp(ap * 2));
+      const ap = backPop(t, c[0] + 0.1, 0.6);
+      place(s.app, APP.x + sx, APP.y + sy, ap.s, ap.o);
       if (t >= crashAt && t < back) setAppStatus(s.app, 'RESTARTED', 'crashed');
       else setAppStatus(s.app, 'WAITING FOR MARIA', 'waiting');
       s.chips.forEach((e, i) => {
         // first shown from c[0], dropped by the crash, then back once teams save it by hand
         const grow = t < back ? P(t, c[0] + 0.6 + i * 0.25, 0.35) : P(t, c[1] + 2.0, 0.5);
         const fall = t < back ? P(t, crashAt + 0.2 + i * 0.12, 0.8, easeIn) : 0;
-        e.style.opacity = grow * (1 - fall);
-        e.style.transform = `translateY(${fall * 260}px) rotate(${fall * (i % 2 ? 22 : -18)}deg)`;
+        fallOut(e, fall, i % 2 ? 22 : -18, grow);
       });
       s.empty.style.opacity = win(t, crashAt + 1.0, back, 0.4);
       place(s.lost, APP.x, APP.y + 79, P(t, crashAt + 1.4, 0.45, backOut), win(t, crashAt + 1.4, back, 0.3));
@@ -119,17 +136,17 @@
       // hand-made plumbing: tiles pop with their names, the tangled links draw in between
       s.tiles.forEach((e, i) => {
         const [, , x, y] = PLUMBING[i];
-        const p = P(t, c[1] + 2.2 + i * 0.7, 0.45, backOut);
-        place(e, x, y, p, clamp(p * 2));
+        const p = backPop(t, c[1] + 2.2 + i * 0.7);
+        place(e, x, y, p.s, p.o);
       });
       const bad = t >= c[2] + 2.6;
       s.links.forEach((l, i) => {
         l.setAttribute('stroke', bad && BROKEN_LINKS.includes(i) ? C.red : C.slate);
         draw(l, P(t, c[1] + 2.6 + i * 0.35, 0.6));
       });
-      const p1 = P(t, c[2] + 2.6, 0.45, backOut), p2 = P(t, c[2] + 4.2, 0.45, backOut);
-      place(s.stuck, PLUMBING[0][2], TAG_Y, p1, clamp(p1 * 2));
-      place(s.twice, PLUMBING[3][2], TAG_Y, p2, clamp(p2 * 2));
+      const p1 = backPop(t, c[2] + 2.6), p2 = backPop(t, c[2] + 4.2);
+      place(s.stuck, PLUMBING[0][2], TAG_Y, p1.s, p1.o);
+      place(s.twice, PLUMBING[3][2], TAG_Y, p2.s, p2.o);
     }
   });
 }

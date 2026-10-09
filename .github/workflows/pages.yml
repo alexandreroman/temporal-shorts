@@ -32,9 +32,6 @@ jobs:
         with:
           python-version: "3.14"
 
-      - name: Download fonts
-        run: bash scripts/fonts.sh
-
       # Calls the Pages API, which a pull request token (from a fork in particular) cannot reach. Gives the URL of
       # the site, custom domain included, for the link preview tags.
       - id: pages
@@ -42,6 +39,7 @@ jobs:
         uses: actions/configure-pages@v6
 
       # build_html.py uses the standard library only: the setup-python interpreter replaces the .venv one.
+      # make downloads the fonts first (scripts/fonts.sh): they are git-ignored, and the pages inline them.
       # On pull requests, the pages step is skipped and SITE_URL is empty: the pages have no link preview tags.
       - name: Build HTML pages
         env:

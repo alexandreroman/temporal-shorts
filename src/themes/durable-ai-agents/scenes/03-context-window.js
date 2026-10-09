@@ -40,7 +40,7 @@
       s.svg = svgLayer(root);
       s.cone = document.createElementNS(SVGNS, 'polygon');
       s.cone.setAttribute('points', '1480,445 1085,185 1085,775');
-      s.cone.setAttribute('fill', 'rgba(182,100,255,0.13)');
+      s.cone.setAttribute('fill', `rgba(${RGB.violet},0.13)`);
       s.svg.appendChild(s.cone);
       s.sheet = E(root, '', 'paper', { width: '640px', height: '600px', overflow: 'hidden' });
       s.sheetT = E(root, 'Context window', 'lbl', { color: 'var(--ink)', fontSize: '22px' });
@@ -48,14 +48,17 @@
         const b = document.createElement('div');
         Object.assign(b.style, {
           position: 'absolute', left: '20px', width: '600px', background: col, borderLeft: `6px solid ${bar}`,
-          padding: '8px 16px', overflow: 'hidden', color: '#141414', borderRadius: 'var(--rs)',
+          padding: '8px 16px', overflow: 'hidden', color: C.bg, borderRadius: 'var(--rs)',
         });
-        b.innerHTML = `<div class="mono" style="font-size:14px;letter-spacing:.12em;color:#5B6475">${who}</div>`
+        b.innerHTML = `<div class="mono" style="font-size:14px;letter-spacing:.12em;color:${C.slateDark}">${who}</div>`
           + `<div class="mono" style="font-size:21px;line-height:1.45">${html}</div>`;
         s.sheet.appendChild(b); return b;
       };
       s.instr = mk('INSTRUCTIONS', "You are the shop's helpful assistant.", C.uvTint, C.uv);
       s.hist = mk('HISTORY', '', '#EDEFF3', C.slate);
+      // the instructions on top, then the HISTORY block, whose height grows with each message
+      Object.assign(s.instr.style, { top: '20px', height: '74px' });
+      s.hist.style.top = '104px';
       // one 40 px row per message, each sliding in on its own part
       const docChip = '<span style="display:inline-block;line-height:30px;padding:0 10px;margin-left:12px;'
         + `background:${C.neonTint};border:1px solid ${C.neonDark};border-radius:var(--rs)">price-list.pdf</span>`;
@@ -75,9 +78,9 @@
         if (m.question) {
           // the NEW highlight sits behind the text, its violet bar in the block's left padding
           row.innerHTML = `<div class="hl" style="position:absolute;left:-10px;right:-6px;top:0;bottom:0;`
-            + `background:#F2E6FF;border-left:4px solid ${C.violet};border-radius:var(--rs)">`
+            + `background:${C.violetTint};border-left:4px solid ${C.violet};border-radius:var(--rs)">`
             + '<div style="position:absolute;right:12px;top:0;bottom:0;display:flex;align-items:center;'
-            + 'font-size:14px;letter-spacing:.12em;color:#5B6475">NEW</div></div>';
+            + `font-size:14px;letter-spacing:.12em;color:${C.slateDark}">NEW</div></div>`;
         }
         const text = document.createElement('div');
         text.style.position = 'relative';
@@ -87,7 +90,7 @@
         return { row, hl: row.querySelector('.hl') };
       });
       s.gauge = E(root, '<div class="f" style="position:absolute;left:0;right:0;bottom:0"></div>', '', {
-        width: '22px', height: '600px', background: 'rgba(248,250,252,.08)', border: '1.5px solid ' + C.line,
+        width: '22px', height: '600px', background: `rgba(${RGB.ink},.08)`, border: '1.5px solid ' + C.line,
         overflow: 'hidden', borderRadius: 'var(--rs)',
       });
       s.gf = s.gauge.querySelector('.f');
@@ -97,7 +100,9 @@
       s.g1 = E(root,
         `<div class="mono" style="font-size:22px">Yesterday's email</div>`
         + '<div class="lbl" style="font-size:15px;margin-top:4px">not in context</div>',
-        '', { border: '1.5px dashed #4B5363', padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)' });
+        '', {
+          border: `1.5px dashed ${C.lineLight}`, padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)',
+        });
       s.bill = E(root,
         '<div style="display:flex;align-items:center;gap:16px">'
         + `<div class="coin">${ICON('coin', 46, C.neon, 1.6)}</div><div>`
@@ -107,7 +112,7 @@
         + '<div class="lbl" style="font-size:16px;margin-top:6px;color:var(--neon)">billed so far</div>'
         + '</div></div>',
         '', {
-          padding: '16px 22px', border: '1.5px solid ' + C.neon, background: 'rgba(219,255,75,.06)',
+          padding: '16px 22px', border: '1.5px solid ' + C.neon, background: `rgba(${RGB.neon},.06)`,
           borderRadius: 'var(--r)',
         });
       s.tok = s.bill.querySelector('.tok');
@@ -119,7 +124,7 @@
         pagePx += px;
         // 36 px icon, a 27 px coin, centered on the big coin (1.5 px border + 22 px padding + 23 px)
         const coin = E(s.bill, ICON('coin', 36, C.neon, 1.8), '', { left: '28.5px', top: 'calc(50% - 18px)' });
-        coin.querySelector('circle').setAttribute('fill', 'rgba(219,255,75,.2)');
+        coin.querySelector('circle').setAttribute('fill', `rgba(${RGB.neon},.2)`);
         const plus = E(s.bill, '+' + gain.toLocaleString('en-US'), 'mono', {
           left: 'calc(100% + 20px)', top: '14px', fontSize: '22px', color: C.neon, whiteSpace: 'nowrap',
         });
@@ -127,8 +132,8 @@
       });
     },
     update(t, c, s) {
-      const sp = P(t, c[0] + 0.1, 0.7, backOut);
-      place(s.sheet, 760, 480, sp, clamp(sp * 2));
+      const sp = backPop(t, c[0] + 0.1, 0.7);
+      place(s.sheet, 760, 480, sp.s, sp.o);
       place(s.sheetT, 760, 150, 1, P(t, c[0] + 0.6, 0.4));
       place(s.llm.root, 1560, 445, P(t, c[0] + 0.4, 0.6, backOut), P(t, c[0] + 0.4, 0.4));
       llmState(s.llm, { look: -1 });
@@ -145,21 +150,17 @@
       const app = partAt.map(at => P(t, at, 0.5));
       // parts 0 and 1 are the two blocks, then one part per message row
       const rowApp = app.slice(2);
-      const slideIn = (el, a) => {
-        el.style.opacity = a; el.style.transform = `translateX(${(1 - a) * 80}px)`;
-      };
-      // grown, the history keeps the 20 px bottom margin of the 600 px sheet
-      Object.assign(s.instr.style, { top: '20px', height: '74px' });
-      slideIn(s.instr, app[0]);
-      slideIn(s.hist, app[1]);
+      showRow(s.instr, app[0], 80);
+      showRow(s.hist, app[1], 80);
       // the HISTORY block arrives with its label only; each message pushes its bottom down
       let y = 28;
       s.rows.forEach((r, i) => {
         r.row.style.top = y + 'px';
-        slideIn(r.row, rowApp[i]);
+        showRow(r.row, rowApp[i], 80);
         y += ROW * rowApp[i];
       });
-      s.hist.style.top = '104px'; s.hist.style.height = (y + 8) + 'px';
+      // grown, the history keeps the 20 px bottom margin of the 600 px sheet
+      s.hist.style.height = (y + 8) + 'px';
       // the highlight moves to the latest user message: each one fades as the next question comes in
       const questions = s.rows.map((r, i) => ({ hl: r.hl, a: rowApp[i] })).filter(q => q.hl);
       questions.forEach((q, i) => {
@@ -174,9 +175,9 @@
       place(s.gauge, 1130, 480, 1, P(t, c[0] + 1.6, 0.5));
       place(s.gaugeL, 1130, 810, 1, P(t, c[0] + 1.6, 0.5));
       // the token count arrives with the gauge and follows it part by part
-      const bp = P(t, c[0] + 1.6, 0.5, backOut);
+      const bp = backPop(t, c[0] + 1.6, 0.5);
       // the 105 px box ends on the sheet's bottom edge (480 + 300)
-      place(s.bill, 1560, 727.5, bp, clamp(bp * 2));
+      place(s.bill, 1560, 727.5, bp.s, bp.o);
       s.tok.textContent = tokensFor(used).toLocaleString('en-US') + ' tokens';
       // money spent at each part, mid-slide: the big coin swells, a small coin flies off, "+N" rises and fades
       const spendAt = partAt.map(at => at + 0.1);

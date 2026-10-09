@@ -17,7 +17,7 @@
   // center of row i, measured from the card's center
   const rowDy = i => CARD.pad + CARD.head + CARD.rule + CARD.cols + CARD.rowGap
     + i * (CARD.rowH + CARD.rowGap) + CARD.rowH / 2 - CARD_H / 2;
-  const ROW_BG = 'rgba(248,250,252,.04)';
+  const ROW_BG = `rgba(${RGB.ink},.04)`;
   const ROW_CSS = `display:flex;align-items:center;height:${CARD.rowH}px;margin-top:${CARD.rowGap}px;padding:0 16px;`
     + `border:1.5px solid transparent;border-radius:var(--rs);background:${ROW_BG}`;
 
@@ -88,7 +88,7 @@
       + `<span class="mono" style="flex:1;font-size:22px;white-space:nowrap">${signature}</span>`
       + '<span class="mono" style="width:40px;text-align:center;font-size:22px;color:var(--slate)">→</span>'
       + `<span style="width:${outW}px"><span class="mono" style="font-size:22px;padding:2px 10px;border-radius:4px;`
-      + `border:1.5px solid ${C.uv};background:rgba(68,76,231,.18)">${out}</span></span></div>`).join('');
+      + `border:1.5px solid ${C.uv};background:rgba(${RGB.uv},.18)">${out}</span></span></div>`).join('');
     const cols = `<span style="flex:1">INPUT</span><span style="width:${outW + 40}px;padding-left:40px">OUTPUT</span>`;
     return makeAgentCard(p, 'TravelAgent', 'Operations', cols, rows, TRAVEL.w);
   };
@@ -99,7 +99,7 @@
       + '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px">'
       + '<b class="mono" style="font-size:22px;line-height:26px">travel_plan_trip</b>'
       + '<span class="from mono" style="display:inline-block;font-size:16px;line-height:20px;letter-spacing:.06em;'
-      + `padding:2px 8px;border-radius:4px;border:1.5px solid ${C.uv};background:rgba(68,76,231,.16);`
+      + `padding:2px 8px;border-radius:4px;border:1.5px solid ${C.uv};background:rgba(${RGB.uv},.16);`
       + 'color:var(--slate);transform-origin:left center">'
       + 'FROM <span style="color:var(--ink)">TravelAgent</span></span></div>'
       + `<span class="ok" style="margin-left:auto;display:flex">${ICON('check', 28, C.neon, 2.6)}</span></div>`
@@ -113,14 +113,14 @@
   // Its height is 12 + 28 + 6 + 28 per field + 14 px (VALUE.requestH, VALUE.resultH).
   const makeValueCard = (p, label, title, fields, accent) => E(p,
     '<div style="display:flex;align-items:baseline;gap:12px;line-height:28px">'
-    + `<span class="mono" style="font-size:16px;letter-spacing:.12em;color:#5B6475">${label}</span>`
+    + `<span class="mono" style="font-size:16px;letter-spacing:.12em;color:${C.slateDark}">${label}</span>`
     + `<b class="mono" style="font-size:22px">${title}</b></div>`
     + `<div class="mono" style="font-size:20px;line-height:28px;margin-top:6px">${fields}</div>`,
     'paper', {
       width: VALUE.w + 'px', padding: '12px 20px 14px', whiteSpace: 'nowrap', borderLeft: `6px solid ${accent}`,
       boxShadow: '0 10px 30px rgba(0,0,0,.45)',
     });
-  const field = (name, value) => `<span style="color:#5B6475">${name}:</span> ${value}`;
+  const field = (name, value) => `<span style="color:${C.slateDark}">${name}:</span> ${value}`;
 
   scene({
     chapter: 5, title: 'Typed, composable agents',
@@ -129,7 +129,8 @@
     // laid out at final positions on the grid (x 140-1780), so no offset is needed
     subs: [
       {
-        text: "An agent is more than text in, text out: it exposes <b>typed operations</b>, with their inputs and outputs.",
+        text: 'An agent is more than text in, text out: '
+          + 'it exposes <b>typed operations</b>, with their inputs and outputs.',
         after: 1.0,
       },
       {
@@ -137,7 +138,8 @@
         after: 2.1,
       },
       {
-        text: "To use it, the parent starts TravelAgent as a <b>child workflow</b>: a new instance with its own history.",
+        text: 'To use it, the parent starts TravelAgent as a <b>child workflow</b>: '
+          + 'a new instance with its own history.',
         after: 0.6,
       },
       {
@@ -203,15 +205,15 @@
       const closedAt = c[4] + 3.2, closed = P(t, closedAt + 0.3, 0.6);
 
       // phase 1: "text in, text out" is struck out in the left column, TravelAgent lists its typed operations
-      const pp = P(t, c[0] + 0.1, 0.5, backOut);
-      place(s.pill, PARENT.x, PARENT.y, pp, clamp(pp * 2) * (1 - P(t, c[1] + 0.7, 0.35)));
+      const pp = backPop(t, c[0] + 0.1, 0.5);
+      place(s.pill, PARENT.x, PARENT.y, pp.s, pp.o * (1 - P(t, c[1] + 0.7, 0.35)));
       // the strike is drawn from left to right by clipping its end, so it keeps its centered position
       const struck = P(t, c[0] + 1.6, 0.5);
       s.pill.strike.style.clipPath = `inset(0 ${((1 - struck) * 100).toFixed(2)}% 0 0)`;
       s.pill.txt.style.opacity = lerp(1, 0.5, struck);
 
-      const tp = P(t, c[0] + 3.0, 0.5, backOut);
-      place(s.travel, TRAVEL.x, TRAVEL.y, tp, clamp(tp * 2));
+      const tp = backPop(t, c[0] + 3.0, 0.5);
+      place(s.travel, TRAVEL.x, TRAVEL.y, tp.s, tp.o);
       // a closed instance dims its content; the card itself stays opaque, so the stage never shows through
       const dim = lerp(1, 0.5, closed);
       s.travel.head.style.opacity = dim;
@@ -224,13 +226,11 @@
         showRow(row, rowIn);
         row.style.opacity = rowIn * dim;
       });
-      const sp = P(t, c[1] + 0.3, 0.45, backOut);
-      s.self.style.opacity = clamp(sp * 2);
-      s.self.style.transform = `scale(${sp})`;
+      popScale(s.self, backPop(t, c[1] + 0.3));
 
       // phase 2: the Trip planner takes the pill's place, with its tools
-      const parentIn = P(t, c[1] + 0.9, 0.5, backOut);
-      place(s.parent, PARENT.x, PARENT.y, parentIn, clamp(parentIn * 2));
+      const parentIn = backPop(t, c[1] + 0.9, 0.5);
+      place(s.parent, PARENT.x, PARENT.y, parentIn.s, parentIn.o);
       showRow(s.parent.cols, P(t, c[1] + 1.2, 0.3));
 
       // step 1: the Trip planner reads TravelAgent's interface and travel_plan_trip joins its tools
@@ -247,9 +247,7 @@
       showRow(planRow, P(t, copied + 1.4, 0.3), 0);
       searchRow.style.opacity = P(t, c[1] + 1.3, 0.35);
       searchRow.style.transform = `translateY(${(-(CARD.rowH + CARD.rowGap) * (1 - inserted)).toFixed(2)}px)`;
-      const fp = P(t, copied + 1.8, 0.4, backOut);
-      s.parent.from.style.opacity = clamp(fp * 2);
-      s.parent.from.style.transform = `scale(${fp})`;
+      popScale(s.parent.from, backPop(t, copied + 1.8, 0.4));
 
       // step 2: the Trip planner starts TravelAgent as its child workflow: start_travel travels along the request
       // arrow into TravelAgent's header, which turns UV and gets its CHILD WORKFLOW tag, then the instance shows up
@@ -257,9 +255,7 @@
       draw(s.requestArrow, P(t, c[2] + 0.3, 0.5));
       fly(s.start, t, startSent, CALL_X0, CALL_Y, startSent + 1.3, 0.9, CALL_X1, CALL_Y,
         started, TRAVEL_HEAD.x, TRAVEL_HEAD.y);
-      const cp = P(t, started + 0.3, 0.45, backOut);
-      s.child.style.opacity = clamp(cp * 2);
-      s.child.style.transform = `scale(${cp})`;
+      popScale(s.child, backPop(t, started + 0.3));
       const ip = P(t, started + 1.5, 0.4);
       place(s.instance, TRAVEL.x, INSTANCE_Y + 12 * (1 - ip), 1, ip);
 
@@ -272,8 +268,8 @@
       const working = win(t, landed + 0.15, answered + 0.2, 0.2);
       const travelPlan = s.travel.rows[0];
       travelPlan.style.borderColor = working > 0.5 ? C.violet : 'transparent';
-      travelPlan.style.background = working > 0 ? `rgba(182,100,255,${(0.16 * working).toFixed(3)})` : ROW_BG;
-      travelPlan.style.boxShadow = `0 0 ${Math.round(22 * working)}px rgba(182,100,255,${(0.35 * working).toFixed(2)})`;
+      travelPlan.style.background = working > 0 ? `rgba(${RGB.violet},${(0.16 * working).toFixed(3)})` : ROW_BG;
+      travelPlan.style.boxShadow = glowShadow(RGB.violet, working, { blur: 22, alpha: 0.35 });
 
       // step 4: the typed result comes back and the tool row checks
       const received = answered + 1.5;
@@ -281,9 +277,7 @@
       place(s.resultLbl, GAP_MID, RESULT_Y + LBL_DY, 1, P(t, answered + 0.15, 0.35));
       fly(s.result, t, answered + 0.2, VALUE_X1, RESULT_CARD_Y, answered + 0.6, 0.9, VALUE_X0, RESULT_CARD_Y,
         received, PARENT_NAME_X, PARENT_NAME_Y);
-      const ok = P(t, received + 0.25, 0.45, backOut);
-      s.parent.ok.style.opacity = clamp(ok * 2);
-      s.parent.ok.style.transform = `scale(${ok})`;
+      popScale(s.parent.ok, backPop(t, received + 0.25));
 
       // step 5: when the work is done, stop_travel closes the instance: CLOSED, and TravelAgent dims
       const stopSent = c[4] + 0.8;
@@ -295,7 +289,7 @@
       // the card is live (UV border and glow) from the start until it is closed (its content dims, see phase 1)
       const live = P(t, started + 0.3, 0.4) * (1 - closed);
       s.travel.style.borderColor = mix(C.line, C.uv, live);
-      s.travel.style.boxShadow = `0 0 ${Math.round(28 * live)}px rgba(68,76,231,${(0.35 * live).toFixed(2)})`;
+      s.travel.style.boxShadow = glowShadow(RGB.uv, live, { blur: 28, alpha: 0.35 });
     }
   });
 }

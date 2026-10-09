@@ -5,9 +5,10 @@ from a deterministic HTML animation. Each video is a theme:
 
 - `meet-temporal`: Meet Temporal, a video that introduces Temporal to
   everyone who has never heard of it: its creators, Maxim Fateev and Samar
-  Abbas, its lineage from Amazon Simple Workflow Service through the
-  Microsoft Durable Task Framework and Uber Cadence, Temporal today, and
-  why it matters for AI
+  Abbas, and its lineage from Amazon Simple Workflow Service through the
+  Microsoft Durable Task Framework and Uber Cadence, then what it does,
+  where it is used, why it matters for AI, Temporal Cloud and Temporal
+  today
 - `durable-execution`: Introduction to Durable Execution, a video that
   shows everyone the principles of Durable Execution with Temporal
   Workflows
@@ -59,14 +60,22 @@ running, and open the link in a browser when one is available. The player
 opens paused there. A reload keeps the viewer's position over the
 fragment: change `#t=` to jump. Pausing writes the position into the URL
 in whole seconds (`#t=70`), so a paused viewer can share it; playing
-clears it. After a visual change, give the user the link to the changed
-moment. `?t=` is the frozen capture frame, without the player.
+clears it. `?t=` is the frozen capture frame, without the player.
+
+**Every report of a change to a page ends with its timecode links**, with
+no exception: one link per changed moment (a scene, a subtitle, a label,
+a transient effect), grouped by theme, the time a second or more inside
+the changed subtitle window or at the exact moment of a brief effect;
+`http://localhost:<port>/` for the home page. This holds for work done by
+subagents: ask them for the times, and give the links in the answer. A
+change with no visible effect (a refactor that keeps frames identical)
+gets no link, and the report says so.
 
 `preview` requires `THEME`. Each MP4 or SRT rebuilds only when the shared
 sources or its own theme change (see README.md); `-B` forces a rebuild.
 
 In Casper (`.casper.json`), Run (`casper run`) serves the home page and the
-HTML players on `CASPER_PORT` (8000 in the primary workspace), Render
+HTML players on `CASPER_PORT` (8000 where it is unset), Render
 (`casper run render`) renders every theme into `output/<theme>.mp4`; new
 workspaces run `make setup` automatically.
 
@@ -89,40 +98,48 @@ workspaces run `make setup` automatically.
     scenes, then freezes on `?t=` or starts the player); chapter titles come
     from the scenes
   - `shared.js`: brand constants and components used by two or more
-    themes (`C`, `LOGO`, tiles, step rows, app and TEMPORAL panels, the
-    Event History card, status tags, crash and takeover effects, small
-    animation helpers, title and end cards)
+    themes (`C` and `RGB` colors, `assetUrl()` and `LOGO`, tiles, tags,
+    glows, step rows, the agentic loop (`makeAgentLoop()`), the lunch
+    example (`LUNCH_STEPS`, `LUNCH_HISTORY`) with its CONTEXT panel and
+    blocks (`makeMemory()`, `makeMemBlocks()`), app and TEMPORAL panels,
+    the app panel of numbered step lines (`makeLinesApp()`), the Event
+    History card, status tags, counters, crash and takeover effects, small
+    animation helpers such as `backPop()`, title and end cards) and the
+    whole "What you can build" chapter, `useCaseScene()`; icons used by
+    two or more themes are in `ICONS` in `engine.js`, the others in their
+    theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page; opens paused at a `#t=<time>` URL fragment
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
     ordered `<link>` / `<script>` list: shared files as `../../<file>`,
     the theme's own scripts relative to its folder, then `boot()`
   - `themes/<theme>/`: the theme's own scripts, e.g.
-    `themes/durable-ai-agents/shared.js` (`STEPS`, `makeApp`, memory, bill)
+    `themes/durable-ai-agents/shared.js` (extra icons, the step list,
+    `makeApp`, the context block size `MEM_BLOCK`, the bill, the takeover
+    of chapters 6 and 7, the booking ticket)
   - `social.png`, `themes/<theme>/social.png`: 1200x630 link preview
     image of each page (`social.html`, or the intro title card), written by
     `make social` and committed
   - `themes/<theme>/scenes/`: one file per scene (subtitles and
     animations), wrapped in a `{ ... }` block so its helpers stay local;
-    the first scene of a chapter sets `chapter` and `title`; `shift`
+    each chapter is one scene, which sets `chapter` and `title`; `shift`
     (`[dx, dy]` or `(t, c) => [dx, dy]`, see `pan()`) centers the
     composition at (960, 515)
-- `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh`, CI
-  and any make target when the fonts are missing), frame preview, parallel
+- `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh` and
+  any make target when the fonts are missing), frame preview, parallel
   render, timeline, layout check (`layout_check.py`), SRT export, social
   preview images (`social_images.py`), standalone HTML build and server;
   the per-theme scripts require `--theme` (no default). The HTML build
   adds the Open Graph and X card tags and a canonical link only when the
   `SITE_URL` environment variable (or make variable) holds the site's root
-  URL: local builds have none; it drops the home page cards that carry
-  the `hidden` attribute
-- `.github/workflows/pages.yml`: on push to `main`, downloads the fonts,
-  runs `make html` with `SITE_URL` set to the Pages URL given by
-  `actions/configure-pages` (no domain in the repository) and deploys
-  `output/` to GitHub Pages (no video, no SRT); served at a domain root,
-  as the player's home button links to `/`. Pull requests to `main` run
-  the build only, without the Pages step, so with no social tags, and no
-  deploy: the pages are attached to the run as an artifact
+  URL: local builds have none
+- `.github/workflows/pages.yml`: on push to `main`, runs `make html`
+  (which downloads the fonts) with `SITE_URL` set to the Pages URL given by
+  `actions/configure-pages` (no domain in the build or the workflow) and
+  deploys `output/` to GitHub Pages (no video, no SRT); served at a domain
+  root, as the player's home button links to `/`. Pull requests to `main`
+  run the build only, without the Pages step, so with no social tags, and
+  no deploy: the pages are attached to the run as an artifact
 - `docs/<theme>/script.md`: full script of a theme: subtitles, timings,
   visuals
 - `output/`: generated `<theme>.srt`, `<theme>.mp4`, and the HTML pages
@@ -181,7 +198,8 @@ not shared with the team.
   comments, commit messages. No em dash in subtitles or on-screen labels.
 - Videos have no maximum length (`make timeline THEME=<theme>` reports
   it). Key every animation to `c[i]` (subtitle start) so timings follow
-  text changes.
+  text changes. Continuous ambient loops (spinners, blinks, dashed flows)
+  read the ambient clock `G`, never `t`: 0.5x slows `t` only.
 - Keep rendering deterministic (no `Math.random`): parallel workers render
   segments independently.
 - Use classic `<script src>` tags, not ES modules: Playwright opens
@@ -189,17 +207,14 @@ not shared with the team.
   `type="module"`.
 - New scene: add a file in `src/themes/<theme>/scenes/` and one `<script>`
   line in `src/themes/<theme>/index.html`, in playing order.
-- New theme: folder `src/themes/<theme>/` with its page `index.html` (with
-  `<title>` and `<meta name="description">`) and its scenes, a card linking
-  to `themes/<theme>/` in `src/index.html`, `docs/<theme>/script.md`, and
-  its `social.png` from `make social`.
+- New theme: follow the checklist in README.md, "Add a theme".
 - Relative URLs must work from `src/` and `output/` alike: theme pages
   live two folders below the home page. Link to folders
   (`themes/<theme>/`): `make serve` is the only way to view the HTML pages.
   The one absolute link is the player's home button, `/`.
-  Resolve asset URLs built in JS against the script
-  (`document.currentScript.src`, see `LOGO`), not the page: Playwright
-  opens theme pages over `file://` to render frames.
+  Build asset URLs in JS with `assetUrl('assets/...')` (`src/shared.js`),
+  which resolves them against the script, not the page: Playwright opens
+  theme pages over `file://` to render frames.
 - Live-mode player code (`startPlayer()`, `.live` CSS) must never affect the
   frozen `?t=` mode: rendered frames must stay pixel-identical.
 - After changing an intro scene, a page title, `src/social.html` or the

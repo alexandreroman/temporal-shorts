@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=durable-ai-agents` for the live values; the start
-times below are a snapshot from 2026-10-07.
+times below are a snapshot from 2026-10-09.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -27,9 +27,15 @@ The video explains to a non-technical audience, in seven topics:
 The budget numbers are deliberately illustrative ("in this example"):
 4 steps = 4 LLM calls. Chapters 6 and 7 crash at the same point: after
 step 3's result (the booking) is in CONTEXT, before step 4's LLM call.
-Without durable execution the restart re-runs those 3 steps, booking
-included, so 7 calls in total (3/7 ≈ 43% wasted); with Temporal the 3 saved
-steps are reused, so 4 calls and 1 booking.
+Without Durable Execution the restart re-runs those 3 steps, booking
+included, then step 4: 3 + 4 = 7 calls, 3 of them wasted; with Temporal
+the 3 saved steps are reused, so 4 calls and 1 booking: 43% fewer LLM
+calls (3/7). Chapter 6 ends with the counter at 6, before the rerun
+reaches step 4: the recap's 7 includes the rerun's step 4 call, not shown.
+
+The money saved is somewhat less than 43%: the rerun's wasted calls are
+the early ones, with the smallest context, so they cost less than the
+later calls.
 
 The "in this example" label stays next to the percentage on screen, and
 the figures follow the step count if the scenario changes.
@@ -61,7 +67,7 @@ the figures follow the step count if the scenario changes.
     above orb.
 - **0:33** Then ask again in the next call: it has already forgotten.
   - Visuals: Bubble wiped, NOT KEPT label above the orb, Call 2: "What's my
-    name?" / "I don't know…" (red).
+    name?" / "I don't know. You haven't told me." (red).
 - **0:39** That's by design: LLMs are stateless. So the app resends the whole
   conversation with every call.
   - Visuals: STATELESS tag, "Full history" card sent, "You're Alex!".
@@ -129,8 +135,8 @@ the figures follow the step count if the scenario changes.
     an empty memory, status STARTING OVER: no history to resume from. The
     steps reset and a "Start over" arrow draws from Invite back to Calendar.
     The tag and glow fade.
-- **2:03** Every LLM call is made, and paid for, a second time, just to rebuild
-  the context. And the table gets booked twice.
+- **2:03** The LLM calls are made, and paid for, a second time, just to
+  rebuild the context. And the table gets booked twice.
   - Visuals: Instance B starts RUNNING THE AGENT again: steps 1 to 3
     re-run and refill its memory. Each LLM call is billed again and hits
     the counter: the number swells, the tile jolts
@@ -178,7 +184,7 @@ the figures follow the step count if the scenario changes.
 
 - **2:43** No saved LLM call is paid for twice, and no saved step runs again.
   Plus retries, human waits and full visibility.
-  - Visuals: "43% less LLM spend in this example", "4 vs 7 LLM calls", then a
+  - Visuals: "43% fewer LLM calls in this example", "4 vs 7 LLM calls", then a
     row of 4 large tiles, as wide as the use cases' row: Saved steps reused /
     Automatic retries / Waits for humans / Full visibility.
 

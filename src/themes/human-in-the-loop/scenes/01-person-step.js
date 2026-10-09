@@ -18,11 +18,11 @@
   const SAM_X = SAM_LEFT + AVATAR.size / 2, REQ_X = SAM_LEFT + AVATAR.size + FRAME.gap + APPROVAL_CARD.w / 2;
   // White purchase request card, in the style of the approval card, without buttons
   const makeRequestCard = p => E(p,
-    '<div class="mono" style="font-size:19px;letter-spacing:.12em;color:#5B6475">PURCHASE REQUEST</div>'
+    `<div class="mono" style="font-size:19px;letter-spacing:.12em;color:${C.slateDark}">PURCHASE REQUEST</div>`
     + '<div><div style="font-size:36px">New laptop for Sam</div>'
     + '<div style="font-size:65px;line-height:1.1;font-weight:700;letter-spacing:-1px">$2,400</div></div>'
     + `<div class="mono" style="display:flex;align-items:center;gap:12px;font-size:19px;`
-    + `letter-spacing:.1em;color:#5B6475">${ICON('user', 24, '#5B6475', 1.8)} SENT BY SAM</div>`,
+    + `letter-spacing:.1em;color:${C.slateDark}">${ICON('user', 24, C.slateDark, 1.8)} SENT BY SAM</div>`,
     'paper', {
       width: APPROVAL_CARD.w + 'px', height: CARD_H + 'px', padding: '24px 31px 28px',
       display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderLeft: '7px solid ' + C.violet,
@@ -58,8 +58,7 @@
       s.card = makeApprovalCard(root, APPROVAL_CARD.k);
       s.clock = makeWaitClock(root, 'Waiting for Maria');
       // equal widths, so the column of reasons has straight edges
-      s.why = ['In meetings', 'Traveling', 'On vacation'].map(l => tag(root, l));
-      s.why.forEach(e => Object.assign(e.style, { width: WHY_W + 'px', textAlign: 'center' }));
+      s.why = ['In meetings', 'Traveling', 'On vacation'].map(l => fixedTag(root, l, '', WHY_W));
     },
     update(t, c, s) {
       const checkOn = c[1] + 0.6, checked = c[1] + 1.5, askOn = c[1] + 1.6, waitOn = c[1] + 4.6;
@@ -72,30 +71,30 @@
 
       // Sam's request: avatar and card under the steps, then the card enters the process at CHECK
       const out1 = P(t, c[1], 0.4);
-      const sp = P(t, c[0] + 0.7, 0.5, backOut);
-      place(s.sam, SAM_X, AVATAR_Y, sp, clamp(sp * 2) * (1 - out1));
+      const sp = backPop(t, c[0] + 0.7, 0.5);
+      place(s.sam, SAM_X, AVATAR_Y, sp.s, sp.o * (1 - out1));
       fly(s.req, t, c[0] + 1.1, REQ_X, BAND_Y, c[1] + 0.1, 0.6, ROW.x0, ROW_Y, c[1] + 0.45, ROW.x0, ROW_Y);
-      const rp = P(t, c[0] + 3.8, 0.45, backOut);
-      place(s.rule, APPROVAL_X, LABEL_Y, rp, clamp(rp * 2) * (1 - out1));
+      const rp = backPop(t, c[0] + 3.8);
+      place(s.rule, APPROVAL_X, LABEL_Y, rp.s, rp.o * (1 - out1));
       draw(s.ruleLink, P(t, c[0] + 3.6, 0.3), 1 - out1);
 
       // the approval request flies from the APPROVAL step to Maria
-      const mp = P(t, c[1] + 1.4, 0.5, backOut);
-      place(s.maria, MARIA_X, AVATAR_Y, mp, clamp(mp * 2));
+      const mp = backPop(t, c[1] + 1.4, 0.5);
+      place(s.maria, MARIA_X, AVATAR_Y, mp.s, mp.o);
       fly(s.card, t, c[1] + 2.4, APPROVAL_X, ROW_Y, c[1] + 2.45, 0.9, APPROVAL_X, BAND_Y);
       place(s.waitL, APPROVAL_X, LABEL_Y, 1, P(t, waitOn, 0.4));
 
       // days go by: the clock spins up to DAY 3, then rests; Maria is busy
-      const cp = P(t, c[2] + 0.2, 0.5, backOut);
+      const cp = backPop(t, c[2] + 0.2, 0.5);
       const spinFrom = c[2] + 1.0, spinTo = c[2] + 5.6;
       const elapsed = waitHours(t, spinFrom, spinTo, DAY3_MORNING);
       const blur = win(t, spinFrom, spinTo, 0.3);
       setWaitClock(s.clock, elapsed, blur);
       setClock(s.card.clk, REQUEST_HOUR + elapsed, blur);
-      place(s.clock, CLOCK_X, BAND_Y, cp, clamp(cp * 2));
+      place(s.clock, CLOCK_X, BAND_Y, cp.s, cp.o);
       s.why.forEach((e, i) => {
-        const p = P(t, c[2] + 2.0 + i * 1.0, 0.45, backOut);
-        place(e, WHY_X, BAND_Y + (i - 1) * 72, p, clamp(p * 2));
+        const p = backPop(t, c[2] + 2.0 + i * 1.0);
+        place(e, WHY_X, BAND_Y + (i - 1) * 72, p.s, p.o);
       });
     }
   });

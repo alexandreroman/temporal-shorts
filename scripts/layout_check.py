@@ -124,7 +124,7 @@ MEASURE = r"""({index, t}) => {
 }"""
 
 SCENES = """scenes.map(s => ({
-  chapter: s.chapter || 0, title: s.chapter ? CHAPTERS[s.chapter - 1] : '',
+  chapter: s.chapter || 0, title: s.title || '',
   end: s.end, subs: s.subs.map(x => [x.start, x.end])}))"""
 
 

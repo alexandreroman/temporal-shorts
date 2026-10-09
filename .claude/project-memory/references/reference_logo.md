@@ -20,13 +20,12 @@ change to each is a viewBox cropped to remove the margin.
   bounds of its path. It is the `#mark` corner logo, 32x32 px, bottom-left
   of the stage: left edge on the chapter number (`left:80px`, as `#hdr`),
   vertically centered on the subtitle box (`bottom:69px`). Its position is
-  fixed: it does not move in the live player when the controls or the
-  subtitles appear (only the subtitle box is lifted above the controls,
-  `--sub-lift`). The subtitle box sits above it: the widest subtitles
-  (three in durable-ai-agents) cover part of it, an accepted overlap. It
-  stays fully visible across chapter scene changes, fades in with the
-  first chapter scene and out with the last one (the scene fade); intro
-  and outro show no corner logo.
+  fixed in the live player whether the controls or the subtitles show
+  (only the subtitle box is lifted above the controls, `--sub-lift`). The
+  subtitle box sits above it: the widest subtitles cover part of it, an
+  accepted overlap. It stays fully visible across chapter scene changes,
+  fades in with the first chapter scene and out with the last one (the
+  scene fade); the intro and outro show the full lockup instead.
 
 **Why:** the video is published under the Temporal brand; a redrawn or
 approximated logo is off-brand.

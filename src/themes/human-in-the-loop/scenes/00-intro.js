@@ -1,7 +1,7 @@
 // ===================== INTRO
 // The block keeps every name declared in this file local to this scene.
 {
-  const ORBIT = { x: 1510, y: 440, rx: 430, ry: 300 }; // the card is centered on the title block (y 440)
+  const ORBIT = { x: 1510, y: 440, rx: 430, ry: 300, speed: 0.4 }; // the card is centered on the title block (y 440)
   scene({
     pre: 1.0,
     shift: [-155, 42],
@@ -20,14 +20,13 @@
     },
     update(t, c, s) {
       rise(s.t, 640, 440, P(t, 0.15, 0.9));
-      const p = P(t, 0.4, 0.9, backOut);
-      place(s.card, ORBIT.x, ORBIT.y, p, clamp(p * 2));
+      const p = backPop(t, 0.4, 0.9);
+      place(s.card, ORBIT.x, ORBIT.y, p.s, p.o);
       // the mini clock ticks: the minute hand jumps one minute every half second (ambient, driven by G)
       setClock(s.card.clk, REQUEST_HOUR + Math.floor(G * 2) / 60);
       s.orb.forEach((e, i) => {
-        const a = G * 0.4 + i * (Math.PI * 2 / 6), pp = P(t, 0.9 + i * 0.15, 0.6, backOut);
-        const depth = 0.45 + 0.55 * (Math.sin(a) + 1) / 2;
-        place(e, ORBIT.x + Math.cos(a) * ORBIT.rx, ORBIT.y + Math.sin(a) * ORBIT.ry, pp, clamp(pp * 2) * depth);
+        const pp = backPop(t, 0.9 + i * 0.15, 0.6), at = orbitAt(i, s.orb.length, ORBIT);
+        place(e, at.x, at.y, pp.s, pp.o * at.depth);
       });
     }
   });

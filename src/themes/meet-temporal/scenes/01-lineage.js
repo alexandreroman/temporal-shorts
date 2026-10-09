@@ -64,7 +64,6 @@
 
   scene({
     chapter: 1, title: 'Where it comes from',
-    holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     // the heading plays before the first subtitle
     pre: 2.0,
     // the heading and the founders centered, then the whole timeline (laid out centered at (960, 524)), raised
@@ -91,7 +90,8 @@
       // Temporal's arrival: a bloom of light behind its tile (under everything else)
       s.bloom = E(root, '', '', {
         width: '700px', height: '700px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(182,100,255,.45) 0%, rgba(68,76,231,.18) 40%, rgba(68,76,231,0) 70%)',
+        background: `radial-gradient(circle, rgba(${RGB.violet},.45) 0%, `
+          + `rgba(${RGB.uv},.18) 40%, rgba(${RGB.uv},0) 70%)`,
       });
       // "20 years" is put forward while the heading is large: a light runs through its letters (a copy of the words
       // filled with a moving gradient), a glow blooms around them, they pop, and sparkles burst out
@@ -101,8 +101,8 @@
         + '<span class="txt">20 years</span>'
         + '<span class="shine" style="position:absolute;left:0;top:0;color:transparent;'
         + '-webkit-background-clip:text;background-clip:text;background-size:300% 100%;'
-        + `background-image:linear-gradient(100deg, rgba(182,100,255,0) 38%, ${C.violet} 44%, #FFFFFF 50%, `
-        + `${C.violet} 56%, rgba(182,100,255,0) 62%)">20 years</span></span> in the making`, '', {
+        + `background-image:linear-gradient(100deg, rgba(${RGB.violet},0) 38%, ${C.violet} 44%, #FFFFFF 50%, `
+        + `${C.violet} 56%, rgba(${RGB.violet},0) 62%)">20 years</span></span> in the making`, '', {
         whiteSpace: 'nowrap', lineHeight: 1,
       });
       s.key = s.heading.querySelector('.key');
@@ -110,7 +110,7 @@
       s.key.shine = s.key.querySelector('.shine');
       // the sparkles of the burst, each with a seeded direction, distance and size
       s.sparkles = Array.from({ length: 10 }, (_, i) => {
-        const e = makeSpark(s.key, 7 + Math.round(hash(i * 5 + 3) * 5), i % 2 ? '182,100,255' : '248,250,252');
+        const e = makeSpark(s.key, 7 + Math.round(hash(i * 5 + 3) * 5), i % 2 ? RGB.violet : RGB.ink);
         e.angle = (i / 10) * Math.PI * 2 + (hash(i * 5 + 1) - 0.5) * 0.5;
         e.dist = 130 + hash(i * 5 + 2) * 80;
         return e;
@@ -124,7 +124,7 @@
       });
       s.ticks = NODE_X.map(x => path(s.svg, `M ${x} ${LINE.y + 12} L ${x} ${TILE.top - 2}`, C.line, 2, false));
       s.nodes = NODE_X.map(() => E(root, '', '', {
-        width: '16px', height: '16px', borderRadius: '50%', border: '2px solid ' + C.slate, background: '#141414',
+        width: '16px', height: '16px', borderRadius: '50%', border: '2px solid ' + C.slate, background: C.bg,
       }));
       s.years = MILESTONES.map(m => E(root, m.year, 'mono', {
         fontSize: '30px', lineHeight: '40px', letterSpacing: '.06em',
@@ -133,9 +133,9 @@
       s.tiles = MILESTONES.map(m => makeMilestone(root, m));
       // Temporal stands out: UV border, a UV tint and a soft glow
       Object.assign(s.tiles[LAST].style, {
-        borderColor: C.uv, background: '#1D1E3A', boxShadow: '0 0 48px rgba(68,76,231,.35)',
+        borderColor: C.uv, background: 'var(--uv-solid)', boxShadow: `0 0 48px rgba(${RGB.uv},.35)`,
       });
-      s.ripples = makeRipples(root, 3, '182,100,255');
+      s.ripples = makeRipples(root, 3, RGB.violet);
       // the fork: a thin arch from Cadence's milestone to Temporal's, labelled FORK at its top
       s.fork = path(s.svg, `M ${FORK.x0} ${FORK.y} Q ${(FORK.x0 + FORK.x1) / 2} ${FORK.top} ${FORK.x1} ${FORK.y}`,
         C.violet, 2, true);
@@ -164,19 +164,17 @@
       s.heading.style.letterSpacing = (lerp(0.35, -0.02, ease(enter))).toFixed(4) + 'em';
       s.heading.style.filter = enter < 1 ? `blur(${((1 - enter) * 8).toFixed(2)}px)` : 'none';
       const glow = win(t, 0.45, 1.0, 0.25);
-      s.heading.style.textShadow = glow > 0 ? `0 0 ${Math.round(30 * glow)}px rgba(182,100,255,${(0.7 * glow)
-        .toFixed(3)})` : 'none';
+      s.heading.style.textShadow = glowShadow(RGB.violet, glow, { blur: 30, alpha: 0.7 });
       place(s.heading, 960, Math.round(lerp(HEADING.big.y, HEADING.top.y, settle)), 1, clamp(enter * 1.5));
       // while the heading is large, right after its entrance and before it shrinks, "20 years" is put forward: a
       // light sweeps through its letters, a glow blooms and settles to a faint lasting one, the words pop (anchored
       // on their right, clear of "in the making") and sparkles burst out and fade
       const highlight = 0.9;
-      const sweep = P(t, highlight, 0.6, x => x);
+      const sweep = P(t, highlight, 0.6, linear);
       s.key.shine.style.opacity = sweep > 0 && sweep < 1 ? 1 : 0;
       s.key.shine.style.backgroundPosition = `${lerp(100, 0, sweep).toFixed(2)}% 0`;
       const bloom = Math.max(win(t, highlight, highlight + 0.5, 0.25), 0.35 * P(t, highlight + 0.3, 0.5));
-      s.key.txt.style.textShadow = bloom > 0
-        ? `0 0 ${Math.round(28 * bloom)}px rgba(182,100,255,${(0.9 * bloom).toFixed(3)})` : '';
+      s.key.txt.style.textShadow = glowShadow(RGB.violet, bloom, { blur: 28, alpha: 0.9 });
       s.key.style.transform = `scale(${swell(t, highlight + 0.2, 0.06)})`;
       const cx = s.key.offsetWidth / 2, cy = s.key.offsetHeight / 2;
       s.sparkles.forEach(e => {
@@ -250,9 +248,9 @@
       s.faces.forEach((e, i) => {
         const { show } = founders[i];
         const m = marks[i];
-        const pop = P(t, show, 0.5, backOut);
+        const pop = backPop(t, show, 0.5);
         // the large face is the one shown until it lands; then the small one takes over on the line
-        place(e, Math.round(m.x), Math.round(m.y), pop * m.size / INTRO.size, landed(i) ? 0 : clamp(pop * 2));
+        place(e, Math.round(m.x), Math.round(m.y), pop.s * m.size / INTRO.size, landed(i) ? 0 : pop.o);
         place(s.marks[i], Math.round(m.x), Math.round(m.y), 1, landed(i) ? 1 : 0);
         rise(s.names[i], Math.round(nameX(i, introSize(t))), Math.round(introY(t)),
           P(t, show + 0.2, 0.5) * (1 - P(t, founders[i].fly, 0.6)), 12);
@@ -279,19 +277,14 @@
       // a short bloom that settles to a faint lasting glow, and quick ripples, both done before the subtitle ends
       place(s.bloom, ...tileCenter, 0.6 + 0.5 * P(t, arrive, 0.7), win(t, arrive, arrive + 0.5, 0.3) * 0.9
         + P(t, arrive + 0.5, 0.5) * 0.35);
-      s.ripples.forEach((e, i) => {
-        const p = P(t, arrive + i * 0.15, 0.7, x => 1 - Math.pow(1 - x, 2));
-        const size = Math.round(lerp(320, 560, p) / 2) * 2;
-        e.style.width = e.style.height = size + 'px';
-        place(e, ...tileCenter, 1, p > 0 && p < 1 ? (1 - p) * 0.9 : 0);
-      });
+      placeRipples(s.ripples, t, arrive, ...tileCenter, 320, 560, { d: 0.7, step: 0.15 });
       // the fork, drawn once the founders reach 2019, just before Temporal's tile lights
       draw(s.fork, P(t, c[3] + 1.3, 0.7));
       // on top of the arch's apex (halfway to its control point), 10 px clear of it
       place(s.forkLabel, (FORK.x0 + FORK.x1) / 2, (FORK.y + FORK.top) / 2 - 22, 1, P(t, c[3] + 1.4, 0.3));
       NODE_X.forEach((x, k) => {
         const lit = t >= tileIn[k] - 0.4;
-        s.nodes[k].style.background = lit ? C.violet : '#141414';
+        s.nodes[k].style.background = lit ? C.violet : C.bg;
         s.nodes[k].style.borderColor = lit ? C.violet : C.slate;
         place(s.nodes[k], x, LINE.y, swell(t, tileIn[k] - 0.4, 0.4), P(t, timelineIn + 0.2 + k * 0.12, 0.3));
         draw(s.ticks[k], P(t, tileIn[k] - 0.2, 0.3));

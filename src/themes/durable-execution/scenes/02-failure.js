@@ -29,10 +29,11 @@
   // sparks flying out of the break: [angle in degrees, 0 pointing right and -90 up, distance in px]. A fixed table
   // keeps every frame deterministic; at most 60 px, they stay clear of the tags above.
   const SPARKS = [[-150, 50], [-105, 60], [-60, 52], [-20, 40], [25, 44], [70, 56], [120, 48], [165, 40]];
-  // damped shake of the tiles next to a failing link, as dx
-  const jolt = (t, a) => (t < a ? 0 : Math.sin((t - a) * 55) * 12 * (1 - clamp((t - a) / 0.45)));
-  // much smaller vertical kick of the whole row at each hit, as dy (the crash shake is 12 by 8 px)
-  const kick = (t, a) => (t < a ? 0 : Math.sin((t - a) * 60) * 4 * (1 - clamp((t - a) / 0.3)));
+  // damped shake of the tiles next to a failing link, as dx: 12 px, swinging at 55 rad/s for 0.45 s
+  const jolt = (t, a) => dampedShake(t, a, 12, 0.45, 55 * 0.45 / Math.PI);
+  // much smaller vertical kick of the whole row at each hit, as dy (the crash shake is 12 by 8 px): 4 px, swinging at
+  // 60 rad/s for 0.3 s
+  const kick = (t, a) => dampedShake(t, a, 4, 0.3, 60 * 0.3 / Math.PI);
   // the border of the tiles next to a failing link flickers red, 0.07 s on, 0.07 s off, three times
   const flickerOn = (t, a) => t >= a && t < a + 0.42 && Math.floor((t - a) / 0.07) % 2 === 0;
   // Restart: the tiles go dark twice, 0.1 s each
@@ -45,9 +46,9 @@
     const u = clamp((t - a) / 0.25);
     return (1 - u) ** 2 * Math.cos(u * Math.PI * 3);
   };
-  const svgLine = (svg, width) => {
+  const svgLine = svg => {
     const l = document.createElementNS(SVGNS, 'line');
-    l.setAttribute('stroke-width', width);
+    l.setAttribute('stroke-width', 3);
     l.setAttribute('stroke-linecap', 'round');
     l.style.opacity = 0;
     svg.appendChild(l);
@@ -147,14 +148,10 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.steps = makeStepRow(root, s.svg, ORDER_TILES, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
+      s.steps = makeStepRow(root, s.svg, ORDER_STEPS, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       s.status = makeStatusTile(root);
-      s.charge = makeCharge(root);
       // same size and centered contents as the status tile
-      s.charge.style.width = BOTTOM.w + 'px';
-      s.charge.style.textAlign = 'center';
-      s.charge.querySelector('.lbl').style.justifyContent = 'center';
-      s.charge.w.style.paddingLeft = '.1em';
+      s.charge = makeCharge(root, BOTTOM.w, true);
       s.causes = CAUSES.map(cause => {
         const e = tag(root, `${ICON(cause.icon, 24, C.red, 2)}${cause.label}`, 'red');
         // one fixed whole-pixel size for the three tags, centered on their links: equal gaps between them
@@ -165,17 +162,16 @@
         return e;
       });
       s.breaks = s.steps.links.map(() => ({
-        halves: [svgLine(s.svg, 3), svgLine(s.svg, 3)],
+        halves: [svgLine(s.svg), svgLine(s.svg)],
         ring: svgRing(s.svg),
-        sparks: SPARKS.map(() => svgLine(s.svg, 3)),
+        sparks: SPARKS.map(() => svgLine(s.svg)),
       }));
       s.bolt = E(root, ICON('bolt', 100, C.red, 1.6));
-      s.crash = tag(root, 'Server crash', 'red big');
-      Object.assign(s.crash.style, { width: '310px', height: '66px', textAlign: 'center' });
+      s.crash = fixedTag(root, 'Server crash', 'red big', 310, 66);
       s.flash = makeFlash(root);
       const [x0, x1] = s.steps.xs, top = ROW.y - ROW.h / 2 - 6;
-      s.redo = path(s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`, C.red, 3);
-      s.redoL = E(root, 'Start over', 'lbl', { color: C.red, width: '148px', height: '26px', textAlign: 'center' });
+      s.redo = makeRestartArc(root, s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`,
+        'Start over', C.red, { width: '148px', height: '26px', textAlign: 'center' });
     },
     update(t, c, s) {
       const crashAt = c[1] + 2.4, stuck = c[1] + 3.8, restart = c[2] + 1.2;
@@ -202,8 +198,8 @@
           if (flickerOn(t, hit)) e.style.borderColor = C.red;
           if (cause.accent === 'blink' && blinkOff(t, hit)) o = 0.15;
         });
-        const p = P(t, 0.1 + i * 0.12, 0.45, backOut);
-        place(e, s.steps.xs[i] + dx, ROW.y + dy, p, clamp(p * 2) * o);
+        const p = backPop(t, 0.1 + i * 0.12);
+        place(e, s.steps.xs[i] + dx, ROW.y + dy, p.s, p.o * o);
       });
       s.steps.links.forEach((l, i) => {
         const broken = placeBreak(s.breaks[i], i, t, c[0] + CAUSES[i].at);
@@ -226,23 +222,22 @@
       // order status: PENDING, stuck after the crash, PENDING again once restarted
       const isStuck = t >= stuck && t < restart;
       setStatusTile(s.status, isStuck);
-      const stp = P(t, 0.3, 0.45, backOut), stuckPop = bumpAt(t, stuck);
-      place(s.status, BOTTOM.statusX + sx, BOTTOM_Y + sy, stp * (1 + 0.06 * stuckPop), clamp(stp * 2));
+      const stp = backPop(t, 0.3), stuckPop = bumpAt(t, stuck);
+      place(s.status, BOTTOM.statusX + sx, BOTTOM_Y + sy, stp.s * (1 + 0.06 * stuckPop), stp.o);
       // card charged: $42 when Charge card completes, $84 when it completes a second time
       const paid1 = r1[0][1], paid2 = r2[0][1], twice = t >= paid2;
-      if (twice) setCharge(s.charge, 84, 'CHARGED TWICE!', C.red, C.red);
-      else setCharge(s.charge, t >= paid1 ? 42 : 0);
+      if (twice) setCounter(s.charge, '$84', 'CHARGED TWICE!', { noteColor: C.red, numColor: C.red });
+      else setCounter(s.charge, t >= paid1 ? '$42' : '$0');
       s.charge.style.borderColor = twice ? C.red : C.line;
       const bump = bumpAt(t, paid1) + bumpAt(t, paid2);
-      const cp = P(t, 0.4, 0.45, backOut);
-      place(s.charge, BOTTOM.chargeX + sx, BOTTOM_Y + sy, cp * (1 + 0.06 * bump), clamp(cp * 2));
+      const cp = backPop(t, 0.4);
+      place(s.charge, BOTTOM.chargeX + sx, BOTTOM_Y + sy, cp.s * (1 + 0.06 * bump), cp.o);
       // crash: red flash, bolt over the running step, SERVER CRASH until the restart
       placeFlash(s.flash, t, crashAt);
       place(s.bolt, s.steps.xs[1], TOP_Y, popIn(t, crashAt).s, win(t, crashAt, crashAt + 1.5, 0.2));
       place(s.crash, CRASH_X, TOP_Y, popIn(t, crashAt + 0.1, 0.08).s, win(t, crashAt + 0.1, c[2] + 0.3, 0.25));
       // restart: "Start over" arrow back to the first step, kept until the end
-      draw(s.redo, P(t, c[2] + 0.3, 0.8));
-      place(s.redoL, (s.steps.xs[0] + s.steps.xs[1]) / 2, ROW.y - ROW.h / 2 - 6 - 65 - 36, 1, P(t, c[2] + 0.8, 0.35));
+      placeRestartArc(s.redo, t, c[2] + 0.3, (s.steps.xs[0] + s.steps.xs[1]) / 2, ROW.y - ROW.h / 2 - 6 - 65 - 36);
     }
   });
 }

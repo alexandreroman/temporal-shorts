@@ -15,28 +15,28 @@
   const SHIP_LINE = 0, SLEEP_LINE = 2, REVIEW_LINE = 3;
   const ROWS = [
     `${uvName('shipPackage')}: tracking 1Z-48`,
-    'TimerStarted: 30 days',
-    'TimerFired',
+    'Timer started: 30 days',
+    'Timer fired',
     `${uvName('askForReview')}: review requested`,
   ];
   const SHIP_ROW = 0, STARTED_ROW = 1, FIRED_ROW = 2, REVIEW_ROW = 3;
   const DAYS = 30;
   const TICK_D = 0.18; // length of a day tick of the timer
 
-  // Two panels on the lines of chapters 5 and 6: the Worker x 120..920, Temporal x 1056..1800, both y 176..880.
-  // Inside each, 32 px from its sides: a card on top (both end at y 572) and a status block under it (both
-  // y 604..848: 32 px under the cards and above the panel bottoms). Every size is even, so all rest on whole pixels.
+  // Two panels on the lines of chapters 5 and 6: the Worker x 120..920, Temporal (EH.temporal) x 1056..1800, both
+  // y 176..880. Inside each, 32 px from its sides: a card on top (both end at y 572) and a status block under it
+  // (both y 604..848: 32 px under the cards and above the panel bottoms). Every size is even, so all rest on whole
+  // pixels.
   const WK = { x: 520, y: 528, w: 800, h: 704 };
-  const TP = { x: 1428, y: 528, w: 744, h: 704 };
   // code card: x 152..888, y 294..572, 118 px below the panel top (under its tab), 4 lines of 56 px
-  const CODE_CARD = { x: 520, y: 433, w: 736, font: 28, lineH: 56, padY: 27 };
+  const CODE_CARD = { x: 520, y: 433, w: EH.code.w, font: 28, lineH: 56, padY: 27 };
   // history card: x 1088..1768, y 256..572, 80 px below the panel top (under the logo header), 4 rows of 56 px
-  const HIST_CARD = { x: 1428, y: 414, w: 680, h: 316 };
+  const HIST_CARD = { x: EH.temporal.x, y: 414, w: EH.hist.w, h: 316 };
   const BLOCK = { y: 726, h: 244 };
   const BAR_W = 628; // timer progress bar: the block's width less 26 px on each side
-  // chips leave and reach the code 72 px inside the card's right edge, and the history at the start of the row text;
-  // WAKE UP lands on the sleep line short of its clock badge
-  const LINE_END_X = 816, ROW_START_X = 1208, WAKE_X = 740;
+  // chips leave and reach the code and the history at EH.lineEndX and EH.rowStartX, as in chapters 5 and 6; WAKE UP
+  // lands on the sleep line short of its clock badge
+  const WAKE_X = 740;
   const lineY = i => CODE_CARD.y - (CODE_CARD.padY * 2 + WAIT_CODE.length * CODE_CARD.lineH) / 2
     + CODE_CARD.padY + (i + 0.5) * CODE_CARD.lineH;
   const rowY = i => HIST_CARD.y - HIST_CARD.h / 2 + HIST.row0 + (i + 0.5) * HIST.rowGap;
@@ -51,9 +51,6 @@
     replaying: { text: 'REPLAYING…', icon: 'retry', color: C.ink },
   };
   const ICON_COLOR = { pauseLines: C.slate, power: C.slate, upload: C.violet, retry: C.violet };
-  // NEW WORKER: astride the top edge of Worker B's panel, centered on it, clear of its name and of VERSION 2; fixed
-  // even width, so it rests on whole pixels (solid: the panel border does not show through)
-  const NEW_TAG = { x: WK.x, y: WK.y - WK.h / 2, w: 200 };
 
   // badge (28 x 28) at the right end of code line i, inside the card
   const makeLineBadge = (card, i, html, background) => E(card, html, '', {
@@ -61,12 +58,6 @@
     width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
     background, borderRadius: 'var(--rs)',
   });
-  // RESULT-style chip with another label
-  const makeChip = (p, label) => {
-    const chip = makeResultCard(p);
-    chip.firstChild.textContent = label;
-    return chip;
-  };
   // Worker status block: a label, then one icon and one text, swapped by setStatusBlock
   const makeStatusBlock = p => {
     const icons = Object.keys(ICON_COLOR)
@@ -112,7 +103,7 @@
       + 'style="font-variant-numeric:tabular-nums"></span>'
       + `<span class="mono" style="font-size:38px;color:var(--slate)"> / ${DAYS}</span></div></div>`
       + `<div style="position:absolute;left:26px;top:196px;width:${BAR_W}px;height:12px;border-radius:6px;`
-      + 'background:rgba(248,250,252,.12);overflow:hidden"><div class="bar" style="height:100%;border-radius:6px">'
+      + `background:rgba(${RGB.ink},.12);overflow:hidden"><div class="bar" style="height:100%;border-radius:6px">`
       + '</div></div>',
       'tile', { width: HIST_CARD.w + 'px', height: BLOCK.h + 'px', textAlign: 'left' });
     e.hand = e.querySelector('.hand'); e.n = e.querySelector('.n'); e.bar = e.querySelector('.bar');
@@ -143,20 +134,20 @@
       const { w, font, lineH, padY } = CODE_CARD;
       s.code = makeCodeCard(root, { lines: WAIT_CODE, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY });
       s.code.hdr.style.opacity = 1;
-      s.code.lines[1].style.color = '#7C8698'; // the comment line, slate like the punctuation
       const check = ICON('check', 20, C.neon, 2.6);
-      s.checks = [SHIP_LINE, SLEEP_LINE, REVIEW_LINE].map(i => makeLineBadge(s.code, i, check, '#141414'));
+      s.checks = [SHIP_LINE, SLEEP_LINE, REVIEW_LINE].map(i => makeLineBadge(s.code, i, check, C.bg));
       s.sleeping = makeLineBadge(s.code, SLEEP_LINE, ICON('clock', 20, '#FFFFFF', 2.2), C.uv);
       s.spin = makeLineBadge(s.code, 0, spinnerRing(26), 'none');
       s.status = makeStatusBlock(root);
-      s.temporal = makeTemporalPanel(root, TP.w, TP.h, TEMPORAL_HEADER);
+      s.temporal = makeTemporalPanel(root, EH.temporal.w, EH.temporal.h, TEMPORAL_HEADER);
       s.hist = makeHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h);
       s.timer = makeTimerBlock(root);
       s.chips = {
-        ship: makeResultCard(root), start: makeChip(root, 'START TIMER'), wake: makeChip(root, 'WAKE UP'),
+        ship: makeResultCard(root), start: makeResultCard(root, true, 'START TIMER'),
+        wake: makeResultCard(root, true, 'WAKE UP'),
         review: makeResultCard(root),
       };
-      s.newWorker = makeNewTag(root, 'New Worker', NEW_TAG.w);
+      s.newWorker = makeNewTag(root, 'New Worker', EH.newTag.w);
     },
     update(t, c, s) {
       const [workerA, workerB] = s.workers;
@@ -177,16 +168,14 @@
 
       // Worker A, retired by the deploy (not crashed, so not greyed), drops and fades out; then a new machine, Worker
       // B, slides in from the left to the same place, its border glowing violet while it arrives
-      const wp = P(t, c[0] + 0.1, 0.5, backOut);
+      const wp = backPop(t, c[0] + 0.1, 0.5);
       const leave = leavingInstance(t, aDrop);
-      place(workerA, WK.x, WK.y + leave.dy, wp, clamp(wp * 2) * leave.o);
-      const bHere = t >= bIn;
+      place(workerA, WK.x, WK.y + leave.dy, wp.s, wp.o * leave.o);
       const arrive = arrivingInstance(t, bIn);
       place(workerB, WK.x + arrive.dx, WK.y, 1, arrive.o);
       // the code card and the status block move with the Worker on screen (Worker A, then Worker B), so they never
-      // float without a panel; both Workers are gone when they switch
-      const wkDx = bHere ? arrive.dx : 0, wkDy = bHere ? 0 : leave.dy;
-      const wkOn = bHere ? arrive.o : leave.o;
+      // float without a panel
+      const rider = takeoverRider(t, aDrop, bIn);
 
       let status = 'running';
       if (t >= freeAt) status = 'free';
@@ -201,16 +190,16 @@
       setAppStatus(workerA, 'VERSION 1', busy ? 'running' : 'stopped');
       setAppStatus(workerB, 'VERSION 2', busy ? 'running' : 'stopped');
       setStatusBlock(s.status, status);
-      place(s.status, WK.x + wkDx, BLOCK.y + wkDy, 1, P(t, c[0] + 0.6, 0.4) * wkOn);
+      place(s.status, WK.x + rider.dx, BLOCK.y + rider.dy, 1, P(t, c[0] + 0.6, 0.4) * rider.o);
       // the glow is gone before day 30, at c[2], so a presenter hold there shows it at rest
       setArrivalGlow(workerB, t, bIn, c[2] - 0.3);
       // NEW WORKER pops on Worker B once it is almost in place and leaves before day 30
-      placeNewTag(s.newWorker, t, bIn + 0.5, c[2] - 0.4, NEW_TAG.x + arrive.dx, NEW_TAG.y);
+      placeNewTag(s.newWorker, t, bIn + 0.5, c[2] - 0.4, EH.newTag.x + arrive.dx, EH.newTag.y);
 
       // the code card dims while the Worker restarts and no Worker runs it
       const down = win(t, restartAt, backAt, 0.3);
-      const codeOn = P(t, c[0] + 0.4, 0.4) * (1 - 0.65 * down) * wkOn;
-      place(s.code, CODE_CARD.x + wkDx, CODE_CARD.y + wkDy, 1, codeOn);
+      const codeOn = P(t, c[0] + 0.4, 0.4) * (1 - 0.65 * down) * rider.o;
+      place(s.code, CODE_CARD.x + rider.dx, CODE_CARD.y + rider.dy, 1, codeOn);
 
       // code highlight: shipPackage, then the sleep line until the Worker lets go; on wake-up it replays from the
       // top to the sleep line (already fired), then runs askForReview
@@ -236,26 +225,26 @@
       s.sleeping.style.transform = `scale(${zz.s})`;
 
       // Temporal and its Event History
-      const tp = P(t, c[0] + 0.3, 0.5, backOut);
-      place(s.temporal, TP.x, TP.y, tp, clamp(tp * 2));
+      const tp = backPop(t, c[0] + 0.3, 0.5);
+      place(s.temporal, EH.temporal.x, EH.temporal.y, tp.s, tp.o);
       place(s.hist, HIST_CARD.x, HIST_CARD.y, 1, P(t, c[0] + 0.6, 0.4));
       const written = [shipSaved, timerSaved, firedSaved, reviewSaved];
       written.forEach((at, i) => {
         showHistoryRow(s.hist, i, P(t, at - 0.1, 0.3));
-        // TimerStarted bumps again as the Worker restarts: it stays in the history
+        // "Timer started" bumps again as the Worker restarts: it stays in the history
         const bump = i === STARTED_ROW ? bumpAt(t, at) + bumpAt(t, restartAt) + bumpAt(t, deployAt) : bumpAt(t, at);
         setHistoryTag(s.hist, i, 'SAVED', 'saved', P(t, at, 0.25), bump);
       });
-      // the TimerStarted row stays lit while the Worker comes and goes; then the replay reads the history: the
-      // shipPackage row, then TimerFired (the sleep returns at once)
+      // the "Timer started" row stays lit while the Worker comes and goes; then the replay reads the history: the
+      // shipPackage row, then "Timer fired" (the sleep returns at once)
       const replayRow = t < replaySleep ? SHIP_ROW : FIRED_ROW;
-      if (t < fireAt) setHistoryScan(s.hist, STARTED_ROW, 0.6 * win(t, c[1] + 0.4, fireAt - 0.3, 0.4));
-      else setHistoryScan(s.hist, replayRow, win(t, replayAt, runAt, 0.15));
+      if (t < fireAt) scanRow(s.hist, STARTED_ROW, 0.6 * win(t, c[1] + 0.4, fireAt - 0.3, 0.4));
+      else scanRow(s.hist, replayRow, win(t, replayAt, runAt, 0.15));
 
       // durable timer: day 1 once saved, resting until c[1]; then one tick per day until day 30, when it fires. On
       // each tick the day changes, the hand turns once and the bar grows a step, then all rest until the next tick
       // (still moments the 0.5x player can stretch)
-      place(s.timer, TP.x, BLOCK.y, 1, P(t, timerSaved, 0.3));
+      place(s.timer, EH.temporal.x, BLOCK.y, 1, P(t, timerSaved, 0.3));
       const firstTick = c[1] - 0.2, tickGap = (fireAt - firstTick) / (DAYS - 1);
       const ticks = clamp(Math.floor((t - firstTick) / tickGap) + 1, 0, DAYS - 1);
       const turns = ticks > 0 ? ticks - 1 + P(t, firstTick + (ticks - 1) * tickGap, TICK_D) : 0;
@@ -269,10 +258,10 @@
 
       // chips: shipPackage's RESULT, START TIMER to the history, WAKE UP back to the sleep line, then
       // askForReview's RESULT
-      flyChip(s.chips.ship, t, shipRes, LINE_END_X, lineY(SHIP_LINE), ROW_START_X, rowY(SHIP_ROW));
-      flyChip(s.chips.start, t, startChip, LINE_END_X, lineY(SLEEP_LINE), ROW_START_X, rowY(STARTED_ROW));
-      flyChip(s.chips.wake, t, wakeAt, ROW_START_X, rowY(FIRED_ROW), WAKE_X, lineY(SLEEP_LINE));
-      flyChip(s.chips.review, t, reviewRes, LINE_END_X, lineY(REVIEW_LINE), ROW_START_X, rowY(REVIEW_ROW));
+      flyChip(s.chips.ship, t, shipRes, EH.lineEndX, lineY(SHIP_LINE), EH.rowStartX, rowY(SHIP_ROW));
+      flyChip(s.chips.start, t, startChip, EH.lineEndX, lineY(SLEEP_LINE), EH.rowStartX, rowY(STARTED_ROW));
+      flyChip(s.chips.wake, t, wakeAt, EH.rowStartX, rowY(FIRED_ROW), WAKE_X, lineY(SLEEP_LINE));
+      flyChip(s.chips.review, t, reviewRes, EH.lineEndX, lineY(REVIEW_LINE), EH.rowStartX, rowY(REVIEW_ROW));
     }
   });
 }

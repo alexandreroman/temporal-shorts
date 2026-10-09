@@ -21,7 +21,8 @@
     // the Event History card, then the pill 30 px under it
     subs: [
       {
-        text: "No answer? The Workflow can also wait on a timer: a reminder after two days, escalation after five.",
+        text: "No answer? The Workflow can also wait on a <b>timer</b>: "
+          + "a reminder after two days, escalation after five.",
         // the pill lands at c[0] + 4.95: the finished timeline reads to the end of the subtitle and this pause
         after: 1.4,
       },
@@ -34,14 +35,14 @@
       s.days = [0, 1, 2, 3, 4, 5].map(d => E(root, 'Day ' + d, 'lbl', { fontSize: '22px' }));
       s.marker = E(root, ICON('hourglass', 30, C.ink, 2), '', {
         width: '54px', height: '54px', background: C.violet, borderRadius: '50%', display: 'flex',
-        alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 22px 6px rgba(182,100,255,.4)',
+        alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 22px 6px rgba(${RGB.violet},.4)`,
       });
       s.events = EVENTS.map(([, icon, label]) => ({
         tile: iconTile(root, icon, null, 124, 124, C.ink, { size: 58, stroke: 1.6 }),
         tag: tag(root, label, 'violet'),
         stem: E(root, '', '', { width: '2px', height: '30px' }),
       }));
-      s.jr = makeHistory(root, TIMER_ROWS, CARD.w, CARD.h);
+      s.history = makeHistory(root, TIMER_ROWS, CARD.w, CARD.h);
       s.durable = tag(root, 'Timers are durable too', 'uv big');
     },
     update(t, c, s) {
@@ -63,24 +64,24 @@
         // the request is already out when the marker starts walking
         const firedAt = day === 0 ? c[0] + 0.3 : dayAt(day);
         const fired = t >= firedAt;
-        const p = P(t, c[0] + 0.1 + i * 0.1, 0.45, backOut);
+        const p = backPop(t, c[0] + 0.1 + i * 0.1);
         tile.style.borderColor = fired ? C.violet : C.line;
-        place(tile, dayX(day), LINE.y - 110, p, clamp(p * 2));
+        place(tile, dayX(day), LINE.y - 110, p.s, p.o);
         stem.style.background = fired ? C.violet : C.line;
         place(stem, dayX(day), LINE.y - 33, 1, P(t, c[0] + 0.3, 0.3));
-        const tp = P(t, firedAt, 0.45, backOut);
-        place(e, dayX(day), LINE.y - 216, tp, clamp(tp * 2));
+        const tp = backPop(t, firedAt);
+        place(e, dayX(day), LINE.y - 216, tp.s, tp.o);
       });
 
       // Temporal writes each timer to the Event History, so the timers survive restarts like the wait itself
-      place(s.jr, dayX(0) + CARD.w / 2, CARD.y, 1, P(t, c[0] + 0.2, 0.4));
+      place(s.history, dayX(0) + CARD.w / 2, CARD.y, 1, P(t, c[0] + 0.2, 0.4));
       const saved = [c[0] + 0.7, c[0] + 0.9, dayAt(2) + 0.2, dayAt(5) + 0.2];
       saved.forEach((at, i) => {
-        showRow(s.jr.rows[i], P(t, at - 0.1, 0.3));
-        setRowTag(s.jr, i, t, 'SAVED', at, P(t, at, 0.25));
+        showRow(s.history.rows[i], P(t, at - 0.1, 0.3));
+        setRowTag(s.history, i, t, 'SAVED', at, P(t, at, 0.25));
       });
-      const dp = P(t, c[0] + 4.5, 0.45, backOut);
-      place(s.durable, dayX(0) + CARD.w / 2, CARD.y + CARD.h / 2 + 63, dp, clamp(dp * 2));
+      const dp = backPop(t, c[0] + 4.5);
+      place(s.durable, dayX(0) + CARD.w / 2, CARD.y + CARD.h / 2 + 63, dp.s, dp.o);
     }
   });
 }

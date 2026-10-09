@@ -20,15 +20,16 @@ Two kinds of differences are capture noise, not source changes:
 
 **Why:** the renderer splits a video into segments drawn by parallel
 workers that start at arbitrary frames, so a frame must look the same
-whichever frames came before it. Elements carry no per-element
-compositing layer (`.abs` sets no `will-change`), and resting elements sit
-on whole pixels (pill line heights in px, status tags rounded to even
-widths, whole-number shifts), which keeps the remaining differences to
-these curves.
+whichever frames came before it. Every element composites on the page
+layer, and resting elements sit on whole pixels (pill line heights in px,
+status tags rounded to even widths, whole-number shifts), which keeps the
+remaining differences to these curves.
 
 **How to apply:** when checking that a change keeps frames identical, treat
 specks with a delta of 2 or less as noise, and capture the same sequence
 of times before and after. To check render-order independence, render
 sample frames in fresh pages and compare them with a sequential capture:
 anything beyond the curves above (a straight edge, a text block, a tag
-shifted by a pixel) is a half-pixel geometry to fix.
+shifted by a pixel) is a half-pixel geometry to fix. A `make social` PNG
+diff with no visible change is capture noise too: revert it rather than
+commit it.

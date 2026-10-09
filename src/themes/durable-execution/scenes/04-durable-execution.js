@@ -62,7 +62,7 @@
     + `text-transform:uppercase;color:var(--slate)">${name}</span>`,
     '', {
       width: SERVICE.w + 'px', height: SERVICE.h + 'px', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', gap: '12px', border: '1.5px solid #4B5363', borderRadius: 'var(--rs)',
+      justifyContent: 'center', gap: '12px', border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
     });
   // attempt marker: the attempt number while it runs, then a red x or a neon check
   const makeAttempt = (p, n) => {
@@ -72,7 +72,7 @@
       + `<span class="ok" style="position:absolute">${ICON('check', 20, C.neon, 2.6)}</span>`,
       '', {
         width: MARK + 'px', height: MARK + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#141414', border: '2px solid ' + C.violet, borderRadius: '50%',
+        background: C.bg, border: '2px solid ' + C.violet, borderRadius: '50%',
       });
     e.n = e.querySelector('.n'); e.ko = e.querySelector('.ko'); e.ok = e.querySelector('.ok');
     return e;
@@ -189,8 +189,8 @@
         const ring = strong ? win(t, hit - 0.05, hit + 0.6, 0.15) : win(t, hit - 0.05, hit + 0.25, 0.15) * 0.75;
         glow = Math.max(glow, ring);
       });
-      const cp = P(t, c[0] + 0.5, 0.6, backOut);
-      place(s.card, cardX + joltX, cardY + joltY, cp, clamp(cp * 2));
+      const cp = backPop(t, c[0] + 0.5, 0.6);
+      place(s.card, cardX + joltX, cardY + joltY, cp.s, cp.o);
       place(s.ring, cardX + joltX, cardY + joltY, 1, glow);
 
       // ---- c[2]: each Activity runs in turn; Ship package fails twice and is retried after 1s, then 2s
@@ -219,7 +219,7 @@
         setCodeLine(s.card, 0, win(t, c[1] + 2.3, c[1] + 6.0, 0.3), RUNNING, DECLARATION_LINES);
       } else {
         const waiting = active === SHIP && stepStates[SHIP] === 3;
-        const color = waiting ? 'rgba(255,90,95,.3)' : RUNNING;
+        const color = waiting ? `rgba(${RGB.red},.3)` : RUNNING;
         const line = awaitLine(WORKFLOWS_TS, Math.max(active, 0));
         setCodeLine(s.card, line, win(t, run[0], run[3] + 0.8, 0.25), color);
       }
@@ -228,8 +228,8 @@
       ORDER_STEPS.forEach((_, i) => {
         const at = c[1] + 2.6 + i * 0.4;
         draw(s.calls[i], P(t, at, 0.35));
-        const tp = P(t, at + 0.2, 0.45, backOut);
-        place(s.tiles[i], TILE.x, rowY(i), tp, clamp(tp * 2));
+        const tp = backPop(t, at + 0.2);
+        place(s.tiles[i], TILE.x, rowY(i), tp.s, tp.o);
         stepState(s.tiles[i], stepStates[i]);
         const sv = c[1] + 4.6 + i * 0.15;
         draw(s.links[i], P(t, sv, 0.35));
@@ -246,7 +246,7 @@
         attemptState(e, t >= tries[k][1] ? outcome : 1);
         place(e, ATTEMPT_X[k], y, ap.s, ap.o);
       });
-      s.waits.forEach((w, k) => draw(w, P(t, waits[k][0], waits[k][1], x => x)));
+      s.waits.forEach((w, k) => draw(w, P(t, waits[k][0], waits[k][1], linear)));
       s.waitL.forEach((e, k) => {
         place(e, (ATTEMPT_X[k] + ATTEMPT_X[k + 1]) / 2, y - 40, 1, P(t, waits[k][0], 0.3));
       });
