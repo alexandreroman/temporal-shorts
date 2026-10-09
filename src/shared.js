@@ -491,6 +491,8 @@ function placeStatusTag(e, t, label, kind, o, at) {
 const reusedLabel = isModelCall => isModelCall ? 'REUSED, NOT RE-BILLED' : 'REUSED, NOT RE-RUN';
 
 // ---------- app and Temporal panels
+// Options of an app panel (makeAppPanel) with a larger name and status
+const APP_TEXT_LARGE = { font: 22, statusFont: 18, statusTop: 25 };
 // App (or Worker) instance panel: gear + name at the top left, status text at the top right (see setAppStatus).
 // font: name size; statusFont and statusTop: size and top of the status text.
 function makeAppPanel(p, name, w, h, { font = 20, statusFont = 16, statusTop = 26 } = {}) {
@@ -512,6 +514,8 @@ function setAppStatus(panel, text, state) {
   panel.style.borderColor = { crashed: C.red, stopped: C.line }[state] || C.violet;
   gearSpin(panel, state === 'running' ? 1 : 0);
 }
+// Options of a TEMPORAL panel (makeTemporalPanel) with the logo in its header and a larger note
+const TEMPORAL_HEADER_LARGE = { logoAt: [24, 20], noteAt: [24, 25], font: 18 };
 // TEMPORAL panel, UV border: the official logo at native size with its top left corner at logoAt ([left, top];
 // null for none, when a logo flies in) and a note whose top right corner is at noteAt ([right, top]); e.out is
 // the note
@@ -526,6 +530,9 @@ function makeTemporalPanel(p, w, h, { logoAt = null, noteAt, font = 16, note = '
   e.out = e.querySelector('.out');
   return e;
 }
+// The Event History card in a TEMPORAL panel: under its 70 px header, 20 px from its other edges. panel and the
+// result: { x, y, w, h }, the center and size of each
+const historyInset = ({ x, y, w, h }) => ({ x, y: y + 25, w: w - 40, h: h - 90 });
 
 // ---------- Event History card
 // White card with an EVENT HISTORY header (headerFont, its icon 4 px larger, headerTop px from the card top),

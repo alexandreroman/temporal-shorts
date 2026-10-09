@@ -9,7 +9,7 @@
   const ROW = { x0: 270, gap: 460, y: 215, w: 300, h: 120 };
   const APP = { x: 510, y: 595, w: 780, h: 560 };
   const TEMPORAL = { x: 1380, y: 595, w: 840, h: 560 };
-  const HIST = { x: TEMPORAL.x, y: TEMPORAL.y + 25, w: TEMPORAL.w - 40, h: TEMPORAL.h - 90 };
+  const HIST = historyInset(TEMPORAL);
   // the STEPS card inside the app panel, and its lines
   const CARD = { left: 24, top: 76, w: APP.w - 48, h: APP.h - 100 };
   const LINE = { top: 62, gap: 80, h: 56 };
@@ -36,7 +36,7 @@
 
   // App instance panel holding a STEPS card: one line per step, with a neon check once done
   function makeStepsApp(root, name) {
-    const app = makeAppPanel(root, name, APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
+    const app = makeAppPanel(root, name, APP.w, APP.h, APP_TEXT_LARGE);
     app.insertAdjacentHTML('beforeend',
       `<div style="position:absolute;left:${CARD.left}px;top:${CARD.top}px;width:${CARD.w}px;height:${CARD.h}px;`
       + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
@@ -94,7 +94,7 @@
       s.steps = makeStepRow(root, s.svg, STEPS, ROW.x0, ROW.gap, ROW.y, ROW.w, ROW.h);
       s.A = makeStepsApp(root, 'APP INSTANCE A');
       s.B = makeStepsApp(root, 'APP INSTANCE B');
-      s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { logoAt: [24, 20], noteAt: [24, 25], font: 18 });
+      s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, TEMPORAL_HEADER_LARGE);
       s.history = makeHistoryCard(root, HISTORY, {
         w: HIST.w, h: HIST.h, headerFont: 20, rowTop, font: 23, rowH: HROW.h, tagTop: i => rowTop(i) + 6,
         tag: { font: 18, pad: '4px 12px', icon: 18, border: false },

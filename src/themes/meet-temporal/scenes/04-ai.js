@@ -92,8 +92,8 @@
         background: HALO_BACKGROUND,
       });
       // the app instances that run the loop: built first, so the loop and its arcs sit on top of them
-      s.appA = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
-      s.appB = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
+      s.appA = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h, APP_TEXT_LARGE);
+      s.appB = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h, APP_TEXT_LARGE);
       // each instance's AGENT CONTEXT strip: A's fills as the steps run and empties at the crash (CONTEXT LOST);
       // B's starts empty and the replay rebuilds it (CONTEXT RESTORED, then the invite adds its two blocks)
       const memory = () => makeMemory(root, MEM.w, MEM.h, {
@@ -134,7 +134,7 @@
 
       // Temporal with the Event History, outside the app (rows 1 to 6 survive the crash), the result cards between
       // the loop and the history, the pills under it, the crash marks and the takeover tag
-      s.outside = makeTemporalPanel(root, OUTSIDE.w, OUTSIDE.h, { logoAt: [24, 20], noteAt: [24, 25], font: 18 });
+      s.outside = makeTemporalPanel(root, OUTSIDE.w, OUTSIDE.h, TEMPORAL_HEADER_LARGE);
       s.history = makeHistoryCard(root, LUNCH_HISTORY, {
         uvRow: isLLMRow, w: HIST.w, h: HIST.h, headerTop: HIST_PAD, rowTop: i => HIST.row0 + i * HIST.gap, font: 22,
         rowH: HIST.rowH, tagTop: i => HIST.row0 + (HIST.rowH - 28) / 2 + i * HIST.gap, tagRight: HIST_PAD,

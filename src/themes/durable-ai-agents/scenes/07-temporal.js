@@ -13,10 +13,10 @@
   const APP = { x: 502.5, y: 445, w: 845, h: 310 };
   // context panel, 24 px inside the instance panel, and its 8 block slots, 21 px from each side
   const MEM = { x: 502.5, y: 469, w: 797, h: 210, slot0: 163, slotGap: 97, slotY: 484 };
-  // TEMPORAL panel, 20 px around the Event History card (x 1015-1820); the card and its rows (call cards land 110 px
+  // TEMPORAL panel, holding the Event History card (x 1015-1820); the card and its rows (call cards land 110 px
   // inside its left edge)
   const TEMPORAL = { x: 1417.5, y: 555, w: 845, h: 530 };
-  const HIST = { x: 1417.5, y: 580, w: 805, cardX: 1125, row0: 447, rowGap: 44 };
+  const HIST = { ...historyInset(TEMPORAL), cardX: 1125, row0: 447, rowGap: 44 };
   // ticket and AGENT COMPLETE: between the bill's right edge and the instance panel's
   const DONE_X = 692;
   // NEW INSTANCE: on the top edge of instance B's panel, centered between its name and its TAKING OVER status
@@ -69,7 +69,7 @@
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { noteAt: [24, 24] });
       // rows 1-6 survive the crash: tinted block + crash line under them
       s.history = makeHistoryCard(root, LUNCH_HISTORY, {
-        uvRow: isLLMRow, w: HIST.w, h: 440, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44,
+        uvRow: isLLMRow, w: HIST.w, h: HIST.h, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44,
         tag: { border: false },
         crash: { keptTop: 64, keptH: 262, cutTop: 330, label: 'APP CRASHED HERE', labelX: '66%', labelFont: 13 },
         scanH: 42, scanDy: -2,

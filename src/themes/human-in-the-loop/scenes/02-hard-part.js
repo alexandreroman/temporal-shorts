@@ -60,7 +60,7 @@
         width: '24px', height: '24px', background: C.violet, borderRadius: '50%',
         boxShadow: '0 0 18px 4px rgba(182,100,255,.45)',
       });
-      s.app = makeAppPanel(root, 'APP', APP.w, APP.h, APP_TEXT);
+      s.app = makeAppPanel(root, 'APP', APP.w, APP.h, APP_TEXT_LARGE);
       // the memory card never moves: it is part of the panel's HTML, and only its chips are animated elements
       s.app.insertAdjacentHTML('beforeend',
         `<div class="tile" style="position:absolute;left:24px;top:76px;width:${APP.w - 48}px;height:${APP.h - 100}px;`

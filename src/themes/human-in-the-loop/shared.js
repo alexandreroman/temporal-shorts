@@ -164,9 +164,6 @@ function setWaitClock(e, elapsed, blur = 0) {
 }
 
 // ===================== app and Temporal panels (chapters 2, 3 and 4)
-// Text sizes of the app panels (makeAppPanel options): a larger name and status
-const APP_TEXT = { font: 22, statusFont: 18, statusTop: 25 };
-
 // Chapters 3 and 4 share one layout on the content frame, y 153-877 around y 515: the step row on top; 30 px under
 // it, the app column (instance panel, then 30 px lower a strip with the clock) on the left and the Temporal panel on
 // the right, both ending on y 877
@@ -191,7 +188,7 @@ const WF_LINES = ['check the request', 'ask Maria', 'wait for the decision', 'pl
 const WF = { top: 52, gap: 44, h: 42 }; // first line, line spacing and line height inside the WORKFLOW card
 function makeWorkflowApp(p, name) {
   const { w, h } = WF_LAYOUT.app;
-  const app = makeAppPanel(p, name, w, h, APP_TEXT);
+  const app = makeAppPanel(p, name, w, h, APP_TEXT_LARGE);
   // the WORKFLOW card: under the 72 px header, 24 px from the other panel edges
   const cardW = w - 48, cardH = h - 96;
   // the card never moves: it is part of the panel's HTML, and only its lines are animated elements
@@ -243,7 +240,7 @@ function setWfCursor(app, pos, o) {
 // right (e.out)
 function makeWfTemporalPanel(p) {
   const { w, h } = WF_LAYOUT.temporal;
-  return makeTemporalPanel(p, w, h, { logoAt: [24, 20], noteAt: [24, 25], font: 18 });
+  return makeTemporalPanel(p, w, h, TEMPORAL_HEADER_LARGE);
 }
 // Event History rows of the laptop order, in the order Temporal writes them; the Signal row is in UV
 const HISTORY = [
@@ -252,10 +249,8 @@ const HISTORY = [
 ];
 const HROW = { top: 74, gap: 52, h: 40 }; // rows inside an Event History card: first row top, spacing, height
 const rowTop = i => HROW.top + i * HROW.gap;
-// the chapter 3 and 4 Event History card: 20 px inside the Temporal panel, under its 70 px header
-const HIST = {
-  x: WF_LAYOUT.temporal.x, y: WF_LAYOUT.temporal.y + 25, w: WF_LAYOUT.temporal.w - 40, h: WF_LAYOUT.temporal.h - 90,
-};
+// the chapter 3 and 4 Event History card, in the Temporal panel
+const HIST = historyInset(WF_LAYOUT.temporal);
 // stage y of the middle of row i in that card, where things flying into the history land
 const historyRowY = i => HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2;
 // Kinds of the row tags (see setRowTag): SAVED (neon on black), REPLAYED (white on UV, the look of reused rows),
