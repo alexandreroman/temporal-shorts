@@ -223,19 +223,22 @@ and each chapter has a cinematic moment, listed in its visuals.
     from the converter to a dot on Temporal Cloud's edge, labelled OUTBOUND
     ONLY, mTLS OR PRIVATELINK. On the right, Temporal Cloud, titled with the
     official logo followed by "Cloud", with its two functions: ORCHESTRATION
-    · TASK QUEUE, holding OrderWorkflow, chargeCard and shipPackage, and
+    · TASK QUEUE, holding a single OrderWorkflow task, and
     PERSISTENCE, an empty history; its caption reads ONLY WORKFLOW &
     ACTIVITY DATA, NEVER YOUR CODE. The Workers poll out to Temporal Cloud
     one after the other (a violet pulse that lights the orchestration
     block) and read POLLING.
 - **2:10** Temporal Cloud orchestrates your Workflows and Activities, and
   persists their history.
-  - Visuals: Slowly, a beat at a time: the OrderWorkflow task leaves the
-    queue, flies to the dot, back along the connection, over the Data
-    Converter and down to WORKER 1, which runs it, its code lines lit one by
-    one; its result runs back the same way and lands as row 1,
-    "OrderWorkflow · started", its payload a locked, encrypted chip. The
-    queue moves up, and the chargeCard task reaches WORKER 2, which runs it.
+  - Visuals: Slowly, a beat at a time, one task at a time in the queue. Row
+    1, "OrderWorkflow · started", is persisted, its payload a locked,
+    encrypted chip. The OrderWorkflow task leaves the queue, flies to the
+    dot, back along the connection, over the Data Converter and down to
+    WORKER 1, which runs the Workflow from the top, its code lit a line at a
+    time, and stops at `await chargeCard(o)`: WAITING, the line faintly lit.
+    Its request, a violet "schedule chargeCard" card, travels out over the
+    converter and along the connection into the queue, where the chargeCard
+    task appears; it is dispatched to WORKER 2, which runs it.
 - **2:24** Data is encrypted with your own keys before it leaves your
   environment: Temporal never sees your payloads.
   - Visuals: The rest dims for a close-up: the chargeCard result, "card:
@@ -243,18 +246,23 @@ and each chapter has a cinematic moment, listed in its visuals.
     full view; the lock opens, the key glows, the lock snaps shut and the
     text scrambles in place into hex digits; the encrypted payload crosses
     over slowly and lands as row 2, "chargeCard · completed". NEVER SEES
-    YOUR PAYLOADS pops on the history and holds. Then the shipPackage task
-    runs on WORKER 3, and row 3, "shipPackage · completed", is persisted,
+    YOUR PAYLOADS pops on the history and holds. Then the Workflow takes
+    over again: a new OrderWorkflow task resumes WORKER 1 where it paused,
+    its highlight moving on to `await shipPackage(o)`, WAITING; "schedule
+    shipPackage" travels to the queue, the shipPackage task runs on WORKER
+    3 and its result lands as row 3, "shipPackage · completed". A last
+    OrderWorkflow task resumes WORKER 1 past its last line: the Workflow
+    returns, DONE, and row 4, "OrderWorkflow · completed", is persisted,
     encrypted too.
 
 ## 06 Temporal today
 
-- **2:43** Today, more than 4,300 companies pay for it, including Netflix,
+- **2:57** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **2:50** In September 2026, investors valued Temporal at $12.55 billion.
+- **3:04** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
@@ -264,7 +272,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **2:59** Temporal keeps code running whatever fails, from everyday apps
+- **3:13** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,

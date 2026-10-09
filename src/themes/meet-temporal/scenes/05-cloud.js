@@ -28,32 +28,36 @@
   const DOT = { x: CLOUD.x - CLOUD.w / 2, y: CONV.y, size: 18 };
   // the connection's labels, centered between your zone's edge and Temporal Cloud's
   const LINE_X = (YOURS.x + YOURS.w / 2 + DOT.x) / 2;
-  // Inside Temporal Cloud, 24 px from its sides under its logo: ORCHESTRATION, its task queue (three task slots in
-  // a row), then PERSISTENCE, its three history rows 18 px apart, each with an encrypted payload; 24 px between the
-  // two blocks, the last one 24 px above the caption's clear space (y 798)
+  // Inside Temporal Cloud, 24 px from its sides under its logo: ORCHESTRATION, its task queue, which holds one task
+  // at a time, then PERSISTENCE, its four history rows 20 px apart, each with an encrypted payload; 24 px between
+  // the two blocks, the last one 24 px above the caption's clear space (y 798)
   const BLOCK = { x: CLOUD.x, w: CLOUD.w - 48 };
-  const LANE = { left: 20, top: 60, w: BLOCK.w - 40, h: 124 };
+  const LANE = { left: 20, top: 60, w: BLOCK.w - 40, h: 84 };
   const ORCH = { top: 228, h: LANE.top + LANE.h + 24 };
   const PERS = { top: ORCH.top + ORCH.h + 24 };
   PERS.h = 798 - PERS.top;
-  const TASK = { w: 192, h: 56, gapX: 16 };
-  // the slot of the i-th task in the queue, front first, left to right; between two slots as a task moves up
-  const slotAt = f => [BLOCK.x + (f - 1) * (TASK.w + TASK.gapX), ORCH.top + LANE.top + LANE.h / 2];
-  const slotPoint = slotAt;
-  const ROW = { top: 68, h: 70, gap: 18 };
+  const TASK = { w: 192, h: 48 };
+  // the queue's head, in the middle of its lane, where each task waits to be dispatched
+  const QUEUE = [BLOCK.x, ORCH.top + LANE.top + LANE.h / 2];
+  const ROW = { top: 68, h: 56, gap: 20 };
   const rowY = i => PERS.top + ROW.top + ROW.h / 2 + i * (ROW.h + ROW.gap);
   const PAYLOAD_X = BLOCK.x + BLOCK.w / 2 - 24 - 16 - 105; // the middle of a row's payload chip (210 px wide)
-  // the tasks, in queue order, the Worker each goes to, and the history row its result writes
-  const TASKS = [['OrderWorkflow', 0], ['chargeCard', 1], ['shipPackage', 2]];
+  // The tasks, in the order Temporal queues them, and the Worker each goes to: the Workflow task starts the
+  // Workflow, which runs until it awaits chargeCard; the chargeCard task runs; a new Workflow task resumes the
+  // Workflow until it awaits shipPackage; the shipPackage task runs; a last Workflow task resumes it to its end
+  const TASKS = [['OrderWorkflow', 0], ['chargeCard', 1], ['OrderWorkflow', 0], ['shipPackage', 2],
+    ['OrderWorkflow', 0]];
+  // the Workflow's requests to schedule its Activities, as it pauses on each await
+  const SCHEDULES = ['schedule chargeCard', 'schedule shipPackage'];
   const HISTORY = [['OrderWorkflow · started', '4be1…07da'], ['chargeCard · completed', '9f3a…c21e'],
-    ['shipPackage · completed', '2d7c…a913']];
-  // a task's trip, slow enough to follow: it slides to the front of the queue, flies to the connector dot, then
-  // along the connection and the wire to its Worker; the Worker runs it, a code line at a time, and its result goes
-  // back the other way, through the converter, into its history row
-  const TRIP = { slide: 0.6, toDot: 0.6, route: 1.5, run: 1.8, back: 1.5, toRow: 0.8 };
-  const arriveAt = d => d + TRIP.slide + TRIP.toDot + TRIP.route;
-  const resultAt = d => arriveAt(d) + TRIP.run;
-  const landAt = d => resultAt(d) + TRIP.back + TRIP.toRow;
+    ['shipPackage · completed', '2d7c…a913'], ['OrderWorkflow · completed', '71b0…e5f4']];
+  // a task's trip, slow enough to follow: it flies from the queue to the connector dot, then along the connection,
+  // over the Data Converter and down to its Worker; the Worker runs it a code line (step) at a time; what it sends
+  // back (a schedule request or a result) goes the other way, then on to the queue or to its history row
+  const TRIP = { toDot: 0.8, route: 1.6, step: 0.9, back: 1.5, toQueue: 0.6, toRow: 0.8 };
+  const arriveAt = d => d + TRIP.toDot + TRIP.route;
+  // a Worker's edge, where data leaves it and tasks reach it
+  const workerEdge = k => [WORKER.x + WORKER.w / 2, workerY(k)];
   // the gate just above the Data Converter, where data passes over it in full view, and the connection's start
   const GATE = [CONV.x, CONV.y - CONV.h / 2 - 34];
   const LINE_START = [CONV.x + CONV.w / 2 + 40, CONV.y];
@@ -178,8 +182,8 @@
       {
         text: "Data is encrypted with your own keys before it leaves your environment: "
           + "Temporal never sees your payloads.",
-        // the close-up, then the last task runs and persists
-        after: 10.4,
+        // the close-up, then the Workflow resumes, schedules shipPackage, which runs, and completes
+        after: 24.4,
       },
     ],
     build(stage, s) {
@@ -216,8 +220,14 @@
         // opaque, so nothing it passes over shows through its text
         fontSize: '20px', background: '#2B2F78', border: '1.5px solid ' + C.uv, borderRadius: 'var(--rs)',
       }));
+      // the Workflow's schedule requests: violet, opaque, so nothing shows through their text
+      s.schedules = SCHEDULES.map(text => E(root, text, 'mono', {
+        fontSize: '17px', padding: '8px 14px', background: '#3A2766', color: C.ink,
+        border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
+      }));
       s.polls = WORKERS.map(() => makeSpark(root, 12, '182,100,255'));
-      s.results = TASKS.map(() => makeSpark(root, 14, '219,255,75'));
+      // shipPackage's result and the Workflow's completion, flying back as sparks
+      s.results = [0, 1].map(() => makeSpark(root, 14, '219,255,75'));
       // the close-up: one result, in clear, then encrypted
       s.secret = E(root, SECRET, 'mono', {
         fontSize: '20px', padding: '6px 14px', background: C.uvTint, color: '#141414', borderRadius: 'var(--rs)',
@@ -256,82 +266,106 @@
       s.yours.cap.style.transform = `scale(${swell(t, c[0] + 7.7, 0.08)})`;
       s.cloud.cap.style.transform = `scale(${swell(t, c[0] + 8.4, 0.08)})`;
 
-      // c[1]: each task is dispatched to its Worker, which runs it, and its result is persisted in a history row.
-      // The second task's result is the close-up of c[2]; the last two run after it
-      // the two functions are there with the zone, the queue holding its tasks, the history empty; each poll
-      // lights the orchestration block as it arrives
+      // c[1] on: Temporal orchestrates the Workflow, one task at a time in its queue. Its two blocks are there with
+      // the zone, the queue holding the first Workflow task, the history empty; each poll lights the orchestration
+      // block as it arrives
       rise(s.orch, BLOCK.x, ORCH.top + ORCH.h / 2, P(t, c[0] + 0.9, 0.5), 16);
       rise(s.pers, BLOCK.x, PERS.top + PERS.h / 2, P(t, c[0] + 1.1, 0.5), 16);
       const polled = Math.max(0, ...WORKERS.map((_, k) => win(t, pollAt(k) + 1.15, pollAt(k) + 1.6, 0.1)));
       s.orch.style.borderColor = polled > 0.5 ? C.violet : 'rgba(68,76,231,.6)';
-      // one task at a time, each dispatched once the previous one's result has landed and held
-      const dispatch = [c[1] + 0.8, c[1] + 8.4, c[2] + 9.2];
-      const queuedAt = i => c[0] + 1.5 + i * 0.15;
-      // the close-up, slowly: the second result comes out of its Worker, goes to the Data Converter's gate, just
-      // above it, and holds there in clear; the lock opens, the key glows and the lock snaps shut, the text
+      // the close-up of c[2], slowly: chargeCard's result comes out of WORKER 2, goes to the Data Converter's gate,
+      // just above it, and holds there in clear; the lock opens, the key glows and the lock snaps shut, the text
       // scrambling in place; then it leaves encrypted, crosses over and lands in its row
       const out = c[2] + 0.8, leaveAt = c[2] + 1.2, atGate = c[2] + 2.0, openAt = c[2] + 3.1, snap = c[2] + 3.6;
       const crossAt = c[2] + 4.6, atDot = c[2] + 6.6, landed = c[2] + 7.4;
-      const rowAt = i => (i === 1 ? landed : landAt(dispatch[i]));
+      // the beats, one after the other: each task is queued (q), dispatched (d) 0.8 s later and reaches its Worker
+      // (a); the Workflow pauses on an await (p) and its schedule request travels to the queue, where the Activity
+      // task appears; an Activity's result is persisted, and a new Workflow task is queued
+      const toQueue = TRIP.back + TRIP.toQueue, toRow = TRIP.back + TRIP.toRow;
+      const d0 = c[1] + 0.8, a0 = arriveAt(d0), p0 = a0 + 2 * TRIP.step;
+      const q1 = p0 + toQueue, d1 = q1 + 0.8, a1 = arriveAt(d1);
+      const q2 = landed + 0.6, d2 = q2 + 0.8, a2 = arriveAt(d2), p2 = a2 + 2 * TRIP.step;
+      const q3 = p2 + toQueue, d3 = q3 + 0.8, a3 = arriveAt(d3), r3 = a3 + 2 * TRIP.step;
+      const q4 = r3 + toRow + 0.6, d4 = q4 + 0.8, a4 = arriveAt(d4), done = a4 + TRIP.step + 0.3;
+      const queued = [c[0] + 1.5, q1, q2, q3, q4], dispatch = [d0, d1, d2, d3, d4];
+      const rowAt = [c[1] + 0.3, landed, r3 + toRow, done + toRow];
+      // each task waits at the queue's head, then flies out and on to its Worker
       s.tasks.forEach((e, i) => {
-        const d = dispatch[i];
-        // its queue slot: once a task ahead of it has left the queue, it moves one slot forward, the tasks
-        // behind it one after the other
-        const shift = dispatch.slice(0, i).map((at, j) => P(t, at + TRIP.slide + 0.3 + (i - j - 1) * 0.5, 0.5))
-          .reduce((a, b) => a + b, 0);
-        let [x, y] = slotAt(i - shift);
-        const shown = P(t, queuedAt(i), 0.3);
-        const toDot = P(t, d + TRIP.slide, TRIP.toDot, ease), along = P(t, d + TRIP.slide + TRIP.toDot, TRIP.route);
-        const k = TASKS[i][1];
-        let k2 = 1;
-        if (toDot > 0 && along <= 0) {
-          const [fx, fy] = slotPoint(0);
-          x = lerp(fx, DOT.x, toDot); y = lerp(fy, DOT.y, toDot); k2 = lerp(1, 0.8, toDot);
-        } else if (along > 0) {
-          // back along the connection, over the Data Converter's gate (never across its box), then down its wire
-          [x, y] = pointOnLegs([[DOT.x, DOT.y], LINE_START, GATE, [WORKER.x + WORKER.w / 2, workerY(k)]], along);
-          k2 = 0.8;
+        const k = TASKS[i][1], pop = popIn(t, queued[i]);
+        const toDot = P(t, dispatch[i], TRIP.toDot, ease), along = P(t, dispatch[i] + TRIP.toDot, TRIP.route);
+        let [x, y] = QUEUE, scale = pop.s;
+        if (along > 0) {
+          // back along the connection, over the Data Converter's gate (never across its box), then to its Worker
+          [x, y] = pointOnLegs([[DOT.x, DOT.y], LINE_START, GATE, workerEdge(k)], along);
+          scale = 0.8;
+        } else if (toDot > 0) {
+          x = lerp(QUEUE[0], DOT.x, toDot); y = lerp(QUEUE[1], DOT.y, toDot); scale = lerp(1, 0.8, toDot);
         }
-        const gone = along >= 1 ? 0 : 1;
-        place(e, Math.round(x * 100) / 100, Math.round(y * 100) / 100, k2, shown * gone);
+        const o = t < queued[i] || along >= 1 ? 0 : pop.o;
+        place(e, Math.round(x * 100) / 100, Math.round(y * 100) / 100, scale, o);
       });
-      // each Worker runs its tasks: RUNNING, its code lit, a line at a time
-      s.workers.forEach((w, k) => {
-        // the close-up's Worker keeps running until its result leaves
-        const runs = dispatch.map((d, i) => ({ i, at: arriveAt(d) })).filter(r => TASKS[r.i][1] === k);
-        const running = runs.some(r => t >= r.at && t < (r.i === 1 ? leaveAt : r.at + TRIP.run));
+      // the Workflow's schedule requests: out of WORKER 1 as it pauses, from just right of it, over the gate, along
+      // the connection, then into the queue, where the Activity task takes their place
+      s.schedules.forEach((e, j) => {
+        const at = [p0, p2][j];
+        const start = [WORKER.x + WORKER.w / 2 + 130, workerY(0)];
+        const f = P(t, at, TRIP.back, x => x), g = P(t, at + TRIP.back, TRIP.toQueue, ease);
+        let [x, y] = pointOnLegs([start, GATE, LINE_START, [DOT.x, DOT.y]], f);
+        if (g > 0) { x = lerp(DOT.x, QUEUE[0], g); y = lerp(DOT.y, QUEUE[1], g); }
+        const o = t < at ? 0 : P(t, at, 0.3) * (1 - P(t, at + toQueue - 0.15, 0.2));
+        place(e, Math.round(x), Math.round(y), 1, o);
+      });
+      // The Workers. WORKER 1 runs the Workflow a line at a time: from the top to `await chargeCard`, where it waits;
+      // resumed, on to `await shipPackage`, where it waits again; resumed, past the last line: it returns, DONE. The
+      // line it waits on stays faintly lit. WORKERs 2 and 3 run their Activity, a line at a time
+      const lineOf = (at, first, n) => (t >= at && t < at + n * TRIP.step ? first + Math.floor((t - at) / TRIP.step)
+        : -1);
+      const w1 = s.workers[0];
+      let lit = -1, paused = -1;
+      if (t < a0) setAppStatus(w1, t >= pollAt(0) ? 'POLLING' : '', 'idle');
+      else if (t < p0) { setAppStatus(w1, 'RUNNING', 'running'); lit = lineOf(a0, 0, 2); }
+      else if (t < a2) { setAppStatus(w1, 'WAITING', 'waiting'); paused = 1; }
+      else if (t < p2) { setAppStatus(w1, 'RUNNING', 'running'); lit = lineOf(a2, 1, 2); }
+      else if (t < a4) { setAppStatus(w1, 'WAITING', 'waiting'); paused = 2; }
+      else if (t < done) { setAppStatus(w1, 'RUNNING', 'running'); lit = lineOf(a4, 2, 1); }
+      else setAppStatus(w1, 'DONE', 'idle');
+      w1.code.style.borderColor = lit >= 0 || (t >= a4 && t < done) ? C.violet : t >= done ? C.neon : C.line;
+      w1.lines.forEach((e, j) => {
+        e.style.background = j === lit ? 'rgba(182,100,255,.28)' : j === paused ? 'rgba(182,100,255,.12)' : '';
+      });
+      [[1, a1, leaveAt], [2, a3, r3]].forEach(([k, at, until]) => {
+        const w = s.workers[k], running = t >= at && t < until;
         setAppStatus(w, running ? 'RUNNING' : t >= pollAt(k) ? 'POLLING' : '', running ? 'running' : 'idle');
         w.code.style.borderColor = running ? C.violet : C.line;
-        const sweep = runs.find(r => t >= r.at && t < r.at + TRIP.run);
-        const line = sweep ? Math.floor((t - sweep.at) / TRIP.run * w.lines.length) : -1;
+        const line = running ? Math.min(1, Math.floor((t - at) / TRIP.step)) : -1;
         w.lines.forEach((e, j) => { e.style.background = j === line ? 'rgba(182,100,255,.28)' : ''; });
       });
-      // the results, but the close-up's, run back as sparks, through the Data Converter, into their rows
-      s.results.forEach((e, i) => {
-        const r = resultAt(dispatch[i]), k = TASKS[i][1];
-        const back = P(t, r, TRIP.back, x => x), toRow = P(t, r + TRIP.back, TRIP.toRow);
-        if (i === 1 || back <= 0 || toRow >= 1) {
+      // shipPackage's result and the Workflow's completion run back as sparks, over the gate, into their rows
+      [[r3, 2, 2], [done, 0, 3]].forEach(([at, k, row], j) => {
+        const e = s.results[j];
+        const back = P(t, at, TRIP.back, x => x), into = P(t, at + TRIP.back, TRIP.toRow);
+        if (back <= 0 || into >= 1) {
           place(e, 0, 0, 1, 0);
           return;
         }
-        if (toRow <= 0) {
-          const pt = routePoint(k, back);
-          place(e, pt.x, pt.y, 1, Math.min(1, back * 6));
+        if (into <= 0) {
+          const [x, y] = pointOnLegs([workerEdge(k), GATE, LINE_START, [DOT.x, DOT.y]], back);
+          place(e, x, y, 1, Math.min(1, back * 6));
         } else {
-          place(e, lerp(DOT.x, PAYLOAD_X, toRow), lerp(DOT.y, rowY(i), toRow), 1, 1 - toRow * 0.5);
+          place(e, lerp(DOT.x, PAYLOAD_X, into), lerp(DOT.y, rowY(row), into), 1, 1 - into * 0.5);
         }
       });
-      // each row slides in as its result lands, its payload glowing a moment
+      // each row slides in as its result lands (the first as the Workflow starts), its payload glowing a moment
       s.rows.forEach((e, i) => {
-        const rp = P(t, rowAt(i) - 0.05, 0.3);
+        const rp = P(t, rowAt[i] - 0.05, 0.3);
         place(e, BLOCK.x + Math.round((1 - rp) * 26), rowY(i), 1, rp);
-        e.pl.style.boxShadow = win(t, rowAt(i), rowAt(i) + 0.5, 0.15) > 0.5 ? '0 0 16px rgba(182,100,255,.6)' : '';
+        e.pl.style.boxShadow = win(t, rowAt[i], rowAt[i] + 0.5, 0.15) > 0.5 ? '0 0 16px rgba(182,100,255,.6)' : '';
       });
 
       // the close-up of c[2]: the rest dims while the payload makes its journey
       const sp = P(t, c[2] + 0.3, 0.4) * (1 - P(t, c[2] + 8.3, 0.4));
       const dim = e => { e.style.opacity = (parseFloat(e.style.opacity || 1) * (1 - 0.6 * sp)).toFixed(3); };
-      [s.workers[0], s.workers[2], s.orch, ...s.tasks, s.yours.cap, s.cloud.cap].forEach(dim);
+      [s.workers[0], s.workers[2], s.orch, ...s.tasks, ...s.schedules, s.yours.cap, s.cloud.cap].forEach(dim);
       s.rows.forEach((e, i) => { if (i !== 1) dim(e); });
       // the payload's position, always on top of what it passes: out of WORKER 2's edge, up to the gate above the
       // Data Converter (the converter's lock and key in full view under it), down to the connection's start, along
@@ -362,8 +396,9 @@
       const open = P(t, openAt, 0.25) * (1 - P(t, snap, 0.15, easeIn));
       s.conv.shackle.setAttribute('transform', `translate(0 ${(-4 * open).toFixed(2)})`);
       s.conv.key.style.transform = `scale(${swell(t, snap - 0.25, 0.5)})`;
-      const through = [...dispatch.map(d => d + TRIP.slide + TRIP.toDot + TRIP.route * 0.45),
-        ...dispatch.map(d => resultAt(d) + TRIP.back * 0.55), snap];
+      // (as tasks come in over it, and schedule requests and results go out over it)
+      const through = [...dispatch.map(d => d + TRIP.toDot + TRIP.route * 0.55),
+        ...[p0, p2, r3, done].map(at => at + TRIP.back * 0.3), snap];
       const glow = Math.max(0, ...through.map(at => win(t, at - 0.1, at + 0.3, 0.1)));
       s.conv.style.boxShadow = glow > 0 ? `0 0 ${Math.round(24 * glow)}px rgba(219,255,75,${(0.45 * glow).toFixed(3)})`
         : '';
