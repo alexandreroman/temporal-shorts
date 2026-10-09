@@ -34,43 +34,11 @@
   }
   const GLITCH_BARS = 7;
 
-  // App instance panel holding a STEPS card: one line per step, with a neon check once done
-  function makeStepsApp(root, name) {
-    const app = makeAppPanel(root, name, APP.w, APP.h, APP_TEXT_LARGE);
-    app.insertAdjacentHTML('beforeend',
-      `<div style="position:absolute;left:${CARD.left}px;top:${CARD.top}px;width:${CARD.w}px;height:${CARD.h}px;`
-      + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
-      + panelLabel('code', 'Steps', 'left:20px;top:16px;padding-left:0')
-      + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${CARD.h / 2 - 20}px;text-align:center;`
-      + 'font-size:30px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div></div>');
-    const card = app.lastElementChild;
-    app.empty = card.querySelector('.empty');
-    app.lines = LINES.map((text, i) => {
-      const line = E(card,
-        `<span style="color:#6B7385;display:inline-block;width:38px">${i + 1}</span><span class="tx">${text}</span>`
-        + `<div class="ok" style="position:absolute;right:18px;top:${(LINE.h - 30) / 2}px">`
-        + `${ICON('check', 30, C.neon, 2.6)}</div>`,
-        'mono', {
-          left: '20px', top: (LINE.top + i * LINE.gap) + 'px', width: (CARD.w - 40) + 'px', height: LINE.h + 'px',
-          lineHeight: LINE.h + 'px', fontSize: '26px', whiteSpace: 'nowrap', paddingLeft: '14px',
-          borderRadius: 'var(--rs)', borderLeft: '4px solid transparent',
-        });
-      line.tx = line.querySelector('.tx'); line.ok = line.querySelector('.ok');
-      line.tilt = i % 2 ? 22 : -18;
-      return line;
-    });
-    return app;
-  }
-  // Line state: 0 to run (dim), 1 running (violet bar), 2 done (check); fall (0 to 1) drops it out on a crash
-  function setLine(app, i, state, fall = 0) {
-    const line = app.lines[i];
-    line.tx.style.color = state === 0 ? C.slate : C.ink;
-    line.style.background = state === 1 ? 'rgba(182,100,255,.2)' : 'transparent';
-    line.style.borderLeftColor = state === 1 ? C.violet : 'transparent';
-    line.ok.style.opacity = state === 2 ? 1 : 0;
-    line.style.opacity = 1 - fall;
-    line.style.transform = `translateY(${fall * 260}px) rotate(${fall * line.tilt}deg)`;
-  }
+  // App instance panel holding a STEPS card: one line per step, with a neon check once done; EMPTY in the middle
+  const makeStepsApp = (root, name) => makeLinesApp(root, name, APP.w, APP.h, LINES, {
+    label: 'Steps', cardTop: CARD.top, emptyTop: CARD.h / 2 - 20, line: LINE, font: 26, inset: 18,
+    check: { size: 30, right: 18 }, tilts: [-18, 22],
+  });
 
   scene({
     chapter: 2, title: 'What Temporal does',
@@ -167,8 +135,8 @@
       if (crashed) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, t >= run[0] ? 'RUNNING' : '', t >= run[0] ? 'running' : 'idle');
       LINES.forEach((_, i) => {
-        const st = t >= done[i] ? 2 : t >= run[i] ? 1 : 0;
-        setLine(s.A, i, st, P(t, crashAt + 0.2 + i * 0.1, 0.8, easeIn));
+        const state = t >= done[i] ? 'done' : t >= run[i] ? 'running' : 'todo';
+        setCardLine(s.A, i, state, P(t, crashAt + 0.2 + i * 0.1, 0.8, easeIn));
       });
       s.A.empty.style.opacity = P(t, crashAt + 1.0, 0.3);
 
@@ -190,11 +158,11 @@
       // steps 1 and 2 tick as their results come back, without running again
       LINES.forEach((_, i) => {
         if (i < 2) {
-          setLine(s.B, i, t >= replay[i] + 0.4 ? 2 : 0);
+          setCardLine(s.B, i, t >= replay[i] + 0.4 ? 'done' : 'todo');
           return;
         }
         const runAt = i === 2 ? rerun : run[3];
-        setLine(s.B, i, t >= done[i] ? 2 : t >= runAt ? 1 : 0);
+        setCardLine(s.B, i, t >= done[i] ? 'done' : t >= runAt ? 'running' : 'todo');
       });
 
       // Temporal and its Event History, outside the app: untouched by the crash

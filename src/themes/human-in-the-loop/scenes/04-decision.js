@@ -123,7 +123,7 @@
       const lineDone = [replay[1], replay[2], replay[3], ordered, notified];
       lineDone.forEach((at, i) => {
         const current = cursorOn && Math.round(pos) === i;
-        setWfLine(s.B, i, t >= at ? 1 : current ? 3 : 0);
+        setWfLine(s.B, i, t >= at ? 'done' : current ? 'current' : 'todo');
       });
 
       // the order is placed once

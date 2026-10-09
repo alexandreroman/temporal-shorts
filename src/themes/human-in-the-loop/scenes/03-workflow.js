@@ -92,14 +92,14 @@
       const cursorOn = t >= started && !stopped;
       setWfCursor(s.A, pos, P(t, started, 0.3) * (1 - P(t, restartAt, 0.2)));
       const lineStates = [
-        t >= checked ? 1 : 0,
-        t >= asked ? 1 : 0,
-        t >= waitOn ? 2 : 0,
-        0, 0,
+        t >= checked ? 'done' : 'todo',
+        t >= asked ? 'done' : 'todo',
+        t >= waitOn ? 'waiting' : 'todo',
+        'todo', 'todo',
       ];
-      lineStates.forEach((st, i) => {
-        const current = st === 0 && cursorOn && Math.round(pos) === i;
-        setWfLine(s.A, i, current ? 3 : st, P(t, restartAt + 0.2 + i * 0.1, 0.8, easeIn));
+      lineStates.forEach((state, i) => {
+        const current = state === 'todo' && cursorOn && Math.round(pos) === i;
+        setWfLine(s.A, i, current ? 'current' : state, P(t, restartAt + 0.2 + i * 0.1, 0.8, easeIn));
       });
       s.A.empty.style.opacity = P(t, restartAt + 1.1, 0.4);
       // each hit flickers instance A red: its border and a tint over its background

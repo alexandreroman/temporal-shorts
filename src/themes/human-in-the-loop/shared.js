@@ -186,49 +186,34 @@ function makeClockStrip(p) {
 // The Workflow as plain-English lines, shown inside an app instance panel
 const WF_LINES = ['check the request', 'ask Maria', 'wait for the decision', 'place the order', 'notify Sam'];
 const WF = { top: 52, gap: 44, h: 42 }; // first line, line spacing and line height inside the WORKFLOW card
+// The app instance panel of chapters 3 and 4: its WORKFLOW card under the 72 px header, a cursor bar on the line
+// being run and an hourglass for the line that waits
 function makeWorkflowApp(p, name) {
   const { w, h } = WF_LAYOUT.app;
-  const app = makeAppPanel(p, name, w, h, APP_TEXT_LARGE);
-  // the WORKFLOW card: under the 72 px header, 24 px from the other panel edges
-  const cardW = w - 48, cardH = h - 96;
-  // the card never moves: it is part of the panel's HTML, and only its lines are animated elements
-  app.insertAdjacentHTML('beforeend',
-    `<div style="position:absolute;left:24px;top:72px;width:${cardW}px;height:${cardH}px;`
-    + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
-    + panelLabel('code', 'Workflow', 'left:20px;top:16px;padding-left:0')
-    + `<div class="cur" style="position:absolute;left:12px;width:${cardW - 26}px;height:${WF.h + 2}px;`
-    + `background:rgba(182,100,255,.2);border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`
+  const app = makeLinesApp(p, name, w, h, WF_LINES, {
     // EMPTY sits in the middle of the space under the WORKFLOW label
-    + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${(44 + cardH) / 2 - 20}px;`
-    + 'text-align:center;font-size:30px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div>'
-    + '</div>');
-  const card = app.lastElementChild;
-  app.cur = card.querySelector('.cur'); app.empty = card.querySelector('.empty');
-  app.lines = WF_LINES.map((txt, i) => {
-    const line = E(card,
-      `<span style="color:#6B7385;display:inline-block;width:38px">${i + 1}</span><span class="tx">${txt}</span>`
-      + `<div class="ok" style="position:absolute;right:16px;top:7px">${ICON('check', 28, C.neon, 2.6)}</div>`
-      + `<div class="hg" style="position:absolute;right:16px;top:6px">${ICON('hourglass', 28, C.violet, 2)}</div>`,
-      'mono', {
-        left: '20px', top: (WF.top + i * WF.gap) + 'px', width: (cardW - 40) + 'px', height: WF.h + 'px',
-        lineHeight: WF.h + 'px', fontSize: '24px', whiteSpace: 'nowrap', paddingLeft: '10px',
-      });
-    line.ok = line.querySelector('.ok'); line.hg = line.querySelector('.hg'); line.tx = line.querySelector('.tx');
-    line.tilt = i % 2 ? 24 : -20;
-    return line;
+    label: 'Workflow', cardTop: 72, emptyTop: (44 + h - 96) / 2 - 20, line: WF, font: 24, inset: 10,
+    check: { size: 28, right: 16 }, tilts: [-20, 24],
+  });
+  // under the lines
+  app.empty.insertAdjacentHTML('beforebegin',
+    `<div class="cur" style="position:absolute;left:12px;width:${w - 74}px;height:${WF.h + 2}px;`
+    + `background:rgba(182,100,255,.2);border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`);
+  app.cur = app.card.querySelector('.cur');
+  app.lines.forEach(line => {
+    line.insertAdjacentHTML('beforeend',
+      `<div class="hg" style="position:absolute;right:16px;top:6px">${ICON('hourglass', 28, C.violet, 2)}</div>`);
+    line.hg = line.querySelector('.hg');
   });
   return app;
 }
-// Line state: 0 to run (dim), 1 done (check), 2 waiting (hourglass), 3 under the cursor (bright, no mark yet).
-// fall (0 to 1) drops the line out of the card when the app crashes.
+// Line state (see setCardLine): 'todo' (dim), 'done' (check), 'waiting' (hourglass) or 'current' (under the cursor:
+// bright, no mark yet). fall (0 to 1) drops the line out of the card when the app crashes.
 function setWfLine(app, i, state, fall = 0) {
-  const line = app.lines[i];
-  line.tx.style.color = state === 0 ? C.slate : C.ink;
-  line.ok.style.opacity = state === 1 ? 1 : 0;
-  line.hg.style.opacity = state === 2 ? 1 : 0;
-  line.hg.style.transform = `rotate(${hourglassTurn()}deg)`;
-  line.style.opacity = 1 - fall;
-  line.style.transform = `translateY(${fall * 260}px) rotate(${fall * line.tilt}deg)`;
+  setCardLine(app, i, state, fall);
+  const hourglass = app.lines[i].hg;
+  hourglass.style.opacity = state === 'waiting' ? 1 : 0;
+  hourglass.style.transform = `rotate(${hourglassTurn()}deg)`;
 }
 // Cursor bar on line pos (fractional while it moves from one line to the next), with opacity o
 function setWfCursor(app, pos, o) {

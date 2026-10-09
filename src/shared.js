@@ -307,14 +307,23 @@ function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts,
   });
 }
 
+// Red note, e.g. EMPTY, centered across a panel or a card that a crash empties, its top `top` px from the box's;
+// hidden until its opacity is set (class empty)
+const emptyNote = (top, text = 'EMPTY', font = 30) => '<div class="empty mono" style="position:absolute;left:0;'
+  + `right:0;top:${top}px;text-align:center;font-size:${font}px;letter-spacing:.14em;padding-left:.14em;`
+  + `color:var(--red);opacity:0">${text}</div>`;
+// A line or chip falls out of its panel when the app crashes: as fall goes from 0 to 1, it drops 260 px, tilts by
+// `tilt` degrees and fades out; o: its opacity before the fall
+function fallOut(e, fall, tilt, o = 1) {
+  e.style.opacity = o * (1 - fall);
+  e.style.transform = `translateY(${fall * 260}px) rotate(${fall * tilt}deg)`;
+}
 // CONTEXT panel: the agent's context, held in the app's memory, with a red note (EMPTY by default) for when a
 // crash wipes it. Its icon is a page, as durable-ai-agents chapter 3 draws the context window. Options: label, the
 // panel's label, its top left corner at labelAt ([left, top], px); emptyText, the note
 function makeMemory(p, w, h, { label = 'Context', labelAt = [22, 16], emptyText = 'EMPTY' } = {}) {
   const e = E(p,
-    panelLabel('book', label, `left:${labelAt[0]}px;top:${labelAt[1]}px`)
-    + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;`
-    + `font-size:26px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">${emptyText}</div>`,
+    panelLabel('book', label, `left:${labelAt[0]}px;top:${labelAt[1]}px`) + emptyNote(h / 2 - 8, emptyText, 26),
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
   e.empty = e.querySelector('.empty');
   return e;
@@ -513,6 +522,54 @@ function setAppStatus(panel, text, state) {
   panel.st.style.color = { crashed: C.red, waiting: C.violet }[state] || C.slate;
   panel.style.borderColor = { crashed: C.red, stopped: C.line }[state] || C.violet;
   gearSpin(panel, state === 'running' ? 1 : 0);
+}
+// App instance panel (APP_TEXT_LARGE) holding a card of numbered lines in plain English, the steps the app runs,
+// each with a neon check once done (see setCardLine), and EMPTY for when a crash wipes them. The card sits cardTop
+// px from the panel top and 24 px from its other edges; it is part of the panel's HTML, so it never moves, and
+// only its lines are animated elements. Options:
+// - label: the card's label; emptyTop: top of EMPTY in the card
+// - line: { top, gap, h }, the first line's top in the card, the line spacing and height; font: the text size;
+//   inset: where the text starts in its line
+// - check: { size, right }, the check icon's size and right margin, centered on its line
+// - tilts: [even, odd], the tilt of the even and odd lines as they fall out on a crash
+// Returns the panel with card, empty and lines (each with tx, its text, and ok, its check).
+function makeLinesApp(p, name, w, h, lines, opts) {
+  const { label, cardTop, emptyTop, line: L, font, inset, check, tilts } = opts;
+  const app = makeAppPanel(p, name, w, h, APP_TEXT_LARGE);
+  const cardW = w - 48, cardH = h - cardTop - 24;
+  app.insertAdjacentHTML('beforeend',
+    `<div style="position:absolute;left:24px;top:${cardTop}px;width:${cardW}px;height:${cardH}px;`
+    + `background:rgba(248,250,252,.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
+    + panelLabel('code', label, 'left:20px;top:16px;padding-left:0') + emptyNote(emptyTop) + '</div>');
+  app.card = app.lastElementChild;
+  app.empty = app.card.querySelector('.empty');
+  app.lines = lines.map((text, i) => {
+    const line = E(app.card,
+      `<span style="color:#6B7385;display:inline-block;width:38px">${i + 1}</span><span class="tx">${text}</span>`
+      + `<div class="ok" style="position:absolute;right:${check.right}px;top:${(L.h - check.size) / 2}px">`
+      + `${ICON('check', check.size, C.neon, 2.6)}</div>`,
+      'mono', {
+        left: '20px', top: (L.top + i * L.gap) + 'px', width: (cardW - 40) + 'px', height: L.h + 'px',
+        lineHeight: L.h + 'px', fontSize: font + 'px', whiteSpace: 'nowrap', paddingLeft: (inset - 4) + 'px',
+        // shows as a violet bar while the line runs
+        borderRadius: 'var(--rs)', borderLeft: '4px solid transparent',
+      });
+    line.tx = line.querySelector('.tx'); line.ok = line.querySelector('.ok');
+    line.tilt = tilts[i % 2];
+    return line;
+  });
+  return app;
+}
+// Line state: 'todo' (dim), 'running' (violet bar), 'done' (check) or another state, bright with no mark (e.g. the
+// line under a cursor); fall (0 to 1) drops the line out of the card when the app crashes (see fallOut)
+function setCardLine(app, i, state, fall = 0) {
+  const line = app.lines[i];
+  const running = state === 'running';
+  line.tx.style.color = state === 'todo' ? C.slate : C.ink;
+  line.style.background = running ? 'rgba(182,100,255,.2)' : 'transparent';
+  line.style.borderLeftColor = running ? C.violet : 'transparent';
+  line.ok.style.opacity = state === 'done' ? 1 : 0;
+  fallOut(line, fall, line.tilt);
 }
 // Options of a TEMPORAL panel (makeTemporalPanel) with the logo in its header and a larger note
 const TEMPORAL_HEADER_LARGE = { logoAt: [24, 20], noteAt: [24, 25], font: 18 };

@@ -67,8 +67,7 @@
         + 'text-align:left;background:rgba(248,250,252,.03)">'
         + panelLabel('server', 'App memory', 'left:20px;top:16px;padding-left:0')
         // EMPTY and REQUEST LOST, like the chips, sit in the middle of the space under the APP MEMORY label
-        + '<div class="empty mono" style="position:absolute;left:0;right:0;top:129px;text-align:center;font-size:30px;'
-        + 'letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">EMPTY</div></div>');
+        + emptyNote(129) + '</div>');
       s.mem = s.app.lastElementChild;
       s.empty = s.mem.querySelector('.empty');
       s.chips = CHIPS.map((txt, i) => E(s.mem, txt, 'mono', {
@@ -95,8 +94,7 @@
         // first shown from c[0], dropped by the crash, then back once teams save it by hand
         const grow = t < back ? P(t, c[0] + 0.6 + i * 0.25, 0.35) : P(t, c[1] + 2.0, 0.5);
         const fall = t < back ? P(t, crashAt + 0.2 + i * 0.12, 0.8, easeIn) : 0;
-        e.style.opacity = grow * (1 - fall);
-        e.style.transform = `translateY(${fall * 260}px) rotate(${fall * (i % 2 ? 22 : -18)}deg)`;
+        fallOut(e, fall, i % 2 ? 22 : -18, grow);
       });
       s.empty.style.opacity = win(t, crashAt + 1.0, back, 0.4);
       place(s.lost, APP.x, APP.y + 79, P(t, crashAt + 1.4, 0.45, backOut), win(t, crashAt + 1.4, back, 0.3));
