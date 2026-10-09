@@ -123,7 +123,7 @@ the visuals belong to each theme (last section).
 - The Temporal arc repeats: the problem without Temporal (crash, lost
   progress, duplicated side effect, hand-built plumbing), then a Workflow,
   an Event History saved outside the app before the next step, a crash,
-  another instance replaying the history and resuming with no step redone.
+  another instance replaying the history and resuming with no saved step redone.
   A theme whose audience knows the problem opens on the solution.
 - Shared components carry it: step rows (`makeStepRow`, `makeStep`), app
   panel (`makeAppPanel`), TEMPORAL panel (`makeTemporalPanel`, "Outside the
@@ -338,7 +338,8 @@ below and the card order in [Home page design](feedback_home-page.md).
   agent waits durably for the result without tying up compute (one
   callback target on screen: USER'S LAPTOP). Ch8 typed sessions shows the
   path agent Python class → generated TypeScript types → UI; on-screen
-  TypeScript follows the harness-codegen shape (`handlers: {name: {input;
+  TypeScript follows the harness-codegen shape (`initData` first, `null`
+  for an agent with no init data, then `handlers: {name: {input;
   output}}`, `states`). Ch9 is the recap.
 - The turn is the core concept (a message starts a turn, the developer's
   loop runs inside, the reply streams, the harness waits); ch1 introduces
