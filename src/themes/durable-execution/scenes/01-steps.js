@@ -100,7 +100,7 @@
         const busy = t >= a + 0.45 && t < a + RUN_D;
         const all = win(t, c[1] + 4.8 + i * 0.12, c[1] + 6.2, 0.3);
         e.style.borderColor = busy || all > 0.5 ? C.uv : '#4B5363';
-        const down = P(t, a + 0.3, 0.25, x => x), up = P(t, a + 0.6, 0.25, x => x);
+        const down = P(t, a + 0.3, 0.25, linear), up = P(t, a + 0.6, 0.25, linear);
         const y = lerp(lerp(SERVICE_LINK[0], SERVICE_LINK[1], down), SERVICE_LINK[0], up);
         place(s.dots[i], x, y, 1, win(t, a + 0.3, a + 0.85, 0.05));
       });

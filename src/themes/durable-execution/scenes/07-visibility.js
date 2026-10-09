@@ -741,7 +741,7 @@
       // ---- c[1]: order-1042: the chart sweeps through the run in time order on "every Activity" (each label,
       // with its duration, shows as its bar ends), then the crash annotation on "the retry after the crash"
       const tl = s.timeline;
-      setTimeline(tl, ORDER_1042.runtime * P(t, c[1] + 1.8, 2.2, x => x));
+      setTimeline(tl, ORDER_1042.runtime * P(t, c[1] + 1.8, 2.2, linear));
       s.order1042.end.textContent = dateTime(ORDER_1042.start + ORDER_1042.runtime);
       s.order1042.duration.textContent = duration(ORDER_1042.runtime);
       showAnnotation(s.crashNote, t, c[1] + 4.9);

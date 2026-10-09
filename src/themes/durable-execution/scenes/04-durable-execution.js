@@ -246,7 +246,7 @@
         attemptState(e, t >= tries[k][1] ? outcome : 1);
         place(e, ATTEMPT_X[k], y, ap.s, ap.o);
       });
-      s.waits.forEach((w, k) => draw(w, P(t, waits[k][0], waits[k][1], x => x)));
+      s.waits.forEach((w, k) => draw(w, P(t, waits[k][0], waits[k][1], linear)));
       s.waitL.forEach((e, k) => {
         place(e, (ATTEMPT_X[k] + ATTEMPT_X[k + 1]) / 2, y - 40, 1, P(t, waits[k][0], 0.3));
       });

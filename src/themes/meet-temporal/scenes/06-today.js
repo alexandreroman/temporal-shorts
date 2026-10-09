@@ -381,7 +381,7 @@
       // ---------- beat 3
       // the timing of the climb: the grid and the first round, then each curve, the last one a surge
       const climb = c[3] + 0.6;
-      const segs = [[climb + 0.2, 1.4, ease], [climb + 1.6, 1.2, x => x], [climb + 2.8, 1.0, easeIn]];
+      const segs = [[climb + 0.2, 1.4, ease], [climb + 1.6, 1.2, linear], [climb + 2.8, 1.0, easeIn]];
       const arrive = segs[2][0] + segs[2][1];
       const settle = ease(P(t, arrive + 0.5, 1.3));
       let seg = 0, u = 0;

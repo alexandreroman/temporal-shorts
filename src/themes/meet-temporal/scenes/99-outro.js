@@ -96,7 +96,6 @@
   const PULSE_AT = 3.3; // the constellation is complete: a glow sweeps across it, left to right
   const PULSE_SWEEP = 0.5;
 
-  const linear = p => p;
   const polylinePath = (points, closed) =>
     'M ' + points.map(point => ziggyPoint(point).join(' ')).join(' L ') + (closed ? ' Z' : '');
   const distance = ([x1, y1], [x2, y2]) => Math.hypot(x2 - x1, y2 - y1);

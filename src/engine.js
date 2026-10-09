@@ -1,5 +1,6 @@
 // ---------- helpers
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const linear = p => p;
 const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
 const easeIn = p => p * p * p;
 const easeOut = p => 1 - (1 - p) ** 3;
@@ -284,7 +285,7 @@ function renderAt(t, g = t) {
   for (const sc of scenes) for (const s of sc.subs) if (t >= s.start && t < s.end) st = s;
   if (st) {
     sub.innerHTML = st.text;
-    const so = P(t, st.start, 0.18, x => x) * (1 - P(t, st.end - 0.18, 0.18, x => x));
+    const so = P(t, st.start, 0.18, linear) * (1 - P(t, st.end - 0.18, 0.18, linear));
     sub.parentNode.style.opacity = so;
   } else sub.parentNode.style.opacity = 0;
   // header, which fades in and out with each chapter scene, and the Temporal symbol, which stays fully visible

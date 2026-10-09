@@ -432,7 +432,7 @@
       s.turnLinks.forEach((l, k) => {
         const at = k < TURN_CALLS.length ? CMP_AT.call0 + k * CMP_AT.callGap : CMP_AT.reply;
         draw(l, P(t, b4 + at - CMP_AT.link, CMP_AT.link), cmpO);
-        draw(s.streamLinks[k], P(t, streamAt(k), SAVE_AT.seg, x => x), cmpO);
+        draw(s.streamLinks[k], P(t, streamAt(k), SAVE_AT.seg, linear), cmpO);
       });
       s.calls.forEach((e, i) => {
         const p = P(t, b4 + CMP_AT.call0 + i * CMP_AT.callGap, 0.4, backOut);
@@ -447,7 +447,7 @@
       const pReply = P(t, b4 + CMP_AT.reply, 0.45, backOut);
       place(s.turnReply, CMP.right - CMP.cardW / 2, CMP.cardY, pReply, clamp(pReply * 2) * cmpO);
       // the bracket draws under the turn as the reply streams, then the pill pops on it
-      draw(s.bracket, P(t, b5 + SAVE_AT.reply, SAVE_AT.streamed - SAVE_AT.reply, x => x), cmpO);
+      draw(s.bracket, P(t, b5 + SAVE_AT.reply, SAVE_AT.streamed - SAVE_AT.reply, linear), cmpO);
       const pSt = P(t, b5 + SAVE_AT.streamed, 0.45, backOut);
       place(s.streamed, 960, CMP.bracketY, pSt, clamp(pSt * 2) * cmpO);
       // c[6]: each capability pops beside the frame as the subtitle names it, and plugs in with a short link

@@ -116,7 +116,7 @@ function makeApprovalCard(p, k) {
 }
 // Tap on Approve at `at`: a ripple, a neon flash, then the button stays approved (check + "Approved")
 function tapApprove(card, t, at) {
-  const ripple = P(t, at, 0.5, x => x);
+  const ripple = P(t, at, 0.5, linear);
   card.ring.style.opacity = t >= at ? 1 - ripple : 0;
   card.ring.style.transform = `scale(${0.2 + 1.6 * ripple})`;
   const approved = t >= at + 0.15;

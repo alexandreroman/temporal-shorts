@@ -171,7 +171,7 @@
       // light sweeps through its letters, a glow blooms and settles to a faint lasting one, the words pop (anchored
       // on their right, clear of "in the making") and sparkles burst out and fade
       const highlight = 0.9;
-      const sweep = P(t, highlight, 0.6, x => x);
+      const sweep = P(t, highlight, 0.6, linear);
       s.key.shine.style.opacity = sweep > 0 && sweep < 1 ? 1 : 0;
       s.key.shine.style.backgroundPosition = `${lerp(100, 0, sweep).toFixed(2)}% 0`;
       const bloom = Math.max(win(t, highlight, highlight + 0.5, 0.25), 0.35 * P(t, highlight + 0.3, 0.5));

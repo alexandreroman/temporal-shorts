@@ -61,7 +61,6 @@
       + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
       + `background:${css.background};color:${type === 'TOKENS' ? '#5B6475' : css.color}">${type}</span>`;
   };
-  const linear = p => p;
   const cubic = (a, b, c, d, u) => {
     const v = 1 - u;
     return v * v * v * a + 3 * v * v * u * b + 3 * v * u * u * c + u * u * u * d;

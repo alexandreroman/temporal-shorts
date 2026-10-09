@@ -310,7 +310,7 @@
       place(s.outbound, LINE_X, CONV.y - 46, 1, P(t, c[0] + 2.6, 0.4));
       place(s.mtls, LINE_X, CONV.y + 58, 1, P(t, c[0] + 2.8, 0.4));
       s.polls.forEach((e, k) => {
-        const p = P(t, pollAt(k), 1.2, x => x);
+        const p = P(t, pollAt(k), 1.2, linear);
         if (p <= 0 || p >= 1) {
           place(e, 0, 0, 1, 0);
           return;
@@ -410,7 +410,7 @@
       // shipPackage's result and the Workflow's completion run back as sparks, over the gate, into their rows
       [[r3, 2, 6], [done, 0, 7]].forEach(([at, k, row], j) => {
         const e = s.results[j];
-        const back = P(t, at, TRIP.back, x => x), into = P(t, at + TRIP.back, TRIP.toRow);
+        const back = P(t, at, TRIP.back, linear), into = P(t, at + TRIP.back, TRIP.toRow);
         if (back <= 0 || into >= 1) {
           place(e, 0, 0, 1, 0);
           return;
@@ -474,11 +474,11 @@
         ...dispatch.map((d, i) => ({ k: TASKS[i][1], start: d + TRIP.toDot, d: TRIP.route, map: u => 1 - ease(u),
           out: false })),
         ...[p0, p2].map(at => ({ k: 0, start: at, d: TRIP.back, map: ease, out: true })),
-        ...[[r3, 2], [done, 0]].map(([at, k]) => ({ k, start: at, d: TRIP.back, map: u => u, out: true })),
+        ...[[r3, 2], [done, 0]].map(([at, k]) => ({ k, start: at, d: TRIP.back, map: linear, out: true })),
       ].map(pass => ({ ...pass, mid: passMid(pass) }));
       const active = passes.find(pass => Math.abs(t - pass.mid) < 0.22);
       const pulse = active ? win(t, active.mid - 0.22, active.mid + 0.22, 0.12) : 0;
-      const sweep = active ? P(t, active.mid - 0.22, 0.44, x => x) : 0;
+      const sweep = active ? P(t, active.mid - 0.22, 0.44, linear) : 0;
       place(s.conv.scan, (active && active.out ? sweep : 1 - sweep) * (CONV.w - 6) + 1.5, (CONV.h - 3) / 2, 1,
         active ? pulse * 0.8 : 0);
       const decrypt = active && !active.out ? win(t, active.mid - 0.2, active.mid + 0.15, 0.1) : 0;
