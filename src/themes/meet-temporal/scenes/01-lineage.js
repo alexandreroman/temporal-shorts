@@ -22,9 +22,9 @@
   // the outer side (Maxim's on the left, Samar's on the right)
   const INTRO = { y: 380, size: 140, x: [760, 1160] };
   const NAME = { w: 340, gap: 24 };
-  // as the timeline comes in, the faces and names move up out of its way, the faces shrinking: their bottom then
-  // clears the years by 47 px
-  const LIFTED = { y: 318, size: 90 };
+  // as the timeline comes in, the faces and names move up out of its way, the faces shrinking: they then sit
+  // halfway between the heading's descenders and the years, about 32 px from each
+  const LIFTED = { y: 339, size: 78 };
   const nameX = (i, size) => INTRO.x[i] + (i === 0 ? -1 : 1) * (size / 2 + NAME.gap + NAME.w / 2);
   // company (null for the Temporal logo), name, detail and year of each milestone
   const MILESTONES = [
