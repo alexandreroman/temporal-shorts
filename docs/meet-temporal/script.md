@@ -77,6 +77,16 @@ its visuals.
   (Series C, March 2025, $1.72B: chapter 06)
 - https://sdtimes.com/temporal-io-raises-103-million-series-b-company-valuation-passes-1-5-billion/
   (Series B, February 2022, $1.5B: chapter 06)
+- https://www.geekwire.com/2023/developer-productivity-startup-temporal-raises-75m/
+  (February 28, 2023: Temporal "raised $75 million", a round it
+  "described as 'Series B-Prime'", Greenoaks a new investor; "its current
+  valuation is 'just over' $1.5 billion": chapter 06)
+- https://docs.temporal.io/blog/funding-announcement (October 15, 2020: "a
+  18.75M A round led by Sequoia Capital", no valuation given: chapter 06)
+- https://www.alexanderjarvis.com/temporal-pitch-deck-to-raise-18-75m-series-a-round/
+  ("Temporal ultimately closed an $18.75 million Series A in October at a
+  roughly $75 million valuation, according to PitchBook": the ~$75M
+  estimate of chapter 06)
 - https://temporal.io/blog/improving-java-sdk-codex-openai (Codex runs on
   Temporal: chapter 04)
 - https://temporal.io/resources/case-studies/replit-uses-temporal-to-power-replit-agent-reliably-at-scale
@@ -317,26 +327,30 @@ its visuals.
 - **3:30** In September 2026, investors valued Temporal at $12.55 billion.
   - Visuals: The chips and the symbol fall away as the camera starts to
     rise over a dark grid and parallax stars, riding the head of a glowing
-    line: it reaches FEB 2022 $1.5B (Series B), MAR 2025 $1.72B (Series C)
-    and FEB 2026 $5B (Series D), each marker and label flashing as the line
-    hits it, with the value racing above; then a near-vertical neon surge
-    to SEP 2026, the value blurring to $12.55B, and the arrival: a shake, a
-    flash bloom, shockwave rings and sparks. The camera pulls back to the
-    whole climb on the right, and "$12.55B" holds huge on the left,
-    VALUATION · SEPTEMBER 2026 under it.
-- **3:37** That's more than 8 times its 2022 value: investors see it as core
+    line from OCT 2020 ~$75M (Series A, the tilde marking an estimate),
+    near the bottom: it rises to FEB 2022 $1.5B (Series B), runs flat to
+    FEB 2023 $1.5B (Series B-Prime), then reaches MAR 2025 $1.72B
+    (Series C) and FEB 2026 $5B (Series D), each marker and label flashing
+    as the line hits it, with the value racing above, in millions with a
+    tilde below a billion; then a near-vertical neon surge to SEP 2026,
+    the value blurring to $12.55B, and the arrival: a shake, a flash
+    bloom, shockwave rings and sparks. The camera pulls back to the whole
+    climb on the right, the Oct 2020 point low under the value's end, and
+    "$12.55B" holds huge on the left, VALUATION · SEPTEMBER 2026 under it.
+- **3:38** That's more than 8 times its 2022 value: investors see it as core
   infrastructure for AI.
   - Visuals: On the settled chart, dashed guides run from the FEB 2022 and
     SEP 2026 points to a vertical bracket on the right of the climb, which
-    draws from the 2022 level up to the $12.55B level with a pulse and an
-    arrowhead, "$1.5B" and "$12.55B" at its ends and "×8 SINCE 2022" beside
-    its middle, reading upward. Then, as the subtitle reaches its phrase, a neon
-    CORE INFRASTRUCTURE FOR AI tag pops under VALUATION · SEPTEMBER 2026,
-    and the whole holds.
+    draws from the 2022 level (the first valuation Temporal announced, the
+    guide passing the flat FEB 2023 point) up to the $12.55B level with a
+    pulse and an arrowhead, "$1.5B" and "$12.55B" at its ends and
+    "×8 SINCE 2022" beside its middle, reading upward. Then, as the
+    subtitle reaches its phrase, a neon CORE INFRASTRUCTURE FOR AI tag
+    pops under VALUATION · SEPTEMBER 2026, and the whole holds.
 
 ## Outro
 
-- **3:46** Temporal keeps code running through crashes and outages, from
+- **3:47** Temporal keeps code running through crashes and outages, from
   everyday apps to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,

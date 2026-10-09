@@ -90,29 +90,40 @@
   const TILE = { background: '#17182A', color: C.ink, border: '1.5px solid ' + C.uv, fontSize: '24px', gap: '14px',
     padding: '0 24px', borderRadius: '22px' };
 
-  // ---------- beat 3: the valuation, drawn on a full-stage canvas. The rounds as world points (x right, y up the
-  // value), joined by three curves; the camera keeps the head of the line at HEAD while it climbs
+  // ---------- beat 3: the valuation, drawn on a full-stage canvas. Every round with a reported valuation as a world
+  // point (x right, y up the value, both scales shaped by hand), joined by one curve per step; the camera keeps the
+  // head of the line at HEAD while it climbs. The Series A valuation is a PitchBook estimate, not announced by
+  // Temporal: its tilde marks it, and the ×8 bracket starts from Feb 2022, the first announced valuation. Feb 2022
+  // and Feb 2023 share a value: their points sit 250 px apart, so their labels stay clear of each other
   const ROUNDS = [
+    { date: 'Oct 2020', value: 0.075, label: '~$75M', series: 'Series A', at: [-240, 150] },
     { date: 'Feb 2022', value: 1.5, label: '$1.5B', series: 'Series B', at: [0, 0] },
-    { date: 'Mar 2025', value: 1.72, label: '$1.72B', series: 'Series C', at: [520, -20] },
-    { date: 'Feb 2026', value: 5, label: '$5B', series: 'Series D', at: [1000, -290] },
-    { date: 'Sep 2026', value: 12.55, label: '$12.55B', series: 'Series E', at: [1260, -1000] },
+    { date: 'Feb 2023', value: 1.5, label: '$1.5B', series: 'Series B-Prime', at: [250, 0] },
+    { date: 'Mar 2025', value: 1.72, label: '$1.72B', series: 'Series C', at: [600, -20] },
+    { date: 'Feb 2026', value: 5, label: '$5B', series: 'Series D', at: [1040, -290] },
+    { date: 'Sep 2026', value: 12.55, label: '$12.55B', series: 'Series E', at: [1300, -1000] },
   ];
+  const LAST = ROUNDS.length - 1;
   // each curve's control points, from one round to the next
   const CURVES = [
-    [[0, 0], [200, 0], [360, -10], [520, -20]],
-    [[520, -20], [700, -30], [860, -120], [1000, -290]],
-    [[1000, -290], [1100, -410], [1200, -700], [1260, -1000]],
+    [[-240, 150], [-140, 150], [-90, 0], [0, 0]],
+    [[0, 0], [80, 0], [170, 0], [250, 0]],
+    [[250, 0], [370, 0], [480, -10], [600, -20]],
+    [[600, -20], [780, -30], [940, -120], [1040, -290]],
+    [[1040, -290], [1140, -410], [1240, -700], [1300, -1000]],
   ];
   const HEAD = [1100, 640];
-  // at rest: the whole chart at 55% on the right (its middle at screen x 1360), the value on the left, clear of it
-  const REST = { at: [630, -500], scale: 0.55, x: 1290, valueX: 560 };
-  // On the settled chart (screen pixels), a vertical measuring bracket right of the SEP 2026 point, from the 2022
-  // value's height (the line's start) up to the $12.55B point's, with dashed guides from both points; its label
-  // rotated beside its middle, its end values to its right
-  const FEB22 = [Math.round(REST.x + (0 - REST.at[0]) * REST.scale), Math.round(515 + (0 - REST.at[1]) * REST.scale)];
-  const SEP26 = [Math.round(REST.x + (1260 - REST.at[0]) * REST.scale),
-    Math.round(515 + (-1000 - REST.at[1]) * REST.scale)];
+  // at rest: the whole chart at 52% on the right, the value on the left, clear of it; the Oct 2020 point tucks in
+  // under the value's right end, below its AI tag
+  const REST = { at: [690, -425], scale: 0.52, x: 1300, valueX: 560 };
+  // a world point's place on the settled chart, on whole pixels
+  const atRest = ([wx, wy]) => [Math.round(REST.x + (wx - REST.at[0]) * REST.scale),
+    Math.round(515 + (wy - REST.at[1]) * REST.scale)];
+  // On the settled chart (screen pixels), a vertical measuring bracket right of the SEP 2026 point, from the Feb 2022
+  // value's height up to the $12.55B point's, with dashed guides from both points; its label rotated beside its
+  // middle, its end values to its right
+  const FEB22 = atRest(ROUNDS.find(round => round.date === 'Feb 2022').at);
+  const SEP26 = atRest(ROUNDS[LAST].at);
   const BRACKET = { x: SEP26[0] + 54, bottom: FEB22[1], top: SEP26[1], tick: 10 };
   const GRID = 80;
   const STARS = Array.from({ length: 220 }, (_, i) => ({
@@ -148,8 +159,8 @@
           + "LangGraph, and more.",
         after: 1.2,
       },
-      // the climb and the arrival; the chart settles before the next subtitle
-      { text: "In September 2026, investors valued Temporal at $12.55 billion.", after: 1.8 },
+      // the climb through the six rounds and the arrival; the chart settles before the next subtitle
+      { text: "In September 2026, investors valued Temporal at $12.55 billion.", after: 3.5 },
       // on the settled chart, a bracket from 2022 to 2026, ×8; then, by the value, CORE INFRASTRUCTURE FOR AI
       { text: "That's more than 8 times its 2022 value: investors see it as core infrastructure for AI.", after: 1.6 },
     ],
@@ -225,7 +236,7 @@
         AI_CHIP, { ...TILE, border: '1.5px dashed ' + C.uv }));
 
       // beat 3's labels: the rounds, then the valuation
-      s.rounds = ROUNDS.slice(0, 3).map(round => E(root,
+      s.rounds = ROUNDS.slice(0, LAST).map(round => E(root,
         `<div class="lbl" style="font-size:16px;color:var(--slate)">${round.date}</div>`
         + `<div style="font-size:34px;font-weight:700;line-height:1.15;color:var(--ink)">${round.label}</div>`
         + `<div class="lbl" style="font-size:14px;color:var(--violet)">${round.series}</div>`,
@@ -373,10 +384,21 @@
       s.ais[AI.length].style.boxShadow = glowShadow(RGB.violet, more, { blur: 30, alpha: 0.5 });
 
       // ---------- beat 3
-      // the timing of the climb: the grid and the first round, then each curve, the last one a surge
+      // the timing of the climb, [start, duration, easing] per curve: the grid and the first round, the rise to Feb
+      // 2022 easing into it, the flat stretch and the next two curves at a steady pace, the last one a surge. The
+      // chart settles before the next subtitle
       const climb = c[3] + 0.6;
-      const segs = [[climb + 0.2, 1.4, ease], [climb + 1.6, 1.2, linear], [climb + 2.8, 1.0, easeIn]];
-      const arrive = segs[2][0] + segs[2][1];
+      const segs = [
+        [climb + 0.1, 1.3, ease],
+        [climb + 1.4, 0.85, linear],
+        [climb + 2.25, 1.0, linear],
+        [climb + 3.25, 1.1, linear],
+        [climb + 4.35, 1.35, easeIn],
+      ];
+      const lastSeg = segs[segs.length - 1];
+      const arrive = lastSeg[0] + lastSeg[1];
+      // when the line reaches round i
+      const reachedAt = i => (i === 0 ? segs[0][0] : segs[i - 1][0] + segs[i - 1][1]);
       const settle = ease(P(t, arrive + 0.5, 1.3));
       let seg = 0, u = 0;
       segs.forEach(([at, d, fn], i) => {
@@ -415,13 +437,14 @@
         cg.lineCap = 'round';
         const curvePoints = (i, upTo) => Array.from({ length: 41 },
           (_, n) => toScreen(bezier(CURVES[i], upTo * n / 40)));
-        const drawn = [0, 1, 2].filter(i => i < seg || (i === seg && t >= segs[0][0]));
+        const surge = CURVES.length - 1;
+        const drawn = CURVES.map((_, i) => i).filter(i => i < seg || (i === seg && t >= segs[0][0]));
         drawn.forEach(i => {
           const pts = curvePoints(i, i < seg ? 1 : u);
           cg.shadowColor = `rgba(${RGB.violet},.9)`;
           cg.shadowBlur = 18;
-          cg.strokeStyle = i === 2 ? C.neon : C.violet;
-          cg.lineWidth = i === 2 ? 5 : 4;
+          cg.strokeStyle = i === surge ? C.neon : C.violet;
+          cg.lineWidth = i === surge ? 5 : 4;
           cg.beginPath();
           pts.forEach(([x, y], n) => (n ? cg.lineTo(x, y) : cg.moveTo(x, y)));
           cg.stroke();
@@ -429,11 +452,11 @@
         cg.shadowBlur = 0;
         // the rounds' markers, each flashing as the line reaches it
         ROUNDS.forEach((round, i) => {
-          const reached = i === 0 ? segs[0][0] : segs[i - 1][0] + segs[i - 1][1];
+          const reached = reachedAt(i);
           if (t < reached - 0.05) return;
           const [x, y] = toScreen(round.at);
           const fl = win(t, reached, reached + 0.5, 0.1);
-          cg.fillStyle = i === 3 ? C.neon : C.ink;
+          cg.fillStyle = i === LAST ? C.neon : C.ink;
           cg.beginPath(); cg.arc(x, y, 7 + 8 * fl, 0, Math.PI * 2); cg.fill();
           if (fl > 0) {
             cg.strokeStyle = `rgba(${RGB.neon},${(0.8 * fl).toFixed(3)})`;
@@ -452,7 +475,7 @@
           cg.beginPath(); cg.arc(hx, hy, 46, 0, Math.PI * 2); cg.fill();
         }
         // the arrival: sparks thrown out of the last round, falling and fading
-        const [px, py] = toScreen(ROUNDS[3].at);
+        const [px, py] = toScreen(ROUNDS[LAST].at);
         SPARKS.forEach(sp => {
           const age = t - arrive;
           if (age <= 0 || age >= sp.life) return;
@@ -465,13 +488,13 @@
         cg.globalAlpha = 1;
       }
       place(s.chart, 960, 540, 1, chartO > 0 ? 1 : 0);
-      const [px, py] = toScreen(ROUNDS[3].at);
+      const [px, py] = toScreen(ROUNDS[LAST].at);
       place(s.bloom, px, py, 1, win(t, arrive - 0.05, arrive + 0.5, 0.15) * 0.9);
       placeRipples(s.rings, t, arrive, px, py, 40, 900);
       // the rounds' labels, above and left of their markers, flashing as the line reaches them; they fade near the
       // frame's edges as the camera moves on, and as the chart settles
       s.rounds.forEach((e, i) => {
-        const reached = i === 0 ? segs[0][0] : segs[i - 1][0] + segs[i - 1][1];
+        const reached = reachedAt(i);
         const [x, y] = toScreen(ROUNDS[i].at);
         const lx = x - 100, ly = y - 76;
         const edge = clamp((880 - (ly + 52)) / 60) * clamp((lx - 88 - 120) / 60) * clamp((ly - 52 - 150) / 40);
@@ -479,10 +502,11 @@
           * (1 - P(t, arrive + 0.3, 0.5)));
         e.style.borderColor = win(t, reached, reached + 0.6, 0.15) > 0.5 ? C.neon : C.line;
       });
-      // the value: racing with the head, blurred while it surges, then to the middle, big, with its label
-      const valueText = '$' + value.toFixed(2) + 'B';
+      // the value: racing with the head, blurred while it surges, then to the middle, big, with its label. Below a
+      // billion it counts in millions with the tilde of the Series A estimate it starts from
+      const valueText = value < 1 ? '~$' + Math.round(value * 1000) + 'M' : '$' + value.toFixed(2) + 'B';
       if (s.value.textContent !== valueText) s.value.textContent = valueText;
-      const speed = seg === 2 && t < arrive ? P(t, segs[2][0], segs[2][1], easeIn) : 0;
+      const speed = seg === segs.length - 1 && t < arrive ? P(t, lastSeg[0], lastSeg[1], easeIn) : 0;
       s.value.style.filter = speed > 0.05 ? `blur(${(2.5 * speed).toFixed(2)}px)` : '';
       place(s.value, Math.round(lerp(700, REST.valueX, settle) + kx), Math.round(lerp(300, 480, settle) + ky),
         lerp(0.5, 1, settle) * swell(t, arrive, 0.1), P(t, climb, 0.4));
