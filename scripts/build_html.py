@@ -3,7 +3,8 @@
 Each theme page becomes a standalone HTML player, and src/index.html the home page that links to them. The
 stylesheets, scripts, fonts and logo of each page are inlined so it opens offline; a single player file plays
 with no other file, while the home page links to the players below it: output/ mirrors src/, so the
-relative links stay the same. Each page's social.png, written by `make social`, is copied next to it.
+relative links stay the same. Each page's social.png, written by `make social`, is copied next to it. A home page
+card with the hidden attribute is dropped from the build: its theme is unlisted, but still built and reachable.
 
 Link previews on social networks need absolute URLs: when the SITE_URL environment variable holds the root URL of
 the deployed site, set by the Pages workflow, each page also gets a canonical link and the link preview tags of
@@ -21,7 +22,7 @@ from html import escape, unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import OUTPUT, SRC, built_page, page_sources
+from common import HOME_PAGE, OUTPUT, SRC, built_page, page_sources
 
 SITE_NAME = "Temporal Shorts"
 # The preview image of a page lives next to it, in src/ and output/ alike, so its URL is the page URL + this name.
@@ -42,6 +43,12 @@ ASSET_REF = re.compile(r"assets/[\w.-]+")
 DATA_URI = re.compile(r"data:[^\"')\s]+")
 TITLE_TAG = re.compile(r"<title>(.*?)</title>", re.DOTALL)
 DESCRIPTION_TAG = re.compile(r'<meta name="description" content="([^"]*)">')
+# A link carrying the standard hidden attribute, whatever its other attributes. The lookahead ends the attribute
+# name, and the leading whitespace starts it, so that an href such as themes/hidden-x/ never matches.
+HIDDEN_LINK_TAG = r'<a\s[^>]*\shidden(?=[\s>=])[^>]*>'
+# A whole home page card of an unlisted theme, with its indentation and line break. Cards hold no nested <a>, so
+# the card ends at the first </a>.
+HIDDEN_CARD = re.compile(r'^[ \t]*' + HIDDEN_LINK_TAG + r'.*?</a>[ \t]*\n', re.DOTALL | re.MULTILINE)
 
 
 def data_uri(path):
@@ -177,6 +184,18 @@ def check_self_contained(html):
             sys.exit(f"ERROR: the output still references {marker!r}")
 
 
+def drop_hidden_cards(html):
+    """Remove each home page card that carries the hidden attribute: the page keeps no link to an unlisted theme."""
+    return HIDDEN_CARD.sub("", html)
+
+
+def check_no_hidden_cards(html):
+    # Searches for the opening tag alone: a card that drop_hidden_cards() missed, e.g. sharing a line with another
+    # tag, would otherwise leak the link to an unlisted theme.
+    if re.search(HIDDEN_LINK_TAG, html):
+        sys.exit("ERROR: the home page still holds a link with the hidden attribute")
+
+
 def check_social_tags_first(html):
     """Exit unless og:image comes before the first inline style or script, within reach of link preview crawlers."""
     image_tag = html.find('<meta property="og:image"')
@@ -191,6 +210,9 @@ def check_social_tags_first(html):
 def build_page(source, site):
     """Write the self-contained build of a page of src/ to the same relative path under output/."""
     html = read_source(source)
+    if source == HOME_PAGE:
+        html = drop_hidden_cards(html)
+        check_no_hidden_cards(html)
     html = add_social_tags(html, source, site)
     html = inline_assets(html)
     html = inline_stylesheets(html, source.parent)

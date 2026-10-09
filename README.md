@@ -224,6 +224,12 @@ F = fullscreen.
 needed), on port 8000 by default (`CASPER_PORT` in a Casper workspace);
 override it with `make serve PORT=9000`.
 
+`make html` drops a home page card with the `hidden` attribute from the built
+home page, so the page holds no link to that theme; the theme is unlisted,
+but its player is still built, deployed and reachable at `themes/<theme>/`.
+The home page `<meta name="description">` names the themes and is edited by
+hand.
+
 A `#t=<time>` fragment opens a player paused at that time, in seconds
 (`70`, `70.5`) or `m:ss` as in the time label (`1:10`, `1:10.5`), for
 example `http://localhost:8000/themes/human-in-the-loop/#t=70`; Space plays
@@ -327,7 +333,13 @@ editing different scenes never touch the same file.
    `THEME=<theme>` accept it, and `make html` builds it.
 2. Create `src/themes/<theme>/scenes/` with the scene files.
 3. Add a card linking to `themes/<theme>/` in `src/index.html`; the cards
-   wrap and keep the same size, with no CSS change.
+   wrap and keep the same size, with no CSS change. To keep the theme
+   unlisted, add the `hidden` attribute to its card
+   (`<a class="theme" href="themes/<theme>/" hidden>`): `make html` drops
+   the card from the built home page, so the page holds no link to the
+   theme, but the theme is still built, rendered, deployed and reachable at
+   `themes/<theme>/`. The home page `<meta name="description">` names the
+   themes: edit it by hand.
 4. Write the script in `docs/<theme>/script.md`.
 5. Run `make social` and commit `src/themes/<theme>/social.png`: the HTML
    build needs it.
