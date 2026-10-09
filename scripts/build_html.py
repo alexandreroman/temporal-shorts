@@ -22,7 +22,7 @@ from html import escape, unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import HOME_PAGE, OUTPUT, SRC, built_page, page_sources
+from common import HOME_PAGE, SRC, built_page, page_sources
 
 SITE_NAME = "Temporal Shorts"
 # The preview image of a page lives next to it, in src/ and output/ alike, so its URL is the page URL + this name.

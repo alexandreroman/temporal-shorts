@@ -33,8 +33,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import HOME_PAGE, ROOT, SRC, built_page, page_sources, theme_names, theme_page
 
 BUILD_SCRIPT = ROOT / "scripts" / "build_html.py"
-# Mirror the Makefile inputs of the HTML pages: everything under src/ plus the build scripts.
-SOURCE_DIR = SRC
+# Mirror the Makefile inputs of the HTML pages: everything under src/ (see source_snapshot()) plus the build
+# scripts.
 SOURCE_SCRIPTS = (BUILD_SCRIPT, ROOT / "scripts" / "common.py")
 POLL_SECONDS = 0.5
 HEARTBEAT_SECONDS = 15
@@ -173,7 +173,7 @@ class PlayerHandler(BaseHTTPRequestHandler):
 def source_snapshot():
     """Map each watched source file to its modification time."""
     # Skip hidden files: editor swap files and .DS_Store change without any source change.
-    paths = [path for path in SOURCE_DIR.rglob("*") if path.is_file() and not path.name.startswith(".")]
+    paths = [path for path in SRC.rglob("*") if path.is_file() and not path.name.startswith(".")]
     paths += SOURCE_SCRIPTS
     snapshot = {}
     for path in paths:
