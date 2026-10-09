@@ -11,6 +11,7 @@ Object.assign(ICONS, {
   laptop: '<rect x="5" y="5" width="14" height="10"/><path d="M5 15l-2 4h18l-2-4"/>',
   layers: '<path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"/>',
   stream: '<path d="M3 7h11M3 12h17M3 17h11M17 9l3 3-3 3"/>',
+  cloud: '<path d="M7 19h10.5a4.5 4.5 0 0 0 .4-9A6 6 0 0 0 6.3 11.6 3.8 3.8 0 0 0 7 19z"/>',
   agent: '<rect x="4" y="8" width="16" height="12" rx="3"/><circle cx="12" cy="3.8" r="1.3"/>'
     + '<path d="M12 5.1V8M9 12.5v2M15 12.5v2"/>',
 });
