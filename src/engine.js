@@ -328,7 +328,7 @@ function renderAt(t, g = t) {
     hdr.style.opacity = P(lt, 0.2, 0.5) * (1 - P(lt, cur.dur - 0.5, 0.4)) * headerOut;
     const firstStart = chapterScenes[0].start;
     const lastEnd = chapterScenes[chapterScenes.length - 1].end;
-    mark.style.opacity = P(t, firstStart, 0.5) * (1 - P(t, lastEnd - 0.5, 0.5));
+    mark.style.opacity = P(t, firstStart, SCENE_FADE) * (1 - P(t, lastEnd - SCENE_FADE, SCENE_FADE));
     hdr.querySelector('.num').textContent = String(cur.chapter).padStart(2, '0');
     hdr.querySelector('.ttl').textContent = cur.title;
   } else {
