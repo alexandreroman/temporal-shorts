@@ -239,7 +239,7 @@ its visuals.
   - Visuals: As on slides 6 and 7 of Temporal's deck, two zones of equal
     width from the start. On the left, YOUR ENVIRONMENT (dashed slate):
     three Workers spread evenly, each an app panel with its code (WORKER 1
-    the OrderWorkflow Workflow, WORKER 2 and 3 the chargeCard and shipPackage
+    the OrderWorkflow Workflow, WORKER 2 and 3 the ChargeCard and ShipPackage
     Activities), wired to a DATA CONVERTER level with WORKER 2 (a neon lock,
     a key and YOUR KEYS); caption YOUR CODE RUNS HERE. A connection draws
     from the converter to a dot on Temporal Cloud's edge, labelled OUTBOUND
@@ -261,27 +261,27 @@ its visuals.
     STARTED. The OrderWorkflow task leaves the queue, flies to the dot,
     back along the connection, over the Data Converter and down to WORKER 1,
     which runs the Workflow from the top, its code lit a line at a time, and
-    stops at `await chargeCard(o)`: WAITING, the line faintly lit. Its
-    request, a violet "schedule chargeCard" card, travels out over the
-    converter into the queue, where the chargeCard task appears: event 2,
-    chargeCard SCHEDULED. The task is dispatched to WORKER 2, which runs
+    stops at `await ChargeCard(o)`: WAITING, the line faintly lit. Its
+    request, a violet "schedule ChargeCard" card, travels out over the
+    converter into the queue, where the ChargeCard task appears: event 2,
+    ChargeCard SCHEDULED. The task is dispatched to WORKER 2, which runs
     it.
 - **2:25** You can encrypt data with your own keys before it leaves:
   Temporal never sees your payloads.
-  - Visuals: The rest dims for a close-up: the chargeCard result, "card: $42",
+  - Visuals: The rest dims for a close-up: the ChargeCard result, "card: $42",
     leaves WORKER 2 in clear and holds over the Data Converter, in full view;
     the lock opens, the key glows, the lock snaps shut and the text scrambles in
     place, once, into the ciphertext "9f3a…c21e", which then stays fixed as it
-    crosses over slowly. As it reaches Temporal Cloud, event 3, chargeCard
+    crosses over slowly. As it reaches Temporal Cloud, event 3, ChargeCard
     STARTED (no payload), lands, as Temporal writes an Activity's start only
-    once the Activity closes; the payload then lands as event 4, chargeCard
+    once the Activity closes; the payload then lands as event 4, ChargeCard
     COMPLETED, with that same chip. NEVER SEES YOUR PAYLOADS pops on the history
     and holds. Then the Workflow takes over again: a new OrderWorkflow task
     resumes WORKER 1 where it paused, its highlight moving on to `await
-    shipPackage(o)`, WAITING; "schedule shipPackage" reaches the queue, event 5,
-    shipPackage SCHEDULED; the task is dispatched to WORKER 3, which runs it; as
-    its result reaches Temporal Cloud, event 6, shipPackage STARTED, lands, then
-    the result lands as event 7, shipPackage COMPLETED. A last OrderWorkflow
+    ShipPackage(o)`, WAITING; "schedule ShipPackage" reaches the queue, event 5,
+    ShipPackage SCHEDULED; the task is dispatched to WORKER 3, which runs it; as
+    its result reaches Temporal Cloud, event 6, ShipPackage STARTED, lands, then
+    the result lands as event 7, ShipPackage COMPLETED. A last OrderWorkflow
     task resumes WORKER 1 past its last line: the Workflow returns, DONE, event
     8, OrderWorkflow COMPLETED. The history shows its last five events: before
     events 6, 7 and 8 land, the list scrolls up one row, the oldest rows fading
