@@ -29,4 +29,3 @@
 - [Player presenter mode](references/project_player-presenter-mode.md) — why holds sit at cues and fade-outs; held = playing, G runs
 - [Custom domain](references/project_custom-domain.md) — durable.withtemporal.dev, Cloudflare CNAME to Pages, DNS only, shared zone
 - [Themes: shared anatomy and stories](references/project_theme-anatomy.md) — structure, layout, subtitles, vocabulary, docs, per-theme stories
-- [Timecode links after every page change](references/feedback_time-links.md) — one make serve #t= link per changed moment in every report

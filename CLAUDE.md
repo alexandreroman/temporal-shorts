@@ -60,8 +60,16 @@ running, and open the link in a browser when one is available. The player
 opens paused there. A reload keeps the viewer's position over the
 fragment: change `#t=` to jump. Pausing writes the position into the URL
 in whole seconds (`#t=70`), so a paused viewer can share it; playing
-clears it. After a visual change, give the user the link to the changed
-moment. `?t=` is the frozen capture frame, without the player.
+clears it. `?t=` is the frozen capture frame, without the player.
+
+**Every report of a change to a page ends with its timecode links**, with
+no exception: one link per changed moment (a scene, a subtitle, a label,
+a transient effect), grouped by theme, the time a second or more inside
+the changed subtitle window or at the exact moment of a brief effect;
+`http://localhost:<port>/` for the home page. This holds for work done by
+subagents: ask them for the times, and give the links in the answer. A
+change with no visible effect (a refactor that keeps frames identical)
+gets no link, and the report says so.
 
 `preview` requires `THEME`. Each MP4 or SRT rebuilds only when the shared
 sources or its own theme change (see README.md); `-B` forces a rebuild.
