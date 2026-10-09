@@ -305,10 +305,10 @@ function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts,
 
 // CONTEXT panel: the agent's context, held in the app's memory, with a red note (EMPTY by default) for when a
 // crash wipes it. Its icon is a page, as durable-ai-agents chapter 3 draws the context window. Options: label, the
-// panel's label; emptyText, the note
-function makeMemory(p, w, h, { label = 'Context', emptyText = 'EMPTY' } = {}) {
+// panel's label, its top left corner at labelAt ([left, top], px); emptyText, the note
+function makeMemory(p, w, h, { label = 'Context', labelAt = [22, 16], emptyText = 'EMPTY' } = {}) {
   const e = E(p,
-    panelLabel('book', label, 'left:22px;top:16px')
+    panelLabel('book', label, `left:${labelAt[0]}px;top:${labelAt[1]}px`)
     + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;`
     + `font-size:26px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">${emptyText}</div>`,
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });

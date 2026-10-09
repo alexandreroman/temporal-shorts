@@ -143,9 +143,9 @@ function setSymbolDraw(e, draw, fill) {
 // ===================== hand-off from chapter 3 (the AI hub) to chapter 4 (the agentic loop)
 // Chapter 4's agentic loop: the geometry it is built with, and where it shows for the whole chapter (`place`: its
 // center on the stage and its scale, so it never moves, from the cut to the end), and the chapter's camera shift.
-// The scale gives the LLM node an even whole size (118 px), so it rests on whole pixels
+// The scale gives the LLM node an even whole size (112 px), so it rests on whole pixels
 const AGENT_LOOP = { cx: 560, cy: 540, r: 220 };
-const AGENT_PLACE = { x: 520, y: 500, k: 118 / 130 };
+const AGENT_PLACE = { x: 520, y: 489, k: 112 / 130 };
 const AGENT_START = { shift: [0, 0] };
 // the LLM node's size as built in chapter 4, and the blink phase of both orbs
 const AGENT_LLM = { size: 130, seed: 0.37 };

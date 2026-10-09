@@ -6,8 +6,8 @@
   // instance takes over and replays the history, nothing is lost and no LLM call is paid twice
   const LOOP = AGENT_LOOP;
   const COMET = 6; // sparks trailing the token
-  // the loop shows at 91% of its size for the whole chapter, in its app panel, 40 px clear of its header and of the
-  // context strip (stage pixels)
+  // the loop shows at 86% of its size for the whole chapter, in its app panel, about 40 px clear of its header and
+  // of the context strip (stage pixels)
   const DL = AGENT_PLACE;
   // a point of the loop (from s.loop.pos) where it shows on the stage of the scene
   const durablePos = ([x, y]) => [DL.x + (x - LOOP.cx) * DL.k, DL.y + (y - LOOP.cy) * DL.k];
@@ -22,9 +22,12 @@
   const APP = { x: DL.x, y: 515, w: 760, h: 730 };
   const GUTTER = 40;
   // Under the loop in the app panel, 24 px from its sides and bottom (as its header): the agent's goal, then in its
-  // place the AGENT CONTEXT strip, one block per saved row (n), gap px apart and pad px inside the strip, under its
-  // label (the blocks' top at blockTop)
-  const MEM = { w: APP.w - 48, h: 116, n: 8, bw: 72, bh: 50, gap: 12, pad: 26, blockTop: 50 };
+  // place the AGENT CONTEXT strip. Inside it, padY from its top and bottom: the label row (its label and, on B,
+  // CONTEXT RESTORED, both centered on the row, rowH high), then padY under it the blocks, one per saved row (n), gap
+  // px apart; the label, the blocks and the tag pad px from the strip's sides
+  const MEM = { w: APP.w - 48, n: 8, bw: 72, bh: 50, gap: 12, pad: 26, padY: 20, rowH: 30 };
+  MEM.blockTop = MEM.padY + MEM.rowH + MEM.padY;
+  MEM.h = MEM.blockTop + MEM.bh + MEM.padY;
   const MEM_Y = APP.y + APP.h / 2 - 24 - MEM.h / 2;
   const memSlotX = i => APP.x - MEM.w / 2 + MEM.pad + MEM.bw / 2 + i * (MEM.bw + MEM.gap);
   const MEM_SLOT_Y = MEM_Y - MEM.h / 2 + MEM.blockTop + MEM.bh / 2;
@@ -98,7 +101,9 @@
       s.appB = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
       // each instance's AGENT CONTEXT strip: A's fills as the steps run and empties at the crash (CONTEXT LOST);
       // B's starts empty and the replay rebuilds it (CONTEXT RESTORED, then the invite adds its two blocks)
-      const memory = () => makeMemory(root, MEM.w, MEM.h, { label: 'Agent context', emptyText: 'CONTEXT LOST' });
+      const memory = () => makeMemory(root, MEM.w, MEM.h, {
+        label: 'Agent context', labelAt: [MEM.pad - 2, MEM.padY + 2], emptyText: 'CONTEXT LOST',
+      });
       s.memA = memory();
       s.memB = memory();
       s.blocksA = makeMemBlocks(root, 6, MEM.bw, MEM.bh);
@@ -107,7 +112,7 @@
       // strip's border)
       s.restored = statusTag(s.memB);
       Object.assign(s.restored.style, {
-        left: 'auto', right: (MEM.pad - 1) + 'px', top: '14px', transformOrigin: 'right center',
+        left: 'auto', right: (MEM.pad - 1) + 'px', top: MEM.padY + 'px', transformOrigin: 'right center',
       });
       // the loop, its arcs and its token's tail on one layer, scaled as a whole
       s.loopLayer = E(root, '', '', {
@@ -226,7 +231,7 @@
         place(e, x, y, 1, 0.55 - 0.08 * k);
       });
       s.svg.style.transform = `translate(${ax}px,${ay}px)`;
-      // the loop sits in its place for the whole chapter, at 91% of its size
+      // the loop sits in its place for the whole chapter, at 86% of its size
       s.loopLayer.style.transform = `translate(${DL.x - LOOP.cx}px,${DL.y - LOOP.cy}px) scale(${DL.k})`;
       // under the loop: the agent's goal, then the context strip in its place
       const gp = P(t, c[0] + 0.6, 0.45, backOut);
