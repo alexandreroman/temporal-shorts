@@ -29,10 +29,11 @@
   // sparks flying out of the break: [angle in degrees, 0 pointing right and -90 up, distance in px]. A fixed table
   // keeps every frame deterministic; at most 60 px, they stay clear of the tags above.
   const SPARKS = [[-150, 50], [-105, 60], [-60, 52], [-20, 40], [25, 44], [70, 56], [120, 48], [165, 40]];
-  // damped shake of the tiles next to a failing link, as dx
-  const jolt = (t, a) => (t < a ? 0 : Math.sin((t - a) * 55) * 12 * (1 - clamp((t - a) / 0.45)));
-  // much smaller vertical kick of the whole row at each hit, as dy (the crash shake is 12 by 8 px)
-  const kick = (t, a) => (t < a ? 0 : Math.sin((t - a) * 60) * 4 * (1 - clamp((t - a) / 0.3)));
+  // damped shake of the tiles next to a failing link, as dx: 12 px, swinging at 55 rad/s for 0.45 s
+  const jolt = (t, a) => dampedShake(t, a, 12, 0.45, 55 * 0.45 / Math.PI);
+  // much smaller vertical kick of the whole row at each hit, as dy (the crash shake is 12 by 8 px): 4 px, swinging at
+  // 60 rad/s for 0.3 s
+  const kick = (t, a) => dampedShake(t, a, 4, 0.3, 60 * 0.3 / Math.PI);
   // the border of the tiles next to a failing link flickers red, 0.07 s on, 0.07 s off, three times
   const flickerOn = (t, a) => t >= a && t < a + 0.42 && Math.floor((t - a) / 0.07) % 2 === 0;
   // Restart: the tiles go dark twice, 0.1 s each
@@ -45,9 +46,9 @@
     const u = clamp((t - a) / 0.25);
     return (1 - u) ** 2 * Math.cos(u * Math.PI * 3);
   };
-  const svgLine = (svg, width) => {
+  const svgLine = svg => {
     const l = document.createElementNS(SVGNS, 'line');
-    l.setAttribute('stroke-width', width);
+    l.setAttribute('stroke-width', 3);
     l.setAttribute('stroke-linecap', 'round');
     l.style.opacity = 0;
     svg.appendChild(l);
@@ -161,9 +162,9 @@
         return e;
       });
       s.breaks = s.steps.links.map(() => ({
-        halves: [svgLine(s.svg, 3), svgLine(s.svg, 3)],
+        halves: [svgLine(s.svg), svgLine(s.svg)],
         ring: svgRing(s.svg),
-        sparks: SPARKS.map(() => svgLine(s.svg, 3)),
+        sparks: SPARKS.map(() => svgLine(s.svg)),
       }));
       s.bolt = E(root, ICON('bolt', 100, C.red, 1.6));
       s.crash = fixedTag(root, 'Server crash', 'red big', 310, 66);
