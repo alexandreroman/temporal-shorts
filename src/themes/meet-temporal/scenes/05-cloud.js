@@ -150,6 +150,12 @@
       });
     e.shackle = e.querySelector('.shackle');
     e.key = e.querySelector('.key');
+    e.lock = e.querySelector('svg');
+    // the scan line that sweeps across the tile as data goes through it, behind the tile's text
+    e.scan = E(e, '', '', {
+      width: '3px', height: (CONV.h - 3) + 'px', zIndex: -1, background: C.neon,
+      boxShadow: '0 0 12px 3px rgba(219,255,75,.45)',
+    });
     return e;
   }
   // A block of Temporal Cloud: its label (an icon and a name) at its top left, top px from its top
@@ -268,6 +274,20 @@
       const routePoint = (k, p) => s.routes[k].getPointAtLength(s.routes[k]._L * clamp(p));
       // whether progress p of route k is still on its Worker's wire, before the Data Converter's left edge
       const onWirePart = (k, p) => routePoint(k, p).x < CONV.x - CONV.w / 2;
+      // When something on route k is in the middle of the Data Converter: its route runs along the wire, then
+      // straight through the tile to the dot, so the tile's middle is at a known share of the route; pass.map turns
+      // the progress of its trip (0 to 1 from pass.start, over pass.d) into progress along the route, monotonic
+      // either way, so the moment is found by bisection
+      const passMid = ({ k, start, d, map }) => {
+        const L = s.routes[k]._L, middle = (L - (DOT.x - CONV.x)) / L;
+        let lo = 0, hi = 1;
+        const rising = map(1) > map(0);
+        for (let n = 0; n < 24; n++) {
+          const u = (lo + hi) / 2;
+          if ((map(u) < middle) === rising) lo = u; else hi = u;
+        }
+        return start + (lo + hi) / 2 * d;
+      };
 
       // c[0]: both zones, your Workers and their code, the Data Converter and the connection out; each Worker
       // polls Temporal Cloud; the captions: your code runs here, none on Temporal's side
@@ -437,14 +457,29 @@
       s.secret.style.background = encrypted > 0.5 ? C.violetTint : C.uvTint;
       const k3 = 1.1 * pop * (1 - 0.2 * drop);
       place(s.secret, Math.round(sx), Math.round(sy), k3, clamp(pop * 2) * (1 - P(t, landed - 0.15, 0.2)));
-      // the lock opens as the payload arrives, snaps shut on it, and glows each time data goes through
-      const open = P(t, openAt, 0.25) * (1 - P(t, snap, 0.15, easeIn));
+      // The Data Converter reacts to everything that goes through it, for 0.44 s centered on the moment it is
+      // inside the tile: its glow pulses, a scan line sweeps across it in the direction of travel, and its lock
+      // clicks: outbound data is encrypted (the lock bumps), inbound data decrypted (the lock opens, then closes).
+      // The close-up's payload gets the strongest reaction: the lock opens as it arrives, snaps shut on it, the
+      // key glows
+      const passes = [
+        ...dispatch.map((d, i) => ({ k: TASKS[i][1], start: d + TRIP.toDot, d: TRIP.route, map: u => 1 - ease(u),
+          out: false })),
+        ...[p0, p2].map(at => ({ k: 0, start: at, d: TRIP.back, map: ease, out: true })),
+        ...[[r3, 2], [done, 0]].map(([at, k]) => ({ k, start: at, d: TRIP.back, map: u => u, out: true })),
+      ].map(pass => ({ ...pass, mid: passMid(pass) }));
+      const active = passes.find(pass => Math.abs(t - pass.mid) < 0.22);
+      const pulse = active ? win(t, active.mid - 0.22, active.mid + 0.22, 0.12) : 0;
+      const sweep = active ? P(t, active.mid - 0.22, 0.44, x => x) : 0;
+      place(s.conv.scan, (active && active.out ? sweep : 1 - sweep) * (CONV.w - 6) + 1.5, (CONV.h - 3) / 2, 1,
+        active ? pulse * 0.8 : 0);
+      const decrypt = active && !active.out ? win(t, active.mid - 0.2, active.mid + 0.15, 0.1) : 0;
+      const click = active && active.out ? swell(t, active.mid - 0.1, 0.25) : 1;
+      s.conv.lock.style.transform = `scale(${click})`;
+      const open = Math.max(P(t, openAt, 0.25) * (1 - P(t, snap, 0.15, easeIn)), decrypt);
       s.conv.shackle.setAttribute('transform', `translate(0 ${(-4 * open).toFixed(2)})`);
       s.conv.key.style.transform = `scale(${swell(t, snap - 0.25, 0.5)})`;
-      // (as tasks come in over it, and schedule requests and results go out over it)
-      const through = [...dispatch.map(d => d + TRIP.toDot + TRIP.route * 0.55),
-        ...[p0, p2, r3, done].map(at => at + TRIP.back * 0.3), snap];
-      const glow = Math.max(0, ...through.map(at => win(t, at - 0.1, at + 0.3, 0.1)));
+      const glow = Math.max(pulse * 0.7, win(t, snap - 0.1, snap + 0.5, 0.15));
       s.conv.style.boxShadow = glow > 0 ? `0 0 ${Math.round(24 * glow)}px rgba(219,255,75,${(0.45 * glow).toFixed(3)})`
         : '';
       // Temporal Cloud never sees your payloads, held
