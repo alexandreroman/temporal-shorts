@@ -26,7 +26,7 @@
   // the agent chip flies from the first Event History row to instance B's status, 100 px from the panel's right edge
   const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 36 };
   // x of context block i, where the LLM CALL and TOOL CALL cards leave and land
-  const blockX = i => memSlot(MEM.x - MEM.w / 2, i);
+  const blockX = i => memSlotX(MEM.x - MEM.w / 2, i, MEM_BLOCK);
   const rowY = i => HIST.row0 + i * HIST.rowGap;
   // the big intro logo flies into the TEMPORAL panel header from c[0] + FLIGHT.at, for FLIGHT.d seconds
   const FLIGHT = { at: 1.9, d: 0.8 };

@@ -55,12 +55,8 @@ function makeApp(parent) {
 
 // ===================== shared by chapters 6 and 7 (crash vs Durable Execution)
 // Context blocks (makeMemBlocks in src/shared.js): left-aligned in the context panel, `margin` px from its left
-// edge, `gap` px apart
+// edge, `gap` px apart (see memSlotX)
 const MEM_BLOCK = { w: 76, h: 56, margin: 20, gap: 12 };
-// x of the center of context block i, in a context panel whose left edge is at panelLeft
-function memSlot(panelLeft, i) {
-  return panelLeft + MEM_BLOCK.margin + MEM_BLOCK.w / 2 + i * (MEM_BLOCK.w + MEM_BLOCK.gap);
-}
 // LLM calls billed: a counter tile with a strip of 8 cells, one per call; w: width in px, 330 or more for the strip
 // to fit
 function makeBill(p, w = 380) {
@@ -104,7 +100,7 @@ function placeTakeover(s, t, opts) {
   s.mem.style.filter = rider.grey;
   // the blocks of A have all fallen before A leaves
   s.mblocks.forEach((b, i) => {
-    const x = memSlot(mem.x - mem.w / 2, i);
+    const x = memSlotX(mem.x - mem.w / 2, i, MEM_BLOCK);
     if (rider.onB) {
       placeMemBlock(b, x, mem.slotY, blockB(i), 0);
     } else {

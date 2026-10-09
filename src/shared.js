@@ -371,6 +371,11 @@ function makeMemBlocks(p, n, w, h) {
 function placeMemBlock(b, x, y, grow, fall, { dx = 0, dy = 0, o = 1, drop = 300 } = {}) {
   place(b, x + dx, y + fall * drop + dy, grow, clamp(grow * 2) * (1 - fall) * o, fall * b.tilt);
 }
+// x of the center of context block i, the blocks left-aligned in a context panel whose left edge is at panelLeft:
+// each w px wide, gap px apart, the first one margin px from the edge
+function memSlotX(panelLeft, i, { w, gap, margin }) {
+  return panelLeft + margin + w / 2 + i * (w + gap);
+}
 
 // ---------- crash and takeover effects
 // screen shake around a crash, as [dx, dy]
