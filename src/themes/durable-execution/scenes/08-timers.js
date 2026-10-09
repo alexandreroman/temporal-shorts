@@ -61,12 +61,6 @@
     width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
     background, borderRadius: 'var(--rs)',
   });
-  // RESULT-style chip with another label
-  const makeChip = (p, label) => {
-    const chip = makeResultCard(p);
-    chip.firstChild.textContent = label;
-    return chip;
-  };
   // Worker status block: a label, then one icon and one text, swapped by setStatusBlock
   const makeStatusBlock = p => {
     const icons = Object.keys(ICON_COLOR)
@@ -153,7 +147,8 @@
       s.hist = makeHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h);
       s.timer = makeTimerBlock(root);
       s.chips = {
-        ship: makeResultCard(root), start: makeChip(root, 'START TIMER'), wake: makeChip(root, 'WAKE UP'),
+        ship: makeResultCard(root), start: makeResultCard(root, true, 'START TIMER'),
+        wake: makeResultCard(root, true, 'WAKE UP'),
         review: makeResultCard(root),
       };
       s.newWorker = makeNewTag(root, 'New Worker', NEW_TAG.w);

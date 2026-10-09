@@ -59,8 +59,7 @@
       });
       s.shot = makeEventHistoryShot(root, ['WORKER A', 'WORKER B']);
       // the retry travels like a RESULT chip, from Temporal to the Worker, labelled RETRY
-      s.retryChip = makeResultCard(root);
-      s.retryChip.firstChild.textContent = 'RETRY';
+      s.retryChip = makeResultCard(root, true, 'RETRY');
       s.reuseChips = REUSED_LABELS.map(() => makeResultCard(root));
       s.saveChips = [SHIP, EMAIL].map(() => makeResultCard(root));
       // the Workflow itself, handed to Worker B
