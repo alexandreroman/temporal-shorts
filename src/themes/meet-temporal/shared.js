@@ -23,6 +23,20 @@ const PHOTO = {
   w: 900, h: 929,
 };
 
+// The languages of Temporal's SDKs, in the order chapter 6 reads them, each with its official logo (their sources
+// and licenses are in the README of their folder), resolved against src/ as PHOTO
+const ASSETS_BASE = new URL('../../', document.currentScript.src || document.baseURI);
+const LANGUAGES = [
+  ['Go', new URL('assets/languages/go.svg', ASSETS_BASE).href],
+  ['Java', new URL('assets/languages/java.svg', ASSETS_BASE).href],
+  ['Python', new URL('assets/languages/python.svg', ASSETS_BASE).href],
+  ['TypeScript', new URL('assets/languages/typescript.svg', ASSETS_BASE).href],
+  ['.NET', new URL('assets/languages/dotnet.svg', ASSETS_BASE).href],
+  ['PHP', new URL('assets/languages/php.svg', ASSETS_BASE).href],
+  ['Ruby', new URL('assets/languages/ruby.svg', ASSETS_BASE).href],
+  ['Rust', new URL('assets/languages/rust.svg', ASSETS_BASE).href],
+];
+
 // The two founders, in the order the scenes introduce them; `face` is the center of the face in the photo (Samar
 // stands on the left, Maxim on the right)
 const FOUNDERS = [

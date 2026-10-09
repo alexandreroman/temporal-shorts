@@ -1,148 +1,428 @@
 // ===================== 6. TEMPORAL TODAY
 // The block keeps every name declared in this file local to this scene.
 {
-  // Two columns: customers and team on the left, valuation on the right
-  // the customers tile on top of the team tile, 60 px apart, from y 330 to 850 like the chart
-  const LEFT = { x: 530, w: 820 };
-  const CUSTOMERS = { top: 330, h: 290 };
-  const TEAM = { h: 170, bottom: 850 };
-  const NAMES = ['Netflix', 'Snap', 'NVIDIA', 'Salesforce', 'Shopify'];
-  const CHART = { x: 1400, y: 590, w: 800, h: 520 };
-  // valuations in billions of dollars; bar heights are proportional to them
-  const ROUNDS = [
-    { date: '2022', value: 1.5, label: '$1.5B' },
-    { date: '2025', value: 1.72, label: '$1.72B' },
-    { date: 'Feb 2026', value: 5, label: '$5B' },
-    { date: 'Sep 2026', value: 12.55, label: '$12.55B' },
+  // Three beats. The customers: one dot per paying customer ignites in waves over the band while a counter rolls to
+  // 4,300+; then the team, a block of 285 dots that split in two, 570. All the dots then condense into the Temporal
+  // symbol. The SDKs: their eight languages orbit out of the symbol onto an inner ring, five AI frameworks plug in on
+  // an outer one. The valuation: the camera rides a rising line over a grid, through its funding rounds, up to
+  // $12.55B. Stage pixels; the content frame runs from y 150 to 880
+
+  // ---------- beat 1: customers and team, drawn on a canvas over the band (it counts as the beat's content)
+  const BAND = { x: 960, y: 515, w: 1640, h: 720 };
+  const BAND_LEFT = BAND.x - BAND.w / 2, BAND_TOP = BAND.y - BAND.h / 2;
+  const CUSTOMERS = 4300;
+  // when each customer's dot ignites, in seconds after the waves start: rings spreading from the middle, rippling
+  const IGNITE_D = 4.2;
+  const DOTS = Array.from({ length: CUSTOMERS }, (_, i) => {
+    const x = BAND_LEFT + 12 + hash(i * 3 + 1) * (BAND.w - 24), y = BAND_TOP + 12 + hash(i * 3 + 2) * (BAND.h - 24);
+    const d = Math.hypot((x - BAND.x) / (BAND.w / 2), (y - BAND.y) / (BAND.h / 2)) / Math.SQRT2;
+    const ripple = 0.06 * Math.sin(d * 22);
+    return {
+      x, y, off: IGNITE_D * clamp(0.82 * d + ripple + 0.12 * hash(i * 3 + 3)),
+      rgb: hash(i * 7) < 0.55 ? '248,250,252' : hash(i * 7) < 0.85 ? '182,100,255' : '68,76,231',
+    };
+  });
+  const OFFSETS = DOTS.map(dot => dot.off).sort((a, b) => a - b);
+  const IGNITED_ALL = OFFSETS[OFFSETS.length - 1];
+  // how many dots have ignited `since` seconds after the waves start
+  const ignitedBy = since => {
+    let lo = 0, hi = OFFSETS.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (OFFSETS[mid] <= since) lo = mid + 1; else hi = mid;
+    }
+    return lo;
+  };
+  // the team: 285 dots on a grid of 15 columns, each splitting into two side by side: 30 columns, 570 dots
+  const TEAM = { x: 1340, y: 400, cols: 15, rows: 19, step: 13 };
+  const teamDot = (col, row, half) => [
+    TEAM.x + (2 * col + half + 0.5 - TEAM.cols) * TEAM.step, TEAM.y + (row - (TEAM.rows - 1) / 2) * TEAM.step,
   ];
-  const BAR = { w: 124, maxH: 300, baseline: 420, x0: 136, gap: 176 }; // inside the chart tile
-  const LAST = ROUNDS.length - 1;
-  const barH = value => Math.round(BAR.maxH * value / ROUNDS[LAST].value);
+  // the two columns while the team shows: the customers on the left, the team on the right, their numbers level
+  const NUMBER_Y = 640, LABEL_Y = 736;
+  const LEFT_X = 580;
+
+  // ---------- the Temporal symbol at the middle, and the points of its outline the dots condense onto
+  const SYMBOL_SIZE = 170;
+  const SYMBOL_POINTS = (() => {
+    const svg = document.createElementNS(SVGNS, 'svg');
+    const p = document.createElementNS(SVGNS, 'path');
+    p.setAttribute('d', SYMBOL_PATH.d);
+    svg.appendChild(p);
+    const [vx, vy, vw] = SYMBOL_PATH.viewBox.split(' ').map(Number);
+    const k = SYMBOL_SIZE / vw, L = p.getTotalLength(), n = 900;
+    return Array.from({ length: n }, (_, i) => {
+      const pt = p.getPointAtLength(L * i / n);
+      return [BAND.x + (pt.x - vx - vw / 2) * k, BAND.y + (pt.y - vy - vw / 2) * k];
+    });
+  })();
+
+  // ---------- beat 2: the SDKs. Language chips on an inner ellipse, AI framework chips on an outer ring, each
+  // linked to the symbol (centers, stage pixels)
+  const LANG_CHIP = { w: 252, h: 56, logo: { w: 72, h: 38 } };
+  // clockwise from the top left, in reading order
+  const LANG_AT = [247.5, 292.5, 337.5, 22.5, 67.5, 112.5, 157.5, 202.5].map(a => [
+    Math.round(960 + 400 * Math.cos(a * Math.PI / 180)), Math.round(515 + 215 * Math.sin(a * Math.PI / 180)),
+  ]);
+  const AI = ['OpenAI Agents SDK', 'Vercel AI SDK', 'Pydantic AI', 'Google ADK', 'LangGraph'];
+  const AI_CHIP = { w: 300, h: 56 };
+  // top, right, bottom right, bottom left, left: each link runs between the language chips
+  const AI_AT = [[960, 210], [1640, 515], [1440, 780], [480, 780], [280, 515]];
+
+  // ---------- beat 3: the valuation, drawn on a full-stage canvas. The rounds as world points (x right, y up the
+  // value), joined by three curves; the camera keeps the head of the line at HEAD while it climbs
+  const ROUNDS = [
+    { date: 'Feb 2022', value: 1.5, label: '$1.5B', series: 'Series B', at: [0, 0] },
+    { date: 'Mar 2025', value: 1.72, label: '$1.72B', series: 'Series C', at: [520, -20] },
+    { date: 'Feb 2026', value: 5, label: '$5B', series: 'Series D', at: [1000, -290] },
+    { date: 'Sep 2026', value: 12.55, label: '$12.55B', series: 'Series E', at: [1260, -1000] },
+  ];
+  // each curve's control points, from one round to the next
+  const CURVES = [
+    [[0, 0], [200, 0], [360, -10], [520, -20]],
+    [[520, -20], [700, -30], [860, -120], [1000, -290]],
+    [[1000, -290], [1100, -410], [1200, -700], [1260, -1000]],
+  ];
+  const bezier = ([a, b, c2, d], u) => {
+    const v = 1 - u;
+    return [0, 1].map(k => v * v * v * a[k] + 3 * v * v * u * b[k] + 3 * v * u * u * c2[k] + u * u * u * d[k]);
+  };
+  const HEAD = [1100, 640];
+  // at rest: the whole chart at 55% on the right (its middle at screen x 1360), the value on the left, clear of it
+  const REST = { at: [630, -500], scale: 0.55, x: 1360, valueX: 600 };
+  const GRID = 80;
+  const STARS = Array.from({ length: 220 }, (_, i) => ({
+    x: hash(i * 5 + 11) * 1920, y: hash(i * 5 + 12) * 1080, r: 0.6 + hash(i * 5 + 13) * 1.4,
+    depth: 0.15 + hash(i * 5 + 14) * 0.35,
+  }));
+  const SPARKS = Array.from({ length: 40 }, (_, i) => ({
+    a: hash(i * 9 + 1) * Math.PI * 2, v: 260 + hash(i * 9 + 2) * 520, life: 0.6 + hash(i * 9 + 3) * 0.6,
+  }));
+
+  // A number in the brand font with a violet glow, centered on its box
+  const makeNumber = (root, font) => E(root, '', '', {
+    fontSize: font + 'px', fontWeight: 700, lineHeight: 1, letterSpacing: '-.02em', whiteSpace: 'nowrap',
+    fontVariantNumeric: 'tabular-nums', color: C.ink, textShadow: '0 0 40px rgba(182,100,255,.65)',
+  });
+  const makeLabel = (root, text) => E(root, text, 'lbl', { fontSize: '24px', color: C.slate, whiteSpace: 'nowrap' });
+  // A chip: its content centered, a fixed size; css: its colors
+  const makeChip = (root, html, size, css) => E(root, html, 'mono', {
+    width: size.w + 'px', height: size.h + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    gap: '12px', fontSize: '22px', whiteSpace: 'nowrap', borderRadius: 'var(--rs)', ...css,
+  });
 
   scene({
     chapter: 6, title: 'Temporal today',
     holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
-    // the customers tile alone in the middle, then the whole layout as the chart comes in
-    shift: (t, c) => pan(t, [430, 47], [[c[1], 0, -68]], 0.8),
     subs: [
+      // the waves and the count, the team doubling, then the dots condense into the symbol
+      { text: "Today, more than 4,300 companies pay for Temporal, and the team has doubled in a year.", after: 9.6 },
+      // the eight languages, one after the other, then a hold
+      { text: "Its open source SDKs support Go, Java, Python, TypeScript, .NET, PHP, Ruby and Rust.", after: 1.0 },
+      // the five AI frameworks, then a hold
       {
-        text: "Today, more than 4,300 companies pay for it, "
-          + "including Netflix, Snap, NVIDIA, Salesforce and Shopify.",
-        after: 0.4,
+        text: "And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI SDK, Pydantic AI, Google ADK, LangGraph.",
+        after: 1.2,
       },
-      {
-        text: "In September 2026, investors valued Temporal at $12.55 billion. The team has doubled in a year.",
-        after: 1.0,
-      },
+      // the climb, the arrival, the hold on $12.55B
+      { text: "In September 2026, investors valued Temporal at $12.55 billion.", after: 5.4 },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-
-      s.customers = makeCounter(root, 'Paying customers', LEFT.w);
-
-      s.customers.style.height = CUSTOMERS.h + 'px';
-      s.customers.insertAdjacentHTML('beforeend',
-        '<div style="position:absolute;left:24px;right:24px;bottom:28px;height:50px;overflow:hidden">'
-        + '<div class="belt" style="display:flex;gap:16px;width:max-content"></div></div>');
-      // the names on a belt: two copies of the list, so it can loop once it starts moving
-      s.belt = s.customers.querySelector('.belt');
-      s.names = [...NAMES, ...NAMES].map(name => {
-        const e = tag(s.belt, name);
-        Object.assign(e.style, { position: 'static', fontSize: '20px' });
-        return e;
+      // beat 3's canvas and its arrival bloom first, under everything else
+      s.chartCanvas = document.createElement('canvas');
+      s.chartCanvas.width = 1920; s.chartCanvas.height = 1080;
+      s.chart = E(root, '', '', { width: '1920px', height: '1080px' });
+      s.chart.appendChild(s.chartCanvas);
+      s.bloom = E(root, '', '', {
+        width: '2400px', height: '1400px',
+        background: 'radial-gradient(circle at center, rgba(255,255,255,.85) 0, rgba(182,100,255,.45) 18%, '
+          + 'rgba(68,76,231,.15) 36%, rgba(68,76,231,0) 60%)',
       });
-
-      s.team = makeCounter(root, 'Employees', LEFT.w);
-      s.team.note.textContent = 'DOUBLED IN A YEAR';
-      s.team.note.style.color = C.violet;
-      s.team.style.height = TEAM.h + 'px';
-
-      s.chart = E(root, '<div class="lbl" style="position:absolute;left:24px;top:18px;padding-left:0;font-size:16px">'
-        + 'Valuation</div>', 'tile', { width: CHART.w + 'px', height: CHART.h + 'px' });
-      s.chart.insertAdjacentHTML('beforeend',
-        `<div style="position:absolute;left:40px;right:40px;top:${BAR.baseline}px;border-top:1.5px solid ${C.line}">`
-        + '</div>');
-      s.bars = ROUNDS.map((round, i) => {
-        const x = BAR.x0 + i * BAR.gap - BAR.w / 2;
-        const highlighted = i === LAST;
-        const bar = E(s.chart, '', '', {
-          left: x + 'px', top: (BAR.baseline - barH(round.value)) + 'px', width: BAR.w + 'px',
-          height: barH(round.value) + 'px', borderRadius: '6px 6px 0 0', transformOrigin: '50% 100%',
-          background: highlighted ? `linear-gradient(180deg, ${C.violet}, ${C.uv})` : 'rgba(148,163,184,.28)',
-        });
-        bar.value = E(s.chart, round.label, 'mono', {
-          left: x + 'px', width: BAR.w + 'px', textAlign: 'center',
-          top: (BAR.baseline - barH(round.value) - (highlighted ? 52 : 42)) + 'px',
-          fontSize: highlighted ? '32px' : '24px', color: highlighted ? C.ink : C.slate,
-        });
-        bar.date = E(s.chart, round.date, 'lbl', {
-          left: (x - 20) + 'px', width: (BAR.w + 40) + 'px', textAlign: 'center', top: (BAR.baseline + 18) + 'px',
-          fontSize: '18px',
-        });
-        return bar;
+      s.rings = makeRipples(root, 3, '219,255,75');
+      // beat 1's canvas over the band
+      s.dotsCanvas = document.createElement('canvas');
+      s.dotsCanvas.width = BAND.w; s.dotsCanvas.height = BAND.h;
+      s.dots = E(root, '', '', { width: BAND.w + 'px', height: BAND.h + 'px' });
+      s.dots.appendChild(s.dotsCanvas);
+      s.burst = E(root, '', '', {
+        width: '900px', height: '900px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(219,255,75,.5) 0, rgba(182,100,255,.25) 35%, '
+          + 'rgba(182,100,255,0) 70%)',
       });
-      // the trend through the tops of the bars, and a burst of light at the last one
-      const tops = ROUNDS.map((round, i) => [BAR.x0 + i * BAR.gap, BAR.baseline - barH(round.value)]);
-      s.trendSvg = document.createElementNS(SVGNS, 'svg');
-      Object.assign(s.trendSvg.style, { position: 'absolute', left: 0, top: 0, overflow: 'visible' });
-      s.trendSvg.setAttribute('width', CHART.w); s.trendSvg.setAttribute('height', CHART.h);
-      s.chart.appendChild(s.trendSvg);
-      // 70 px over the bar tops, above the value labels; it levels off just left of the last label to stay clear of it
-      const points = tops.map(([x, y]) => [x, y - 70]);
-      points.splice(LAST, 0, [tops[LAST][0] - 70, tops[LAST][1] - 70]);
-      s.trend = path(s.trendSvg, 'M ' + points.map(([x, y]) => `${x} ${y}`).join(' L '), C.violet, 3, false);
-      s.trend.style.filter = 'drop-shadow(0 0 6px rgba(182,100,255,.8))';
-      const [lx, ly] = tops[LAST];
-      s.burstAt = [lx, ly - 70];
-      s.rays = Array.from({ length: 10 }, (_, k) => {
-        const a = (k / 10) * Math.PI * 2;
-        return path(s.trendSvg, `M ${lx + Math.cos(a) * 20} ${ly - 70 + Math.sin(a) * 20} `
-          + `L ${lx + Math.cos(a) * 64} ${ly - 70 + Math.sin(a) * 64}`, C.neon, 2.5, false);
+      s.custNum = makeNumber(root, 200);
+      s.custLabel = makeLabel(root, 'Paying customers');
+      s.teamNum = makeNumber(root, 140);
+      s.teamLabel = makeLabel(root, 'Employees');
+      // the stamp: neon, a fixed even width, so it rests on whole pixels
+      s.stamp = tag(root, '×2 in a year', 'neon solid big');
+      Object.assign(s.stamp.style, { width: '268px', textAlign: 'center', boxShadow: '0 0 30px rgba(219,255,75,.4)' });
+
+      // beat 2: the links under the chips, the symbol, the chips and their pulses
+      s.links = svgLayer(root);
+      const edgePoint = ([x, y], size, r) => {
+        // where the link from the symbol reaches the chip's box, and where it leaves the symbol's circle
+        const dx = x - 960, dy = y - 515, d = Math.hypot(dx, dy);
+        const t1 = Math.min(Math.abs((size.w / 2 + 8) / (dx || 1e-6)), Math.abs((size.h / 2 + 8) / (dy || 1e-6)));
+        return [[960 + dx / d * r, 515 + dy / d * r], [x - dx * Math.min(1, t1), y - dy * Math.min(1, t1)]];
+      };
+      const linkD = ([[x0, y0], [x1, y1]]) => `M ${x0} ${y0} L ${x1} ${y1}`;
+      s.langLinks = LANG_AT.map(at => path(s.links, linkD(edgePoint(at, LANG_CHIP, SYMBOL_SIZE / 2 + 12)),
+        C.uv, 2, false));
+      s.aiLinks = AI_AT.map(at => path(s.links, linkD(edgePoint(at, AI_CHIP, SYMBOL_SIZE / 2 + 12)), C.violet, 2,
+        false));
+      s.symbolGlow = E(root, '', '', {
+        width: '460px', height: '460px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(182,100,255,.35) 0, rgba(68,76,231,.12) 45%, rgba(68,76,231,0) 70%)',
       });
-      s.burst = makeSpark(s.chart, 18, '219,255,75');
+      s.symbol = E(root, `<img src="${SYMBOL}" style="width:${SYMBOL_SIZE}px;height:${SYMBOL_SIZE}px;display:block">`);
+      s.langs = LANGUAGES.map(([name, logo]) => makeChip(root,
+        `<span style="width:${LANG_CHIP.logo.w}px;height:${LANG_CHIP.logo.h}px;display:flex;align-items:center;`
+        + `justify-content:center"><img src="${logo}" style="max-width:${LANG_CHIP.logo.w}px;`
+        + `max-height:${LANG_CHIP.logo.h}px;display:block"></span><span style="width:132px">${name}</span>`,
+        LANG_CHIP, { background: '#17182A', color: C.ink, border: '1.5px solid ' + C.uv }));
+      s.ais = AI.map(name => makeChip(root, `${ICON('sparkle', 22, C.violet, 1.8)}<span>${name}</span>`, AI_CHIP,
+        { background: '#22163A', color: C.ink, border: '1.5px solid ' + C.violet }));
+      s.pulses = AI.map(() => makeSpark(root, 14, '182,100,255'));
+
+      // beat 3's labels: the rounds, then the valuation
+      s.rounds = ROUNDS.slice(0, 3).map(round => E(root,
+        `<div class="lbl" style="font-size:16px;color:var(--slate)">${round.date}</div>`
+        + `<div style="font-size:34px;font-weight:700;line-height:1.15;color:var(--ink)">${round.label}</div>`
+        + `<div class="lbl" style="font-size:14px;color:var(--violet)">${round.series}</div>`,
+        'tile', { width: '176px', height: '104px', padding: '12px 0', textAlign: 'center', background: '#17182A' }));
+      s.value = makeNumber(root, 200);
+      s.valueLabel = makeLabel(root, 'Valuation · September 2026');
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
-      // customers: the count rolls up, then the names pop in as the subtitle reads them, then the belt starts to
-      // move (ambient loop, driven by G)
-      rise(s.customers, LEFT.x, CUSTOMERS.top + CUSTOMERS.h / 2, P(t, c[0] + 0.2, 0.5));
-      const counted = P(t, c[0] + 0.4, 1.8);
-      s.customers.n.textContent = Math.round(4300 * counted).toLocaleString('en-US') + (counted >= 1 ? '+' : '');
-      s.names.forEach((e, i) => {
-        // the second copy of the list only shows once the belt moves
-        const at = i < NAMES.length ? c[0] + 2.6 + i * 0.35 : c[0] + 4.6;
-        const p = P(t, at, 0.45, backOut);
-        e.style.opacity = clamp(p * 2);
-        e.style.transform = `scale(${p})`;
-      });
-      const beltFrom = c[0] + 5.0;
-      const moving = Math.max(0, G - this.start - beltFrom) * 45 * (t >= beltFrom ? 1 : 0);
-      const loop = s.names[NAMES.length].offsetLeft - s.names[0].offsetLeft;
-      s.belt.style.transform = loop > 0 ? `translateX(${-(moving % loop).toFixed(2)}px)` : '';
+      const waves = c[0] + 0.3;
+      const full = waves + IGNITED_ALL;
+      const teamIn = full + 2.4, splitAt = teamIn + 1.0, splitD = 2.0, stampAt = splitAt + splitD + 0.3;
+      const gather = c[1] - 2.4;
+      const symbolIn = c[1] - 1.0;
 
-      // valuation: the bars grow one by one, the last one highlighted; then the team
-      place(s.chart, CHART.x, CHART.y, 1, P(t, c[1] + 0.1, 0.4));
-      s.bars.forEach((bar, i) => {
-        const at = c[1] + 0.4 + i * 0.45;
-        const grow = P(t, at, 0.6);
-        bar.style.opacity = grow > 0 ? 1 : 0;
-        bar.style.transform = `scaleY(${grow})`;
-        bar.value.style.opacity = P(t, at + 0.5, 0.3);
-        bar.date.style.opacity = P(t, c[1] + 0.2, 0.4);
+      // ---------- beat 1
+      // the customers' dots: each flashes as it ignites, then glows softly (twinkling on G); they dim to a starry
+      // backdrop while the team shows, then all flow into the symbol's outline as it gathers
+      const g = s.dotsCanvas.getContext('2d');
+      g.clearRect(0, 0, BAND.w, BAND.h);
+      const backdrop = 1 - 0.7 * P(t, teamIn - 0.4, 0.8);
+      const toSymbol = i => SYMBOL_POINTS[i % SYMBOL_POINTS.length];
+      const gatherP = i => ease(P(t, gather + 0.5 * hash(i * 13 + 5), 1.1));
+      const fadeAll = 1 - P(t, symbolIn, 0.5);
+      DOTS.forEach((dot, i) => {
+        const since = t - waves - dot.off;
+        if (since < 0 || fadeAll <= 0) return;
+        const flash = Math.max(0, 1 - since / 0.4);
+        const twinkle = 0.75 + 0.25 * Math.sin(G * 2.3 + i);
+        const f = gatherP(i), [sx, sy] = toSymbol(i);
+        const x = lerp(dot.x, sx, f) - BAND_LEFT, y = lerp(dot.y, sy, f) - BAND_TOP;
+        g.globalAlpha = clamp((0.55 + 0.45 * flash) * twinkle * lerp(backdrop, 1, f)) * fadeAll;
+        g.fillStyle = `rgb(${dot.rgb})`;
+        const r = 1.2 + 2.2 * flash;
+        g.fillRect(x - r / 2, y - r / 2, r, r);
       });
-      const last = s.bars[LAST].value;
-      last.style.transform = `scale(${swell(t, c[1] + 2.2, 0.25)})`;
-      // the trend line climbs over the bars, then a burst of light on $12.55B
-      draw(s.trend, P(t, c[1] + 2.0, 0.9));
-      const burst = c[1] + 2.8;
-      s.rays.forEach((ray, k) => {
-        const r = P(t, burst + (k % 2) * 0.06, 0.6);
-        draw(ray, r, r > 0 && r < 1 ? 1 - r : 0);
+      // the team: 285 dots pop in on their grid, then each splits in two, column after column
+      const teamO = P(t, teamIn, 0.5) * fadeAll;
+      let split = 0;
+      for (let col = 0; col < TEAM.cols; col++) {
+        const at = splitAt + (col / TEAM.cols) * (splitD - 0.4);
+        const sp = P(t, at, 0.4, backOut);
+        if (t >= at + 0.2) split += TEAM.rows;
+        for (let row = 0; row < TEAM.rows; row++) {
+          const n = CUSTOMERS + col * TEAM.rows + row;
+          [0, 1].forEach(half => {
+            if (teamO <= 0) return;
+            const [x1, y1] = teamDot(col, row, half), [x0] = teamDot(col, row, 0.5);
+            const f = gatherP(n * 2 + half), [sx, sy] = toSymbol(n * 2 + half);
+            const x = lerp(lerp(x0, x1, sp), sx, f) - BAND_LEFT, y = lerp(y1, sy, f) - BAND_TOP;
+            const pop = P(t, teamIn + 0.4 * hash(n), 0.3);
+            g.globalAlpha = teamO * pop;
+            g.fillStyle = half ? 'rgb(219,255,75)' : 'rgb(248,250,252)';
+            const r = sp > 0 && sp < 1 ? 4 : 3;
+            g.fillRect(x - r / 2, y - r / 2, r, r);
+          });
+        }
+      }
+      g.globalAlpha = 1;
+      place(s.dots, BAND.x, BAND.y, 1, t >= waves && fadeAll > 0 ? 1 : 0);
+
+      // the count rolls with the ignitions, blurring while it races; a pop and a burst of light at 4,300+
+      const count = Math.min(CUSTOMERS, ignitedBy(t - waves));
+      const rate = count - Math.min(CUSTOMERS, ignitedBy(t - waves - 0.1));
+      const done = t >= full;
+      const custText = count.toLocaleString('en-US') + (done ? '+' : '');
+      if (s.custNum.textContent !== custText) s.custNum.textContent = custText;
+      s.custNum.style.filter = !done && rate > 0 ? `blur(${Math.min(3, rate / 60).toFixed(2)}px)` : '';
+      // to the left column as the team comes in
+      const toLeft = ease(P(t, teamIn - 0.6, 0.8));
+      const out1 = 1 - P(t, gather, 0.4);
+      place(s.custNum, Math.round(lerp(960, LEFT_X, toLeft)), Math.round(lerp(460, NUMBER_Y, toLeft)),
+        lerp(1, 0.7, toLeft) * swell(t, full, 0.12), P(t, waves, 0.3) * out1);
+      place(s.custLabel, Math.round(lerp(960, LEFT_X, toLeft)), Math.round(lerp(592, LABEL_Y, toLeft)), 1,
+        P(t, waves + 0.6, 0.4) * out1);
+      place(s.burst, 960, 460, lerp(0.4, 1.4, P(t, full, 0.7)), win(t, full, full + 0.7, 0.2) * 0.9);
+      // the team's count, 285 then up to 570 with the splits, then the stamp
+      const teamText = String(285 + split);
+      if (s.teamNum.textContent !== teamText) s.teamNum.textContent = teamText;
+      place(s.teamNum, TEAM.x, NUMBER_Y, swell(t, stampAt - 0.2, 0.1), P(t, teamIn, 0.4) * out1);
+      place(s.teamLabel, TEAM.x, LABEL_Y, 1, P(t, teamIn + 0.3, 0.4) * out1);
+      const st = P(t, stampAt, 0.35, easeIn);
+      place(s.stamp, TEAM.x + 286, NUMBER_Y - 66, lerp(1.8, 1, st), clamp(st * 3) * out1, lerp(-20, -8, st));
+
+      // ---------- beat 2
+      // the symbol takes the dots' place; then the languages orbit out of it, one after the other, each landing
+      // with a pop and its link drawn back to the symbol; then the AI frameworks slide in from outside, a pulse
+      // running from the symbol to each as it connects. As the climb starts, all fly down and off
+      const exitAt = c[3] + 0.05;
+      const exit = P(t, exitAt, 0.7, easeIn);
+      const away = (x, y) => [x + (x - 960) * 0.4 * exit, y + 520 * exit];
+      const symO = P(t, symbolIn, 0.5) * (1 - exit);
+      place(s.symbol, ...away(960, 515), swell(t, c[1] + 0.1, 0.08), symO);
+      place(s.symbolGlow, ...away(960, 515), 1 + 0.04 * Math.sin(G * 1.6), symO * 0.9);
+      const langAt = k => c[1] + 0.6 + k * 0.45;
+      s.langs.forEach((e, k) => {
+        const p = ease(P(t, langAt(k), 0.8));
+        const [tx, ty] = LANG_AT[k];
+        // a spiral: from the symbol, sweeping 70 degrees as it moves out
+        const a = Math.atan2((ty - 515) / 215, (tx - 960) / 400) - (1 - p) * 70 * Math.PI / 180;
+        const x = 960 + 400 * p * Math.cos(a), y = 515 + 215 * p * Math.sin(a);
+        const landed = P(t, langAt(k) + 0.8, 0.01);
+        const [ex, ey] = away(landed ? tx : x, landed ? ty : y);
+        place(e, Math.round(ex), Math.round(ey), lerp(0.4, 1, p) * swell(t, langAt(k) + 0.8, 0.12),
+          clamp(p * 3) * (1 - exit));
+        draw(s.langLinks[k], P(t, langAt(k) + 0.75, 0.3), 0.7 * (1 - P(t, exitAt, 0.3)));
       });
-      place(s.burst, ...s.burstAt, 1 + 0.6 * win(t, burst, burst + 0.3, 0.15), P(t, burst - 0.1, 0.2));
-      // the team: the count rolls up too
-      rise(s.team, LEFT.x, TEAM.bottom - TEAM.h / 2, P(t, c[1] + 3.8, 0.5));
-      s.team.n.textContent = Math.round(570 * P(t, c[1] + 3.9, 1.0));
+      const aiAt = j => c[2] + 0.4 + j * 0.7;
+      s.ais.forEach((e, j) => {
+        const p = ease(P(t, aiAt(j), 0.7));
+        const [tx, ty] = AI_AT[j];
+        const x = tx + (tx - 960) * 0.35 * (1 - p), y = ty + (ty - 515) * 0.35 * (1 - p);
+        const pulseAt = aiAt(j) + 0.5;
+        const [ex, ey] = away(p >= 1 ? tx : x, p >= 1 ? ty : y);
+        place(e, Math.round(ex), Math.round(ey), swell(t, pulseAt + 0.55, 0.1), p * (1 - exit));
+        e.style.boxShadow = win(t, pulseAt + 0.45, pulseAt + 1.0, 0.15) > 0
+          ? `0 0 ${Math.round(28 * win(t, pulseAt + 0.45, pulseAt + 1.0, 0.15))}px rgba(182,100,255,.7)` : '';
+        draw(s.aiLinks[j], P(t, aiAt(j) + 0.3, 0.4), 0.8 * (1 - P(t, exitAt, 0.3)));
+        sparkOnPath(s.pulses[j], s.aiLinks[j], P(t, pulseAt, 0.55, x => x));
+      });
+
+      // ---------- beat 3
+      // the timing of the climb: the grid and the first round, then each curve, the last one a surge
+      const climb = c[3] + 0.6;
+      const segs = [[climb + 0.2, 1.4, ease], [climb + 1.6, 1.2, x => x], [climb + 2.8, 1.0, easeIn]];
+      const arrive = segs[2][0] + segs[2][1];
+      const settle = ease(P(t, arrive + 0.5, 1.3));
+      let seg = 0, u = 0;
+      segs.forEach(([at, d, fn], i) => {
+        if (t >= at) { seg = i; u = fn(P(t, at, d)); }
+      });
+      const head = bezier(CURVES[seg], u);
+      const value = t < segs[0][0] ? ROUNDS[0].value : lerp(ROUNDS[seg].value, ROUNDS[seg + 1].value, u);
+      // the camera: on the head while it climbs, then easing out to the whole chart at rest; a shake on arrival
+      const [kx, ky] = shakeAt(t, arrive - 0.15);
+      const camAt = [lerp(head[0], REST.at[0], settle), lerp(head[1], REST.at[1], settle)];
+      const anchor = [lerp(HEAD[0], REST.x, settle) + kx, lerp(HEAD[1], 515, settle) + ky];
+      const zoom = lerp(1, REST.scale, settle);
+      const toScreen = ([wx, wy]) => [anchor[0] + (wx - camAt[0]) * zoom, anchor[1] + (wy - camAt[1]) * zoom];
+      const chartO = P(t, climb - 0.3, 0.5) * lerp(1, 0.7, settle);
+      const cg = s.chartCanvas.getContext('2d');
+      cg.clearRect(0, 0, 1920, 1080);
+      if (chartO > 0) {
+        cg.globalAlpha = chartO;
+        // the stars drift slower than the grid, which drifts slower than the chart: three depths
+        STARS.forEach(star => {
+          const x = ((star.x - camAt[0] * star.depth) % 1920 + 1920) % 1920;
+          const y = ((star.y - camAt[1] * star.depth) % 1080 + 1080) % 1080;
+          cg.fillStyle = 'rgba(232,234,255,.7)';
+          cg.fillRect(x, y, star.r, star.r);
+        });
+        cg.strokeStyle = 'rgba(148,163,184,.12)';
+        cg.lineWidth = 1;
+        const step = GRID * zoom;
+        const ox = ((anchor[0] - camAt[0] * zoom * 0.6) % step + step) % step;
+        const oy = ((anchor[1] - camAt[1] * zoom * 0.6) % step + step) % step;
+        cg.beginPath();
+        for (let x = ox; x < 1920; x += step) { cg.moveTo(x, 0); cg.lineTo(x, 1080); }
+        for (let y = oy; y < 1080; y += step) { cg.moveTo(0, y); cg.lineTo(1920, y); }
+        cg.stroke();
+        // the line, drawn up to the head, glowing, its newest part brightest
+        cg.lineCap = 'round';
+        const curvePoints = (i, upTo) => Array.from({ length: 41 },
+          (_, n) => toScreen(bezier(CURVES[i], upTo * n / 40)));
+        const drawn = [0, 1, 2].filter(i => i < seg || (i === seg && t >= segs[0][0]));
+        drawn.forEach(i => {
+          const pts = curvePoints(i, i < seg ? 1 : u);
+          cg.shadowColor = 'rgba(182,100,255,.9)';
+          cg.shadowBlur = 18;
+          cg.strokeStyle = i === 2 ? '#DBFF4B' : '#B664FF';
+          cg.lineWidth = i === 2 ? 5 : 4;
+          cg.beginPath();
+          pts.forEach(([x, y], n) => (n ? cg.lineTo(x, y) : cg.moveTo(x, y)));
+          cg.stroke();
+        });
+        cg.shadowBlur = 0;
+        // the rounds' markers, each flashing as the line reaches it
+        ROUNDS.forEach((round, i) => {
+          const reached = i === 0 ? segs[0][0] : segs[i - 1][0] + segs[i - 1][1];
+          if (t < reached - 0.05) return;
+          const [x, y] = toScreen(round.at);
+          const fl = win(t, reached, reached + 0.5, 0.1);
+          cg.fillStyle = i === 3 ? '#DBFF4B' : '#F8FAFC';
+          cg.beginPath(); cg.arc(x, y, 7 + 8 * fl, 0, Math.PI * 2); cg.fill();
+          if (fl > 0) {
+            cg.strokeStyle = `rgba(219,255,75,${(0.8 * fl).toFixed(3)})`;
+            cg.lineWidth = 3;
+            cg.beginPath(); cg.arc(x, y, 14 + 40 * (1 - fl), 0, Math.PI * 2); cg.stroke();
+          }
+        });
+        // the head: a bright comet while it climbs
+        if (t >= segs[0][0] && t < arrive + 0.2) {
+          const [hx, hy] = toScreen(head);
+          const glow = cg.createRadialGradient(hx, hy, 0, hx, hy, 46);
+          glow.addColorStop(0, 'rgba(255,255,255,.95)');
+          glow.addColorStop(0.3, 'rgba(219,255,75,.6)');
+          glow.addColorStop(1, 'rgba(219,255,75,0)');
+          cg.fillStyle = glow;
+          cg.beginPath(); cg.arc(hx, hy, 46, 0, Math.PI * 2); cg.fill();
+        }
+        // the arrival: sparks thrown out of the last round, falling and fading
+        const [px, py] = toScreen(ROUNDS[3].at);
+        SPARKS.forEach(sp => {
+          const age = t - arrive;
+          if (age <= 0 || age >= sp.life) return;
+          const at = a => [px + Math.cos(sp.a) * sp.v * a, py + Math.sin(sp.a) * sp.v * a + 380 * a * a];
+          const [x0, y0] = at(Math.max(0, age - 0.06)), [x1, y1] = at(age);
+          cg.strokeStyle = `rgba(219,255,75,${(1 - age / sp.life).toFixed(3)})`;
+          cg.lineWidth = 2.5;
+          cg.beginPath(); cg.moveTo(x0, y0); cg.lineTo(x1, y1); cg.stroke();
+        });
+        cg.globalAlpha = 1;
+      }
+      place(s.chart, 960, 540, 1, chartO > 0 ? 1 : 0);
+      const [px, py] = toScreen(ROUNDS[3].at);
+      place(s.bloom, px, py, 1, win(t, arrive - 0.05, arrive + 0.5, 0.15) * 0.9);
+      placeRipples(s.rings, t, arrive, px, py, 40, 900);
+      // the rounds' labels, above and left of their markers, flashing as the line reaches them; they fade near the
+      // frame's edges as the camera moves on, and as the chart settles
+      s.rounds.forEach((e, i) => {
+        const reached = i === 0 ? segs[0][0] : segs[i - 1][0] + segs[i - 1][1];
+        const [x, y] = toScreen(ROUNDS[i].at);
+        const lx = x - 100, ly = y - 76;
+        const edge = clamp((880 - (ly + 52)) / 60) * clamp((lx - 88 - 120) / 60) * clamp((ly - 52 - 150) / 40);
+        place(e, Math.round(lx), Math.round(ly), swell(t, reached, 0.14), P(t, reached - 0.1, 0.3) * edge
+          * (1 - P(t, arrive + 0.3, 0.5)));
+        e.style.borderColor = win(t, reached, reached + 0.6, 0.15) > 0.5 ? C.neon : C.line;
+      });
+      // the value: racing with the head, blurred while it surges, then to the middle, big, with its label
+      const valueText = '$' + value.toFixed(2) + 'B';
+      if (s.value.textContent !== valueText) s.value.textContent = valueText;
+      const speed = seg === 2 && t < arrive ? P(t, segs[2][0], segs[2][1], easeIn) : 0;
+      s.value.style.filter = speed > 0.05 ? `blur(${(2.5 * speed).toFixed(2)}px)` : '';
+      place(s.value, Math.round(lerp(700, REST.valueX, settle) + kx), Math.round(lerp(300, 480, settle) + ky),
+        lerp(0.5, 1, settle) * swell(t, arrive, 0.1), P(t, climb, 0.4));
+      place(s.valueLabel, REST.valueX, 610, 1, P(t, arrive + 1.2, 0.5));
     }
   });
 }

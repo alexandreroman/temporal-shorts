@@ -41,6 +41,13 @@ and each chapter has a cinematic moment, listed in its visuals.
   side, encryption by a Data Converter with the customer's keys
 - https://docs.temporal.io/dataconversion (Data Converters and codecs,
   chapter 05)
+- https://docs.temporal.io/encyclopedia/temporal-sdks (the SDK languages of
+  chapter 06)
+- https://docs.temporal.io/ai (the AI framework integrations of chapter 06)
+- The languages' official logos, chapter 06: see
+  `src/assets/languages/README.md` (Go brand page, python.org, TypeScript
+  branding, dotnet/brand, php.net, ruby-lang.org, rust-lang/rust-artwork;
+  Java from devicon, MIT, as Oracle publishes no reusable logo file)
 - https://docs.temporal.io/cloud/security (the Temporal Cloud claims of
   chapter 05)
 - https://temporal.io/blog/samars-journey
@@ -265,22 +272,43 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 06 Temporal today
 
-- **2:57** Today, more than 4,300 companies pay for it, including Netflix,
-  Snap, NVIDIA, Salesforce and Shopify.
-  - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
-    "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
-    SALESFORCE, SHOPIFY) and start moving on a belt.
-- **3:05** In September 2026, investors valued Temporal at $12.55 billion.
-  The team has doubled in a year.
-  - Visuals: The customers tile moves left as the VALUATION chart comes in:
-    bars proportional to the value grow one by one, 2022 $1.5B, 2025
-    $1.72B, FEB 2026 $5B, SEP 2026 $12.55B (the last one violet to UV), a
-    violet trend line climbs over them and a burst of light lands on
-    $12.55B; then the EMPLOYEES tile rolls up to "570", DOUBLED IN A YEAR.
+- **2:57** Today, more than 4,300 companies pay for Temporal, and the team
+  has doubled in a year.
+  - Visuals: A dark stage. One tiny dot per paying customer, 4,300 at
+    seeded places over the band, ignites in rippling waves from the middle
+    while a huge counter, PAYING CUSTOMERS, rolls up with them, blurred as
+    it races, and lands on "4,300+" with a pop and a burst of light. The
+    dots dim to a starry backdrop as the count moves left and the team
+    comes in on the right: 285 dots on a grid, EMPLOYEES 285; column after
+    column each dot splits in two, the count climbing to 570, and a neon
+    ×2 IN A YEAR stamp slams on. Then every dot flows into the outline of
+    the Temporal symbol, which takes their place in the middle.
+- **3:13** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
+  PHP, Ruby and Rust.
+  - Visuals: Eight language chips, each with the language's official logo
+    and its name, spiral out of the symbol one after the other in reading
+    order onto a ring around it, each landing with a pop and a thin UV
+    link back to the symbol.
+- **3:20** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
+  SDK, Pydantic AI, Google ADK, LangGraph.
+  - Visuals: Five AI framework chips, text only with a violet sparkle,
+    slide in on an outer ring between the languages, each linked to the
+    symbol by a violet line along which a pulse runs from the symbol, the
+    chip glowing as it connects.
+- **3:28** In September 2026, investors valued Temporal at $12.55 billion.
+  - Visuals: The chips and the symbol fall away as the camera starts to
+    rise over a dark grid and parallax stars, riding the head of a glowing
+    line: it reaches FEB 2022 $1.5B (Series B), MAR 2025 $1.72B (Series C)
+    and FEB 2026 $5B (Series D), each marker and label flashing as the line
+    hits it, with the value racing above; then a near-vertical neon surge
+    to SEP 2026, the value blurring to $12.55B, and the arrival: a shake, a
+    flash bloom, shockwave rings and sparks. The camera pulls back to the
+    whole climb on the right, and "$12.55B" holds huge on the left,
+    VALUATION · SEPTEMBER 2026 under it.
 
 ## Outro
 
-- **3:13** Temporal keeps code running whatever fails, from everyday apps
+- **3:39** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,

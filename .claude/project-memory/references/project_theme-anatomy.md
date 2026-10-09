@@ -230,8 +230,10 @@ CLAUDE.md; a section below and the card order in
   "20 YEARS IN THE MAKING" in large type, which shrinks into the heading
   (no year beside it) as the timeline draws in. The founders appear as
   faces cropped from the official photo (`src/assets/temporal-founders.jpg`,
-  temporal.io/about), never the full photo. Third-party companies appear as
-  text, never as logos.
+  temporal.io/about), never the full photo. Third-party companies and AI
+  frameworks appear as text, never as logos; programming languages show
+  their official logos (src/assets/languages/, sources and licenses in
+  its README.md).
 - Ch6 figures are dated (Series E, September 2026: $12.55B valuation,
   4,300+ paying customers, 570 employees): refresh them with each funding
   announcement. Ch4 names OpenAI (Codex), Cursor, Lovable, Replit.
