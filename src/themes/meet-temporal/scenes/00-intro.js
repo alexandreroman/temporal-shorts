@@ -2,7 +2,7 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // the symbol sits in the middle of the orbit, centered on the title block (y 440)
-  const ORBIT = { x: 1450, y: 440, rx: 400, ry: 290 };
+  const ORBIT = { x: 1450, y: 440, rx: 400, ry: 290, speed: 0.4 };
   const SYMBOL_SIZE = 260;
   // everyday apps that run on Temporal: shopping, payments, rides, streaming, AI
   const ORBIT_ICONS = ['cart', 'card', 'car', 'play', 'sparkle'];
@@ -60,14 +60,11 @@
       place(s.glow, ORBIT.x, ORBIT.y, 1 + 0.04 * Math.sin(G * 1.6), P(t, 1.6, 0.9));
 
       s.orb.forEach(({ icon, ghosts }, i) => {
-        const pp = backPop(t, 2.6 + i * 0.15, 0.6);
-        const at = a => [ORBIT.x + Math.cos(a) * ORBIT.rx, ORBIT.y + Math.sin(a) * ORBIT.ry];
-        const depth = a => 0.45 + 0.55 * (Math.sin(a) + 1) / 2;
-        const a = G * 0.4 + i * (Math.PI * 2 / ORBIT_ICONS.length);
-        place(icon, ...at(a), pp.s, pp.o * depth(a));
+        const pp = backPop(t, 2.6 + i * 0.15, 0.6), at = orbitAt(i, ORBIT_ICONS.length, ORBIT);
+        place(icon, at.x, at.y, pp.s, pp.o * at.depth);
         ghosts.forEach((g, k) => {
-          const ga = a - TRAIL[k];
-          place(g, ...at(ga), pp.s * (1 - 0.12 * (k + 1)), pp.o * depth(ga) * (0.35 - 0.1 * k));
+          const ghostAt = orbitAt(i, ORBIT_ICONS.length, ORBIT, TRAIL[k]);
+          place(g, ghostAt.x, ghostAt.y, pp.s * (1 - 0.12 * (k + 1)), pp.o * ghostAt.depth * (0.35 - 0.1 * k));
         });
       });
     }

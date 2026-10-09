@@ -112,6 +112,14 @@ function makeTitleBlock(root, kicker, titleHtml, tagline, sizes = {}) {
     + `<div class="mono" style="font-size:${taglineFont}px;letter-spacing:.12em;color:var(--violet);`
     + `margin-top:${taglineGap}px">${tagline}</div>`);
 }
+// Where icon i of n orbiting an intro's theme visual is: evenly spaced on an ellipse, they turn on the ambient clock
+// G. orbit: { x, y, rx, ry, speed }, the ellipse's center and radii, and the angular speed in radians per second;
+// lag: how far behind the icon, in radians (a trail). Returns { x, y, depth }: depth, an opacity factor, goes from
+// 0.45 at the top of the ellipse (the back) to 1 at its bottom (the front).
+function orbitAt(i, n, { x, y, rx, ry, speed }, lag = 0) {
+  const a = G * speed + i * (Math.PI * 2 / n) - lag;
+  return { x: x + Math.cos(a) * rx, y: y + Math.sin(a) * ry, depth: 0.45 + 0.55 * (Math.sin(a) + 1) / 2 };
+}
 // End card: the title, a violet tagline, an optional violet pill and the official logo, centered.
 // opts.pill: text of the pill shown under the tagline, e.g. 'Experimental'.
 function makeEndCard(root, title, tagline, opts = {}) {
