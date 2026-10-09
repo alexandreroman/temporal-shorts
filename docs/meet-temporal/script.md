@@ -335,8 +335,9 @@ its visuals.
     tilde below a billion; then a near-vertical neon surge to SEP 2026,
     the value blurring to $12.55B, and the arrival: a shake, a flash
     bloom, shockwave rings and sparks. The camera pulls back to the whole
-    climb on the right, the Oct 2020 point low under the value's end, and
-    "$12.55B" holds huge on the left, VALUATION · SEPTEMBER 2026 under it.
+    climb on the right, clear of the value, its Oct 2020 point low at its
+    left, and "$12.55B" holds huge on the left, VALUATION · SEPTEMBER 2026
+    under it.
 - **3:38** That's more than 8 times its 2022 value: investors see it as core
   infrastructure for AI.
   - Visuals: On the settled chart, dashed guides run from the FEB 2022 and

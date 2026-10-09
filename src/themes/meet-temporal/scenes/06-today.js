@@ -96,26 +96,27 @@
   // Temporal: its tilde marks it, and the ×8 bracket starts from Feb 2022, the first announced valuation. Feb 2022
   // and Feb 2023 share a value: their points sit 250 px apart, so their labels stay clear of each other
   const ROUNDS = [
-    { date: 'Oct 2020', value: 0.075, label: '~$75M', series: 'Series A', at: [-240, 150] },
+    { date: 'Oct 2020', value: 0.075, label: '~$75M', series: 'Series A', at: [-200, 150] },
     { date: 'Feb 2022', value: 1.5, label: '$1.5B', series: 'Series B', at: [0, 0] },
     { date: 'Feb 2023', value: 1.5, label: '$1.5B', series: 'Series B-Prime', at: [250, 0] },
-    { date: 'Mar 2025', value: 1.72, label: '$1.72B', series: 'Series C', at: [600, -20] },
-    { date: 'Feb 2026', value: 5, label: '$5B', series: 'Series D', at: [1040, -290] },
-    { date: 'Sep 2026', value: 12.55, label: '$12.55B', series: 'Series E', at: [1300, -1000] },
+    { date: 'Mar 2025', value: 1.72, label: '$1.72B', series: 'Series C', at: [560, -20] },
+    { date: 'Feb 2026', value: 5, label: '$5B', series: 'Series D', at: [1000, -290] },
+    { date: 'Sep 2026', value: 12.55, label: '$12.55B', series: 'Series E', at: [1260, -1000] },
   ];
   const LAST = ROUNDS.length - 1;
   // each curve's control points, from one round to the next
   const CURVES = [
-    [[-240, 150], [-140, 150], [-90, 0], [0, 0]],
+    [[-200, 150], [-110, 150], [-70, 0], [0, 0]],
     [[0, 0], [80, 0], [170, 0], [250, 0]],
-    [[250, 0], [370, 0], [480, -10], [600, -20]],
-    [[600, -20], [780, -30], [940, -120], [1040, -290]],
-    [[1040, -290], [1140, -410], [1240, -700], [1300, -1000]],
+    [[250, 0], [350, 0], [450, -10], [560, -20]],
+    [[560, -20], [740, -30], [900, -120], [1000, -290]],
+    [[1000, -290], [1100, -410], [1200, -700], [1260, -1000]],
   ];
   const HEAD = [1100, 640];
-  // at rest: the whole chart at 52% on the right, the value on the left, clear of it; the Oct 2020 point tucks in
-  // under the value's right end, below its AI tag
-  const REST = { at: [690, -425], scale: 0.52, x: 1300, valueX: 560 };
+  // at rest: the whole chart at 44% on the right, its middle (world x 530) at screen x 1319, the value on the left.
+  // The Oct 2020 point (x 998) keeps over 40 px clear of the value's right end (x 945), and the bracket's end
+  // values end left of x 1800
+  const REST = { at: [530, -425], scale: 0.44, x: 1319, valueX: 560 };
   // a world point's place on the settled chart, on whole pixels
   const atRest = ([wx, wy]) => [Math.round(REST.x + (wx - REST.at[0]) * REST.scale),
     Math.round(515 + (wy - REST.at[1]) * REST.scale)];
