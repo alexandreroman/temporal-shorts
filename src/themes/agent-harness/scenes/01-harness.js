@@ -137,10 +137,6 @@
   const savedAt = i => SAVE_AT.saved0 + i * SAVE_AT.savedGap;
   SAVE_AT.reply = savedAt(TURN_CALLS.length - 1) + SAVE_AT.seg;
   SAVE_AT.streamed = SAVE_AT.reply + 0.5;
-  // a straight arrow drawn inline in a flex row, its head filled explicitly (see arrowHead in engine.js)
-  const inlineArrow = (w, color) => `<svg width="${w}" height="14" viewBox="0 0 ${w} 14" style="display:block">`
-    + `<path d="M1.5 7 H ${w - 8}" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>`
-    + `<path d="M${w - 12} 1.5 L${w} 7 L${w - 12} 12.5 z" fill="${color}"/></svg>`;
   // a label block on the left edge: an ink heading over a slate sub-label
   const makeHeading = (p, title, sub, top) => E(p,
     `<div class="lbl" style="color:var(--ink)">${title}</div>`
@@ -322,13 +318,10 @@
       const harnessO = 1 - P(t, c[4], 0.5) * (1 - P(t, c[6] + 0.3, 0.5));
       // the loop dims while the harness waits between turn 1 and turn 2
       const idle = P(t, c[2] + BEAT.wait, 0.4) * (1 - P(t, c[3] + BEAT.run - 0.3, 0.3));
-      // the token hides with the loop, and comes back only once the model is fully lit again
-      const tokenAway = P(t, c[2] + BEAT.wait, 0.4) * (1 - P(t, c[3] + BEAT.run, 0.2));
       const loopO = (1 - 0.5 * idle) * harnessO;
       s.arcs.forEach((a, i) => draw(a, P(t, c[0] + 3.0 + i * 0.3, 0.45), loopO));
-      // token: one eased leg per node, so it slows down as it reaches each node and slips behind it. Between runs
-      // it rests hidden behind the model, so it hides whenever the harness is not fully lit: a dimmed or fading
-      // model would show it through
+      // token: one eased leg per node, so it slows down as it reaches each node and slips behind it. It shows only
+      // during its runs: between them it would rest behind the model, which shows it through while it dims or fades
       const u = tokenLegs(t, c);
       let near = -1, deg = NODES[0].deg;
       if (u !== null) {
@@ -340,8 +333,7 @@
         });
       }
       const [tx, ty] = loopPos(deg);
-      const harnessLit = harnessO === 1 ? 1 : 0;
-      place(s.token, tx, ty, 1, P(t, c[0] + TOKEN_AT, 0.3) * (1 - tokenAway) * harnessLit);
+      place(s.token, tx, ty, 1, P(t, c[0] + TOKEN_AT, 0.3) * (u !== null ? 1 : 0));
       const [mx, my] = loopPos(NODES[0].deg);
       place(s.llm.root, mx, my, pM.s, pM.o * loopO);
       llmState(s.llm, { think: near === 0 ? 1 : 0, lookY: 0.4 });
