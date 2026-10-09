@@ -139,6 +139,10 @@ function makeEndCard(root, title, tagline, opts = {}) {
   html += `<img src="${LOGO}" style="height:70px;display:block;margin:${logoGap}px auto 0">`;
   return E(root, html, '', { textAlign: 'center' });
 }
+// The end card fades in from `at` within d seconds, centered on (960, 560): the theme visual sits above it
+function placeEndCard(card, t, at = 0.3, d = 0.8) {
+  place(card, 960, 560, 1, P(t, at, d));
+}
 // Glow of a brand color round an element (box-shadow) or its text (text-shadow), of strength k from 0 to 1: blur
 // px wide at opacity alpha, and spread px wider than the element (box-shadow only); all three grow with k. '' for
 // none (k <= 0).

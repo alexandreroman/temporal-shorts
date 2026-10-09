@@ -26,7 +26,7 @@
     },
     update(t, c, s) {
       // the tiles' bottom edge sits as far above the title's letters as the tagline sits above the logo
-      place(s.t, 960, 560, 1, P(t, 0.3, 0.8));
+      placeEndCard(s.t, t);
       // tiles pop in one after the other, then each step gets its check
       s.tiles.forEach((e, i) => {
         const p = backPop(t, 0.1 + i * 0.12);

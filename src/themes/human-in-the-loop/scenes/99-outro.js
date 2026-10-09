@@ -17,7 +17,7 @@
       });
     },
     update(t, c, s) {
-      place(s.t, 960, 560, 1, P(t, 0.3, 0.8));
+      placeEndCard(s.t, t);
       const p = backPop(t, 0.1, 0.7);
       // the same 76 px from the person to the title as from the tagline to the logo
       place(s.person, 960, 266, p.s, p.o);

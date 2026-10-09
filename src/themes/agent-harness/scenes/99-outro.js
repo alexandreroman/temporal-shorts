@@ -17,7 +17,7 @@
       s.llm = makeLLM(root, 120, '');
     },
     update(t, c, s) {
-      place(s.t, 960, 560, 1, P(t, 0.4, 0.9));
+      placeEndCard(s.t, t, 0.4, 0.9);
       const p = backPop(t, 0.2, 0.8);
       // the same gap from the LLM to the title as in the durable-ai-agents end card
       place(s.llm.root, 960, 246, p.s, p.o);
