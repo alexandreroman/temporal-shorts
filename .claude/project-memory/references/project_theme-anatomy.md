@@ -212,10 +212,14 @@ CLAUDE.md; a section below and the card order in
   does, Where Temporal is used, Why it matters for AI, How Temporal
   Cloud works, Temporal today. Source material includes a Temporal deck
   from the user (/tmp/meet-temporal.pdf: slide 3 use cases, slide 5
-  timeline, slide 6 "Temporal Cloud: how does it work?", which ch5
-  reproduces: your app and Workflow code on the open source SDK in your
-  environment, the Temporal Service and its internals run by Temporal;
-  slide 4, customer proof points, stays out). Simple Workflow Service is dated 2009, the launch
+  timeline, slides 6-7 on Temporal Cloud; slide 4, customer proof
+  points, stays out). Ch5 makes three points without service internals:
+  Workers run the customer's code in their environment (Temporal Cloud
+  holds no app code), Temporal Cloud orchestrates Workflows and
+  Activities and persists their history, and payloads are encrypted
+  with the customer's keys (Data Converter) so Temporal never sees them;
+  connections are outbound only (mTLS or PrivateLink). Its right zone is
+  titled with the lockup followed by "Cloud". Simple Workflow Service is dated 2009, the launch
   Max and Samar led.
 - Founders are told by their careers only, never by country of origin:
   Maxim Fateev (co-founder, CTO) and Samar Abbas (co-founder, CEO).

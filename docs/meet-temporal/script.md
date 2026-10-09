@@ -33,10 +33,14 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ### Sources
 
-- Temporal deck provided by the user (slides 3, 5, 7): the use case
-  categories, the 20-year timeline, Temporal Cloud's security
-- Temporal deck provided by the user, slide 6 ("Temporal Cloud: how does it
-  work?"): the two zones of chapter 05 and the service's internals
+- Temporal deck provided by the user (slides 3 and 5): the use case
+  categories, the 20-year timeline
+- Temporal deck provided by the user, slides 6 ("Temporal Cloud: how does
+  it work?") and 7 ("Temporal Cloud: security"): chapter 05's two zones,
+  outbound mTLS or private connectivity, Workers and code on the customer's
+  side, encryption by a Data Converter with the customer's keys
+- https://docs.temporal.io/dataconversion (Data Converters and codecs,
+  chapter 05)
 - https://docs.temporal.io/cloud/security (the Temporal Cloud claims of
   chapter 05)
 - https://temporal.io/blog/samars-journey
@@ -208,41 +212,46 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 05 How Temporal Cloud works
 
-- **2:00** With Temporal Cloud, your Workflow code keeps running in your
-  environment, on the open source SDK.
-  - Visuals: As on slide 6 of Temporal's deck. On the left, a dashed slate
-    zone: YOUR APPLICATION, a Workflow card listing the order of chapter 02
-    as four activity rows (take the order, charge the card, ship the
-    package, email the receipt, each tagged ACTIVITY) and a TEMPORAL SDK ·
-    OPEN SOURCE chip; the zone caption reads MANAGED BY YOU, IN YOUR
-    ENVIRONMENT. An arrow draws from the app to a connector dot, then the
-    Workflow runs: each activity lights in turn and sends a neon request
-    along the arrow.
-- **2:08** Temporal's team manages the Temporal Service, so you don't run a
-  complex, highly available cluster.
-  - Visuals: On the right, a UV zone with the official Temporal logo: the
-    Temporal Service box, its FRONT END SERVICE bar on the arrow's dot, and
-    under it five internals that pop in one by one: HISTORY SERVICE,
-    MATCHING SERVICE, WORKER SERVICE, ELASTICSEARCH and DB (a database
-    cylinder), joined to the Front End by violet links. Four dim bars
-    appear under the box, and the caption MANAGED BY TEMPORAL, IN
-    TEMPORAL'S ENVIRONMENT; the two captions swell in turn, you then
-    Temporal. The Workflow runs again: each request lands on the Front End,
-    which glows and dispatches it to the History Service and one more
-    internal, each glowing violet as it arrives.
-- **2:17** Security, compliance, scale and high availability come built in.
-  - Visuals: The four bars light one by one, each with a UV glow and a neon
-    check: SECURITY & COMPLIANCE, CUSTOM PERSISTENCE, CONTROL PLANE & SCALE,
-    HIGH AVAILABILITY.
+- **2:00** With Temporal Cloud, your Workers run your Workflow and Activity
+  code in your own environment.
+  - Visuals: As on slides 6 and 7 of Temporal's deck, both zones from the
+    start. On the left, YOUR ENVIRONMENT (dashed slate): three Workers, each
+    an app panel with its code (WORKER 1 the order Workflow, WORKER 2 and 3
+    the chargeCard and shipPackage Activities), wired to a DATA CONVERTER
+    (a neon lock, with a key and YOUR KEYS); caption YOUR CODE RUNS HERE. A
+    connection draws from the converter to a dot on Temporal Cloud's edge,
+    labelled OUTBOUND ONLY, mTLS OR PRIVATELINK. On the right, Temporal
+    Cloud, titled with the official logo followed by "Cloud", with its two
+    functions: ORCHESTRATION · TASKS, a task queue holding OrderWorkflow,
+    chargeCard, shipPackage and OrderWorkflow, and PERSISTENCE · ENCRYPTED,
+    an empty history; its caption reads ONLY WORKFLOW & ACTIVITY DATA, NEVER
+    YOUR CODE. Each Worker polls out to Temporal Cloud (a violet pulse that
+    lights the orchestration block) and reads POLLING.
+- **2:08** Temporal Cloud orchestrates your Workflows and Activities, and
+  persists their history.
+  - Visuals: The first task
+    flies out of the queue, along the connection and through the Data
+    Converter to WORKER 1, which runs it; its result runs back the same way
+    and lands as row 1, "OrderWorkflow · started", its payload a locked,
+    encrypted chip. The chargeCard task then reaches WORKER 2.
+- **2:15** Data is encrypted with your own keys before it leaves your
+  environment: Temporal never sees your payloads.
+  - Visuals: The rest dims for a close-up: the chargeCard result, "card:
+    $42", leaves WORKER 2 in clear and enters the Data Converter, whose lock
+    opens and snaps shut on it; it leaves as scrambled hex digits, crosses
+    over and lands as row 2, "chargeCard · completed", payload encrypted.
+    NEVER SEES YOUR PAYLOADS pops on the history and holds. Then the last
+    two tasks run on WORKER 3 and WORKER 1, and rows 3 and 4 are persisted,
+    encrypted too.
 
 ## 06 Temporal today
 
-- **2:24** Today, more than 4,300 companies pay for it, including Netflix,
+- **2:29** Today, more than 4,300 companies pay for it, including Netflix,
   Snap, NVIDIA, Salesforce and Shopify.
   - Visuals: PAYING CUSTOMERS, alone in the middle: the count rolls up to
     "4,300+", then the names pop in as mono pills (NETFLIX, SNAP, NVIDIA,
     SALESFORCE, SHOPIFY) and start moving on a belt.
-- **2:32** In September 2026, investors valued Temporal at $12.55 billion.
+- **2:36** In September 2026, investors valued Temporal at $12.55 billion.
   The team has doubled in a year.
   - Visuals: The customers tile moves left as the VALUATION chart comes in:
     bars proportional to the value grow one by one, 2022 $1.5B, 2025
@@ -252,7 +261,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **2:40** Temporal keeps code running whatever fails, from everyday apps
+- **2:45** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,
