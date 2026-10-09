@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=agent-harness` for the live values; the start
-times below are a snapshot from 2026-10-08.
+times below are a snapshot from 2026-10-09.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -87,8 +87,8 @@ Lisbon.
   - Visuals: "Add a city tour" opens TURN 2, the loop laps again, "Added:
     Tram 28 tour $25. Total $895." is typed under the first reply and TURN 2
     shows ENDED.
-- **0:48** An LLM call is one step. A turn lasts until the agent is idle
-  again: often many model and tool calls.
+- **0:48** Each model or tool call is one step. A turn runs until the agent
+  is idle: often many steps.
   - Visuals: the frame gives way to a comparison: AN LLM CALL, ONE STEP
     (`text in` → Model → `text out`, deliberately short) above A TURN, UNTIL
     THE AGENT IS IDLE AGAIN: from the user message to the reply, Model,
@@ -140,7 +140,7 @@ Lisbon.
     one (REUSED, "STEP n: FROM THE HISTORY"), the steps re-check without
     running, the counters show NOT RE-BILLED / NOT RE-RUN; step 5 then runs
     and is SAVED (Model: write the reply).
-- **1:50** Saved results are reused, not redone: no finished model call is
+- **1:51** Saved results are reused, not redone: no finished model call is
   paid again, no finished tool reruns.
   - Visuals: tags "REUSED, NOT RE-BILLED" (model rows) and "REUSED, NOT
     RE-RUN" (tool rows); counters glow: MODEL CALLS BILLED 3 "NOT 5",
@@ -190,8 +190,8 @@ Lisbon.
 - **3:03** Or replay it afterward: exactly what it did, what it cost and
   where a human stepped in.
   - Visuals: the badge switches to REPLAY, the playhead rewinds and sweeps
-    the rows again; "approved by a human" gets a HUMAN tag and "turn ended
-    · 2,140 tokens" a COST tag.
+    the rows again; "approved by a human" gets a HUMAN tag and the TURN row
+    "turn total · 2,140 tokens" a COST tag.
 
 ## 05 Typed, composable agents
 
@@ -240,8 +240,8 @@ Lisbon.
     as dicts): `asyncio.gather` of `search_flights(destination="LIS")` and
     `search_hotels(city="Lisbon")`, `min` by `f["price_usd"]`,
     `return await book_flight(best)`.
-- **4:12** Loops, conditions and parallel calls all run inside the script,
-  in one turn.
+- **4:12** Parallel calls and the logic between them run inside the
+  script, as one tool call.
   - Visuals: the script runs: both searches run at once and are SAVED;
     "best: $480" on the `min` line.
 - **4:19** Every call stays durable, gated and visible, and the whole
@@ -278,10 +278,12 @@ Lisbon.
     `async def plan_trip(self, request: PlanTrip) -> Itinerary: ...`; a
     GENERATED TYPES arrow leads down to a `client_sdk/TravelAgent.ts` card
     (GENERATED): `export interface Trip { items: Item[]; total_usd:
-    number; }` and `export interface TravelAgent { handlers: { plan_trip:
-    { input: PlanTrip; output: Itinerary } }; states: { trip: Trip }; }`
-    (the shape `harness-codegen` writes); matching lines light up pair by
-    pair: the Trip model, the observable state, the `plan_trip` handler.
+    number; }` and `export interface TravelAgent { initData: null;
+    handlers: { plan_trip: { input: PlanTrip; output: Itinerary } };
+    states: { trip: Trip }; }` (the shape `harness-codegen` writes,
+    `initData` null for an agent without init data); matching lines light
+    up pair by pair: the Trip model, the observable state, the `plan_trip`
+    handler.
 - **4:56** Typed React and Svelte SDKs turn your agent into a live, typed
   session inside your product UI.
   - Visuals: the view pans; YOUR UI: a trip planner in a browser window
@@ -295,7 +297,7 @@ Lisbon.
 
 - **5:08** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
-  - Visuals: six recap tiles land one by one, one per topic: Survives
+  - Visuals: six recap tiles, the main features, land one by one: Survives
     crashes / Event stream / Typed subagents / Human approvals / Code Mode /
     Your AI SDK.
 
