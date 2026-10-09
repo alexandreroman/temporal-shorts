@@ -44,6 +44,13 @@
 
   // ---------- the Temporal symbol at the middle, and the points of its outline the dots condense onto
   const SYMBOL_SIZE = 170;
+  // the SDK beat's composition, centered on 515: the ring of language tiles (y 157 to 677) around the symbol, then
+  // 32 px under it the AI framework tiles in two rows of three (y 709 to 873). The ring turns slowly once its tiles
+  // have landed; its radii keep at least 32 px between its tiles at every angle (34 px at the closest)
+  const SYM = { x: 960, y: 417 };
+  const RING = { rx: 330, ry: 210 };
+  // one turn of the ring, in seconds
+  const ORBIT = 50;
   const SYMBOL_POINTS = (() => {
     const svg = document.createElementNS(SVGNS, 'svg');
     const p = document.createElementNS(SVGNS, 'path');
@@ -53,21 +60,35 @@
     const k = SYMBOL_SIZE / vw, L = p.getTotalLength(), n = 900;
     return Array.from({ length: n }, (_, i) => {
       const pt = p.getPointAtLength(L * i / n);
-      return [BAND.x + (pt.x - vx - vw / 2) * k, BAND.y + (pt.y - vy - vw / 2) * k];
+      return [SYM.x + (pt.x - vx - vw / 2) * k, SYM.y + (pt.y - vy - vw / 2) * k];
     });
   })();
 
-  // ---------- beat 2: the SDKs. Language chips on an inner ellipse, AI framework chips on an outer ring, each
-  // linked to the symbol (centers, stage pixels)
-  const LANG_CHIP = { w: 252, h: 56, logo: { w: 72, h: 38 } };
-  // clockwise from the top left, in reading order
-  const LANG_AT = [247.5, 292.5, 337.5, 22.5, 67.5, 112.5, 157.5, 202.5].map(a => [
-    Math.round(960 + 400 * Math.cos(a * Math.PI / 180)), Math.round(515 + 215 * Math.sin(a * Math.PI / 180)),
-  ]);
+  // ---------- beat 2: the SDKs. Language tiles, a logo each, on an ellipse round the symbol, each linked to it,
+  // then the AI framework tiles in two rows under it (centers, stage pixels)
+  const LANG_CHIP = { w: 100, h: 100 };
+  // each logo's size in its tile, matched by eye to an even visual weight: square marks about 56 px, wide marks up to
+  // 74 px wide, Java's tall cup 58 px tall; each size leaves even margins, so the logo rests on whole pixels
+  const LOGO_SIZE = {
+    'Go': [72, 28], 'Java': [44, 58], 'Python': [56, 56], 'TypeScript': [54, 54], '.NET': [72, 28], 'PHP': [74, 40],
+    'Ruby': [56, 56], 'Rust': [58, 58],
+  };
+  // each tile's angle on the ring, clockwise from the top left, in reading order (degrees), and its place on the
+  // ring turned by rot (radians), on whole pixels
+  const LANG_DEG = [247.5, 292.5, 337.5, 22.5, 67.5, 112.5, 157.5, 202.5];
+  const ringAt = (k, rot = 0) => {
+    const a = LANG_DEG[k] * Math.PI / 180 + rot;
+    return [Math.round(SYM.x + RING.rx * Math.cos(a)), Math.round(SYM.y + RING.ry * Math.sin(a))];
+  };
+  // the five frameworks, then a sixth tile: more to come
   const AI = ['OpenAI Agents SDK', 'Vercel AI SDK', 'Pydantic AI', 'Google ADK', 'LangGraph'];
-  const AI_CHIP = { w: 300, h: 56 };
-  // top, right, bottom right, bottom left, left: each link runs between the language chips
-  const AI_AT = [[960, 210], [1640, 515], [1440, 780], [480, 780], [280, 515]];
+  const AI_CHIP = { w: 340, h: 68, gapX: 32, gapY: 28 };
+  const AI_Y = [743, 839];
+  const AI_AT = [...AI, 'more'].map((_, j) => [960 + (j % 3 - 1) * (AI_CHIP.w + AI_CHIP.gapX),
+    AI_Y[Math.floor(j / 3)]]);
+  // the tiles of both groups: one style, well rounded
+  const TILE = { background: '#17182A', color: C.ink, border: '1.5px solid ' + C.uv, fontSize: '24px', gap: '14px',
+    padding: '0 24px', borderRadius: '22px' };
 
   // ---------- beat 3: the valuation, drawn on a full-stage canvas. The rounds as world points (x right, y up the
   // value), joined by three curves; the camera keeps the head of the line at HEAD while it climbs
@@ -156,34 +177,46 @@
       s.teamLabel = makeLabel(root, 'Employees');
       // the stamp: neon, a fixed even width, so it rests on whole pixels
       s.stamp = tag(root, '×2 in a year', 'neon solid big');
-      Object.assign(s.stamp.style, { width: '268px', textAlign: 'center', boxShadow: '0 0 30px rgba(219,255,75,.4)' });
+      // sized to its text (307 px with its padding) with a margin
+      Object.assign(s.stamp.style, { width: '316px', textAlign: 'center', boxShadow: '0 0 30px rgba(219,255,75,.4)' });
 
-      // beat 2: the links under the chips, the symbol, the chips and their pulses
+      // beat 2: the links under the chips, the symbol, the chips, and the filter that draws the logos in ink
       s.links = svgLayer(root);
       const edgePoint = ([x, y], size, r) => {
         // where the link from the symbol reaches the chip's box, and where it leaves the symbol's circle
-        const dx = x - 960, dy = y - 515, d = Math.hypot(dx, dy);
+        const dx = x - SYM.x, dy = y - SYM.y, d = Math.hypot(dx, dy);
         const t1 = Math.min(Math.abs((size.w / 2 + 8) / (dx || 1e-6)), Math.abs((size.h / 2 + 8) / (dy || 1e-6)));
-        return [[960 + dx / d * r, 515 + dy / d * r], [x - dx * Math.min(1, t1), y - dy * Math.min(1, t1)]];
+        return [[SYM.x + dx / d * r, SYM.y + dy / d * r], [x - dx * Math.min(1, t1), y - dy * Math.min(1, t1)]];
       };
       const linkD = ([[x0, y0], [x1, y1]]) => `M ${x0} ${y0} L ${x1} ${y1}`;
-      s.langLinks = LANG_AT.map(at => path(s.links, linkD(edgePoint(at, LANG_CHIP, SYMBOL_SIZE / 2 + 12)),
+      s.langLinks = LANGUAGES.map((_, k) => path(s.links, linkD(edgePoint(ringAt(k), LANG_CHIP, SYMBOL_SIZE / 2 + 12)),
         C.uv, 2, false));
-      s.aiLinks = AI_AT.map(at => path(s.links, linkD(edgePoint(at, AI_CHIP, SYMBOL_SIZE / 2 + 12)), C.violet, 2,
-        false));
+      // a link follows its tile as the ring turns: its line redrawn, its length measured again
+      s.setLink = (k, at) => {
+        const link = s.langLinks[k];
+        link.setAttribute('d', linkD(edgePoint(at, LANG_CHIP, SYMBOL_SIZE / 2 + 12)));
+        link._L = link.getTotalLength();
+      };
+      // Each logo, a monochrome mark, in ink: an SVG filter floods its shape (its opaque parts) with the ink colour
+      s.inkDefs = document.createElementNS(SVGNS, 'svg');
+      Object.assign(s.inkDefs.style, { position: 'absolute', width: 0, height: 0 });
+      s.inkDefs.innerHTML = '<filter id="logo-ink" color-interpolation-filters="sRGB">'
+        + `<feFlood flood-color="${C.ink}"/><feComposite in2="SourceAlpha" operator="in"/></filter>`;
+      root.appendChild(s.inkDefs);
       s.symbolGlow = E(root, '', '', {
         width: '460px', height: '460px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(182,100,255,.35) 0, rgba(68,76,231,.12) 45%, rgba(68,76,231,0) 70%)',
       });
       s.symbol = E(root, `<img src="${SYMBOL}" style="width:${SYMBOL_SIZE}px;height:${SYMBOL_SIZE}px;display:block">`);
+      // the logo alone, the subtitle names the language; whole-pixel sizes keep its edges crisp
       s.langs = LANGUAGES.map(([name, logo]) => makeChip(root,
-        `<span style="width:${LANG_CHIP.logo.w}px;height:${LANG_CHIP.logo.h}px;display:flex;align-items:center;`
-        + `justify-content:center"><img src="${logo}" style="max-width:${LANG_CHIP.logo.w}px;`
-        + `max-height:${LANG_CHIP.logo.h}px;display:block"></span><span style="width:132px">${name}</span>`,
-        LANG_CHIP, { background: '#17182A', color: C.ink, border: '1.5px solid ' + C.uv }));
-      s.ais = AI.map(name => makeChip(root, `${ICON('sparkle', 22, C.violet, 1.8)}<span>${name}</span>`, AI_CHIP,
-        { background: '#22163A', color: C.ink, border: '1.5px solid ' + C.violet }));
-      s.pulses = AI.map(() => makeSpark(root, 14, '182,100,255'));
+        `<img src="${logo}" alt="${name}" width="${LOGO_SIZE[name][0]}" height="${LOGO_SIZE[name][1]}" `
+        + 'style="display:block;filter:url(#logo-ink)">', LANG_CHIP, { ...TILE, padding: '0' }));
+      s.ais = AI.map(name => makeChip(root, `${ICON('sparkle', 24, C.violet, 1.8)}<span>${name}</span>`, AI_CHIP,
+        TILE));
+      // more to come: the same tile, dashed and a little dimmer
+      s.ais.push(makeChip(root, `${ICON('plus', 24, C.violet, 2)}<span style="opacity:.75">more to come</span>`,
+        AI_CHIP, { ...TILE, border: '1.5px dashed ' + C.uv }));
 
       // beat 3's labels: the rounds, then the valuation
       s.rounds = ROUNDS.slice(0, 3).map(round => E(root,
@@ -269,25 +302,31 @@
       place(s.teamNum, TEAM.x, NUMBER_Y, swell(t, stampAt - 0.2, 0.1), P(t, teamIn, 0.4) * out1);
       place(s.teamLabel, TEAM.x, LABEL_Y, 1, P(t, teamIn + 0.3, 0.4) * out1);
       const st = P(t, stampAt, 0.35, easeIn);
-      place(s.stamp, TEAM.x + 286, NUMBER_Y - 66, lerp(1.8, 1, st), clamp(st * 3) * out1, lerp(-20, -8, st));
+      // under the team's label, tilted, at least 20 px clear of the label and of 570
+      place(s.stamp, TEAM.x, LABEL_Y + 84, lerp(1.8, 1, st), clamp(st * 3) * out1, lerp(-18, -6, st));
 
       // ---------- beat 2
       // the symbol takes the dots' place; then the languages orbit out of it, one after the other, each landing
-      // with a pop and its link drawn back to the symbol; then the AI frameworks slide in from outside, a pulse
-      // running from the symbol to each as it connects. As the climb starts, all fly down and off
+      // with a pop and its link drawn back to the symbol; then the AI frameworks, a row of tiles under the ring.
+      // As the climb starts, all fly down and off
       const exitAt = c[3] + 0.05;
       const exit = P(t, exitAt, 0.7, easeIn);
-      const away = (x, y) => [x + (x - 960) * 0.4 * exit, y + 520 * exit];
+      const away = (x, y) => [x + (x - SYM.x) * 0.4 * exit, y + 520 * exit];
       const symO = P(t, symbolIn, 0.5) * (1 - exit);
-      place(s.symbol, ...away(960, 515), swell(t, c[1] + 0.1, 0.08), symO);
-      place(s.symbolGlow, ...away(960, 515), 1 + 0.04 * Math.sin(G * 1.6), symO * 0.9);
+      place(s.symbol, ...away(SYM.x, SYM.y), swell(t, c[1] + 0.1, 0.08), symO);
+      place(s.symbolGlow, ...away(SYM.x, SYM.y), 1 + 0.04 * Math.sin(G * 1.6), symO * 0.9);
       const langAt = k => c[1] + 0.6 + k * 0.45;
+      // once all have landed, the ring turns slowly clockwise, gathering speed over 3 s (keyed to t)
+      const orbitAt = langAt(LANGUAGES.length - 1) + 1.0;
+      const spin = Math.max(0, t - orbitAt);
+      const rot = (spin < 3 ? spin * spin / 6 : spin - 1.5) * 2 * Math.PI / ORBIT;
       s.langs.forEach((e, k) => {
         const p = ease(P(t, langAt(k), 0.8));
-        const [tx, ty] = LANG_AT[k];
+        const [tx, ty] = ringAt(k, rot);
+        s.setLink(k, [tx, ty]);
         // a spiral: from the symbol, sweeping 70 degrees as it moves out
-        const a = Math.atan2((ty - 515) / 215, (tx - 960) / 400) - (1 - p) * 70 * Math.PI / 180;
-        const x = 960 + 400 * p * Math.cos(a), y = 515 + 215 * p * Math.sin(a);
+        const a = Math.atan2((ty - SYM.y) / RING.ry, (tx - SYM.x) / RING.rx) - (1 - p) * 70 * Math.PI / 180;
+        const x = SYM.x + RING.rx * p * Math.cos(a), y = SYM.y + RING.ry * p * Math.sin(a);
         const landed = P(t, langAt(k) + 0.8, 0.01);
         const [ex, ey] = away(landed ? tx : x, landed ? ty : y);
         place(e, Math.round(ex), Math.round(ey), lerp(0.4, 1, p) * swell(t, langAt(k) + 0.8, 0.12),
@@ -295,18 +334,16 @@
         draw(s.langLinks[k], P(t, langAt(k) + 0.75, 0.3), 0.7 * (1 - P(t, exitAt, 0.3)));
       });
       const aiAt = j => c[2] + 0.4 + j * 0.7;
+      // the AI frameworks: a row of tiles under the ring, one after the other, each rising in with a calm pop
       s.ais.forEach((e, j) => {
-        const p = ease(P(t, aiAt(j), 0.7));
-        const [tx, ty] = AI_AT[j];
-        const x = tx + (tx - 960) * 0.35 * (1 - p), y = ty + (ty - 515) * 0.35 * (1 - p);
-        const pulseAt = aiAt(j) + 0.5;
-        const [ex, ey] = away(p >= 1 ? tx : x, p >= 1 ? ty : y);
-        place(e, Math.round(ex), Math.round(ey), swell(t, pulseAt + 0.55, 0.1), p * (1 - exit));
-        e.style.boxShadow = win(t, pulseAt + 0.45, pulseAt + 1.0, 0.15) > 0
-          ? `0 0 ${Math.round(28 * win(t, pulseAt + 0.45, pulseAt + 1.0, 0.15))}px rgba(182,100,255,.7)` : '';
-        draw(s.aiLinks[j], P(t, aiAt(j) + 0.3, 0.4), 0.8 * (1 - P(t, exitAt, 0.3)));
-        sparkOnPath(s.pulses[j], s.aiLinks[j], P(t, pulseAt, 0.55, x => x));
+        const pop = popIn(t, aiAt(j), 0.08), rise = Math.round(16 * (1 - ease(P(t, aiAt(j), 0.4))));
+        const [ex, ey] = away(AI_AT[j][0], AI_AT[j][1] + rise);
+        place(e, Math.round(ex), Math.round(ey), pop.s, pop.o * (1 - exit));
       });
+      // the last one, more to come, glows softly as it arrives
+      const more = win(t, aiAt(AI.length) + 0.2, aiAt(AI.length) + 1.4, 0.4);
+      s.ais[AI.length].style.boxShadow = more > 0 ? `0 0 ${Math.round(30 * more)}px rgba(182,100,255,${
+        (0.5 * more).toFixed(3)})` : '';
 
       // ---------- beat 3
       // the timing of the climb: the grid and the first round, then each curve, the last one a surge

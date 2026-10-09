@@ -11,6 +11,8 @@ Object.assign(ICONS, {
   // a chip with its pins: model training
   chip: '<rect x="6" y="6" width="12" height="12"/><rect x="10" y="10" width="4" height="4"/>'
     + '<path d="M9 2.5v3.5M15 2.5v3.5M9 18v3.5M15 18v3.5M2.5 9h3.5M2.5 15h3.5M18 9h3.5M18 15h3.5"/>',
+  // a plus: more to come
+  plus: '<path d="M12 4.5v15M4.5 12h15"/>',
   // a key: its bow and its bit
   key: '<circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21M17.5 12v3.5M20.5 12v2.5"/>',
 });

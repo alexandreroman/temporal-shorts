@@ -44,10 +44,11 @@ and each chapter has a cinematic moment, listed in its visuals.
 - https://docs.temporal.io/encyclopedia/temporal-sdks (the SDK languages of
   chapter 06)
 - https://docs.temporal.io/ai (the AI framework integrations of chapter 06)
-- The languages' official logos, chapter 06: see
-  `src/assets/languages/README.md` (Go brand page, python.org, TypeScript
-  branding, dotnet/brand, php.net, ruby-lang.org, rust-lang/rust-artwork;
-  Java from devicon, MIT, as Oracle publishes no reusable logo file)
+- The languages' monochrome logos, chapter 06: see
+  `src/assets/languages/README.md` (Go and .NET white logos from their
+  brand pages; Python, TypeScript, PHP, Ruby and Rust from Simple Icons,
+  CC0; Java from devicon's java-plain, MIT, as Oracle publishes no reusable
+  logo file)
 - https://docs.temporal.io/cloud/security (the Temporal Cloud claims of
   chapter 05)
 - https://temporal.io/blog/samars-journey
@@ -285,16 +286,18 @@ and each chapter has a cinematic moment, listed in its visuals.
     the Temporal symbol, which takes their place in the middle.
 - **3:13** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
   PHP, Ruby and Rust.
-  - Visuals: Eight language chips, each with the language's official logo
-    and its name, spiral out of the symbol one after the other in reading
-    order onto a ring around it, each landing with a pop and a thin UV
-    link back to the symbol.
+  - Visuals: Eight rounded logo tiles, each the language's logo alone in
+    monochrome ink, spiral out of the symbol one after the other in
+    reading order onto an elliptical ring around it, each landing with a
+    pop and a thin UV link back to the symbol. Once all have landed, the
+    ring turns slowly round the symbol, the tiles upright, the links
+    following them.
 - **3:20** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
   SDK, Pydantic AI, Google ADK, LangGraph.
-  - Visuals: Five AI framework chips, text only with a violet sparkle,
-    slide in on an outer ring between the languages, each linked to the
-    symbol by a violet line along which a pulse runs from the symbol, the
-    chip glowing as it connects.
+  - Visuals: Under the ring, in the same rounded tile style, two rows of
+    three tiles appear one by one with a calm pop: OpenAI Agents SDK, Vercel
+    AI SDK, Pydantic AI, Google ADK, LangGraph (each with a violet sparkle),
+    and a dashed "more to come" tile with a plus, last, glowing softly.
 - **3:28** In September 2026, investors valued Temporal at $12.55 billion.
   - Visuals: The chips and the symbol fall away as the camera starts to
     rise over a dark grid and parallax stars, riding the head of a glowing
