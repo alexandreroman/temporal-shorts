@@ -43,7 +43,7 @@
     row0: 78, gap: 57, rowH: 42,
   };
   const CALLOUT_Y = OUTSIDE.y + OUTSIDE.h / 2 - CALLOUT_GAP - CALLOUT_H / 2;
-  const PILL = { w: 300, gap: 24 };
+  const PILL = { w: 300, gap: 48 };
   // Each turn of the loop, slow enough to follow the Event History (seconds into the turn): the LLM CALL card
   // leaves THINK and lands on its row at llm, the row turns SAVED, highlighted for HOLD; the TOOL CALL card leaves
   // ACT, lands at tool and its row holds the same; a card flies FLIGHT seconds
