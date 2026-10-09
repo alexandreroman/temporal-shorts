@@ -32,6 +32,8 @@
     { company: null, name: null, detail: 'Open source, MIT license', year: '2019' },
   ];
   const LAST = MILESTONES.length - 1;
+  // the fork's arch, from Cadence's year to Temporal's, over the line, clear of the faces on it
+  const FORK = { x0: NODE_X[3] + 52, x1: NODE_X[4] - 52, y: YEAR_Y, top: YEAR_Y - 64 };
   const FLY_D = 1.2; // duration of a face's flight onto the line, in seconds
   const TRAIL = [0.06, 0.12, 0.18]; // how far each ghost of a travelling face lags behind it, in seconds
 
@@ -64,15 +66,20 @@
     pre: 2.0,
     // the heading and the founders centered, then the whole timeline (laid out centered at (960, 524)), raised
     // 9 px so it centers on 515
-    shift: (t, c) => pan(t, [0, INTRO_DY - 9], [[c[0] + 1.1, 0, -9]], 0.9),
+    shift: (t, c) => pan(t, [0, INTRO_DY - 9], [[c[1], 0, -9]], 0.9),
     subs: [
       // the founders' introduction, then Maxim flies to 2004
       { text: "Meet Maxim Fateev and Samar Abbas, the creators of Temporal." },
-      { text: "2009: Amazon Simple Workflow Service." },
-      { text: "2014: Microsoft's Durable Task Framework." },
-      { text: "2015: Cadence at Uber, open source since 2017." },
+      // the timeline draws in with its five milestones, dim: the journey ahead. Then, without subtitles, Maxim
+      // flies to 2004, Samar joins him at 2009, and travels on to 2014, each tile lighting up as they reach it
       {
-        text: "2019: they found Temporal.",
+        text: "Temporal's ideas come from projects they built at Amazon, Microsoft and Uber.",
+        after: 3.8,
+      },
+      { text: "2015: at Uber, they create Cadence. It becomes the standard for Uber's critical processes." },
+      {
+        // a FORK link draws from Cadence's tile to Temporal's before it lights
+        text: "2019: they found Temporal, a fork of Cadence, to bring it to every company.",
         after: 1.0, // Temporal's bloom and ripples settle before the exit zoom
       },
     ],
@@ -126,6 +133,10 @@
         borderColor: C.uv, background: '#1D1E3A', boxShadow: '0 0 48px rgba(68,76,231,.35)',
       });
       s.ripples = makeRipples(root, 3, '182,100,255');
+      // the fork: a thin arch from Cadence's milestone to Temporal's, labelled FORK at its top
+      s.fork = path(s.svg, `M ${FORK.x0} ${FORK.y} Q ${(FORK.x0 + FORK.x1) / 2} ${FORK.top} ${FORK.x1} ${FORK.y}`,
+        C.violet, 2, true);
+      s.forkLabel = E(root, 'Fork', 'lbl', { fontSize: '14px', color: C.violet, letterSpacing: '.14em' });
       s.names = FOUNDERS.map((f, i) => makeNameLabel(root, f, i === 0 ? 'right' : 'left'));
       // faint violet discs trailing each face while it travels
       s.ghosts = FOUNDERS.map(() => TRAIL.map(() => E(root, '', '', {
@@ -171,20 +182,22 @@
       });
 
       // when each milestone lights up, as the founders reach it, then its tile rises
-      const tileIn = [c[0] + 3.9, c[1] + 1.5, c[2] + 1.4, c[3] + 1.5, c[4] + 1.2];
+      const tileIn = [c[1] + 3.9, c[1] + 6.0, c[1] + 8.2, c[2] + 1.5, c[3] + 2.2];
+      // the milestones' slots, dim, one after the other as the timeline draws in
+      const slotIn = k => c[1] + 0.8 + k * 0.25;
       // each founder: the face shows with its name at `show`, leaves at `fly` and lands FLY_D seconds later on its
       // first milestone, then travels the line. Every place is [milestone, slot]: slot 0 is centered on the node, for a
       // face alone there for the beat; -1 and 1 are the paired slots, left of the node for Maxim and right for Samar,
       // taken straight away when the other founder joins that milestone in the same beat
       const founders = [
         {
-          show: c[0] + 0.1, fly: c[0] + 2.5, first: [0, 0],
+          show: c[0] + 0.1, fly: c[1] + 2.6, first: [0, 0],
           // 2009 with Samar, then alone there once Samar leaves for 2014, then 2015 and 2019 together
-          route: [[c[1] + 0.2, 1, -1], [c[2] + 0.2, 1, 0], [c[3] + 0.3, 3, -1], [c[4] + 0.1, 4, -1]],
+          route: [[c[1] + 4.6, 1, -1], [c[1] + 7.0, 1, 0], [c[2] + 0.3, 3, -1], [c[3] + 0.1, 4, -1]],
         },
         {
-          show: c[0] + 0.3, fly: c[1] + 0.2, first: [1, 1],
-          route: [[c[2] + 0.2, 2, 0], [c[3] + 0.3, 3, 1], [c[4] + 0.1, 4, 1]],
+          show: c[0] + 0.3, fly: c[1] + 4.6, first: [1, 1],
+          route: [[c[1] + 7.0, 2, 0], [c[2] + 0.3, 3, 1], [c[3] + 0.1, 4, 1]],
         },
       ];
       const slotX = ([k, slot]) => NODE_X[k] + slot * PAIR_DX;
@@ -240,8 +253,8 @@
         });
       });
 
-      // the timeline draws in below as the names show
-      const timelineIn = c[0] + 1.2;
+      // the timeline draws in below with the second subtitle
+      const timelineIn = c[1] + 0.2;
       draw(s.line, P(t, timelineIn, 0.8));
       // the travelled part reaches the founder furthest along
       const onLine = i => (landed(i) ? nodeX(i, t) : NODE_X[0]);
@@ -260,14 +273,20 @@
         e.style.width = e.style.height = size + 'px';
         place(e, ...tileCenter, 1, p > 0 && p < 1 ? (1 - p) * 0.9 : 0);
       });
+      // the fork, drawn once the founders reach 2019, just before Temporal's tile lights
+      draw(s.fork, P(t, c[3] + 1.3, 0.7));
+      place(s.forkLabel, (FORK.x0 + FORK.x1) / 2, (FORK.y + FORK.top) / 2 - 20, 1, P(t, c[3] + 1.7, 0.4));
       NODE_X.forEach((x, k) => {
         const lit = t >= tileIn[k] - 0.4;
         s.nodes[k].style.background = lit ? C.violet : '#141414';
         s.nodes[k].style.borderColor = lit ? C.violet : C.slate;
         place(s.nodes[k], x, LINE.y, swell(t, tileIn[k] - 0.4, 0.4), P(t, timelineIn + 0.2 + k * 0.12, 0.3));
         draw(s.ticks[k], P(t, tileIn[k] - 0.2, 0.3));
-        rise(s.tiles[k], x, TILE_Y, P(t, tileIn[k], 0.6));
-        rise(s.years[k], x, YEAR_Y, P(t, tileIn[k] + 0.1, 0.5), 12);
+        // a dim slot first, rising in with the timeline, then lit as the founders reach it
+        const slot = P(t, slotIn(k), 0.5), shown = P(t, tileIn[k], 0.6);
+        place(s.tiles[k], x, TILE_Y + Math.round((1 - slot) * 24), swell(t, tileIn[k], 0.04),
+          lerp(0.28 * slot, 1, shown));
+        place(s.years[k], x, YEAR_Y + Math.round((1 - slot) * 12), 1, lerp(0.4 * slot, 1, P(t, tileIn[k] + 0.1, 0.5)));
       });
     }
   });
