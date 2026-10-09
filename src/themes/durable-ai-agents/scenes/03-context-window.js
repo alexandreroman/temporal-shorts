@@ -56,6 +56,9 @@
       };
       s.instr = mk('INSTRUCTIONS', "You are the shop's helpful assistant.", C.uvTint, C.uv);
       s.hist = mk('HISTORY', '', '#EDEFF3', C.slate);
+      // the instructions on top, then the HISTORY block, whose height grows with each message
+      Object.assign(s.instr.style, { top: '20px', height: '74px' });
+      s.hist.style.top = '104px';
       // one 40 px row per message, each sliding in on its own part
       const docChip = '<span style="display:inline-block;line-height:30px;padding:0 10px;margin-left:12px;'
         + `background:${C.neonTint};border:1px solid ${C.neonDark};border-radius:var(--rs)">price-list.pdf</span>`;
@@ -147,8 +150,6 @@
       const app = partAt.map(at => P(t, at, 0.5));
       // parts 0 and 1 are the two blocks, then one part per message row
       const rowApp = app.slice(2);
-      // grown, the history keeps the 20 px bottom margin of the 600 px sheet
-      Object.assign(s.instr.style, { top: '20px', height: '74px' });
       showRow(s.instr, app[0], 80);
       showRow(s.hist, app[1], 80);
       // the HISTORY block arrives with its label only; each message pushes its bottom down
@@ -158,7 +159,8 @@
         showRow(r.row, rowApp[i], 80);
         y += ROW * rowApp[i];
       });
-      s.hist.style.top = '104px'; s.hist.style.height = (y + 8) + 'px';
+      // grown, the history keeps the 20 px bottom margin of the 600 px sheet
+      s.hist.style.height = (y + 8) + 'px';
       // the highlight moves to the latest user message: each one fades as the next question comes in
       const questions = s.rows.map((r, i) => ({ hl: r.hl, a: rowApp[i] })).filter(q => q.hl);
       questions.forEach((q, i) => {
