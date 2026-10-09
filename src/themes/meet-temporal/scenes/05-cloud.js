@@ -272,6 +272,12 @@
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
       const routePoint = (k, p) => s.routes[k].getPointAtLength(s.routes[k]._L * clamp(p));
+      // A card on the connection only shows right of the Data Converter tile: it emerges from the tile's right edge
+      // and disappears into it, never overlapping it (x: its center, k: its scale)
+      const clipRightOfConverter = (e, x, k) => {
+        const hidden = (CONV.x + CONV.w / 2 - (x - e.offsetWidth * k / 2)) / k;
+        e.style.clipPath = hidden > 0 ? `inset(0 0 0 ${Math.min(hidden, e.offsetWidth).toFixed(2)}px)` : '';
+      };
       // whether progress p of route k is still on its Worker's wire, before the Data Converter's left edge
       const onWirePart = (k, p) => routePoint(k, p).x < CONV.x - CONV.w / 2;
       // When something on route k is in the middle of the Data Converter: its route runs along the wire, then
@@ -360,6 +366,7 @@
         }
         const o = t < queued[i] || along >= 1 || onWire ? 0 : pop.o;
         place(e, Math.round(x * 100) / 100, Math.round(y * 100) / 100, scale, o);
+        clipRightOfConverter(e, x, scale);
         place(s.taskSparks[i], x, y, 1, onWire && along < 1 ? 1 : 0);
       });
       // the Workflow's schedule requests: out of WORKER 1 as it pauses, a spark along its wire, a card from under the
@@ -373,6 +380,7 @@
         place(s.scheduleSparks[j], x, y, 1, t >= at && f < 1 && onWire ? 1 : 0);
         const o = t < at || onWire ? 0 : 1 - P(t, at + toQueue - 0.15, 0.2);
         place(e, Math.round(x), Math.round(y), 1, o);
+        clipRightOfConverter(e, Math.round(x), 1);
       });
       // The Workers. WORKER 1 runs the Workflow a line at a time: from the top to `await chargeCard`, where it waits;
       // resumed, on to `await shipPackage`, where it waits again; resumed, past the last line: it returns, DONE. The
