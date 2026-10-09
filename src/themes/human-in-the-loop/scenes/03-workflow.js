@@ -98,13 +98,17 @@
         setWfLine(s.A, i, current ? 'current' : state, P(t, restartAt + 0.2 + i * 0.1, 0.8, easeIn));
       });
       s.A.empty.style.opacity = P(t, restartAt + 1.1, 0.4);
-      // each hit flickers instance A red: its border and a tint over its background
+      // each hit flickers instance A red: its border (grey once stopped, violet before, as set by setAppStatus) and a
+      // tint over its background
       const flicker = Math.max(...HITS.map(h => win(t, c[2] + h.at - 0.08, c[2] + h.at + 0.15, 0.1)));
       if (flicker > 0) {
-        const base = s.A.style.borderColor; // as set by setAppStatus for this frame
-        s.A.style.borderColor = `color-mix(in srgb, ${C.red} ${Math.round(flicker * 100)}%, ${base})`;
+        const border = stopped ? C.line : C.violet;
+        const tint = `rgba(${RGB.red},${0.16 * flicker})`;
+        s.A.style.borderColor = `color-mix(in srgb, ${C.red} ${Math.round(flicker * 100)}%, ${border})`;
+        s.A.style.backgroundImage = `linear-gradient(${tint}, ${tint})`;
+      } else {
+        s.A.style.backgroundImage = '';
       }
-      s.A.style.boxShadow = flicker > 0 ? `inset 0 0 0 1000px rgba(${RGB.red},${0.16 * flicker})` : '';
 
       // the clock starts with the wait: days fly by to DAY 2, rest, then on to DAY 3 through the deploys and
       // restarts; at rest only its seconds hand moves
