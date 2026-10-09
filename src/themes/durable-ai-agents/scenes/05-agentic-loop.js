@@ -38,8 +38,8 @@
         o: 1 - out,
       });
       // GOAL REACHED under the steps, as far from the last one as the goal card from the first one
-      const ep = P(t, c[1] + 7.0, 0.45, backOut);
-      place(s.exit, 1440, 753, ep, clamp(ep * 2) * (1 - out));
+      const ep = backPop(t, c[1] + 7.0);
+      place(s.exit, 1440, 753, ep.s, ep.o * (1 - out));
       place(s.formula, 960, 410, 1.15 * P(t, c[2] + 0.4, 0.6, backOut), P(t, c[2] + 0.4, 0.5));
       place(s.goalF, 960, 530, 1, P(t, c[2] + 2.6, 0.5));
     }

@@ -438,7 +438,7 @@
       // the payload's position, always on top of what it passes: out of WORKER 2's edge, up to the gate above the
       // Data Converter (the converter's lock and key in full view under it), down to the connection's start, along
       // it to the dot, then onto its row's payload
-      const pop = P(t, out, 0.4, backOut);
+      const pop = backPop(t, out, 0.4);
       const wireStart = [WORKER.x + WORKER.w / 2, workerY(1)];
       const gate = GATE;
       const lineStart = LINE_START;
@@ -462,8 +462,8 @@
       else if (encrypted > 0) text = scrambleHex(SECRET, Math.round(encrypted * SECRET.length), frame);
       if (s.secret.textContent !== text) s.secret.textContent = text;
       s.secret.style.background = encrypted > 0.5 ? C.violetTint : C.uvTint;
-      const k3 = 1.1 * pop * (1 - 0.2 * drop);
-      place(s.secret, Math.round(sx), Math.round(sy), k3, clamp(pop * 2) * (1 - P(t, landed - 0.15, 0.2)));
+      const k3 = 1.1 * pop.s * (1 - 0.2 * drop);
+      place(s.secret, Math.round(sx), Math.round(sy), k3, pop.o * (1 - P(t, landed - 0.15, 0.2)));
       // The Data Converter reacts to everything that goes through it, for 0.44 s centered on the moment it is
       // inside the tile: its glow pulses, a scan line sweeps across it in the direction of travel, and its lock
       // clicks: outbound data is encrypted (the lock bumps), inbound data decrypted (the lock opens, then closes).

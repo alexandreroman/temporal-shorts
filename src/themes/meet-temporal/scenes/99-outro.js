@@ -180,11 +180,11 @@
 
       // stars: each pops in bright, then settles into a gentle twinkle (ambient, G); the pulse swells them
       s.stars.forEach((star, i) => {
-        const appear = P(t, star.at, 0.35, backOut);
+        const appear = backPop(t, star.at, 0.35);
         const wave = Math.sin(G * 2.1 + i * 2.4);
         const twinkle = star.bright ? 0.85 + 0.15 * wave : 0.7 + 0.2 * wave;
-        const opacity = clamp(appear * 2) * lerp(1, twinkle, P(t, star.at + 0.2, 0.5));
-        place(star.e, star.x, star.y, appear * (1 + 0.6 * pulseAt(star.x)), opacity);
+        const opacity = appear.o * lerp(1, twinkle, P(t, star.at + 0.2, 0.5));
+        place(star.e, star.x, star.y, appear.s * (1 + 0.6 * pulseAt(star.x)), opacity);
       });
       place(s.halo, 960, ZIGGY_TOP + ZIGGY_HEIGHT / 2, 1, 0.3 * P(t, PULSE_AT, 0.4) + 0.18 * pulseAt(960));
     }

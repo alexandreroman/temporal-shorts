@@ -175,8 +175,8 @@
       const g = ambientTime(this);
       const flowIn = P(t, chipsFrom - 0.3, 0.3, linear);
       s.agents.forEach((e, i) => {
-        const p = P(t, c[0] + 0.1 + i * 0.4, 0.5, backOut);
-        place(e, AGENT.x, agentY(i), p, clamp(p * 2));
+        const p = backPop(t, c[0] + 0.1 + i * 0.4, 0.5);
+        place(e, AGENT.x, agentY(i), p.s, p.o);
         // the tile lights up as it emits a chip
         const sinceLast = (g - chipsFrom - i * CHIP_EVERY) % (3 * CHIP_EVERY);
         const emitting = t >= chipsFrom && g >= chipsFrom + i * CHIP_EVERY && sinceLast < 0.25;
@@ -185,8 +185,8 @@
       s.guides.forEach((line, i) => draw(line, P(t, c[0] + 1.8 + i * 0.1, 0.6)));
       place(s.lane, LANE.x, LANE.y, 1, P(t, c[0] + 1.9, 0.5));
       place(s.laneL, LANE.x, LANE.y - LANE.h / 2 - 34, 1, P(t, c[0] + 2.0, 0.5));
-      const sp = P(t, c[0] + 5.0, 0.45, backOut);
-      place(s.same, LANE.x, LANE.y + LANE.h / 2 + 46, sp, clamp(sp * 2));
+      const sp = backPop(t, c[0] + 5.0);
+      place(s.same, LANE.x, LANE.y + LANE.h / 2 + 46, sp.s, sp.o);
       s.chips.forEach((e, k) => {
         // the latest chip this element carries: k, k + CHIP_POOL, k + 2 * CHIP_POOL...
         const cycle = Math.max(0, Math.floor((g - chipsFrom - k * CHIP_EVERY) / (CHIP_POOL * CHIP_EVERY)));

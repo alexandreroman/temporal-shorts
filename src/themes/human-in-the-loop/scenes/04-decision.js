@@ -83,10 +83,10 @@
 
       // Maria approves on the approval card, on day three
       const left = P(t, c[1], 0.4);
-      const mp = P(t, c[0] + 0.2, 0.5, backOut);
-      place(s.maria, MARIA.x, MARIA.y, mp, clamp(mp * 2) * (1 - left));
-      const kp = P(t, c[0] + 0.4, 0.5, backOut);
-      place(s.card, CARD.x, CARD.y, kp, clamp(kp * 2) * (1 - left));
+      const mp = backPop(t, c[0] + 0.2, 0.5);
+      place(s.maria, MARIA.x, MARIA.y, mp.s, mp.o * (1 - left));
+      const kp = backPop(t, c[0] + 0.4, 0.5);
+      place(s.card, CARD.x, CARD.y, kp.s, kp.o * (1 - left));
       tapApprove(s.card, t, tap);
       // the wait picks up a little after where chapter 3 left it; the clock rests, only its seconds hand moves
       const elapsed = DAY3_AFTERNOON;
@@ -127,8 +127,8 @@
       });
 
       // the order is placed once
-      const tp = P(t, ordered, 0.45, backOut);
-      place(s.ticket, TICKET_X, STRIP.y, tp, clamp(tp * 2));
+      const tp = backPop(t, ordered);
+      place(s.ticket, TICKET_X, STRIP.y, tp.s, tp.o);
 
       // Event History: rows 1 to 3 already saved, the Signal replaces the waiting line, then the last steps.
       // Rows 1 to 3 are replayed; the Signal arrived after them, so it is new to the Workflow: it keeps its SAVED
@@ -145,9 +145,9 @@
       setWaitLine(s.history, 1 - P(t, signalIn - 0.2, 0.3));
       const scanning = replay.findIndex(q => t >= q && t < q + 0.5);
       scanRow(s.history, scanning);
-      const dp = P(t, complete, 0.45, backOut);
-      s.history.done.style.opacity = clamp(dp * 2);
-      s.history.done.style.transform = `translateX(-50%) scale(${dp})`;
+      const dp = backPop(t, complete);
+      s.history.done.style.opacity = dp.o;
+      s.history.done.style.transform = `translateX(-50%) scale(${dp.s})`;
     }
   });
 }

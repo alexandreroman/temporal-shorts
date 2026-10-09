@@ -128,9 +128,9 @@
       placeStepRow(s.steps, t, c[0] + 0.1, states, sx, sy);
 
       // app instance A runs the steps, then crashes: its lines fall out
-      const aIn = P(t, c[0] + 0.3, 0.5, backOut);
+      const aIn = backPop(t, c[0] + 0.3, 0.5);
       // once crashed it stays on screen, dead (red border, CRASHED, EMPTY), until B has arrived
-      place(s.A, APP.x + sx, APP.y + sy, aIn, clamp(aIn * 2) * (1 - 0.25 * P(t, crashAt + 0.8, 0.4))
+      place(s.A, APP.x + sx, APP.y + sy, aIn.s, aIn.o * (1 - 0.25 * P(t, crashAt + 0.8, 0.4))
         * (1 - P(t, aGone, 0.4)));
       if (crashed) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, t >= run[0] ? 'RUNNING' : '', t >= run[0] ? 'running' : 'idle');
@@ -147,9 +147,9 @@
       place(s.B, APP.x, Math.round(APP.y + (1 - ease(arrive)) * 60), 1, t >= bOn ? clamp(arrive * 3) : 0);
       s.B.style.clipPath = `inset(0 0 ${((1 - boot) * 100).toFixed(2)}% 0)`;
       place(s.bootLine, APP.x, APP.y - APP.h / 2 + boot * APP.h, 1, boot > 0 && boot < 1 ? 1 : 0);
-      const tp = P(t, bOn + 0.6, 0.45, backOut);
+      const tp = backPop(t, bOn + 0.6);
       // the tag sits in the empty space at the bottom of B's STEPS card
-      place(s.newTag, APP.x, NEW_TAG_Y, tp, clamp(tp * 2) * (1 - P(t, c[2] + 0.2, 0.4)));
+      place(s.newTag, APP.x, NEW_TAG_Y, tp.s, tp.o * (1 - P(t, c[2] + 0.2, 0.4)));
       if (t < bOn + 1.0) setAppStatus(s.B, 'STARTING', 'idle');
       else if (t < replay[0]) setAppStatus(s.B, 'TAKING OVER', 'idle');
       else if (t < rerun) setAppStatus(s.B, 'REPLAYING…', 'running');
@@ -191,9 +191,9 @@
       markCrash(s.history, t, crashAt);
       const scanning = replay.findIndex(q => t >= q - 0.2 && t < q + 0.7);
       scanRow(s.history, scanning);
-      const dp = P(t, complete, 0.45, backOut);
-      s.history.done.style.opacity = clamp(dp * 2);
-      s.history.done.style.transform = `translateX(-50%) scale(${dp})`;
+      const dp = backPop(t, complete);
+      s.history.done.style.opacity = dp.o;
+      s.history.done.style.transform = `translateX(-50%) scale(${dp.s})`;
       placeFlash(s.flash, t, crashAt);
 
       // the crash glitch: color fringes on the whole composition, torn bars and scanlines, re-drawn 24 times a

@@ -172,9 +172,9 @@
 
       // Worker A, retired by the deploy (not crashed, so not greyed), drops and fades out; then a new machine, Worker
       // B, slides in from the left to the same place, its border glowing violet while it arrives
-      const wp = P(t, c[0] + 0.1, 0.5, backOut);
+      const wp = backPop(t, c[0] + 0.1, 0.5);
       const leave = leavingInstance(t, aDrop);
-      place(workerA, WK.x, WK.y + leave.dy, wp, clamp(wp * 2) * leave.o);
+      place(workerA, WK.x, WK.y + leave.dy, wp.s, wp.o * leave.o);
       const arrive = arrivingInstance(t, bIn);
       place(workerB, WK.x + arrive.dx, WK.y, 1, arrive.o);
       // the code card and the status block move with the Worker on screen (Worker A, then Worker B), so they never
@@ -229,8 +229,8 @@
       s.sleeping.style.transform = `scale(${zz.s})`;
 
       // Temporal and its Event History
-      const tp = P(t, c[0] + 0.3, 0.5, backOut);
-      place(s.temporal, TP.x, TP.y, tp, clamp(tp * 2));
+      const tp = backPop(t, c[0] + 0.3, 0.5);
+      place(s.temporal, TP.x, TP.y, tp.s, tp.o);
       place(s.hist, HIST_CARD.x, HIST_CARD.y, 1, P(t, c[0] + 0.6, 0.4));
       const written = [shipSaved, timerSaved, firedSaved, reviewSaved];
       written.forEach((at, i) => {

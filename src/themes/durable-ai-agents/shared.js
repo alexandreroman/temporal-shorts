@@ -82,13 +82,13 @@ function setBill(b, n, wasted, note = wasted ? `+${wasted} wasted` : '') {
 // the panel with it. The scene sets B's status.
 // s: the scene's instance panels A and B, its context panel mem and blocks mblocks. app, mem: the centers of the
 // instance and context panels, mem.slotY the line of the blocks and memSlot(i) the x of block i. aIn: A's pop-in
-// progress; memIn: the context panel's fade-in; blockA(i): [grow, fall] of A's block i; blockB(i): the grow of B's.
+// (a backPop); memIn: the context panel's fade-in; blockA(i): [grow, fall] of A's block i; blockB(i): the grow of B's.
 // Returns B's arrivingInstance: its dx moves what slides in with it.
 function placeTakeover(s, t, opts) {
   const { app, mem, memSlot, shake: [sx, sy], aIn, runAt, crashAt, emptyAt, aDrop, bIn, memIn, blockA, blockB } = opts;
   const dead = t >= crashAt;
   const leave = leavingInstance(t, aDrop);
-  place(s.A, app.x + sx, app.y + sy + leave.dy, aIn, clamp(aIn * 2) * leave.o);
+  place(s.A, app.x + sx, app.y + sy + leave.dy, aIn.s, aIn.o * leave.o);
   if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
   else setAppStatus(s.A, 'RUNNING THE AGENT', t >= runAt ? 'running' : 'idle');
   const arrive = arrivingInstance(t, bIn);

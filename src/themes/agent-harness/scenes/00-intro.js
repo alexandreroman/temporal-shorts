@@ -36,14 +36,14 @@
     update(t, c, s) {
       // a calm entrance: the title rises, then the model; its ring and the four capabilities follow the subtitle
       rise(s.t, 560, 440, P(t, 0.3, 1.2));
-      const p = P(t, 1.0, 0.9, backOut);
-      place(s.llm.root, RING.x, RING.y, p, clamp(p * 2));
+      const p = backPop(t, 1.0, 0.9);
+      place(s.llm.root, RING.x, RING.y, p.s, p.o);
       llmState(s.llm, { look: Math.sin(G * 0.8) * 0.6 });
       draw(s.ring, P(t, c[0] + 0.1, 1.0));
       s.icons.forEach((e, i) => {
         const a = G * RING_SPEED + i * (Math.PI / 2) - Math.PI / 4;
-        const pp = P(t, c[0] + 0.9 + i * 0.35, 0.6, backOut);
-        place(e, RING.x + Math.cos(a) * RING.r, RING.y + Math.sin(a) * RING.r, pp, clamp(pp * 2));
+        const pp = backPop(t, c[0] + 0.9 + i * 0.35, 0.6);
+        place(e, RING.x + Math.cos(a) * RING.r, RING.y + Math.sin(a) * RING.r, pp.s, pp.o);
       });
     }
   });

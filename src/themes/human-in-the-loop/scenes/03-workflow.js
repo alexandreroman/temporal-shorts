@@ -79,8 +79,8 @@
       placeLaptopRow(s.steps, t, c[0] + 0.1, states, sx, sy);
 
       // app instance A: runs the Workflow, then waits with nothing running, then the restart stops it
-      const aIn = P(t, c[0] + 0.3, 0.5, backOut);
-      place(s.A, APP.x + sx, APP.y + sy, aIn, clamp(aIn * 2));
+      const aIn = backPop(t, c[0] + 0.3, 0.5);
+      place(s.A, APP.x + sx, APP.y + sy, aIn.s, aIn.o);
       if (stopped) setAppStatus(s.A, 'STOPPED', 'stopped');
       else if (t >= waitOn + 0.4) setAppStatus(s.A, 'WAITING, NO CODE RUNNING', 'waiting');
       else setAppStatus(s.A, t >= started ? 'RUNNING THE WORKFLOW' : '', t >= started ? 'running' : 'idle');
@@ -108,13 +108,13 @@
 
       // the clock starts with the wait: days fly by to DAY 2, rest, then on to DAY 3 through the deploys and
       // restarts; at rest only its seconds hand moves
-      const cp = P(t, c[1] + 1.2, 0.5, backOut);
+      const cp = backPop(t, c[1] + 1.2, 0.5);
       const day2 = [waitOn, c[1] + 4.6], day3 = [c[2] + 0.5, c[2] + 5.0];
       const elapsed = waitHours(t, ...day2, DAY2_HOURS) + waitHours(t, ...day3, DAY3_MORNING - DAY2_HOURS);
       setWaitClock(s.clock, elapsed, Math.max(win(t, ...day2, 0.3), win(t, ...day3, 0.3)));
       // the strip arrives with the clock, so it never shows empty
       place(s.strip, STRIP.x, STRIP.y, 1, P(t, c[1] + 1.0, 0.45));
-      place(s.clock, CLOCK.x, CLOCK.y, cp, clamp(cp * 2));
+      place(s.clock, CLOCK.x, CLOCK.y, cp.s, cp.o);
       // each tag slams down into its cell (from 1.25x, clear of its neighbors), landing on its hit; they all ride the
       // jolts and leave together
       s.causes.forEach((e, i) => {

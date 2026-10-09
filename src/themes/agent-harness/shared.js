@@ -25,3 +25,10 @@ function callCard(p, name, arg = '', cls = '') {
   e.arg = e.querySelector('.arg');
   return e;
 }
+
+// Pops in an element laid out by its CSS rather than by place() (a pill in a row, a badge on a card): the scale and
+// opacity of a backPop()
+function popScale(e, pop) {
+  e.style.transform = `scale(${pop.s})`;
+  e.style.opacity = pop.o;
+}

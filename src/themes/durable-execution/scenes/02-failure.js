@@ -197,8 +197,8 @@
           if (flickerOn(t, hit)) e.style.borderColor = C.red;
           if (cause.accent === 'blink' && blinkOff(t, hit)) o = 0.15;
         });
-        const p = P(t, 0.1 + i * 0.12, 0.45, backOut);
-        place(e, s.steps.xs[i] + dx, ROW.y + dy, p, clamp(p * 2) * o);
+        const p = backPop(t, 0.1 + i * 0.12);
+        place(e, s.steps.xs[i] + dx, ROW.y + dy, p.s, p.o * o);
       });
       s.steps.links.forEach((l, i) => {
         const broken = placeBreak(s.breaks[i], i, t, c[0] + CAUSES[i].at);
@@ -221,16 +221,16 @@
       // order status: PENDING, stuck after the crash, PENDING again once restarted
       const isStuck = t >= stuck && t < restart;
       setStatusTile(s.status, isStuck);
-      const stp = P(t, 0.3, 0.45, backOut), stuckPop = bumpAt(t, stuck);
-      place(s.status, BOTTOM.statusX + sx, BOTTOM_Y + sy, stp * (1 + 0.06 * stuckPop), clamp(stp * 2));
+      const stp = backPop(t, 0.3), stuckPop = bumpAt(t, stuck);
+      place(s.status, BOTTOM.statusX + sx, BOTTOM_Y + sy, stp.s * (1 + 0.06 * stuckPop), stp.o);
       // card charged: $42 when Charge card completes, $84 when it completes a second time
       const paid1 = r1[0][1], paid2 = r2[0][1], twice = t >= paid2;
       if (twice) setCounter(s.charge, '$84', 'CHARGED TWICE!', { noteColor: C.red, numColor: C.red });
       else setCounter(s.charge, t >= paid1 ? '$42' : '$0');
       s.charge.style.borderColor = twice ? C.red : C.line;
       const bump = bumpAt(t, paid1) + bumpAt(t, paid2);
-      const cp = P(t, 0.4, 0.45, backOut);
-      place(s.charge, BOTTOM.chargeX + sx, BOTTOM_Y + sy, cp * (1 + 0.06 * bump), clamp(cp * 2));
+      const cp = backPop(t, 0.4);
+      place(s.charge, BOTTOM.chargeX + sx, BOTTOM_Y + sy, cp.s * (1 + 0.06 * bump), cp.o);
       // crash: red flash, bolt over the running step, SERVER CRASH until the restart
       placeFlash(s.flash, t, crashAt);
       place(s.bolt, s.steps.xs[1], TOP_Y, popIn(t, crashAt).s, win(t, crashAt, crashAt + 1.5, 0.2));

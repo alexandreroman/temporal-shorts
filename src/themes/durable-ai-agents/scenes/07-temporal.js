@@ -126,7 +126,7 @@
       // panel is filled as results are saved, emptied by the crash and refilled from the history; B's blocks are
       // empty until the replay.
       const arrive = placeTakeover(s, t, {
-        app: APP, mem: MEM, memSlot, shake: [sx, sy], aIn: P(t, c[0] + 2.3, 0.5, backOut), runAt: write[0], crashAt,
+        app: APP, mem: MEM, memSlot, shake: [sx, sy], aIn: backPop(t, c[0] + 2.3, 0.5), runAt: write[0], crashAt,
         emptyAt: crashAt + 1.1, aDrop, bIn, memIn: P(t, c[0] + 2.5, 0.45),
         blockA: i => [i < 6 ? P(t, saved[i], 0.35, backOut) : 0, P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn)],
         blockB: i => P(t, i < 6 ? replay[i] + 0.33 : saved[i], 0.35, backOut),
@@ -147,8 +147,8 @@
       s.bill.style.borderColor = notBilled > 0.5 ? C.neon : C.line;
       place(s.bill, 270 + sx, 720 + sy, P(t, c[0] + 2.7, 0.45, backOut), P(t, c[0] + 2.7, 0.4));
       // the booking is made once and never repeated
-      const tp = P(t, saved[5], 0.45, backOut);
-      place(s.ticket, DONE_X, 648, tp * (1 + 0.15 * win(t, reused[5], reused[5] + 0.5, 0.2)), clamp(tp * 2));
+      const tp = backPop(t, saved[5]);
+      place(s.ticket, DONE_X, 648, tp.s * (1 + 0.15 * win(t, reused[5], reused[5] + 0.5, 0.2)), tp.o);
 
       // LLM CALL and TOOL CALL cards: app -> Temporal when saving, Temporal -> app when replaying
       s.saveCards.forEach((e, i) => {

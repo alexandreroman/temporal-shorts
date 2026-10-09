@@ -44,8 +44,8 @@
       // the last on "visibility"
       const at = [c[0] + 3.0, c[0] + 3.8, c[0] + 4.5, c[0] + 5.4];
       s.ben.forEach((e, i) => {
-        const p = P(t, at[i], 0.45, backOut);
-        place(e, 960 + (i - 1.5) * BEN.pitch, BEN.y, p, clamp(p * 2));
+        const p = backPop(t, at[i]);
+        place(e, 960 + (i - 1.5) * BEN.pitch, BEN.y, p.s, p.o);
       });
     }
   });

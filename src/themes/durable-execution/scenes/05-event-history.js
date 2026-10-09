@@ -30,8 +30,8 @@
       const res = run.slice(0, 2).map(r => r + RESULT_LAG), saved = res.map(r => r + SAVE_LAG);
 
       // Worker first, then Temporal and its Event History
-      const wp = P(t, c[0] + 1.1, 0.5, backOut);
-      place(worker, EH.worker.x, EH.worker.y, wp, clamp(wp * 2));
+      const wp = backPop(t, c[0] + 1.1, 0.5);
+      place(worker, EH.worker.x, EH.worker.y, wp.s, wp.o);
       setAppStatus(worker, t >= go ? 'RUNNING' : 'IDLE', t >= go ? 'running' : 'stopped');
       const chargePop = bumpAt(t, saved[0]);
       placeEventHistoryShot(shot, {

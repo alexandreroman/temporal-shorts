@@ -83,8 +83,8 @@
       const lineOut = P(t, c[1], 0.4);
 
       // the app waits with its request in memory; the restart wipes it
-      const ap = P(t, c[0] + 0.1, 0.6, backOut);
-      place(s.app, APP.x + sx, APP.y + sy, ap, clamp(ap * 2));
+      const ap = backPop(t, c[0] + 0.1, 0.6);
+      place(s.app, APP.x + sx, APP.y + sy, ap.s, ap.o);
       if (t >= crashAt && t < back) setAppStatus(s.app, 'RESTARTED', 'crashed');
       else setAppStatus(s.app, 'WAITING FOR MARIA', 'waiting');
       s.chips.forEach((e, i) => {
@@ -114,17 +114,17 @@
       // hand-made plumbing: tiles pop with their names, the tangled links draw in between
       s.tiles.forEach((e, i) => {
         const [, , x, y] = PLUMBING[i];
-        const p = P(t, c[1] + 2.2 + i * 0.7, 0.45, backOut);
-        place(e, x, y, p, clamp(p * 2));
+        const p = backPop(t, c[1] + 2.2 + i * 0.7);
+        place(e, x, y, p.s, p.o);
       });
       const bad = t >= c[2] + 2.6;
       s.links.forEach((l, i) => {
         l.setAttribute('stroke', bad && BROKEN_LINKS.includes(i) ? C.red : C.slate);
         draw(l, P(t, c[1] + 2.6 + i * 0.35, 0.6));
       });
-      const p1 = P(t, c[2] + 2.6, 0.45, backOut), p2 = P(t, c[2] + 4.2, 0.45, backOut);
-      place(s.stuck, PLUMBING[0][2], TAG_Y, p1, clamp(p1 * 2));
-      place(s.twice, PLUMBING[3][2], TAG_Y, p2, clamp(p2 * 2));
+      const p1 = backPop(t, c[2] + 2.6), p2 = backPop(t, c[2] + 4.2);
+      place(s.stuck, PLUMBING[0][2], TAG_Y, p1.s, p1.o);
+      place(s.twice, PLUMBING[3][2], TAG_Y, p2.s, p2.o);
     }
   });
 }

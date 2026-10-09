@@ -503,8 +503,8 @@
       place(s.bracketLabel, BRACKET.x + 34, Math.round((BRACKET.top + BRACKET.bottom) / 2), bl.s, bl.o, -90);
       s.bracketEnds.forEach((e, k) => place(e, BRACKET.x + 22 + 40, k ? BRACKET.top : BRACKET.bottom, 1,
         P(t, bracketAt + (k ? 0.9 : 0), 0.3)));
-      const ai = P(t, c[4] + 2.8, 0.45, backOut);
-      place(s.aiTag, REST.valueX, 690, ai, clamp(ai * 2));
+      const ai = backPop(t, c[4] + 2.8);
+      place(s.aiTag, REST.valueX, 690, ai.s, ai.o);
     }
   });
 }

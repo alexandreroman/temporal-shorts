@@ -34,8 +34,8 @@
       // one tile per feature, 1 s apart; each lights up as it lands
       s.recap.forEach((e, i) => {
         const at = c[0] + 0.7 + i;
-        const p = P(t, at, 0.45, backOut);
-        place(e, recapX(i), recapY(i), p, clamp(p * 2));
+        const p = backPop(t, at);
+        place(e, recapX(i), recapY(i), p.s, p.o);
         e.style.borderColor = t >= at && t < at + 1.0 ? C.uv : C.line;
       });
     }

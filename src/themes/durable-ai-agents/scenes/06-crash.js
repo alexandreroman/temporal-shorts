@@ -165,7 +165,7 @@
       s.ticket.n.textContent = two ? '2 BOOKINGS!' : '1 BOOKING';
       s.ticket.style.borderColor = two ? C.red : C.slate; s.ticket.n.style.color = two ? C.red : C.ink;
       s.ticket.style.background = two ? 'var(--red-solid)' : '';
-      const tp = P(t, c[0] + 3.5, 0.45, backOut);
+      const tp = backPop(t, c[0] + 3.5);
       // up to 1.4 within 0.08 s, then back to 1 with a small bounce below it
       const slam = 0.4 * P(t, slamAt, 0.08) * (1 - P(t, slamAt + 0.08, 0.5, backOut));
       const flightX = P(t, bookedTwiceAt, TICKET_FLIGHT, easeOut);
@@ -173,7 +173,7 @@
       const grow = lerp(1, TICKET_CENTER.scale, P(t, bookedTwiceAt, TICKET_FLIGHT));
       const ticketX = lerp(TICKET.x, TICKET_CENTER.x, flightX) + sx + dampedShake(t, slamAt, 10, 0.4, 4);
       const ticketY = lerp(TICKET.y, TICKET_CENTER.y, flightY);
-      place(s.ticket, ticketX, ticketY, tp * grow * (1 + slam), clamp(tp * 2));
+      place(s.ticket, ticketX, ticketY, tp.s * grow * (1 + slam), tp.o);
       redHalo(s.ticket, P(t, slamAt, 0.08) * (1 - P(t, slamAt + 0.2, 0.8)), 30);
       const stack = P(t, slamAt + 0.15, 0.4, backOut);
       const stackOffset = 16 * TICKET_CENTER.scale * stack;
@@ -185,7 +185,7 @@
       const add1 = [0.8, 1.3, 1.9, 2.4, 3.0, 3.5].map(x => c[0] + x);
       const add2 = [0.6, 0.9, 1.4, 1.7, 2.3, 2.6].map(x => c[2] + x);
       const arrive = placeTakeover(s, t, {
-        app: APP, mem: MEM, memSlot, shake: [sx, sy], aIn: P(t, 0.3, 0.45, backOut), runAt: c[0] + 0.3, crashAt,
+        app: APP, mem: MEM, memSlot, shake: [sx, sy], aIn: backPop(t, 0.3), runAt: c[0] + 0.3, crashAt,
         emptyAt: c[1] + 1.2, aDrop, bIn, memIn: P(t, 0.5, 0.45),
         blockA: i => [P(t, add1[i], 0.35, backOut), P(t, c[1] + 0.3 + i * 0.1, 0.8, easeIn)],
         blockB: i => P(t, add2[i], 0.35, backOut),
@@ -204,8 +204,8 @@
       place(s.bolt, BOLT.x, BOLT.y, bp, win(t, crashAt, crashAt + 1.5, 0.2));
       place(s.crash, COL.x, TAGS_Y, bp, win(t, crashAt + 0.1, c[1] + 0.3, 0.25));
       s.causes.forEach((e, i) => {
-        const p = P(t, c[0] + 4.8 + i * 0.3, 0.4, backOut);
-        place(e, colX(i), TAGS_Y, p, clamp(p * 2) * (1 - P(t, c[1], 0.35)));
+        const p = backPop(t, c[0] + 4.8 + i * 0.3, 0.4);
+        place(e, colX(i), TAGS_Y, p.s, p.o * (1 - P(t, c[1], 0.35)));
       });
       draw(s.redo, P(t, startOver, 0.8), 1 - P(t, c[2] + 3.0, 0.4));
       place(s.redoL, 960, REDO_LABEL_Y, 1, P(t, startOver + 0.5, 0.35) * (1 - P(t, c[2] + 3.0, 0.4)));

@@ -27,21 +27,21 @@
     },
     update(t, c, s) {
       const mv1 = P(t, c[1], 0.9), mv2 = P(t, c[2], 0.9);
-      const pop = P(t, c[0], 0.8, backOut);
-      place(s.llm.root, 960 + 490 * mv1 - 490 * mv2, 430, pop, clamp(pop * 2));
+      const pop = backPop(t, c[0], 0.8);
+      place(s.llm.root, 960 + 490 * mv1 - 490 * mv2, 430, pop.s, pop.o);
       llmState(s.llm, { think: win(t, c[1] + 2.3, c[1] + 3.0, 0.2), look: -mv1 * (1 - mv2) });
       s.chips.forEach((ch, i) => {
-        const p = P(t, c[0] + 2.4 + i * 0.25, 0.45, backOut);
-        place(ch, 960 + (i - 1) * 230, 650, p, clamp(p * 2) * (1 - P(t, c[1], 0.4)));
+        const p = backPop(t, c[0] + 2.4 + i * 0.25);
+        place(ch, 960 + (i - 1) * 230, 650, p.s, p.o * (1 - P(t, c[1], 0.4)));
       });
       const out = P(t, c[2], 0.5);
-      const ap = P(t, c[1] + 0.2, 0.6, backOut);
-      place(s.app, 420, 430, ap, clamp(ap * 2) * (1 - out));
+      const ap = backPop(t, c[1] + 0.2, 0.6);
+      place(s.app, 420, 430, ap.s, ap.o * (1 - out));
       draw(s.arrow, P(t, c[1] + 0.5, 0.6), 1 - out);
       place(s.arrowL, 955, 398, 1, P(t, c[1] + 0.8, 0.4) * (1 - out));
       fly(s.q, t, c[1] + 0.6, 420, 260, c[1] + 1.0, 1.0, 1180, 260, c[1] + 2.0, 1450, 430);
-      const aa = P(t, c[1] + 3.0, 0.4, backOut), af = P(t, c[1] + 5.2, 0.9);
-      place(s.a, lerp(1250, 560, af), lerp(690, 720, af), aa, clamp(aa * 2) * (1 - out));
+      const aa = backPop(t, c[1] + 3.0, 0.4), af = P(t, c[1] + 5.2, 0.9);
+      place(s.a, lerp(1250, 560, af), lerp(690, 720, af), aa.s, aa.o * (1 - out));
       typeWords(s.a, clamp((t - (c[1] + 3.1)) / 2.0));
       place(s.inP, 480, 430, P(t, c[2] + 0.5, 0.5, backOut), P(t, c[2] + 0.5, 0.4));
       place(s.outP, 1440, 430, P(t, c[2] + 1.3, 0.5, backOut), P(t, c[2] + 1.3, 0.4));

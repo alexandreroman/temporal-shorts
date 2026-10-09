@@ -160,17 +160,17 @@ function makeStepRow(root, svg, steps, x0, gap, y, w, h) {
 function placeStepRow(row, t, a, states, dx = 0, dy = 0, o = 1, setState = stepState) {
   row.tiles.forEach((e, i) => {
     setState(e, states[i]);
-    const p = P(t, a + i * 0.12, 0.45, backOut);
-    place(e, row.xs[i] + dx, row.y + dy, p, clamp(p * 2) * o);
+    const p = backPop(t, a + i * 0.12);
+    place(e, row.xs[i] + dx, row.y + dy, p.s, p.o * o);
   });
   row.links.forEach((l, i) => draw(l, P(t, a + 0.4 + i * 0.12, 0.35), o));
 }
 
 // fly: appear at (x0,y0) at a, travel to (x1,y1) during [b, b+d], absorbed (shrink+fade) at k if given
 function fly(e, t, a, x0, y0, b, d, x1, y1, k = null, kx = 0, ky = 0) {
-  const ap = P(t, a, 0.45, backOut), f = P(t, b, d), ab = k === null ? 0 : P(t, k, 0.4, easeIn);
+  const ap = backPop(t, a), f = P(t, b, d), ab = k === null ? 0 : P(t, k, 0.4, easeIn);
   const x = lerp(lerp(x0, x1, f), kx, ab), y = lerp(lerp(y0, y1, f), ky, ab);
-  place(e, x, y, ap * (1 - 0.65 * ab), clamp(ap * 2) * (1 - ab));
+  place(e, x, y, ap.s * (1 - 0.65 * ab), ap.o * (1 - ab));
 }
 // Chip flight: it pops in at (x0, y0) at `at`, travels to (x1, y1) during [at + 0.1, at + 0.55], then is absorbed
 // there (shrinks and fades)
@@ -182,6 +182,12 @@ const bumpAt = (t, at) => win(t, at, at + 0.15, 0.15);
 // Appearance at `at` of a small element (badge, icon, tag), as { o, s } for place(): it fades in while it
 // bumps briefly above its native size (k: height of the bump, 0 for none)
 const popIn = (t, at, k = 0.14) => ({ o: P(t, at, 0.2), s: 1 + k * bumpAt(t, at) });
+// Appearance at `at` of a larger element (tile, card, panel), as { s, o } for place(): it grows from nothing to a
+// little over its native size and settles back (backOut) over d seconds, fully opaque halfway through its growth
+function backPop(t, at, d = 0.45) {
+  const s = P(t, at, d, backOut);
+  return { s, o: clamp(s * 2) };
+}
 // Damped shake of an element hit at `at`: `swings` half swings of amp px, fading out linearly over d seconds.
 // Exactly 0 outside them, so the element rests on the same pixels as before the hit.
 function dampedShake(t, at, amp, d, swings) {
@@ -251,8 +257,8 @@ function placeAgentLoop(loop, t, a, opts = {}) {
   const near = d => deg === null ? 0 : Math.max(0, 1 - Math.abs((((deg - d) % 360) + 540) % 360 - 180) / 30);
   const nodes = [[loop.think.root, LOOP_DEG.think], [loop.act, LOOP_DEG.act], [loop.observe, LOOP_DEG.observe]];
   nodes.forEach(([e, d], i) => {
-    const [x, y] = loop.nodePos(d), p = P(t, i === 0 ? thinkIn : a + i * 0.2, 0.5, backOut);
-    place(e, x + dx, y + dy, p * (1 + 0.12 * near(d)), clamp(p * 2) * o);
+    const [x, y] = loop.nodePos(d), p = backPop(t, i === 0 ? thinkIn : a + i * 0.2, 0.5);
+    place(e, x + dx, y + dy, p.s * (1 + 0.12 * near(d)), p.o * o);
   });
   llmState(loop.think, { think: near(LOOP_DEG.think) > 0.2 ? 1 : 0, look: 0.5 });
   // THINK's label sits left of the orb, the others under their tiles

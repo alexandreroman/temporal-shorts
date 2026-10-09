@@ -203,15 +203,15 @@
       const closedAt = c[4] + 3.2, closed = P(t, closedAt + 0.3, 0.6);
 
       // phase 1: "text in, text out" is struck out in the left column, TravelAgent lists its typed operations
-      const pp = P(t, c[0] + 0.1, 0.5, backOut);
-      place(s.pill, PARENT.x, PARENT.y, pp, clamp(pp * 2) * (1 - P(t, c[1] + 0.7, 0.35)));
+      const pp = backPop(t, c[0] + 0.1, 0.5);
+      place(s.pill, PARENT.x, PARENT.y, pp.s, pp.o * (1 - P(t, c[1] + 0.7, 0.35)));
       // the strike is drawn from left to right by clipping its end, so it keeps its centered position
       const struck = P(t, c[0] + 1.6, 0.5);
       s.pill.strike.style.clipPath = `inset(0 ${((1 - struck) * 100).toFixed(2)}% 0 0)`;
       s.pill.txt.style.opacity = lerp(1, 0.5, struck);
 
-      const tp = P(t, c[0] + 3.0, 0.5, backOut);
-      place(s.travel, TRAVEL.x, TRAVEL.y, tp, clamp(tp * 2));
+      const tp = backPop(t, c[0] + 3.0, 0.5);
+      place(s.travel, TRAVEL.x, TRAVEL.y, tp.s, tp.o);
       // a closed instance dims its content; the card itself stays opaque, so the stage never shows through
       const dim = lerp(1, 0.5, closed);
       s.travel.head.style.opacity = dim;
@@ -224,13 +224,11 @@
         showRow(row, rowIn);
         row.style.opacity = rowIn * dim;
       });
-      const sp = P(t, c[1] + 0.3, 0.45, backOut);
-      s.self.style.opacity = clamp(sp * 2);
-      s.self.style.transform = `scale(${sp})`;
+      popScale(s.self, backPop(t, c[1] + 0.3));
 
       // phase 2: the Trip planner takes the pill's place, with its tools
-      const parentIn = P(t, c[1] + 0.9, 0.5, backOut);
-      place(s.parent, PARENT.x, PARENT.y, parentIn, clamp(parentIn * 2));
+      const parentIn = backPop(t, c[1] + 0.9, 0.5);
+      place(s.parent, PARENT.x, PARENT.y, parentIn.s, parentIn.o);
       showRow(s.parent.cols, P(t, c[1] + 1.2, 0.3));
 
       // step 1: the Trip planner reads TravelAgent's interface and travel_plan_trip joins its tools
@@ -247,9 +245,7 @@
       showRow(planRow, P(t, copied + 1.4, 0.3), 0);
       searchRow.style.opacity = P(t, c[1] + 1.3, 0.35);
       searchRow.style.transform = `translateY(${(-(CARD.rowH + CARD.rowGap) * (1 - inserted)).toFixed(2)}px)`;
-      const fp = P(t, copied + 1.8, 0.4, backOut);
-      s.parent.from.style.opacity = clamp(fp * 2);
-      s.parent.from.style.transform = `scale(${fp})`;
+      popScale(s.parent.from, backPop(t, copied + 1.8, 0.4));
 
       // step 2: the Trip planner starts TravelAgent as its child workflow: start_travel travels along the request
       // arrow into TravelAgent's header, which turns UV and gets its CHILD WORKFLOW tag, then the instance shows up
@@ -257,9 +253,7 @@
       draw(s.requestArrow, P(t, c[2] + 0.3, 0.5));
       fly(s.start, t, startSent, CALL_X0, CALL_Y, startSent + 1.3, 0.9, CALL_X1, CALL_Y,
         started, TRAVEL_HEAD.x, TRAVEL_HEAD.y);
-      const cp = P(t, started + 0.3, 0.45, backOut);
-      s.child.style.opacity = clamp(cp * 2);
-      s.child.style.transform = `scale(${cp})`;
+      popScale(s.child, backPop(t, started + 0.3));
       const ip = P(t, started + 1.5, 0.4);
       place(s.instance, TRAVEL.x, INSTANCE_Y + 12 * (1 - ip), 1, ip);
 
@@ -281,9 +275,7 @@
       place(s.resultLbl, GAP_MID, RESULT_Y + LBL_DY, 1, P(t, answered + 0.15, 0.35));
       fly(s.result, t, answered + 0.2, VALUE_X1, RESULT_CARD_Y, answered + 0.6, 0.9, VALUE_X0, RESULT_CARD_Y,
         received, PARENT_NAME_X, PARENT_NAME_Y);
-      const ok = P(t, received + 0.25, 0.45, backOut);
-      s.parent.ok.style.opacity = clamp(ok * 2);
-      s.parent.ok.style.transform = `scale(${ok})`;
+      popScale(s.parent.ok, backPop(t, received + 0.25));
 
       // step 5: when the work is done, stop_travel closes the instance: CLOSED, and TravelAgent dims
       const stopSent = c[4] + 0.8;

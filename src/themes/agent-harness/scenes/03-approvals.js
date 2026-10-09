@@ -194,8 +194,8 @@
       const hotelWaits = t >= escalate && t < drop + 0.4;
 
       // agent, gate, tools, person
-      const ap = P(t, c[0], 0.6, backOut);
-      place(s.agent.root, AGENT.x, AGENT.y, ap, clamp(ap * 2));
+      const ap = backPop(t, c[0], 0.6);
+      place(s.agent.root, AGENT.x, AGENT.y, ap.s, ap.o);
       // the agent thinks before each call it sends, and once it has read why the suite was denied
       const think = win(t, c[0] + 0.6, pop[2], 0.3) + win(t, c[2] + 0.9, suitePop, 0.3)
         + win(t, backAtAgent, bigPop, 0.3);
@@ -203,9 +203,9 @@
       draw(s.lane, P(t, c[0] + 0.6, 0.6));
       const gateColor = crossing ? C.neon : (flightWaits || hotelWaits) ? C.violet : C.line;
       [s.gate, s.rules].forEach((e, i) => {
-        const p = P(t, c[0] + 0.2 + i * 0.1, 0.5, backOut);
+        const p = backPop(t, c[0] + 0.2 + i * 0.1, 0.5);
         e.style.borderColor = gateColor;
-        place(e, GATE.x, i === 0 ? POLICY.y0 + POLICY.h / 2 : RULES.y0 + RULES.h / 2, p, clamp(p * 2));
+        place(e, GATE.x, i === 0 ? POLICY.y0 + POLICY.h / 2 : RULES.y0 + RULES.h / 2, p.s, p.o);
       });
       // the rule a call matches lights up: each search its own ALLOW row, the bookings the ASK row
       const searchLit = i => t >= cross[i] + 0.2 && t < cross[i] + 1.2;
@@ -216,36 +216,36 @@
         const litColor = i < 2 ? `rgba(${RGB.neon},.12)` : `rgba(${RGB.violet},.18)`;
         row.style.background = ruleLit[i] ? litColor : 'transparent';
       });
-      const tp = P(t, c[0] + 0.4, 0.5, backOut);
-      place(s.tools, TOOLS.rowX, (TOOLS.y0 + TOOLS.y1) / 2, tp, clamp(tp * 2));
+      const tp = backPop(t, c[0] + 0.4, 0.5);
+      place(s.tools, TOOLS.rowX, (TOOLS.y0 + TOOLS.y1) / 2, tp.s, tp.o);
 
-      const yp = P(t, c[0] + 0.6, 0.5, backOut);
+      const yp = backPop(t, c[0] + 0.6, 0.5);
       const youWaits = (t >= c[1] + 1.4 && t < approve + 0.05) || t >= atYou;
       const youActs = t >= approve + 0.05 && t < cross[2];
       s.you.style.borderColor = youActs ? C.neon : youWaits ? C.violet : C.line;
-      place(s.you, YOU.x, YOU.y, yp, clamp(yp * 2));
+      place(s.you, YOU.x, YOU.y, yp.s, yp.o);
       const pressed = t >= approve + 0.05 && t < c[2] + 0.2;
       s.approve.className = 'abs pill' + (pressed ? ' neon' : '');
-      const bp = P(t, c[0] + 0.75, 0.45, backOut), dp = P(t, c[0] + 0.85, 0.45, backOut);
-      place(s.approve, YOU.buttonX, YOU.y - YOU.buttonDy, bp * (1 - 0.08 * bump(t, approve, 0.25)), clamp(bp * 2));
-      place(s.deny, YOU.buttonX, YOU.y + YOU.buttonDy, dp, clamp(dp * 2));
+      const bp = backPop(t, c[0] + 0.75), dp = backPop(t, c[0] + 0.85);
+      place(s.approve, YOU.buttonX, YOU.y - YOU.buttonDy, bp.s * (1 - 0.08 * bump(t, approve, 0.25)), bp.o);
+      place(s.deny, YOU.buttonX, YOU.y + YOU.buttonDy, dp.s, dp.o);
 
       // tool calls: pop out next to the agent, then follow their route; tags ride under them
       const placeCall = (i, appear, legs, cls, fade = Infinity) => {
-        const grow = P(t, appear, 0.45, backOut);
+        const grow = backPop(t, appear);
         const [x, y] = pan(t, FROM, legs);
-        const o = clamp(grow * 2) * (1 - P(t, fade, 0.4));
+        const o = grow.o * (1 - P(t, fade, 0.4));
         s.calls[i].className = 'abs pill solid ' + cls;
-        place(s.calls[i], x, y, grow, o);
+        place(s.calls[i], x, y, grow.s, o);
         return [x, y, o];
       };
       // the tag pops at popAt, swells briefly at swellAt (a status change), and hides from hideAt: it is
       // too wide to follow its call through the gate, so it pops again once the call has landed
       const placeTag = (i, [x, y, o], popAt, label, kind, swellAt = Infinity, hideAt = Infinity) => {
         setStatus(s.tags[i], label, kind);
-        const grow = P(t, popAt, 0.4, backOut);
-        const scale = grow * (1 + 0.12 * bump(t, swellAt, 0.3));
-        place(s.tags[i], x, y + TAG_DY, scale, o * clamp(grow * 2) * (1 - P(t, hideAt, 0.2)));
+        const grow = backPop(t, popAt, 0.4);
+        const scale = grow.s * (1 + 0.12 * bump(t, swellAt, 0.3));
+        place(s.tags[i], x, y + TAG_DY, scale, o * grow.o * (1 - P(t, hideAt, 0.2)));
       };
       // a call that stops in front of the gate: from the agent to the parking spot, 0.3 s after it pops
       const toPark = at => [at + 0.3, PARK.x, PARK.y, 0.8];
@@ -264,11 +264,11 @@
       else if (t < booked) placeTag(2, f2, parkFlight + 0.2, 'APPROVED', 'ok', approved, cross[2]);
       else placeTag(2, f2, booked, 'BOOKED', 'ok');
 
-      const pp = P(t, c[1] + 0.3, 0.45, backOut);
+      const pp = backPop(t, c[1] + 0.3);
       // the 44 px pause badge sits 8 px left of the parked call
-      place(s.pause, PARK.x - CALL_W / 2 - 30, PARK.y, pp, clamp(pp * 2) * (1 - P(t, approved, 0.3)));
-      const wp = P(t, c[1] + 0.6, 0.45, backOut);
-      place(s.wait, PARK.x, (WAIT.y0 + WAIT.y1) / 2, wp, clamp(wp * 2) * (1 - P(t, approved + 0.1, 0.3)));
+      place(s.pause, PARK.x - CALL_W / 2 - 30, PARK.y, pp.s, pp.o * (1 - P(t, approved, 0.3)));
+      const wp = backPop(t, c[1] + 0.6);
+      place(s.wait, PARK.x, (WAIT.y0 + WAIT.y1) / 2, wp.s, wp.o * (1 - P(t, approved + 0.1, 0.3)));
       // the waiting time races from minutes to days; the clock hands spin with it
       const race = clamp((t - c[1] - 1.2) / 2.8);
       s.waitD.textContent = WAITS[Math.min(WAITS.length - 1, Math.floor(race * WAITS.length))];

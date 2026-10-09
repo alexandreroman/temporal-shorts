@@ -86,13 +86,11 @@
       s.result = callCard(root, 'result', '"Lisbon, 3 nights"', 'uv solid');
     },
     update(t, c, s) {
-      const pop = at => P(t, at, 0.5, backOut);
-
       // ---- c[0]: the app and the laptop it can't reach; the call travels down to the laptop, which runs it
-      const appIn = pop(c[0] + 0.2);
-      place(s.app, COL.x, COL.appY, appIn, clamp(appIn * 2));
-      const laptopIn = pop(c[0] + 0.6);
-      place(s.laptop, COL.x, COL.laptopY, laptopIn, clamp(laptopIn * 2));
+      const appIn = backPop(t, c[0] + 0.2, 0.5);
+      place(s.app, COL.x, COL.appY, appIn.s, appIn.o);
+      const laptopIn = backPop(t, c[0] + 0.6, 0.5);
+      place(s.laptop, COL.x, COL.laptopY, laptopIn.s, laptopIn.o);
       // the laptop runs the tool from the call's arrival until just before the result leaves (in c[1])
       const resultAt = c[1] + 4.5;
       stepState(s.laptop, t >= resultAt - 0.1 ? 2 : t >= c[0] + 3.3 ? 1 : 0);
@@ -106,17 +104,15 @@
       const waitIn = P(t, c[1] + 0.3, 0.4) * (1 - P(t, resultAt - 0.3, 0.3));
       s.app.agent.style.opacity = 1 - 0.6 * waitIn;
       s.app.style.borderColor = waitIn > 0.5 ? C.line : C.violet;
-      const pp = P(t, c[1] + 0.3, 0.45, backOut);
-      place(s.pause, PAUSE.x, PAUSE.y, pp, clamp(pp * 2) * (1 - P(t, resultAt - 0.3, 0.3)));
+      const pp = backPop(t, c[1] + 0.3);
+      place(s.pause, PAUSE.x, PAUSE.y, pp.s, pp.o * (1 - P(t, resultAt - 0.3, 0.3)));
       place(s.wait, COL.x, WAIT.y - 12 * (1 - waitIn), 1, waitIn);
       const race = clamp((t - c[1] - 1.0) / 2.8);
       s.waitD.textContent = WAITS[Math.min(WAITS.length - 1, Math.floor(race * WAITS.length))];
       s.minute.setAttribute('transform', `rotate(${race * 360 * 12} 12 12)`);
       s.hour.setAttribute('transform', `rotate(${race * 360} 12 12)`);
       setStatus(s.free, 'NO COMPUTE HELD', 'ok');
-      const freeIn = pop(c[1] + 1.5);
-      s.free.style.transform = `scale(${freeIn})`;
-      s.free.style.opacity = clamp(freeIn * 2);
+      popScale(s.free, backPop(t, c[1] + 1.5, 0.5));
       fly(s.result, t, resultAt, COL.x, ARROW.bottom - 30, resultAt + 0.3, 0.8, COL.x, ARROW.top + 30,
         resultAt + 1.2, COL.x, COL.appY);
     }

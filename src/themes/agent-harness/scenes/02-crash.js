@@ -146,9 +146,9 @@
       placeStepRow(s.steps, t, c[0] + 0.2, states, ax, ay);
 
       // instance A runs, crashes, then leaves like a dead machine: it greys, drops and fades out
-      const aIn = P(t, c[0] + 0.1, 0.5, backOut);
+      const aIn = backPop(t, c[0] + 0.1, 0.5);
       const leave = leavingInstance(t, aDrop);
-      place(s.A, APP.x + ax, APP.y + ay + leave.dy, aIn, clamp(aIn * 2) * leave.o);
+      place(s.A, APP.x + ax, APP.y + ay + leave.dy, aIn.s, aIn.o * leave.o);
       if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, 'RUNNING THE AGENT', t >= run[0] ? 'running' : 'idle');
       glitchPanel(s.A, glitch);
@@ -196,8 +196,8 @@
       const lblOff = P(t, crashAt + 0.1, 0.2);
       const lblOn = Math.max(win(t, run[0], aOut, 0.15) * (1 - lblOff), win(t, replay[0], doneAt - 0.45, 0.15));
       place(s.chipLbl, APP.x + ax, APP.lblY + ay, 1, lblOn);
-      const dp = P(t, doneAt, 0.45, backOut);
-      place(s.done, APP.x, (APP.lblY + APP.chipY) / 2, dp, clamp(dp * 2));
+      const dp = backPop(t, doneAt);
+      place(s.done, APP.x, (APP.lblY + APP.chipY) / 2, dp.s, dp.o);
 
       // counters: only the 3 real model calls are billed and the flight is booked once; the replay costs nothing
       const calls = [0, 2, 4].filter(i => t >= saved[i]).length;
@@ -217,10 +217,10 @@
       const billedSwell = Math.max(...[0, 2, 4].map(i => swell(t, saved[i], 0.12)));
       s.billed.n.style.transform = `scale(${billedSwell})`;
       s.booked.n.style.transform = `scale(${swell(t, saved[3], 0.12)})`;
-      const counterIn = i => P(t, c[0] + 0.5 + i * 0.12, 0.45, backOut);
       const counterX = [APP.x - APP.w / 2 + COUNTER.w / 2, APP.x + APP.w / 2 - COUNTER.w / 2];
       [s.billed, s.booked].forEach((e, i) => {
-        place(e, counterX[i] + ax, COUNTER.y + ay, counterIn(i), clamp(counterIn(i) * 2));
+        const pop = backPop(t, c[0] + 0.5 + i * 0.12);
+        place(e, counterX[i] + ax, COUNTER.y + ay, pop.s, pop.o);
       });
 
       // Temporal panel: faded in at native size (no scale), so the header logo stays pixel-aligned

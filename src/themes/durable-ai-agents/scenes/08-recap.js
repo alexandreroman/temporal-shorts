@@ -37,8 +37,8 @@
       rise(s.budget, 960, BUDGET_Y, P(t, c[0] + 0.5, 0.6), 20);
       const at = [c[0] + 2.2, c[0] + 3.4, c[0] + 4.3, c[0] + 5.2];
       s.ben.forEach((e, i) => {
-        const p = P(t, at[i], 0.45, backOut);
-        place(e, 960 + (i - 1.5) * BEN.pitch, BEN.y, p, clamp(p * 2));
+        const p = backPop(t, at[i]);
+        place(e, 960 + (i - 1.5) * BEN.pitch, BEN.y, p.s, p.o);
       });
     }
   });

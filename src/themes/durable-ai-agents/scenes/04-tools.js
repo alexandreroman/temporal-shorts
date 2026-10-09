@@ -49,23 +49,23 @@
       fly(s.q, t, c[0] + 0.3, 420, 190, c[0] + 0.6, 1.0, 960, 190);
       s.q.style.opacity *= 1 - P(t, c[2] + 0.4, 0.4);
       s.no.forEach((n, i) => {
-        const p = P(t, c[0] + 1.6 + i * 0.25, 0.45, backOut);
-        place(n, 1580 + i * 120, 570, p, clamp(p * 2) * (1 - P(t, c[0] + 3.4, 0.4)));
+        const p = backPop(t, c[0] + 1.6 + i * 0.25);
+        place(n, 1580 + i * 120, 570, p.s, p.o * (1 - P(t, c[0] + 3.4, 0.4)));
       });
       place(s.box, 960, 680, 1, P(t, c[0] + 2.8, 0.5)); place(s.boxL, 960, 552, 1, P(t, c[0] + 2.8, 0.5));
       const hl = win(t, c[1] + 1.2, c[2] + 0.2, 0.2);
       s.tiles.forEach((e, i) => {
-        const p = P(t, c[0] + 3.0 + i * 0.2, 0.45, backOut);
+        const p = backPop(t, c[0] + 3.0 + i * 0.2);
         e.style.borderColor = (i === 0 && hl > 0.5) ? C.neon : C.line;
-        place(e, 600 + i * 240, 680, p, clamp(p * 2));
+        place(e, 600 + i * 240, 680, p.s, p.o);
       });
       fly(s.req, t, c[1] + 1.2, 1330, 330, c[1] + 3.0, 0.8, 650, 330, c[2] + 0.0, 300, 330);
       draw(s.run, P(t, c[1] + 4.0, 0.5), 1 - P(t, c[2] + 0.2, 0.3));
       fly(s.res, t, c[1] + 4.8, 600, 620, c[1] + 5.2, 0.8, 660, 470, c[2] + 0.1, 300, 330);
       fly(s.bundle, t, c[2] + 0.5, 470, 330, c[2] + 0.9, 1.0, 1350, 330, c[2] + 1.8, 1640, 330);
       place(s.tag, lerp(470, 1350, P(t, c[2] + 0.9, 1.0)), 250, 1, win(t, c[2] + 0.5, c[2] + 1.9, 0.25));
-      const aa = P(t, c[2] + 3.0, 0.5, backOut);
-      place(s.ans, lerp(1350, 920, P(t, c[2] + 3.2, 0.9)), 330, aa, clamp(aa * 2));
+      const aa = backPop(t, c[2] + 3.0, 0.5);
+      place(s.ans, lerp(1350, 920, P(t, c[2] + 3.2, 0.9)), 330, aa.s, aa.o);
     }
   });
 }

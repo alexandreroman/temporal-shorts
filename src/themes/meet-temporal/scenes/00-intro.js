@@ -60,14 +60,14 @@
       place(s.glow, ORBIT.x, ORBIT.y, 1 + 0.04 * Math.sin(G * 1.6), P(t, 1.6, 0.9));
 
       s.orb.forEach(({ icon, ghosts }, i) => {
-        const pp = P(t, 2.6 + i * 0.15, 0.6, backOut);
+        const pp = backPop(t, 2.6 + i * 0.15, 0.6);
         const at = a => [ORBIT.x + Math.cos(a) * ORBIT.rx, ORBIT.y + Math.sin(a) * ORBIT.ry];
         const depth = a => 0.45 + 0.55 * (Math.sin(a) + 1) / 2;
         const a = G * 0.4 + i * (Math.PI * 2 / ORBIT_ICONS.length);
-        place(icon, ...at(a), pp, clamp(pp * 2) * depth(a));
+        place(icon, ...at(a), pp.s, pp.o * depth(a));
         ghosts.forEach((g, k) => {
           const ga = a - TRAIL[k];
-          place(g, ...at(ga), pp * (1 - 0.12 * (k + 1)), clamp(pp * 2) * depth(ga) * (0.35 - 0.1 * k));
+          place(g, ...at(ga), pp.s * (1 - 0.12 * (k + 1)), pp.o * depth(ga) * (0.35 - 0.1 * k));
         });
       });
     }

@@ -217,8 +217,8 @@
       // the loop sits in its place for the whole chapter, at 86% of its size
       s.loopLayer.style.transform = `translate(${DL.x - LOOP.cx}px,${DL.y - LOOP.cy}px) scale(${DL.k})`;
       // under the loop: the agent's goal, then the context strip in its place
-      const gp = P(t, c[0] + 0.6, 0.45, backOut);
-      place(s.goal, DL.x, MEM_Y, gp, clamp(gp * 2) * (1 - P(t, c[0] + 3.4, 0.3)));
+      const gp = backPop(t, c[0] + 0.6);
+      place(s.goal, DL.x, MEM_Y, gp.s, gp.o * (1 - P(t, c[0] + 3.4, 0.3)));
 
       // The app instances: A runs the loop, crashes before the invite and leaves; B slides into its place, replays
       // the history, then runs the invite
@@ -266,8 +266,8 @@
       s.restored.style.transform = `scale(${rp.s})`;
       placeCrashMarks(s.crash, t, crashAt, crashAt + 0.3, aOut, ax, ay);
       placeFlash(s.flash, t, crashAt);
-      const cp = P(t, complete, 0.45, backOut);
-      place(s.complete, DL.x, DL.y - 25, cp, clamp(cp * 2));
+      const cp = backPop(t, complete);
+      place(s.complete, DL.x, DL.y - 25, cp.s, cp.o);
 
       // Temporal, outside the app, with the Event History: untouched by the crash
       place(s.outside, OUTSIDE.x, OUTSIDE.y, 1, P(t, loopAt + 0.4, 0.5));

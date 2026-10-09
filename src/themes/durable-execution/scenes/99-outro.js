@@ -29,8 +29,8 @@
       place(s.t, 960, 560, 1, P(t, 0.3, 0.8));
       // tiles pop in one after the other, then each step gets its check
       s.tiles.forEach((e, i) => {
-        const p = P(t, 0.1 + i * 0.12, 0.45, backOut);
-        place(e, ROW.x0 + i * ROW.gap, ROW.y, p, clamp(p * 2));
+        const p = backPop(t, 0.1 + i * 0.12);
+        place(e, ROW.x0 + i * ROW.gap, ROW.y, p.s, p.o);
         const okAt = 0.8 + i * 0.25, ok = popIn(t, okAt);
         e.ok.style.opacity = ok.o;
         e.ok.style.transform = `scale(${ok.s})`;

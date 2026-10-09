@@ -63,13 +63,13 @@
         // the request is already out when the marker starts walking
         const firedAt = day === 0 ? c[0] + 0.3 : dayAt(day);
         const fired = t >= firedAt;
-        const p = P(t, c[0] + 0.1 + i * 0.1, 0.45, backOut);
+        const p = backPop(t, c[0] + 0.1 + i * 0.1);
         tile.style.borderColor = fired ? C.violet : C.line;
-        place(tile, dayX(day), LINE.y - 110, p, clamp(p * 2));
+        place(tile, dayX(day), LINE.y - 110, p.s, p.o);
         stem.style.background = fired ? C.violet : C.line;
         place(stem, dayX(day), LINE.y - 33, 1, P(t, c[0] + 0.3, 0.3));
-        const tp = P(t, firedAt, 0.45, backOut);
-        place(e, dayX(day), LINE.y - 216, tp, clamp(tp * 2));
+        const tp = backPop(t, firedAt);
+        place(e, dayX(day), LINE.y - 216, tp.s, tp.o);
       });
 
       // Temporal writes each timer to the Event History, so the timers survive restarts like the wait itself
@@ -79,8 +79,8 @@
         showRow(s.history.rows[i], P(t, at - 0.1, 0.3));
         setRowTag(s.history, i, t, 'SAVED', at, P(t, at, 0.25));
       });
-      const dp = P(t, c[0] + 4.5, 0.45, backOut);
-      place(s.durable, dayX(0) + CARD.w / 2, CARD.y + CARD.h / 2 + 63, dp, clamp(dp * 2));
+      const dp = backPop(t, c[0] + 4.5);
+      place(s.durable, dayX(0) + CARD.w / 2, CARD.y + CARD.h / 2 + 63, dp.s, dp.o);
     }
   });
 }

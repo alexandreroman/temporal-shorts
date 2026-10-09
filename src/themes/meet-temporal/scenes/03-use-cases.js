@@ -145,12 +145,12 @@
         const prog = P(t, spokeAt(i), 0.5);
         draw(s.spokes[i], prog, rest);
         sparkOnPath(s.pulses[i], s.spokes[i], prog);
-        const hp = P(t, spokeAt(i) + 0.45, 0.5, backOut);
+        const hp = backPop(t, spokeAt(i) + 0.45, 0.5);
         if (i === AI) {
           // the hub follows the morph, fading as the orb takes over; its text fades before the orb's eyes come in,
           // and a violet light glows in it while it fills the stage
           const hub = s.hubs[i];
-          place(hub, x, y, hp * size / HUB_SIZE, clamp(hp * 2) * (1 - orb));
+          place(hub, x, y, hp.s * size / HUB_SIZE, hp.o * (1 - orb));
           // WORKFLOWS fades out as the hub swells, and AI slides down to the disc's center
           const alone = ease(P(t, morphAt, 0.8));
           const drop = Math.round((s.aiRest.offsetHeight + 4) / 2 * alone * 100) / 100;
@@ -162,22 +162,22 @@
           hub.style.background = light > 0
             ? `radial-gradient(circle at 50% 42%, rgba(${RGB.violet},${light.toFixed(3)}), ${C.uv} 70%)` : C.uv;
         } else {
-          place(s.hubs[i], hub.x, hub.y, hp, clamp(hp * 2) * o);
+          place(s.hubs[i], hub.x, hub.y, hp.s, hp.o * o);
         }
         s.bubbles[i].forEach((b, k) => {
           const [bx, by] = bubbleAt(hub, k);
           // a gentle float around its place (ambient, driven by G), each bubble on its own phase
           const phase = (i * 3 + k) * 1.9;
           const x = bx + FLOAT * Math.sin(G * 0.9 + phase), y = by + FLOAT * Math.cos(G * 0.7 + phase);
-          const bp = P(t, spokeAt(i) + 0.8 + k * 0.12, 0.45, backOut);
-          place(b, x, y, bp, clamp(bp * 2) * rest);
+          const bp = backPop(t, spokeAt(i) + 0.8 + k * 0.12);
+          place(b, x, y, bp.s, bp.o * rest);
           // the link from the hub's edge to the bubble's edge
           const d = Math.hypot(x - hub.x, y - hub.y);
           const ux = (x - hub.x) / d, uy = (y - hub.y) / d;
           const link = s.links[i][k];
           link.setAttribute('d', `M ${hub.x + ux * (HUB_SIZE / 2 + 6)} ${hub.y + uy * (HUB_SIZE / 2 + 6)} `
             + `L ${x - ux * (BUBBLE.size / 2 + 6)} ${y - uy * (BUBBLE.size / 2 + 6)}`);
-          link.style.opacity = clamp(bp * 2) * rest;
+          link.style.opacity = bp.o * rest;
         });
       });
     }

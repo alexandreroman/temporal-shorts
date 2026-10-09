@@ -124,8 +124,8 @@
       s.bizL = s.bar.querySelector('.bizL'); s.plumbL = s.bar.querySelector('.plumbL');
     },
     update(t, c, s) {
-      const cp = P(t, c[0] + 0.1, 0.6, backOut);
-      place(s.card, CARD.x, CARD.y, cp, clamp(cp * 2));
+      const cp = backPop(t, c[0] + 0.1, 0.6);
+      place(s.card, CARD.x, CARD.y, cp.s, cp.o);
       place(s.cardL, CARD.x, CARD.y - s.card.h / 2 - 38, 1, P(t, c[0] + 0.5, 0.4));
 
       const landings = BUGS.map(b => c[1] + b.at); // when each bug badge lands, in scene time
@@ -134,11 +134,11 @@
       // bug lands, and jolts and flickers red with every bug that lands on it
       const tileJolts = PLUMBING.map((p, i) => {
         const at = c[0] + p.at;
-        const tp = P(t, at, 0.45, backOut);
+        const tp = backPop(t, at);
         const hits = landings.filter((_, k) => BUGS[k].tile === i);
         const buggy = hits.some(h => t >= h);
         const [dx, dy] = jolts(t, hits, 7);
-        place(s.tiles[i], tileX(p) + dx, tileY(p) + dy, tp, clamp(tp * 2));
+        place(s.tiles[i], tileX(p) + dx, tileY(p) + dy, tp.s, tp.o);
         s.tiles[i].style.borderColor = buggy ? C.red : C.line;
         s.tiles[i].style.boxShadow = redGlow(flicker(t, hits));
         s.wires[i].setAttribute('stroke', buggy ? C.red : C.slate);

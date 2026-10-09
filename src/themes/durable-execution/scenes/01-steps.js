@@ -71,8 +71,8 @@
       // order card: pops in, its BUY button is pressed at `press`
       const press = c[0] + 1.5;
       const out = P(t, c[2], 0.4);
-      const op = P(t, c[0] + 0.1, 0.5, backOut);
-      place(s.order, 960, ORDER_Y, op, clamp(op * 2) * (1 - out));
+      const op = backPop(t, c[0] + 0.1, 0.5);
+      place(s.order, 960, ORDER_Y, op.s, op.o * (1 - out));
       s.order.style.borderColor = t >= press ? C.uv : C.line;
       s.order.buy.style.transform = `scale(${1 - 0.1 * win(t, press - 0.12, press + 0.05, 0.12)})`;
       s.order.buy.style.background = t >= press ? C.uv : `rgba(${RGB.uv},.15)`;

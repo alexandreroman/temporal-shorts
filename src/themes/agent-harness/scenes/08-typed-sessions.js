@@ -150,11 +150,6 @@
     e.style.opacity = clamp(o);
     e.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
   };
-  // pops an element in place with a small overshoot
-  const popIn = (e, p) => {
-    e.style.opacity = clamp(p * 2);
-    e.style.transform = `scale(${p})`;
-  };
 
   scene({
     chapter: 8, title: 'Typed sessions',
@@ -217,18 +212,18 @@
       }));
     },
     update(t, c, s) {
-      const pop = at => P(t, at, 0.5, backOut);
+      const pop = at => backPop(t, at, 0.5);
       const showLines = (card, at) => card.lines.forEach((line, i) => showRow(line, P(t, at + i * 0.08, 0.3), 16));
 
       // ---- c[0]: the Python class, then the TypeScript generated from it; matching lines light up pair by pair
       place(s.lblL, CODE.x, HEADING_Y, 1, P(t, c[0] + 0.1, 0.4));
       const pyIn = pop(c[0] + 0.2);
-      place(s.python, CODE.x, PY.y, pyIn, clamp(pyIn * 2));
+      place(s.python, CODE.x, PY.y, pyIn.s, pyIn.o);
       showLines(s.python, c[0] + 0.6);
       draw(s.gen, P(t, c[0] + 1.8, 0.5));
       placeLeft(s.genL, GEN.lblX, (GEN.top + GEN.bottom) / 2, P(t, c[0] + 2.0, 0.4));
       const tsIn = pop(c[0] + 2.4);
-      place(s.ts, CODE.x, TS.y, tsIn, clamp(tsIn * 2));
+      place(s.ts, CODE.x, TS.y, tsIn.s, tsIn.o);
       showLines(s.ts, c[0] + 2.8);
       // each pair reads about 1.4 s; the last one stays lit until the UI window starts to enter
       const pairStarts = [c[0] + 3.9, c[0] + 5.3, c[0] + 6.7];
@@ -242,7 +237,7 @@
       // ---- c[1]: the trip planner UI, its typed session with the generated types, then the fields it binds
       const uiIn = pop(c[1] + 0.5);
       place(s.lblR, UI.x, HEADING_Y, 1, P(t, c[1] + 0.5, 0.5));
-      place(s.planner, UI.x, UI.y, uiIn, clamp(uiIn * 2));
+      place(s.planner, UI.x, UI.y, uiIn.s, uiIn.o);
       s.planner.rows.forEach((row, i) => showRow(row, P(t, c[1] + 1.2 + i * 0.4, 0.4), 24));
       s.planner.foot.style.opacity = P(t, c[1] + 2.5, 0.4);
       draw(s.link, P(t, c[1] + 3.2, 0.6));
@@ -256,12 +251,12 @@
       // bindings: the rows read trip.items, then the total reads trip.total_usd; each lights its Trip field
       const itemsAt = c[1] + 4.4, totalAt = c[1] + 5.4;
       s.bindItems.style.opacity = P(t, itemsAt, 0.3);
-      popIn(s.planner.itemsBadge, pop(itemsAt + 0.1));
+      popScale(s.planner.itemsBadge, pop(itemsAt + 0.1));
       s.planner.rows.forEach(row => { row.style.borderColor = t >= itemsAt + 0.15 ? C.uv : C.line; });
       s.bindTotal.style.opacity = P(t, totalAt, 0.3);
-      popIn(s.planner.totalBadge, pop(totalAt + 0.1));
+      popScale(s.planner.totalBadge, pop(totalAt + 0.1));
       place(s.sdkRow, SDK_ROW.x, BOTTOM - UI.tagH / 2, 1, P(t, c[1] + 6.0, 0.4));
-      s.sdks.forEach((e, i) => popIn(e, pop(c[1] + 6.1 + i * 0.3)));
+      s.sdks.forEach((e, i) => popScale(e, pop(c[1] + 6.1 + i * 0.3)));
     }
   });
 }

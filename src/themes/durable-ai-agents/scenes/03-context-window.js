@@ -129,8 +129,8 @@
       });
     },
     update(t, c, s) {
-      const sp = P(t, c[0] + 0.1, 0.7, backOut);
-      place(s.sheet, 760, 480, sp, clamp(sp * 2));
+      const sp = backPop(t, c[0] + 0.1, 0.7);
+      place(s.sheet, 760, 480, sp.s, sp.o);
       place(s.sheetT, 760, 150, 1, P(t, c[0] + 0.6, 0.4));
       place(s.llm.root, 1560, 445, P(t, c[0] + 0.4, 0.6, backOut), P(t, c[0] + 0.4, 0.4));
       llmState(s.llm, { look: -1 });
@@ -176,9 +176,9 @@
       place(s.gauge, 1130, 480, 1, P(t, c[0] + 1.6, 0.5));
       place(s.gaugeL, 1130, 810, 1, P(t, c[0] + 1.6, 0.5));
       // the token count arrives with the gauge and follows it part by part
-      const bp = P(t, c[0] + 1.6, 0.5, backOut);
+      const bp = backPop(t, c[0] + 1.6, 0.5);
       // the 105 px box ends on the sheet's bottom edge (480 + 300)
-      place(s.bill, 1560, 727.5, bp, clamp(bp * 2));
+      place(s.bill, 1560, 727.5, bp.s, bp.o);
       s.tok.textContent = tokensFor(used).toLocaleString('en-US') + ' tokens';
       // money spent at each part, mid-slide: the big coin swells, a small coin flies off, "+N" rises and fades
       const spendAt = partAt.map(at => at + 0.1);

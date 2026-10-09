@@ -249,9 +249,9 @@
       s.faces.forEach((e, i) => {
         const { show } = founders[i];
         const m = marks[i];
-        const pop = P(t, show, 0.5, backOut);
+        const pop = backPop(t, show, 0.5);
         // the large face is the one shown until it lands; then the small one takes over on the line
-        place(e, Math.round(m.x), Math.round(m.y), pop * m.size / INTRO.size, landed(i) ? 0 : clamp(pop * 2));
+        place(e, Math.round(m.x), Math.round(m.y), pop.s * m.size / INTRO.size, landed(i) ? 0 : pop.o);
         place(s.marks[i], Math.round(m.x), Math.round(m.y), 1, landed(i) ? 1 : 0);
         rise(s.names[i], Math.round(nameX(i, introSize(t))), Math.round(introY(t)),
           P(t, show + 0.2, 0.5) * (1 - P(t, founders[i].fly, 0.6)), 12);

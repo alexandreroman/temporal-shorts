@@ -15,8 +15,8 @@
     },
     update(t, c, s) {
       rise(s.t, 700, 440, P(t, 0.15, 0.9));
-      const p = P(t, 0.4, 0.9, backOut);
-      place(s.llm.root, 1460, 460, p, clamp(p * 2));
+      const p = backPop(t, 0.4, 0.9);
+      place(s.llm.root, 1460, 460, p.s, p.o);
       llmState(s.llm, { look: Math.sin(G * 0.8) * 0.6 });
       s.orb.forEach((e, i) => {
         const a = G * 0.45 + i * (Math.PI * 2 / 5), pp = P(t, 0.9 + i * 0.15, 0.6, backOut);

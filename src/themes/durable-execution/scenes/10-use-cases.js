@@ -35,8 +35,8 @@
     update(t, c, s) {
       // one tile at a time while "any process that must run to the end" reads, then each lights up as it is named
       s.uses.forEach((e, i) => {
-        const p = P(t, c[0] + 1.6 + i * 0.8, 0.45, backOut);
-        place(e, 960 + (i - 1.5) * USE_CASE_ROW.pitch, USE_CASE_ROW.y, p, clamp(p * 2));
+        const p = backPop(t, c[0] + 1.6 + i * 0.8);
+        place(e, 960 + (i - 1.5) * USE_CASE_ROW.pitch, USE_CASE_ROW.y, p.s, p.o);
         const litFrom = c[1] + NAMED_AT[i];
         const litUntil = i + 1 < NAMED_AT.length ? c[1] + NAMED_AT[i + 1] : litFrom + LAST_LIT;
         e.style.borderColor = t >= litFrom && t < litUntil ? C.uv : C.line;

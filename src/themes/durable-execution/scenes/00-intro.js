@@ -57,8 +57,8 @@
       const fade = 1 - P(u, LOOP.reset, 0.4); // checks and neon links fade out before the next pass
       const hitAt = i => (i === LOOP.fail ? LOOP.pass : LOOP.arrive[i]); // when step i passes
       s.tiles.forEach((e, i) => {
-        const p = P(t, 0.5 + i * 0.15, 0.5, backOut);
-        place(e, CHAIN.x, tileY(i), p, clamp(p * 2));
+        const p = backPop(t, 0.5 + i * 0.15, 0.5);
+        place(e, CHAIN.x, tileY(i), p.s, p.o);
         const failed = i === LOOP.fail && u >= LOOP.arrive[i] && u < LOOP.retry;
         const retrying = i === LOOP.fail && u >= LOOP.retry && u < LOOP.pass;
         const passed = u >= hitAt(i);
