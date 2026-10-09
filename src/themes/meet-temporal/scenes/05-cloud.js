@@ -64,8 +64,8 @@
   const SECRET = 'card: $42';
   // its ciphertext, as chargeCard's completed event shows it (as long as SECRET, so the card keeps its width)
   const CIPHER = '9f3a…c21e';
-  // the Event History: each event as it happens, with its payload if it carries data (the Workflow's input, an
-  // Activity's input or result), encrypted; an Activity's start carries none
+  // the Event History: each event, with its payload if it carries data (the Workflow's input, an Activity's input
+  // or result), encrypted; an Activity's start carries none
   const HISTORY = [['OrderWorkflow', 'started', '4be1…07da'], ['chargeCard', 'scheduled', 'c08d…5b17'],
     ['chargeCard', 'started', null], ['chargeCard', 'completed', CIPHER],
     ['shipPackage', 'scheduled', 'e6a2…3f90'], ['shipPackage', 'started', null],
@@ -338,14 +338,16 @@
       // task appears; an Activity's result is persisted, and a new Workflow task is queued
       const toQueue = TRIP.back + TRIP.toQueue, toRow = TRIP.back + TRIP.toRow;
       const d0 = c[1] + 0.8, a0 = arriveAt(d0), p0 = a0 + 2 * TRIP.step;
-      // an Activity's scheduled and started events land 1.2 s apart, each a readable beat
+      // an Activity task waits 1.2 s in the queue, a readable beat after its scheduled event
       const q1 = p0 + toQueue, d1 = q1 + 1.2, a1 = arriveAt(d1);
       const q2 = landed + 0.6, d2 = q2 + 0.8, a2 = arriveAt(d2), p2 = a2 + 2 * TRIP.step;
       const q3 = p2 + toQueue, d3 = q3 + 1.2, a3 = arriveAt(d3), r3 = a3 + 2 * TRIP.step;
       const q4 = r3 + toRow + 0.6, d4 = q4 + 0.8, a4 = arriveAt(d4), done = a4 + TRIP.step + 0.3;
       const queued = [c[0] + 1.5, q1, q2, q3, q4], dispatch = [d0, d1, d2, d3, d4];
-      // each event at the moment it happens
-      const rowAt = [c[1] + 0.3, q1, d1, landed, q3, d3, r3 + toRow, done + toRow];
+      // each event at the moment Temporal writes it: an Activity's STARTED event only once its result reaches
+      // Temporal Cloud (at the connector dot), as Temporal records an Activity's start when the Activity closes,
+      // then its COMPLETED event as the result lands in its row
+      const rowAt = [c[1] + 0.3, q1, atDot, landed, q3, r3 + TRIP.back, r3 + toRow, done + toRow];
       // the history scrolls up one row, eased, before each event beyond the fifth lands: it rests on whole rows
       const scroll = PITCH * rowAt.slice(VISIBLE).map(at => P(t, at - 0.6, 0.45, ease)).reduce((a, b) => a + b, 0);
       const rowY = i => PERS.top + VIEW.top + rowInView(i) - scroll;
