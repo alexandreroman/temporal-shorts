@@ -278,12 +278,7 @@
       // a short bloom that settles to a faint lasting glow, and quick ripples, both done before the subtitle ends
       place(s.bloom, ...tileCenter, 0.6 + 0.5 * P(t, arrive, 0.7), win(t, arrive, arrive + 0.5, 0.3) * 0.9
         + P(t, arrive + 0.5, 0.5) * 0.35);
-      s.ripples.forEach((e, i) => {
-        const p = P(t, arrive + i * 0.15, 0.7, x => 1 - Math.pow(1 - x, 2));
-        const size = Math.round(lerp(320, 560, p) / 2) * 2;
-        e.style.width = e.style.height = size + 'px';
-        place(e, ...tileCenter, 1, p > 0 && p < 1 ? (1 - p) * 0.9 : 0);
-      });
+      placeRipples(s.ripples, t, arrive, ...tileCenter, 320, 560, { d: 0.7, step: 0.15 });
       // the fork, drawn once the founders reach 2019, just before Temporal's tile lights
       draw(s.fork, P(t, c[3] + 1.3, 0.7));
       // on top of the arch's apex (halfway to its control point), 10 px clear of it

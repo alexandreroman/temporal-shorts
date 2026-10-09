@@ -97,9 +97,10 @@ function sparkOnPath(spark, pathEl, prog, dx = 0, dy = 0) {
 function makeRipples(p, n, rgb) {
   return Array.from({ length: n }, () => E(p, '', '', { borderRadius: '50%', border: `3px solid rgb(${rgb})` }));
 }
-function placeRipples(rings, t, at, x, y, size0, size1, d = 1.2) {
+// Each ring grows over d seconds, step seconds after the one before it
+function placeRipples(rings, t, at, x, y, size0, size1, { d = 1.2, step = 0.25 } = {}) {
   rings.forEach((e, i) => {
-    const p = P(t, at + i * 0.25, d, x => 1 - Math.pow(1 - x, 2));
+    const p = P(t, at + i * step, d, x => 1 - Math.pow(1 - x, 2));
     // sized, not scaled, so the ring keeps its 3 px line
     const size = Math.round(lerp(size0, size1, p) / 2) * 2;
     e.style.width = e.style.height = size + 'px';
