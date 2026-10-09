@@ -111,6 +111,17 @@
   const HEAD = [1100, 640];
   // at rest: the whole chart at 55% on the right (its middle at screen x 1360), the value on the left, clear of it
   const REST = { at: [630, -500], scale: 0.55, x: 1360, valueX: 600 };
+  // On the settled chart (screen pixels), a bracket arching over the climb from FEB 2022 to SEP 2026, on the
+  // upper left side of it, 80 px off the straight line between them at its apex; its label 100 px further out,
+  // clear of the arch, the line and the value
+  const BRACKET = { from: [1013.5, 790], to: [1706.5, 240], bulge: 160, labelOut: 100 };
+  BRACKET.mid = [(BRACKET.from[0] + BRACKET.to[0]) / 2, (BRACKET.from[1] + BRACKET.to[1]) / 2];
+  {
+    const dx = BRACKET.to[0] - BRACKET.from[0], dy = BRACKET.to[1] - BRACKET.from[1], L = Math.hypot(dx, dy);
+    BRACKET.normal = [dy / L, -dx / L].map(v => -Math.abs(v));
+  }
+  BRACKET.ctrl = BRACKET.mid.map((v, k) => v + BRACKET.normal[k] * BRACKET.bulge);
+  BRACKET.label = BRACKET.mid.map((v, k) => Math.round(v + BRACKET.normal[k] * (BRACKET.bulge / 2 + BRACKET.labelOut)));
   const GRID = 80;
   const STARS = Array.from({ length: 220 }, (_, i) => ({
     x: hash(i * 5 + 11) * 1920, y: hash(i * 5 + 12) * 1080, r: 0.6 + hash(i * 5 + 13) * 1.4,
@@ -147,7 +158,10 @@
         after: 1.2,
       },
       // the climb, the arrival, the hold on $12.55B
-      { text: "In September 2026, investors valued Temporal at $12.55 billion.", after: 5.4 },
+      // the climb and the arrival; the chart settles before the next subtitle
+      { text: "In September 2026, investors valued Temporal at $12.55 billion.", after: 1.8 },
+      // on the settled chart, a bracket from 2022 to 2026, ×8; then, by the value, CORE INFRASTRUCTURE FOR AI
+      { text: "That's more than 8 times its 2022 value: investors see it as core infrastructure for AI.", after: 1.6 },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
@@ -227,6 +241,16 @@
         'tile', { width: '176px', height: '104px', padding: '12px 0', textAlign: 'center', background: '#17182A' }));
       s.value = makeNumber(root, 200);
       s.valueLabel = makeLabel(root, 'Valuation · September 2026');
+      // the ×8 bracket, its pulse and its label; the AI tag under the value, a fixed even width
+      s.bracket = path(s.links, `M ${BRACKET.from.join(' ')} Q ${BRACKET.ctrl.join(' ')} ${BRACKET.to.join(' ')}`,
+        C.violet, 2.5, true);
+      s.bracketPulse = makeSpark(root, 14, '182,100,255');
+      s.bracketLabel = E(root, '×8 since 2022', 'mono', {
+        fontSize: '22px', lineHeight: '28px', letterSpacing: '.12em', paddingLeft: '.12em', textTransform: 'uppercase',
+        color: C.ink, whiteSpace: 'nowrap',
+      });
+      s.aiTag = tag(root, 'Core infrastructure for AI', 'neon solid');
+      Object.assign(s.aiTag.style, { width: '440px', textAlign: 'center', boxShadow: '0 0 26px rgba(219,255,75,.3)' });
     },
     update(t, c, s) {
       setCamera(s.cam, t, this.dur);
@@ -461,6 +485,15 @@
       place(s.value, Math.round(lerp(700, REST.valueX, settle) + kx), Math.round(lerp(300, 480, settle) + ky),
         lerp(0.5, 1, settle) * swell(t, arrive, 0.1), P(t, climb, 0.4));
       place(s.valueLabel, REST.valueX, 610, 1, P(t, arrive + 1.2, 0.5));
+      // c[4]: the ×8 bracket draws over the climb with a pulse, its label pops; then the AI tag, as the subtitle
+      // reaches its phrase
+      const bracketAt = c[4] + 0.5;
+      draw(s.bracket, P(t, bracketAt, 0.9));
+      sparkOnPath(s.bracketPulse, s.bracket, P(t, bracketAt, 0.9, x => x));
+      const bl = popIn(t, bracketAt + 0.8);
+      place(s.bracketLabel, ...BRACKET.label, bl.s, bl.o);
+      const ai = P(t, c[4] + 2.8, 0.45, backOut);
+      place(s.aiTag, REST.valueX, 690, ai, clamp(ai * 2));
     }
   });
 }

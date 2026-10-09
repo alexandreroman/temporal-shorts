@@ -64,6 +64,8 @@ and each chapter has a cinematic moment, listed in its visuals.
 - https://www.uber.com/en-US/blog/open-source-orchestration-tool-cadence-overview/
 - https://temporal.io/blog/temporal-v1-announcement
 - https://temporal.io/news/temporal-raises-550m-at-a-12-55b-valuation
+- https://am.gs.com/en-us/institutions/news/press-release/2026/temporal-raises-550m-ai-infrastructure-demand
+  (Goldman Sachs Alternatives: AI infrastructure demand, chapter 06)
 - https://temporal.io/blog/temporal-raises-usd300m-series-d-at-a-usd5b-valuation
 - https://techcrunch.com/2025/03/31/temporal-lands-146-million-at-a-flat-valuation-eyes-agentic-ai-expansion
 - https://sdtimes.com/temporal-io-raises-103-million-series-b-company-valuation-passes-1-5-billion/
@@ -313,10 +315,17 @@ and each chapter has a cinematic moment, listed in its visuals.
     flash bloom, shockwave rings and sparks. The camera pulls back to the
     whole climb on the right, and "$12.55B" holds huge on the left,
     VALUATION · SEPTEMBER 2026 under it.
+- **3:36** That's more than 8 times its 2022 value: investors see it as core
+  infrastructure for AI.
+  - Visuals: On the settled chart, a violet arch draws over the climb from
+    FEB 2022 to SEP 2026 with a pulse running along it, and "×8 SINCE 2022"
+    pops above its apex. Then, as the subtitle reaches its phrase, a neon
+    CORE INFRASTRUCTURE FOR AI tag pops under VALUATION · SEPTEMBER 2026,
+    and the whole holds.
 
 ## Outro
 
-- **3:40** Temporal keeps code running whatever fails, from everyday apps
+- **3:45** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,
