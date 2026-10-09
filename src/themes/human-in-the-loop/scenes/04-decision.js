@@ -28,7 +28,7 @@
     subs: [
       {
         text: "On day three, Maria taps Approve. "
-          + "Temporal delivers the decision to the Workflow as a <b>Signal</b>.",
+          + "Temporal records the decision in the history as a <b>Signal</b>.",
         after: 1.4,
       },
       {
