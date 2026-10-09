@@ -221,7 +221,7 @@
         s.jr.tags[i].style.opacity = P(t, saved[i], 0.25);
         s.jr.tags[i].style.transform = `scale(${swell(t, isReplayed ? replay[i] : saved[i], 0.14)})`;
       });
-      markCrash(s.jr, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
+      markCrash(s.jr, t, crashAt);
       const scanning = replay.findIndex(q => t >= q - 0.2 && t < q + 0.7);
       setScan(s.jr, rowTop(Math.max(0, scanning)) - 3, scanning >= 0 ? 1 : 0);
       const dp = P(t, complete, 0.45, backOut);

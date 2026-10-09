@@ -245,7 +245,7 @@
       });
 
       // Event History rows and their status tags
-      markCrash(s.jr, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
+      markCrash(s.jr, t, crashAt);
       s.jr.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
       s.jr.tags.forEach((e, i) => {
         const isReused = i < 4 && t >= replay[i] + 0.05, isTold = i < 4 && t >= told[i];

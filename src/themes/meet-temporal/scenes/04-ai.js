@@ -302,7 +302,7 @@
         const [tx, ty] = [memSlotX(i), MEM_SLOT_Y];
         fly(e, t, q, CARD_X, rowMid(i), q + 0.1, 0.55, tx, ty, q + 0.65, tx, ty);
       });
-      markCrash(s.history, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
+      markCrash(s.history, t, crashAt);
       s.history.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.05, 0.3)));
       // a row turns SAVED as it is written; on the replay its tag says the result is reused, not paid or run again
       const reusedAt = i => replay[i] + 0.25;

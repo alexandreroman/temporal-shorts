@@ -573,10 +573,11 @@ function setScan(card, top, o) {
   card.scan.style.top = top + 'px';
   card.scan.style.opacity = clamp(o);
 }
-// Crash marks of an Event History card: the tinted kept rows (oKept) and the crash line (oCut)
-function markCrash(card, oKept, oCut) {
-  card.kept.style.opacity = clamp(oKept);
-  card.cut.style.opacity = clamp(oCut);
+// Crash marks of an Event History card after a crash at crashAt: the crash line shows first, then the tinted block
+// over the rows that survive it
+function markCrash(card, t, crashAt) {
+  card.kept.style.opacity = P(t, crashAt + 0.7, 0.4);
+  card.cut.style.opacity = P(t, crashAt + 0.3, 0.3);
 }
 // Small card carrying one step result between the app and Temporal: UV for a model call or an Activity, green
 // for a tool result; label: the card text, e.g. the kind of call the result comes from

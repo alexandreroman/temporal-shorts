@@ -172,7 +172,7 @@
       // Event History: rows 1-3 kept through the crash, replayed rows 2 and 3 lit and re-tagged, then row 4 written
       // by the second attempt below the crash line, then rows 5 and 6
       const hist = shot.hist;
-      markCrash(hist, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));
+      markCrash(hist, t, crashAt);
       const written = [-Infinity, -Infinity, -Infinity, retrySaved, saved, completed];
       hist.rows.forEach((_, i) => showHistoryRow(hist, i, P(t, written[i] - 0.1, 0.3)));
       hist.tags.forEach((_, i) => {
