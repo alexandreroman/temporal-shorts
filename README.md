@@ -66,10 +66,13 @@ src/styles.css         Temporal brand styles and the live player's CSS
 src/engine.js          timeline, easing, placement, SVG icons, components,
                        page start (boot)
 src/shared.js          brand helpers shared by the themes (colors, tiles,
-                       title and end cards, step rows, crash and takeover
-                       effects, status tags, app and Temporal panels, Event
-                       History card, counters, small animation helpers)
-                       and the "What you can build" chapter (useCaseScene)
+                       title and end cards, step rows, the agentic loop,
+                       the lunch example with its context panel and
+                       blocks, crash and takeover effects, status tags,
+                       app and Temporal panels, the app panel of numbered
+                       step lines, Event History card, counters, small
+                       animation helpers) and the "What you can build"
+                       chapter (useCaseScene)
 src/player.js          live player: controls, fit-to-window, shortcuts
 src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        theme page (background, subtitles, header, script
@@ -323,23 +326,24 @@ editing different scenes never touch the same file.
   local time and `c[i]` the moment subtitle `i` starts. Every animation is
   keyed to these cues. Continuous ambient loops (spinners, blinks, dashed
   flows) read the ambient clock `G`, never `t`: 0.5x slows `t` only.
-- Presenter stops: presenter mode holds at each cue but the first of a
-  scene, and at the end of each scene, just before its fade-out (`fadeOut`,
-  0.5 s by default). If a cue's animation starts a little before its cue,
-  set `stopLead` on that subtitle to move its stop that many seconds
-  earlier, just before the animation (`stopLead: 0.4` for an animation at
-  `c[1] - 0.35`). A scene whose ending animation should play straight into
-  the next scene sets `holdBeforeEnd` (seconds before its end, or
-  `(c, dur) => seconds` from its cues and duration) to hold there instead,
-  before that animation starts. A step whose picture stays
-  still from one stop to the next is empty: the player plays through it
-  rather than holding the same picture twice, and Left steps back over
-  it. Only the live player reads these: rendered frames do not change.
+- Presenter stops: presenter mode holds at each cue but the first of a scene,
+  and at the end of each scene, just before its fade-out (`fadeOut`, 0.5 s by
+  default). If a cue's animation starts a little before its cue, set `stopLead`
+  on that subtitle to move its stop that many seconds earlier, strictly before
+  the animation, as a step such as `t >= at` already shows at `at`
+  (`stopLead: 0.4` for an animation at `c[1] - 0.35`). A scene whose ending
+  animation should play straight into the next scene sets `holdBeforeEnd`
+  (seconds before its end, or `(c, dur) => seconds` from its cues and duration)
+  to hold there instead, before that animation starts. A step whose picture
+  stays still from one stop to the next is empty: the player plays through it
+  rather than holding the same picture twice, and Left steps back over it. Only
+  the live player reads these: rendered frames do not change.
 - Centering: the scene's optional `shift`, `[dx, dy]` or `(t, c) => [dx, dy]`,
   translates the whole scene so its composition is centered at (960, 515),
   inside the content frame y 150-880 between the header and the subtitles
-  (`make layout` checks it). `pan(t, from, stops)` eases between
-  offsets when the layout changes between phases.
+  (`make layout` checks it). `pan(t, from, stops, d)` eases between offsets over
+  `d` seconds (or a stop's own fourth value) when the layout changes between
+  phases.
 - Fades: every scene fades in and out over 0.5 s; the optional `fadeIn` and
   `fadeOut` set other durations, for a cut that continues one motion across
   two scenes (meet-temporal zooms into the AI hub this way). A chapter scene's
@@ -382,14 +386,13 @@ editing different scenes never touch the same file.
 2. Create `src/themes/<theme>/scenes/` with the scene files, and
    `src/themes/<theme>/shared.js` for the helpers of the theme alone,
    loaded right after `../../shared.js`.
-3. Add a card linking to `themes/<theme>/` in `src/index.html`; the cards
-   wrap and keep the same size, with no CSS change. Its icon animates on
-   hover: give it an animation in `src/home.css`, next to those of the
-   other cards. To keep the theme
-   unlisted, add the `hidden` attribute to its card
-   (`<a class="theme" href="themes/<theme>/" hidden>`): `make html` drops
-   the card from the built home page, so the page holds no link to the
-   theme, but the theme is still built, rendered, deployed and reachable at
+3. Add a card linking to `themes/<theme>/` in `src/index.html`; the cards wrap
+   and keep the same size, with no CSS change. Its icon animates on hover: give
+   it an animation in `src/home.css`, next to those of the other cards. To keep
+   the theme unlisted, add the `hidden` attribute to its card
+   (`<a class="theme" href="themes/<theme>/" hidden>`): `make html` drops the
+   card from the built home page, so the page holds no link to the theme, but
+   the theme is still built, rendered, deployed and reachable at
    `themes/<theme>/`. The home page `<meta name="description">` names the
    themes: edit it by hand.
 4. Write the script in `docs/<theme>/script.md`.

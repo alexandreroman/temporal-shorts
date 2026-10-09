@@ -91,12 +91,15 @@ workspaces run `make setup` automatically.
     from the scenes
   - `shared.js`: brand constants and components used by two or more
     themes (`C` and `RGB` colors, `assetUrl()` and `LOGO`, tiles, tags,
-    glows, step rows, app and TEMPORAL panels, the Event History card,
-    status tags, counters, crash and takeover effects, small animation
-    helpers such as `backPop()`, title and end cards) and the whole "What
-    you can build" chapter, `useCaseScene()`; icons used by two or more
-    themes are in `ICONS` in `engine.js`, the others in their theme's
-    `shared.js`
+    glows, step rows, the agentic loop (`makeAgentLoop()`), the lunch
+    example (`LUNCH_STEPS`, `LUNCH_HISTORY`) with its CONTEXT panel and
+    blocks (`makeMemory()`, `makeMemBlocks()`), app and TEMPORAL panels,
+    the app panel of numbered step lines (`makeLinesApp()`), the Event
+    History card, status tags, counters, crash and takeover effects, small
+    animation helpers such as `backPop()`, title and end cards) and the
+    whole "What you can build" chapter, `useCaseScene()`; icons used by
+    two or more themes are in `ICONS` in `engine.js`, the others in their
+    theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page; opens paused at a `#t=<time>` URL fragment
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
