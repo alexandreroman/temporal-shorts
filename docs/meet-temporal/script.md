@@ -53,8 +53,9 @@ and each chapter has a cinematic moment, listed in its visuals.
   chapter 05)
 - https://temporal.io/blog/samars-journey (Cadence became the standard way
   to build reliable stateful apps inside Uber)
-- https://docs.temporal.io/cadence-to-temporal (Temporal is a fork of
-  Cadence by its original creators)
+- https://github.com/temporalio/temporal (README: "Temporal is a mature
+  technology that originated as a fork of Uber's Cadence", developed by
+  "a startup by the creators of Cadence")
 - https://temporal.io/about (also the source of the founders' photo,
   `src/assets/temporal-founders.jpg`: "Portrait of Temporal Co-Founders,
   Maxim Fateev and Samar Abbas")
