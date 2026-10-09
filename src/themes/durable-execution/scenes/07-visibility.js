@@ -760,7 +760,9 @@
       // completes (ActivityTaskStarted, ActivityTaskCompleted, a Workflow Task, emailReceipt scheduled), then the
       // Workflow complete (29)
       p45.tabCount('Event History').textContent = finished ? 29 : shipped ? 23 : 17;
-      p45.tabCount('Pending Activities').textContent = shipped ? 0 : 1;
+      // one Activity is pending until the last one, emailReceipt (scheduled as shipPackage completes), ends
+      const lastActivity = o45.activities[o45.activities.length - 1];
+      p45.tabCount('Pending Activities').textContent = now < lastActivity.to ? 1 : 0;
       // pending card: each failure raises the attempt count (it bumps) and shows the last failure; between attempts
       // the Activity waits, SCHEDULED, for its retry
       const failures = o45.attempts.filter(a => a !== last && now >= a.to);
