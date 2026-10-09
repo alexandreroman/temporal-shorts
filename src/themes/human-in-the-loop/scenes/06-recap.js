@@ -28,7 +28,7 @@
       s.benefits.forEach((e, i) => {
         const at = c[0] + 0.7 + i * 1.1;
         const p = backPop(t, at);
-        place(e, 960 + (i - 1.5) * USE_CASE_ROW.pitch, USE_CASE_ROW.y, p.s, p.o);
+        place(e, useCaseX(i), USE_CASE_ROW.y, p.s, p.o);
         e.style.borderColor = t >= at && t < at + 1.0 ? C.uv : C.line;
       });
     }

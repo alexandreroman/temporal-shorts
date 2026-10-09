@@ -46,9 +46,9 @@ function iconTile(p, icon, label, w, h, col = C.ink, opts = {}) {
     alignItems: 'center', justifyContent: 'center',
   });
 }
-// The row of 4 tiles of the use cases ("What you can build") of every theme, which some recaps match: tiles of
-// w x h px, 48 px apart (x 120..1800), centered on y 515, the content frame's middle. Tile i is centered at
-// x = 960 + (i - 1.5) * pitch.
+// The row of 4 tiles of the use cases ("What you can build", see useCaseScene) of every theme, which some recaps
+// match: tiles of w x h px, 48 px apart (x 120..1800), centered on y 515, the content frame's middle. Tile i is
+// centered at x = useCaseX(i).
 const USE_CASE_ROW = { y: 515, w: 384, h: 460, pitch: 432 };
 // Type scale of the tiles of that row, as iconTile options: icon size and stroke, label font and gap above it
 const USE_CASE_TYPE = { size: 96, stroke: 1.6, font: 26, gap: 30 };
@@ -60,6 +60,32 @@ function useCaseTile(p, icon, label, example, w, h) {
     '<div class="mono" style="font-size:20px;color:var(--slate);white-space:nowrap;margin-top:16px">'
     + `${example}</div>`);
   return tile;
+}
+// x of the center of tile i (0 to 3) of a row of 4 tiles like USE_CASE_ROW, centered on x 960; pitch: the spacing
+// of a row with other tiles
+const useCaseX = (i, pitch = USE_CASE_ROW.pitch) => 960 + (i - 1.5) * pitch;
+// The "What you can build" chapter of an explainer, its scene before the outro: chapter, its number; uses, the
+// [icon, label, example] of each of the 4 useCaseTiles of USE_CASE_ROW; subs, its 2 subtitles. The tiles pop in
+// one at a time, 0.8 s apart from c[0] + firstAt, while subtitle 1 reads; subtitle 2 names them in order, and each
+// lights up (UV border) as it is named, namedAt[i] seconds after c[1], until the next one is named (the last one
+// stays lit for lastLit seconds).
+function useCaseScene({ chapter, uses, namedAt, subs, firstAt = 1.6, lastLit = 1.2 }) {
+  scene({
+    chapter, title: 'What you can build', subs,
+    build(root, s) {
+      const { w, h } = USE_CASE_ROW;
+      s.uses = uses.map(([icon, label, example]) => useCaseTile(root, icon, label, example, w, h));
+    },
+    update(t, c, s) {
+      s.uses.forEach((e, i) => {
+        const p = backPop(t, c[0] + firstAt + i * 0.8);
+        place(e, useCaseX(i), USE_CASE_ROW.y, p.s, p.o);
+        const litFrom = c[1] + namedAt[i];
+        const litUntil = i + 1 < namedAt.length ? c[1] + namedAt[i + 1] : litFrom + lastLit;
+        e.style.borderColor = t >= litFrom && t < litUntil ? C.uv : C.line;
+      });
+    },
+  });
 }
 // Mono label with a 22 px slate icon, at the top left corner of a panel; css: its position (left, top, ...)
 const panelLabel = (icon, text, css) => '<div class="lbl" style="position:absolute;display:flex;gap:10px;'

@@ -45,7 +45,7 @@
       const at = [c[0] + 3.0, c[0] + 3.8, c[0] + 4.5, c[0] + 5.4];
       s.ben.forEach((e, i) => {
         const p = backPop(t, at[i]);
-        place(e, 960 + (i - 1.5) * BEN.pitch, BEN.y, p.s, p.o);
+        place(e, useCaseX(i, BEN.pitch), BEN.y, p.s, p.o);
       });
     }
   });
