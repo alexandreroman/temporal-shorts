@@ -155,7 +155,7 @@ and each chapter has a cinematic moment, listed in its visuals.
   and waits for a person.
   - Visuals: The chapter opens on that same LLM orb and its halo, already
     at its final place: the halo fades into the LLM's own glow while the
-    rest of the agentic loop of Durable AI Agents emerges around it, at 80%
+    rest of the agentic loop of Durable AI Agents emerges around it, at 91%
     of its size: THINK (the LLM orb) on top, ACT (neon play tile) and
     OBSERVE (eye tile) below. APP INSTANCE A frames it, and TEMPORAL
     ("OUTSIDE THE APP") with an empty EVENT HISTORY enters on the right;

@@ -6,22 +6,25 @@
   // instance takes over and replays the history, nothing is lost and no LLM call is paid twice
   const LOOP = AGENT_LOOP;
   const COMET = 6; // sparks trailing the token
-  // the loop shows at 80% of its size for the whole chapter, centered in its app panel (scene pixels)
+  // the loop shows at 91% of its size for the whole chapter, in its app panel, 40 px clear of its header and of the
+  // context strip (stage pixels)
   const DL = AGENT_PLACE;
   // a point of the loop (from s.loop.pos) where it shows on the stage of the scene
   const durablePos = ([x, y]) => [DL.x + (x - LOOP.cx) * DL.k, DL.y + (y - LOOP.cy) * DL.k];
   // a point of the loop moved to the nearest one that shows on a whole pixel of the stage
-  const snapToPixel = ([x, y]) => [Math.round(x * DL.k) / DL.k, Math.round(y * DL.k) / DL.k];
+  const snapToPixel = ([x, y]) => [
+    LOOP.cx + (Math.round(DL.x + (x - LOOP.cx) * DL.k) - DL.x) / DL.k,
+    LOOP.cy + (Math.round(DL.y + (y - LOOP.cy) * DL.k) - DL.y) / DL.k,
+  ];
 
-  // Scene pixels; the shift [10, 0] puts the stage 10 px to the right. The app panel spans the content frame (y 150
-  // to 880) around the loop; the Temporal panel, as high, starts one GUTTER right of it, 800 px wide (x 932 to 1732
-  // on screen)
-  const APP = { x: DL.x, y: 515, w: 704, h: 730 };
+  // Stage pixels. The app panel spans the content frame (y 150 to 880) around the loop, x 140 to 900; the Temporal
+  // panel, as high, starts one GUTTER right of it, 840 px wide (x 940 to 1780)
+  const APP = { x: DL.x, y: 515, w: 760, h: 730 };
   const GUTTER = 40;
   // Under the loop in the app panel, 24 px from its sides and bottom (as its header): the agent's goal, then in its
   // place the AGENT CONTEXT strip, one block per saved row (n), gap px apart and pad px inside the strip, under its
   // label (the blocks' top at blockTop)
-  const MEM = { w: APP.w - 48, h: 116, n: 8, bw: 66, bh: 50, gap: 12, pad: 22, blockTop: 50 };
+  const MEM = { w: APP.w - 48, h: 116, n: 8, bw: 72, bh: 50, gap: 12, pad: 26, blockTop: 50 };
   const MEM_Y = APP.y + APP.h / 2 - 24 - MEM.h / 2;
   const memSlotX = i => APP.x - MEM.w / 2 + MEM.pad + MEM.bw / 2 + i * (MEM.bw + MEM.gap);
   const MEM_SLOT_Y = MEM_Y - MEM.h / 2 + MEM.blockTop + MEM.bh / 2;
@@ -29,15 +32,15 @@
   // the slot of the pills (a callout at a time, then NO PROGRESS LOST and NO TOKENS WASTED side by side, PILL_GAP
   // apart), CALLOUT_GAP clear of the card and of the panel's bottom. The card's header, rows and tags sit 26 px
   // inside it on every side
-  const OUTSIDE = { x: APP.x + APP.w / 2 + GUTTER + 400, y: APP.y, w: 800, h: APP.h };
+  const OUTSIDE = { x: APP.x + APP.w / 2 + GUTTER + 420, y: APP.y, w: 840, h: APP.h };
   const HIST_INSET = 20, HIST_TOP = 70, HIST_PAD = 26, CALLOUT_H = 50, CALLOUT_GAP = 30;
   const HIST_H = OUTSIDE.h - HIST_TOP - 2 * CALLOUT_GAP - CALLOUT_H;
   const HIST = {
     x: OUTSIDE.x, y: OUTSIDE.y - OUTSIDE.h / 2 + HIST_TOP + HIST_H / 2, w: OUTSIDE.w - 2 * HIST_INSET, h: HIST_H,
-    row0: 78, gap: 58, rowH: 40,
+    row0: 78, gap: 57, rowH: 42,
   };
   const CALLOUT_Y = OUTSIDE.y + OUTSIDE.h / 2 - CALLOUT_GAP - CALLOUT_H / 2;
-  const PILL = { w: 300, gap: 20 };
+  const PILL = { w: 300, gap: 24 };
   // Each turn of the loop, slow enough to follow the Event History (seconds into the turn): the LLM CALL card
   // leaves THINK and lands on its row at llm, the row turns SAVED, highlighted for HOLD; the TOOL CALL card leaves
   // ACT, lands at tool and its row holds the same; a card flies FLIGHT seconds
@@ -126,15 +129,16 @@
       // the token and its comet pass under the nodes, THINK's face included: moved before the first node, in order
       [s.loop.token, ...s.comet].forEach(e => s.loopLayer.insertBefore(e, s.loop.think.root));
       // the agent's goal, under the loop before the context strip, a fixed whole size, so it rests on whole pixels
-      s.goal = makeCard(root, 'Book lunch with Marie on Thursday.', 'user', null, 640);
-      Object.assign(s.goal.style, { whiteSpace: 'nowrap', height: '88px' });
+      s.goal = makeCard(root, 'Book lunch with Marie on Thursday.', 'user', null, MEM.w);
+      // as wide as the strip that takes its place (cards are 640 px at most)
+      Object.assign(s.goal.style, { whiteSpace: 'nowrap', height: '88px', maxWidth: 'none' });
 
       // Temporal with the Event History, outside the app (rows 1 to 6 survive the crash), the result cards between
       // the loop and the history, the pills under it, the crash marks and the takeover tag
       s.outside = makeTemporalPanel(root, OUTSIDE.w, OUTSIDE.h, { logoAt: [24, 20], noteAt: [24, 25], font: 18 });
       const rowsHtml = HISTORY.map((text, i) => `<span style="color:${isLLM(i) ? C.uv : '#141414'}">${text}</span>`);
       s.history = makeHistoryCard(root, rowsHtml, {
-        w: HIST.w, h: HIST.h, headerTop: HIST_PAD, rowTop: i => HIST.row0 + i * HIST.gap, font: 20,
+        w: HIST.w, h: HIST.h, headerTop: HIST_PAD, rowTop: i => HIST.row0 + i * HIST.gap, font: 22,
         rowH: HIST.rowH, tagTop: i => HIST.row0 + (HIST.rowH - 28) / 2 + i * HIST.gap, tagRight: HIST_PAD,
         tag: { border: false },
         // the kept block runs from 6 px above row 1 to 4 px under row 6; the crash line sits halfway to row 7
@@ -168,7 +172,8 @@
         return e;
       });
       // the tags in the loop's middle sit 30 px above it, clear of the ACT and OBSERVE tiles
-      s.crash = makeCrashMarks(root, 'App crash', { x: DL.x + 250, y: DL.y - 240, size: 110 },
+      // the bolt in the panel's top right, clear of its status and of THINK
+      s.crash = makeCrashMarks(root, 'App crash', { x: DL.x + 230, y: DL.y - 210, size: 110 },
         { x: DL.x, y: DL.y - 30, w: 280 });
       s.newTag = makeNewTag(root, 'New app instance', 300);
       s.flash = makeFlash(root);
@@ -180,7 +185,7 @@
       // its halo; no entrance zoom, so the node never moves: the halo fades into the LLM's own glow and the rest of
       // the loop emerges around it, then the app panel and Temporal with its Event History enter
       setCamera(s.cam, t, this.dur, { enter: 1 });
-      place(s.carry, ...durablePos(s.loop.pos(LOOP_DEG.think)), 1, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
+      place(s.carry, ...durablePos(s.loop.nodePos(LOOP_DEG.think)), 1, HANDOFF_HALO.o * (1 - P(t, 0.2, 1.0)));
       const loopAt = c[0] + 0.1;
       // three turns, one step each, every LLM call and tool result saved (the card leaves the loop, lands on its
       // row, the row turns SAVED); the first starts once the loop is drawn and the goal has shown, and ends before
@@ -221,7 +226,7 @@
         place(e, x, y, 1, 0.55 - 0.08 * k);
       });
       s.svg.style.transform = `translate(${ax}px,${ay}px)`;
-      // the loop sits in its place for the whole chapter, at 80% of its size
+      // the loop sits in its place for the whole chapter, at 91% of its size
       s.loopLayer.style.transform = `translate(${DL.x - LOOP.cx}px,${DL.y - LOOP.cy}px) scale(${DL.k})`;
       // under the loop: the agent's goal, then the context strip in its place
       const gp = P(t, c[0] + 0.6, 0.45, backOut);
@@ -320,8 +325,9 @@
       callout(s.keptNote, OUTSIDE.x, crashAt + 0.9, replay[0]);
       s.outcome.forEach((e, i) => {
         const x = OUTSIDE.x + (i - 0.5) * (PILL.w + PILL.gap);
-        const op = P(t, c[3] + 0.6 + i * 1.2, 0.45, backOut);
-        place(e, x, CALLOUT_Y, op, clamp(op * 2));
+        // each grows from 90% to its size with no overshoot, so the pair never gets closer than PILL.gap
+        const op = P(t, c[3] + 0.6 + i * 1.2, 0.45, easeOut);
+        place(e, x, CALLOUT_Y, lerp(0.9, 1, op), op);
       });
     }
   });

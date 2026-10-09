@@ -4,17 +4,19 @@
   // A hub-and-spoke map: the Temporal symbol in the middle, four spokes out to four category hubs, each hub with
   // its three examples as icon bubbles fanned out on its outer side
   const CENTER = { x: 960, y: 515 };
-  const SYMBOL_SIZE = 190;
-  const HUB_SIZE = 150;
-  const BUBBLE = { size: 90, r: 155 }; // bubble size and distance from its hub
+  const SYMBOL_SIZE = 210;
+  const HUB_SIZE = 170;
+  const BUBBLE = { size: 100, r: 200, icon: 46, font: 18 }; // bubble size, distance from its hub, icon and label sizes
   const FLOAT = 4; // how far a bubble floats around its place, in px
-  // hubs at the four diagonals; `angles`: directions of the hub's three bubbles, away from the center (degrees,
-  // clockwise from the x axis)
+  // hubs at the four diagonals, 360 px left or right of the symbol and 153 px above or under it; `angles`:
+  // directions of the hub's three bubbles, fanned 36 degrees apart on the hub's outer side, all within 52 degrees
+  // of the horizontal, so every label sits beside its bubble (degrees, clockwise from the x axis). The map spans
+  // x 190 to 1752, y 150 to 880 (each bubble floats 4 px)
   const HUBS = [
-    { name: 'Process', x: 640, y: 380, angles: [170, 230, 290] },
-    { name: 'Lifecycle', x: 1280, y: 380, angles: [250, 310, 10] },
-    { name: 'Operational', x: 640, y: 650, angles: [190, 130, 70] },
-    { name: 'AI', x: 1280, y: 650, angles: [110, 50, 350] },
+    { name: 'Process', x: 600, y: 362, angles: [160, 196, 232] },
+    { name: 'Lifecycle', x: 1320, y: 362, angles: [308, 344, 20] },
+    { name: 'Operational', x: 600, y: 668, angles: [200, 164, 128] },
+    { name: 'AI', x: 1320, y: 668, angles: [52, 16, 340] },
   ];
   // the examples of each hub, [icon, label], in the order of its angles
   const EXAMPLES = [
@@ -41,10 +43,10 @@
 
   // Round category hub: the category in bold, then WORKFLOWS lighter, on UV
   const makeHub = (root, name) => E(root,
-    `<b>${name}</b><span style="opacity:.75;font-size:13px;margin-top:4px">Workflows</span>`, 'mono', {
+    `<b>${name}</b><span style="opacity:.75;font-size:14px;margin-top:5px">Workflows</span>`, 'mono', {
       width: HUB_SIZE + 'px', height: HUB_SIZE + 'px', borderRadius: '50%', background: C.uv, color: '#FFFFFF',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      fontSize: '15px', letterSpacing: '.08em', paddingLeft: '.08em', textTransform: 'uppercase',
+      fontSize: '17px', letterSpacing: '.08em', paddingLeft: '.08em', textTransform: 'uppercase',
     });
   // Example bubble: a round tile with a stroke icon, its mono label on its outer side, away from the link to its
   // hub: beside it when the bubble sits mostly left or right of the hub (angle in degrees), else above or under it
@@ -60,8 +62,8 @@
     return E(root,
       `<div style="width:${BUBBLE.size}px;height:${BUBBLE.size}px;border-radius:50%;`
       + `background:var(--surface);border:1.5px solid ${C.line};display:flex;align-items:center;`
-      + `justify-content:center">${ICON(icon, 40, C.ink, 1.7)}</div>`
-      + `<div class="lbl" style="position:absolute;${labelAt};font-size:16px">`
+      + `justify-content:center">${ICON(icon, BUBBLE.icon, C.ink, 1.7)}</div>`
+      + `<div class="lbl" style="position:absolute;${labelAt};font-size:${BUBBLE.font}px">`
       + `${label}</div>`,
       '', { width: BUBBLE.size + 'px', height: BUBBLE.size + 'px' });
   }
@@ -87,7 +89,7 @@
       this.headerOutAt = this.cues[1] + SWELL_AT;
       const root = s.cam = makeCamera(stage);
       s.glow = E(root, '', '', {
-        width: '560px', height: '560px', borderRadius: '50%',
+        width: '620px', height: '620px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(182,100,255,.35) 0%, rgba(68,76,231,.12) 45%, rgba(68,76,231,0) 70%)',
       });
       // the AI hub's halo, which travels with it at the end
