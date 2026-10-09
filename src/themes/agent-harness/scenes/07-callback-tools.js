@@ -19,19 +19,18 @@
   const PAUSE = { x: COL.x + AGENT_ICON.size / 2 + 16 + 22, y: AGENT_ICON.y };
   const WAITS = ['5 SEC', '1 MIN', '1 H', '9 H', '1 DAY', '2 DAYS'];
 
-  // the app tile: cloud header, the agent inside and where it runs
-  const makeAppTile = p => E(p,
-    '<div style="position:absolute;left:24px;top:20px;display:flex;align-items:center;gap:12px">'
-    + ICON('cloud', 30, C.ink, 1.8)
-    + '<span class="mono" style="font-size:20px;letter-spacing:.12em">THE APP</span></div>'
-    + '<div style="position:absolute;left:0;right:0;top:80px;display:flex;flex-direction:column;align-items:center">'
-    + `<div class="agent">${ICON('agent', AGENT_ICON.size, C.violet, 1.8)}</div>`
-    + '<div class="mono" style="font-size:22px;letter-spacing:.12em;padding-left:.12em;margin-top:12px">AGENT</div>'
-    + '<div style="font-size:24px;color:var(--slate);margin-top:8px">on a Temporal worker</div></div>',
-    'tile', { width: COL.w + 'px', height: COL.appH + 'px', borderColor: C.violet });
-  // the app tile, with a handle on its agent icon, which dims while the agent waits
+  // the app tile: cloud header, the agent inside and where it runs; e.agent holds the agent icon, which dims while
+  // the agent waits
   const makeApp = p => {
-    const e = makeAppTile(p);
+    const e = E(p,
+      '<div style="position:absolute;left:24px;top:20px;display:flex;align-items:center;gap:12px">'
+      + ICON('cloud', 30, C.ink, 1.8)
+      + '<span class="mono" style="font-size:20px;letter-spacing:.12em">THE APP</span></div>'
+      + '<div style="position:absolute;left:0;right:0;top:80px;display:flex;flex-direction:column;align-items:center">'
+      + `<div class="agent">${ICON('agent', AGENT_ICON.size, C.violet, 1.8)}</div>`
+      + '<div class="mono" style="font-size:22px;letter-spacing:.12em;padding-left:.12em;margin-top:12px">AGENT</div>'
+      + '<div style="font-size:24px;color:var(--slate);margin-top:8px">on a Temporal worker</div></div>',
+      'tile', { width: COL.w + 'px', height: COL.appH + 'px', borderColor: C.violet });
     e.agent = e.querySelector('.agent');
     return e;
   };
@@ -60,24 +59,11 @@
       s.arrow = path(s.svg, `M ${COL.x} ${ARROW.top} L ${COL.x} ${ARROW.bottom}`, C.slate, 2.5, true, '8,8');
       s.laptop = makeStep(root, 'laptop', "User's laptop", COL.w, COL.laptopH);
       // durable wait: a clock racing through the waiting time (as in chapter 3), and the worker left free
-      s.wait = E(root,
-        '<div class="lbl" style="font-size:16px">Durable wait</div>'
-        + '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px">'
-        + ICON('clockHands', 30, C.violet)
-        + `<span class="mono" style="font-size:22px;letter-spacing:.06em;color:${C.violet}">WAITING `
-        + '<span class="d" style="display:inline-block;min-width:6.6ch;text-align:left"></span></span></div>',
-        'tile', {
-          width: COL.w + 'px', height: WAIT.h + 'px', borderColor: C.violet,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        });
-      s.waitD = s.wait.querySelector('.d');
+      s.wait = makeWaitCard(root, COL.w, WAIT.h, { gap: 8 });
       // in the card's flow, under the clock
       s.free = statusTag(s.wait);
       Object.assign(s.free.style, { position: 'relative', marginTop: '12px' });
-      s.pause = E(root, ICON('pause', 22, C.violet, 1.8), '', {
-        width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'var(--violet-solid)', border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)',
-      });
+      s.pause = makePauseBadge(root);
       // opaque pill colors, so the dashed arrow does not show through the cards traveling on it
       s.call = callCard(root, 'read_file', '"trip.md"', 'violet solid');
       s.result = callCard(root, 'result', '"Lisbon, 3 nights"', 'uv solid');
@@ -104,9 +90,7 @@
       const pp = backPop(t, c[1] + 0.3);
       place(s.pause, PAUSE.x, PAUSE.y, pp.s, pp.o * (1 - P(t, resultAt - 0.3, 0.3)));
       place(s.wait, COL.x, WAIT.y - 12 * (1 - waitIn), 1, waitIn);
-      const race = clamp((t - c[1] - 1.0) / 2.8);
-      s.waitD.textContent = WAITS[Math.min(WAITS.length - 1, Math.floor(race * WAITS.length))];
-      setClockHands(s.wait, race);
+      setWaitRace(s.wait, WAITS, clamp((t - c[1] - 1.0) / 2.8));
       setStatus(s.free, 'NO COMPUTE HELD', 'ok');
       popScale(s.free, backPop(t, c[1] + 1.5, 0.5));
       fly(s.result, t, resultAt, COL.x, ARROW.bottom - 30, resultAt + 0.3, 0.8, COL.x, ARROW.top + 30,

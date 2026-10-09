@@ -43,8 +43,6 @@
   // and lands in its row LAND after `at`
   const through = (at, row) => [[at, EXIT_X, LANE, 0.8], [at + 0.65, TOOLS.rowX, TOOLS.rows[row], 0.7]];
   const GATE_HIT = 0.42, LAND = 1.4;
-  // 0 -> 1 -> 0 over [at, at + d]
-  const bump = (t, at, d) => Math.sin(Math.PI * clamp((t - at) / d));
 
   // statusTag options of the tag under a call, a little larger than the shared one; its left padding offsets the
   // trailing letter spacing. Kinds: 'ok' (allowed, approved, done), 'denied' or 'wait'
@@ -57,7 +55,8 @@
     // laid out in final coordinates: the gate column reserves the AUTO MODE space from the start
     subs: [
       {
-        text: "Some tool calls need a person's OK first, like a payment. The <b>approval policy</b> decides which ones.",
+        text: "Some tool calls need a person's OK first, like a payment. "
+          + 'The <b>approval policy</b> decides which ones.',
         after: 2.3,
       },
       {
@@ -132,27 +131,11 @@
       s.approve = button('Approve'); s.deny = button('Deny');
 
       // durable wait: a clock racing through the waiting time, and a pause badge on the parked call
-      s.wait = E(root,
-        '<div class="lbl" style="font-size:16px">Durable wait</div>'
-        + '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:10px">'
-        + ICON('clockHands', 30, C.violet)
-        + `<span class="mono" style="font-size:22px;letter-spacing:.06em;color:${C.violet}">WAITING `
-        + '<span class="d" style="display:inline-block;min-width:6.6ch;text-align:left"></span></span></div>',
-        'tile', {
-          width: CALL_W + 'px', height: (WAIT.y1 - WAIT.y0) + 'px', borderColor: C.violet,
-          display: 'flex', flexDirection: 'column', justifyContent: 'center',
-        });
-      s.waitD = s.wait.querySelector('.d');
-      s.pause = E(root, ICON('pause', 22, C.violet, 1.8), '', {
-        width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'var(--violet-solid)', border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)',
-      });
-      // a denied call goes back to the agent, the reason as its result: a left arrow (its head filled explicitly,
-      // see arrowHead in engine.js) and a label
+      s.wait = makeWaitCard(root, CALL_W, WAIT.y1 - WAIT.y0);
+      s.pause = makePauseBadge(root);
+      // a denied call goes back to the agent, the reason as its result: a left arrow and a label
       s.reason = E(root,
-        `<svg width="36" height="14" viewBox="0 0 36 14" style="display:block">`
-        + `<path d="M10 7 H 34.5" stroke="${C.red}" stroke-width="2.5" stroke-linecap="round"/>`
-        + `<path d="M12 1.5 L0 7 L12 12.5 z" fill="${C.red}"/></svg>`
+        inlineArrow(36, C.red, true)
         + `<span class="lbl" style="font-size:18px;color:${C.red}">Reason sent to the model</span>`,
         '', { display: 'flex', alignItems: 'center', gap: '12px' });
 
@@ -224,7 +207,7 @@
       const pressed = t >= approve + 0.05 && t < c[2] + 0.2;
       s.approve.className = 'abs pill' + (pressed ? ' neon' : '');
       const bp = backPop(t, c[0] + 0.75), dp = backPop(t, c[0] + 0.85);
-      place(s.approve, YOU.buttonX, YOU.y - YOU.buttonDy, bp.s * (1 - 0.08 * bump(t, approve, 0.25)), bp.o);
+      place(s.approve, YOU.buttonX, YOU.y - YOU.buttonDy, bp.s * (1 - 0.08 * bumpAt(t, approve)), bp.o);
       place(s.deny, YOU.buttonX, YOU.y + YOU.buttonDy, dp.s, dp.o);
 
       // tool calls: pop out next to the agent, then follow their route; tags ride under them
@@ -241,7 +224,7 @@
       const placeTag = (i, [x, y, o], popAt, label, kind, swellAt = Infinity, hideAt = Infinity) => {
         setStatus(s.tags[i], label, kind);
         const grow = backPop(t, popAt, 0.4);
-        const scale = grow.s * (1 + 0.12 * bump(t, swellAt, 0.3));
+        const scale = grow.s * (1 + 0.12 * bumpAt(t, swellAt));
         place(s.tags[i], x, y + TAG_DY, scale, o * grow.o * (1 - P(t, hideAt, 0.2)));
       };
       // a call that stops in front of the gate: from the agent to the parking spot, 0.3 s after it pops
@@ -267,9 +250,7 @@
       const wp = backPop(t, c[1] + 0.6);
       place(s.wait, PARK.x, (WAIT.y0 + WAIT.y1) / 2, wp.s, wp.o * (1 - P(t, approved + 0.1, 0.3)));
       // the waiting time races from minutes to days; the clock hands spin with it
-      const race = clamp((t - c[1] - 1.2) / 2.8);
-      s.waitD.textContent = WAITS[Math.min(WAITS.length - 1, Math.floor(race * WAITS.length))];
-      setClockHands(s.wait, race);
+      setWaitRace(s.wait, WAITS, clamp((t - c[1] - 1.2) / 2.8));
       draw(s.ask, P(t, c[1] + 1.0, 0.6), 1 - P(t, approved + 0.1, 0.3));
 
       // c[2] to c[4]: the AUTO MODE judge docks on the gate; it weighs each hotel parked in front of the gate
