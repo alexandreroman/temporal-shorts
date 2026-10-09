@@ -1,37 +1,10 @@
 // ===================== 1. AN AGENT HARNESS
 // The block keeps every name declared in this file local to this scene.
 {
-  // the agentic loop: the model on top, the two tools below, all on one circle
+  // the agentic loop of makeAgentLoop(): THINK (the model orb) on top, ACT and OBSERVE below, all on one circle
   const LOOP = { cx: 960, cy: 551, r: 230 };
-  const ORB = 140, TILE = { w: 180, h: 150 };
-  const loopPos = deg => {
-    const a = deg * Math.PI / 180;
-    return [LOOP.cx + Math.cos(a) * LOOP.r, LOOP.cy + Math.sin(a) * LOOP.r];
-  };
-  // loop nodes and the zone each one covers (its size plus a margin), which the arcs stop short of
-  const NODES = [
-    { deg: -90, covers: (dx, dy) => Math.hypot(dx, dy) < ORB / 2 + 16 }, // model orb
-    { deg: 30, covers: (dx, dy) => Math.abs(dx) < TILE.w / 2 + 14 && Math.abs(dy) < TILE.h / 2 + 14 }, // Flights
-    { deg: 150, covers: (dx, dy) => Math.abs(dx) < TILE.w / 2 + 14 && Math.abs(dy) < TILE.h / 2 + 14 }, // Hotels
-  ];
-  // angle where the circle leaves a node's zone, walking from the node's center in direction dir (+1 or -1)
-  const exitDeg = (deg, covers, dir) => {
-    const [nx, ny] = loopPos(deg);
-    let d = deg;
-    for (;;) {
-      const [x, y] = loopPos(d);
-      if (!covers(x - nx, y - ny)) return d;
-      d += dir * 0.5;
-    }
-  };
-  // clockwise arc from node i to the next one (the last arc closes the loop back to the model)
-  const arcD = i => {
-    const from = NODES[i], to = NODES[(i + 1) % NODES.length];
-    const toDeg = to.deg > from.deg ? to.deg : to.deg + 360;
-    const [x0, y0] = loopPos(exitDeg(from.deg, from.covers, 1));
-    const [x1, y1] = loopPos(exitDeg(toDeg, to.covers, -1));
-    return `M ${x0} ${y0} A ${LOOP.r} ${LOOP.r} 0 0 1 ${x1} ${y1}`;
-  };
+  // the loop pops in after c[0]: THINK first, then ACT, OBSERVE and the arcs from LOOP_AT (see placeAgentLoop())
+  const THINK_AT = 0.2, LOOP_AT = 1.5;
   // the token goes round the loop from TOKEN_AT (after c[0]), one leg of LEG seconds per node
   const TOKEN_AT = 4.4, LEG = 0.9;
   // the beat of a turn, in seconds after its cue (c[2] for turn 1, c[3] for turn 2): the message comes in, the
@@ -41,14 +14,14 @@
   BEAT.ended = BEAT.reply + 2.5;
   // after turn 1, the harness waits for the next message (until c[3])
   BEAT.wait = BEAT.ended + 1.2;
-  // the token's runs round the loop, as [start, legs]: the free run of c[0] and c[1] stops on the model at the
+  // the token's runs round the loop, as [start, legs]: the free run of c[0] and c[1] stops on THINK at the
   // end of its last full lap before turn 1, then each turn runs one lap
   const tokenRuns = c => {
     const first = c[0] + TOKEN_AT, turn1 = c[2] + BEAT.run;
     const laps = Math.floor((turn1 - first) / (3 * LEG));
     return [[first, 3 * laps], [turn1, 3], [c[3] + BEAT.run, 3]];
   };
-  // legs travelled in the run under way at t, or null while the token rests behind the model
+  // legs travelled in the run under way at t, or null while the token rests behind THINK
   const tokenLegs = (t, c) => {
     for (const [at, legs] of tokenRuns(c)) {
       const u = (t - at) / LEG;
@@ -56,8 +29,8 @@
     }
     return null;
   };
-  // the harness frame around the loop, with its header row above the model; it leaves 60 px or more around
-  // the loop, and 50 px between the bottom arc and the Workflow pill on its bottom edge. The frame spans
+  // the harness frame around the loop, with its header row above THINK; it leaves 60 px or more around the
+  // loop, and 50 px between the bottom arc and the Workflow pill on its bottom edge. The frame spans
   // y 151-855, so the pill's bottom stays inside the content frame (y 880)
   const FRAME = { x0: LOOP.cx - 360, x1: LOOP.cx + 360, y0: LOOP.cy - 400, y1: LOOP.cy + 304, r: 10 };
   // capabilities plugged into the frame: [icon, label, side (-1 left, 1 right), row (0 top, 1 bottom)]
@@ -184,13 +157,12 @@
     ],
     build(root, s) {
       const { x0, x1, y0, y1, r } = FRAME;
-      // created first, so the frame tint stays under the arcs and the loop
+      // created first, so the frame tint stays under the loop
       s.frameBg = E(root, '', '', {
         left: x0 + 'px', top: y0 + 'px', width: (x1 - x0) + 'px', height: (y1 - y0) + 'px',
         background: `rgba(${RGB.uv},.07)`, borderRadius: 'var(--r)',
       });
       s.svg = svgLayer(root);
-      s.arcs = NODES.map((_, i) => path(s.svg, arcD(i), C.slate, 2.5, true));
       // the frame draws in two halves, from the top center down both sides, meeting at the bottom center
       const cx = LOOP.cx;
       // side 1 runs clockwise down the right edge, side -1 counterclockwise down the left edge
@@ -203,10 +175,11 @@
       // each link runs from the tile's inner edge to the frame's edge
       s.links = CAPS.map(([, , side, row]) =>
         path(s.svg, `M ${capX(side) - side * CAP.w / 2} ${capY(row)} H ${frameX(side)}`, C.uv, 2.5, false));
-      // under the nodes, so it slips behind each node it reaches
-      s.token = makeToken(root);
-      s.llm = makeLLM(root, ORB, 'MODEL');
-      s.tools = [iconTile(root, 'plane', 'Flights', TILE.w, TILE.h), iconTile(root, 'bed', 'Hotels', TILE.w, TILE.h)];
+      s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy, LOOP.r);
+      // the nodes and labels on whole pixels: ACT and OBSERVE sit at fractional points of the circle
+      s.loop.nodePos = deg => s.loop.pos(deg).map(Math.round);
+      // the token passes under the nodes, so it slips behind each node it reaches
+      root.insertBefore(s.loop.token, s.loop.think.root);
       s.loopL = E(root, 'Your agentic loop', 'lbl', { color: 'var(--ink)' });
       s.yourL = E(root, 'Your loop', 'lbl', { color: 'var(--ink)' });
       // the SDKs your loop is written with: the available ones, then the planned ones, dashed and dimmed
@@ -311,38 +284,25 @@
       s.streamed = tag(root, 'Streamed live, replayable', 'violet solid');
     },
     update(t, c, s) {
-      // c[0]: the model, then the tools, then the arcs of the loop; its label and the token, then the SDK tags
-      const pM = backPop(t, c[0] + 0.2, 0.5);
-      const pF = backPop(t, c[0] + 1.7, 0.5);
-      const pH = backPop(t, c[0] + 1.9, 0.5);
       // the harness and its loop leave the stage to the comparison of c[4] and c[5], then come back for c[6]
       const harnessO = 1 - P(t, c[4], 0.5) * (1 - P(t, c[6] + 0.3, 0.5));
       // the loop dims while the harness waits between turn 1 and turn 2
       const idle = P(t, c[2] + BEAT.wait, 0.4) * (1 - P(t, c[3] + BEAT.run - 0.3, 0.3));
       const loopO = (1 - 0.5 * idle) * harnessO;
-      s.arcs.forEach((a, i) => draw(a, P(t, c[0] + 3.0 + i * 0.3, 0.45), loopO));
       // token: one eased leg per node, so it slows down as it reaches each node and slips behind it. It shows only
-      // during its runs: between them it would rest behind the model, which shows it through while it dims or fades
+      // during its runs: between them it would rest behind THINK, which shows it through while it dims or fades
       const u = tokenLegs(t, c);
-      let near = -1, deg = NODES[0].deg;
+      let deg = null;
       if (u !== null) {
         const leg = Math.floor(u);
         deg = -90 + 120 * (leg + ease(u - leg));
-        NODES.forEach((n, i) => {
-          const dist = Math.abs((((deg - n.deg) % 360) + 540) % 360 - 180);
-          if (dist < 20) near = i;
-        });
       }
-      const [tx, ty] = loopPos(deg);
-      place(s.token, tx, ty, 1, P(t, c[0] + TOKEN_AT, 0.3) * (u !== null ? 1 : 0));
-      const [mx, my] = loopPos(NODES[0].deg);
-      place(s.llm.root, mx, my, pM.s, pM.o * loopO);
-      llmState(s.llm, { think: near === 0 ? 1 : 0, lookY: 0.4 });
-      [pF, pH].forEach((p, i) => {
-        // rounded, so the tiles rest on whole pixels
-        const [x, y] = loopPos(NODES[i + 1].deg).map(Math.round);
-        place(s.tools[i], x, y, p.s, p.o * loopO);
-        s.tools[i].style.borderColor = near === i + 1 ? C.violet : C.line;
+      // c[0]: THINK, then ACT, OBSERVE, their labels and the arcs of the loop; its label and the token, then the
+      // SDK tags
+      placeAgentLoop(s.loop, t, c[0] + LOOP_AT, {
+        deg, thinkIn: c[0] + THINK_AT, o: loopO,
+        // the loop's own label stays hidden: the scene's label below names it, then becomes YOUR LOOP
+        centerAt: c[0], centerO: 0,
       });
       // the label names the loop, then becomes YOUR LOOP once the harness wraps it
       const rename = P(t, c[1] + 1.0, 0.5);

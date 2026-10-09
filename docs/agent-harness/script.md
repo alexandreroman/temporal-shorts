@@ -64,11 +64,13 @@ Lisbon.
 
 - **0:12** An AI agent is a model, plus tools, plus a loop. You write that
   loop with the AI SDK you already know.
-  - Visuals: "YOUR AGENTIC LOOP": MODEL orb, Flights and Hotels tiles joined
-    by three curved arrows, a neon token travelling round the loop; under
-    it, two rows of equal-width SDK tags: AVAILABLE: OPENAI AGENTS SDK /
-    GOOGLE GEMINI / PYDANTIC AI, then PLANNED, dashed and dimmed: STRANDS
-    AGENTS / GOOGLE ADK / LANGGRAPH, GOOGLE ADK under GOOGLE GEMINI.
+  - Visuals: "YOUR AGENTIC LOOP", the loop of the `durable-ai-agents`
+    video: THINK orb on top, ACT and OBSERVE tiles below, joined by three
+    curved arrows, a neon token travelling round the loop, each node
+    swelling as it passes; under it, two rows of equal-width SDK tags:
+    AVAILABLE: OPENAI AGENTS SDK / GOOGLE GEMINI / PYDANTIC AI, then
+    PLANNED, dashed and dimmed: STRANDS AGENTS / GOOGLE ADK / LANGGRAPH,
+    GOOGLE ADK under GOOGLE GEMINI.
 - **0:22** The harness doesn't replace your loop, it wraps it: every agent
   runs as a durable Temporal Workflow.
   - Visuals: both rows of SDK tags fade; a UV frame draws around the loop,
