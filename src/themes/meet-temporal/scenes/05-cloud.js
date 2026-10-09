@@ -17,9 +17,9 @@
   const workerY = k => WORKER.top + WORKER.h / 2 + k * (WORKER.h + WORKER.gap);
   const CODE = { top: 58, h: 104, inset: 24, line: 28 };
   const WORKERS = [
-    ['workflow OrderWorkflow(o)', '  await ChargeCard(o)', '  await ShipPackage(o)'],
-    ['activity ChargeCard(o)', '  return charge(o.card)'],
-    ['activity ShipPackage(o)', '  return ship(o.address)'],
+    ['workflow OrderWorkflow(o)', '  await chargeCard(o)', '  await shipPackage(o)'],
+    ['activity chargeCard(o)', '  return charge(o.card)'],
+    ['activity shipPackage(o)', '  return ship(o.address)'],
   ];
   // the Data Converter, 60 px right of the Workers (the wires' run), level with WORKER 2, where all data leaves and
   // comes back: 24 px from the zone's right border, so its name fits on one line
@@ -54,22 +54,22 @@
   // the middle of a row's payload chip (210 px wide), 20 px inside the row's right border
   const PAYLOAD_X = BLOCK.x + BLOCK.w / 2 - 24 - 1.5 - 20 - 105;
   // The tasks, in the order Temporal queues them, and the Worker each goes to: the Workflow task starts the
-  // Workflow, which runs until it awaits ChargeCard; the ChargeCard task runs; a new Workflow task resumes the
-  // Workflow until it awaits ShipPackage; the ShipPackage task runs; a last Workflow task resumes it to its end
-  const TASKS = [['OrderWorkflow', 0], ['ChargeCard', 1], ['OrderWorkflow', 0], ['ShipPackage', 2],
+  // Workflow, which runs until it awaits chargeCard; the chargeCard task runs; a new Workflow task resumes the
+  // Workflow until it awaits shipPackage; the shipPackage task runs; a last Workflow task resumes it to its end
+  const TASKS = [['OrderWorkflow', 0], ['chargeCard', 1], ['OrderWorkflow', 0], ['shipPackage', 2],
     ['OrderWorkflow', 0]];
   // the Workflow's requests to schedule its Activities, as it pauses on each await
-  const SCHEDULES = ['schedule ChargeCard', 'schedule ShipPackage'];
+  const SCHEDULES = ['schedule chargeCard', 'schedule shipPackage'];
   // the payload of the close-up, in clear, then encrypted
   const SECRET = 'card: $42';
-  // its ciphertext, as ChargeCard's completed event shows it (as long as SECRET, so the card keeps its width)
+  // its ciphertext, as chargeCard's completed event shows it (as long as SECRET, so the card keeps its width)
   const CIPHER = '9f3a…c21e';
   // the Event History: each event, with its payload if it carries data (the Workflow's input, an Activity's input
   // or result), encrypted; an Activity's start carries none
-  const HISTORY = [['OrderWorkflow', 'started', '4be1…07da'], ['ChargeCard', 'scheduled', 'c08d…5b17'],
-    ['ChargeCard', 'started', null], ['ChargeCard', 'completed', CIPHER],
-    ['ShipPackage', 'scheduled', 'e6a2…3f90'], ['ShipPackage', 'started', null],
-    ['ShipPackage', 'completed', '2d7c…a913'], ['OrderWorkflow', 'completed', '71b0…e5f4']];
+  const HISTORY = [['OrderWorkflow', 'started', '4be1…07da'], ['chargeCard', 'scheduled', 'c08d…5b17'],
+    ['chargeCard', 'started', null], ['chargeCard', 'completed', CIPHER],
+    ['shipPackage', 'scheduled', 'e6a2…3f90'], ['shipPackage', 'started', null],
+    ['shipPackage', 'completed', '2d7c…a913'], ['OrderWorkflow', 'completed', '71b0…e5f4']];
   // a task's trip, slow enough to follow: it flies from the queue to the connector dot, then along the connection,
   // over the Data Converter and down to its Worker; the Worker runs it a code line (step) at a time; what it sends
   // back (a schedule request or a result) goes the other way, then on to the queue or to its history row
@@ -203,7 +203,7 @@
       // the close-up of the second task's result, then the last two tasks run and persist
       {
         text: "You can encrypt data with your own keys before it leaves: Temporal never sees your payloads.",
-        // the close-up, then the Workflow resumes, schedules ShipPackage, which runs, and completes
+        // the close-up, then the Workflow resumes, schedules shipPackage, which runs, and completes
         after: 25.7,
       },
     ],
@@ -259,7 +259,7 @@
       // Workers' text: the cards only travel on the connection, and pass under the Data Converter
       s.taskSparks = TASKS.map(() => makeSpark(root, 12, RGB.violet));
       s.scheduleSparks = SCHEDULES.map(() => makeSpark(root, 12, RGB.violet));
-      // ShipPackage's result and the Workflow's completion, flying back as sparks
+      // shipPackage's result and the Workflow's completion, flying back as sparks
       s.results = [0, 1].map(() => makeSpark(root, 14, RGB.neon));
       // the close-up: one result, in clear, then encrypted
       s.secret = E(root, SECRET, 'mono', {
@@ -330,7 +330,7 @@
       rise(s.pers, BLOCK.x, PERS.top + PERS.h / 2, P(t, c[0] + 1.1, 0.5), 16);
       const polled = Math.max(0, ...WORKERS.map((_, k) => win(t, pollAt(k) + 1.15, pollAt(k) + 1.6, 0.1)));
       s.orch.style.borderColor = polled > 0.5 ? C.violet : `rgba(${RGB.uv},.6)`;
-      // the close-up of c[2], slowly: ChargeCard's result comes out of WORKER 2, goes to the Data Converter's gate,
+      // the close-up of c[2], slowly: chargeCard's result comes out of WORKER 2, goes to the Data Converter's gate,
       // just above it, and holds there in clear; the lock opens, the key glows and the lock snaps shut, the text
       // scrambling in place; then it leaves encrypted, crosses over and lands in its row
       const out = c[2] + 0.8, leaveAt = c[2] + 1.2, atGate = c[2] + 2.0, openAt = c[2] + 3.1, snap = c[2] + 3.6;
@@ -384,8 +384,8 @@
         place(e, Math.round(x), Math.round(y), 1, o);
         clipRightOfConverter(e, Math.round(x), 1);
       });
-      // The Workers. WORKER 1 runs the Workflow a line at a time: from the top to `await ChargeCard`, where it waits;
-      // resumed, on to `await ShipPackage`, where it waits again; resumed, past the last line: it returns, DONE. The
+      // The Workers. WORKER 1 runs the Workflow a line at a time: from the top to `await chargeCard`, where it waits;
+      // resumed, on to `await shipPackage`, where it waits again; resumed, past the last line: it returns, DONE. The
       // line it waits on stays faintly lit. WORKERs 2 and 3 run their Activity, a line at a time
       const lineOf = (at, first, n) => (t >= at && t < at + n * TRIP.step ? first + Math.floor((t - at) / TRIP.step)
         : -1);
@@ -409,7 +409,7 @@
         const line = running ? Math.min(1, Math.floor((t - at) / TRIP.step)) : -1;
         w.lines.forEach((e, j) => { e.style.background = j === line ? `rgba(${RGB.violet},.28)` : ''; });
       });
-      // ShipPackage's result and the Workflow's completion run back as sparks, over the gate, into their rows
+      // shipPackage's result and the Workflow's completion run back as sparks, over the gate, into their rows
       [[r3, 2, 6], [done, 0, 7]].forEach(([at, k, row], j) => {
         const e = s.results[j];
         const back = P(t, at, TRIP.back, linear), into = P(t, at + TRIP.back, TRIP.toRow);
