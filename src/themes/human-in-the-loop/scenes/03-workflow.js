@@ -40,7 +40,8 @@
         after: 1.4,
       },
       {
-        text: "Temporal keeps its Event History, outside the app. Restarts and deploys come and go; the wait survives.",
+        text: "Temporal keeps its <b>Event History</b>, outside the app. "
+          + "Restarts and deploys come and go; the wait survives.",
         after: 2.0,
       },
     ],

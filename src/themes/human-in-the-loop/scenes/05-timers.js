@@ -21,7 +21,8 @@
     // the Event History card, then the pill 30 px under it
     subs: [
       {
-        text: "No answer? The Workflow can also wait on a timer: a reminder after two days, escalation after five.",
+        text: "No answer? The Workflow can also wait on a <b>timer</b>: "
+          + "a reminder after two days, escalation after five.",
         // the pill lands at c[0] + 4.95: the finished timeline reads to the end of the subtitle and this pause
         after: 1.4,
       },
