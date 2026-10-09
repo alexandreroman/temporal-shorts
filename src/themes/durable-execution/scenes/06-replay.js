@@ -110,7 +110,6 @@
       workerA.st.style.opacity = 1 - P(t, aOut, 0.25);
       // a new machine, Worker B, slides in from the left once Worker A is gone, its border glowing violet while it
       // arrives and takes over; IDLE until the Workflow chip reaches it
-      const bHere = t >= bIn;
       const arrive = arrivingInstance(t, bIn);
       place(workerB, EH.worker.x + arrive.dx, EH.worker.y, 1, arrive.o);
       if (t < takeOver) setAppStatus(workerB, 'IDLE', 'stopped');
@@ -123,15 +122,13 @@
 
       // the code card moves with the Worker on screen (Worker A, then Worker B), so it never floats without a panel;
       // both are gone when it switches
-      const codeDx = bHere ? arrive.dx : sx, codeDy = bHere ? 0 : sy + leave.dy;
-      const codeOn = bHere ? arrive.o : leave.o;
-      const greyed = bHere ? '' : leave.grey;
-      workerA.style.filter = greyed;
-      shot.code.style.filter = greyed;
+      const rider = takeoverRider(t, aDrop, bIn, [sx, sy]);
+      workerA.style.filter = rider.grey;
+      shot.code.style.filter = rider.grey;
       // CARD CHARGED: $42 all along; the replay charges nothing, the order completes with one charge (each note pops)
       const chargePop = bumpAt(t, back[0]) + bumpAt(t, completed);
-      const parts = { code: codeOn, charge: 1, order: 1, temporal: 1, hist: 1, chargePop };
-      placeEventHistoryShot(shot, parts, codeDx, codeDy);
+      const parts = { code: rider.o, charge: 1, order: 1, temporal: 1, hist: 1, chargePop };
+      placeEventHistoryShot(shot, parts, rider.dx, rider.dy);
       const note = t >= completed ? 'CHARGED ONCE' : t >= back[0] ? 'NOT RE-CHARGED' : '';
       setCharge(shot.charge, 42, note, C.neon);
       shot.charge.style.borderColor = note ? C.neon : C.line;

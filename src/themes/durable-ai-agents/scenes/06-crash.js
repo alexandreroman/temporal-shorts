@@ -203,14 +203,12 @@
 
       // context: filled by the first run, emptied by the crash, refilled by the rerun. The panel moves with the
       // instance on screen (A, then B), so it never floats without its app; both are gone when it switches.
-      const memDx = bHere ? arrive.dx : sx, memDy = bHere ? 0 : sy + leave.dy;
-      const memOn = bHere ? arrive.o : leave.o;
-      place(s.mem, MEM.x + memDx, MEM.y + memDy, 1, P(t, 0.5, 0.45) * memOn);
+      const rider = takeoverRider(t, aDrop, bIn, [sx, sy]);
+      place(s.mem, MEM.x + rider.dx, MEM.y + rider.dy, 1, P(t, 0.5, 0.45) * rider.o);
       s.mem.style.borderColor = dead && !bHere ? C.red : C.line;
       s.mem.empty.style.opacity = bHere ? 0 : P(t, c[1] + 1.2, 0.4);
-      const greyed = bHere ? '' : leave.grey;
-      s.A.style.filter = greyed;
-      s.mem.style.filter = greyed;
+      s.A.style.filter = rider.grey;
+      s.mem.style.filter = rider.grey;
       // the blocks of A have all fallen before A leaves; B's stay empty until the rerun
       const add1 = [0.8, 1.3, 1.9, 2.4, 3.0, 3.5].map(x => c[0] + x);
       const add2 = [0.6, 0.9, 1.4, 1.7, 2.3, 2.6].map(x => c[2] + x);

@@ -409,6 +409,17 @@ function leavingInstance(t, at) {
 const arrivingInstance = (t, at) => ({
   dx: Math.round(TAKEOVER.arrive * (1 - P(t, at, 0.7, backOut))), o: P(t, at, 0.25),
 });
+// What rides with the instance on screen during a takeover (its context panel, its code card): the old instance's
+// shake [sx, sy], drop, fade and grey filter until the new one arrives at bIn, then the new one's slide and fade in;
+// both instances are gone when it switches. Returns { dx, dy, o, grey, onB }, onB: the new instance is on screen.
+function takeoverRider(t, aDrop, bIn, [sx, sy] = [0, 0]) {
+  if (t >= bIn) {
+    const arrive = arrivingInstance(t, bIn);
+    return { dx: arrive.dx, dy: 0, o: arrive.o, grey: '', onB: true };
+  }
+  const leave = leavingInstance(t, aDrop);
+  return { dx: sx, dy: sy + leave.dy, o: leave.o, grey: leave.grey, onB: false };
+}
 // Violet glow round the new instance's panel from `at` until `out` (0.3 s fades), pulsing on G as an ambient loop.
 // Call it after setAppStatus: it turns the border violet while it shows.
 function setArrivalGlow(panel, t, at, out) {
