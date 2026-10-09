@@ -32,7 +32,7 @@
     { company: null, name: null, detail: 'Open source, MIT license', year: '2019' },
   ];
   const LAST = MILESTONES.length - 1;
-  const FLY_D = 1.7; // duration of a face's flight onto the line, in seconds
+  const FLY_D = 1.2; // duration of a face's flight onto the line, in seconds
   const TRAIL = [0.06, 0.12, 0.18]; // how far each ghost of a travelling face lags behind it, in seconds
 
   // Milestone tile: company on top, name in a two-line box (or the official logo), a rule, the detail at the bottom
@@ -61,26 +61,19 @@
     chapter: 1, title: 'Where it comes from',
     holdBeforeEnd: CAMERA_EXIT, // presenter mode holds before the exit zoom
     // the heading plays before the first subtitle
-    pre: 2.7,
+    pre: 2.0,
     // the heading and the founders centered, then the whole timeline (laid out centered at (960, 524)), raised
     // 9 px so it centers on 515
     shift: (t, c) => pan(t, [0, INTRO_DY - 9], [[c[0] + 1.1, 0, -9]], 0.9),
     subs: [
+      // the founders' introduction, then Maxim flies to 2004
+      { text: "Meet Maxim Fateev and Samar Abbas, the creators of Temporal." },
+      { text: "2009: Amazon Simple Workflow Service." },
+      { text: "2014: Microsoft's Durable Task Framework." },
+      { text: "2015: Cadence at Uber, open source since 2017." },
       {
-        text: "Meet Maxim Fateev and Samar Abbas. In 2004, Maxim led Amazon's Simple Queue Service.",
-      },
-      {
-        text: "In 2009, they launched Amazon's Simple Workflow Service.",
-      },
-      {
-        text: "In 2014, Samar co-created Microsoft's Durable Task Framework.",
-      },
-      {
-        text: "In 2015, they reunited at Uber to create Cadence, open source since 2017.",
-      },
-      {
-        text: "In 2019, they founded Temporal, the open source successor of Cadence.",
-        after: 0.2, // a short beat before the exit zoom: Temporal's bloom has long settled
+        text: "2019: they found Temporal.",
+        after: 1.0, // Temporal's bloom and ripples settle before the exit zoom
       },
     ],
     build(stage, s) {
@@ -147,30 +140,30 @@
 
       // the heading: large in the middle, its letters closing in from wide apart, sharpening and glowing as they
       // land; it holds, then shrinks up to the top as the founders come in
-      const enter = P(t, 0.15, 1.0);
-      const settle = P(t, 2.4, 0.8);
+      const enter = P(t, 0.1, 0.8);
+      const settle = P(t, 1.75, 0.6);
       const font = lerp(HEADING.big.font, HEADING.top.font, settle);
       s.heading.style.fontSize = font.toFixed(2) + 'px';
       s.heading.style.letterSpacing = (lerp(0.35, -0.02, ease(enter))).toFixed(4) + 'em';
       s.heading.style.filter = enter < 1 ? `blur(${((1 - enter) * 8).toFixed(2)}px)` : 'none';
-      const glow = win(t, 0.6, 1.3, 0.3);
+      const glow = win(t, 0.45, 1.0, 0.25);
       s.heading.style.textShadow = glow > 0 ? `0 0 ${Math.round(30 * glow)}px rgba(182,100,255,${(0.7 * glow)
         .toFixed(3)})` : 'none';
       place(s.heading, 960, Math.round(lerp(HEADING.big.y, HEADING.top.y, settle)), 1, clamp(enter * 1.5));
       // while the heading is large, right after its entrance and before it shrinks, "20 years" is put forward: a
       // light sweeps through its letters, a glow blooms and settles to a faint lasting one, the words pop (anchored
       // on their right, clear of "in the making") and sparkles burst out and fade
-      const highlight = 1.2;
-      const sweep = P(t, highlight, 0.7, x => x);
+      const highlight = 0.9;
+      const sweep = P(t, highlight, 0.6, x => x);
       s.key.shine.style.opacity = sweep > 0 && sweep < 1 ? 1 : 0;
       s.key.shine.style.backgroundPosition = `${lerp(100, 0, sweep).toFixed(2)}% 0`;
-      const bloom = Math.max(win(t, highlight, highlight + 0.6, 0.3), 0.35 * P(t, highlight + 0.3, 0.6));
+      const bloom = Math.max(win(t, highlight, highlight + 0.5, 0.25), 0.35 * P(t, highlight + 0.3, 0.5));
       s.key.txt.style.textShadow = bloom > 0
         ? `0 0 ${Math.round(28 * bloom)}px rgba(182,100,255,${(0.9 * bloom).toFixed(3)})` : '';
       s.key.style.transform = `scale(${swell(t, highlight + 0.2, 0.06)})`;
       const cx = s.key.offsetWidth / 2, cy = s.key.offsetHeight / 2;
       s.sparkles.forEach(e => {
-        const b = P(t, highlight + 0.25, 0.6, x => 1 - Math.pow(1 - x, 2));
+        const b = P(t, highlight + 0.2, 0.55, x => 1 - Math.pow(1 - x, 2));
         const o = b > 0 && b < 1 ? Math.min(1, (1 - b) * 1.6) : 0;
         // the burst is sized for the large heading (its distances are given for a 64 px font)
         const k = font / HEADING.top.font;
@@ -178,7 +171,7 @@
       });
 
       // when each milestone lights up, as the founders reach it, then its tile rises
-      const tileIn = [c[0] + 4.0, c[1] + 1.6, c[2] + 1.3, c[3] + 1.8, c[4] + 1.8];
+      const tileIn = [c[0] + 3.9, c[1] + 1.5, c[2] + 1.4, c[3] + 1.5, c[4] + 1.2];
       // each founder: the face shows with its name at `show`, leaves at `fly` and lands FLY_D seconds later on its
       // first milestone, then travels the line. Every place is [milestone, slot]: slot 0 is centered on the node, for a
       // face alone there for the beat; -1 and 1 are the paired slots, left of the node for Maxim and right for Samar,
@@ -187,11 +180,11 @@
         {
           show: c[0] + 0.1, fly: c[0] + 2.5, first: [0, 0],
           // 2009 with Samar, then alone there once Samar leaves for 2014, then 2015 and 2019 together
-          route: [[c[1] + 0.3, 1, -1], [c[2] + 0.3, 1, 0], [c[3] + 0.5, 3, -1], [c[4] + 0.6, 4, -1]],
+          route: [[c[1] + 0.2, 1, -1], [c[2] + 0.2, 1, 0], [c[3] + 0.3, 3, -1], [c[4] + 0.1, 4, -1]],
         },
         {
-          show: c[0] + 0.3, fly: c[1] + 0.5, first: [1, 1],
-          route: [[c[2] + 0.3, 2, 0], [c[3] + 0.5, 3, 1], [c[4] + 0.6, 4, 1]],
+          show: c[0] + 0.3, fly: c[1] + 0.2, first: [1, 1],
+          route: [[c[2] + 0.2, 2, 0], [c[3] + 0.3, 3, 1], [c[4] + 0.1, 4, 1]],
         },
       ];
       const slotX = ([k, slot]) => NODE_X[k] + slot * PAIR_DX;
@@ -258,9 +251,15 @@
       // Temporal arrives: bloom and ripples around its tile
       const arrive = tileIn[LAST];
       const tileCenter = [NODE_X[LAST], TILE_Y];
-      place(s.bloom, ...tileCenter, 0.6 + 0.5 * P(t, arrive, 0.8), win(t, arrive, arrive + 2.0, 0.3) * 0.9
-        + P(t, arrive + 2.0, 0.6) * 0.35);
-      placeRipples(s.ripples, t, arrive + 0.2, ...tileCenter, 320, 560, 1.4);
+      // a short bloom that settles to a faint lasting glow, and quick ripples, both done before the subtitle ends
+      place(s.bloom, ...tileCenter, 0.6 + 0.5 * P(t, arrive, 0.7), win(t, arrive, arrive + 0.5, 0.3) * 0.9
+        + P(t, arrive + 0.5, 0.5) * 0.35);
+      s.ripples.forEach((e, i) => {
+        const p = P(t, arrive + i * 0.15, 0.7, x => 1 - Math.pow(1 - x, 2));
+        const size = Math.round(lerp(320, 560, p) / 2) * 2;
+        e.style.width = e.style.height = size + 'px';
+        place(e, ...tileCenter, 1, p > 0 && p < 1 ? (1 - p) * 0.9 : 0);
+      });
       NODE_X.forEach((x, k) => {
         const lit = t >= tileIn[k] - 0.4;
         s.nodes[k].style.background = lit ? C.violet : '#141414';

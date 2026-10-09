@@ -79,8 +79,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 01 Where it comes from
 
-- **0:11** Meet Maxim Fateev and Samar Abbas. In 2004, Maxim led Amazon's
-  Simple Queue Service.
+- **0:10** Meet Maxim Fateev and Samar Abbas, the creators of Temporal.
   - Visuals: The chapter opens before the subtitle on its heading, "20
     years in the making" ("20 years" in violet), very large in the middle:
     its letters close in from wide apart, sharpening, with a violet glow.
@@ -92,28 +91,27 @@ and each chapter has a cinematic moment, listed in its visuals.
     MAXIM FATEEV (CO-FOUNDER, CTO) on the left, SAMAR ABBAS (CO-FOUNDER,
     CEO) on the right. The composition rises as a timeline of five
     milestones draws in below; Maxim's name fades and his face flies with
-    a trail onto 2004, which lights up: AMAZON / "Simple Queue Service" /
-    TECH LEAD: MAXIM.
-- **0:17** In 2009, they launched Amazon's Simple Workflow Service.
+    a trail onto 2004 in a smooth 1.2 s arc, and 2004 lights up: AMAZON /
+    "Simple Queue Service" / TECH LEAD: MAXIM.
+- **0:15** 2009: Amazon Simple Workflow Service.
   - Visuals: Maxim's face travels to 2009 with a motion trail; Samar's name
     fades and his face flies to 2009: AMAZON / "Simple Workflow Service" /
     AWS WORKFLOW SERVICE.
-- **0:21** In 2014, Samar co-created Microsoft's Durable Task Framework.
+- **0:18** 2014: Microsoft's Durable Task Framework.
   - Visuals: Samar travels to 2014: MICROSOFT / "Durable Task Framework" /
     AZURE DURABLE FUNCTIONS.
-- **0:26** In 2015, they reunited at Uber to create Cadence, open source
-  since 2017.
+- **0:21** 2015: Cadence at Uber, open source since 2017.
   - Visuals: Both faces reach 2015: UBER / "Cadence" / UBER'S WORKFLOW
     ENGINE.
-- **0:31** In 2019, they founded Temporal, the open source successor of
-  Cadence.
+- **0:25** 2019: they found Temporal.
   - Visuals: Both travel to 2019: a highlighted tile (UV border and glow)
     THEIR OWN COMPANY / official Temporal logo / OPEN SOURCE, MIT LICENSE
-    arrives with a bloom of light and violet ripples.
+    arrives with a short bloom of light and quick violet ripples, settled
+    before the subtitle ends.
 
 ## 02 What Temporal does
 
-- **0:38** The idea is Durable Execution: an app runs in steps, and Temporal
+- **0:30** The idea is Durable Execution: an app runs in steps, and Temporal
   records each one outside the app.
   - Visuals: Step tiles ORDER / CHARGE / SHIP / EMAIL on top; APP INSTANCE
     A on the left with a STEPS card (take the order, charge the card, ship
@@ -122,7 +120,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     runs as a neon pulse along a cable into the history, where rows 1
     "Order #1042 received" and 2 "Card charged: $42" are SAVED; step 3
     starts.
-- **0:45** If the app crashes, a new copy of the app starts and takes
+- **0:37** If the app crashes, a new copy of the app starts and takes
   over.
   - Visuals: Crash during SHIP: a glitch (color fringes, torn bars,
     scanlines), shake, red flash; APP INSTANCE A CRASHED, its lines fall
@@ -130,7 +128,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     dead, for a moment. Then APP INSTANCE B rises into its place, booting
     behind a scanline (STARTING, then TAKING OVER), tagged NEW APP
     INSTANCE; A fades out only once B is there.
-- **0:50** It gets the saved results back from the history, then picks up
+- **0:42** It gets the saved results back from the history, then picks up
   where it left off. No progress is lost.
   - Visuals: Replay, row by row: each saved row of the Event History is
     highlighted and turns REPLAYED, its result runs back to B as a violet
@@ -141,7 +139,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 03 Where Temporal is used
 
-- **1:00** A Workflow is any process that must finish correctly: payments,
+- **0:52** A Workflow is any process that must finish correctly: payments,
   orders, bookings, subscriptions.
   - Visuals: A compact hub-and-spoke map: the official Temporal symbol,
     large, glows in the middle; four short spokes draw out with a pulse of
@@ -152,7 +150,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     Subscriptions, User accounts, Inventory; CI/CD, Provisioning, Data
     pipelines; Agents, RAG flows, Model training. All hubs and bubbles stay
     equal: no domain is highlighted.
-- **1:07** Teams also run infrastructure, data pipelines and, more and
+- **0:59** Teams also run infrastructure, data pipelines and, more and
   more, AI on Temporal.
   - Visuals: The map holds; once the subtitle is read, AI invades the
     screen: the rest of the map fades while the AI hub and its halo swell
@@ -165,7 +163,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 04 Why it matters for AI
 
-- **1:17** AI agents are long processes too: many LLM calls, tools to run,
+- **1:09** AI agents are long processes too: many LLM calls, tools to run,
   and waits for a person.
   - Visuals: The chapter opens on that same LLM orb and its halo, already
     at its final place: the halo fades into the LLM's own glow while the
@@ -187,13 +185,13 @@ and each chapter has a cinematic moment, listed in its visuals.
     free" is saved the same way. Each saved row also adds a block to the
     agent's context, with its step's icon: UV-tinted for an LLM call,
     neon-tinted for a tool result.
-- **1:24** With Temporal, every step the agent takes is saved in an Event
+- **1:16** With Temporal, every step the agent takes is saved in an Event
   History, outside the app.
   - Visuals: Steps 2 and 3 run the same way: "LLM call: find a
     restaurant", "Search: Chez Paulette", "LLM call: book a table",
     "Booking: table for 2, confirmed", each SAVED, the context growing to
     six blocks.
-- **1:31** When the app crashes in production, a new instance replays the
+- **1:23** When the app crashes in production, a new instance replays the
   history: the agent keeps its context.
   - Visuals: Crash before the invite: shake, red flash, a bolt and APP
     CRASH on the dimmed loop, APP INSTANCE A CRASHED; A's context blocks
@@ -210,17 +208,17 @@ and each chapter has a cinematic moment, listed in its visuals.
     pace: rows 7 "LLM call: invite Marie" and 8 "Email: invite sent" are
     saved and add their two blocks, and AGENT COMPLETE shows in the
     loop.
-- **1:46** No progress is lost and no tokens are wasted: no LLM call is
+- **1:38** No progress is lost and no tokens are wasted: no LLM call is
   paid twice.
   - Visuals: Under the history, two compact neon pills with a soft glow
     pop in turn, side by side: NO PROGRESS LOST, then NO TOKENS WASTED.
-- **1:52** That's why OpenAI built Codex on Temporal, and Cursor, Lovable
+- **1:44** That's why OpenAI built Codex on Temporal, and Cursor, Lovable
   and Replit rely on it too.
   - Visuals: The completed state holds.
 
 ## 05 How Temporal Cloud works
 
-- **2:00** With Temporal Cloud, your Workers run your Workflow and Activity
+- **1:52** With Temporal Cloud, your Workers run your Workflow and Activity
   code in your own environment.
   - Visuals: As on slides 6 and 7 of Temporal's deck, two zones of equal
     width from the start. On the left, YOUR ENVIRONMENT (dashed slate):
@@ -236,7 +234,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     ACTIVITY DATA, NEVER YOUR CODE. The Workers poll out to Temporal Cloud
     one after the other (a violet pulse that lights the orchestration
     block) and read POLLING.
-- **2:10** Temporal Cloud orchestrates your Workflows and Activities, and
+- **2:02** Temporal Cloud orchestrates your Workflows and Activities, and
   persists their history.
   - Visuals: Slowly, a beat at a time, one task at a time in the queue;
     PERSISTENCE records each event the moment it happens, as a simplified
@@ -252,7 +250,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     converter into the queue, where the chargeCard task appears: event 2,
     chargeCard SCHEDULED. The task is dispatched to WORKER 2, event 3,
     chargeCard STARTED (no payload), and WORKER 2 runs it.
-- **2:24** Data is encrypted with your own keys before it leaves your
+- **2:16** Data is encrypted with your own keys before it leaves your
   environment: Temporal never sees your payloads.
   - Visuals: The rest dims for a close-up: the chargeCard result, "card:
     $42", leaves WORKER 2 in clear and holds over the Data Converter, in
@@ -273,7 +271,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## 06 Temporal today
 
-- **2:57** Today, more than 4,300 companies pay for Temporal, and the team
+- **2:49** Today, more than 4,300 companies pay for Temporal, and the team
   has doubled in a year.
   - Visuals: A dark stage. One tiny dot per paying customer, 4,300 at
     seeded places over the band, ignites in rippling waves from the middle
@@ -284,7 +282,7 @@ and each chapter has a cinematic moment, listed in its visuals.
     column each dot splits in two, the count climbing to 570, and a neon
     ×2 IN A YEAR stamp slams on. Then every dot flows into the outline of
     the Temporal symbol, which takes their place in the middle.
-- **3:13** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
+- **3:05** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
   PHP, Ruby and Rust.
   - Visuals: Eight rounded logo tiles, each the language's logo alone in
     monochrome ink, spiral out of the symbol one after the other in
@@ -292,13 +290,13 @@ and each chapter has a cinematic moment, listed in its visuals.
     pop and a thin UV link back to the symbol. Once all have landed, the
     ring turns slowly round the symbol, the tiles upright, the links
     following them.
-- **3:20** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
+- **3:12** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
   SDK, Pydantic AI, Google ADK, LangGraph.
   - Visuals: Under the ring, in the same rounded tile style, two rows of
     three tiles appear one by one with a calm pop: OpenAI Agents SDK, Vercel
     AI SDK, Pydantic AI, Google ADK, LangGraph (each with a violet sparkle),
     and a dashed "more to come" tile with a plus, last, glowing softly.
-- **3:28** In September 2026, investors valued Temporal at $12.55 billion.
+- **3:20** In September 2026, investors valued Temporal at $12.55 billion.
   - Visuals: The chips and the symbol fall away as the camera starts to
     rise over a dark grid and parallax stars, riding the head of a glowing
     line: it reaches FEB 2022 $1.5B (Series B), MAR 2025 $1.72B (Series C)
@@ -311,7 +309,7 @@ and each chapter has a cinematic moment, listed in its visuals.
 
 ## Outro
 
-- **3:39** Temporal keeps code running whatever fails, from everyday apps
+- **3:31** Temporal keeps code running whatever fails, from everyday apps
   to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,
