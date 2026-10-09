@@ -231,8 +231,10 @@
       s.svg = svgLayer(root);
       // the wires from each Worker to the Data Converter, the connection out, and the routes the data takes: from
       // a Worker's edge, through the converter, to the connector dot
-      const wire = k => `M ${WORKER.x + WORKER.w / 2} ${workerY(k)} C ${WORKER.x + WORKER.w / 2 + 30} ${workerY(k)},`
-        + ` ${CONV.x - CONV.w / 2 - 30} ${CONV.y}, ${CONV.x - CONV.w / 2} ${CONV.y}`;
+      const wire = k => {
+        const [x, y] = workerEdge(k);
+        return `M ${x} ${y} C ${x + 30} ${y}, ${CONV.x - CONV.w / 2 - 30} ${CONV.y}, ${CONV.x - CONV.w / 2} ${CONV.y}`;
+      };
       s.wires = WORKERS.map((_, k) => path(s.svg, wire(k), C.slate, 2, false));
       s.line = path(s.svg, `M ${CONV.x + CONV.w / 2} ${CONV.y} L ${DOT.x - DOT.size / 2 - 8} ${DOT.y}`, C.ink, 3);
       s.routes = WORKERS.map((_, k) => path(s.svg, `${wire(k)} L ${DOT.x} ${DOT.y}`, 'none', 1, false));
@@ -440,7 +442,7 @@
       // Data Converter (the converter's lock and key in full view under it), down to the connection's start, along
       // it to the dot, then onto its row's payload
       const pop = backPop(t, out, 0.4);
-      const wireStart = [WORKER.x + WORKER.w / 2, workerY(1)];
+      const wireStart = workerEdge(1);
       const legs = [[leaveAt, wireStart, GATE, atGate - leaveAt],
         [crossAt, GATE, LINE_START, 0.5], [crossAt + 0.5, LINE_START, [DOT.x, DOT.y], atDot - crossAt - 0.5],
         [atDot, [DOT.x, DOT.y], [PAYLOAD_X, rowY(3)], landed - atDot]];
