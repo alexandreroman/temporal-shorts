@@ -18,8 +18,13 @@
   // on screen)
   const APP = { x: DL.x, y: 515, w: 704, h: 730 };
   const GUTTER = 40;
-  // the agent's goal and the wait pill, one after the other, under the loop in the app panel
-  const UNDER_LOOP_Y = 785;
+  // Under the loop in the app panel, 24 px from its sides and bottom (as its header): the agent's goal, then in its
+  // place the AGENT CONTEXT strip, one block per saved row (n), gap px apart and pad px inside the strip, under its
+  // label (the blocks' top at blockTop)
+  const MEM = { w: APP.w - 48, h: 116, n: 8, bw: 66, bh: 50, gap: 12, pad: 22, blockTop: 50 };
+  const MEM_Y = APP.y + APP.h / 2 - 24 - MEM.h / 2;
+  const memSlotX = i => APP.x - MEM.w / 2 + MEM.pad + MEM.bw / 2 + i * (MEM.bw + MEM.gap);
+  const MEM_SLOT_Y = MEM_Y - MEM.h / 2 + MEM.blockTop + MEM.bh / 2;
   // Inside the Temporal panel, under its header (70 px), the Event History card 20 px from the panel's sides, then
   // the slot of the pills (a callout at a time, then NO PROGRESS LOST and NO TOKENS WASTED side by side, PILL_GAP
   // apart), CALLOUT_GAP clear of the card and of the panel's bottom. The card's header, rows and tags sit 26 px
@@ -57,7 +62,8 @@
     fadeIn: 0.001, // a hard cut: the previous chapter ends on this chapter's first frame
     shift: AGENT_START.shift,
     subs: [
-      // the loop and the panels enter, the goal shows, then the first of three slow turns, each step saved
+      // the loop and the panels enter, the goal shows, then the first of three slow turns, each step saved in the
+      // history and added to the agent's context
       {
         text: "AI agents are long processes too: many LLM calls, tools to run, and waits for a person.",
         after: 0.4,
@@ -66,11 +72,12 @@
         text: "With Temporal, every step the agent takes is saved in an Event History, outside the app.",
         after: 0.7,
       },
-      // the crash, held with the history kept, the takeover, the replay row by row, then the invite and AGENT
-      // COMPLETE
+      // the crash, held with the history kept and A's context lost, the takeover, the replay row by row that
+      // rebuilds the context in B, then the invite and AGENT COMPLETE
       {
-        text: "When the app crashes in production, a new instance gets the saved results back and resumes.",
-        after: 8.7,
+        text: "When the app crashes in production, a new instance replays the history: "
+          + "the agent keeps its context.",
+        after: 8.1,
       },
       // NO PROGRESS LOST, then NO TOKENS WASTED
       { text: "No progress is lost and no tokens are wasted: no LLM call is paid twice.", after: 0.4 },
@@ -86,6 +93,19 @@
       // the app instances that run the loop: built first, so the loop and its arcs sit on top of them
       s.appA = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
       s.appB = makeAppPanel(root, 'APP INSTANCE B', APP.w, APP.h, { font: 22, statusFont: 18, statusTop: 25 });
+      // each instance's AGENT CONTEXT strip: A's fills as the steps run and empties at the crash (CONTEXT LOST);
+      // B's starts empty and the replay rebuilds it (CONTEXT RESTORED, then the invite adds its two blocks)
+      const memory = () => makeMemory(root, MEM.w, MEM.h, { label: 'Agent context', emptyText: 'CONTEXT LOST' });
+      s.memA = memory();
+      s.memB = memory();
+      s.blocksA = makeMemBlocks(root, 6, MEM.bw, MEM.bh);
+      s.blocksB = makeMemBlocks(root, MEM.n, MEM.bw, MEM.bh);
+      // on B's strip, level with its label, right-aligned with the last block (CSS right is measured inside the
+      // strip's border)
+      s.restored = statusTag(s.memB);
+      Object.assign(s.restored.style, {
+        left: 'auto', right: (MEM.pad - 1) + 'px', top: '14px', transformOrigin: 'right center',
+      });
       // the loop, its arcs and its token's tail on one layer, scaled as a whole
       s.loopLayer = E(root, '', '', {
         width: '1920px', height: '1080px', transformOrigin: `${LOOP.cx}px ${LOOP.cy}px`,
@@ -105,13 +125,9 @@
       s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(s.loopLayer, 16 - 2 * k, '219,255,75'));
       // the token and its comet pass under the nodes, THINK's face included: moved before the first node, in order
       [s.loop.token, ...s.comet].forEach(e => s.loopLayer.insertBefore(e, s.loop.think.root));
-      // the agent's goal, then the wait for a person, under the loop
-      // both a fixed whole size, so they rest on whole pixels centered
+      // the agent's goal, under the loop before the context strip, a fixed whole size, so it rests on whole pixels
       s.goal = makeCard(root, 'Book lunch with Marie on Thursday.', 'user', null, 640);
       Object.assign(s.goal.style, { whiteSpace: 'nowrap', height: '88px' });
-      s.wait = E(root, `${ICON('user', 22, C.violet, 2)}<span>Waits for a person</span>`, 'pill violet', {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '352px',
-      });
 
       // Temporal with the Event History, outside the app (rows 1 to 6 survive the crash), the result cards between
       // the loop and the history, the pills under it, the crash marks and the takeover tag
@@ -207,11 +223,9 @@
       s.svg.style.transform = `translate(${ax}px,${ay}px)`;
       // the loop sits in its place for the whole chapter, at 80% of its size
       s.loopLayer.style.transform = `translate(${DL.x - LOOP.cx}px,${DL.y - LOOP.cy}px) scale(${DL.k})`;
-      // under the loop: the agent's goal, then the wait for a person, both said in the first subtitle
+      // under the loop: the agent's goal, then the context strip in its place
       const gp = P(t, c[0] + 0.6, 0.45, backOut);
-      place(s.goal, DL.x, UNDER_LOOP_Y, gp, clamp(gp * 2) * (1 - P(t, c[0] + 3.4, 0.3)));
-      const wp = P(t, c[0] + 3.8, 0.45, backOut);
-      place(s.wait, DL.x, UNDER_LOOP_Y, wp, clamp(wp * 2) * (1 - P(t, c[1] + 0.2, 0.4)));
+      place(s.goal, DL.x, MEM_Y, gp, clamp(gp * 2) * (1 - P(t, c[0] + 3.4, 0.3)));
 
       // The app instances: A runs the loop, crashes before the invite and leaves; B slides into its place, replays
       // the history, then runs the invite
@@ -229,6 +243,33 @@
       else setAppStatus(s.appB, 'DONE', 'idle');
       setArrivalGlow(s.appB, t, bOn, bOn + 1.6);
       placeNewTag(s.newTag, t, bOn + 0.3, replay[0], DL.x + arriving.dx, DL.y - 25);
+
+      // The agent's context, in each instance's strip, which moves with its panel. In A, a block per row as the row
+      // is saved; at the crash A's blocks fall and CONTEXT LOST shows until A leaves. B arrives with an empty
+      // strip; each replayed row's card lands as a block, the context restored block by block, then the invite
+      // adds its blocks
+      const memIn = P(t, c[0] + 3.6, 0.4);
+      place(s.memA, APP.x + ax, MEM_Y + ay + leaving.dy, 1, memIn * leaving.o);
+      s.memA.style.filter = s.appA.style.filter;
+      s.memA.style.borderColor = t >= crashAt ? C.red : C.line;
+      s.memA.empty.style.opacity = P(t, crashAt + 1.1, 0.4);
+      // the blocks drop half as far as placeMemBlock's 300 px, so they fade out before leaving the panel
+      s.blocksA.forEach((b, i) => {
+        const fall = P(t, crashAt + 0.3 + i * 0.08, 0.8, easeIn);
+        placeMemBlock(b, memSlotX(i), MEM_SLOT_Y, P(t, saved[i] - 0.05, 0.35, backOut), fall, ax, ay - fall * 150);
+      });
+      const bO = t >= bOn ? arriving.o : 0;
+      place(s.memB, APP.x + arriving.dx, MEM_Y, 1, bO);
+      const landAt = i => (i < 6 ? replay[i] + 0.75 : saved[i] - 0.05);
+      s.blocksB.forEach((b, i) => {
+        placeMemBlock(b, memSlotX(i), MEM_SLOT_Y, P(t, landAt(i), 0.35, backOut), 0, arriving.dx, 0, bO);
+      });
+      // CONTEXT RESTORED once the last replayed block has landed, held
+      const restoredAt = landAt(5) + 0.45;
+      setStatus(s.restored, 'CONTEXT RESTORED', 'ok');
+      const rp = popIn(t, restoredAt);
+      s.restored.style.opacity = rp.o;
+      s.restored.style.transform = `scale(${rp.s})`;
       placeCrashMarks(s.crash, t, crashAt, crashAt + 0.3, aOut, ax, ay);
       placeFlash(s.flash, t, crashAt);
       const cp = P(t, complete, 0.45, backOut);
@@ -245,10 +286,11 @@
         const [fx, fy] = isLLM(i) ? [thx, thy] : [acx, acy];
         fly(e, t, leave, fx, fy, leave + 0.1, FLIGHT, CARD_X, rowMid(i), saved[i] + 0.1, CARD_X, rowMid(i));
       });
-      // the replay: each saved row, highlighted, hands its result back to the loop from its left end
+      // the replay: each saved row, highlighted, hands its result back from its left end to B, where it lands as
+      // a block of the agent's context
       s.reuseCards.forEach((e, i) => {
         const q = replay[i] + 0.15;
-        const [tx, ty] = isLLM(i) ? [thx, thy] : [acx, acy];
+        const [tx, ty] = [memSlotX(i), MEM_SLOT_Y];
         fly(e, t, q, CARD_X, rowMid(i), q + 0.1, 0.55, tx, ty, q + 0.65, tx, ty);
       });
       markCrash(s.history, P(t, crashAt + 0.7, 0.4), P(t, crashAt + 0.3, 0.3));

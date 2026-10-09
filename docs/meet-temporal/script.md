@@ -161,7 +161,8 @@ and each chapter has a cinematic moment, listed in its visuals.
     ("OUTSIDE THE APP") with an empty EVENT HISTORY enters on the right;
     the two panels share their top and bottom edges, 40 px apart. Under the
     loop, the goal card "Book lunch with Marie on Thursday." (YOU) shows,
-    then a violet "WAITS FOR A PERSON" pill in its place. The agent runs
+    then an AGENT CONTEXT strip in its place, inside the app panel. The
+    agent runs
     its first step, slowly (3.2 s a turn): a neon token with a comet tail
     runs round the loop, passing under the nodes; its LLM call, an "LLM
     CALL" card, leaves THINK, flies to the history and docks at its row's
@@ -169,25 +170,32 @@ and each chapter has a cinematic moment, listed in its visuals.
     calendar" is written and turns SAVED, highlighted for a moment, and
     "SAVED OUTSIDE THE APP" shows under the history; then a "TOOL CALL"
     card leaves ACT as the token passes it, and "Calendar: Thu 12:30 is
-    free" is saved the same way.
+    free" is saved the same way. Each saved row also adds a block to the
+    agent's context, with its step's icon: UV-tinted for an LLM call,
+    neon-tinted for a tool result.
 - **1:24** With Temporal, every step the agent takes is saved in an Event
   History, outside the app.
   - Visuals: Steps 2 and 3 run the same way: "LLM call: find a
     restaurant", "Search: Chez Paulette", "LLM call: book a table",
-    "Booking: table for 2, confirmed", each SAVED.
-- **1:31** When the app crashes in production, a new instance gets the
-  saved results back and resumes.
+    "Booking: table for 2, confirmed", each SAVED, the context growing to
+    six blocks.
+- **1:31** When the app crashes in production, a new instance replays the
+  history: the agent keeps its context.
   - Visuals: Crash before the invite: shake, red flash, a bolt and APP
-    CRASH on the dimmed loop, APP INSTANCE A CRASHED; the history keeps
-    its six rows, tinted, over "APP CRASHED HERE", and "HISTORY KEPT" shows
-    under it; the crashed state holds. A leaves; APP INSTANCE B slides into
-    its place with a violet glow, NEW APP INSTANCE holds in the loop's
-    middle. Replay, one row a second: each saved row is highlighted, its
-    tag turns "REUSED, NOT RE-BILLED" (LLM calls) or "REUSED, NOT RE-RUN"
-    (tools), and its card flies from the row's left end back to THINK or
-    ACT. Then the invite runs for real at the same slow pace: rows 7 "LLM
-    call: invite Marie" and 8 "Email: invite sent" are saved, and AGENT
-    COMPLETE shows in the loop.
+    CRASH on the dimmed loop, APP INSTANCE A CRASHED; A's context blocks
+    fall and fade, and a red CONTEXT LOST shows in its strip. The history
+    keeps its six rows, tinted, over "APP CRASHED HERE", and "HISTORY KEPT"
+    shows under it; the crashed state holds. A leaves; APP INSTANCE B
+    slides into its place with a violet glow and an empty context strip,
+    NEW APP INSTANCE held in the loop's middle. Replay, one row a second:
+    each saved row is highlighted, its tag turns "REUSED, NOT RE-BILLED"
+    (LLM calls) or "REUSED, NOT RE-RUN" (tools), and its card flies from
+    the row's left end down to B's strip, where it lands as a block: the
+    context is rebuilt block by block, and a neon CONTEXT RESTORED tag pops
+    on the strip and holds. Then the invite runs for real at the same slow
+    pace: rows 7 "LLM call: invite Marie" and 8 "Email: invite sent" are
+    saved and add their two blocks, and AGENT COMPLETE shows in the
+    loop.
 - **1:46** No progress is lost and no tokens are wasted: no LLM call is
   paid twice.
   - Visuals: Under the history, two compact neon pills with a soft glow

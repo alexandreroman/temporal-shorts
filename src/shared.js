@@ -303,6 +303,37 @@ function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts,
   });
 }
 
+// CONTEXT panel: the agent's context, held in the app's memory, with a red note (EMPTY by default) for when a
+// crash wipes it. Its icon is a page, as durable-ai-agents chapter 3 draws the context window. Options: label, the
+// panel's label; emptyText, the note
+function makeMemory(p, w, h, { label = 'Context', emptyText = 'EMPTY' } = {}) {
+  const e = E(p,
+    panelLabel('book', label, 'left:22px;top:16px')
+    + `<div class="empty mono" style="position:absolute;left:0;right:0;top:${h / 2 - 8}px;text-align:center;`
+    + `font-size:26px;letter-spacing:.14em;padding-left:.14em;color:var(--red);opacity:0">${emptyText}</div>`,
+    'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
+  e.empty = e.querySelector('.empty');
+  return e;
+}
+// context blocks held by the app: LLM results and tool results alternate, two per step of LUNCH_STEPS, each
+// centring the icon of its step (same colours as the Event History rows)
+function makeMemBlocks(p, n, w, h) {
+  return Array.from({ length: n }, (_, i) => {
+    const isTool = i % 2 === 1;
+    const icon = ICON(LUNCH_STEPS[Math.floor(i / 2)].icon, Math.round(h / 2), isTool ? '#141414' : C.uv, 1.8);
+    const b = E(p, icon, '', {
+      width: w + 'px', height: h + 'px', background: isTool ? C.neonTint : C.uvTint, borderRadius: 'var(--rs)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    });
+    b.tilt = isTool ? 40 : -35;
+    return b;
+  });
+}
+// grow: pop-in progress; fall: crash progress (the block drops, tilts and fades)
+function placeMemBlock(b, x, y, grow, fall, dx = 0, dy = 0, o = 1) {
+  place(b, x + dx, y + fall * 300 + dy, grow, clamp(grow * 2) * (1 - fall) * o, fall * b.tilt);
+}
+
 // ---------- crash and takeover effects
 // screen shake around a crash, as [dx, dy]
 function shakeAt(t, crashAt) {
