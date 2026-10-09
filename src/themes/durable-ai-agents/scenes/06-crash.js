@@ -71,7 +71,7 @@
         after: 0.4,
       },
       {
-        text: "Every LLM call is made, and paid for, a second time, just to rebuild the context. "
+        text: "The LLM calls are made, and paid for, a second time, just to rebuild the context. "
           + "And the table gets booked twice.",
         after: 1.2,
       },
