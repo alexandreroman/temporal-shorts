@@ -217,9 +217,9 @@
       HISTORY.forEach((_, i) => {
         showRow(s.jr.rows[i], P(t, saved[i] - 0.1, 0.3));
         const isReplayed = i < 2 && t >= replay[i];
-        setStatus(s.jr.tags[i], isReplayed ? 'REPLAYED' : 'SAVED', isReplayed ? 'reused' : 'saved');
-        s.jr.tags[i].style.opacity = P(t, saved[i], 0.25);
-        s.jr.tags[i].style.transform = `scale(${swell(t, isReplayed ? replay[i] : saved[i], 0.14)})`;
+        const opacity = P(t, saved[i], 0.25);
+        if (isReplayed) placeStatusTag(s.jr.tags[i], t, 'REPLAYED', 'reused', opacity, replay[i]);
+        else placeStatusTag(s.jr.tags[i], t, 'SAVED', 'saved', opacity, saved[i]);
       });
       markCrash(s.jr, t, crashAt);
       const scanning = replay.findIndex(q => t >= q - 0.2 && t < q + 0.7);

@@ -193,12 +193,9 @@
       s.jr.rows.forEach((r, i) => showRow(r, P(t, saved[i] - 0.1, 0.3)));
       s.jr.tags.forEach((e, i) => {
         const isReused = i < 6 && t >= reused[i], isTold = i < 6 && t >= told[i];
-        if (isTold) setStatus(e, isLLM(i) ? 'REUSED, NOT RE-BILLED' : 'REUSED, NOT RE-RUN', 'reused');
-        else if (isReused) setStatus(e, 'REUSED', 'reused');
-        else setStatus(e, 'SAVED', 'saved');
+        const label = isTold ? reusedLabel(isLLM(i)) : isReused ? 'REUSED' : 'SAVED';
         const switchedAt = isTold ? told[i] : isReused ? reused[i] : saved[i];
-        e.style.opacity = P(t, saved[i], 0.25);
-        e.style.transform = `scale(${swell(t, switchedAt, 0.14)})`;
+        placeStatusTag(e, t, label, isTold || isReused ? 'reused' : 'saved', P(t, saved[i], 0.25), switchedAt);
       });
       const scanning = replay.findIndex(q => t >= q && t < q + 0.4);
       scanRow(s.jr, scanning);

@@ -292,10 +292,7 @@ function makeOrderHistory(p) {
 }
 // Status tag of row i, a key of ROW_TAG_KINDS; it pops when its label changes at `at`
 function setRowTag(jr, i, t, label, at, o) {
-  const e = jr.tags[i];
-  setStatus(e, label, ROW_TAG_KINDS[label]);
-  e.style.opacity = o;
-  e.style.transform = `scale(${swell(t, at, 0.14)})`;
+  placeStatusTag(jr.tags[i], t, label, ROW_TAG_KINDS[label], o, at);
 }
 // The "waiting for a Signal" line pulses while shown
 function setWaitLine(jr, o) {

@@ -308,10 +308,9 @@
       const reusedAt = i => replay[i] + 0.25;
       s.history.tags.forEach((e, i) => {
         const isReused = i < 6 && t >= reusedAt(i);
-        if (isReused) setStatus(e, isLLM(i) ? 'REUSED, NOT RE-BILLED' : 'REUSED, NOT RE-RUN', 'reused');
-        else setStatus(e, 'SAVED', 'saved');
-        e.style.opacity = P(t, saved[i], 0.25);
-        e.style.transform = `scale(${swell(t, isReused ? reusedAt(i) : saved[i], 0.14)})`;
+        const opacity = P(t, saved[i], 0.25);
+        if (isReused) placeStatusTag(e, t, reusedLabel(isLLM(i)), 'reused', opacity, reusedAt(i));
+        else placeStatusTag(e, t, 'SAVED', 'saved', opacity, saved[i]);
       });
       // the row being written or replayed is highlighted: HOLD after it is saved, most of its second on the replay
       const savingRow = saved.findIndex(at => t >= at && t < at + HOLD);

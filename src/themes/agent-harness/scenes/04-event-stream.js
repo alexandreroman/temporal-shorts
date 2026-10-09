@@ -235,9 +235,7 @@
         const at = sweep + sweepD * row / LAST_ROW;
         s.marks[j].style.opacity = P(t, at, 0.3);
         const [label, kind] = MARK_TAGS[j];
-        setStatus(s.tags[j], label, kind);
-        s.tags[j].style.opacity = P(t, at, 0.25);
-        s.tags[j].style.transform = `scale(${swell(t, at, 0.14)})`;
+        placeStatusTag(s.tags[j], t, label, kind, P(t, at, 0.25), at);
       });
     }
   });

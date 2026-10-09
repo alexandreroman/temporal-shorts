@@ -472,6 +472,16 @@ function setStatus(e, label, kind) {
   // in the live player, a width measured before the fonts load is measured again on the next call
   if (document.fonts.status === 'loaded') e._l = key;
 }
+// A status tag at time t: its label and kind (see setStatus) and its opacity o; it swells briefly when its label
+// changes at `at`
+function placeStatusTag(e, t, label, kind, o, at) {
+  setStatus(e, label, kind);
+  e.style.opacity = o;
+  e.style.transform = `scale(${swell(t, at, 0.14)})`;
+}
+// Tag of an Event History row whose saved result is handed back on a replay: a model (LLM) call is not billed
+// again, a tool call is not run again
+const reusedLabel = isModelCall => isModelCall ? 'REUSED, NOT RE-BILLED' : 'REUSED, NOT RE-RUN';
 
 // ---------- app and Temporal panels
 // App (or Worker) instance panel: gear + name at the top left, status text at the top right (see setAppStatus).
