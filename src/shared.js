@@ -371,6 +371,13 @@ function crashGlitch(t, crashAt) {
   const step = Math.min(Math.floor((t - glitchAt) / 0.05), GLITCH_JITTER.length - 1);
   return { red: step % 2 === 0, dx: GLITCH_JITTER[step] };
 }
+// The red flicker of a crashGlitch() on an app panel: its border and status text turn red on the red steps. Call it
+// after setAppStatus.
+function glitchPanel(panel, glitch) {
+  if (!glitch.red) return;
+  panel.style.borderColor = C.red;
+  panel.st.style.color = C.red;
+}
 // Crash marks on a crashed panel: a red bolt (bolt: { x, y, size }) and a solid red tag, e.g. 'App crash'
 // (crashTag: { x, y, w, h }, h optional). Even sizes keep the tag on whole pixels once centered (the .1em letter
 // spacing gives fractional widths); solid, so nothing under it shows through.

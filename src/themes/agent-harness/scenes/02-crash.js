@@ -153,10 +153,7 @@
       place(s.A, APP.x + ax, APP.y + ay + leave.dy, aIn, clamp(aIn * 2) * leave.o);
       if (dead) setAppStatus(s.A, 'CRASHED', 'crashed');
       else setAppStatus(s.A, 'RUNNING THE AGENT', t >= run[0] ? 'running' : 'idle');
-      if (glitch.red) {
-        s.A.style.borderColor = C.red;
-        s.A.st.style.color = C.red;
-      }
+      glitchPanel(s.A, glitch);
       s.A.st.style.opacity = 1 - P(t, aOut, 0.25);
       s.A.style.filter = leave.grey;
       // a new instance B slides in from the left once A is gone, its border glowing violet while it arrives and

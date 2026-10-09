@@ -103,10 +103,7 @@
       place(workerA, EH.worker.x + sx, EH.worker.y + sy + leave.dy, 1, leave.o);
       if (dead) setAppStatus(workerA, 'CRASHED', 'crashed');
       else setAppStatus(workerA, 'RUNNING', 'running');
-      if (glitch.red) {
-        workerA.style.borderColor = C.red;
-        workerA.st.style.color = C.red;
-      }
+      glitchPanel(workerA, glitch);
       workerA.st.style.opacity = 1 - P(t, aOut, 0.25);
       // a new machine, Worker B, slides in from the left once Worker A is gone, its border glowing violet while it
       // arrives and takes over; IDLE until the Workflow chip reaches it
