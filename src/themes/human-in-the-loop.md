@@ -1,7 +1,7 @@
 # Human-in-the-Loop with Temporal
 
-How a Temporal Workflow waits for a person's approval, for minutes or days, then
-picks up where it left off.
+How a Temporal Workflow waits for a person's approval, for minutes or days, with
+deadlines and reminders, then picks up where it left off.
 
 [Watch the video](/themes/human-in-the-loop/)
 

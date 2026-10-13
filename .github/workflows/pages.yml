@@ -26,7 +26,13 @@ jobs:
     permissions:
       contents: read
     steps:
+      # Full history for the <lastmod> dates of sitemap.xml: the build takes them from the last commit that changed
+      # each page's own content, and skips them in a shallow clone. History is enough: git log by path compares trees
+      # only, so the blobless clone fetches file contents for the checked-out commit alone.
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          filter: blob:none
 
       - uses: actions/setup-python@v7
         with:

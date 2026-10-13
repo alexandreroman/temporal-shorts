@@ -47,7 +47,7 @@ make render                  # output/<theme>.mp4 for every out-of-date theme
 make render SUBS=off         # same, no subtitles: output/<theme>-nosubs.mp4
 make srt                     # output/<theme>.srt for every out-of-date theme
 make markdown                # Markdown for agents, committed: src/themes/*.md
-make social                  # link preview images, committed: src/**/social.png
+make social                  # link preview images + touch icon, committed
 make html                    # home page + one HTML player per theme
 make serve                   # hot-reload home page on CASPER_PORT, else 8000
 make clean                   # delete output/ (every generated file)
@@ -114,7 +114,12 @@ workspaces run `make setup` automatically.
     the home page; opens paused at a `#t=<time>` URL fragment
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
     ordered `<link>` / `<script>` list: shared files as `../../<file>`,
-    the theme's own scripts relative to its folder, then `boot()`
+    the theme's own scripts relative to its folder, then `boot()`; its
+    head holds the viewport meta, the `<title>` (written for search
+    results), `<meta name="description">`, `<meta name="audience">` (who
+    the video is for, for the structured data) and
+    `<meta name="markdown-title">` (the name of the video, heading of its
+    Markdown version)
   - `themes/<theme>/`: the theme's own scripts, e.g.
     `themes/durable-ai-agents/shared.js` (extra icons, the step list,
     `makeApp`, the context block size `MEM_BLOCK`, the bill, the takeover
@@ -122,8 +127,12 @@ workspaces run `make setup` automatically.
   - `social.png`, `themes/<theme>/social.png`: 1200x630 link preview
     image of each page (`social.html`, or the intro title card), written by
     `make social` and committed
+  - `favicon.svg`: site icon, the official Temporal symbol (path and fill
+    untouched) on a Space Black rounded square; `apple-touch-icon.png`:
+    its 180x180 opaque PNG for phones, written by `make social` and
+    committed; the HTML build copies both to the root of `output/`
   - `themes/<theme>.md`: Markdown version of a theme for coding agents,
-    next to its folder: the page `<title>` and description, then one
+    next to its folder: the page `markdown-title` and description, then one
     section per chapter with an absolute link to the player at its start
     (`/themes/<theme>/#t=<s>`) and its subtitles as prose; written by
     `make markdown` from the scenes and committed, never edited by hand.
@@ -139,20 +148,35 @@ workspaces run `make setup` automatically.
   any make target when the fonts are missing), frame preview, parallel
   render, timeline, layout check (`layout_check.py`), SRT export, Markdown
   export (`export_markdown.py`), social preview images
-  (`social_images.py`), standalone HTML build and server (which also
-  serves `/themes/<theme>.md` as `text/markdown`);
-  the per-theme scripts require `--theme` (no default). The HTML build
-  adds the Open Graph and X card tags and a canonical link only when the
-  `SITE_URL` environment variable (or make variable) holds the site's root
-  URL: local builds have none
-- `.github/workflows/pages.yml`: on push to `main`, runs `make html`
+  (`social_images.py`, which also writes the touch icon), standalone HTML
+  build and server (which also serves `/themes/<theme>.md` as
+  `text/markdown`, the site icons, and `/sitemap.xml` and `/robots.txt`
+  when built); the per-theme scripts require `--theme` (no default). The
+  HTML build links every page to the site icons and gives each theme page
+  a visually hidden transcript of its Markdown version (after the stage,
+  for screen readers and search engines; `src/` pages never hold it, so
+  frames are unaffected) and the ` | Temporal Shorts` suffix to its
+  `<title>`. It adds the Open Graph and X card tags, a canonical link and
+  JSON-LD structured data (author and publisher Alexandre Roman, a person:
+  the site is no official Temporal site; topics in `THEME_TOPICS`), and
+  writes `output/sitemap.xml` (home page and listed themes, each with the
+  git date of the last commit that changed its own content as `<lastmod>`:
+  `src/index.html`, or the theme folder and its Markdown version; none in
+  a shallow clone or without git) and
+  `output/robots.txt`, only when the `SITE_URL` environment variable (or
+  make variable) holds the site's root URL: local builds have none, and
+  delete those of an earlier build
+- `.github/workflows/pages.yml`: on push to `main`, checks out the full
+  history (blobless, for the sitemap dates), runs `make html`
   (which downloads the fonts) with `SITE_URL` set to the Pages URL given by
   `actions/configure-pages` (no domain in the build or the workflow) and
-  deploys `output/` to GitHub Pages (pages, images and the Markdown
-  versions of the themes; no video, no SRT); served at a domain
-  root, as the player's home button links to `/`. Pull requests to `main`
-  run the build only, without the Pages step, so with no social tags, and
-  no deploy: the pages are attached to the run as an artifact
+  deploys `output/` to GitHub Pages (pages, images, the Markdown
+  versions of the themes, the site icons, `sitemap.xml` and `robots.txt`;
+  no video, no SRT); served at a domain root, as the player's home button
+  links to `/`. Pull requests to `main` run the build only, without the
+  Pages step, so with no social tags, structured data, sitemap or
+  `robots.txt`, and no deploy: the pages are attached to the run as an
+  artifact
 - `docs/<theme>/script.md`: full script of a theme: subtitles, timings,
   visuals
 - `output/`: generated `<theme>.srt`, `<theme>.mp4`, and the HTML pages
@@ -226,18 +250,20 @@ not shared with the team.
   (`themes/<theme>/`): `make serve` is the only way to view the HTML pages.
   The absolute links are the player's home button, `/`, the player
   links of the Markdown versions, `/themes/<theme>/`, and the theme
-  pages' link to their Markdown version, `/themes/<theme>.md`: the site
-  is served at a domain root.
+  pages' link to their Markdown version, `/themes/<theme>.md`, and the
+  site icons, `/favicon.svg` and `/apple-touch-icon.png`: the site is
+  served at a domain root.
   Build asset URLs in JS with `assetUrl('assets/...')` (`src/shared.js`),
   which resolves them against the script, not the page: Playwright opens
   theme pages over `file://` to render frames.
 - Live-mode player code (`startPlayer()`, `.live` CSS) must never affect the
   frozen `?t=` mode: rendered frames must stay pixel-identical.
-- After changing an intro scene, a page title, `src/social.html` or the
-  home page lockup or background, run `make social` and commit the
-  `social.png` images: CI only copies them.
+- After changing an intro scene, a page title, `src/social.html`, the
+  home page lockup or background, or `src/favicon.svg`, run `make social`
+  and commit the `social.png` images and `src/apple-touch-icon.png`: CI
+  only copies them.
 - Check frames with `make preview` before `make render`; after a text change
-  (a subtitle, a chapter title, a page `<title>` or description), run
+  (a subtitle, a chapter title, a page `markdown-title` or description), run
   `make srt` and `make markdown`, update `docs/<theme>/script.md`, and commit
   the `src/themes/<theme>.md` files: CI only copies them.
 - Compositions stay inside the content frame y 150-880 (scene `shift`

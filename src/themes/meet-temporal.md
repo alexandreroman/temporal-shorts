@@ -1,7 +1,7 @@
 # Meet Temporal
 
-Who created Temporal, where it comes from, where it stands today, and why it
-matters for AI.
+Who created Temporal, its path from Amazon SWF and Uber Cadence, what it does,
+where it runs today, and why it matters for AI.
 
 [Watch the video](/themes/meet-temporal/)
 
