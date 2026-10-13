@@ -222,8 +222,10 @@ background and glow filling the window whatever its shape, and plays once,
 unless loop is enabled (it is off by default); the controls (home,
 play/pause, seek bar, time, speed, loop, subtitles, presenter mode,
 fullscreen) hide after a few seconds of playback and come back when the
-mouse moves. Each control shows its name and shortcut on hover. The home
-button goes back to the home page (`/`). Playback runs at 1x by default; the
+mouse moves. On narrow windows, the bar drops the time, and below that the
+speed, loop and presenter mode buttons unless they are on. Each control
+shows its name and shortcut on hover. The home button goes back to the home
+page (`/`). Playback runs at 1x by default; the
 speed button switches between 1x and 0.5x. At 0.5x, only the still moments
 between animations stretch, which leaves time to explain the screen; the
 animations keep their normal speed. Subtitles are shown by default; the CC
