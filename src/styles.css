@@ -179,6 +179,14 @@ html,body{margin:0;background:var(--bg)}
 #time{flex:none;font-family:'Mono',monospace;font-size:14px;letter-spacing:.06em;color:var(--slate);white-space:nowrap}
 /* Fixed width, wide enough for "0.5x", so the bar does not shift when the speed changes. */
 #ctl #speed{width:52px;font-family:'Mono',monospace;font-size:14px;letter-spacing:.06em}
+/* Narrow windows, such as phones: the fixed controls would squeeze the seek bar to nothing. The time goes first,
+   since the seek bar shows the position; then speed, loop and presenter mode, unless they are on, so the viewer
+   can still turn them off. Home, play, seek, subtitles and fullscreen always stay. */
+@media (max-width:900px){#time{display:none}}
+@media (max-width:600px){
+  #ctl{bottom:12px;width:calc(100% - 16px);gap:6px;padding:8px}
+  #ctl #speed[aria-pressed=false],#ctl #loop[aria-pressed=false],#ctl #presenter[aria-pressed=false]{display:none}
+}
 /* Hold mark: a muted pause glyph that fades in while held at a presenter stop (.held) and breathes slowly,
    clear for the presenter, faint for the audience. It sits in the top-right corner, away from the controls,
    and stays whether they show or hide. The breathing pauses rather than stops outside a hold, so the
