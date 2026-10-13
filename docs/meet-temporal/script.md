@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=meet-temporal` for the live values; the start
-times below are a snapshot from 2026-10-09.
+times below are a snapshot from 2026-10-13.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -89,8 +89,6 @@ its visuals.
   estimate of chapter 06)
 - https://temporal.io/blog/improving-java-sdk-codex-openai (Codex runs on
   Temporal: chapter 04)
-- https://temporal.io/resources/case-studies/replit-uses-temporal-to-power-replit-agent-reliably-at-scale
-  (Replit Agent runs on Temporal: chapter 04)
 
 ## Intro
 
@@ -238,13 +236,13 @@ its visuals.
   call is paid twice.
   - Visuals: Under the history, two compact neon pills with a soft glow
     pop in turn, side by side: NO PROGRESS LOST, then NO TOKENS WASTED.
-- **1:53** That's why OpenAI built Codex on Temporal, and Cursor, Lovable
-  and Replit rely on it too.
+- **1:53** That's why OpenAI built Codex on Temporal, and Cursor and Lovable
+  rely on it too.
   - Visuals: The completed state holds.
 
 ## 05 How Temporal Cloud works
 
-- **2:02** With Temporal Cloud, your Workers run your Workflow and Activity
+- **2:01** With Temporal Cloud, your Workers run your Workflow and Activity
   code in your own environment.
   - Visuals: As on slides 6 and 7 of Temporal's deck, two zones of equal
     width from the start. On the left, YOUR ENVIRONMENT (dashed slate):
@@ -276,7 +274,7 @@ its visuals.
     converter into the queue, where the chargeCard task appears: event 2,
     chargeCard SCHEDULED. The task is dispatched to WORKER 2, which runs
     it.
-- **2:25** You can encrypt data with your own keys before it leaves:
+- **2:24** You can encrypt data with your own keys before it leaves:
   Temporal never sees your payloads.
   - Visuals: The rest dims for a close-up: the chargeCard result, "card: $42",
     leaves WORKER 2 in clear and holds over the Data Converter, in full view;

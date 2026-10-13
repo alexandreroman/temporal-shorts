@@ -70,7 +70,7 @@
       },
       // NO PROGRESS LOST, then NO TOKENS WASTED
       { text: "No progress is lost and no tokens are wasted: no finished LLM call is paid twice.", after: 0.4 },
-      { text: "That's why OpenAI built Codex on Temporal, and Cursor, Lovable and Replit rely on it too.", after: 1.4 },
+      { text: "That's why OpenAI built Codex on Temporal, and Cursor and Lovable rely on it too.", after: 1.4 },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);

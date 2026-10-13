@@ -227,7 +227,7 @@ below and the card order in [Home page design](feedback_home-page.md).
   marking it), B (Feb 2022, $1.5B), B-Prime (Feb 2023, $1.5B), C, D, E;
   the seed has no reported valuation. The "×8" multiple runs from Feb
   2022, the first officially reported valuation. Ch4 names OpenAI (Codex),
-  Cursor, Lovable, Replit.
+  Cursor, Lovable.
 - Ch4 shows only the durable agent: an AI agent run with Temporal that
   crashes in production; the Event History keeps every step, a new app
   instance replays it and finishes, ending on NO PROGRESS LOST and NO
