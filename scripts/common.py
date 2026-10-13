@@ -13,6 +13,13 @@ HOME_PAGE = SRC / "index.html"
 THEMES_DIR = SRC / "themes"
 
 
+# Files at the root of the site besides the home page, all served at a domain root: the site icon, linked by every
+# page by absolute path, its PNG version for phones (written by `make social`, committed), both copied from src/,
+# and the files for search engine crawlers, written by the HTML build only when SITE_URL is set.
+SITE_ICONS = ("favicon.svg", "apple-touch-icon.png")
+CRAWLER_FILES = ("sitemap.xml", "robots.txt")
+
+
 def theme_names():
     """The themes, sorted: the folders of src/themes/ that hold an index.html page."""
     return sorted(path.parent.name for path in THEMES_DIR.glob("*/index.html"))

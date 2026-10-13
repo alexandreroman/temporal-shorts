@@ -1,7 +1,7 @@
 # Temporal Agent Harness
 
-Run AI agents as durable Temporal Workflows, built with the AI SDKs you already
-use.
+Run AI agents as durable Temporal Workflows with the AI SDKs you already use:
+turns, human approvals, one event stream, typed subagents and Code Mode.
 
 [Watch the video](/themes/agent-harness/)
 

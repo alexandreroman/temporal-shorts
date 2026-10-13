@@ -9,30 +9,61 @@ card with the hidden attribute is dropped from the build: its theme is unlisted,
 Each theme's Markdown version for coding agents, src/themes/<theme>.md, written by `make markdown`, is copied to
 output/themes/<theme>.md, next to the theme folder, and the theme page links to it with
 <link rel="alternate" type="text/markdown" href="/themes/<theme>.md">, so that an agent reading the page finds the
-text of the video. The href is an absolute path, as the site is served at a domain root.
+text of the video. The href is an absolute path, as the site is served at a domain root. The same text, as HTML,
+goes into the body of the theme page: a transcript out of sight but read by screen readers and search engines,
+which find the rest of the text inside JavaScript only. The frames are captured from src/, never from output/: the
+transcript never shows in a video. The <title> of a built theme page also gets the site name, "<title> | Temporal
+Shorts", for browser tabs and search results; the home page title starts with it already.
+
+The site icon, src/favicon.svg, and its PNG version for phones, src/apple-touch-icon.png, written by
+`make social`, are copied to the root of output/, and every page links to them by absolute path.
 
 Link previews on social networks need absolute URLs: when the SITE_URL environment variable holds the root URL of
 the deployed site, set by the Pages workflow, each page also gets a canonical link and the link preview tags of
-social networks (Open Graph, X card). Without it, the pages are built with neither. Standard library only.
+social networks (Open Graph, X card), then structured data for search engines (JSON-LD): the home page as a
+WebSite of the listed themes, each theme page as a LearningResource, its audience from <meta name="audience">, with
+its breadcrumb trail. These keep the bare title. output/ also gets a sitemap.xml of the home page and the listed
+themes, and a robots.txt that points to it. Each sitemap URL carries as <lastmod> the date of the last commit that
+changed the page's own content (src/index.html; a theme folder and its Markdown version), read with git; a
+shallow clone or a tree without git gets none. Without SITE_URL, the pages are built with none of these, and the
+build deletes the sitemap.xml and robots.txt of an earlier one. Standard library only.
 
   python scripts/build_html.py
   SITE_URL=https://example.com python scripts/build_html.py
 """
 import base64
+import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from html import escape, unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import HOME_PAGE, SRC, built_page, page_sources, theme_markdown
+from common import (CRAWLER_FILES, HOME_PAGE, OUTPUT, ROOT, SITE_ICONS, SRC, built_page, page_sources,
+                    theme_markdown, theme_names, theme_page)
 
 SITE_NAME = "Temporal Shorts"
 # The preview image of a page lives next to it, in src/ and output/ alike, so its URL is the page URL + this name.
 SOCIAL_IMAGE = "social.png"
 SOCIAL_IMAGE_WIDTH, SOCIAL_IMAGE_HEIGHT = 1200, 630
+
+# Structured data (JSON-LD, schema.org) for search engines. The author and publisher are a person: the site is no
+# official Temporal site.
+SCHEMA_CONTEXT = "https://schema.org"
+AUTHOR = {"@type": "Person", "name": "Alexandre Roman", "url": "https://www.linkedin.com/in/alexandre-roman"}
+LANGUAGE = "en"
+LEARNING_RESOURCE_TYPE = "Animated explainer video"
+# What each theme's video is about, besides Temporal itself: one or two topics per theme, which a new theme adds.
+THEME_TOPICS = {
+    "meet-temporal": ["Durable Execution", "Temporal Cloud"],
+    "durable-execution": ["Durable Execution", "Workflow"],
+    "human-in-the-loop": ["Human-in-the-loop", "Approval workflow"],
+    "durable-ai-agents": ["AI agent", "Durable Execution"],
+    "agent-harness": ["AI agent", "Temporal Agent Harness"],
+}
 
 MIME_TYPES = {
     ".woff2": "font/woff2",
@@ -50,12 +81,34 @@ ASSET_REF = re.compile(r"assets/[\w.-]+(?:/[\w.-]+)*")
 DATA_URI = re.compile(r"data:[^\"')\s]+")
 TITLE_TAG = re.compile(r"<title>(.*?)</title>", re.DOTALL)
 DESCRIPTION_TAG = re.compile(r'<meta name="description" content="([^"]*)">')
+# Who a theme's video is for, e.g. "Developers": read for the structured data, required on every theme page.
+AUDIENCE_TAG = re.compile(r'<meta name="audience" content="([^"]*)">')
 # A link carrying the standard hidden attribute, whatever its other attributes. The lookahead ends the attribute
 # name, and the leading whitespace starts it, so that an href such as themes/hidden-x/ never matches.
 HIDDEN_LINK_TAG = r'<a\s[^>]*\shidden(?=[\s>=])[^>]*>'
 # A whole home page card of an unlisted theme, with its indentation and line break. Cards hold no nested <a>, so
 # the card ends at the first </a>.
 HIDDEN_CARD = re.compile(r'^[ \t]*' + HIDDEN_LINK_TAG + r'.*?</a>[ \t]*\n', re.DOTALL | re.MULTILINE)
+# The theme a home page card links to, e.g. themes/meet-temporal/.
+CARD_THEME = re.compile(r'\shref="themes/([^/"]+)/"')
+
+# Absolute paths from the site root, like the player's home button: the site is served at a domain root.
+ICON_LINKS = """
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">"""
+
+# The blocks of a theme's Markdown version (see export_markdown.py), separated by blank lines: the # title and the
+# ## chapter headings, the "[Watch ...](...)" links to the player, and paragraphs of prose.
+MARKDOWN_HEADING = re.compile(r"(#+) (.+)")
+WATCH_LINK = re.compile(r"\[Watch [^\]]*\]\([^)]*\)")
+# A backslash escape: in CommonMark, a backslash before any ASCII punctuation character stands for that character.
+MARKDOWN_ESCAPE = re.compile(r"\\([!-/:-@\[-`{-~])")
+# The standard visually hidden pattern: the transcript takes no room on screen, yet screen readers and search engine
+# crawlers read it, which display:none or the hidden attribute would prevent. The style is inline because the
+# transcript exists in the built pages only: a rule in styles.css, a video input, would invalidate every MP4 and SRT.
+TRANSCRIPT_STYLE = ("position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;"
+                    "margin:-1px;padding:0;border:0")
+TRANSCRIPT_TAG = '<article class="transcript"'
 
 
 def data_uri(path):
@@ -135,31 +188,49 @@ def public_url(source, site):
     return f"{site}/{path}"
 
 
-def attribute_value(html, source, pattern, what):
-    """The text matched by pattern in the page, whitespace collapsed, escaped for a double-quoted attribute."""
+def page_text(html, source, pattern, what):
+    """The text matched by pattern in the page, entities decoded and whitespace collapsed; exit if it is missing."""
     match = pattern.search(html)
     if match is None:
         sys.exit(f"ERROR: {source} has no {what}")
     # The page text is HTML already: unescape it first, so that an entity such as &amp; is not escaped twice.
-    text = " ".join(unescape(match.group(1)).split())
+    return " ".join(unescape(match.group(1)).split())
+
+
+def page_title(html, source):
+    return page_text(html, source, TITLE_TAG, "<title>")
+
+
+def attribute(text):
+    """Plain text escaped for a double-quoted attribute."""
     # Inside double quotes, only " needs escaping on top of &, < and >: an apostrophe stays readable.
     return escape(text, quote=False).replace('"', "&quot;")
 
 
-def add_social_tags(html, source, site):
-    """Add the canonical link and the link preview tags of social networks after the description; none without a site.
+def insert_after_description(html, tags):
+    """Insert tags right after the description, at the top of <head>.
 
-    The tags go at the top of <head>, ahead of the inlined fonts and scripts: link preview crawlers, such as Slack's,
-    read only the start of a page. The page is checked either way, so that a page missing its title or description
-    fails on pull requests too.
+    The tags start with a line break and end without one, to sit on their own lines.
     """
-    title = attribute_value(html, source, TITLE_TAG, "<title>")
-    description = attribute_value(html, source, DESCRIPTION_TAG, '<meta name="description" content="...">')
-    if not site:
-        return html
-    url = public_url(source, site)
-    # Starts with a line break and ends without one, to sit on its own lines right after the description.
-    tags = f"""
+    description_end = DESCRIPTION_TAG.search(html).end()
+    return html[:description_end] + tags + html[description_end:]
+
+
+def markdown_link(theme):
+    """The link to the theme's Markdown version.
+
+    At the top of <head>, as an agent may read only the start of a page that the inlined fonts make large. The
+    href is an absolute path from the site root, /themes/<theme>.md, like the player's home button: the site is
+    served at a domain root.
+    """
+    return f'\n<link rel="alternate" type="text/markdown" href="/themes/{theme}.md">'
+
+
+def social_tags(url, title, description):
+    """The canonical link and the link preview tags of social networks (Open Graph, X card) of the page at url."""
+    title = attribute(title)
+    description = attribute(description)
+    return f"""
 <link rel="canonical" href="{url}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{SITE_NAME}">
@@ -171,28 +242,156 @@ def add_social_tags(html, source, site):
 <meta property="og:image:height" content="{SOCIAL_IMAGE_HEIGHT}">
 <meta property="og:image:alt" content="{title}">
 <meta name="twitter:card" content="summary_large_image">"""
-    description_end = DESCRIPTION_TAG.search(html).end()
-    return html[:description_end] + tags + html[description_end:]
 
 
-def add_markdown_link(html, theme):
-    """Add the link to the theme's Markdown version right after the description, which add_social_tags() checks.
+def home_structured_data(site, description):
+    """The home page as a schema.org WebSite whose parts are the listed themes, named after their page <title>."""
+    parts = []
+    for theme in listed_themes():
+        page = theme_page(theme)
+        title = page_title(read_source(page), page)
+        parts.append({"@type": "LearningResource", "name": title, "url": public_url(page, site)})
+    return {
+        "@context": SCHEMA_CONTEXT,
+        "@type": "WebSite",
+        "name": SITE_NAME,
+        "url": public_url(HOME_PAGE, site),
+        "description": description,
+        "inLanguage": LANGUAGE,
+        "author": AUTHOR,
+        "publisher": AUTHOR,
+        "hasPart": parts,
+    }
 
-    At the top of <head>, as an agent may read only the start of a page that the inlined fonts make large. The
-    href is an absolute path from the site root, /themes/<theme>.md, like the player's home button: the site is
-    served at a domain root.
+
+def theme_structured_data(theme, site, title, description, audience):
+    """A theme page as a schema.org LearningResource, part of the site, and the breadcrumb trail from the home page."""
+    topics = THEME_TOPICS.get(theme)
+    if topics is None:
+        sys.exit(f"ERROR: {theme} has no entry in THEME_TOPICS (scripts/build_html.py): add the topics of its video")
+    url = public_url(theme_page(theme), site)
+    home_url = public_url(HOME_PAGE, site)
+    resource = {
+        "@type": "LearningResource",
+        "name": title,
+        "description": description,
+        "url": url,
+        "image": f"{url}{SOCIAL_IMAGE}",
+        "inLanguage": LANGUAGE,
+        "learningResourceType": LEARNING_RESOURCE_TYPE,
+        "about": [{"@type": "Thing", "name": topic} for topic in ["Temporal", *topics]],
+        "audience": {"@type": "Audience", "audienceType": audience},
+        "isPartOf": {"@type": "WebSite", "name": SITE_NAME, "url": home_url},
+        "author": AUTHOR,
+    }
+    breadcrumbs = {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": SITE_NAME, "item": home_url},
+            {"@type": "ListItem", "position": 2, "name": title, "item": url},
+        ],
+    }
+    return {"@context": SCHEMA_CONTEXT, "@graph": [resource, breadcrumbs]}
+
+
+def structured_data_script(data):
+    """A JSON-LD block holding structured data for search engines."""
+    # A literal "</" could close the block early, as in inline_scripts(); "<\/" means the same in JSON.
+    text = json.dumps(data, indent=2, ensure_ascii=False).replace("</", "<\\/")
+    return f'\n<script type="application/ld+json">\n{text}\n</script>'
+
+
+def head_tags(source, site, title, description, audience):
+    """The tags the build adds right after the description, at the top of <head>; the ones with URLs need a site.
+
+    In this order: the site icons, the theme's Markdown version, the canonical link and the link preview tags,
+    then the structured data. They go ahead of the inlined fonts and scripts: link preview crawlers, such as Slack's,
+    read only the start of a page.
     """
-    link = f'\n<link rel="alternate" type="text/markdown" href="/themes/{theme}.md">'
-    description_end = DESCRIPTION_TAG.search(html).end()
-    return html[:description_end] + link + html[description_end:]
+    tags = ICON_LINKS
+    if source != HOME_PAGE:
+        tags += markdown_link(source.parent.name)
+    if not site:
+        return tags
+    tags += social_tags(public_url(source, site), title, description)
+    if source == HOME_PAGE:
+        data = home_structured_data(site, description)
+    else:
+        data = theme_structured_data(source.parent.name, site, title, description, audience)
+    return tags + structured_data_script(data)
 
 
-def copy_markdown(theme):
-    """Copy the theme's Markdown version, written by `make markdown` and committed, to output/themes/<theme>.md."""
+def add_title_suffix(html, title):
+    """Append the site name to the <title> of a theme page, in browser tabs and search results.
+
+    The home page title starts with it already. The link preview tags and the structured data keep the bare title,
+    next to their own site name.
+    """
+    suffixed = f"<title>{escape(title, quote=False)} | {SITE_NAME}</title>"
+    return TITLE_TAG.sub(lambda match: suffixed, html, count=1)
+
+
+def markdown_version(theme):
+    """The theme's Markdown version, written by `make markdown` and committed; exit if it is missing."""
     markdown = theme_markdown(theme)
     if not markdown.is_file():
         sys.exit(f"ERROR: missing Markdown version {markdown}\nRun `make markdown` to write it, then commit it.")
-    shutil.copyfile(markdown, built_page(markdown))
+    return markdown
+
+
+def markdown_text(text):
+    """The plain text of a Markdown block: whitespace collapsed and backslash escapes resolved."""
+    return MARKDOWN_ESCAPE.sub(r"\1", " ".join(text.split()))
+
+
+def transcript_html(markdown):
+    """The text of a theme's Markdown version as a visually hidden <article>, for screen readers and search engines.
+
+    The title becomes an <h1>, each chapter heading an <h2>, each paragraph a <p>. The links to the player are
+    dropped: a link hidden from sight but reachable with the Tab key would trap keyboard users.
+    """
+    elements = []
+    for block in markdown.read_text(encoding="utf-8").strip().split("\n\n"):
+        if WATCH_LINK.fullmatch(block):
+            continue
+        heading = MARKDOWN_HEADING.fullmatch(block)
+        if heading is None:
+            tag = "p"
+            text = block
+        elif len(heading.group(1)) <= 2:
+            tag = f"h{len(heading.group(1))}"
+            text = heading.group(2)
+        else:
+            sys.exit(f"ERROR: {markdown} holds a heading deeper than ##, which the transcript does not expect: "
+                     f"{block!r}")
+        elements.append(f"<{tag}>{escape(markdown_text(text), quote=False)}</{tag}>")
+    if not elements or not elements[0].startswith("<h1>"):
+        sys.exit(f"ERROR: {markdown} does not start with a # title")
+    body = "\n".join(elements)
+    return f'{TRANSCRIPT_TAG} style="{TRANSCRIPT_STYLE}">\n{body}\n</article>\n'
+
+
+def add_transcript(html, source, markdown):
+    """Insert the transcript at the start of the scripts of <body>, after the stage, out of sight.
+
+    The scenes hold the text of a theme inside JavaScript, which search engines may not run: the transcript gives
+    them that text as HTML. Only the built pages carry it: the frames are captured from src/, so it never shows in a
+    video.
+    """
+    body_start = html.find("<body")
+    if body_start == -1:
+        sys.exit(f"ERROR: {source} has no <body>")
+    first_script = SCRIPT_TAG.search(html, body_start)
+    if first_script is None:
+        sys.exit(f"ERROR: {source} has no <script src> in its <body>, before which the transcript goes")
+    insert_at = first_script.start()
+    return html[:insert_at] + transcript_html(markdown) + html[insert_at:]
+
+
+def check_transcript(html):
+    # Once, in <body>: a page without it would show search engines no text, a second copy would repeat it.
+    if html.count(TRANSCRIPT_TAG) != 1 or html.find(TRANSCRIPT_TAG) < html.find("<body"):
+        sys.exit("ERROR: the theme page does not hold exactly one transcript in its <body>")
 
 
 def copy_social_image(source, out):
@@ -201,6 +400,118 @@ def copy_social_image(source, out):
     if not image.is_file():
         sys.exit(f"ERROR: missing social preview image {image}\nRun `make social` to write it, then commit it.")
     shutil.copyfile(image, out.parent / SOCIAL_IMAGE)
+
+
+def copy_site_icons():
+    """Copy the site icon and its PNG version for phones to the root of output/, where every page links to them."""
+    for name in SITE_ICONS:
+        icon = SRC / name
+        if not icon.is_file():
+            sys.exit(f"ERROR: missing site icon {icon}\nsrc/favicon.svg is a source file; `make social` writes "
+                     "src/apple-touch-icon.png from it: run it, then commit the image.")
+        shutil.copyfile(icon, OUTPUT / name)
+
+
+def hidden_themes():
+    """The unlisted themes: those whose home page card carries the hidden attribute."""
+    themes = []
+    for card in HIDDEN_CARD.finditer(read_source(HOME_PAGE)):
+        link = CARD_THEME.search(card.group(0))
+        if link is None:
+            sys.exit(f"ERROR: a hidden card of {HOME_PAGE} links to no themes/<theme>/ folder")
+        themes.append(link.group(1))
+    return themes
+
+
+def listed_themes():
+    """The themes the home page lists: every theme but the unlisted ones."""
+    hidden = hidden_themes()
+    return [theme for theme in theme_names() if theme not in hidden]
+
+
+def page_content_paths(source):
+    """The files and folders that hold a page's own content, whose last commit dates the page in the sitemap.
+
+    The home page is src/index.html; a theme page is its folder, src/themes/<theme>/ (its page, scenes and
+    helpers), and its Markdown version, src/themes/<theme>.md. The shared sources (engine.js, styles.css,
+    shared.js, assets) are left out on purpose: <lastmod> tells of a change of the page's own content.
+    """
+    if source == HOME_PAGE:
+        return [HOME_PAGE]
+    theme = source.parent.name
+    return [source.parent, theme_markdown(theme)]
+
+
+def git(*args):
+    """The output of a git command run in the project, stripped; None if git is missing or the command fails."""
+    try:
+        result = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+    except FileNotFoundError:
+        return None
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
+def last_change_dates(pages):
+    """The committer date of the last commit that changed each page's own content, by page; None without git history.
+
+    Dates come from commits only: uncommitted changes are ignored, and a page whose content no commit touches gets
+    None. A shallow clone, such as the default checkout of GitHub Actions, holds a single commit, whose date would
+    stand for every file: no date beats a wrong one.
+    """
+    shallow = git("rev-parse", "--is-shallow-repository")
+    if shallow is None:
+        print("Skipped <lastmod> in sitemap.xml: no git repository, or no git")
+        return None
+    if shallow == "true":
+        print("Skipped <lastmod> in sitemap.xml: the clone is shallow, its dates are not those of the last changes")
+        return None
+    dates = {}
+    for page in pages:
+        paths = [str(path.relative_to(ROOT)) for path in page_content_paths(page)]
+        # Strict ISO 8601 with the committer's offset, e.g. 2026-10-13T10:15:00+02:00: a W3C datetime.
+        dates[page] = git("log", "-1", "--format=%cI", "--", *paths) or None
+    return dates
+
+
+def sitemap(site):
+    """The sitemap of the home page and the listed theme pages; the unlisted themes stay out of search engines' way.
+
+    Each URL carries the date of the last commit that changed the page's own content as <lastmod>, when the git
+    history gives it (see last_change_dates()).
+    """
+    pages = [HOME_PAGE, *(theme_page(theme) for theme in listed_themes())]
+    dates = last_change_dates(pages) or {}
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for page in pages:
+        lastmod = ""
+        if dates.get(page):
+            lastmod = f"<lastmod>{dates[page]}</lastmod>"
+        lines.append(f"  <url><loc>{escape(public_url(page, site))}</loc>{lastmod}</url>")
+    lines.append("</urlset>")
+    return "\n".join(lines) + "\n"
+
+
+def robots_txt(site):
+    """Let every crawler in, and point it to the sitemap."""
+    return f"User-agent: *\nAllow: /\n\nSitemap: {site}/sitemap.xml\n"
+
+
+def write_crawler_files(site):
+    """Write sitemap.xml and robots.txt at the root of output/; without a site, delete those of an earlier build.
+
+    Both need absolute URLs, so they exist only on the deployed site: a stale pair left by a build with SITE_URL
+    would point a local server to the deployed one.
+    """
+    if not site:
+        for name in CRAWLER_FILES:
+            (OUTPUT / name).unlink(missing_ok=True)
+        return
+    for name, text in (("sitemap.xml", sitemap(site)), ("robots.txt", robots_txt(site))):
+        path = OUTPUT / name
+        path.write_text(text, encoding="utf-8")
+        print(path)
 
 
 def check_self_contained(html):
@@ -237,13 +548,25 @@ def check_social_tags_first(html):
 def build_page(source, site):
     """Write the self-contained build of a page of src/ to the same relative path under output/."""
     html = read_source(source)
+    # Read with or without a site, so that a page missing one of them fails on pull requests too.
+    title = page_title(html, source)
+    description = page_text(html, source, DESCRIPTION_TAG, '<meta name="description" content="...">')
     if source == HOME_PAGE:
+        audience = None
+        markdown = None
         html = drop_hidden_cards(html)
         check_no_hidden_cards(html)
-    html = add_social_tags(html, source, site)
-    if source != HOME_PAGE:
-        html = add_markdown_link(html, theme=source.parent.name)
+    else:
+        audience = page_text(html, source, AUDIENCE_TAG, '<meta name="audience" content="...">')
+        markdown = markdown_version(theme=source.parent.name)
+    html = insert_after_description(html, head_tags(source, site, title, description, audience))
+    if markdown is not None:
+        html = add_title_suffix(html, title)
     html = inline_assets(html)
+    # After the assets: a subtitle that mentions an assets/ path must stay text.
+    if markdown is not None:
+        html = add_transcript(html, source, markdown)
+        check_transcript(html)
     html = inline_stylesheets(html, source.parent)
     html = inline_scripts(html, source.parent)
     check_self_contained(html)
@@ -253,8 +576,8 @@ def build_page(source, site):
     out = built_page(source)
     out.parent.mkdir(parents=True, exist_ok=True)
     copy_social_image(source, out)
-    if source != HOME_PAGE:
-        copy_markdown(theme=source.parent.name)
+    if markdown is not None:
+        shutil.copyfile(markdown, built_page(markdown))
     out.write_text(html, encoding="utf-8")
     print(f"{out} ({out.stat().st_size / 1024:.0f} KB)")
 
@@ -262,9 +585,13 @@ def build_page(source, site):
 def main():
     site = site_url()
     if not site:
-        print("Skipped the social tags and canonical links: SITE_URL is unset")
-    # page_sources() lists the home page last, on purpose: the Makefile uses output/index.html as the target of
-    # the whole build, so it must be written only once every theme page is, and never be older than any of them.
+        print("Skipped the social tags, canonical links, sitemap.xml and robots.txt: SITE_URL is unset")
+    # The files of the site root come first, and page_sources() lists the home page last, on purpose: the Makefile
+    # uses output/index.html as the target of the whole build, so it must be written only once every other file is,
+    # and never be older than any of them.
+    OUTPUT.mkdir(exist_ok=True)
+    copy_site_icons()
+    write_crawler_files(site)
     for source in page_sources():
         build_page(source, site)
 

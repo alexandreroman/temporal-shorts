@@ -121,10 +121,13 @@ html,body{margin:0;background:var(--bg)}
    Every rule targets .live or the #backdrop, #ctl and #hold elements, all created by startPlayer() only, so the
    frozen ?t= frames used by the renderer stay pixel-identical. */
 .live,.live body{height:100%;overflow:hidden}
-.live #stage{position:absolute;left:50%;top:50%;transform-origin:50% 50%;background:none}
+/* The stage and the backdrop are fixed, not absolute: a fixed box adds nothing to the scrollable size of the page.
+   Otherwise the star tiles, which reach past the window edges, would make a phone widen its layout viewport beyond
+   the screen (the viewport meta sets it to the device width) and the player would show a cropped stage. */
+.live #stage{position:fixed;left:50%;top:50%;transform-origin:50% 50%;background:none}
 /* The backdrop holds the stage's #sky and #band under the transparent stage, with the stage's size, position and
    scale (set by fit()) but no clipping, so the background fills the whole window whatever its shape. */
-#backdrop{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:50% 50%;pointer-events:none}
+#backdrop{position:fixed;left:50%;top:50%;width:1920px;height:1080px;transform-origin:50% 50%;pointer-events:none}
 #backdrop .sky-tile{position:absolute;width:1920px;height:1080px}
 /* The glow sits on the window bottom: --bleed-y is the letterbox height below the stage, in stage px. */
 .live #band{bottom:calc(-1 * var(--bleed-y, 0px))}

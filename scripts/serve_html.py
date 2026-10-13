@@ -5,8 +5,10 @@
 / and /index.html serve the home page (output/index.html), the theme picker; /themes/<theme>/ (or
 /themes/<theme>/index.html) serves the standalone HTML player of that theme
 (output/themes/<theme>/index.html), and /themes/<theme>.md its Markdown version for coding agents
-(output/themes/<theme>.md), as text/markdown. The URLs mirror the output/ tree, so the relative links between the
-pages work. Only the pages of src/ and the Markdown versions of the themes are served, nothing else from output/.
+(output/themes/<theme>.md), as text/markdown. /favicon.svg and /apple-touch-icon.png serve the site icons, and
+/sitemap.xml and /robots.txt the files for search engine crawlers, when a build with SITE_URL wrote them. The URLs
+mirror the output/ tree, so the relative links between the pages work. Only these files are served, nothing else
+from output/.
 
 A watcher thread rebuilds the pages (scripts/build_html.py) when a file under src/ or a build script
 changes, a Markdown version written by `make markdown` included. Every open tab follows the version of the
@@ -31,13 +33,22 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import HOME_PAGE, ROOT, SRC, built_page, page_sources, theme_markdown, theme_names, theme_page
+from common import (CRAWLER_FILES, HOME_PAGE, OUTPUT, ROOT, SITE_ICONS, SRC, built_page, page_sources,
+                    theme_markdown, theme_names, theme_page)
 
 BUILD_SCRIPT = ROOT / "scripts" / "build_html.py"
 # Mirror the Makefile inputs of the HTML pages: everything under src/ (see source_snapshot()) plus the build
 # scripts.
 SOURCE_SCRIPTS = (BUILD_SCRIPT, ROOT / "scripts" / "common.py")
 POLL_SECONDS = 0.5
+# The files served as is, by suffix: no reload script, they are no pages.
+CONTENT_TYPES = {
+    ".md": "text/markdown; charset=utf-8",
+    ".svg": "image/svg+xml",
+    ".png": "image/png",
+    ".xml": "application/xml; charset=utf-8",
+    ".txt": "text/plain; charset=utf-8",
+}
 HEARTBEAT_SECONDS = 15
 
 # Added before </body> of the served page. It only listens: no DOM change, so ?t= frames stay identical.
@@ -80,12 +91,17 @@ def requested_page(url_path):
     return None
 
 
-def requested_markdown(url_path):
-    """The built Markdown version of a theme for a request path, or None if the path names none."""
-    # The same whitelist as requested_page(): only the exact URL of a known theme's Markdown file is served.
+def requested_static_file(url_path):
+    """The built file served as is for a request path, a theme's Markdown version or a file of the site root, or None.
+
+    The same whitelist as requested_page(): only the exact URL of a known file is served.
+    """
     for theme in theme_names():
         if url_path == f"/themes/{theme}.md":
             return built_page(theme_markdown(theme))
+    for name in (*SITE_ICONS, *CRAWLER_FILES):
+        if url_path == f"/{name}":
+            return OUTPUT / name
     return None
 
 
@@ -128,22 +144,25 @@ class PlayerHandler(BaseHTTPRequestHandler):
         self.send_file(include_body=False)
 
     def send_file(self, include_body):
-        """Send the Markdown version of a theme or a page, whichever the path names."""
-        markdown = requested_markdown(urlsplit(self.path).path)
-        if markdown is None:
+        """Send a file served as is or a page, whichever the path names."""
+        static_file = requested_static_file(urlsplit(self.path).path)
+        if static_file is None:
             self.send_page(include_body)
         else:
-            self.send_markdown(markdown, include_body)
+            self.send_static_file(static_file, include_body)
 
-    def send_markdown(self, markdown, include_body):
-        """Send the Markdown version of a theme as is: no reload script, it is no page."""
+    def send_static_file(self, path, include_body):
+        """Send a Markdown version, a site icon or a crawler file as is: no reload script, it is no page."""
         try:
-            body = markdown.read_bytes()
+            body = path.read_bytes()
         except FileNotFoundError:
-            self.send_error(HTTPStatus.NOT_FOUND, f"{markdown.relative_to(ROOT)} not found: run `make html`")
+            hint = "run `make html`"
+            if path.name in CRAWLER_FILES:
+                hint = "only a build with SITE_URL writes it"
+            self.send_error(HTTPStatus.NOT_FOUND, f"{path.relative_to(ROOT)} not found: {hint}")
             return
         self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", "text/markdown; charset=utf-8")
+        self.send_header("Content-Type", CONTENT_TYPES[path.suffix])
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-cache")
         self.end_headers()

@@ -1,7 +1,8 @@
 """Write src/themes/<theme>.md, the Markdown version of a theme, for coding agents.
 
-The text comes from the built page only, so it cannot drift from the video: the title and summary from the theme
-page's <title> and <meta name="description">, then one section per chapter of the scenes
+The text comes from the built page only, so it cannot drift from the video: the title from the theme page's
+<meta name="markdown-title">, the name of the video, which the search-oriented <title> of the page may extend, and
+the summary from its <meta name="description">, then one section per chapter of the scenes
 (src/themes/<theme>/scenes/), its subtitles joined into one paragraph. Each section links to the player at the
 chapter start. The links are absolute paths from the site root, /themes/<theme>/#t=<seconds>, as the site is served
 at a domain root (the player's home button links to /). The file is committed, like social.png: CI has no
@@ -28,7 +29,7 @@ OUTRO_HEADING = "Outro"
 
 # Everything the page knows of its text: the scenes in playing order, with their chapters and subtitles.
 READ_PAGE = """JSON.stringify({
-  title: document.title,
+  title: document.querySelector('meta[name="markdown-title"]')?.content ?? null,
   summary: document.querySelector('meta[name="description"]').content,
   scenes: scenes.map(s => ({chapter: s.chapter || null, title: s.title || null, start: s.start,
                             subs: s.subs.map(x => x.text)})),
@@ -50,6 +51,9 @@ def read_page(theme):
         browser, page = open_page(pw, theme)
         data = json.loads(page.evaluate(READ_PAGE))
         browser.close()
+    if not data["title"]:
+        sys.exit(f'ERROR: src/themes/{theme}/index.html has no <meta name="markdown-title" content="...">, the '
+                 "title of its Markdown version")
     return data
 
 

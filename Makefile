@@ -78,10 +78,13 @@ SOCIAL_IMAGES := $(wildcard src/social.png src/themes/*/social.png)
 # The Markdown version of each theme, src/themes/<theme>.md, written by `make markdown` and committed for the same
 # reason. It sits next to the theme folder, outside theme_sources: it is an output of the scenes, never an input.
 MARKDOWN_FILES := $(wildcard src/themes/*.md)
+# The site icon and its PNG version for phones, which `make social` writes from it and which is committed, like the
+# social images. Both are copied to the root of output/; neither is a video input.
+SITE_ICONS := $(wildcard src/favicon.svg src/apple-touch-icon.png)
 # The HTML build depends on every page, the home page and the live player included, and copies the images and the
-# Markdown files.
+# Markdown files. sitemap.xml and robots.txt depend on SITE_URL only, like the canonical links: see SITE_URL above.
 ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$(call theme_sources,$(theme))) \
-               $(SOCIAL_IMAGES) $(MARKDOWN_FILES)
+               $(SOCIAL_IMAGES) $(SITE_ICONS) $(MARKDOWN_FILES)
 
 # Never keep a partial MP4, SRT or HTML from an interrupted or failed run:
 # its fresh timestamp would make Make treat it as up to date.
@@ -122,11 +125,11 @@ srt: $(SUBTITLES)       ## one SRT per theme -> output/<theme>.srt [THEME=<theme
 
 markdown: $(MARKDOWN)   ## Markdown of each theme for coding agents, committed -> src/themes/<theme>.md [THEME=<theme>]
 
-social: $(FONTS) | $(VENV)    ## social preview images, committed -> src/social.png, src/themes/<theme>/social.png
+social: $(FONTS) | $(VENV)    ## preview images + touch icon, committed -> src/**/social.png, src/apple-touch-icon.png
 	$(call require,playwright PIL)
 	$(PY) scripts/social_images.py
 
-html: $(HTML)     ## home page + one standalone HTML player per theme -> output/index.html, output/themes/
+html: $(HTML)     ## home page + one standalone HTML player per theme -> output/ [SITE_URL=<url>]
 
 serve: $(HTML)    ## home page and players on http://localhost:PORT (CASPER_PORT, else 8000)
 	$(PY) scripts/serve_html.py --port $(PORT)

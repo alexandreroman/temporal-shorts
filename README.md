@@ -83,6 +83,9 @@ src/themes/<theme>.md  Markdown version of a theme for coding agents
 src/home.css, home.js  home page styles and star field
 src/social.html        home link preview card, captured by make social
 src/social.png         link preview image of the home page (make social)
+src/favicon.svg        site icon: the Temporal symbol on a dark rounded
+                       square; apple-touch-icon.png is its 180x180 PNG
+                       for phones (make social)
 src/assets/            Temporal lockup and symbol, founders' photo, language
                        logos (see src/assets/languages/README.md)
 src/fonts/             brand fonts (downloaded by make), see
@@ -115,7 +118,7 @@ make render                  # videos -> output/<theme>.mp4
 make render SUBS=off         # same, no subtitles -> output/<theme>-nosubs.mp4
 make srt                     # subtitles -> output/<theme>.srt
 make markdown                # Markdown for agents -> src/themes/<theme>.md
-make social                  # link preview images -> src/**/social.png
+make social                  # link previews + touch icon -> src/**/*.png
 make html                    # home page + players -> output/**/index.html
 make serve                   # hot-reloading home page on http://localhost:8000
 make clean                   # delete output/ (every generated file)
@@ -161,7 +164,8 @@ are out of date: each `output/<theme>.mp4`, `-nosubs.mp4`, `.srt` or
 or export script. Editing a scene rebuilds its theme only; editing the home
 page (`src/index.html`, `src/home.css`) or the live player (`src/player.js`)
 rebuilds no video. `make html` rebuilds when any source of any page, a
-`social.png` image, a Markdown version or `scripts/build_html.py` changes.
+`social.png` image, a site icon, a Markdown version or
+`scripts/build_html.py` changes.
 Use `make -B render` to force a full render.
 
 `make clean` deletes `output/`: videos, subtitles, HTML pages, previews and
@@ -264,8 +268,11 @@ files.
 
 `make serve` also serves the Markdown version of each theme on
 `/themes/<theme>.md`, as `text/markdown` (see
-[Markdown versions for coding agents](#markdown-versions-for-coding-agents)).
-Nothing else from `output/` is served.
+[Markdown versions for coding agents](#markdown-versions-for-coding-agents)),
+the site icons on `/favicon.svg` and `/apple-touch-icon.png`, and
+`/sitemap.xml` and `/robots.txt` when a build with `SITE_URL` wrote them
+(see [Search engines](#search-engines)). Nothing else from `output/` is
+served.
 
 ### Markdown versions for coding agents
 
@@ -274,8 +281,10 @@ scripts only: a coding agent that fetches `themes/<theme>/` reads almost
 nothing. Each theme therefore has a Markdown version, published at
 `/themes/<theme>.md`, next to the theme folder:
 
-- the page `<title>` as the heading, then its
-  `<meta name="description">` as the summary, and a link to the player
+- the name of the video as the heading, from the theme page's
+  `<meta name="markdown-title">` (the page `<title>`, written for search
+  results, may extend it), then its `<meta name="description">` as the
+  summary, and a link to the player
 - one section per chapter, `Chapter <n>: <title>` as the scenes give it,
   with a link to the player at the chapter start
   (`/themes/<theme>/#t=<seconds>`, rounded up to the whole second, so
@@ -297,21 +306,23 @@ built theme page links to its Markdown version with
 `<link rel="alternate" type="text/markdown" href="/themes/<theme>.md">`,
 an absolute path like the links of the Markdown files, which the build
 adds right after the description, hidden themes included. After
-any text change, a subtitle, a chapter title, a page `<title>` or
-description, run `make markdown` and commit the updated files with the
-change. Never edit them by hand.
+any text change, a subtitle, a chapter title, the `markdown-title` or
+description of a page, run `make markdown` and commit the updated files
+with the change. Never edit them by hand.
 
 ### Social link previews
 
 The deployed pages carry link preview tags, so a shared link shows a card
 on social networks: Open Graph (`og:title`, `og:description`, `og:url`,
 `og:image` and its size), an X `summary_large_image` card and a canonical
-link. The title and description come from the page's `<title>` and
-`<meta name="description">`; the build stops if either is missing, with or
-without the tags. The tags sit at the top of `<head>`, right after the
-description, ahead of the inlined fonts and scripts: crawlers such as
-Slack's read only the start of a page, and the build stops if `og:image`
-comes after the first inline style or script.
+link. The title and description come from the page's `<title>`, without
+the suffix the build adds to theme pages (see
+[Search engines](#search-engines)), and `<meta name="description">`; the
+build stops if either is missing, with or without the tags. The tags sit
+at the top of `<head>`, right after the description, ahead of the inlined
+fonts and scripts: crawlers such as Slack's read only the start of a page,
+and the build stops if `og:image` comes after the first inline style or
+script.
 
 These tags need the absolute root URL of the site, which `make html` reads
 from the `SITE_URL` variable. The Pages workflow sets it to the URL given
@@ -357,6 +368,66 @@ commit:
 - a new theme: `make html` fails without its `social.png`
 
 Look at each changed PNG before committing it.
+
+### Search engines
+
+Search engines see a theme page much as a coding agent does: its text
+lives in its scripts. The build therefore adds to each built theme page,
+with or without `SITE_URL`:
+
+- a transcript: the text of its Markdown version as HTML, an `<h1>` title,
+  an `<h2>` per chapter and the subtitles as paragraphs, without the links
+  to the player. It sits in `<article class="transcript">` after the
+  stage, visually hidden (the standard 1px clipped pattern, inline), so
+  that screen readers and crawlers read it while the page shows nothing
+  more; a hidden link would trap keyboard users, hence none. Only the
+  built pages hold it: the frames are captured from `src/`, so it never
+  shows in a video. The build stops if it is missing.
+- the site name after the `<title>`, `<title> | Temporal Shorts`, for
+  browser tabs and search results. The home page `<title>` starts with
+  it, and keeps its own; the link preview tags, the structured data and
+  the Markdown versions keep the bare title.
+
+With `SITE_URL`, as these need absolute URLs, the build also writes:
+
+- structured data (JSON-LD, schema.org) at the top of `<head>`, after the
+  link preview tags: on the home page, a `WebSite` whose parts are the
+  listed themes; on a theme page, a `LearningResource` (title,
+  description, image, `<meta name="audience">` of the page, topics from
+  `THEME_TOPICS` in `scripts/build_html.py`) and a `BreadcrumbList` from
+  the home page. The author and publisher are a person, Alexandre Roman:
+  the site is no official Temporal site.
+- `output/sitemap.xml`, the URLs of the home page and the listed themes
+  (hidden cards excluded), and `output/robots.txt`, which lets every
+  crawler in and points to the sitemap. A build without `SITE_URL`
+  deletes those of an earlier one, so that a local server never offers
+  the deployed site's URLs.
+
+Each sitemap URL carries as `<lastmod>` the committer date of the last
+commit that changed the page's own content, read with `git log`:
+`src/index.html` for the home page, the theme folder and its Markdown
+version for a theme. The shared sources (`engine.js`, `styles.css`,
+`shared.js`, assets) do not count, and uncommitted changes neither. The
+dates come from git, not from file times, which a checkout resets. A
+shallow clone holds a single commit, whose date would stand for every
+page: there, and without git, the build leaves `<lastmod>` out and says
+why.
+
+The build stops if a theme page has no `<meta name="audience">`, with or
+without `SITE_URL`, or no entry in `THEME_TOPICS` with it.
+
+### Site icon
+
+`src/favicon.svg` is the site icon: the official Temporal symbol, its path
+and light fill untouched, on a Space Black rounded square, so that it
+reads on light and dark browser tabs. `make social` renders it into
+`src/apple-touch-icon.png`, 180x180 and opaque, the icon phones show for a
+page saved to the home screen; the PNG is committed, like the
+`social.png` images. The build copies both to the root of `output/` and
+links every page to them right after the description, by absolute path
+(`/favicon.svg`, `/apple-touch-icon.png`), like the player's home button;
+it stops if either is missing. After a change to `favicon.svg`, run
+`make social` and commit the PNG.
 
 ### Editing
 
@@ -425,10 +496,16 @@ editing different scenes never touch the same file.
 ### Add a theme
 
 1. Copy a theme page, for example `src/themes/durable-execution/index.html`,
-   to `src/themes/<theme>/index.html`; set its `<title>`, its
-   `<meta name="description">` and its list of scene scripts. The new
-   folder is a theme as soon as its page exists: `--theme` and
-   `THEME=<theme>` accept it, and `make html` builds it.
+   to `src/themes/<theme>/index.html`. Keep its
+   `<meta name="viewport">`, which fits the player to phone screens, and
+   set its head and its list of scene scripts: `<title>`, written for
+   search results; `<meta name="description">`;
+   `<meta name="audience">`, who the video is for (`General audience`,
+   `Developers`); `<meta name="markdown-title">`, the name of the video,
+   the heading of its Markdown version. Add the topics of the video to
+   `THEME_TOPICS` in `scripts/build_html.py`. The new folder is a theme as
+   soon as its page exists: `--theme` and `THEME=<theme>` accept it, and
+   `make html` builds it.
 2. Create `src/themes/<theme>/scenes/` with the scene files, and
    `src/themes/<theme>/shared.js` for the helpers of the theme alone,
    loaded right after `../../shared.js`.
@@ -461,9 +538,12 @@ players to [GitHub Pages](https://docs.github.com/en/pages) on every push to
 `main`, or on demand from the Actions tab (`workflow_dispatch`). It runs
 `make html` with the runner's Python (make downloads the fonts first with
 `scripts/fonts.sh`, the font step of `make setup`), then deploys `output/`:
-the pages, their `social.png` images and the Markdown versions of the
-themes. It builds no video and no subtitle file, so it needs neither
-Playwright nor ffmpeg.
+the pages, their `social.png` images, the Markdown versions of the themes,
+the site icons, `sitemap.xml` and `robots.txt`. It builds no video and no
+subtitle file, so it needs neither Playwright nor ffmpeg. The checkout
+fetches the full history, without file contents beyond the built commit
+(`fetch-depth: 0`, `filter: blob:none`), for the `<lastmod>` dates of the
+sitemap.
 
 Pull requests to `main` run the same build without deploying: the pages are
 attached to the run as the `github-pages` artifact, a tar archive of
@@ -476,12 +556,14 @@ The site must be served at the root of a domain, a custom domain or a
 `<user>.github.io` repository: the player's home button links to `/`,
 which a project site under `<user>.github.io/<repository>/` breaks.
 
-The link preview tags hold absolute URLs, as social networks require. The
-workflow takes the site URL from the Pages configuration
+The link preview tags, the structured data, `sitemap.xml` and
+`robots.txt` hold absolute URLs, as social networks and search engines
+require. The workflow takes the site URL from the Pages configuration
 (`actions/configure-pages`, custom domain included) and passes it to the
 build as `SITE_URL`, so no domain is written in the build or the
 workflow. Pull request builds skip that step: their pages have no link
-preview tags.
+preview tags and no structured data, and `output/` has no sitemap and no
+`robots.txt`.
 
 ## Contributing
 

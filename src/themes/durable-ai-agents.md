@@ -1,6 +1,7 @@
 # Durable AI Agents with Temporal
 
-How an AI agent works, and why it needs Durable Execution to keep its progress.
+How an AI agent works, from LLM calls and tools to the agentic loop, and why it
+needs Durable Execution with Temporal to keep its progress.
 
 [Watch the video](/themes/durable-ai-agents/)
 

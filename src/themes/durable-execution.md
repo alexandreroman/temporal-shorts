@@ -1,6 +1,7 @@
 # Introduction to Durable Execution with Temporal
 
-The principles of Durable Execution with Temporal Workflows.
+How Temporal Workflows survive crashes: Event History, replay, durable timers
+and full visibility, shown on an online order that never charges twice.
 
 [Watch the video](/themes/durable-execution/)
 
