@@ -19,7 +19,7 @@ VENV := $(if $(filter .venv/bin/python,$(PY)),$(VENV_STAMP))
 # One video per theme: src/themes/<theme>/index.html plays the scenes of its folder; src/index.html is the home page.
 ALL_THEMES := $(patsubst src/themes/%/index.html,%,$(wildcard src/themes/*/index.html))
 
-# timeline, layout, render and srt cover every theme; THEME=<theme> restricts them to one. preview needs one.
+# timeline, layout, render, srt and markdown cover every theme; THEME=<theme> restricts them to one. preview needs one.
 THEME ?=
 ifeq ($(THEME),)
 THEMES := $(ALL_THEMES)
@@ -41,6 +41,8 @@ $(error Unknown SUBS=$(SUBS). Valid values: on off)
 endif
 
 SUBTITLES := $(THEMES:%=output/%.srt)
+# The Markdown version of each theme, for coding agents: committed, as CI has no Playwright (see below).
+MARKDOWN  := $(THEMES:%=src/themes/%.md)
 # The HTML build writes every page, the home page (output/index.html) last: it stands for the whole build.
 HTML      := output/index.html
 
@@ -73,15 +75,19 @@ theme_sources = src/themes/$(1)/index.html $(wildcard src/themes/$(1)/*.js src/t
 # The social preview image of each page, written by `make social` and committed. No rule builds them: CI has no
 # Playwright, and a checkout gives them arbitrary timestamps. They are no video input, so they rebuild no MP4 or SRT.
 SOCIAL_IMAGES := $(wildcard src/social.png src/themes/*/social.png)
-# The HTML build depends on every page, the home page and the live player included, and copies the images.
+# The Markdown version of each theme, src/themes/<theme>.md, written by `make markdown` and committed for the same
+# reason. It sits next to the theme folder, outside theme_sources: it is an output of the scenes, never an input.
+MARKDOWN_FILES := $(wildcard src/themes/*.md)
+# The HTML build depends on every page, the home page and the live player included, and copies the images and the
+# Markdown files.
 ALL_SOURCES := $(SHARED_SOURCES) $(HOME_SOURCES) $(foreach theme,$(ALL_THEMES),$(call theme_sources,$(theme))) \
-               $(SOCIAL_IMAGES)
+               $(SOCIAL_IMAGES) $(MARKDOWN_FILES)
 
 # Never keep a partial MP4, SRT or HTML from an interrupted or failed run:
 # its fresh timestamp would make Make treat it as up to date.
 .DELETE_ON_ERROR:
 
-.PHONY: setup timeline layout preview render srt social html serve clean
+.PHONY: setup timeline layout preview render srt markdown social html serve clean
 
 setup:            ## venv + Playwright Chromium + fonts
 	bash scripts/setup.sh
@@ -113,6 +119,8 @@ preview: $(FONTS) | $(VENV)   ## contact sheet of one theme: make preview THEME=
 render: $(VIDEOS)       ## one MP4 per theme -> output/<theme>.mp4 [THEME=<theme>] [SUBS=off]
 
 srt: $(SUBTITLES)       ## one SRT per theme -> output/<theme>.srt [THEME=<theme>]
+
+markdown: $(MARKDOWN)   ## Markdown of each theme for coding agents, committed -> src/themes/<theme>.md [THEME=<theme>]
 
 social: $(FONTS) | $(VENV)    ## social preview images, committed -> src/social.png, src/themes/<theme>/social.png
 	$(call require,playwright PIL)
@@ -147,6 +155,17 @@ $(ALL_THEMES:%=output/%.srt): output/%.srt: $(VIDEO_SOURCES) $$(call theme_sourc
                                             | $(VENV)
 	$(call require,playwright)
 	$(PY) scripts/export_srt.py --theme $*
+
+# The Markdown rules exist only when a goal asks for them: the HTML build lists the Markdown files among its inputs,
+# and with these rules in sight, `make html` would rebuild a file that looks older than its scenes, which needs
+# Playwright: CI has none, and a checkout gives the files arbitrary timestamps. Like the social images, `make html`
+# only copies them, and stops if one is missing.
+ifneq ($(filter markdown src/themes/%.md,$(MAKECMDGOALS)),)
+$(ALL_THEMES:%=src/themes/%.md): src/themes/%.md: $(VIDEO_SOURCES) $$(call theme_sources,$$*) \
+                                                  scripts/export_markdown.py | $(VENV)
+	$(call require,playwright)
+	$(PY) scripts/export_markdown.py --theme $*
+endif
 
 $(HTML): $(ALL_SOURCES) scripts/build_html.py
 	$(PY) scripts/build_html.py

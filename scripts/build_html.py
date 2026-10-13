@@ -6,6 +6,11 @@ with no other file, while the home page links to the players below it: output/ m
 relative links stay the same. Each page's social.png, written by `make social`, is copied next to it. A home page
 card with the hidden attribute is dropped from the build: its theme is unlisted, but still built and reachable.
 
+Each theme's Markdown version for coding agents, src/themes/<theme>.md, written by `make markdown`, is copied to
+output/themes/<theme>.md, next to the theme folder, and the theme page links to it with
+<link rel="alternate" type="text/markdown" href="/themes/<theme>.md">, so that an agent reading the page finds the
+text of the video. The href is an absolute path, as the site is served at a domain root.
+
 Link previews on social networks need absolute URLs: when the SITE_URL environment variable holds the root URL of
 the deployed site, set by the Pages workflow, each page also gets a canonical link and the link preview tags of
 social networks (Open Graph, X card). Without it, the pages are built with neither. Standard library only.
@@ -22,7 +27,7 @@ from html import escape, unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import HOME_PAGE, SRC, built_page, page_sources
+from common import HOME_PAGE, SRC, built_page, page_sources, theme_markdown
 
 SITE_NAME = "Temporal Shorts"
 # The preview image of a page lives next to it, in src/ and output/ alike, so its URL is the page URL + this name.
@@ -170,6 +175,26 @@ def add_social_tags(html, source, site):
     return html[:description_end] + tags + html[description_end:]
 
 
+def add_markdown_link(html, theme):
+    """Add the link to the theme's Markdown version right after the description, which add_social_tags() checks.
+
+    At the top of <head>, as an agent may read only the start of a page that the inlined fonts make large. The
+    href is an absolute path from the site root, /themes/<theme>.md, like the player's home button: the site is
+    served at a domain root.
+    """
+    link = f'\n<link rel="alternate" type="text/markdown" href="/themes/{theme}.md">'
+    description_end = DESCRIPTION_TAG.search(html).end()
+    return html[:description_end] + link + html[description_end:]
+
+
+def copy_markdown(theme):
+    """Copy the theme's Markdown version, written by `make markdown` and committed, to output/themes/<theme>.md."""
+    markdown = theme_markdown(theme)
+    if not markdown.is_file():
+        sys.exit(f"ERROR: missing Markdown version {markdown}\nRun `make markdown` to write it, then commit it.")
+    shutil.copyfile(markdown, built_page(markdown))
+
+
 def copy_social_image(source, out):
     """Copy the preview image of a page next to its build: it is linked by URL, never inlined."""
     image = source.parent / SOCIAL_IMAGE
@@ -216,6 +241,8 @@ def build_page(source, site):
         html = drop_hidden_cards(html)
         check_no_hidden_cards(html)
     html = add_social_tags(html, source, site)
+    if source != HOME_PAGE:
+        html = add_markdown_link(html, theme=source.parent.name)
     html = inline_assets(html)
     html = inline_stylesheets(html, source.parent)
     html = inline_scripts(html, source.parent)
@@ -226,6 +253,8 @@ def build_page(source, site):
     out = built_page(source)
     out.parent.mkdir(parents=True, exist_ok=True)
     copy_social_image(source, out)
+    if source != HOME_PAGE:
+        copy_markdown(theme=source.parent.name)
     out.write_text(html, encoding="utf-8")
     print(f"{out} ({out.stat().st_size / 1024:.0f} KB)")
 

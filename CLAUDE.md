@@ -46,6 +46,7 @@ make preview THEME=<theme> T="12 40 136"  # contact sheet -> output/preview.png
 make render                  # output/<theme>.mp4 for every out-of-date theme
 make render SUBS=off         # same, no subtitles: output/<theme>-nosubs.mp4
 make srt                     # output/<theme>.srt for every out-of-date theme
+make markdown                # Markdown for agents, committed: src/themes/*.md
 make social                  # link preview images, committed: src/**/social.png
 make html                    # home page + one HTML player per theme
 make serve                   # hot-reload home page on CASPER_PORT, else 8000
@@ -71,8 +72,9 @@ subagents: ask them for the times, and give the links in the answer. A
 change with no visible effect (a refactor that keeps frames identical)
 gets no link, and the report says so.
 
-`preview` requires `THEME`. Each MP4 or SRT rebuilds only when the shared
-sources or its own theme change (see README.md); `-B` forces a rebuild.
+`preview` requires `THEME`. Each MP4, SRT or Markdown file rebuilds only
+when the shared sources or its own theme change (see README.md); `-B`
+forces a rebuild.
 
 In Casper (`.casper.json`), Run (`casper run`) serves the home page and the
 HTML players on `CASPER_PORT` (8000 where it is unset), Render
@@ -120,6 +122,14 @@ workspaces run `make setup` automatically.
   - `social.png`, `themes/<theme>/social.png`: 1200x630 link preview
     image of each page (`social.html`, or the intro title card), written by
     `make social` and committed
+  - `themes/<theme>.md`: Markdown version of a theme for coding agents,
+    next to its folder: the page `<title>` and description, then one
+    section per chapter with an absolute link to the player at its start
+    (`/themes/<theme>/#t=<s>`) and its subtitles as prose; written by
+    `make markdown` from the scenes and committed, never edited by hand.
+    The HTML build copies it to `output/themes/<theme>.md` and links each
+    theme page to it (`<link rel="alternate" type="text/markdown"
+    href="/themes/<theme>.md">`)
   - `themes/<theme>/scenes/`: one file per scene (subtitles and
     animations), wrapped in a `{ ... }` block so its helpers stay local;
     each chapter is one scene, which sets `chapter` and `title`; `shift`
@@ -127,8 +137,10 @@ workspaces run `make setup` automatically.
     composition at (960, 515)
 - `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh` and
   any make target when the fonts are missing), frame preview, parallel
-  render, timeline, layout check (`layout_check.py`), SRT export, social
-  preview images (`social_images.py`), standalone HTML build and server;
+  render, timeline, layout check (`layout_check.py`), SRT export, Markdown
+  export (`export_markdown.py`), social preview images
+  (`social_images.py`), standalone HTML build and server (which also
+  serves `/themes/<theme>.md` as `text/markdown`);
   the per-theme scripts require `--theme` (no default). The HTML build
   adds the Open Graph and X card tags and a canonical link only when the
   `SITE_URL` environment variable (or make variable) holds the site's root
@@ -136,7 +148,8 @@ workspaces run `make setup` automatically.
 - `.github/workflows/pages.yml`: on push to `main`, runs `make html`
   (which downloads the fonts) with `SITE_URL` set to the Pages URL given by
   `actions/configure-pages` (no domain in the build or the workflow) and
-  deploys `output/` to GitHub Pages (no video, no SRT); served at a domain
+  deploys `output/` to GitHub Pages (pages, images and the Markdown
+  versions of the themes; no video, no SRT); served at a domain
   root, as the player's home button links to `/`. Pull requests to `main`
   run the build only, without the Pages step, so with no social tags, and
   no deploy: the pages are attached to the run as an artifact
@@ -144,7 +157,7 @@ workspaces run `make setup` automatically.
   visuals
 - `output/`: generated `<theme>.srt`, `<theme>.mp4`, and the HTML pages
   at the same paths as in `src/`: `index.html`,
-  `themes/<theme>/index.html`
+  `themes/<theme>/index.html`, with the copied `themes/<theme>.md`
 
 ## Agents
 
@@ -211,7 +224,10 @@ not shared with the team.
 - Relative URLs must work from `src/` and `output/` alike: theme pages
   live two folders below the home page. Link to folders
   (`themes/<theme>/`): `make serve` is the only way to view the HTML pages.
-  The one absolute link is the player's home button, `/`.
+  The absolute links are the player's home button, `/`, the player
+  links of the Markdown versions, `/themes/<theme>/`, and the theme
+  pages' link to their Markdown version, `/themes/<theme>.md`: the site
+  is served at a domain root.
   Build asset URLs in JS with `assetUrl('assets/...')` (`src/shared.js`),
   which resolves them against the script, not the page: Playwright opens
   theme pages over `file://` to render frames.
@@ -220,8 +236,10 @@ not shared with the team.
 - After changing an intro scene, a page title, `src/social.html` or the
   home page lockup or background, run `make social` and commit the
   `social.png` images: CI only copies them.
-- Check frames with `make preview` before `make render`; after a text change,
-  run `make srt` and update `docs/<theme>/script.md`.
+- Check frames with `make preview` before `make render`; after a text change
+  (a subtitle, a chapter title, a page `<title>` or description), run
+  `make srt` and `make markdown`, update `docs/<theme>/script.md`, and commit
+  the `src/themes/<theme>.md` files: CI only copies them.
 - Compositions stay inside the content frame y 150-880 (scene `shift`
   included), centered on y 515 when shorter, spanning at least 440 px;
   `make layout` checks every scene.

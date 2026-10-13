@@ -23,6 +23,11 @@ def theme_page(theme):
     return THEMES_DIR / theme / "index.html"
 
 
+def theme_markdown(theme):
+    """The Markdown version of a theme, for coding agents: src/themes/<theme>.md, next to the theme folder."""
+    return THEMES_DIR / f"{theme}.md"
+
+
 def page_sources():
     """The source path of every page: the theme pages, then the home page last."""
     return [*(theme_page(theme) for theme in theme_names()), HOME_PAGE]
