@@ -108,7 +108,8 @@ the figures follow the step count if the scenario changes.
 
 - **1:26** Repeat until the goal is reached: think, act, observe. That's the
   agentic loop.
-  - Visuals: Think / Act / Observe loop with travelling token.
+  - Visuals: Think / Act / Observe loop; a neon token with a comet tail
+    travels round it, passing under the nodes.
 - **1:32** "Book lunch with Marie on Thursday": check the calendar, find a
   restaurant, book a table, send the invite.
   - Visuals: 4 loop turns, each fills a task row, GOAL REACHED.

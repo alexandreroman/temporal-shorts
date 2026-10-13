@@ -175,11 +175,8 @@
       // each link runs from the tile's inner edge to the frame's edge
       s.links = CAPS.map(([, , side, row]) =>
         path(s.svg, `M ${capX(side) - side * CAP.w / 2} ${capY(row)} H ${frameX(side)}`, C.uv, 2.5, false));
-      s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy, LOOP.r);
-      // the nodes and labels on whole pixels: ACT and OBSERVE sit at fractional points of the circle
-      s.loop.nodePos = deg => s.loop.pos(deg).map(Math.round);
-      // the token passes under the nodes, so it slips behind each node it reaches
-      root.insertBefore(s.loop.token, s.loop.think.root);
+      // the token alone, with no comet, slips behind each node it reaches
+      s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy, LOOP.r, { comet: 0 });
       s.loopL = E(root, 'Your agentic loop', 'lbl', { color: 'var(--ink)' });
       s.yourL = E(root, 'Your loop', 'lbl', { color: 'var(--ink)' });
       // the SDKs your loop is written with: the available ones, then the planned ones, dashed and dimmed

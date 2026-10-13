@@ -158,6 +158,10 @@ function makeGlowDot(p, size, rgb, { radius = '50%', blur = size, spread = 0, al
     boxShadow: glowShadow(rgb, 1, { blur, alpha, spread }),
   });
 }
+// Spark: a makeGlowDot with a wide soft halo, size px wide, in a color (an RGB triplet, e.g. RGB.neon)
+function makeSpark(p, size = 14, rgb = RGB.ink) {
+  return makeGlowDot(p, size, rgb, { spread: Math.round(size / 2), alpha: 0.55 });
+}
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
 function rise(e, x, y, p, d = 24) {
   place(e, x, y, 1, p);
@@ -255,17 +259,18 @@ const makeToken = root => makeGlowDot(root, 22, RGB.neon, { radius: '5px', sprea
 const LOOP_DEG = { think: -90, act: 30, observe: 150 };
 // The agentic loop on a circle of radius r centered on (cx, cy): THINK (the LLM orb) on top, ACT (neon play tile)
 // and OBSERVE (eye tile, UV border) below, slate arcs with arrow heads between them, the node labels, an
-// "Agentic loop" label in the middle and the neon token. The arcs go in svg. Returns the loop, with pos(deg), the
-// point at an angle on the circle, and nodePos(deg), where a node and its label sit (pos; a scene can replace it to
-// keep the tiles on whole pixels). Options: `seed`, the blink phase of the THINK orb (see makeLLM()); `node`, the
-// size of the nodes in px.
-function makeAgentLoop(root, svg, cx, cy, r = 220, { seed, node = 130 } = {}) {
+// "Agentic loop" label in the middle and the neon token with its comet tail. The arcs go in svg. Returns the loop,
+// with pos(deg), the point at an angle on the circle, and nodePos(deg), where a node and its label sit: pos on whole
+// pixels, as ACT and OBSERVE sit at fractional points of the circle. Options: `seed`, the blink phase of the THINK
+// orb (see makeLLM()); `node`, the size of the nodes in px; `comet`, the number of sparks trailing the token (0 for
+// none).
+function makeAgentLoop(root, svg, cx, cy, r = 220, { seed, node = 130, comet = 6 } = {}) {
   const loop = { cx, cy, node };
   loop.pos = deg => {
     const a = deg * Math.PI / 180;
     return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
   };
-  loop.nodePos = loop.pos;
+  loop.nodePos = deg => loop.pos(deg).map(Math.round);
   const arcD = (d0, d1) => {
     const [x0, y0] = loop.pos(d0), [x1, y1] = loop.pos(d1);
     return `M ${x0} ${y0} A ${r} ${r} 0 0 1 ${x1} ${y1}`;
@@ -274,6 +279,10 @@ function makeAgentLoop(root, svg, cx, cy, r = 220, { seed, node = 130 } = {}) {
   const { think, act, observe } = LOOP_DEG;
   const arcPaths = [arcD(think + 27, act - 27), arcD(act + 27, observe - 27), arcD(observe + 27, think + 360 - 27)];
   loop.arcs = arcPaths.map(d => path(svg, d, C.slate, 2.5));
+  // built before the nodes, so the token and its comet pass under them, THINK's face included; each spark smaller
+  // than the one before
+  loop.token = makeToken(root);
+  loop.comet = Array.from({ length: comet }, (_, k) => makeSpark(root, 16 - 2 * k, RGB.neon));
   loop.think = makeLLM(root, node, '', { seed });
   loop.act = iconTile(root, 'play', '', node, node, C.neon); loop.act.style.borderColor = C.neon;
   loop.observe = iconTile(root, 'eye', '', node, node, C.ink); loop.observe.style.borderColor = C.uv;
@@ -281,11 +290,11 @@ function makeAgentLoop(root, svg, cx, cy, r = 220, { seed, node = 130 } = {}) {
   loop.center = E(root, 'Agentic<br>loop', 'lbl', {
     textAlign: 'center', color: 'var(--ink)', fontSize: '24px', lineHeight: 1.4,
   });
-  loop.token = makeToken(root);
   return loop;
 }
 // Places the loop at time t: its nodes pop in from `a`, 0.2 s apart, then their labels and the arcs. Options:
-// - deg: angle of the token on the loop (null hides it); the node it passes swells by 12%, the LLM thinks near it
+// - deg: angle of the token on the loop (null hides it and its comet); the node it passes swells by 12%, the LLM
+//   thinks near it
 // - thinkIn: when THINK pops in (default `a`); before the start of the scene to show it from the first frame
 // - centerAt: when the "Agentic loop" label fades in; centerO: its opacity (0 to 1), e.g. while another label shows
 // - o: opacity of the whole loop
@@ -313,6 +322,16 @@ function placeAgentLoop(loop, t, a, opts = {}) {
     const [x, y] = loop.pos(deg);
     place(loop.token, x, y, 1, o);
   }
+  // the comet: each spark 6 degrees further behind the token and fainter, none behind THINK, where every run starts
+  loop.comet.forEach((e, k) => {
+    const tailDeg = deg === null ? null : deg - (k + 1) * 6;
+    if (tailDeg === null || tailDeg < LOOP_DEG.think) {
+      place(e, 0, 0, 1, 0);
+      return;
+    }
+    const [x, y] = loop.pos(tailDeg);
+    place(e, x, y, 1, (0.55 - 0.08 * k) * o);
+  });
 }
 
 // The agent's example task, lunch with Marie: each step's tile icon and label, its action in the step list, then
