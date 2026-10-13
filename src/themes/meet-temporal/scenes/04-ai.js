@@ -6,7 +6,6 @@
   // instance takes over and replays the history, nothing is lost and no finished LLM call is paid twice
   // the loop sits in its app panel for the whole chapter, about 40 px clear of its header and of the context strip
   const LOOP = AGENT_LOOP;
-  const COMET = 6; // sparks trailing the token
 
   // Stage pixels. The app panel spans the content frame (y 150 to 880) around the loop, x 140 to 900; the Temporal
   // panel, as high, starts one GUTTER right of it, 840 px wide (x 940 to 1780)
@@ -71,7 +70,7 @@
       },
       // NO PROGRESS LOST, then NO TOKENS WASTED
       { text: "No progress is lost and no tokens are wasted: no finished LLM call is paid twice.", after: 0.4 },
-      { text: "That's why OpenAI built Codex on Temporal, and Cursor, Lovable and Replit rely on it too.", after: 1.4 },
+      { text: "That's why OpenAI built Codex on Temporal, and Cursor and Lovable rely on it too.", after: 1.4 },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
@@ -101,11 +100,6 @@
       s.svg = svgLayer(root);
       // THINK blinks as the orb the previous chapter's AI hub turned into
       s.loop = makeAgentLoop(root, s.svg, LOOP.cx, LOOP.cy, LOOP.r, { seed: AGENT_LLM_SEED, node: LOOP.node });
-      // the nodes and labels on whole pixels: ACT and OBSERVE sit at fractional points of the circle
-      s.loop.nodePos = deg => s.loop.pos(deg).map(Math.round);
-      s.comet = Array.from({ length: COMET }, (_, k) => makeSpark(root, 16 - 2 * k, RGB.neon));
-      // the token and its comet pass under the nodes, THINK's face included: moved before the first node, in order
-      [s.loop.token, ...s.comet].forEach(e => root.insertBefore(e, s.loop.think.root));
       // the agent's goal, under the loop before the context strip, a fixed whole size, so it rests on whole pixels
       s.goal = makeCard(root, 'Book lunch with Marie on Thursday.', 'user', null, MEM.w);
       // as wide as the strip that takes its place (cards are 640 px at most)
@@ -181,16 +175,6 @@
         thinkIn: -1,
         // the loop dims while its app is down
         o: 1 - 0.6 * win(t, crashAt, bOn + 0.4, 0.3),
-      });
-      // the token's comet tail: sparks along the loop behind it, smaller and fainter
-      s.comet.forEach((e, k) => {
-        const tailDeg = deg === null ? null : deg - (k + 1) * 6;
-        if (tailDeg === null || tailDeg < -90) {
-          place(e, 0, 0, 1, 0);
-          return;
-        }
-        const [x, y] = s.loop.pos(tailDeg);
-        place(e, x, y, 1, 0.55 - 0.08 * k);
       });
       s.svg.style.transform = `translate(${ax}px,${ay}px)`;
       // under the loop: the agent's goal, then the context strip in its place
