@@ -75,7 +75,8 @@ every theme and scene), `scripts/`, `Makefile`, `.casper.json`, `docs/`,
 3. Merge the findings into one list, then apply all of them, in small
    logical commits (English messages) on this branch.
 4. Verify: `make timeline`, the frame comparison, `make srt`, `make render`
-   (every theme), and update `docs/<theme>/script.md` after any text change.
+   (every theme); after any text change, update `docs/<theme>/script.md`,
+   run `make markdown` and commit the `src/themes/<theme>.md` files.
 5. Run a last **skillbox:code-reviewer** pass on the whole branch diff and
    apply what it finds.
 

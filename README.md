@@ -78,6 +78,8 @@ src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        theme page (background, subtitles, header, script
                        list); scenes/ (one file per scene: subtitle text +
                        animations), theme-only helpers and social.png
+src/themes/<theme>.md  Markdown version of a theme for coding agents
+                       (make markdown)
 src/home.css, home.js  home page styles and star field
 src/social.html        home link preview card, captured by make social
 src/social.png         link preview image of the home page (make social)
@@ -86,11 +88,12 @@ src/assets/            Temporal lockup and symbol, founders' photo, language
 src/fonts/             brand fonts (downloaded by make), see
                        src/fonts/README.md
 scripts/               setup, fonts, render, preview, timeline, layout
-                       check, SRT export, social images, HTML build and
-                       server
+                       check, SRT export, Markdown export, social images,
+                       HTML build and server
 docs/<theme>/script.md full script: subtitles, timings, animations
 output/                generated .srt, .mp4 and standalone .html (the HTML
-                       pages mirror src/: index.html, themes/<theme>/)
+                       pages mirror src/: index.html, themes/<theme>/,
+                       themes/<theme>.md)
 .github/workflows/     pages.yml: deploys the HTML pages to GitHub Pages
 CLAUDE.md              conventions for Claude sessions working on the project
 preview.png            README screenshot (Durable AI Agents at 2:40)
@@ -111,6 +114,7 @@ make preview THEME=durable-ai-agents T="3 140 160"  # -> output/preview.png
 make render                  # videos -> output/<theme>.mp4
 make render SUBS=off         # same, no subtitles -> output/<theme>-nosubs.mp4
 make srt                     # subtitles -> output/<theme>.srt
+make markdown                # Markdown for agents -> src/themes/<theme>.md
 make social                  # link preview images -> src/**/social.png
 make html                    # home page + players -> output/**/index.html
 make serve                   # hot-reloading home page on http://localhost:8000
@@ -119,25 +123,26 @@ make clean                   # delete output/ (every generated file)
 
 The targets run on `.venv/bin/python` once `make setup` has created it,
 otherwise on the system `python3`: enough for `html` and `serve`, which need
-only the standard library. `timeline`, `layout`, `preview`, `render`, `srt`
-and `social` need Playwright and stop with a hint to run `make setup` when
-it is missing. Once the virtualenv exists, these six targets rerun
-`make setup` by themselves when `requirements.txt` or `scripts/setup.sh`
-changes, so that a pinned Playwright upgrade also brings its Chromium build;
-this alone does not rebuild an up-to-date MP4 or SRT. Override the
-interpreter with `PY`, for example `make html PY=python`: no automatic setup
-then. Every target that needs the brand fonts downloads them first when
-they are missing.
+only the standard library. `timeline`, `layout`, `preview`, `render`, `srt`,
+`markdown` and `social` need Playwright and stop with a hint to run
+`make setup` when it is missing. Once the virtualenv exists, these seven
+targets rerun `make setup` by themselves when `requirements.txt` or
+`scripts/setup.sh` changes, so that a pinned Playwright upgrade also brings
+its Chromium build; this alone does not rebuild an up-to-date MP4, SRT or
+Markdown file. Override the interpreter with `PY`, for example
+`make html PY=python`: no automatic setup then. Every target that needs the
+brand fonts downloads them first when they are missing.
 
-`timeline`, `layout`, `render` and `srt` cover every theme; `timeline` and
-`layout` print each one under a `== <theme> ==` header. Set the `THEME`
-variable to restrict them to one theme. `preview` needs a theme, as its
-timestamps belong to one video. Outputs are named after the theme:
+`timeline`, `layout`, `render`, `srt` and `markdown` cover every theme;
+`timeline` and `layout` print each one under a `== <theme> ==` header. Set
+the `THEME` variable to restrict them to one theme. `preview` needs a theme,
+as its timestamps belong to one video. Outputs are named after the theme:
 
 ```bash
 make timeline THEME=durable-execution
 make render THEME=durable-execution   # -> output/durable-execution.mp4
 make srt THEME=agent-harness          # -> output/agent-harness.srt
+make markdown THEME=agent-harness     # -> src/themes/agent-harness.md
 ```
 
 An unknown `THEME` stops make with the list of valid themes.
@@ -148,15 +153,16 @@ them without, for instance to upload a clean video with the SRT file of
 that both versions keep their own up-to-date check. `SUBS` accepts `on`
 (the default) and `off`; any other value stops make.
 
-`make render` and `make srt` only rebuild the outputs that are out of date:
-each `output/<theme>.mp4`, `-nosubs.mp4` or `.srt` depends on its theme's
-own sources (`src/themes/<theme>/`: its page and its scripts), the shared
-sources (`src/*.js`, `src/*.css`, assets, fonts, `scripts/common.py`) and
-the render or export script. Editing a scene rebuilds its theme only; editing
-the home page (`src/index.html`, `src/home.css`) or the live player
-(`src/player.js`) rebuilds no video. `make html` rebuilds when any source
-of any page, a `social.png` image or `scripts/build_html.py` changes. Use
-`make -B render` to force a full render.
+`make render`, `make srt` and `make markdown` only rebuild the outputs that
+are out of date: each `output/<theme>.mp4`, `-nosubs.mp4`, `.srt` or
+`src/themes/<theme>.md` depends on its theme's own sources
+(`src/themes/<theme>/`: its page and its scripts), the shared sources
+(`src/*.js`, `src/*.css`, assets, fonts, `scripts/common.py`) and the render
+or export script. Editing a scene rebuilds its theme only; editing the home
+page (`src/index.html`, `src/home.css`) or the live player (`src/player.js`)
+rebuilds no video. `make html` rebuilds when any source of any page, a
+`social.png` image, a Markdown version or `scripts/build_html.py` changes.
+Use `make -B render` to force a full render.
 
 `make clean` deletes `output/`: videos, subtitles, HTML pages, previews and
 render leftovers. It leaves the virtualenv and the fonts in place.
@@ -256,6 +262,45 @@ position). A failed build prints its error and keeps the last good pages.
 The reload script is added to the served pages only, never to the built
 files.
 
+`make serve` also serves the Markdown version of each theme on
+`/themes/<theme>.md`, as `text/markdown` (see
+[Markdown versions for coding agents](#markdown-versions-for-coding-agents)).
+Nothing else from `output/` is served.
+
+### Markdown versions for coding agents
+
+A theme page holds its text, chapter titles and subtitles, inside its
+scripts only: a coding agent that fetches `themes/<theme>/` reads almost
+nothing. Each theme therefore has a Markdown version, published at
+`/themes/<theme>.md`, next to the theme folder:
+
+- the page `<title>` as the heading, then its
+  `<meta name="description">` as the summary, and a link to the player
+- one section per chapter, `Chapter <n>: <title>` as the scenes give it,
+  with a link to the player at the chapter start
+  (`/themes/<theme>/#t=<seconds>`, rounded up to the whole second, so
+  that the paused player shows the chapter), then the chapter's subtitles
+  joined into one paragraph, HTML tags stripped
+- the hook of the intro under the summary, and the closing subtitle under
+  `Outro`
+
+The links are absolute paths from the site root, as the site is served at
+a domain root (see [Deployment](#deployment)). The text comes from the
+built scenes only, never from `docs/<theme>/script.md`, so it cannot
+drift from the video.
+
+`make markdown` writes `src/themes/<theme>.md` with Playwright
+(`scripts/export_markdown.py`). The files are committed, like the
+`social.png` images: `make html` and CI only copy them to
+`output/themes/<theme>.md`, and the build stops if one is missing. Each
+built theme page links to its Markdown version with
+`<link rel="alternate" type="text/markdown" href="/themes/<theme>.md">`,
+an absolute path like the links of the Markdown files, which the build
+adds right after the description, hidden themes included. After
+any text change, a subtitle, a chapter title, a page `<title>` or
+description, run `make markdown` and commit the updated files with the
+change. Never edit them by hand.
+
 ### Social link previews
 
 The deployed pages carry link preview tags, so a shared link shows a card
@@ -321,7 +366,8 @@ editing different scenes never touch the same file.
 - Subtitle text: `subs` of the relevant scene. The duration adapts to the
   text length and shifts everything after it; check with
   `make timeline THEME=<theme>`, then
-  `make preview THEME=<theme> T="<times>"`.
+  `make preview THEME=<theme> T="<times>"`. Then run `make srt` and
+  `make markdown`, and commit the updated `src/themes/<theme>.md`.
 - Animation: the scene's `update(t, c, s)` function, where `t` is the scene's
   local time and `c[i]` the moment subtitle `i` starts. Every animation is
   keyed to these cues. Continuous ambient loops (spinners, blinks, dashed
@@ -400,6 +446,8 @@ editing different scenes never touch the same file.
    `CLAUDE.md`.
 6. Run `make social` and commit `src/themes/<theme>/social.png`: the HTML
    build needs it.
+7. Run `make markdown` and commit `src/themes/<theme>.md`: the HTML build
+   needs it too.
 
 Videos have no maximum length; `make timeline THEME=<theme>` reports it.
 
@@ -412,9 +460,10 @@ The `.github/workflows/pages.yml` workflow publishes the home page and the
 players to [GitHub Pages](https://docs.github.com/en/pages) on every push to
 `main`, or on demand from the Actions tab (`workflow_dispatch`). It runs
 `make html` with the runner's Python (make downloads the fonts first with
-`scripts/fonts.sh`, the font step of `make setup`), then deploys `output/`.
-It builds no video and no subtitle file, so it needs neither Playwright nor
-ffmpeg.
+`scripts/fonts.sh`, the font step of `make setup`), then deploys `output/`:
+the pages, their `social.png` images and the Markdown versions of the
+themes. It builds no video and no subtitle file, so it needs neither
+Playwright nor ffmpeg.
 
 Pull requests to `main` run the same build without deploying: the pages are
 attached to the run as the `github-pages` artifact, a tar archive of

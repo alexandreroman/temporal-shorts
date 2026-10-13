@@ -4,15 +4,16 @@
 
 / and /index.html serve the home page (output/index.html), the theme picker; /themes/<theme>/ (or
 /themes/<theme>/index.html) serves the standalone HTML player of that theme
-(output/themes/<theme>/index.html). The URLs mirror the output/ tree, so the relative links between the pages
-work. Only the pages of src/ are served, nothing else from output/.
+(output/themes/<theme>/index.html), and /themes/<theme>.md its Markdown version for coding agents
+(output/themes/<theme>.md), as text/markdown. The URLs mirror the output/ tree, so the relative links between the
+pages work. Only the pages of src/ and the Markdown versions of the themes are served, nothing else from output/.
 
 A watcher thread rebuilds the pages (scripts/build_html.py) when a file under src/ or a build script
-changes. Every open tab follows the version of the built pages over Server-Sent Events (/events) and
-reloads when they are rebuilt, by the watcher or by `make html`; a player then resumes at the same
-position. The reload script is added to the served bytes only: the built files stay clean standalone
-pages. In a Casper workspace, the theme picker URL is published to the workspace info panel while the
-server runs. Standard library only.
+changes, a Markdown version written by `make markdown` included. Every open tab follows the version of the
+built pages over Server-Sent Events (/events) and reloads when they are rebuilt, by the watcher or by
+`make html`; a player then resumes at the same position. The reload script is added to the served bytes
+only: the built files stay clean standalone pages. In a Casper workspace, the theme picker URL is published to
+the workspace info panel while the server runs. Standard library only.
 """
 import argparse
 import errno
@@ -30,7 +31,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import HOME_PAGE, ROOT, SRC, built_page, page_sources, theme_names, theme_page
+from common import HOME_PAGE, ROOT, SRC, built_page, page_sources, theme_markdown, theme_names, theme_page
 
 BUILD_SCRIPT = ROOT / "scripts" / "build_html.py"
 # Mirror the Makefile inputs of the HTML pages: everything under src/ (see source_snapshot()) plus the build
@@ -79,6 +80,15 @@ def requested_page(url_path):
     return None
 
 
+def requested_markdown(url_path):
+    """The built Markdown version of a theme for a request path, or None if the path names none."""
+    # The same whitelist as requested_page(): only the exact URL of a known theme's Markdown file is served.
+    for theme in theme_names():
+        if url_path == f"/themes/{theme}.md":
+            return built_page(theme_markdown(theme))
+    return None
+
+
 class PageVersion:
     """The current version of the built pages, shared by the watcher thread and the /events streams."""
 
@@ -112,10 +122,33 @@ class PlayerHandler(BaseHTTPRequestHandler):
         if urlsplit(self.path).path == "/events":
             self.send_events()
         else:
-            self.send_page(include_body=True)
+            self.send_file(include_body=True)
 
     def do_HEAD(self):
-        self.send_page(include_body=False)
+        self.send_file(include_body=False)
+
+    def send_file(self, include_body):
+        """Send the Markdown version of a theme or a page, whichever the path names."""
+        markdown = requested_markdown(urlsplit(self.path).path)
+        if markdown is None:
+            self.send_page(include_body)
+        else:
+            self.send_markdown(markdown, include_body)
+
+    def send_markdown(self, markdown, include_body):
+        """Send the Markdown version of a theme as is: no reload script, it is no page."""
+        try:
+            body = markdown.read_bytes()
+        except FileNotFoundError:
+            self.send_error(HTTPStatus.NOT_FOUND, f"{markdown.relative_to(ROOT)} not found: run `make html`")
+            return
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "text/markdown; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        if include_body:
+            self.wfile.write(body)
 
     def send_page(self, include_body):
         # Ignore the query string so that /themes/durable-ai-agents/?t=40 (frozen frame) works too.
