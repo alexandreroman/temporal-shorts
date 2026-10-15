@@ -1,7 +1,7 @@
 // ===================== Security with Temporal helpers (shared by the scenes of this theme)
 
-// ---------- extra icons (stroke, 24 grid, same style as ICONS in engine.js); `shield`, `key`, `lock` and `server`
-// come from the engine set
+// ---------- extra icons (stroke, 24 grid, same style as ICONS in engine.js); `shield`, `key`, `lock`, `server` and
+// `cloud` come from the engine set
 Object.assign(ICONS, {
   // a closed door in its frame, with its handle: no inbound port
   door: '<path d="M3 21h18M6 21V3h12v18"/><path d="M14.5 11v2.5"/>',
@@ -15,8 +15,10 @@ Object.assign(ICONS, {
     + '<path d="M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z"/>',
   // a browser window: its title bar and two dots
   window: '<rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M6.5 6.5h.01M9.5 6.5h.01"/>',
-  // a cloud on a flat base: a managed service
-  cloud: '<path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.7 4.7 0 0 0 7 18.5z"/>',
+  // a key struck through, its bow low on the left and its shaft rising to the right, broken where the slash
+  // crosses it: no secret held
+  keyOff: '<circle cx="5.5" cy="18.5" r="3.5"/><path d="M8 16l2-2M14 10l6.5-6.5M17 7l2 2M19.5 4.5l1.5 1.5"/>'
+    + '<path d="M3.5 3.5l17 17"/>',
   // a medical cross, outlined: health data
   medical: '<path d="M9 3.5h6V9h5.5v6H15v5.5H9V15H3.5V9H9z"/>',
 });
@@ -829,7 +831,7 @@ function namespaceHtml(shown, caret) {
 // that would crowd its tile
 const RECAP = [
   ['door', 'No inbound ports'], ['badge', 'Verified<br>connections'], ['key', 'Your keys only'],
-  ['lock', 'No secrets<br>in Workers'],
+  ['keyOff', 'No secrets<br>in Workers'],
 ];
 // The label height of the recap and use-case tiles, in lines (padTileLabel): one label in a row may take two lines,
 // and the tiles keep their icons aligned
