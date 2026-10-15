@@ -10,6 +10,11 @@ Object.assign(ICONS, {
     + '<path d="M8.5 17.5c.7-1.4 2-2.1 3.5-2.1s2.8.7 3.5 2.1"/>',
   // a key management service (KMS): a vault holding a key
   kms: '<rect x="3" y="4" width="18" height="16"/><circle cx="8.5" cy="12" r="2.5"/><path d="M11 12h6.5M15.5 12v2.5"/>',
+  // a globe, its equator and a meridian: a network address
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/>'
+    + '<path d="M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z"/>',
+  // a browser window: its title bar and two dots
+  window: '<rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M6.5 6.5h.01M9.5 6.5h.01"/>',
 });
 
 // ---------- the running example: Nora sends €25,000 to Leo, one payload carried through every chapter
@@ -167,10 +172,10 @@ function setPayload(card, { seal = 0, scramble = 0, red = 0, fromRight = false }
 // Stage coordinates of the lane shared by every lane scene, at camera rest (scale 1), left to right: YOUR
 // ENVIRONMENT (env) with the Worker panel in it, the wire from x0 to x1, TEMPORAL with the Event History and the Web
 // UI (ui: the size of the Web UI window, and its place under the stored Event History, where its dashed outline rests
-// in chapter 4; the close layout of chapters 3 and 4 shows the window on the history's right, see CLOSE), the
-// TEMPORAL PROXY box at the environment's right edge (from chapter 6) and the closed door on that edge. The two zones
-// give their top left corner and size, the other parts their center (and size). Every lane scene reads them: adjust
-// them here, never in a scene.
+// in chapter 4; the close layout of chapters 3 and 4 shows the window on the history's right, see CLOSE) and the
+// closed door on the environment's edge. The two zones give their top left corner and size, the other parts their
+// center (and size). Every lane scene reads them: adjust them here, never in a scene. From chapter 5, the lane opens
+// into the fleet layout (FLEET), with the TEMPORAL PROXY box (PROXY) from chapter 6.
 const LANE = {
   env: { x: 120, y: 190, w: 640, h: 650 },
   worker: { x: 340, y: 515, w: 380, h: 392 },
@@ -178,7 +183,6 @@ const LANE = {
   temporal: { x: 1160, y: 190, w: 640, h: 650 },
   history: { x: 1560, y: 515, w: 392, h: 260 },
   ui: { x: 1350, y: 741, w: 300, h: 150 },
-  proxy: { x: 700, y: 515 },
   door: { x: 760, y: 720 },
 };
 // Hand-off from the intro to chapter 1: the payload card in the Worker, its center and width. The intro's card flies
@@ -259,6 +263,18 @@ function frameLaneEdges(lane, cam) {
   });
 }
 
+// The environment's dashed edge round the zone env (LANE.env, or a wider one), as two SVG paths: halves from the
+// wire's exit on its right edge round to its left edge
+function envEdgeDs(env) {
+  const right = env.x + env.w, bottom = env.y + env.h, r = 10, y = LANE.wire.y;
+  return [
+    `M ${right} ${y} V ${env.y + r} A ${r} ${r} 0 0 0 ${right - r} ${env.y} H ${env.x + r}`
+      + ` A ${r} ${r} 0 0 0 ${env.x} ${env.y + r} V ${y}`,
+    `M ${right} ${y} V ${bottom - r} A ${r} ${r} 0 0 1 ${right - r} ${bottom} H ${env.x + r}`
+      + ` A ${r} ${r} 0 0 1 ${env.x} ${bottom - r} V ${y}`,
+  ];
+}
+
 // The lane's parts (LANE), in their stacking order: the two zones, an SVG layer (the environment's dashed edge and the
 // wire, an arrow to TEMPORAL; scenes draw their own strokes in it, under the panels), the Worker panel running the
 // TransferWorkflow, the empty Event History card and the closed door. placeLane() shows them.
@@ -282,14 +298,9 @@ function makeLane(root) {
   });
 
   lane.svg = svgLayer(root);
-  // the environment's dashed edge, in two halves from the wire's exit on its right edge round to its left edge
-  const right = env.x + env.w, bottom = env.y + env.h, r = 10;
-  lane.envEdges = [
-    `M ${right} ${wire.y} V ${env.y + r} A ${r} ${r} 0 0 0 ${right - r} ${env.y} H ${env.x + r}`
-      + ` A ${r} ${r} 0 0 0 ${env.x} ${env.y + r} V ${wire.y}`,
-    `M ${right} ${wire.y} V ${bottom - r} A ${r} ${r} 0 0 1 ${right - r} ${bottom} H ${env.x + r}`
-      + ` A ${r} ${r} 0 0 1 ${env.x} ${bottom - r} V ${wire.y}`,
-  ].map(d => path(lane.svg, d, C.slate, 2, false));
+  // the environment's dashed edge (placeLane() redraws it when the zone widens)
+  lane.envEdges = envEdgeDs(env).map(d => path(lane.svg, d, C.slate, 2, false));
+  lane.envW = env.w;
   // the dashed edge shows only inside the content frame, so a close shot never runs it under the chapter header or
   // the subtitles (see frameLaneEdges)
   laneClipCount += 1;
@@ -321,21 +332,35 @@ function makeLane(root) {
 // Shows the lane's parts in place, each with its opacity in o (1 by default): env (with its dashed edge), temporal,
 // worker, history, wire, door, and heads, the zones' headings (YOUR ENVIRONMENT and the logo), which a close shot
 // pushes up under the chapter header (frameLaneEdges also fades them out at the frame's top edge); close, TEMPORAL's
-// widening into the close layout (CLOSE). The Worker runs, its gear turning; the door is in its slate and white look.
-// The zone captions (env.cap, temporal.cap) keep the opacity a scene gives them.
+// widening into the close layout (CLOSE); envW, the environment's width, as it widens to the right, and temporalX,
+// TEMPORAL's left edge, as it narrows toward its right edge (the fleet layout, FLEET). The Worker runs, its gear
+// turning; the door is in its slate and white look. The zone captions (env.cap, temporal.cap) keep the opacity a
+// scene gives them.
 function placeLane(lane, o = {}) {
   const { env = 1, temporal = 1, worker = 1, history = 1, wire = 1, door = 1, heads = 1, close = 0 } = o;
   lane.env.head.style.opacity = heads;
   lane.temporal.head.style.opacity = heads;
   const center = zone => [zone.x + zone.w / 2, zone.y + zone.h / 2];
-  place(lane.env, ...center(LANE.env), 1, env);
+  // even widths, so the zones rest on whole pixels
+  const envZone = { ...LANE.env, w: 2 * Math.round((o.envW ?? LANE.env.w) / 2) };
+  if (lane.envW !== envZone.w) {
+    lane.env.style.width = envZone.w + 'px';
+    envEdgeDs(envZone).forEach((d, i) => {
+      const edge = lane.envEdges[i];
+      edge.setAttribute('d', d);
+      edge._L = edge.getTotalLength();
+    });
+    lane.envW = envZone.w;
+  }
+  place(lane.env, ...center(envZone), 1, env);
   lane.envEdges.forEach(edge => drawDashed(edge, 1, env));
-  // close (0 to 1): TEMPORAL widens to the close layout of chapters 3 and 4 (CLOSE.zone); even widths, so the zone
-  // rests on whole pixels
+  // close (0 to 1): TEMPORAL widens to the close layout of chapters 3 and 4 (CLOSE.zone)
+  const temporalX = o.temporalX ?? LANE.temporal.x;
+  const temporalRight = LANE.temporal.x + LANE.temporal.w;
   const zone = {
     ...LANE.temporal,
-    x: Math.round(lerp(LANE.temporal.x, CLOSE.zone.x, close)),
-    w: 2 * Math.round(lerp(LANE.temporal.w, CLOSE.zone.w, close) / 2),
+    x: Math.round(lerp(temporalX, CLOSE.zone.x, close)),
+    w: 2 * Math.round(lerp(temporalRight - temporalX, CLOSE.zone.w, close) / 2),
   };
   lane.temporal.style.width = zone.w + 'px';
   place(lane.temporal, ...center(zone), 1, temporal);
@@ -357,7 +382,14 @@ TUBE.label = { x: TUBE.x0 + 120, y: TUBE.y - TUBE.h / 2 - 42 };
 // The tube: a glass pipe with neon walls, a neon ring at each mouth and a flow of light running along it toward
 // Temporal; then its TLS label (tube.label). placeTube() shows them.
 function makeTube(root) {
-  const w = TUBE.x1 - TUBE.x0, h = TUBE.h;
+  const tube = glassTube(root, TUBE.x1 - TUBE.x0, TUBE.h);
+  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
+  Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
+  return tube;
+}
+// A glass pipe w x h px with neon walls, a neon ring at each mouth and a flow of light inside it (tube.flow), which
+// runs on the ambient clock G (see placeTube)
+function glassTube(root, w, h) {
   const mouth = side => `<div style="position:absolute;${side}:-12px;top:-2px;width:24px;height:${h}px;`
     + `border:2px solid ${C.neon};border-radius:50%"></div>`;
   const tube = E(root,
@@ -370,8 +402,6 @@ function makeTube(root) {
       boxShadow: `0 0 28px rgba(${RGB.neon},.22)`,
     });
   tube.flow = tube.querySelector('.flow');
-  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
-  Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
   return tube;
 }
 // The tube drawn from its Worker end up to drawn (0 to 1), with opacity o, and its label with opacity label. Its
@@ -594,6 +624,124 @@ const CONVERTER = {
   gate: { y: PAYLOAD_IN_WORKER.y, h: 300 },
 };
 
+// ---------- the fleet of Workers (chapters 5 to 8)
+// The fleet layout, at camera rest: YOUR ENVIRONMENT widens to the right to hold the Workers (envW: its width in
+// chapter 5; proxyEnvW: from chapter 6, its right edge on the proxy box, PROXY) and TEMPORAL narrows toward the lane's
+// right end (temporalX: its left edge); see placeLane(). The tiles (tile: their size, the lane's Worker panel at 0.6)
+// sit in a grid of two rows (rows: their center y) and up to four columns (cols: their center x): the Workers in the
+// first three, the SDK client and the Web UI in the fourth (chapter 6 on). Between the rows runs the channel, on the
+// wire's line, where each tile's connection has a track of its own, `track` px from the next (see fleetLinkD).
+const FLEET = {
+  envW: 780, proxyEnvW: 1150, temporalX: 1560,
+  tile: { w: 228, h: 236 },
+  rows: [368, 662],
+  cols: [258, 510, 762, 1014],
+  track: 6,
+};
+// The fleet tile at column col and row row: its center (x, y) and the y of its connection's track in the channel. A
+// tile's track lies closer to the channel's middle the further left its column, so no connection crosses another
+// tile's link down to its track.
+function fleetSlot(col, row) {
+  const offset = (col + 0.5) * FLEET.track;
+  return { col, row, x: FLEET.cols[col], y: FLEET.rows[row], trackY: LANE.wire.y + (row ? offset : -offset) };
+}
+// The six Workers of chapters 5 to 8, two in each language: lang, the language of its code (a key of LANGUAGE_LOGOS),
+// and its slot (fleetSlot)
+const WORKERS = [
+  ['Go', 0, 0], ['Java', 1, 0], ['TypeScript', 2, 0], ['Java', 0, 1], ['TypeScript', 1, 1], ['Go', 2, 1],
+].map(([lang, col, row]) => ({ lang, ...fleetSlot(col, row) }));
+// The other apps that connect through the proxy from chapter 6, in the fourth column: name, icon and slot
+const FLEET_CLIENTS = [['SDK client', 'code', 3, 0], ['Web UI', 'window', 3, 1]]
+  .map(([name, icon, col, row]) => ({ name, icon, ...fleetSlot(col, row) }));
+// SVG path of a fleet tile's connection, up to x1: from the middle of the tile's edge on the channel side, along its
+// track (a rounded corner between them)
+function fleetLinkD({ x, row, trackY }, x1) {
+  const edgeY = row ? FLEET.rows[1] - FLEET.tile.h / 2 : FLEET.rows[0] + FLEET.tile.h / 2;
+  const r = 4, dir = row ? -1 : 1;
+  return `M ${x} ${edgeY} V ${trackY - dir * r} Q ${x} ${trackY} ${x + r} ${trackY} H ${x1}`;
+}
+
+// The official logo of each Workers' language (their sources and licenses are in the README of their folder), its
+// size in a Worker tile, px, and named when the logo spells the language's name, which the tag then leaves out
+const LANGUAGE_LOGOS = {
+  Go: { url: assetUrl('assets/languages/go.svg'), w: 40, h: 15, named: true },
+  Java: { url: assetUrl('assets/languages/java.svg'), w: 14, h: 18 },
+  TypeScript: { url: assetUrl('assets/languages/typescript.svg'), w: 16, h: 16 },
+};
+// The SVG filter that paints a logo in ink, its shape untouched; added to the stage by the first Worker tile
+const LOGO_INK_ID = 'security-logo-ink';
+function addLogoInkFilter() {
+  if (document.getElementById(LOGO_INK_ID)) return;
+  const svg = document.createElementNS(SVGNS, 'svg');
+  Object.assign(svg.style, { position: 'absolute', width: 0, height: 0 });
+  svg.innerHTML = `<filter id="${LOGO_INK_ID}" color-interpolation-filters="sRGB"><feFlood flood-color="${C.ink}"/>`
+    + '<feComposite in2="SourceAlpha" operator="in"/></filter>';
+  stage.appendChild(svg);
+}
+// The four chips a Worker carries in chapter 5, top to bottom: icon and label
+const WORKER_CHIPS = [['globe', 'Address'], ['badge', 'Certificate'], ['key', 'API key'], ['lock', 'Codec']];
+// Inside a Worker tile, px from its top: the chips' slots (chipTop, chipH apart by chipGap); the two lines of chapter
+// 6 take the first two slots
+const WORKER_TILE = { chipTop: 82, chipH: 28, chipGap: 6 };
+const workerSlotTop = i => WORKER_TILE.chipTop + i * (WORKER_TILE.chipH + WORKER_TILE.chipGap);
+// A Worker tile of the fleet (FLEET.tile) for worker (WORKERS): the gear and WORKER, the language tag with its logo
+// (tile.langTag), then its four chips (tile.chips, hidden) and two code lines in the first two slots (tile.lines,
+// empty). The scenes show its parts; gearSpin() turns its gear (tile.gear).
+function makeWorkerTile(root, worker) {
+  addLogoInkFilter();
+  const logo = LANGUAGE_LOGOS[worker.lang];
+  const name = logo.named ? '' : `<span class="mono" style="font-size:14px">${worker.lang}</span>`;
+  const slot = (i, css) => `position:absolute;left:16px;right:16px;top:${workerSlotTop(i)}px;`
+    + `height:${WORKER_TILE.chipH}px;${css}`;
+  const tile = E(root,
+    '<div style="position:absolute;left:16px;top:14px;display:flex;align-items:center;gap:10px">'
+    + `<div class="gear">${ICON('gear', 24, C.ink, 1.8)}</div>`
+    + '<span class="mono" style="font-size:16px;letter-spacing:.1em">WORKER</span></div>'
+    + '<div class="lang" style="position:absolute;left:16px;top:44px;height:28px;display:flex;align-items:center;'
+    + `gap:8px;padding:0 10px;border:1.5px solid ${C.lineLight};border-radius:var(--rs)">`
+    + `<img src="${logo.url}" alt="" width="${logo.w}" height="${logo.h}" style="display:block;`
+    + `filter:url(#${LOGO_INK_ID})">${name}</div>`
+    + WORKER_CHIPS.map(([icon, label], i) => `<div class="chip" style="${slot(i, 'display:flex;align-items:center;'
+      + `gap:8px;padding-left:10px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);background:${C.bg};`
+      + `opacity:0`)}">${ICON(icon, 16, C.violet, 1.9)}<span class="mono" style="font-size:14px;letter-spacing:.08em">`
+      + `${label.toUpperCase()}</span></div>`).join('')
+    + [0, 1].map(i => `<div class="code mono" style="${slot(i, `font-size:18px;line-height:${WORKER_TILE.chipH}px;`
+      + 'white-space:pre')}"></div>`).join(''),
+    'tile', { width: FLEET.tile.w + 'px', height: FLEET.tile.h + 'px', textAlign: 'left', borderColor: C.violet });
+  tile.gear = tile.querySelector('.gear');
+  tile.langTag = tile.querySelector('.lang');
+  tile.chips = [...tile.querySelectorAll('.chip')];
+  tile.lines = [...tile.querySelectorAll('.code')];
+  return tile;
+}
+
+// ---------- Temporal Proxy (chapters 6 to 8)
+// The TEMPORAL PROXY box, at camera rest: centered on the right edge of the widened environment (FLEET.proxyEnvW), on
+// the wire's line, its size; head: its shield and name at its top (top, the shield's size, the gap under it, the
+// name's line height) and where they end, px under the box's top, which leaves the room under them to what the proxy
+// handles
+const PROXY = { x: LANE.env.x + FLEET.proxyEnvW, y: LANE.wire.y, w: 200, h: 300 };
+PROXY.head = { top: 22, icon: 32, gap: 10, line: 22 };
+PROXY.head.bottom = PROXY.head.top + PROXY.head.icon + PROXY.head.gap + PROXY.head.line;
+// The proxy's connection to TEMPORAL, from the box's right edge to TEMPORAL's left edge in the fleet layout
+const PROXY_WIRE = { x0: PROXY.x + PROXY.w / 2, x1: FLEET.temporalX, y: LANE.wire.y };
+// The TEMPORAL PROXY box: a violet tile, its shield and name at its top. placeProxy() shows it.
+function makeProxy(root) {
+  const { top, icon, gap, line } = PROXY.head;
+  return E(root,
+    `<div style="position:absolute;left:0;right:0;top:${top}px;display:flex;flex-direction:column;`
+    + `align-items:center;gap:${gap}px">${ICON('shield', icon, C.violet, 1.8)}`
+    + `<div class="lbl" style="font-size:15px;line-height:${line}px;color:var(--ink)">Temporal Proxy</div></div>`,
+    'tile', {
+      width: PROXY.w + 'px', height: PROXY.h + 'px', borderColor: C.violet, background: 'var(--violet-solid)',
+    });
+}
+// The proxy box at PROXY moved by dx, with opacity o and a violet glow of strength glow (0 to 1)
+function placeProxy(box, { dx = 0, o = 1, glow = 0 } = {}) {
+  place(box, PROXY.x + dx, PROXY.y, 1, o);
+  box.style.boxShadow = glowShadow(RGB.violet, 0.35 + 0.65 * clamp(glow), { blur: 48, alpha: 0.55 });
+}
+
 // ---------- hand-offs (match cuts: a chapter ends on the next one's first frame, see the plan's motion direction)
 // Opacity of a lane part that a held shot crops at the frame's edge: dimmed below half, out of focus, so the shot
 // reads as a framing and the layout check measures what it frames
@@ -645,6 +793,18 @@ const REWIND_HANDOFF = {
 // history, the Web UI and the Search Attributes have faded out). Call frameLaneEdges() with the camera.
 const WIDE_SHOT = [960, 515, 0.88];
 const WIDE_LANE = { history: 0, door: 0 };
+// Chapter 5 to 6: the six Workers, bare, that chapter 5 ends on once their chips have fallen, and chapter 6 opens on.
+// shot: the framing, [x, y, scale] for shot(), the whole fleet layout at rest. lane: placeLane()'s options there (the
+// others are 1): the fleet layout of chapter 5, the lane's Worker panel, wire, history and door hidden. The six Worker
+// tiles (makeWorkerTile at WORKERS, built after the lane) show their gear turning and their language tag, no chip and
+// no code line. Nothing else shows. Call frameLaneEdges() with the camera.
+const BARE_WORKERS_HANDOFF = {
+  shot: [960, 515, 1],
+  lane: { envW: FLEET.envW, temporalX: FLEET.temporalX, worker: 0, wire: 0, history: 0, door: 0 },
+};
+// Chapter 6 to 7: the push into the TEMPORAL PROXY box that chapter 6 ends on and chapter 7 opens on, [x, y, scale]
+// for shot(): the box fills the content frame's height (y 155-875). See chapter 6's header for what shows there.
+const PROXY_SHOT = [PROXY.x, PROXY.y, 2.4];
 
 // ---------- camera and motion
 // Camera framing eased between stops, like pan(): from and each stop give [x, y, scale], the stage point (x, y)
