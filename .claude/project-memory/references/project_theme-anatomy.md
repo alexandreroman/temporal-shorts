@@ -61,7 +61,11 @@ the visuals belong to each theme (last section).
     4 tiles in order and ends on the benefit; each tile lights (UV border)
     as its name is read: `namedAt` offsets from `c[1]` = name position at
     16 characters per second + 0.3 s, the last one lit for `lastLit`
-    (1.2 s).
+    (1.2 s). Opt-in options, off by default: `labelLines` (room for
+    two-line labels in every tile, so icons stay aligned), `front` (tiles
+    that flip in 3D from the previous scene's tiles in the same slots),
+    `camera` and `fadeIn` (for a match cut from the recap); security uses
+    them.
   - Tiles are concrete use cases, named scenarios matched to the audience
     ("Fraud reviews", "Money transfers", "Deep research"), never generic
     actions or broad categories ("Approvals", "Payments", "Documents").
@@ -418,6 +422,42 @@ below and the card order in [Home page design](feedback_home-page.md).
   too, where the centered 2 x 5 grid opens into the diagram row.
 - Slower pacing, as agent-harness: `pre: 1.5, post: 2.0` on chapters,
   intro `pre: 1.5`, outro `pre: 1.0, post: 3.0`.
+
+### security
+
+- Security teams, tech leads and CISOs evaluating Temporal: technical,
+  no code or configuration on screen. Kicker "AN EXPLAINER FOR SECURITY
+  TEAMS", title "Who can see your Workflow data?". Running example: Nora
+  sends €25,000 to Leo, one payload card (two IBANs, a name, the amount)
+  in every chapter; the euro goes with the IBANs.
+- The story follows that payload along one journey lane (YOUR
+  ENVIRONMENT, the wire, TEMPORAL): where the code runs and outbound-only
+  polling (ch1), TLS, identity and Namespace isolation (ch2), the Event
+  History storing it readable (ch3), the Data Converter, Search Attributes
+  in clear and the Codec Server (ch4), the same work in every Worker
+  (ch5), then Temporal Proxy: a gateway holding the address, credentials
+  and Namespace (ch6), encryption with the customer's KMS, fail closed,
+  built-in Codec Server (ch7), switching upstreams with no Worker change
+  (ch8), recap (ch9), use cases (ch10: health claims, KYC onboarding,
+  payroll runs, AI agents on customer data). Every Proxy claim follows
+  docs.temporal.io and the temporal-proxy repository (`### Sources` in
+  `script.md`).
+- Out of scope: SSO, roles, audit logs, certifications, and the
+  pre-release status of Temporal Proxy, which the video never mentions.
+- Nothing on screen implies Temporal stores credentials or keys: TEMPORAL
+  shows connections as VERIFIED, and stored payloads carry "WRAPPED n"
+  (the wrapped data key that travels with the payload), never "KEY".
+- Cinematic like meet-temporal: one continuous film. Chapters hand off
+  through match cuts (`fadeOut: 0` / `fadeIn: 0` on shared hand-off
+  constants in the theme's `shared.js`), the camera (`shot()`) frames,
+  pushes and whips along the lane following
+  [Camera moves within a scene](feedback_camera-moves.md), across cuts
+  too; one dramatic beat per chapter. Elements the camera crops during a
+  hold dim to `OFF_SHOT` (0.3); zone borders clip to the content frame,
+  headings fade instead of being cut; held shots whose message is small
+  text render values at 18 px and labels at 14 px or more.
+- 08 → 09 and 10 → outro use the engine zoom-through; 09's recap tiles
+  flip in 3D into 10's use-case tiles in the same slots.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title

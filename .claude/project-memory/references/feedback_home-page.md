@@ -19,7 +19,8 @@ The theme picker (`src/index.html`, `src/home.css`) follows these rules:
   scale with `clamp()`.
 - Card order: Meet Temporal (the entry point for newcomers, with a
   handshake icon), Introduction to Durable Execution, Human-in-the-Loop,
-  Durable AI Agents, Temporal Agent Harness, Tuning Temporal Workers.
+  Durable AI Agents, Temporal Agent Harness, Tuning Temporal Workers,
+  Security (a shield whose lock snaps shut on hover).
 - The home page `<meta name="description">` names the themes and is
   edited by hand.
 - Cards show no video duration.
