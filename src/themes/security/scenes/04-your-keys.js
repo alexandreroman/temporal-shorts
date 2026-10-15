@@ -27,17 +27,18 @@
   // before the cut
   const END = { before: 1.4, clearD: 0.5, d: 1.25 };
 
-  // the browser, the Web UI in your environment, in the Worker's place, and the Codec Server under it; the payload's
-  // way down to the Codec Server and back up, beside each other
-  const BROWSER = { x: LANE.worker.x, y: 380 };
+  // the browser, the Web UI in your environment, larger (k), in the Worker's place, and the Codec Server under it;
+  // the payload's way down to the Codec Server and back up, beside each other
+  const BROWSER = { x: LANE.worker.x, y: 372, k: 1.3 };
   const CODEC = { x: LANE.worker.x, y: 700, w: 360, h: 120 };
   const TRIP = {
-    down: BROWSER.x - 60, up: BROWSER.x + 60, y0: BROWSER.y + WEBUI.h / 2 + 10, y1: CODEC.y - CODEC.h / 2 - 10,
+    down: BROWSER.x - 60, up: BROWSER.x + 60, y0: BROWSER.y + BROWSER.k * WEBUI.h / 2 + 10,
+    y1: CODEC.y - CODEC.h / 2 - 10,
   };
-  // KEYS NEVER SHARED, between the zones, under the wire
-  const KEYS_TAG = { x: (LANE.wire.x0 + LANE.wire.x1) / 2, y: 660, w: 340 };
-  // the Search Attributes strip, under the history, as wide as it
-  const STRIP = { x: HIST.x, y: 776, w: HIST.w, h: 92 };
+  // KEYS NEVER SHARED, on the border between the zones, where the wire runs while the Worker is there
+  const KEYS_TAG = { x: (LANE.wire.x0 + LANE.wire.x1) / 2, y: LANE.wire.y, w: 340 };
+  // the Search Attributes panel, under the history, beside the Web UI (BESIDE_UI)
+  const STRIP = BESIDE_UI;
   // the glyphs that rain off the card as it crosses the gate: how many, and how long each one falls
   const RAIN = { n: 28, life: 0.7 };
   // the first characters of the IBAN, which the trip to the Codec Server carries
@@ -63,8 +64,8 @@
     tile.key.style.transform = spinning ? `perspective(120px) rotateX(${(360 * turn).toFixed(2)}deg)` : 'none';
   }
   // A Search Attribute in clear: its name, an equals sign and its value, in a rounded box
-  const attribute = (name, value, css = '') => `<span class="mono" style="display:inline-block;font-size:15px;`
-    + `line-height:28px;padding:0 12px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);${css}">`
+  const attribute = (name, value, css = '') => `<span class="mono" style="display:inline-block;font-size:12px;`
+    + `line-height:26px;padding:0 10px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);${css}">`
     + `${name} <span style="color:${C.slate}">=</span> ${value}</span>`;
 
   scene({
@@ -92,15 +93,18 @@
       ].map(d => path(s.lane.svg, d, C.slate, 2));
       s.hist = makeStoredHistory(root);
       s.webui = makeWebUI(root);
+      // the label, the two attributes on two lines (the IBAN that tries to join them beside the second), then the
+      // INDEXED, NOT ENCRYPTED tag (s.indexed)
       s.strip = E(root,
-        '<div class="lbl" style="position:absolute;left:18.5px;top:12.5px;font-size:14px;padding-left:0">'
+        '<div class="lbl" style="position:absolute;left:16.5px;top:12.5px;font-size:13px;padding-left:0">'
         + 'Search Attributes</div>'
-        + '<div style="position:absolute;left:18.5px;top:46.5px;display:flex;gap:12px">'
-        + `<span class="attr">${attribute('TransferStatus', 'DEBITED')}</span>`
+        + `<span class="attr" style="position:absolute;left:16.5px;top:40.5px">`
+        + `${attribute('TransferStatus', 'DEBITED')}</span>`
+        + '<div style="position:absolute;left:16.5px;top:74.5px;display:flex;gap:6px">'
         + `<span class="attr">${attribute('Region', 'EU')}</span>`
         + `<span class="secret" style="position:relative">${attribute('iban', 'FR76',
           `border:1.5px dashed ${C.red};color:${C.red}`)}`
-        + `<i class="strike" style="position:absolute;left:6px;right:6px;top:14px;height:2px;background:${C.red};`
+        + `<i class="strike" style="position:absolute;left:6px;right:6px;top:13px;height:2px;background:${C.red};`
         + 'transform-origin:left center"></i></span></div>'
         + `<div class="sweep" style="position:absolute;top:0;bottom:0;width:120px;background:linear-gradient(90deg,`
         + `rgba(${RGB.ink},0),rgba(${RGB.ink},.16),rgba(${RGB.ink},0))"></div>`,
@@ -109,8 +113,8 @@
       s.strip.secret = s.strip.querySelector('.secret');
       s.strip.strike = s.strip.querySelector('.strike');
       s.strip.sweep = s.strip.querySelector('.sweep');
-      s.indexed = statusTag(s.strip, { font: 12, icon: 12 });
-      Object.assign(s.indexed.style, { left: 'auto', right: '16.5px', top: '10.5px', height: '24px' });
+      s.indexed = statusTag(s.strip, { font: 11, icon: 11 });
+      Object.assign(s.indexed.style, { left: '16.5px', top: '110.5px', height: '24px' });
       s.codec = makeKeyTile(root, ICON('server', 28, C.ink, 1.8), 'Codec Server', CODEC.w, CODEC.h);
       s.packet = E(root, '', 'mono', {
         width: '160px', height: '30px', lineHeight: '27px', textAlign: 'center', fontSize: '14px', whiteSpace: 'pre',
@@ -149,16 +153,20 @@
       const cam = shot(t, REWIND_HANDOFF.shot, [[c[1] + T1.cam, ...REST, T1.camD], [endAt, ...WIDE_SHOT, END.d]]);
       const [shakeX, shakeY] = shake(t, sealAt + 0.35 * LOCK_SHUT, 6, 0.3);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
+      frameLaneEdges(s.lane, cam);
 
       // the lane, as chapter 3 left it: what the close shot dims comes back with the pull-back. The Worker steps
-      // aside for the browser, and comes back as the chapter clears.
+      // aside for the browser with its wire and its Data Converter; the Worker and the wire come back as the chapter
+      // clears.
       const back = P(t, c[1] + T1.cam, T1.camD);
       const from = REWIND_HANDOFF.lane;
-      const workerAway = P(t, c[3] + T3.worker, 0.4) * (1 - P(t, endAt, END.clearD));
+      const stepAside = P(t, c[3] + T3.worker, 0.4);
+      const workerAway = stepAside * (1 - P(t, endAt, END.clearD));
       placeLane(s.lane, {
         env: lerp(from.env, 1, back), temporal: lerp(from.temporal, 1, back), heads: lerp(from.heads, 1, back),
-        worker: 1 - workerAway, history: WIDE_LANE.history, door: WIDE_LANE.door,
+        worker: 1 - workerAway, wire: 1 - workerAway, history: WIDE_LANE.history, door: WIDE_LANE.door,
       });
+      const converterO = done * (1 - stepAside);
 
       // the stored history, its chip still in clear and red until the sealed card lands on it
       const storedO = lerp(REWIND_HANDOFF.stored, 1, back) * done;
@@ -168,12 +176,12 @@
 
       // the Data Converter comes in beside the Worker; its key turns and its gate lights up
       const tilePop = backPop(t, c[0] + T0.tile);
-      place(s.converter, CONVERTER.x, CONVERTER.tile.y, tilePop.s, tilePop.o * done);
+      place(s.converter, CONVERTER.x, CONVERTER.tile.y, tilePop.s, tilePop.o * converterO);
       turnKey(s.converter, P(t, c[0] + T0.key, T0.keyD));
       s.converter.style.borderColor = t >= c[0] + T0.key ? C.violet : C.line;
       const gate = P(t, c[0] + T0.gate, T0.gateD);
-      draw(s.stem, P(t, c[0] + T0.gate - 0.15, 0.2), done);
-      place(s.gate, CONVERTER.x, CONVERTER.gate.y, 1, (gate > 0 ? 1 : 0) * done);
+      draw(s.stem, P(t, c[0] + T0.gate - 0.15, 0.2), converterO);
+      place(s.gate, CONVERTER.x, CONVERTER.gate.y, 1, (gate > 0 ? 1 : 0) * converterO);
       s.gate.style.transform += ` scaleY(${gate.toFixed(3)})`;
       const armed = P(t, c[0] + T0.key, 0.3) * (1 - P(t, sealAt + 0.6, 0.6));
       s.gate.style.boxShadow = glowShadow(RGB.violet, 0.4 + 0.6 * armed, { blur: 30, alpha: 0.7 });
@@ -223,13 +231,13 @@
         o: storedO, flip, s: flipped ? swell(t, flipAt + 0.1, 0.1) : 1,
       });
 
-      // the Web UI comes back between the zones, showing the same ciphertext; it then moves into your environment as
-      // a browser, which shows the payload in clear once the Codec Server has decrypted it
+      // the Web UI comes back under the history, showing the same ciphertext; it then leaves Temporal's side for your
+      // environment, growing into a browser, which shows the payload in clear once the Codec Server has decrypted it
       const webuiPop = backPop(t, c[1] + T1.webui);
       const move = P(t, c[3] + T3.move, T3.moveD);
-      const [winX, winY] = bezier([[WEBUI.x, WEBUI.y], [WEBUI.x - 200, WEBUI.y - 90],
-        [BROWSER.x + 260, BROWSER.y - 90], [BROWSER.x, BROWSER.y]], move);
-      place(s.webui, winX, winY, webuiPop.s, webuiPop.o * done);
+      const [winX, winY] = bezier([[WEBUI.x, WEBUI.y], [WEBUI.x - 300, WEBUI.y - 200],
+        [BROWSER.x + 400, BROWSER.y - 60], [BROWSER.x, BROWSER.y]], move);
+      place(s.webui, winX, winY, webuiPop.s * lerp(1, BROWSER.k, move), webuiPop.o * done);
       s.webui.caption.textContent = move >= 0.5 ? 'YOUR BROWSER · WEB UI' : 'TEMPORAL WEB UI';
       const clearAt = c[3] + T3.clear;
       setWebUI(s.webui, { scramble: 1 - P(t, clearAt, 0.5, linear) });

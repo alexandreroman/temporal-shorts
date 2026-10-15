@@ -166,16 +166,17 @@ function setPayload(card, { seal = 0, scramble = 0, red = 0, fromRight = false }
 // ---------- the journey lane
 // Stage coordinates of the lane shared by every lane scene, at camera rest (scale 1), left to right: YOUR
 // ENVIRONMENT (env) with the Worker panel in it, the wire from x0 to x1, TEMPORAL with the Event History and the Web
-// UI, the TEMPORAL PROXY box at the environment's right edge (from chapter 6) and the closed door on that edge. The
-// two zones give their top left corner and size, the other parts their center (and size). Every lane scene reads
-// them: adjust them here, never in a scene.
+// UI (ui: the Web UI window, under the stored Event History of chapters 3 and 4, on its left), the TEMPORAL PROXY box
+// at the environment's right edge (from chapter 6) and the closed door on that edge. The two zones give their top
+// left corner and size, the other parts their center (and size). Every lane scene reads them: adjust them here,
+// never in a scene.
 const LANE = {
   env: { x: 120, y: 190, w: 640, h: 650 },
   worker: { x: 340, y: 515, w: 380, h: 392 },
   wire: { x0: 760, x1: 1160, y: 515 },
   temporal: { x: 1160, y: 190, w: 640, h: 650 },
   history: { x: 1560, y: 515, w: 392, h: 260 },
-  ui: { x: 1480, y: 760 },
+  ui: { x: 1350, y: 741, w: 300, h: 150 },
   proxy: { x: 700, y: 515 },
   door: { x: 760, y: 720 },
 };
@@ -207,6 +208,21 @@ const zoneCaption = text => '<div class="cap lbl" style="position:absolute;left:
 // The slate EMPTY note of the lane's Event History, centered across the card, 150 px under its top
 const historyEmptyNote = () => '<div class="empty mono" style="position:absolute;left:0;right:0;top:150px;'
   + `text-align:center;font-size:18px;letter-spacing:.14em;padding-left:.14em;color:${C.slateDark}">EMPTY</div>`;
+
+// Number of lanes built so far: it makes the id of each lane's clip path unique in the document
+let laneClipCount = 0;
+// The content frame's top and bottom on the stage, in px (see the layout check)
+const CONTENT_FRAME = { top: 150, bottom: 880 };
+// Clips the environment's dashed edge to the content frame for the shot of this frame: cam, the scale and dy of shot()
+// given to setCamera() (with an enter and exit zoom of 1), without the shake, which moves the edge and its clip
+// together. At rest the edge lies inside the frame and shows whole.
+function frameLaneEdges(lane, { scale, dy }) {
+  // setCamera() scales round (960, 540) and then moves by dy: the stage y that lands on a screen y
+  const stageY = screenY => 540 + (screenY - 540 - dy) / scale;
+  const top = stageY(CONTENT_FRAME.top), bottom = stageY(CONTENT_FRAME.bottom);
+  lane.frameClip.setAttribute('y', top.toFixed(2));
+  lane.frameClip.setAttribute('height', (bottom - top).toFixed(2));
+}
 
 // The lane's parts (LANE), in their stacking order: the two zones, an SVG layer (the environment's dashed edge and the
 // wire, an arrow to TEMPORAL; scenes draw their own strokes in it, under the panels), the Worker panel running the
@@ -242,6 +258,18 @@ function makeLane(root) {
     `M ${right} ${wire.y} V ${bottom - r} A ${r} ${r} 0 0 1 ${right - r} ${bottom} H ${env.x + r}`
       + ` A ${r} ${r} 0 0 1 ${env.x} ${bottom - r} V ${wire.y}`,
   ].map(d => path(lane.svg, d, C.slate, 2, false));
+  // the dashed edge shows only inside the content frame, so a close shot never runs it under the chapter header or
+  // the subtitles (see frameLaneEdges)
+  laneClipCount += 1;
+  const clip = document.createElementNS(SVGNS, 'clipPath');
+  clip.id = `lane-frame-${laneClipCount}`;
+  clip.setAttribute('clipPathUnits', 'userSpaceOnUse');
+  lane.frameClip = document.createElementNS(SVGNS, 'rect');
+  const whole = { x: -4000, y: -4000, width: 10000, height: 10000 };
+  Object.entries(whole).forEach(([name, value]) => lane.frameClip.setAttribute(name, value));
+  clip.appendChild(lane.frameClip);
+  lane.svg.querySelector('defs').appendChild(clip);
+  lane.envEdges.forEach(edge => edge.setAttribute('clip-path', `url(#${clip.id})`));
   lane.wire = path(lane.svg, `M ${worker.x + worker.w / 2} ${wire.y} L ${temporal.x - 4} ${wire.y}`, C.slate, 2.5);
 
   lane.worker = makeAppPanel(root, 'WORKER', worker.w, worker.h);
@@ -380,22 +408,29 @@ function placeNamespaces(ns, split, lit = 0, seals = [0, 0], o = 1) {
   });
 }
 
-// ---------- the Event History that stores the payload (chapters 3 and 4)
-// The Event History once it stores the payload, at camera rest: it grows from the lane's history (LANE.history) to
-// this center and size, inside TEMPORAL, with room under it for the Search Attributes of chapter 4
-const HIST = { x: 1480, y: 486, w: 560, h: 452 };
+// ---------- the Event History that stores the payload, and the Web UI (chapters 3 and 4)
+// Inside TEMPORAL, at camera rest: the stored Event History on top, then a row under it, the Web UI window (LANE.ui)
+// on the left and a slot on the right (BESIDE_UI: the viewers in chapter 3, the Search Attributes in chapter 4).
+// The Event History grows from the lane's (LANE.history) to HIST, 24 px clear of the TLS tube's mouth on its left.
+const HIST = { x: 1480, y: 454, w: 560, h: 392 };
 // Its rows; row 2 holds the payload. HIST_ROW: each row's top in the card, the row height and the text size.
 const HIST_ROWS = [
   'Workflow started: transfer', 'Activity completed: debitAccount', 'Activity scheduled: creditAccount',
 ];
-const HIST_ROW = { tops: [60, 100, 404], h: 32, font: 18 };
-// The payload chip of row 2: the payload card itself, at the lane's size (PAYLOAD_IN_WORKER.w), left-aligned with the
-// rows' text and 148 px under the card's top. Its center (x, y) and size (w, h), and tagY, the center of its verdict
-// tag (READABLE, then NEVER SEES YOUR PAYLOADS), which straddles its bottom edge.
-const HIST_CHIP = { w: PAYLOAD_IN_WORKER.w, h: payloadLayout(PAYLOAD_IN_WORKER.w).h };
+const HIST_ROW = { tops: [56, 92, 346], h: 32, font: 18 };
+// The payload chip of row 2: the payload card itself, a lane-size card (PAYLOAD_IN_WORKER.w) shown at scale k,
+// left-aligned with the rows' text and 138 px under the card's top. Its center (x, y), its size on the stage (w, h)
+// and tagY, the center of its verdict tag (READABLE, then NEVER SEES YOUR PAYLOADS), which straddles its bottom edge,
+// 3 px low, clear of its last value.
+const HIST_CHIP = { k: 0.8 };
+HIST_CHIP.w = PAYLOAD_IN_WORKER.w * HIST_CHIP.k;
+HIST_CHIP.h = payloadLayout(PAYLOAD_IN_WORKER.w).h * HIST_CHIP.k;
 HIST_CHIP.x = HIST.x - HIST.w / 2 + 70 + HIST_CHIP.w / 2;
-HIST_CHIP.y = HIST.y - HIST.h / 2 + 148 + HIST_CHIP.h / 2;
-HIST_CHIP.tagY = HIST_CHIP.y + HIST_CHIP.h / 2;
+HIST_CHIP.y = HIST.y - HIST.h / 2 + 138 + HIST_CHIP.h / 2;
+HIST_CHIP.tagY = HIST_CHIP.y + HIST_CHIP.h / 2 + 3;
+// The slot beside the Web UI, right-aligned with the history: its center and size
+const BESIDE_UI = { w: HIST.w - LANE.ui.w - 16, h: LANE.ui.h, y: LANE.ui.y };
+BESIDE_UI.x = HIST.x + HIST.w / 2 - BESIDE_UI.w / 2;
 // The stored Event History: the white card (HIST) with its rows, a SAVED tag per row and the lane history's EMPTY
 // note, then its payload chip (card.chip, a makePayload). placeStoredHistory() shows them; the chip's state
 // (setPayload) stays with the scenes.
@@ -407,7 +442,7 @@ function makeStoredHistory(root) {
   card.tags.forEach(tag => { tag.style.height = '24px'; });
   card.insertAdjacentHTML('beforeend', historyEmptyNote());
   card.empty = card.querySelector('.empty');
-  card.chip = makePayload(root, { w: HIST_CHIP.w });
+  card.chip = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
   return card;
 }
 // grow (0 to 1): the card grows from the lane's history, EMPTY, to HIST, as EMPTY fades; o: the opacity of the card
@@ -425,11 +460,11 @@ function placeStoredHistory(card, { grow = 1, o = 1, rows = [1, 1, 1], saved = [
     setStatus(tag, 'SAVED', 'saved');
     tag.style.opacity = saved[i];
   });
-  place(card.chip, HIST_CHIP.x, HIST_CHIP.y, 1, chip * o);
+  place(card.chip, HIST_CHIP.x, HIST_CHIP.y, HIST_CHIP.k, chip * o);
 }
 // The verdict tag on the payload chip (statusTag, 30 px high, so it centers on whole pixels); setChipVerdict() sets it
 function makeChipVerdict(root) {
-  const e = statusTag(root, { font: 15, icon: 15 });
+  const e = statusTag(root, { font: 14, icon: 14 });
   e.style.height = '30px';
   return e;
 }
@@ -444,26 +479,25 @@ function setChipVerdict(e, label, kind, { s = 1, o = 1, flip = 1 } = {}) {
   if (flip < 1) e.style.transform += ` scaleY(${flip.toFixed(3)})`;
 }
 
-// ---------- the Web UI (chapters 3 and 4)
-// The Web UI window, at camera rest: between the zones, above the wire (chapter 4 moves it into your environment)
-const WEBUI = { x: 960, y: 330, w: 360, h: 190 };
-// The fields of the payload that the Web UI shows: their rows in TRANSFER (the IBAN it comes from, and the name)
+// The Web UI window (LANE.ui), and the fields of the payload it shows: their rows in TRANSFER (the IBAN it comes from,
+// and the name)
+const WEBUI = LANE.ui;
 const WEBUI_FIELDS = [0, 2];
 // The Web UI window, in the dark look of the Temporal Web UI: a title bar (win.caption, its text), then row 2 of the
 // Event History and the payload's IBAN and name, keys above values. win.lines: the row and the two fields, which
 // slide in; setWebUI() sets the values.
 function makeWebUI(root) {
-  const dot = '<i style="display:block;width:9px;height:9px;border-radius:50%;background:#4B5363"></i>';
-  const field = (row, i) => `<div class="line" style="margin-top:${i ? 8 : 12}px">`
-    + `<div class="mono" style="font-size:12px;line-height:16px;color:${C.slate}">${TRANSFER[row][0]}</div>`
-    + '<div class="mono value" style="font-size:15px;line-height:22px;white-space:pre;margin:0 -8px;padding:0 8px;'
+  const dot = '<i style="display:block;width:8px;height:8px;border-radius:50%;background:#4B5363"></i>';
+  const field = row => '<div class="line" style="margin-top:6px">'
+    + `<div class="mono" style="font-size:11px;line-height:14px;color:${C.slate}">${TRANSFER[row][0]}</div>`
+    + '<div class="mono value" style="font-size:13px;line-height:20px;white-space:pre;margin:0 -6px;padding:0 6px;'
     + 'border-radius:4px"></div></div>';
   const win = E(root,
-    `<div style="height:36px;background:#191919;border-bottom:1px solid ${C.line};display:flex;align-items:center;`
-    + `gap:7px;padding-left:14px">${dot}${dot}${dot}<span class="ttl mono" style="margin-left:12px;font-size:12px;`
+    `<div style="height:30px;background:#191919;border-bottom:1px solid ${C.line};display:flex;align-items:center;`
+    + `gap:6px;padding-left:12px">${dot}${dot}${dot}<span class="ttl mono" style="margin-left:10px;font-size:11px;`
     + `letter-spacing:.14em;color:${C.slate}">TEMPORAL WEB UI</span></div>`
-    + '<div style="padding:12px 20px 0">'
-    + `<div class="line mono" style="font-size:14px;line-height:20px"><span style="color:${C.slate}">2</span>`
+    + '<div style="padding:10px 16px 0">'
+    + `<div class="line mono" style="font-size:13px;line-height:18px"><span style="color:${C.slate}">2</span>`
     + '&nbsp; Activity completed</div>'
     + WEBUI_FIELDS.map(field).join('') + '</div>',
     '', {
@@ -537,7 +571,8 @@ function tubeWhip(u) {
 // Converter (CONVERTER). lane: the lane's opacities (placeLane; the others are 1): the zones, pushed off the frame,
 // dimmed, their headings and the lane's history hidden, the wire back where the TLS tube was. stored: the opacity of
 // the stored Event History (placeStoredHistory, every row and SAVED tag shown) and of its chip, in clear and red
-// (setPayload red: 1), with its READABLE verdict, all cropped at the frame's right edge.
+// (setPayload red: 1), with its READABLE verdict, all cropped at the frame's right edge. The Web UI and the viewers
+// are gone.
 const REWIND_HANDOFF = {
   shot: [575, 506, 1.5],
   lane: { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, door: 0, heads: 0 },
@@ -545,7 +580,8 @@ const REWIND_HANDOFF = {
 };
 // Chapter 4 to 5: the pull-back that chapter 4 ends on and chapter 5 opens on, [x, y, scale] for shot(): the whole
 // lane, a little smaller than at rest, with room round it. WIDE_LANE: the lane's opacities there (placeLane; the
-// others are 1): the bare lane, the Worker running with no card, the wire, TEMPORAL with no history.
+// others are 1): the bare lane, the Worker running with no card, the wire, TEMPORAL with its logo only (the stored
+// history, the Web UI and the Search Attributes have faded out). Call frameLaneEdges() with the camera.
 const WIDE_SHOT = [960, 515, 0.88];
 const WIDE_LANE = { history: 0, door: 0 };
 

@@ -138,6 +138,7 @@
       ]) : whip.camera;
       const [shakeX, shakeY] = shake(t, rejectAt, 10, 0.4);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
+      frameLaneEdges(s.lane, cam);
       placeFlash(s.flash, t, rejectAt, 0.3);
 
       // the lane, as chapter 1 left it: the zones and the history come back as the camera pulls back; the tube

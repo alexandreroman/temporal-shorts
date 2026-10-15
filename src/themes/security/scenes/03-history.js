@@ -20,32 +20,35 @@
   // the rewind, in seconds before the end: the stutter (stutterD long), then the streak back to the Worker and the
   // whip left (d long), which land 0.15 s before the cut
   const REWIND = { stutter: 1.35, stutterD: 0.35, d: 0.85 };
-  // the two viewers by the Web UI, under the wire: their centers and size
-  const VIEWER = { xs: [868, 1052], y: 660, w: 168, h: 110 };
+  // the two viewers beside the Web UI, one above the other in the slot on its right (BESIDE_UI): their size and
+  // centers
+  const VIEWER = { w: BESIDE_UI.w, h: 66 };
+  VIEWER.ys = [BESIDE_UI.y - BESIDE_UI.h / 2 + VIEWER.h / 2, BESIDE_UI.y + BESIDE_UI.h / 2 - VIEWER.h / 2];
   // the lens over the chip's IBAN: its diameter, its zoom and its margin from the ends of the IBAN as it sweeps
-  const LENS = { d: 200, zoom: 2.2, margin: 46 };
+  const LENS = { d: 200, zoom: 2.6, margin: 38 };
   // how far each ghost outline of the streaking card lags behind it, in progress
   const GHOSTS = [0.06, 0.12, 0.18];
 
-  // The IBAN line of the chip, in stage coordinates at camera rest: its top left corner, its line height and font
-  // size, and its width (Mono advances 0.6 em per character)
-  const CHIP_LAYOUT = payloadLayout(HIST_CHIP.w);
+  // The IBAN line of the chip (a lane-size card shown at HIST_CHIP.k), in stage coordinates at camera rest: its top
+  // left corner, its line height and font size, and its width (Mono advances 0.6 em per character)
+  const CHIP_LAYOUT = payloadLayout(PAYLOAD_IN_WORKER.w);
   const IBAN = {
-    x: HIST_CHIP.x - HIST_CHIP.w / 2 + 1.5 + CHIP_LAYOUT.pad.x,
-    y: HIST_CHIP.y - HIST_CHIP.h / 2 + 1.5 + CHIP_LAYOUT.valueTop(0),
-    line: CHIP_LAYOUT.value.line, font: CHIP_LAYOUT.value.font,
+    x: HIST_CHIP.x - HIST_CHIP.w / 2 + (1.5 + CHIP_LAYOUT.pad.x) * HIST_CHIP.k,
+    y: HIST_CHIP.y - HIST_CHIP.h / 2 + (1.5 + CHIP_LAYOUT.valueTop(0)) * HIST_CHIP.k,
+    line: CHIP_LAYOUT.value.line * HIST_CHIP.k, font: CHIP_LAYOUT.value.font * HIST_CHIP.k,
   };
   IBAN.w = TRANSFER[0][1].length * 0.6 * IBAN.font;
 
-  // A viewer's tile: a person and a name, and the eye that marks it once it reads the IBAN (tile.eye)
+  // A viewer's tile: a person and a name, and the eye that marks it once it reads the IBAN (tile.eye), on its right
   function makeViewer(root, name) {
     const tile = E(root,
-      '<div style="display:flex;flex-direction:column;align-items:center;gap:12px">'
-      + `${ICON('user', 34, C.ink, 1.8)}<span class="lbl" style="font-size:14px;color:var(--ink)">${name}</span></div>`
-      + `<div class="eye" style="position:absolute;right:10px;top:10px;opacity:0">${ICON('eye', 24, C.red, 2)}</div>`,
+      '<div style="display:flex;align-items:center;gap:12px">'
+      + `${ICON('user', 28, C.ink, 1.8)}<span class="lbl" style="font-size:14px;color:var(--ink)">${name}</span></div>`
+      + `<div class="eye" style="position:absolute;right:16px;top:${(VIEWER.h - 24) / 2 - 1.5}px;opacity:0">`
+      + `${ICON('eye', 24, C.red, 2)}</div>`,
       'tile', {
         width: VIEWER.w + 'px', height: VIEWER.h + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center',
+        paddingLeft: '18.5px',
       });
     tile.eye = tile.querySelector('.eye');
     return tile;
@@ -91,10 +94,6 @@
       const root = s.cam = makeCamera(stage);
       s.lane = makeLane(root);
       s.ns = makeNamespaces(s.lane);
-      // the viewers' sight lines, flowing up to the Web UI's IBAN
-      s.sight = VIEWER.xs.map((x, i) => path(s.lane.svg,
-        `M ${x} ${VIEWER.y - VIEWER.h / 2 - 8} L ${WEBUI.x - 30 + 60 * i} ${WEBUI.y + WEBUI.h / 2 + 8}`,
-        C.red, 2, false, '6 7'));
       s.tube = makeTube(root);
       s.hist = makeStoredHistory(root);
       s.webui = makeWebUI(root);
@@ -103,7 +102,7 @@
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
       // the rewind: a copy of the card leaves the chip, under its verdict, with fading outlines behind it
       s.ghosts = GHOSTS.map(() => E(root, '', '', {
-        width: HIST_CHIP.w + 'px', height: HIST_CHIP.h + 'px', border: `1.5px solid ${C.violet}`,
+        width: PAYLOAD_IN_WORKER.w + 'px', height: CHIP_LAYOUT.h + 'px', border: `1.5px solid ${C.violet}`,
         borderRadius: 'var(--r)',
       }));
       s.copy = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
@@ -132,6 +131,7 @@
       const [shakeX, shakeY] = shake(t, hitAt, 8, 0.35);
       const jolt = stutter(t, stutterAt, REWIND.stutterD);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX + jolt.dx, dy: cam.dy + shakeY, enter: 1, exit: 1 });
+      frameLaneEdges(s.lane, cam);
       s.cam.style.filter = jolt.split
         ? `drop-shadow(${jolt.split}px 0 0 rgba(${RGB.red},.7)) drop-shadow(${-jolt.split}px 0 0 rgba(${RGB.uv},.7))`
         : 'none';
@@ -142,14 +142,20 @@
       // way to the wire; the whip left dims what its framing crops (REWIND_HANDOFF)
       const back = P(t, c[0] + T0.cam, T0.camD);
       const away = P(t, streakAt, 0.45);
-      const rewind = REWIND_HANDOFF.lane;
+      // every part starts as chapter 2 left it (TUBE_HANDOFF.lane, 1 where it says nothing) and ends as chapter 4
+      // opens (REWIND_HANDOFF.lane, 1 where it says nothing)
+      const open = { env: 1, worker: 1, temporal: 1, history: 1, wire: 1, door: 1, heads: 1, ...TUBE_HANDOFF.lane };
+      const rewind = { env: 1, worker: 1, temporal: 1, history: 1, wire: 1, door: 1, heads: 1, ...REWIND_HANDOFF.lane };
       const tubeOut = P(t, c[1] + T1.tube, T1.tubeD);
+      const headsOut = P(t, 0, whipEnd);
       placeLane(s.lane, {
-        env: lerp(lerp(TUBE_HANDOFF.lane.env, 1, back), rewind.env, away),
-        worker: lerp(TUBE_HANDOFF.lane.worker, 1, back),
-        temporal: lerp(1, rewind.temporal, away),
-        history: t < dockAt ? 1 : rewind.history,
-        wire: tubeOut, door: rewind.door, heads: lerp(lerp(1 - P(t, 0, whipEnd), 1, back), rewind.heads, away),
+        env: lerp(lerp(open.env, 1, back), rewind.env, away),
+        worker: lerp(lerp(open.worker, 1, back), rewind.worker, away),
+        temporal: lerp(open.temporal, rewind.temporal, away),
+        history: t < dockAt ? open.history : rewind.history,
+        wire: lerp(open.wire, rewind.wire, tubeOut),
+        door: lerp(open.door, rewind.door, away),
+        heads: lerp(lerp(lerp(open.heads, 0, headsOut), 1, back), rewind.heads, away),
       });
       placeTube(s.tube, 1, 1 - tubeOut);
       // the Namespaces have made their point: they fade as the history grows over them
@@ -169,11 +175,11 @@
       const [landX, landY] = TUBE_HANDOFF.cardTo;
       const [cardX, cardY] = t < whipEnd ? whip.card : [lerp(landX, HIST_CHIP.x, dock), lerp(landY, HIST_CHIP.y, dock)];
       setPayload(s.card);
-      place(s.card, cardX, cardY, lerp(TUBE.k, 1, dock), t < dockEnd ? 1 : 0);
+      place(s.card, cardX, cardY, lerp(TUBE.k, HIST_CHIP.k, dock), t < dockEnd ? 1 : 0);
       placeRipples(s.landing, t, whipEnd, landX, landY, 120, 420, { d: 0.8, step: 0.15 });
 
-      // the Web UI shows the same row, IBAN and name in clear; the viewers come in under it. The rewind takes them
-      // away: before the payload was stored, nobody had seen it.
+      // the Web UI, under the history, shows the same row, IBAN and name in clear; the viewers come in beside it.
+      // The rewind takes them away: before the payload was stored, nobody had seen it.
       const unseen = 1 - P(t, stutterAt, 0.3);
       const webui = backPop(t, c[1] + T1.webui);
       place(s.webui, WEBUI.x, WEBUI.y, webui.s, webui.o * unseen);
@@ -181,12 +187,11 @@
       setWebUI(s.webui, { red });
       s.viewers.forEach((tile, i) => {
         const eyesAt = c[1] + T1.eyes + i * 0.12;
-        rise(tile, VIEWER.xs[i], VIEWER.y, P(t, c[1] + T1.viewers + i * 0.15, 0.5) * unseen);
+        rise(tile, BESIDE_UI.x, VIEWER.ys[i], P(t, c[1] + T1.viewers + i * 0.15, 0.5) * unseen);
         tile.style.borderColor = t >= eyesAt ? C.red : C.line;
         const eye = popIn(t, eyesAt, 0.3);
         tile.eye.style.opacity = eye.o;
         tile.eye.style.transform = `scale(${eye.s})`;
-        draw(s.sight[i], P(t, eyesAt, 0.5), 0.8 * unseen);
       });
 
       // the dramatic beat: READABLE slams onto the chip from above its size, red rings, a red flash and a shake;
@@ -207,7 +212,7 @@
       s.lens.text.style.top = (inner - LENS.zoom * (lensY - IBAN.y)).toFixed(2) + 'px';
 
       // the rewind: a copy of the card leaves the chip (the chip keeps what was stored) and streaks back along the
-      // wire into the Worker, its red fading, fading outlines behind it
+      // wire into the Worker, growing back to its lane size, its red fading, fading outlines behind it
       const streak = P(t, streakAt, REWIND.d);
       const route = [
         [HIST_CHIP.x, HIST_CHIP.y], [HIST_CHIP.x - 360, LANE.wire.y],
@@ -215,11 +220,13 @@
       ];
       const [copyX, copyY] = bezier(route, streak);
       setPayload(s.copy, { red: 1 - P(t, streakAt, 0.3) });
-      place(s.copy, copyX, copyY, 1, t >= streakAt ? 1 : 0);
+      const copyK = p => lerp(HIST_CHIP.k, 1, p);
+      place(s.copy, copyX, copyY, copyK(streak), t >= streakAt ? 1 : 0);
       s.ghosts.forEach((ghost, i) => {
-        const [gx, gy] = bezier(route, Math.max(0, streak - GHOSTS[i]));
+        const lag = Math.max(0, streak - GHOSTS[i]);
+        const [gx, gy] = bezier(route, lag);
         const o = streak > 0 && streak < 1 ? (0.35 - 0.1 * i) * Math.min(1, streak * 5, (1 - streak) * 5) : 0;
-        place(ghost, gx, gy, 1, o);
+        place(ghost, gx, gy, copyK(lag), o);
       });
     }
   });

@@ -82,6 +82,7 @@
       ]);
       const [shakeX, shakeY] = shake(t, landed, 9, 0.35);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
+      frameLaneEdges(s.lane, cam);
 
       // the push-in dims what it pushes off the frame (WIRE_LANE) and clears the annotations
       const push = P(t, pushAt, PUSH_D);
