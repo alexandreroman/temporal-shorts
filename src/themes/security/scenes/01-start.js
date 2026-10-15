@@ -8,6 +8,9 @@
   // camera framings, [x, y, scale] for shot(): the whole lane, then your environment
   const REST = [960, 515, 1];
   const ENV_SHOT = [440, 515, 1.1];
+  // the move to your environment, from c[0], and the pull-back to the whole lane, from c[1]: start and duration
+  const ENV_AT = 2.8, ENV_D = 1.1;
+  const BACK_AT = 0.2, BACK_D = 1.0;
   // the push-in on the wire's start that ends the chapter: it starts PUSH_BEFORE_END seconds before the end and
   // lands 0.15 s before the cut
   const PUSH_BEFORE_END = 1.3;
@@ -75,7 +78,7 @@
       // the camera: the whole lane while it draws in, your environment, the whole lane again as the Worker calls
       // out, then the push-in on the wire; the slam shakes it
       const cam = shot(t, REST, [
-        [c[0] + 2.8, ...ENV_SHOT, 1.1], [c[1] + 0.2, ...REST, 1.0], [pushAt, ...WIRE_SHOT, PUSH_D],
+        [c[0] + ENV_AT, ...ENV_SHOT, ENV_D], [c[1] + BACK_AT, ...REST, BACK_D], [pushAt, ...WIRE_SHOT, PUSH_D],
       ]);
       const [shakeX, shakeY] = shake(t, landed, 9, 0.35);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
@@ -88,11 +91,15 @@
       // the lane draws in, stroke by stroke; each panel fills in as its outline closes, the outline fading under it
       const strokeAt = part => c[0] + DRAW[part];
       const fill = (part, d) => P(t, strokeAt(part) + d - 0.15, 0.3);
+      // TEMPORAL, cropped at the right edge while the camera holds on your environment, dims with that move and
+      // comes back with the pull-back
+      const onEnv = P(t, c[0] + ENV_AT, ENV_D) * (1 - P(t, c[1] + BACK_AT, BACK_D));
+      const temporalO = lerp(1, OFF_SHOT, onEnv);
       placeLane(s.lane, {
         env: P(t, strokeAt('env') + 0.8, 0.4) * dim(WIRE_LANE.env),
-        temporal: fill('temporal', 0.7) * dim(WIRE_LANE.temporal),
+        temporal: fill('temporal', 0.7) * temporalO * dim(WIRE_LANE.temporal),
         worker: fill('worker', 0.6),
-        history: fill('history', 0.5) * dim(WIRE_LANE.history),
+        history: fill('history', 0.5) * temporalO * dim(WIRE_LANE.history),
         door: P(t, c[1] + 3.4, 0.25),
         heads: dim(WIRE_LANE.heads),
       });

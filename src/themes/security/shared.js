@@ -364,21 +364,25 @@ function placeNamespaces(ns, split, lit = 0, seals = [0, 0]) {
 }
 
 // ---------- hand-offs (match cuts: a chapter ends on the next one's first frame, see the plan's motion direction)
+// Opacity of a lane part that a held shot crops at the frame's edge: dimmed below half, out of focus, so the shot
+// reads as a framing and the layout check measures what it frames
+const OFF_SHOT = 0.3;
 // Chapter 1 to 2: the framing chapter 1 pushes in to at its end and chapter 2 opens on, [x, y, scale] for shot(): the
 // Worker and its card on the left, the wire's start in the middle. WIRE_LANE: the lane's opacities there (placeLane):
 // the zones, pushed off the frame, dimmed below half, their headings and the history hidden.
 const WIRE_SHOT = [620, 515, 1.35];
-const WIRE_LANE = { env: 0.3, temporal: 0.3, history: 0, heads: 0 };
+const WIRE_LANE = { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, heads: 0 };
 // Chapter 2 to 3: the whip right, from the Namespaces to the Event History. Chapter 2 frames TEMPORAL's split (from),
 // the card at its tube scale (TUBE.k) crossing into payments (card); the whip then eases the camera to the history
 // (to) and the card to it (cardTo) over d seconds. Chapter 2 plays its first `cut` seconds and ends there (fadeOut:
 // 0); chapter 3 opens there (fadeIn: 0) and plays the rest: read both sides from tubeWhip(). At the cut: placeLane()
-// with `lane`, placeTube(tube, 1), placeNamespaces(ns, 1, 1, [1, 1]).
+// with `lane` (the environment and the Worker, cropped at the left edge, dimmed), placeTube(tube, 1),
+// placeNamespaces(ns, 1, 1, [1, 1]).
 const TUBE_HANDOFF = {
   from: [1164, 515, 1.1], to: [LANE.history.x, LANE.history.y, 1.6],
   card: [TUBE.x1 - 62, TUBE.y], cardTo: [LANE.history.x, LANE.history.y],
   d: 0.7, cut: 0.25,
-  lane: { wire: 0, door: 0 },
+  lane: { env: OFF_SHOT, worker: OFF_SHOT, wire: 0, door: 0 },
 };
 // The whip u seconds after it starts (chapter 2: u = t - (dur - TUBE_HANDOFF.cut); chapter 3: u = t +
 // TUBE_HANDOFF.cut): camera, the shot() offsets, and card, the card's center

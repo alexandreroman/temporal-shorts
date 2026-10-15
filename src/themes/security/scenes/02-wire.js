@@ -10,6 +10,8 @@
   const TUBE_FROM = [760, 560, 1.4];
   const TUBE_TO = [900, 560, 1.4];
   const ID_SHOT = [960, 515, 1.1];
+  // the move into the tube shot, from c[0]: start and duration
+  const TUBE_AT = 0.6, TUBE_D = 1.0;
   const NS_SHOT = TUBE_HANDOFF.from;
   // the card's stops in the tube, at TUBE.k: by the Worker, then by TEMPORAL's edge
   const RIDE = { x0: TUBE.x0 + 120, x1: TUBE.x1 - 120 };
@@ -131,7 +133,7 @@
       // the camera: along the tube with the card, back to the whole way for the identities, on to the Namespaces,
       // then the whip toward the Event History; the rejection shakes it
       const cam = t < whipAt ? shot(t, WIRE_SHOT, [
-        [c[0] + 0.6, ...TUBE_FROM, 1.0], [c[0] + 1.6, ...TUBE_TO, 2.6],
+        [c[0] + TUBE_AT, ...TUBE_FROM, TUBE_D], [c[0] + 1.6, ...TUBE_TO, 2.6],
         [c[1] + T1.cam, ...ID_SHOT, 1.0], [c[2] + T2.cam, ...NS_SHOT, 1.0],
       ]) : whip.camera;
       const [shakeX, shakeY] = shake(t, rejectAt, 10, 0.4);
@@ -139,12 +141,16 @@
       placeFlash(s.flash, t, rejectAt, 0.3);
 
       // the lane, as chapter 1 left it: the zones and the history come back as the camera pulls back; the tube
-      // replaces the wire, and the door, its work done, fades
+      // replaces the wire, and the door, its work done, fades. What a held shot crops at the frame's edge dims with
+      // the move into that shot: the Worker along the tube, the environment and the Worker on the Namespaces.
       const back = P(t, c[1] + T1.cam, 1.0);
       const undim = k => lerp(k, 1, back);
+      const onTube = P(t, c[0] + TUBE_AT, TUBE_D) * (1 - back);
+      const onNs = P(t, c[2] + T2.cam, 1.0);
+      const workerO = lerp(lerp(1, OFF_SHOT, onTube), TUBE_HANDOFF.lane.worker, onNs);
       placeLane(s.lane, {
-        env: undim(WIRE_LANE.env), temporal: undim(WIRE_LANE.temporal), history: undim(WIRE_LANE.history),
-        heads: undim(WIRE_LANE.heads),
+        env: lerp(undim(WIRE_LANE.env), TUBE_HANDOFF.lane.env, onNs), worker: workerO,
+        temporal: undim(WIRE_LANE.temporal), history: undim(WIRE_LANE.history), heads: undim(WIRE_LANE.heads),
         wire: 1 - P(t, c[0] + T0.tube, T0.tubeD), door: 1 - P(t, c[0] + T0.door, 0.4),
       });
       placeTube(s.tube, P(t, c[0] + T0.tube, T0.tubeD, linear), 1, popIn(t, c[0] + T0.label).o);
