@@ -1,6 +1,6 @@
 // ===================== 8. CHANGE TEMPORAL, NOT YOUR CODE
 // Opens on the whole fleet that chapter 7 pulled back to (FULL_LANE_SHOT) and holds it. TEMPORAL splits into two
-// upstreams: your own Temporal Service on top, SELF-HOSTED and lit, the proxy's connection bending up to it, and
+// upstreams: your own Temporal Service on top, Self-hosted and lit, the proxy's connection bending up to it, and
 // Temporal Cloud under it (the official lockup followed by "Cloud"), dim. A ROUTING switch docks under the proxy. Then
 // the dramatic beat: the switch flips from SELF-HOSTED to CLOUD, the connection tears off the self-hosted service and
 // redraws down to Temporal Cloud with a spark running along it, and Temporal Cloud lights up, while the Workers and
@@ -25,8 +25,8 @@
   const selfY = SELF_ZONE.y + SELF_ZONE.h / 2, cloudY = CLOUD_ZONE.y + CLOUD_ZONE.h / 2;
   // the self-hosted service's opacity once the connection has left it: out of use, still readable
   const SELF_DIM = 0.6;
-  // inside each upstream: its label under its heading (SELF-HOSTED), and its icon, in the middle
-  const UPSTREAM = { label: 72, icon: 52 };
+  // inside each upstream: its icon, in the middle
+  const UPSTREAM = { icon: 52 };
   // the ROUTING switch, the proxy's setting: a panel docked under the proxy box, on a short stem, where your
   // environment is empty (on the environment's edge, as the box is): center and size; its text is 21 px (18.5 on
   // screen)
@@ -40,15 +40,10 @@
   const OPTIONS = { left: 60, tops: [58, 122] };
   // the sparks that fly off the self-hosted service as the connection tears off it: how many, how long each one flies
   const TEAR = { n: 8, life: 0.5 };
-  // Temporal Cloud's title: the official lockup, 40 px high, then "Cloud" in the brand font (19.7 px on screen), its
-  // capitals as tall as the wordmark's and on its baseline (the measures of meet-temporal's chapter 5: the lockup's
-  // viewBox is 1570x410 units, its capitals run from y 519 to its baseline at y 684.7, 805 being the image's bottom;
-  // Instrument Sans capitals are 0.72 em tall), a word space after it
-  const CLOUD_UNIT = 40 / 410;
-  const CLOUD_TITLE = {
-    rise: Math.round((805 - 684.7) * CLOUD_UNIT), font: +((684.7 - 519) * CLOUD_UNIT / 0.72).toFixed(2),
-  };
-  CLOUD_TITLE.gap = Math.round(0.2 * CLOUD_TITLE.font);
+  // The two upstreams' titles, a pair: the official lockup at the zone's heading place (the lane's TEMPORAL heading
+  // grows to it from its 34 px as TEMPORAL splits), then under it the upstream's name in the brand font: Self-hosted
+  // and Cloud (logo: the lockup's height, its wordmark about 20 px on screen; name: its top and size, 21 px on screen)
+  const TITLE = { logo: 40, laneLogo: 34, nameTop: 72, name: 24 };
 
   // SVG path of the proxy's connection to the point (x1, y): straight when y is on the wire's line, else bending at
   // WIRE.x with rounded corners
@@ -67,11 +62,11 @@
     pathEl._L = pathEl.getTotalLength();
     pathEl._d = d;
   }
-  // An upstream's body: its label (if any) under its heading, and its icon in the middle
-  function upstreamBody(label, icon) {
-    const labelHtml = label ? `<div class="lbl" style="position:absolute;left:24px;top:${UPSTREAM.label}px;`
-      + `padding-left:0;font-size:21px;color:var(--ink)">${label}</div>` : '';
-    return labelHtml + `<div style="position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;`
+  // An upstream's body: its name under its heading's lockup, and its icon in the middle
+  function upstreamBody(name, icon) {
+    return `<div style="position:absolute;left:24px;top:${TITLE.nameTop}px;font-size:${TITLE.name}px;`
+      + `line-height:30px;color:#F2F2F2">${name}</div>`
+      + '<div style="position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;'
       + `transform:translateY(-50%);margin-top:${UPSTREAM.icon / 2}px">${ICON(icon, 52, C.slate, 1.6)}</div>`;
   }
 
@@ -101,10 +96,8 @@
         width: SELF_ZONE.w + 'px', height: SELF_ZONE.h + 'px',
       });
       s.cloud = E(root,
-        '<div style="position:absolute;left:20px;top:18px;height:40px;line-height:0;white-space:nowrap">'
-        + `<img src="${LOGO}" style="height:40px;vertical-align:-${CLOUD_TITLE.rise}px">`
-        + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`
-        + '</div>' + upstreamBody(null, 'cloud'),
+        `<img src="${LOGO}" style="position:absolute;left:24px;top:${ZONE_LABEL_INSET.head}px;height:${TITLE.logo}px;`
+        + `display:block">${upstreamBody('Cloud', 'cloud')}`,
         'tile', { width: CLOUD_ZONE.w + 'px', height: CLOUD_ZONE.h + 'px', borderColor: C.uv, background: '#17182A' });
       s.proxy = makeProxy(root);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
@@ -144,6 +137,7 @@
       const split = P(t, c[0] + T0.split, T0.splitD);
       const selfDim = P(t, tearAt, 0.3);
       const selfZone = lerpZone(PROXY_ZONES.temporal, SELF_ZONE, split);
+      s.lane.temporal.head.style.height = Math.round(lerp(TITLE.laneLogo, TITLE.logo, split)) + 'px';
       placeLane(s.lane, {
         ...BARE_WORKERS_HANDOFF.lane, envZone: PROXY_ZONES.env, temporalZone: selfZone,
         temporal: lerp(1, SELF_DIM, selfDim),

@@ -211,7 +211,8 @@
     + `${storedCipher(i, 8)}</span>`,
     '', {
       width: WIDE_LIST.w + 'px', height: WIDE_LIST.h + 'px', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', gap: '10px', background: C.bg, border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+      justifyContent: 'center', gap: '10px', background: C.bg, border: `1.5px solid ${C.lineLight}`,
+      borderRadius: 'var(--rs)',
     });
   // A window that reads the payload through the proxy, in the dark look of the Temporal Web UI: a title bar, then row
   // 2 of the Event History (its event line) and the payload's IBAN, on two lines, and name, keys above values

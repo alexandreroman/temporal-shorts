@@ -748,14 +748,16 @@ PROXY.head = { top: 22, icon: 32, gap: 10, line: 22 };
 PROXY.head.bottom = PROXY.head.top + PROXY.head.icon + PROXY.head.gap + PROXY.head.line;
 // The proxy's connection to TEMPORAL, from the box's right edge to TEMPORAL's left edge in the fleet layout
 const PROXY_WIRE = { x0: PROXY.x + PROXY.w / 2, x1: FLEET.proxyTemporal.x, y: LANE.wire.y };
-// The TEMPORAL PROXY box: a violet tile, its shield and name at its top (17 px: 15 px on screen at 0.88).
-// placeProxy() shows it.
+// The TEMPORAL PROXY box: a violet tile, its shield and name at its top (21 px: 18.5 px on screen at 0.88; with no
+// letter spacing, unlike a label, so the name fits the box on one line, 10 px clear of each side). placeProxy() shows
+// it.
 function makeProxy(root) {
   const { top, icon, gap, line } = PROXY.head;
   return E(root,
     `<div style="position:absolute;left:0;right:0;top:${top}px;display:flex;flex-direction:column;`
     + `align-items:center;gap:${gap}px">${ICON('shield', icon, C.violet, 1.8)}`
-    + `<div class="lbl" style="font-size:17px;line-height:${line}px;color:var(--ink)">Temporal Proxy</div></div>`,
+    + `<div class="lbl" style="font-size:21px;line-height:${line}px;letter-spacing:0;padding-left:0;`
+    + 'color:var(--ink)">Temporal Proxy</div></div>',
     'tile', {
       width: PROXY.w + 'px', height: PROXY.h + 'px', borderColor: C.violet, background: 'var(--violet-solid)',
     });
