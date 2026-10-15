@@ -1,10 +1,12 @@
 // ===================== 4. ENCRYPTED WITH YOUR KEYS
 // Opens on the rewind that ended chapter 3 (REWIND_HANDOFF): the payload card back in the Worker. A Data Converter
 // comes in beside it; its key turns and the card passes through its gate, which scrambles the fields as they cross,
-// glyphs raining off them, before its lock snaps shut. The camera pulls back as the sealed card flies to the Event
-// History and turns the chip into ciphertext: READABLE flips into NEVER SEES YOUR PAYLOADS, and the Web UI shows the
-// same ciphertext. Search Attributes stay in clear under the history. Last, the Web UI moves into your environment as
-// a browser, which asks your Codec Server to decrypt the payload; then the chapter clears and pulls back (WIDE_SHOT).
+// glyphs raining off them, before its lock snaps shut. The camera tracks the sealed card along the lane to the Event
+// History (CHIP_SHOT), where it turns the chip into ciphertext: READABLE flips into NEVER SEES YOUR PAYLOADS, and the
+// Web UI shows the same ciphertext. Search Attributes stay in clear beside it. Last, the camera pulls back to the
+// whole lane as the Web UI moves into your environment, growing into a browser, which asks your Codec Server to
+// decrypt the payload; then the chapter clears and pulls back further (WIDE_SHOT). The camera travels one way: right
+// with the card, then out.
 // The block keeps every name declared in this file local to this scene.
 {
   const REST = [960, 515, 1];
@@ -13,24 +15,25 @@
   // from c[0]: the converter's tile pops in and its gate draws down (tile, gate); the key turns (key); the card
   // passes through the gate (cross, crossD), then its lock snaps shut (seal)
   const T0 = { tile: 0.2, gate: 0.5, gateD: 0.5, key: 1.1, keyD: 0.35, cross: 1.6, crossD: 1.4, seal: 3.05 };
-  // from c[1]: the camera pulls back (cam, camD) as the card flies to the chip (fly, flyD); the verdict flips over;
-  // the Web UI comes back, in ciphertext
-  const T1 = { cam: 0.2, camD: 1.1, fly: 0.2, flyD: 1.2, flip: 0.15, webui: 2.0 };
+  // from c[1]: the card flies to the chip (fly, flyD) and the camera tracks it there (CHIP_SHOT); the verdict flips
+  // over; the Web UI comes back, in ciphertext
+  const T1 = { fly: 0.2, flyD: 1.2, flip: 0.15, webui: 2.0 };
   // from c[2]: the Search Attributes strip rises in, its two attributes pop in, a light sweeps across them, their tag
   // pops in; then an IBAN tries to join them and is struck out (secret, strike, secretOut)
   const T2 = { strip: 0.2, attrs: 0.6, sweep: 1.3, sweepD: 0.8, tag: 1.9, secret: 2.8, strike: 3.4, secretOut: 4.6 };
-  // from c[3]: the Worker steps aside and the Web UI moves into your environment as a browser (move, moveD); the Codec
-  // Server pops in; the payload goes down to it in ciphertext and comes back in clear (down, up, each tripD long);
-  // the browser shows it in clear (clear); KEYS NEVER SHARED
-  const T3 = { worker: 0.2, move: 0.2, moveD: 0.9, codec: 1.0, down: 1.8, up: 2.5, tripD: 0.6, clear: 3.1, keys: 3.9 };
+  // from c[3]: the camera pulls back to the whole lane as the Worker steps aside and the Web UI moves into your
+  // environment as a browser (move, moveD); the Codec Server pops in; the payload goes down to it in ciphertext and
+  // comes back in clear (down, up, each tripD long); the browser shows it in clear (clear); KEYS NEVER SHARED
+  const T3 = { worker: 0.2, move: 0.2, moveD: 1.2, codec: 1.4, down: 2.0, up: 2.7, tripD: 0.6, clear: 3.3, keys: 4.1 };
   // the ending, in seconds before the end: the chapter clears and the camera pulls back to WIDE_SHOT, landing 0.15 s
   // before the cut
   const END = { before: 1.4, clearD: 0.5, d: 1.25 };
 
-  // the browser, the Web UI in your environment, larger (k), in the Worker's place, and the Codec Server under it;
-  // the payload's way down to the Codec Server and back up, beside each other
-  const BROWSER = { x: LANE.worker.x, y: 372, k: 1.3 };
-  const CODEC = { x: LANE.worker.x, y: 700, w: 360, h: 120 };
+  // the browser, the Web UI grown k times as it moves into your environment (its values render at 18 px in the
+  // whole lane's shot), in the Worker's place, and the Codec Server under it; the payload's way down to the Codec
+  // Server and back up, beside each other
+  const BROWSER = { x: LANE.worker.x + 10, y: 360, k: 1.4 };
+  const CODEC = { x: BROWSER.x, y: 700, w: 360, h: 120 };
   const TRIP = {
     down: BROWSER.x - 60, up: BROWSER.x + 60, y0: BROWSER.y + BROWSER.k * WEBUI.h / 2 + 10,
     y1: CODEC.y - CODEC.h / 2 - 10,
@@ -51,7 +54,7 @@
       + `<span class="lbl" style="font-size:15px;color:var(--ink)">${name}</span></div>`
       + '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px">'
       + `<div class="key">${ICON('key', 28, C.violet, 1.9)}</div>`
-      + `<span class="mono" style="font-size:13px;letter-spacing:.12em;color:${C.violet}">YOUR KEYS</span></div>`,
+      + `<span class="mono" style="font-size:14px;letter-spacing:.12em;color:${C.violet}">YOUR KEYS</span></div>`,
       'tile', {
         width: w + 'px', height: h + 'px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
       });
@@ -92,6 +95,10 @@
         `M ${TRIP.down} ${TRIP.y0} L ${TRIP.down} ${TRIP.y1}`, `M ${TRIP.up} ${TRIP.y1} L ${TRIP.up} ${TRIP.y0}`,
       ].map(d => path(s.lane.svg, d, C.slate, 2));
       s.hist = makeStoredHistory(root);
+      // the Web UI's place under the history, a faint dashed outline once the window has moved out
+      s.webuiSlot = E(root, '', '', {
+        width: WEBUI.w + 'px', height: WEBUI.h + 'px', border: `1.5px dashed ${C.lineLight}`, borderRadius: 'var(--r)',
+      });
       s.webui = makeWebUI(root);
       // the label, the two attributes on two lines (the IBAN that tries to join them beside the second), then the
       // INDEXED, NOT ENCRYPTED tag (s.indexed)
@@ -117,7 +124,7 @@
       Object.assign(s.indexed.style, { left: '16.5px', top: '110.5px', height: '24px' });
       s.codec = makeKeyTile(root, ICON('server', 28, C.ink, 1.8), 'Codec Server', CODEC.w, CODEC.h);
       s.packet = E(root, '', 'mono', {
-        width: '160px', height: '30px', lineHeight: '27px', textAlign: 'center', fontSize: '14px', whiteSpace: 'pre',
+        width: '190px', height: '34px', lineHeight: '31px', textAlign: 'center', fontSize: '18px', whiteSpace: 'pre',
         background: C.bg, border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
       });
       s.converter = makeKeyTile(root, '', 'Data Converter', CONVERTER.tile.w, CONVERTER.tile.h);
@@ -148,29 +155,41 @@
       const endAt = this.dur - END.before;
       const done = 1 - P(t, endAt, END.clearD); // the chapter clears at the end
 
-      // the camera: on the Worker and the converter, pulled back to the whole lane as the sealed card leaves, then
-      // pulled back further at the end; the seal jolts it
-      const cam = shot(t, REWIND_HANDOFF.shot, [[c[1] + T1.cam, ...REST, T1.camD], [endAt, ...WIDE_SHOT, END.d]]);
+      // the camera, one way: on the Worker and the converter; then right along the lane with the sealed card to the
+      // chip and the row under the history (CHIP_SHOT); then out, to the whole lane for the browser and the Codec
+      // Server, and further out at the end (WIDE_SHOT); the seal jolts it
+      const cam = shot(t, REWIND_HANDOFF.shot, [
+        [flyAt, ...CHIP_SHOT, T1.flyD], [c[3] + T3.move, ...REST, T3.moveD], [endAt, ...WIDE_SHOT, END.d],
+      ]);
       const [shakeX, shakeY] = shake(t, sealAt + 0.35 * LOCK_SHUT, 6, 0.3);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
       frameLaneEdges(s.lane, cam);
 
-      // the lane, as chapter 3 left it: what the close shot dims comes back with the pull-back. The Worker steps
-      // aside for the browser with its wire and its Data Converter; the Worker and the wire come back as the chapter
-      // clears.
-      const back = P(t, c[1] + T1.cam, T1.camD);
+      // the lane, as chapter 3 left it. The track to CHIP_SHOT crops the Worker, the wire and the converter at the
+      // frame's left edge, which dim with it; TEMPORAL and the environment stay dim (OFF_SHOT) until the pull-back to
+      // the whole lane brings everything back. The Worker steps aside for the browser with its wire and its Data
+      // Converter; the Worker and the wire come back as the chapter clears.
+      const track = P(t, flyAt, T1.flyD);
+      const wide = P(t, c[3] + T3.move, T3.moveD);
       const from = REWIND_HANDOFF.lane;
+      const leftSide = lerp(lerp(1, OFF_SHOT, track), 1, wide);
       const stepAside = P(t, c[3] + T3.worker, 0.4);
       const workerAway = stepAside * (1 - P(t, endAt, END.clearD));
       placeLane(s.lane, {
-        env: lerp(from.env, 1, back), temporal: lerp(from.temporal, 1, back), heads: lerp(from.heads, 1, back),
-        worker: 1 - workerAway, wire: 1 - workerAway, history: WIDE_LANE.history, door: WIDE_LANE.door,
+        env: lerp(from.env, 1, wide), temporal: lerp(from.temporal, 1, wide), heads: lerp(from.heads, 1, wide),
+        worker: leftSide * (1 - workerAway), wire: leftSide * (1 - workerAway),
+        history: WIDE_LANE.history, door: WIDE_LANE.door,
       });
-      const converterO = done * (1 - stepAside);
+      const converterO = done * lerp(1, OFF_SHOT, track) * (1 - stepAside);
 
-      // the stored history, its chip still in clear and red until the sealed card lands on it
-      const storedO = lerp(REWIND_HANDOFF.stored, 1, back) * done;
-      placeStoredHistory(s.hist, { o: storedO });
+      // the stored history, its chip still in clear and red until the sealed card lands on it. CHIP_SHOT crops the
+      // card at the frame's top, so it stays dim; the chip comes into that shot bright. The pull-back for the Codec
+      // Server is about your side: Temporal's, sealed, dims behind it (the chip, the Search Attributes).
+      const storedO = REWIND_HANDOFF.stored * done;
+      const temporalSide = lerp(1, OFF_SHOT, wide);
+      const chipO = lerp(REWIND_HANDOFF.stored, 1, track) * temporalSide * done;
+      placeStoredHistory(s.hist, { o: storedO, chip: chipO });
+      frameStoredHistory(s.hist, cam);
       const sealedChip = t >= landAt;
       setPayload(s.hist.chip, sealedChip ? { seal: 1, scramble: 1 } : { red: 1 - P(t, landAt - 0.3, 0.3) });
 
@@ -205,7 +224,7 @@
           [HIST_CHIP.x, HIST_CHIP.y]], fly);
       }
       setPayload(s.card, { seal: P(t, sealAt, 0.35, linear), scramble, fromRight: true });
-      place(s.card, cardX, cardY, 1, sealedChip ? 0 : 1);
+      place(s.card, cardX, cardY, lerp(1, HIST_CHIP.k, fly), sealedChip ? 0 : 1);
       placeRipples(s.sealRipples, t, sealAt + 0.35 * LOCK_SHUT, cardX, cardY - layout.h / 2, 40, 300,
         { d: 0.9, step: 0.15 });
       const cardTop = PAYLOAD_IN_WORKER.y - layout.h / 2;
@@ -223,12 +242,12 @@
       });
 
       // the landing: violet rings on the chip; the verdict flips over, READABLE to NEVER SEES YOUR PAYLOADS
-      placeRipples(s.landRipples, t, landAt, HIST_CHIP.x, HIST_CHIP.y, 240, 560, { d: 0.9, step: 0.16 });
+      placeRipples(s.landRipples, t, landAt, HIST_CHIP.x, HIST_CHIP.y, 120, 400, { d: 0.9, step: 0.16 });
       const flipAt = landAt + T1.flip;
       const flipped = t >= flipAt;
       const flip = flipped ? P(t, flipAt, 0.15, easeOut) : 1 - P(t, flipAt - 0.15, 0.15, easeIn);
       setChipVerdict(s.verdict, flipped ? 'NEVER SEES YOUR PAYLOADS' : 'READABLE', flipped ? 'wait' : 'denied', {
-        o: storedO, flip, s: flipped ? swell(t, flipAt + 0.1, 0.1) : 1,
+        o: chipO, flip, s: flipped ? swell(t, flipAt + 0.1, 0.1) : 1,
       });
 
       // the Web UI comes back under the history, showing the same ciphertext; it then leaves Temporal's side for your
@@ -239,6 +258,7 @@
         [BROWSER.x + 400, BROWSER.y - 60], [BROWSER.x, BROWSER.y]], move);
       place(s.webui, winX, winY, webuiPop.s * lerp(1, BROWSER.k, move), webuiPop.o * done);
       s.webui.caption.textContent = move >= 0.5 ? 'YOUR BROWSER · WEB UI' : 'TEMPORAL WEB UI';
+      place(s.webuiSlot, WEBUI.x, WEBUI.y, 1, 0.8 * P(t, c[3] + T3.move + 0.3, 0.4) * done);
       const clearAt = c[3] + T3.clear;
       setWebUI(s.webui, { scramble: 1 - P(t, clearAt, 0.5, linear) });
       const decrypted = P(t, clearAt + 0.4, 0.2) * (1 - P(t, clearAt + 1.2, 0.5));
@@ -247,7 +267,7 @@
 
       // the Search Attributes strip: two attributes in clear, a light sweeping across them, INDEXED, NOT ENCRYPTED;
       // an IBAN tries to join them and is struck out
-      rise(s.strip, STRIP.x, STRIP.y, P(t, c[2] + T2.strip, 0.5) * done);
+      rise(s.strip, STRIP.x, STRIP.y, P(t, c[2] + T2.strip, 0.5) * temporalSide * done);
       s.strip.attrs.forEach((e, i) => {
         const pop = backPop(t, c[2] + T2.attrs + i * 0.2, 0.4);
         e.style.opacity = pop.o;

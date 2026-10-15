@@ -1,20 +1,21 @@
 // ===================== 3. IN THE EVENT HISTORY
-// Opens in the whip that ended chapter 2 (TUBE_HANDOFF): the camera lands on the Event History with the payload card,
-// which docks as the payload chip of row 2 while the history grows into its three rows and the camera pulls back to
-// the whole lane. The TLS tube gives way to the plain wire, and the Web UI shows the same IBAN in clear to two viewers.
-// READABLE slams onto the chip, a lens scans the IBAN and the viewers' eyes turn to it. Then the picture stutters and
-// rewinds: a copy of the card streaks back to the Worker as the camera whips left (REWIND_HANDOFF).
+// Opens in the whip that ended chapter 2 (TUBE_HANDOFF): the camera lands close on the Event History (HIST_SHOT) with
+// the payload card, which docks as the payload chip of row 2 while the history grows into its three rows. The TLS
+// tube gives way to the plain wire and the camera pans down to the chip and the row under the history (CHIP_SHOT),
+// where the Web UI shows the same IBAN in clear to two viewers. READABLE slams onto the chip, a lens scans the IBAN
+// and the viewers' eyes turn to it. Then the picture stutters and rewinds: a copy of the card streaks back to the
+// Worker as the camera whips left (REWIND_HANDOFF).
 // The block keeps every name declared in this file local to this scene.
 {
-  const REST = [960, 515, 1];
-  // the docking, in seconds from c[0]: the history grows from the lane's to HIST while the card grows from its tube
-  // scale into the chip's place (at, d); the camera pulls back to the whole lane (cam, camD); the rows slide in, then
-  // their SAVED tags, one after the other (rows, saved, step)
-  const T0 = { at: -0.1, d: 0.9, cam: 0.1, camD: 1.3, ns: -0.1, rows: 0.6, saved: 1.3, step: 0.15 };
-  // from c[1]: the tube gives way to the wire; the Web UI and the viewers come in; READABLE slams onto the chip; the
-  // lens scans the IBAN; the viewers' eyes turn to it
+  // the docking, in seconds from c[0], in the close shot the whip lands on (HIST_SHOT): the history grows from the
+  // lane's to HIST while the card grows from its tube scale into the chip's place (at, d), and what that shot crops
+  // dims (dim, dimD); the rows slide in, then their SAVED tags, one after the other (rows, saved, step)
+  const T0 = { at: -0.1, d: 0.9, dim: -0.1, dimD: 0.6, ns: -0.1, rows: 0.6, saved: 1.3, step: 0.15 };
+  // from c[1]: the tube gives way to the wire; the camera pans down to the chip and the row under the history
+  // (cam, camD; CHIP_SHOT); the Web UI and the viewers come in; READABLE slams onto the chip; the lens scans the
+  // IBAN; the viewers' eyes turn to it
   const T1 = {
-    tube: 0, tubeD: 0.6, webui: 0.5, lines: 0.9, viewers: 1.5, slam: 2.3, slamD: 0.16,
+    tube: 0, tubeD: 0.6, cam: 0.2, camD: 1.0, webui: 1.2, lines: 1.6, viewers: 1.8, slam: 2.3, slamD: 0.16,
     lens: 2.9, sweep: 3.0, sweepD: 1.4, lensOut: 4.6, eyes: 3.0,
   };
   // the rewind, in seconds before the end: the stutter (stutterD long), then the streak back to the Worker and the
@@ -25,7 +26,7 @@
   const VIEWER = { w: BESIDE_UI.w, h: 66 };
   VIEWER.ys = [BESIDE_UI.y - BESIDE_UI.h / 2 + VIEWER.h / 2, BESIDE_UI.y + BESIDE_UI.h / 2 - VIEWER.h / 2];
   // the lens over the chip's IBAN: its diameter, its zoom and its margin from the ends of the IBAN as it sweeps
-  const LENS = { d: 200, zoom: 2.6, margin: 38 };
+  const LENS = { d: 120, zoom: 2.0, margin: 24 };
   // how far each ghost outline of the streaking card lags behind it, in progress
   const GHOSTS = [0.06, 0.12, 0.18];
 
@@ -123,10 +124,11 @@
       const stutterAt = this.dur - REWIND.stutter;
       const streakAt = stutterAt + REWIND.stutterD;
 
-      // the camera: the end of the whip onto the history, the pull-back to the whole lane, then the whip left with
-      // the rewind; READABLE's landing shakes it, the stutter jolts it and splits its colors
+      // the camera, one way along the story: the end of the whip onto the history (HIST_SHOT), a pan down to the chip
+      // and the row under it (CHIP_SHOT), then the whip left with the rewind; READABLE's landing shakes it, the
+      // stutter jolts it and splits its colors
       const cam = t < whipEnd ? whip.camera : shot(t, TUBE_HANDOFF.to, [
-        [c[0] + T0.cam, ...REST, T0.camD], [streakAt, ...REWIND_HANDOFF.shot, REWIND.d],
+        [c[1] + T1.cam, ...CHIP_SHOT, T1.camD], [streakAt, ...REWIND_HANDOFF.shot, REWIND.d],
       ]);
       const [shakeX, shakeY] = shake(t, hitAt, 8, 0.35);
       const jolt = stutter(t, stutterAt, REWIND.stutterD);
@@ -137,10 +139,11 @@
         : 'none';
       placeFlash(s.flash, t, hitAt, 0.18);
 
-      // the lane, as chapter 2 left it: the zone headings, which the close-up pushes under the chapter header, fade
-      // with the end of the whip; they, the environment and the Worker come back with the pull-back; the tube gives
-      // way to the wire; the whip left dims what its framing crops (REWIND_HANDOFF)
-      const back = P(t, c[0] + T0.cam, T0.camD);
+      // the lane, as chapter 2 left it. The close shots crop TEMPORAL, the tube and then the wire at the frame's
+      // edges: they dim as the camera settles (TEMPORAL's logo, pushed under the chapter header, fades with the end of
+      // the whip); the tube gives way to the wire; the whip left brings the Worker and the wire back into the frame
+      // (REWIND_HANDOFF)
+      const settled = P(t, c[0] + T0.dim, T0.dimD);
       const away = P(t, streakAt, 0.45);
       // every part starts as chapter 2 left it (TUBE_HANDOFF.lane, 1 where it says nothing) and ends as chapter 4
       // opens (REWIND_HANDOFF.lane, 1 where it says nothing)
@@ -149,27 +152,33 @@
       const tubeOut = P(t, c[1] + T1.tube, T1.tubeD);
       const headsOut = P(t, 0, whipEnd);
       placeLane(s.lane, {
-        env: lerp(lerp(open.env, 1, back), rewind.env, away),
-        worker: lerp(lerp(open.worker, 1, back), rewind.worker, away),
-        temporal: lerp(open.temporal, rewind.temporal, away),
+        env: lerp(open.env, rewind.env, away),
+        // the Worker comes into the frame with the second half of the whip, as it reaches the frame's middle
+        worker: lerp(open.worker, rewind.worker, P(t, streakAt + REWIND.d / 2, REWIND.d / 2)),
+        temporal: lerp(lerp(open.temporal, OFF_SHOT, settled), rewind.temporal, away),
         history: t < dockAt ? open.history : rewind.history,
-        wire: lerp(open.wire, rewind.wire, tubeOut),
+        wire: lerp(lerp(open.wire, OFF_SHOT, tubeOut), rewind.wire, away),
         door: lerp(open.door, rewind.door, away),
-        heads: lerp(lerp(lerp(open.heads, 0, headsOut), 1, back), rewind.heads, away),
+        heads: lerp(lerp(open.heads, 0, headsOut), rewind.heads, away),
       });
-      placeTube(s.tube, 1, 1 - tubeOut);
+      placeTube(s.tube, 1, lerp(1, OFF_SHOT, settled) * (1 - tubeOut));
       // the Namespaces have made their point: they fade as the history grows over them
       placeNamespaces(s.ns, 1, 1, [1, 1], 1 - P(t, c[0] + T0.ns, 0.4));
 
       // the history takes over from the lane's (identical at that instant) and grows into its rows; the card grows
       // from its tube scale into the chip's place, where the chip takes over
+      // The pan down to the chip crops the history at the frame's top: the card dims, its chip stays bright until the
+      // rewind dims it too.
       const dock = P(t, dockAt, T0.d);
-      const storedO = t >= dockAt ? lerp(1, REWIND_HANDOFF.stored, away) : 0;
+      const docked = t >= dockAt ? 1 : 0;
+      const storedO = docked * lerp(1, REWIND_HANDOFF.stored, P(t, c[1] + T1.cam, T1.camD));
+      const chipO = docked * lerp(1, REWIND_HANDOFF.stored, away);
       placeStoredHistory(s.hist, {
-        grow: dock, o: storedO, chip: t >= dockEnd ? 1 : 0,
+        grow: dock, o: storedO, chip: t >= dockEnd ? chipO : 0,
         rows: HIST_ROWS.map((_, i) => P(t, c[0] + T0.rows + i * T0.step, 0.4)),
         saved: HIST_ROWS.map((_, i) => P(t, c[0] + T0.saved + i * T0.step, 0.2)),
       });
+      frameStoredHistory(s.hist, cam);
       const red = P(t, hitAt, 0.2);
       setPayload(s.hist.chip, { red });
       const [landX, landY] = TUBE_HANDOFF.cardTo;
@@ -198,7 +207,7 @@
       // then a lens sweeps along the clear IBAN, a red scan line through it
       const slam = P(t, slamAt, T1.slamD, easeIn);
       setChipVerdict(s.verdict, 'READABLE', 'denied', {
-        s: lerp(1.7, 1, slam), o: P(t, slamAt, 0.08, linear) * storedO,
+        s: lerp(1.7, 1, slam), o: P(t, slamAt, 0.08, linear) * chipO,
       });
       placeRipples(s.alarm, t, hitAt, HIST_CHIP.x, HIST_CHIP.tagY, 60, 320, { d: 0.8, step: 0.16 });
       const lensPop = backPop(t, c[1] + T1.lens, 0.35);

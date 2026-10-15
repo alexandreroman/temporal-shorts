@@ -213,15 +213,30 @@ const historyEmptyNote = () => '<div class="empty mono" style="position:absolute
 let laneClipCount = 0;
 // The content frame's top and bottom on the stage, in px (see the layout check)
 const CONTENT_FRAME = { top: 150, bottom: 880 };
-// Clips the environment's dashed edge to the content frame for the shot of this frame: cam, the scale and dy of shot()
-// given to setCamera() (with an enter and exit zoom of 1), without the shake, which moves the edge and its clip
-// together. At rest the edge lies inside the frame and shows whole.
-function frameLaneEdges(lane, { scale, dy }) {
+// The stage band that the shot cam shows inside the content frame, { top, bottom } in stage y: cam, the scale and dy
+// of shot() given to setCamera() (with an enter and exit zoom of 1), without the shake, which moves an element and its
+// clip together
+function contentBand({ scale, dy }) {
   // setCamera() scales round (960, 540) and then moves by dy: the stage y that lands on a screen y
   const stageY = screenY => 540 + (screenY - 540 - dy) / scale;
-  const top = stageY(CONTENT_FRAME.top), bottom = stageY(CONTENT_FRAME.bottom);
+  return { top: stageY(CONTENT_FRAME.top), bottom: stageY(CONTENT_FRAME.bottom) };
+}
+// Clips an element whose box spans stage y top to top + h (at scale 1) to the content band of the shot cam, so a close
+// shot never runs it under the chapter header or the subtitles; no clip when it lies inside
+function clipToContent(el, top, h, cam) {
+  const band = contentBand(cam);
+  const cutTop = Math.max(0, band.top - top), cutBottom = Math.max(0, top + h - band.bottom);
+  el.style.clipPath = cutTop > 0 || cutBottom > 0
+    ? `inset(${cutTop.toFixed(2)}px -200px ${cutBottom.toFixed(2)}px -200px)` : 'none';
+}
+// Clips the lane's zones and the environment's dashed edge to the content frame for the shot cam (see contentBand).
+// At rest they lie inside the frame and show whole.
+function frameLaneEdges(lane, cam) {
+  const { top, bottom } = contentBand(cam);
   lane.frameClip.setAttribute('y', top.toFixed(2));
   lane.frameClip.setAttribute('height', (bottom - top).toFixed(2));
+  clipToContent(lane.env, LANE.env.y, LANE.env.h, cam);
+  clipToContent(lane.temporal, LANE.temporal.y, LANE.temporal.h, cam);
 }
 
 // The lane's parts (LANE), in their stacking order: the two zones, an SVG layer (the environment's dashed edge and the
@@ -431,6 +446,12 @@ HIST_CHIP.tagY = HIST_CHIP.y + HIST_CHIP.h / 2 + 3;
 // The slot beside the Web UI, right-aligned with the history: its center and size
 const BESIDE_UI = { w: HIST.w - LANE.ui.w - 16, h: LANE.ui.h, y: LANE.ui.y };
 BESIDE_UI.x = HIST.x + HIST.w / 2 - BESIDE_UI.w / 2;
+// The close shots that read the small text of TEMPORAL, [x, y, scale] for shot(): at 1.6 the chip's values render
+// at 19 px and its labels at 14.5 px. HIST_SHOT frames the whole stored history. CHIP_SHOT frames the payload chip
+// and its verdict over the row under the history (the Web UI and the slot beside it); the history card, cut by the
+// frame's top edge there, dims to OFF_SHOT while the chip stays bright. TEMPORAL's zone, cut in both, dims too.
+const HIST_SHOT = [HIST.x, HIST.y, 1.6];
+const CHIP_SHOT = [HIST.x, 600, 1.6];
 // The stored Event History: the white card (HIST) with its rows, a SAVED tag per row and the lane history's EMPTY
 // note, then its payload chip (card.chip, a makePayload). placeStoredHistory() shows them; the chip's state
 // (setPayload) stays with the scenes.
@@ -445,22 +466,29 @@ function makeStoredHistory(root) {
   card.chip = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
   return card;
 }
-// grow (0 to 1): the card grows from the lane's history, EMPTY, to HIST, as EMPTY fades; o: the opacity of the card
-// and its chip; rows: the progress of each row as it slides in (showRow); saved: the opacity of each row's SAVED tag;
-// chip: the opacity of the chip, which rests at HIST_CHIP.
+// grow (0 to 1): the card grows from the lane's history, EMPTY, to HIST, as EMPTY fades; o: the opacity of the card;
+// rows: the progress of each row as it slides in (showRow); saved: the opacity of each row's SAVED tag; chip: the
+// opacity of the chip, which rests at HIST_CHIP (a close shot keeps it bright while the card dims).
 function placeStoredHistory(card, { grow = 1, o = 1, rows = [1, 1, 1], saved = [1, 1, 1], chip = 1 } = {}) {
   const { history } = LANE;
   // even sizes, so the card rests on whole pixels
   card.style.width = 2 * Math.round(lerp(history.w, HIST.w, grow) / 2) + 'px';
   card.style.height = 2 * Math.round(lerp(history.h, HIST.h, grow) / 2) + 'px';
   place(card, Math.round(lerp(history.x, HIST.x, grow)), Math.round(lerp(history.y, HIST.y, grow)), 1, o);
+  // its box on the stage, for frameStoredHistory()
+  card.top = Math.round(lerp(history.y, HIST.y, grow)) - parseFloat(card.style.height) / 2;
   card.empty.style.opacity = 1 - clamp(grow * 3);
   card.rows.forEach((row, i) => showRow(row, rows[i], 26, true));
   card.tags.forEach((tag, i) => {
     setStatus(tag, 'SAVED', 'saved');
     tag.style.opacity = saved[i];
   });
-  place(card.chip, HIST_CHIP.x, HIST_CHIP.y, HIST_CHIP.k, chip * o);
+  place(card.chip, HIST_CHIP.x, HIST_CHIP.y, HIST_CHIP.k, chip);
+}
+// Clips the stored history card to the content frame for the shot cam (see contentBand): CHIP_SHOT crops its top.
+// Call it after placeStoredHistory().
+function frameStoredHistory(card, cam) {
+  clipToContent(card, card.top, parseFloat(card.style.height), cam);
 }
 // The verdict tag on the payload chip (statusTag, 30 px high, so it centers on whole pixels); setChipVerdict() sets it
 function makeChipVerdict(root) {
@@ -544,13 +572,14 @@ const OFF_SHOT = 0.3;
 const WIRE_SHOT = [620, 515, 1.35];
 const WIRE_LANE = { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, heads: 0 };
 // Chapter 2 to 3: the whip right, from the Namespaces to the Event History. Chapter 2 frames TEMPORAL's split (from),
-// the card at its tube scale (TUBE.k) crossing into payments (card); the whip then eases the camera to the history
-// (to) and the card to it (cardTo) over d seconds. Chapter 2 plays its first `cut` seconds and ends there (fadeOut:
+// the card at its tube scale (TUBE.k) crossing into payments (card); the whip then eases the camera to the close shot
+// of the stored history (to: HIST_SHOT, where chapter 3 holds as the history grows) and the card to the lane's
+// history (cardTo) over d seconds. Chapter 2 plays its first `cut` seconds and ends there (fadeOut:
 // 0); chapter 3 opens there (fadeIn: 0) and plays the rest: read both sides from tubeWhip(). At the cut: placeLane()
 // with `lane` (the environment and the Worker, cropped at the left edge, dimmed), placeTube(tube, 1),
 // placeNamespaces(ns, 1, 1, [1, 1]).
 const TUBE_HANDOFF = {
-  from: [1164, 515, 1.1], to: [LANE.history.x, LANE.history.y, 1.6],
+  from: [1164, 515, 1.1], to: HIST_SHOT,
   card: [TUBE.x1 - 62, TUBE.y], cardTo: [LANE.history.x, LANE.history.y],
   d: 0.7, cut: 0.25,
   lane: { env: OFF_SHOT, worker: OFF_SHOT, wire: 0, door: 0 },
@@ -570,9 +599,9 @@ function tubeWhip(u) {
 // scale] for shot(), on the Worker with the card in clear at PAYLOAD_IN_WORKER and room on its right for the Data
 // Converter (CONVERTER). lane: the lane's opacities (placeLane; the others are 1): the zones, pushed off the frame,
 // dimmed, their headings and the lane's history hidden, the wire back where the TLS tube was. stored: the opacity of
-// the stored Event History (placeStoredHistory, every row and SAVED tag shown) and of its chip, in clear and red
-// (setPayload red: 1), with its READABLE verdict, all cropped at the frame's right edge. The Web UI and the viewers
-// are gone.
+// the stored Event History (placeStoredHistory, every row and SAVED tag shown, card and chip alike) and of the
+// chip's READABLE verdict; the chip is in clear and red (setPayload red: 1); all are cropped at the frame's right
+// edge. The Web UI and the viewers are gone.
 const REWIND_HANDOFF = {
   shot: [575, 506, 1.5],
   lane: { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, door: 0, heads: 0 },
