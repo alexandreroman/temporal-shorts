@@ -62,27 +62,32 @@ function setLock(lock, seal) {
 }
 
 // ---------- the payload card
-// A value with its first characters replaced by ciphertext, left to right, as s goes from 0 to 1: the ciphertext
-// in violet, then two flickering glyphs at its front, then the clear rest. Spaces stay spaces and the font is
-// monospace, so the value keeps its width.
-function scrambledHtml(row, text, s) {
+// A value with its first characters replaced by ciphertext, left to right, as s goes from 0 to 1 (right to left with
+// fromRight): the ciphertext in violet, then two flickering glyphs at its front, then the clear rest. Spaces stay
+// spaces and the font is monospace, so the value keeps its width. Each character's ciphertext glyph depends only on
+// its place, so both directions end on the same ciphertext.
+function scrambledHtml(row, text, s, fromRight = false) {
   if (s <= 0) return text;
-  const n = Math.round(clamp(s) * text.length);
-  const frontEnd = s < 1 ? Math.min(text.length, n + 2) : n;
+  const len = text.length;
+  const n = Math.round(clamp(s) * len);
+  const frontN = s < 1 ? Math.min(len - n, 2) : 0;
   const flicker = Math.floor(s * 90); // the front glyphs change several times per scrambled character
-  const glyph = (col, salt) => (text[col] === ' ' ? ' ' : cipherGlyph(row, col, salt));
-  let cipher = '', front = '';
-  for (let col = 0; col < n; col++) cipher += glyph(col, 0);
-  for (let col = n; col < frontEnd; col++) front += glyph(col, 1000 + flicker * 31);
-  return `<span style="color:${C.violet}">${cipher}</span><span style="color:${C.slate}">${front}</span>`
-    + text.slice(frontEnd);
+  const glyphs = (from, to, salt) => {
+    let out = '';
+    for (let col = from; col < to; col++) out += text[col] === ' ' ? ' ' : cipherGlyph(row, col, salt);
+    return out;
+  };
+  const cipherHtml = (from, to) => `<span style="color:${C.violet}">${glyphs(from, to, 0)}</span>`;
+  const frontHtml = (from, to) => `<span style="color:${C.slate}">${glyphs(from, to, 1000 + flicker * 31)}</span>`;
+  if (fromRight) {
+    const clearEnd = len - n - frontN;
+    return text.slice(0, clearEnd) + frontHtml(clearEnd, len - n) + cipherHtml(len - n, len);
+  }
+  return cipherHtml(0, n) + frontHtml(n, n + frontN) + text.slice(n + frontN);
 }
-// The payload card of the transfer, w px wide: a PAYLOAD heading, the fields of TRANSFER (key above value, in
-// monospace) and a padlock on its top edge. Every size follows w (at 420 px, the values are 19 px), so cards of two
-// widths look alike, one a scaled copy of the other; pass an even w, so the card rests on whole pixels. Returns the
-// card, with .rows[i].e and .rows[i].value (the row and value elements of field i), .lock, .w and .h (its size in
-// px); setPayload() sets its state.
-function makePayload(p, { w = 420 } = {}) {
+// The sizes of a payload card w px wide (see makePayload), in px: every size follows w (at 420 px, the values are
+// 19 px). valueTop(i): the top of the value line of field i, from the top of the card's padding box.
+function payloadLayout(w) {
   const u = w / 420;
   const px = n => Math.round(n * u);
   const pad = { top: px(24), x: px(20), bottom: px(20) };
@@ -94,6 +99,16 @@ function makePayload(p, { w = 420 } = {}) {
     + (TRANSFER.length - 1) * rowGap + pad.bottom;
   const h = 2 * Math.ceil(content / 2); // even, so the card centers on whole pixels
   const badge = 2 * px(20); // the lock's round badge, even, so it centers on whole pixels
+  const valueTop = i => pad.top + head.line + head.gap + i * (key.line + value.line + rowGap) + key.line;
+  return { u, px, pad, head, key, value, rowGap, h, badge, valueTop };
+}
+// The payload card of the transfer, w px wide: a PAYLOAD heading, the fields of TRANSFER (key above value, in
+// monospace) and a padlock on its top edge. Every size follows w (payloadLayout), so cards of two widths look alike,
+// one a scaled copy of the other; pass an even w, so the card rests on whole pixels. Returns the card, with
+// .rows[i].e and .rows[i].value (the row and value elements of field i), .lock, .w and .h (its size in px);
+// setPayload() sets its state.
+function makePayload(p, { w = 420 } = {}) {
+  const { u, px, pad, head, key, value, rowGap, h, badge } = payloadLayout(w);
 
   const rowsHtml = TRANSFER.map(([k], i) => `<div class="row" style="margin-top:${i ? rowGap : 0}px">`
     + `<div class="mono" style="font-size:${key.font}px;line-height:${key.line}px;color:${C.slate}">${k}</div>`
@@ -130,14 +145,14 @@ function makePayload(p, { w = 420 } = {}) {
 }
 // State of a payload card: seal (0 to 1, a linear progress) snaps its lock shut (see setLock); scramble (0 to 1)
 // turns its values into ciphertext left to right (scrambledHtml), one number for every field or an array of one per
-// field (to scramble the IBANs alone); red (0 to 1) tints the card for an alarm. With no state, the card is open
-// and in clear.
-function setPayload(card, { seal = 0, scramble = 0, red = 0 } = {}) {
+// field (to scramble the IBANs alone), right to left with fromRight; red (0 to 1) tints the card for an alarm. With
+// no state, the card is open and in clear.
+function setPayload(card, { seal = 0, scramble = 0, red = 0, fromRight = false } = {}) {
   setLock(card.lock, seal);
   card.lockBadge.style.borderColor = seal >= LOCK_SHUT ? C.neon : C.line;
   card.rows.forEach(row => {
     const s = Array.isArray(scramble) ? scramble[row.i] : scramble;
-    const html = scrambledHtml(row.i, TRANSFER[row.i][1], s);
+    const html = scrambledHtml(row.i, TRANSFER[row.i][1], s, fromRight);
     // rewritten only when it changes: the same state always gives the same text
     if (row.value._html !== html) {
       row.value.innerHTML = html;
@@ -189,6 +204,10 @@ const roundRectD = (x, y, w, h, r) => `M ${x + w / 2} ${y} H ${x + w - r} A ${r}
 const zoneCaption = text => '<div class="cap lbl" style="position:absolute;left:0;right:0;bottom:24px;'
   + `text-align:center;font-size:18px;color:var(--ink);opacity:0">${text}</div>`;
 
+// The slate EMPTY note of the lane's Event History, centered across the card, 150 px under its top
+const historyEmptyNote = () => '<div class="empty mono" style="position:absolute;left:0;right:0;top:150px;'
+  + `text-align:center;font-size:18px;letter-spacing:.14em;padding-left:.14em;color:${C.slateDark}">EMPTY</div>`;
+
 // The lane's parts (LANE), in their stacking order: the two zones, an SVG layer (the environment's dashed edge and the
 // wire, an arrow to TEMPORAL; scenes draw their own strokes in it, under the panels), the Worker panel running the
 // TransferWorkflow, the empty Event History card and the closed door. placeLane() shows them.
@@ -230,9 +249,7 @@ function makeLane(root) {
     + `font-size:18px;line-height:26px;color:var(--slate)"><span style="color:${C.violet}">workflow</span> `
     + 'TransferWorkflow</div>');
   lane.history = makeHistoryCard(root, [], { w: history.w, h: history.h, rowTop: () => 0, tagTop: () => 0 });
-  lane.history.insertAdjacentHTML('beforeend', '<div class="mono" style="position:absolute;left:0;right:0;'
-    + `top:150px;text-align:center;font-size:18px;letter-spacing:.14em;padding-left:.14em;color:${C.slateDark}">`
-    + 'EMPTY</div>');
+  lane.history.insertAdjacentHTML('beforeend', historyEmptyNote());
   // on the dashed edge, which it hides
   lane.door = E(root, ICON('door', 32, C.ink, 1.8), '', {
     width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -339,8 +356,8 @@ function makeNamespaces(lane) {
 const nsLockAt = i => [NS_BAND.x + NS_BAND.w / 2 - 39, NAMESPACES[i].y];
 // split (0 to 1): the light sweeps across TEMPORAL from left to right and reveals the bands as it passes; lit (0 to
 // 1): payments turns violet and glows while the others dim; seals: one seal per other Namespace, top to bottom (see
-// setLock; its padlock shows once its seal starts).
-function placeNamespaces(ns, split, lit = 0, seals = [0, 0]) {
+// setLock; its padlock shows once its seal starts); o: the opacity of every band.
+function placeNamespaces(ns, split, lit = 0, seals = [0, 0], o = 1) {
   const sweepX = lerp(-NS_SWEEP_W / 2, LANE.temporal.w + NS_SWEEP_W / 2, split); // from TEMPORAL's left edge
   ns.sweep.style.transform = `translateX(${(sweepX - NS_SWEEP_W / 2).toFixed(2)}px)`;
   ns.sweep.style.opacity = split > 0 && split < 1 ? 1 : 0;
@@ -348,8 +365,8 @@ function placeNamespaces(ns, split, lit = 0, seals = [0, 0]) {
   let other = 0;
   ns.bands.forEach(band => {
     const reveal = clamp((sweepX - bandLeft) / NS_BAND.w);
-    const o = band.ns.mine ? 1 : 1 - 0.4 * lit;
-    place(band, NS_BAND.x, band.ns.y, 1, reveal > 0 ? o : 0);
+    const bandO = band.ns.mine ? 1 : 1 - 0.4 * lit;
+    place(band, NS_BAND.x, band.ns.y, 1, reveal > 0 ? bandO * o : 0);
     band.style.clipPath = reveal < 1 ? `inset(-40px ${((1 - reveal) * 100).toFixed(3)}% -40px -40px)` : 'none';
     if (band.ns.mine) {
       band.style.borderColor = lit > 0 ? C.violet : C.uv;
@@ -362,6 +379,126 @@ function placeNamespaces(ns, split, lit = 0, seals = [0, 0]) {
     }
   });
 }
+
+// ---------- the Event History that stores the payload (chapters 3 and 4)
+// The Event History once it stores the payload, at camera rest: it grows from the lane's history (LANE.history) to
+// this center and size, inside TEMPORAL, with room under it for the Search Attributes of chapter 4
+const HIST = { x: 1480, y: 486, w: 560, h: 452 };
+// Its rows; row 2 holds the payload. HIST_ROW: each row's top in the card, the row height and the text size.
+const HIST_ROWS = [
+  'Workflow started: transfer', 'Activity completed: debitAccount', 'Activity scheduled: creditAccount',
+];
+const HIST_ROW = { tops: [60, 100, 404], h: 32, font: 18 };
+// The payload chip of row 2: the payload card itself, at the lane's size (PAYLOAD_IN_WORKER.w), left-aligned with the
+// rows' text and 148 px under the card's top. Its center (x, y) and size (w, h), and tagY, the center of its verdict
+// tag (READABLE, then NEVER SEES YOUR PAYLOADS), which straddles its bottom edge.
+const HIST_CHIP = { w: PAYLOAD_IN_WORKER.w, h: payloadLayout(PAYLOAD_IN_WORKER.w).h };
+HIST_CHIP.x = HIST.x - HIST.w / 2 + 70 + HIST_CHIP.w / 2;
+HIST_CHIP.y = HIST.y - HIST.h / 2 + 148 + HIST_CHIP.h / 2;
+HIST_CHIP.tagY = HIST_CHIP.y + HIST_CHIP.h / 2;
+// The stored Event History: the white card (HIST) with its rows, a SAVED tag per row and the lane history's EMPTY
+// note, then its payload chip (card.chip, a makePayload). placeStoredHistory() shows them; the chip's state
+// (setPayload) stays with the scenes.
+function makeStoredHistory(root) {
+  const card = makeHistoryCard(root, HIST_ROWS, {
+    w: HIST.w, h: HIST.h, font: HIST_ROW.font, rowH: HIST_ROW.h, rowTop: i => HIST_ROW.tops[i],
+    tagTop: i => HIST_ROW.tops[i] + (HIST_ROW.h - 24) / 2, tagRight: 20, tag: { font: 12, icon: 12 },
+  });
+  card.tags.forEach(tag => { tag.style.height = '24px'; });
+  card.insertAdjacentHTML('beforeend', historyEmptyNote());
+  card.empty = card.querySelector('.empty');
+  card.chip = makePayload(root, { w: HIST_CHIP.w });
+  return card;
+}
+// grow (0 to 1): the card grows from the lane's history, EMPTY, to HIST, as EMPTY fades; o: the opacity of the card
+// and its chip; rows: the progress of each row as it slides in (showRow); saved: the opacity of each row's SAVED tag;
+// chip: the opacity of the chip, which rests at HIST_CHIP.
+function placeStoredHistory(card, { grow = 1, o = 1, rows = [1, 1, 1], saved = [1, 1, 1], chip = 1 } = {}) {
+  const { history } = LANE;
+  // even sizes, so the card rests on whole pixels
+  card.style.width = 2 * Math.round(lerp(history.w, HIST.w, grow) / 2) + 'px';
+  card.style.height = 2 * Math.round(lerp(history.h, HIST.h, grow) / 2) + 'px';
+  place(card, Math.round(lerp(history.x, HIST.x, grow)), Math.round(lerp(history.y, HIST.y, grow)), 1, o);
+  card.empty.style.opacity = 1 - clamp(grow * 3);
+  card.rows.forEach((row, i) => showRow(row, rows[i], 26, true));
+  card.tags.forEach((tag, i) => {
+    setStatus(tag, 'SAVED', 'saved');
+    tag.style.opacity = saved[i];
+  });
+  place(card.chip, HIST_CHIP.x, HIST_CHIP.y, 1, chip * o);
+}
+// The verdict tag on the payload chip (statusTag, 30 px high, so it centers on whole pixels); setChipVerdict() sets it
+function makeChipVerdict(root) {
+  const e = statusTag(root, { font: 15, icon: 15 });
+  e.style.height = '30px';
+  return e;
+}
+// The opaque fill of each verdict kind: the tag straddles the chip's edge, which must not show through it
+const VERDICT_FILL = { denied: 'var(--red-solid)', wait: 'var(--violet-solid)' };
+// The verdict tag at HIST_CHIP.tagY: its label and kind (setStatus; 'denied' or 'wait'), its scale and opacity, and
+// flip, its height as it flips over (1 flat on the chip, 0 edge on)
+function setChipVerdict(e, label, kind, { s = 1, o = 1, flip = 1 } = {}) {
+  setStatus(e, label, kind);
+  e.style.background = VERDICT_FILL[kind];
+  place(e, HIST_CHIP.x, HIST_CHIP.tagY, s, o);
+  if (flip < 1) e.style.transform += ` scaleY(${flip.toFixed(3)})`;
+}
+
+// ---------- the Web UI (chapters 3 and 4)
+// The Web UI window, at camera rest: between the zones, above the wire (chapter 4 moves it into your environment)
+const WEBUI = { x: 960, y: 330, w: 360, h: 190 };
+// The fields of the payload that the Web UI shows: their rows in TRANSFER (the IBAN it comes from, and the name)
+const WEBUI_FIELDS = [0, 2];
+// The Web UI window, in the dark look of the Temporal Web UI: a title bar (win.caption, its text), then row 2 of the
+// Event History and the payload's IBAN and name, keys above values. win.lines: the row and the two fields, which
+// slide in; setWebUI() sets the values.
+function makeWebUI(root) {
+  const dot = '<i style="display:block;width:9px;height:9px;border-radius:50%;background:#4B5363"></i>';
+  const field = (row, i) => `<div class="line" style="margin-top:${i ? 8 : 12}px">`
+    + `<div class="mono" style="font-size:12px;line-height:16px;color:${C.slate}">${TRANSFER[row][0]}</div>`
+    + '<div class="mono value" style="font-size:15px;line-height:22px;white-space:pre;margin:0 -8px;padding:0 8px;'
+    + 'border-radius:4px"></div></div>';
+  const win = E(root,
+    `<div style="height:36px;background:#191919;border-bottom:1px solid ${C.line};display:flex;align-items:center;`
+    + `gap:7px;padding-left:14px">${dot}${dot}${dot}<span class="ttl mono" style="margin-left:12px;font-size:12px;`
+    + `letter-spacing:.14em;color:${C.slate}">TEMPORAL WEB UI</span></div>`
+    + '<div style="padding:12px 20px 0">'
+    + `<div class="line mono" style="font-size:14px;line-height:20px"><span style="color:${C.slate}">2</span>`
+    + '&nbsp; Activity completed</div>'
+    + WEBUI_FIELDS.map(field).join('') + '</div>',
+    '', {
+      width: WEBUI.w + 'px', height: WEBUI.h + 'px', background: '#111111', border: `1.5px solid ${C.line}`,
+      borderRadius: 'var(--r)', overflow: 'hidden', textAlign: 'left',
+    });
+  win.caption = win.querySelector('.ttl');
+  win.lines = [...win.querySelectorAll('.line')];
+  win.values = [...win.querySelectorAll('.value')];
+  setWebUI(win);
+  return win;
+}
+// scramble (0 to 1): the values turn into the payload's ciphertext, the same glyphs as the card's (scrambledHtml);
+// red (0 to 1): the IBAN's line lights up red
+function setWebUI(win, { scramble = 0, red = 0 } = {}) {
+  win.values.forEach((value, i) => {
+    const row = WEBUI_FIELDS[i];
+    const html = scrambledHtml(row, TRANSFER[row][1], scramble);
+    if (value._html !== html) {
+      value.innerHTML = html;
+      value._html = html;
+    }
+  });
+  win.values[0].style.background = `rgba(${RGB.red},${(0.24 * clamp(red)).toFixed(3)})`;
+}
+
+// ---------- the Data Converter (chapter 4)
+// The Data Converter in your environment, between the Worker panel and the environment's right edge, at camera rest:
+// its tile (the key and its labels) above the gate that the payload card passes through, level with the card in the
+// Worker. x: their center; tile and gate: each one's center y and size.
+const CONVERTER = {
+  x: (LANE.worker.x + LANE.worker.w / 2 + LANE.env.x + LANE.env.w) / 2,
+  tile: { y: 330, w: 200, h: 110 },
+  gate: { y: PAYLOAD_IN_WORKER.y, h: 300 },
+};
 
 // ---------- hand-offs (match cuts: a chapter ends on the next one's first frame, see the plan's motion direction)
 // Opacity of a lane part that a held shot crops at the frame's edge: dimmed below half, out of focus, so the shot
@@ -394,6 +531,23 @@ function tubeWhip(u) {
     card: [lerp(card[0], cardTo[0], p), lerp(card[1], cardTo[1], p)],
   };
 }
+// Chapter 3 to 4: the rewind. A copy of the payload card streaks back from the Event History to the Worker as the
+// camera whips left; both land 0.15 s before chapter 3 ends, and chapter 4 opens there. shot: the framing, [x, y,
+// scale] for shot(), on the Worker with the card in clear at PAYLOAD_IN_WORKER and room on its right for the Data
+// Converter (CONVERTER). lane: the lane's opacities (placeLane; the others are 1): the zones, pushed off the frame,
+// dimmed, their headings and the lane's history hidden, the wire back where the TLS tube was. stored: the opacity of
+// the stored Event History (placeStoredHistory, every row and SAVED tag shown) and of its chip, in clear and red
+// (setPayload red: 1), with its READABLE verdict, all cropped at the frame's right edge.
+const REWIND_HANDOFF = {
+  shot: [575, 506, 1.5],
+  lane: { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, door: 0, heads: 0 },
+  stored: OFF_SHOT,
+};
+// Chapter 4 to 5: the pull-back that chapter 4 ends on and chapter 5 opens on, [x, y, scale] for shot(): the whole
+// lane, a little smaller than at rest, with room round it. WIDE_LANE: the lane's opacities there (placeLane; the
+// others are 1): the bare lane, the Worker running with no card, the wire, TEMPORAL with no history.
+const WIDE_SHOT = [960, 515, 0.88];
+const WIDE_LANE = { history: 0, door: 0 };
 
 // ---------- camera and motion
 // Camera framing eased between stops, like pan(): from and each stop give [x, y, scale], the stage point (x, y)
