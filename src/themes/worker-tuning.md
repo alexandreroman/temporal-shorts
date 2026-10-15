@@ -27,9 +27,57 @@ a Slot is free. A Slot is the permission to run one task. The task itself uses
 the Worker's CPU and memory. The Workflow cache keeps Workflows in memory, so
 their next task skips replaying the history.
 
-## Outro
+## Chapter 3: Every Slot is busy
 
 [Watch from 1:16](/themes/worker-tuning/#t=76)
+
+The Worker was set for normal days: 10 Activity Slots. All 10 are busy, and the
+CPU sits at 35%. Tasks wait for a Slot, not for the machine: the Slots available
+metric stays at zero. Raise the limit from 10 to 50 Slots, and five times more
+tasks run at once. Throughput climbs, yet the backlog grows again. Something
+else is the limit now.
+
+## Chapter 4: The Pollers can't keep up
+
+[Watch from 1:52](/themes/worker-tuning/#t=112)
+
+Now Slots sit free while the queue still grows, and the CPU has room to spare.
+Tasks wait a long time before they start: the Pollers can't fetch them fast
+enough. Turn on Poller Autoscaling: the Worker adds Pollers when tasks wait and
+removes them when idle. Tasks reach the free Slots again, and the CPU starts to
+climb.
+
+## Chapter 5: The cache runs out
+
+[Watch from 2:26](/themes/worker-tuning/#t=146)
+
+More orders are open at once than the Workflow cache can hold. The cache evicts
+Workflows. An evicted Workflow replays its whole Event History on its next task.
+Replays burn CPU and hold Slots without moving any order forward. Give the
+Worker more memory and a larger cache: open orders stay cached, and replays
+stop.
+
+## Chapter 6: The CPU is full
+
+[Watch from 3:00](/themes/worker-tuning/#t=180)
+
+Now renderInvoice keeps the CPU at 100%: every task slows down and holds its
+Slot longer. More Slots would not help: a Slot adds no CPU. This Worker has
+reached the limit of its machine. This is the moment to add Workers: B and C
+poll the same Task Queue and share the load. The backlog drains, and new orders
+start right away again.
+
+## Chapter 7: Read the signals
+
+[Watch from 3:35](/themes/worker-tuning/#t=215)
+
+A growing backlog has four causes: full Slots, slow Pollers, a small cache or a
+full CPU. Change one setting at a time, watch the signals, then look for the
+next bottleneck.
+
+## Outro
+
+[Watch from 3:55](/themes/worker-tuning/#t=235)
 
 Tune one bottleneck at a time, and your Temporal Workers keep up when traffic
 spikes.
