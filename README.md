@@ -33,12 +33,18 @@ Each video is a theme:
 - **Tuning Temporal Workers** (`worker-tuning`): for developers and SREs,
   how a Worker takes work, and how to find and fix the bottleneck behind a
   growing Task Queue backlog: Slots, Pollers, the Workflow cache, CPU.
+- **Security** (`security`): for security teams, one payload on its way
+  from the Worker to the Event History: where the code runs, TLS and
+  identity, what Temporal stores, encryption with your keys, then
+  [Temporal Proxy][temporal-proxy], which keeps credentials and encryption
+  out of the Workers.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal hands back the saved results from the Event
 History](preview.png)
 
 [agent-harness]: https://github.com/temporal-community/temporal-agent-harness
+[temporal-proxy]: https://docs.temporal.io/production-deployment/temporal-proxy
 
 ## Getting started
 
