@@ -45,6 +45,8 @@
   // status tags of the HUMAN_ROW and TOTAL_ROW marks, as [label, statusTag kind]
   const MARK_TAGS = [['HUMAN', 'wait'], ['COST', 'reused']];
   const LAST_ROW = ROWS.length - 1;
+  // share of a row interval the replay highlight takes to snap to the next row
+  const SNAP = 0.3;
 
   const chipCss = type => ({
     ...EVENT_TYPES[type], fontSize: '16px', letterSpacing: '.1em', padding: '4px 10px 4px calc(10px + .1em)',
@@ -216,21 +218,27 @@
       s.replay.style.opacity = t < toReplay ? 0 : 1;
       s.replay.style.transform = `scale(${swell(t, toReplay, 0.15)})`;
       s.bar.style.opacity = P(t, toReplay, 0.3);
-      // playhead: at the end when the replay starts, rewound to the start, then swept forward
+      // playhead: at the end when the replay starts, rewound to the start, then swept forward. It moves
+      // continuously, as a timeline; the highlight rests on a row, then snaps to the next one in the last SNAP of
+      // the row interval, landing on it as the playhead reaches it
       let head = 1 - P(t, rewind, 0.8);
       if (t >= sweep) head = clamp((t - sweep) / sweepD);
       s.bar.fill.style.width = (head * BAR_W) + 'px';
       s.bar.head.style.left = (head * BAR_W) + 'px';
+      const headRow = head * LAST_ROW;
+      const scanRow = Math.floor(headRow) + P(headRow % 1, 1 - SNAP, SNAP);
+      // rows light up as the highlight lands on them while sweeping, and follow the playhead otherwise
+      const litRow = t >= sweep ? scanRow : headRow;
       s.rows.forEach((r, i) => {
         const p = P(t, rowAt(i), 0.3);
         showRow(r, p);
-        // a row dims while the playhead is before it
-        const reached = clamp(1 + (head - i / LAST_ROW) * 12);
+        // a row dims while the highlight (or the playhead) is before it
+        const reached = clamp(1 + (litRow - i) * 12 / LAST_ROW);
         r.style.opacity = p * lerp(0.3, 1, reached);
       });
       const scanning = win(t, sweep, sweep + sweepD + 0.3, 0.2);
       s.scan.style.opacity = scanning;
-      s.scan.style.top = (CONSOLE.row0 - 4 + head * LAST_ROW * CONSOLE.rowGap) + 'px';
+      s.scan.style.top = (CONSOLE.row0 - 4 + scanRow * CONSOLE.rowGap) + 'px';
       // where a human stepped in and what it cost stay marked once the sweep reaches them
       [HUMAN_ROW, TOTAL_ROW].forEach((row, j) => {
         const at = sweep + sweepD * row / LAST_ROW;
