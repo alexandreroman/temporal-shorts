@@ -29,7 +29,7 @@
   const GLYPHS = 8;
   // the identity badge: it leaves the Worker's top right, at the shot's left edge, and slides in over the tube's
   // label to land above the tube's end, by TEMPORAL's edge, inside the tube shot
-  const BADGE = { x: 990, y: 350, w: 280, h: 120, route: [[540, 340], [690, 300], [860, 310]] };
+  const BADGE = { x: 990, y: 350, w: 280, h: 120, route: [[540, 340], [690, 315], [860, 325]] };
   // the unknown client's request, up to TEMPORAL's edge under the tube, where a red barrier stops it
   const BARRIER = { x: LANE.temporal.x, y: 655, h: 100 };
   const REQUEST_PATH = `M 1070 ${OUTSIDER.y - OUTSIDER.h / 2 + 3} Q 1120 630 ${BARRIER.x - 6} ${BARRIER.y}`;
@@ -207,7 +207,9 @@
       const badgeP = P(t, c[1] + T1.badge, T1.badgeD);
       const [bx, by] = bezier([...BADGE.route, [BADGE.x, BADGE.y]], badgeP);
       const out2 = 1 - P(t, c[2] + T2.out, 0.4);
-      place(s.badge, bx, by, lerp(0.3, 1, badgeP), P(t, c[1] + T1.badge, 0.2) * out2);
+      // it stays small as it passes over the TLS label, and grows to its size on the way to its place, so it
+      // clears both the label and the frame's top edge
+      place(s.badge, bx, by, lerp(0.3, 1, badgeP * badgeP), P(t, c[1] + T1.badge, 0.2) * out2);
       const scan = P(t, c[1] + T1.scan, T1.scanD, linear);
       s.badge.scan.style.top = Math.round(scan * (BADGE.h - 5)) + 'px';
       s.badge.scan.style.opacity = scan > 0 && scan < 1 ? 1 : 0;
@@ -235,7 +237,7 @@
       const others = NAMESPACES.map((ns, i) => i).filter(i => !NAMESPACES[i].mine);
       s.lockRipples.forEach((rings, k) => {
         const [lx, ly] = nsLockAt(others[k]);
-        placeRipples(rings, t, c[2] + T2.locks[k] + 0.5 * LOCK_SHUT, lx, ly, 30, 140, { d: 0.8, step: 0.2 });
+        placeRipples(rings, t, c[2] + T2.locks[k] + 0.5 * LOCK_SHUT, lx, ly, 30, 100, { d: 0.8, step: 0.2 });
       });
     }
   });

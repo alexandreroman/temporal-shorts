@@ -271,13 +271,9 @@ function makeLane(root) {
     '', {
       width: env.w + 'px', height: env.h + 'px', background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)',
     });
-  // clipped, for the light sweep of the Namespaces (makeNamespaces)
   lane.temporal = E(root,
     zoneHeading(`<img class="head" src="${LOGO}" style="height:34px;display:block">`) + zoneCaption('Never your code'),
-    'tile', {
-      width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: '#17182A',
-      overflow: 'hidden',
-    });
+    'tile', { width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: '#17182A' });
   [lane.env, lane.temporal].forEach(zone => {
     zone.head = zone.querySelector('.head');
     zone.headFrame = zone.querySelector('.head-frame');
