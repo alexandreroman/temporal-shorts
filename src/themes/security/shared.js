@@ -15,6 +15,8 @@ Object.assign(ICONS, {
     + '<path d="M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z"/>',
   // a browser window: its title bar and two dots
   window: '<rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M6.5 6.5h.01M9.5 6.5h.01"/>',
+  // a cloud on a flat base: a managed service
+  cloud: '<path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.7 4.7 0 0 0 7 18.5z"/>',
 });
 
 // ---------- the running example: Nora sends €25,000 to Leo, one payload carried through every chapter
@@ -763,6 +765,60 @@ function placeProxy(box, { dx = 0, o = 1, glow = 0 } = {}) {
   place(box, PROXY.x + dx, PROXY.y, 1, o);
   box.style.boxShadow = glowShadow(RGB.violet, 0.35 + 0.65 * clamp(glow), { blur: 48, alpha: 0.55 });
 }
+// The two lines each Worker knows from chapter 6 on: the proxy's local address and the short Namespace name. FULL_NS:
+// the full Namespace name that the proxy writes over the short one on the way out.
+const WORKER_LINES = ['proxy:7233', 'payments'];
+const FULL_NS = 'payments.a1b2c';
+// How long the light takes to run along a connection to or from the proxy, seconds
+const PROXY_FLOW_PERIOD = 2.0;
+// Where a tag about the Workers sits in the fleet layout, centered under them (NO SECRETS, WORKERS UNCHANGED)
+const UNDER_WORKERS = {
+  x: (WORKERS[0].x + WORKERS[2].x) / 2, y: (FLEET.rows[1] + FLEET.tile.h / 2 + FLEET.y + FLEET.h) / 2,
+};
+// The TLS tube that the proxy adds on the way out (chapters 6 and 7): from the box's right edge to 12 px inside
+// TEMPORAL, on the wire's line, high enough to hold the card and its tags; its label above it
+const PROXY_TUBE = { x0: PROXY_WIRE.x0, x1: PROXY_WIRE.x1 + 12, y: LANE.wire.y, h: 176 };
+PROXY_TUBE.label = { x: (PROXY_TUBE.x0 + PROXY_TUBE.x1) / 2, y: PROXY_TUBE.y - PROXY_TUBE.h / 2 - 36 };
+// The card that goes through the proxy in chapter 6, a lane-size card at scale k, with its Namespace tag straddling
+// its bottom edge and the API KEY under it (tagH: their height; nsW and keyW: their widths; tagGap: the gap between
+// them); h: its height on the stage; keyDy: from its center to the API KEY's
+const PROXY_CARD = { w: PAYLOAD_IN_WORKER.w, k: 0.45, tagH: 28, nsW: 172, keyW: 124, tagGap: 6 };
+PROXY_CARD.h = payloadLayout(PROXY_CARD.w).h * PROXY_CARD.k;
+PROXY_CARD.keyDy = PROXY_CARD.h / 2 + PROXY_CARD.tagH / 2 + PROXY_CARD.tagGap + PROXY_CARD.tagH;
+// The payments Namespace inside TEMPORAL that the card goes into in chapter 6: its center and size; card: where the
+// card rests in it, under its name
+const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 250 };
+PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 64 + PROXY_CARD.h / 2 };
+// The TLS tube (PROXY_TUBE) and its TLS label (tube.label)
+function makeProxyTube(root) {
+  const tube = glassTube(root, PROXY_TUBE.x1 - PROXY_TUBE.x0, PROXY_TUBE.h);
+  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
+  Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
+  return tube;
+}
+// The payments Namespace band (PROXY_BAND), labelled with its full name at its top left
+const makeProxyBand = root => E(root,
+  '<div style="position:absolute;left:16.5px;top:12.5px">'
+  + `<div class="mono" style="font-size:12px;line-height:18px;letter-spacing:.14em;color:${C.slate}">NAMESPACE</div>`
+  + `<div class="mono" style="font-size:18px;line-height:26px">${FULL_NS}</div></div>`,
+  '', {
+    width: PROXY_BAND.w + 'px', height: PROXY_BAND.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)',
+  });
+// A small tag beside the card (PROXY_CARD): a fixed width w, its HTML centered, in the violet look
+const proxyCardTag = (root, html, w) => E(root, html, 'mono', {
+  width: w + 'px', height: PROXY_CARD.tagH + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  gap: '6px', fontSize: '16px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1.5px solid ${C.violet}`,
+  borderRadius: 'var(--rs)', background: 'var(--violet-solid)',
+});
+// The Namespace tag's text: the full name's room always laid out (the tag's font is monospace), its first `shown`
+// characters visible and the rest invisible, so the visible text never moves as it types and the full name sits
+// centered; the caret, if `caret`, overlays the next character's cell (past the last one once the name is whole)
+function namespaceHtml(shown, caret) {
+  const cursor = caret
+    ? `<span style="position:absolute;top:0;left:calc(${shown} * (1ch + .06em))">▌</span>` : '';
+  return `<span style="position:relative">${FULL_NS.slice(0, shown)}`
+    + `<span style="opacity:0">${FULL_NS.slice(shown)}</span>${cursor}</span>`;
+}
 
 // ---------- hand-offs (match cuts: a chapter ends on the next one's first frame, see the plan's motion direction)
 // Opacity of a lane part that a held shot crops at the frame's edge: dimmed below half, out of focus, so the shot
@@ -828,6 +884,13 @@ const BARE_WORKERS_HANDOFF = {
 // Chapter 6 to 7: the push into the TEMPORAL PROXY box that chapter 6 ends on and chapter 7 opens on, [x, y, scale]
 // for shot(): the box fills the content frame's height (y 155-875). See chapter 6's header for what shows there.
 const PROXY_SHOT = [PROXY.x, PROXY.y, 2.4];
+// Chapter 7 to 8: the pull-back out of the proxy that chapter 7 ends on and chapter 8 opens on, [x, y, scale] for
+// shot(): the whole fleet with the proxy, in chapter 4's wide shot. What shows there, every part at full opacity: the
+// lane in the proxy layout (placeLane() with BARE_WORKERS_HANDOFF.lane and PROXY_ZONES), the six Workers with their two
+// lines (WORKER_LINES), the SDK client and the Web UI, the eight connections and the proxy's connection to TEMPORAL
+// (PROXY_WIRE) with their light (PROXY_FLOW_PERIOD), and the proxy box; TEMPORAL holds only its logo. Call
+// frameLaneEdges() with the camera.
+const FULL_LANE_SHOT = WIDE_SHOT;
 
 // ---------- camera and motion
 // Camera framing eased between stops, like pan(): from and each stop give [x, y, scale], the stage point (x, y)
