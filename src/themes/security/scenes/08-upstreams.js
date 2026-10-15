@@ -1,7 +1,7 @@
 // ===================== 8. CHANGE TEMPORAL, NOT YOUR CODE
 // Opens on the whole fleet that chapter 7 pulled back to (FULL_LANE_SHOT) and holds it. TEMPORAL splits into two
 // upstreams: your own Temporal Service on top, SELF-HOSTED and lit, the proxy's connection bending up to it, and
-// Temporal Cloud under it (the official lockup followed by "Cloud"), dim. A ROUTING switch pops into the proxy. Then
+// Temporal Cloud under it (the official lockup followed by "Cloud"), dim. A ROUTING switch docks under the proxy. Then
 // the dramatic beat: the switch flips from SELF-HOSTED to CLOUD, the connection tears off the self-hosted service and
 // redraws down to Temporal Cloud with a spark running along it, and Temporal Cloud lights up, while the Workers and
 // their two lines stay perfectly still: WORKERS UNCHANGED. The camera holds; the default fade-out plays the engine's
@@ -9,7 +9,7 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // from c[0]: TEMPORAL narrows to the top upstream (split, splitD) as Temporal Cloud rises in under it (cloud); the
-  // ROUTING switch pops into the proxy (routing); it flips (flip); the connection tears off the self-hosted service
+  // ROUTING switch docks under the proxy (routing); it flips (flip); the connection tears off the self-hosted service
   // (tear, tearD) and redraws to Temporal Cloud (redraw, redrawD); WORKERS UNCHANGED (unchanged)
   const T0 = {
     split: 0, splitD: 0.8, cloud: 0.4, routing: 1.0, flip: 3.4, tear: 3.6, tearD: 0.3, redraw: 4.0, redrawD: 0.7,
@@ -23,23 +23,28 @@
   // with its middle
   const WIRE = { x0: PROXY_WIRE.x0, x: 1585, x1: SELF_ZONE.x - 4, r: 10 };
   const selfY = SELF_ZONE.y + SELF_ZONE.h / 2, cloudY = CLOUD_ZONE.y + CLOUD_ZONE.h / 2;
+  // the self-hosted service's opacity once the connection has left it: out of use, still readable
+  const SELF_DIM = 0.6;
   // inside each upstream: its label under its heading (SELF-HOSTED), and its icon, in the middle
   const UPSTREAM = { label: 72, icon: 52 };
-  // the ROUTING switch, in the proxy box under its name: center and size
-  const ROUTING = { x: PROXY.x, y: 552, w: 184, h: 160 };
+  // the ROUTING switch, the proxy's setting: a panel docked under the proxy box, on a short stem, where your
+  // environment is empty (on the environment's edge, as the box is): center and size; its text is 21 px (18.5 on
+  // screen)
+  const ROUTING = { x: PROXY.x, y: 765, w: 220, h: 170 };
+  const STEM = { y0: PROXY.y + PROXY.h / 2, y1: ROUTING.y - ROUTING.h / 2 };
   // its track, from the panel's top left corner, and its knob's size, inset in the track and travel; its two options'
   // left edge and tops
-  const TRACK = { left: 14, top: 48, w: 26, h: 92 };
-  const KNOB = { size: 20, inset: 1.5 };
+  const TRACK = { left: 16, top: 54, w: 30, h: 100 };
+  const KNOB = { size: 24, inset: 1.5 };
   KNOB.travel = TRACK.h - 3 - KNOB.size - 2 * KNOB.inset;
-  const OPTIONS = { left: 52, tops: [52, 110] };
+  const OPTIONS = { left: 60, tops: [58, 122] };
   // the sparks that fly off the self-hosted service as the connection tears off it: how many, how long each one flies
   const TEAR = { n: 8, life: 0.5 };
-  // Temporal Cloud's title: the official lockup, 34 px high, then "Cloud" in the brand font, its capitals as tall as
-  // the wordmark's and on its baseline (the measures of meet-temporal's chapter 5: the lockup's viewBox is 1570x410
-  // units, its capitals run from y 519 to its baseline at y 684.7, 805 being the image's bottom; Instrument Sans
-  // capitals are 0.72 em tall), a word space after it
-  const CLOUD_UNIT = 34 / 410;
+  // Temporal Cloud's title: the official lockup, 40 px high, then "Cloud" in the brand font (19.7 px on screen), its
+  // capitals as tall as the wordmark's and on its baseline (the measures of meet-temporal's chapter 5: the lockup's
+  // viewBox is 1570x410 units, its capitals run from y 519 to its baseline at y 684.7, 805 being the image's bottom;
+  // Instrument Sans capitals are 0.72 em tall), a word space after it
+  const CLOUD_UNIT = 40 / 410;
   const CLOUD_TITLE = {
     rise: Math.round((805 - 684.7) * CLOUD_UNIT), font: +((684.7 - 519) * CLOUD_UNIT / 0.72).toFixed(2),
   };
@@ -65,7 +70,7 @@
   // An upstream's body: its label (if any) under its heading, and its icon in the middle
   function upstreamBody(label, icon) {
     const labelHtml = label ? `<div class="lbl" style="position:absolute;left:24px;top:${UPSTREAM.label}px;`
-      + `padding-left:0;font-size:18px;color:var(--ink)">${label}</div>` : '';
+      + `padding-left:0;font-size:21px;color:var(--ink)">${label}</div>` : '';
     return labelHtml + `<div style="position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;`
       + `transform:translateY(-50%);margin-top:${UPSTREAM.icon / 2}px">${ICON(icon, 52, C.slate, 1.6)}</div>`;
   }
@@ -96,8 +101,8 @@
         width: SELF_ZONE.w + 'px', height: SELF_ZONE.h + 'px',
       });
       s.cloud = E(root,
-        '<div style="position:absolute;left:24px;top:20px;height:34px;line-height:0;white-space:nowrap">'
-        + `<img src="${LOGO}" style="height:34px;vertical-align:-${CLOUD_TITLE.rise}px">`
+        '<div style="position:absolute;left:20px;top:18px;height:40px;line-height:0;white-space:nowrap">'
+        + `<img src="${LOGO}" style="height:40px;vertical-align:-${CLOUD_TITLE.rise}px">`
         + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`
         + '</div>' + upstreamBody(null, 'cloud'),
         'tile', { width: CLOUD_ZONE.w + 'px', height: CLOUD_ZONE.h + 'px', borderColor: C.uv, background: '#17182A' });
@@ -105,16 +110,17 @@
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
       s.outSparks = [0, 1].map(() => makeSpark(root, 12, RGB.violet));
 
-      // the ROUTING switch: its label, its track and knob, and its two options
+      // the ROUTING switch on its stem: its label, its track and knob, and its two options
+      s.stem = path(s.lane.svg, `M ${PROXY.x} ${STEM.y0} V ${STEM.y1}`, C.violet, 2.5, false);
       s.routing = E(root,
-        '<div class="lbl" style="position:absolute;left:14px;top:14px;padding-left:0;font-size:16px">Routing</div>'
+        '<div class="lbl" style="position:absolute;left:16px;top:14px;padding-left:0;font-size:21px">Routing</div>'
         + `<div style="position:absolute;left:${TRACK.left}px;top:${TRACK.top}px;width:${TRACK.w}px;`
         + `height:${TRACK.h}px;border:1.5px solid ${C.violet};border-radius:${TRACK.w / 2}px">`
         + `<div class="knob" style="position:absolute;left:${KNOB.inset}px;top:${KNOB.inset}px;width:${KNOB.size}px;`
         + `height:${KNOB.size}px;`
         + `border-radius:50%;background:${C.violet};box-shadow:0 0 12px rgba(${RGB.violet},.8)"></div></div>`
         + ['SELF-HOSTED', 'CLOUD'].map((name, i) => `<div class="option mono" style="position:absolute;`
-          + `left:${OPTIONS.left}px;top:${OPTIONS.tops[i]}px;font-size:16px;line-height:24px;letter-spacing:.04em">`
+          + `left:${OPTIONS.left}px;top:${OPTIONS.tops[i]}px;font-size:21px;line-height:28px;letter-spacing:.02em">`
           + `${name}</div>`).join(''),
         'tile', { width: ROUTING.w + 'px', height: ROUTING.h + 'px', textAlign: 'left', background: C.bg });
       s.knob = s.routing.querySelector('.knob');
@@ -123,8 +129,8 @@
       s.headSpark = makeSpark(root, 14, RGB.violet);
       s.tearSparks = Array.from({ length: TEAR.n }, () => makeSpark(root, 6, RGB.violet));
       s.landing = makeRipples(root, 2, RGB.violet);
-      s.unchanged = statusTag(root, { font: 17, icon: 17 });
-      s.unchanged.style.height = '34px';
+      s.unchanged = statusTag(root, { font: 21, icon: 21 });
+      s.unchanged.style.height = '40px';
     },
     update(t, c, s) {
       const flipAt = c[0] + T0.flip, tearAt = c[0] + T0.tear, redrawAt = c[0] + T0.redraw;
@@ -140,10 +146,10 @@
       const selfZone = lerpZone(PROXY_ZONES.temporal, SELF_ZONE, split);
       placeLane(s.lane, {
         ...BARE_WORKERS_HANDOFF.lane, envZone: PROXY_ZONES.env, temporalZone: selfZone,
-        temporal: lerp(1, 0.45, selfDim),
+        temporal: lerp(1, SELF_DIM, selfDim),
       });
       frameLaneEdges(s.lane, cam);
-      place(s.self, selfZone.x + selfZone.w / 2, selfZone.y + selfZone.h / 2, 1, split * lerp(1, 0.45, selfDim));
+      place(s.self, selfZone.x + selfZone.w / 2, selfZone.y + selfZone.h / 2, 1, split * lerp(1, SELF_DIM, selfDim));
       // Temporal Cloud rises in under it, dim, and lights up as the new connection reaches it
       const cloudLit = P(t, landAt, 0.3);
       rise(s.cloud, CLOUD_ZONE.x + CLOUD_ZONE.w / 2, CLOUD_ZONE.y + CLOUD_ZONE.h / 2,
@@ -196,10 +202,11 @@
         place(spark, x, y, 1, 1 - age / TEAR.life);
       });
 
-      // the proxy, with a swell of its glow as the switch flips; the ROUTING switch in it
+      // the proxy, with a swell of its glow as the switch flips; the ROUTING switch on its stem under it
       placeProxy(s.proxy, { glow: Math.max(0, 1 - Math.abs(t - flipAt - 0.15) / 0.5) });
       const routingPop = backPop(t, c[0] + T0.routing);
       place(s.routing, ROUTING.x, ROUTING.y, routingPop.s, routingPop.o);
+      draw(s.stem, P(t, c[0] + T0.routing - 0.15, 0.2));
       const flip = P(t, flipAt, 0.3, backOut);
       s.knob.style.transform = `translateY(${(KNOB.travel * flip).toFixed(2)}px)`;
       const toCloud = t >= flipAt + 0.15;

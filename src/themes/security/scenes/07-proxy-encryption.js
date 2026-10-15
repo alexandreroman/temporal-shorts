@@ -77,21 +77,23 @@
   const NO_CODE = { x: 1197, y: 600 };
   // TEMPORAL in the close layout: its left edge and width (on screen x 1373-1790); the TLS tube shortens with it
   const CLOSE_ZONE = { x: 1602, y: FLEET.y, w: 174, h: FLEET.h };
-  // TEMPORAL's list of stored payloads, one row per card that went through: each row's size, at camera rest (wide);
-  // in the close layout, drawn smaller (closeK) between the tube's mouth (24 px into the zone) and the zone's right
+  // TEMPORAL's list of stored payloads in the close shot, one row per card that went through, each with its wrapped
+  // data key: a row's size, drawn smaller (closeK) between the tube's mouth (24 px into the zone) and the zone's right
   // edge, 8 px clear of each, and centered on the tube; label: the list's label, top: the first row, pitch: from one
   // row to the next (all center y)
   const ROW = { w: 196, h: 32 };
   const CLOSE_ROW = { left: CLOSE_ZONE.x + 32, right: CLOSE_ZONE.x + CLOSE_ZONE.w - 8 };
   ROW.closeK = (CLOSE_ROW.right - CLOSE_ROW.left) / ROW.w;
-  const LIST_AT = {
-    close: { x: (CLOSE_ROW.left + CLOSE_ROW.right) / 2, label: 456, top: 482, pitch: 27 },
-    wide: { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, label: 236, top: 272, pitch: 40 },
+  const LIST_AT = { x: (CLOSE_ROW.left + CLOSE_ROW.right) / 2, label: 456, top: 482, pitch: 27 };
+  // The same list at camera rest, where the message is that TEMPORAL keeps ciphertext only: larger rows of ciphertext
+  // alone (no key), spread down TEMPORAL's column under its logo, clear of the tube's mouth (x: their center; w and h:
+  // a row's size; label, top, pitch as above), and CIPHERTEXT ONLY under them (cipherY)
+  const WIDE_LIST = {
+    x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w - 12 - 88, w: 176, h: 46, label: 266, top: 344, pitch: 76,
+    cipherY: 690,
   };
-  // CIPHERTEXT ONLY, under TEMPORAL's list at camera rest
-  const CIPHER_TAG = { x: LIST_AT.wide.x, y: 440 };
   // the Codec Server, in the proxy box under its name, at camera rest: center and size
-  const CODEC = { x: PROXY.x, y: 548, w: 172, h: 100 };
+  const CODEC = { x: PROXY.x, y: 558, w: 172, h: 136 };
   // the CLI and the Web UI windows, which open over the SDK client's and the Web UI's tiles: their slots, the
   // connections they read through (in s.links) and their titles and event lines
   const READERS = [
@@ -101,6 +103,8 @@
   // the IBAN on two lines in a window, and the name
   const IBAN = TRANSFER[0][1];
   const READER_VALUES = [IBAN.slice(0, 19), IBAN.slice(20), TRANSFER[2][1]];
+  // the seeds of their ciphertext (scrambledHtml): the IBAN's first line reads as stored row 2 (storedCipher(1))
+  const READER_SEEDS = [11, 111, 211];
   // the red sparks that burst from the link as it snaps: how many, how long each one flies
   const SPARKS = { n: 12, life: 0.7 };
 
@@ -109,11 +113,9 @@
     [1330, end.y], [end.x, end.y]];
   // Its way out, from where it was sealed, through the tube to its row in TEMPORAL's list
   const rideOut = row => [[SEAL.x, SEAL.y], [1560, LANE.wire.y], [row[0] - 80, row[1]], row];
-  // The center of row i of TEMPORAL's list, and of its label, at the pull-back's progress wide (0 to 1)
-  function listRow(i, wide) {
-    const { close, wide: w } = LIST_AT;
-    return [lerp(close.x, w.x, wide), lerp(close.top + i * close.pitch, w.top + i * w.pitch, wide)];
-  }
+  // The center of row i of TEMPORAL's list in the close shot, and in the wide one
+  const closeRow = i => [LIST_AT.x, LIST_AT.top + i * LIST_AT.pitch];
+  const wideRow = i => [WIDE_LIST.x, WIDE_LIST.top + i * WIDE_LIST.pitch];
   // The point at progress p along a path element, from its end back to its start if `back`
   function alongPath(pathEl, p, back = false) {
     const point = pathEl.getPointAtLength(pathEl._L * clamp(back ? 1 - p : p));
@@ -190,15 +192,26 @@
     setHtml(e, `${icon}${wrapped ? 'WRAPPED' : 'DATA'} KEY ${n}`);
     Object.assign(e.style, { width: px(200), justifyContent: 'center', borderStyle: wrapped ? 'solid' : 'dashed' });
   }
-  // A row of TEMPORAL's list (ROW, at camera rest): a neon lock, ciphertext, and the number of its data key
+  // The ciphertext of stored payload i, its first n glyphs (the same glyphs in both lists and in the windows)
+  const storedCipher = (i, n) => Array.from({ length: n }, (_, col) => cipherGlyph(i + 10, col)).join('');
+  // A row of the close shot's list (ROW): ciphertext, then the payload's wrapped data key behind the violet lock of
+  // the cards' WRAPPED KEY tag; a wrapped key is ciphertext too, which only your KMS can unwrap
   const makeListRow = (root, i, key) => E(root,
-    `${ICON('lock', 14, C.neon, 2.2)}<span class="mono" style="font-size:16px;color:${C.violet}">`
-    + `${Array.from({ length: 8 }, (_, col) => cipherGlyph(i + 10, col)).join('')}</span>`
-    + `<span class="key mono" style="margin-left:auto;font-size:16px;line-height:20px;letter-spacing:.06em;`
-    + `padding:0 6px;border:1.5px solid ${C.violet};border-radius:4px;color:${C.violet}">KEY ${key}</span>`,
+    `<span class="mono" style="font-size:16px;color:${C.violet}">${storedCipher(i, 5)}</span>`
+    + `<span class="key mono" style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:15px;`
+    + `line-height:20px;letter-spacing:.04em;padding:0 5px;border:1.5px solid ${C.violet};border-radius:4px;`
+    + `color:${C.violet}">${ICON('lock', 13, C.violet, 2.2)}WRAPPED ${key}</span>`,
     '', {
       width: ROW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 8px',
       background: C.bg, border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+    });
+  // A row of the wide shot's list: a neon lock and the payload's ciphertext, at camera rest (values 18.5 px on screen)
+  const makeWideRow = (root, i) => E(root,
+    `${ICON('lock', 18, C.neon, 2.2)}<span class="mono" style="font-size:21px;color:${C.violet}">`
+    + `${storedCipher(i, 8)}</span>`,
+    '', {
+      width: WIDE_LIST.w + 'px', height: WIDE_LIST.h + 'px', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', gap: '10px', background: C.bg, border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
     });
   // A window that reads the payload through the proxy, in the dark look of the Temporal Web UI: a title bar, then row
   // 2 of the Event History (its event line) and the payload's IBAN, on two lines, and name, keys above values
@@ -226,7 +239,7 @@
   }
   // clear (0 to 1): the window's values turn from ciphertext to clear, left to right
   function setReader(win, clear) {
-    win.values.forEach((e, i) => setHtml(e, scrambledHtml(10 + i, READER_VALUES[i], 1 - clear, true)));
+    win.values.forEach((e, i) => setHtml(e, scrambledHtml(READER_SEEDS[i], READER_VALUES[i], 1 - clear, true)));
   }
   // A small pill that carries the payload along a connection: its text in ciphertext (violet) or in clear (neon)
   const makePacket = (root, html, color) => E(root, html, 'mono', {
@@ -279,6 +292,14 @@
       // this chapter's parts: TEMPORAL's list, YOUR KMS and its link, the DATA KEY, the gate
       s.listLabel = E(root, 'Stored payloads', 'lbl', { fontSize: '16px', width: ROW.w + 'px', paddingLeft: '0' });
       s.rows = RUNS.filter(run => !run.fails).map((run, i) => makeListRow(root, i, run.key));
+      s.wideLabel = E(root, 'Stored<br>payloads', 'lbl', {
+        fontSize: '21px', lineHeight: '28px', width: WIDE_LIST.w + 'px', paddingLeft: '0',
+      });
+      s.wideRows = s.rows.map((_, i) => makeWideRow(root, i));
+      s.cipherTag = E(root, 'Ciphertext<br>only', 'lbl', {
+        width: WIDE_LIST.w + 'px', padding: '8px 0', fontSize: '21px', lineHeight: '28px', textAlign: 'center',
+        color: C.violet, border: `1.5px solid ${C.violet}`, borderRadius: 'var(--rs)', background: VERDICT_FILL.wait,
+      });
       s.kms = makeKms(root);
       s.top = svgLayer(root);
       const { x0, y0, x, x1, y1, breakY } = LINK;
@@ -295,9 +316,9 @@
         border: `${px(2)} solid ${C.red}`, boxShadow: `0 0 ${px(24)} rgba(${RGB.red},.6)`,
       });
       s.codec = E(root,
-        `${ICON('server', 24, C.ink, 1.8)}<div class="lbl" style="font-size:16px;color:var(--ink);margin-top:8px">`
-        + 'Codec Server</div><div class="mono" style="font-size:16px;letter-spacing:.12em;padding-left:.12em;'
-        + `color:${C.violet};margin-top:4px">BUILT IN</div>`,
+        `${ICON('server', 26, C.ink, 1.8)}<div class="lbl" style="font-size:21px;line-height:26px;color:var(--ink);`
+        + 'text-align:center;margin-top:8px">Codec<br>Server</div><div class="mono" style="font-size:21px;'
+        + `letter-spacing:.12em;padding-left:.12em;color:${C.violet};margin-top:6px">BUILT IN</div>`,
         'tile', {
           width: CODEC.w + 'px', height: CODEC.h + 'px', display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center', background: C.bg,
@@ -313,7 +334,7 @@
         });
         return { card, keyTag, fly };
       });
-      s.fetch = makePacket(root, `${scrambledHtml(0, IBAN.slice(0, 9), 1)}`, C.violet);
+      s.fetch = makePacket(root, scrambledHtml(READER_SEEDS[0], IBAN.slice(0, 9), 1), C.violet);
       s.deliver = READERS.map(() => makePacket(root, IBAN.slice(0, 9), C.neon));
       s.noCode = closeTag(root, 'NO CODE CHANGE', 'ok', 20, 'var(--neon-solid)');
       s.callFailed = closeTag(root, 'CALL FAILED', 'denied', 18, 'var(--red-solid)');
@@ -323,8 +344,6 @@
         color: C.red, background: 'var(--red-solid)', whiteSpace: 'nowrap', fontWeight: 700,
         boxShadow: `0 0 ${px(30)} rgba(${RGB.red},.5)`,
       });
-      s.cipherTag = statusTag(root, { font: 16, icon: 16 });
-      s.cipherTag.style.height = '32px';
       s.sealRipples = RUNS.map(() => makeRipples(root, 2, RGB.violet));
       s.wrapRipples = makeRipples(root, 2, RGB.violet);
       s.gateRipples = makeRipples(root, 2, RGB.red);
@@ -353,7 +372,8 @@
       // what the close shot crops at the frame's edge stays dimmed until the pull-back frames it whole, in the last
       // part of the move
       const wide = P(t, pullAt, T4.pullD);
-      const offShot = lerp(OFF_SHOT, 1, clamp((wide - 0.7) / 0.3));
+      const reveal = clamp((wide - 0.7) / 0.3);
+      const offShot = lerp(OFF_SHOT, 1, reveal);
       // what only the close shot shows leaves with the pull-back
       const closeOnly = 1 - P(t, pullAt, T4.pullD * 0.6);
 
@@ -374,10 +394,10 @@
         });
         tile.lines[1].style.color = C.violet;
       });
-      const kmsIn = P(t, c[1] + T1.kms, 0.3) * closeOnly;
-      s.clients.forEach((tile, i) => {
-        place(tile, FLEET_CLIENTS[i].x, FLEET_CLIENTS[i].y, 1, offShot * (i === 0 ? 1 - kmsIn : 1));
-      });
+      // the SDK client and the Web UI, cropped by the close shot into the header and subtitle bands, fade out with
+      // TEMPORAL's move, and come back once the pull-back frames them whole
+      const clientsO = lerp(OFF_SHOT * (1 - P(t, c[0] + T0.close, 0.5)), 1, reveal);
+      s.clients.forEach((tile, i) => place(tile, FLEET_CLIENTS[i].x, FLEET_CLIENTS[i].y, 1, clientsO));
 
       // the connections and their light; the proxy's connection to TEMPORAL follows TEMPORAL's edge
       s.links.forEach((link, i) => {
@@ -414,7 +434,7 @@
 
       // chapter 6's card in its Namespace, dimmed, fades out with the Namespace as TEMPORAL moves in
       const sentO = OFF_SHOT * (1 - P(t, c[0] + T0.close, 0.5));
-      rise(s.band, PROXY_BAND.x, PROXY_BAND.y, sentO);
+      place(s.band, PROXY_BAND.x, PROXY_BAND.y, 1, sentO);
       s.band.style.borderColor = C.violet;
       s.band.style.background = `rgba(${RGB.violet},.1)`;
       s.band.style.boxShadow = glowShadow(RGB.violet, 1, { blur: 36, alpha: 0.4 });
@@ -501,7 +521,7 @@
         if (!run.fails) {
           const out = P(t, at + run.out, run.outD);
           if (out > 0) {
-            [x, y] = bezier(rideOut(listRow(rowI, 0)), out);
+            [x, y] = bezier(rideOut(closeRow(rowI)), out);
             k = lerp(1, 0.4, out);
             o *= 1 - P(out, 0.6, 0.4, linear);
           }
@@ -549,20 +569,24 @@
           place(keyTag, dock[0], dock[1], k * tagPop.s, tagPop.o * o);
         }
 
-        // its row in TEMPORAL's list rises in as it lands, and follows the list through the pull-back
+        // its row in TEMPORAL's list rises in as it lands; the pull-back carries the row toward the wide list as it
+        // fades, and the wide list's row comes in once the shot holds it
         if (run.fails) return;
         const landed = P(t, at + run.out + run.outD - 0.15, 0.3);
-        const [rowX, rowY] = listRow(rowI, wide);
+        const [closeX, closeY] = closeRow(rowI), [wideX, wideY] = wideRow(rowI);
         const rowE = s.rows[rowI];
-        place(rowE, rowX, rowY + (1 - landed) * 6, lerp(ROW.closeK, 1, wide), landed * (1 - clear));
+        place(rowE, lerp(closeX, wideX, wide), lerp(closeY, wideY, wide) + (1 - landed) * 6,
+          lerp(ROW.closeK, 1, wide), landed * closeOnly);
+        place(s.wideRows[rowI], wideX, wideY, 1, landed * reveal * (1 - clear));
         // the payloads that keep the first data key light up once the key has rotated
         const keep = run.key === 1 ? win(t, c[2] + T2.keep, c[2] + T2.keep + 0.6, 0.2) : 0;
         rowE.querySelector('.key').style.boxShadow = glowShadow(RGB.neon, keep, { blur: 12, alpha: 0.8 });
         rowE.style.borderColor = keep > 0.5 ? C.neon : C.lineLight;
       });
-      const labelY = lerp(LIST_AT.close.label, LIST_AT.wide.label, wide);
       const firstLanded = P(t, runAt(RUNS[0]) + RUNS[0].out + RUNS[0].outD - 0.15, 0.3);
-      place(s.listLabel, listRow(0, wide)[0], labelY, lerp(ROW.closeK, 1, wide), firstLanded * (1 - clear));
+      place(s.listLabel, lerp(LIST_AT.x, WIDE_LIST.x, wide), lerp(LIST_AT.label, WIDE_LIST.label, wide),
+        lerp(ROW.closeK, 1, wide), firstLanded * closeOnly);
+      place(s.wideLabel, WIDE_LIST.x, WIDE_LIST.label, 1, reveal * (1 - clear));
 
       // NO CODE CHANGE, in your environment, where the Workers' connections come from
       const noCode = popIn(t, c[0] + T0.noCode);
@@ -589,7 +613,7 @@
       place(s.codec, CODEC.x, CODEC.y, codecPop.s * swell(t, decryptAt, 0.1), codecPop.o * (1 - clear));
       s.codec.style.borderColor = t >= decryptAt ? C.violet : C.line;
       const fetch = P(t, c[4] + T4.fetch, T4.tripD);
-      const [fromX, fromY] = listRow(1, 1);
+      const [fromX, fromY] = wideRow(1);
       const [fetchX, fetchY] = bezier([[fromX, fromY], [fromX - 60, LANE.wire.y], [PROXY_WIRE.x1, LANE.wire.y],
         [PROXY_WIRE.x0 + 10, LANE.wire.y]], fetch);
       place(s.fetch, fetchX, fetchY, 1, fetch > 0 && fetch < 1 ? 1 : 0);
@@ -608,10 +632,7 @@
         place(s.deliver[i], px1, py1, 1, deliver > 0 && deliver < 1 ? 1 : 0);
       });
       const cipherIn = popIn(t, c[4] + T4.ciphertext);
-      setStatus(s.cipherTag, 'CIPHERTEXT ONLY', 'wait');
-      // opaque: it sits on TEMPORAL's fill
-      s.cipherTag.style.background = VERDICT_FILL.wait;
-      place(s.cipherTag, CIPHER_TAG.x, CIPHER_TAG.y, cipherIn.s, cipherIn.o * (1 - clear));
+      place(s.cipherTag, WIDE_LIST.x, WIDE_LIST.cipherY, cipherIn.s, cipherIn.o * (1 - clear));
     }
   });
 }

@@ -239,7 +239,9 @@
 
       // the payments Namespace waits in Temporal, under its full name, and lights up as the card lands in it
       const lit = P(t, landAt, 0.3);
-      rise(s.band, PROXY_BAND.x, PROXY_BAND.y, P(t, c[2] + T2.band, 0.5) * dimPush);
+      // it rises in, then dims in place as the push into the proxy crops it
+      const bandIn = P(t, c[2] + T2.band, 0.5);
+      place(s.band, PROXY_BAND.x, PROXY_BAND.y + (1 - bandIn) * 24, 1, bandIn * dimPush);
       s.band.style.borderColor = lit > 0 ? C.violet : C.line;
       s.band.style.background = `rgba(${RGB.violet},${(0.03 + 0.07 * lit).toFixed(3)})`;
       s.band.style.boxShadow = glowShadow(RGB.violet, lit, { blur: 36, alpha: 0.4 });
