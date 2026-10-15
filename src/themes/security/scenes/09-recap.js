@@ -7,7 +7,7 @@
 {
   // seconds after c[0] when each tile lands: as the subtitle names its benefit, at its position at 16 characters per
   // second plus 0.3 s; the first one 0.05 s later, so that its drop starts at c[0]
-  const LAND_AT = [0.35, 1.68, 3.55, 5.49];
+  const LAND_AT = [0.35, 1.68, 3.55, 5.11];
   // the drop: the tile falls from DROP.scale to its resting size over DROP.d seconds, ending as it lands, and fades
   // in over the first `fade` of it
   const DROP = { scale: 1.3, d: 0.35, fade: 0.6 };
@@ -25,9 +25,8 @@
     holdBeforeEnd: 0.6,
     subs: [
       {
-        text: 'Your code stays home, every connection is verified, Temporal sees only ciphertext, '
-          + 'Workers hold no secrets.',
-        // the last padlock's ripples end at c[0] + 7.1: the full row then holds about 1.4 s before the cut
+        text: 'Your code stays home, every connection is verified, payloads stay encrypted, Workers hold no secrets.',
+        // the last padlock's ripples end at c[0] + 6.7: the full row then holds about 1.4 s before the cut
         after: 0.6,
       },
     ],

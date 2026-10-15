@@ -1,7 +1,7 @@
 # Security with Temporal
 
-Where your code runs, what Temporal stores, who holds the keys, and how Temporal
-Proxy keeps credentials and encryption out of your Workers.
+Where your code runs, what Temporal stores, who holds the keys, and what
+Temporal Proxy adds.
 
 [Watch the video](/themes/security/)
 
@@ -82,12 +82,12 @@ Workers don't change.
 
 [Watch from 2:51](/themes/security/#t=171)
 
-Your code stays home, every connection is verified, Temporal sees only
-ciphertext, Workers hold no secrets.
+Your code stays home, every connection is verified, payloads stay encrypted,
+Workers hold no secrets.
 
 ## Chapter 10: What you can build
 
-[Watch from 3:00](/themes/security/#t=180)
+[Watch from 2:59](/themes/security/#t=179)
 
 Nora's transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -95,6 +95,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 3:14](/themes/security/#t=194)
+[Watch from 3:13](/themes/security/#t=193)
 
 With Temporal, your code, your keys and your data stay yours.

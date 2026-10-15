@@ -287,12 +287,13 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 - **2:33** Its built-in Codec Server lets the Web UI and the CLI show the
   decrypted payloads.
   - Visuals: The link heals, the gate lifts and the failed card goes back
-    to its Worker. The camera pulls back to the whole lane: CODEC SERVER /
-    BUILT IN appears in the proxy box, and a TEMPORAL CLI and a TEMPORAL
-    WEB UI window open over the client tiles, showing row 2 in ciphertext.
-    Row 2 travels from TEMPORAL into the proxy, and both windows decrypt
-    it, the IBAN and Leo Martin in clear, while TEMPORAL's STORED PAYLOADS
-    stay in ciphertext: CIPHERTEXT ONLY.
+    to its Worker. The camera pulls back in one steady move, out of the
+    proxy to the whole fleet: CODEC SERVER / BUILT IN appears in the proxy
+    box, and a TEMPORAL CLI and a TEMPORAL WEB UI window open over the
+    client tiles, showing row 2 in ciphertext. Row 2 travels from TEMPORAL
+    into the proxy, and both windows decrypt it, the IBAN and Leo Martin in
+    clear, while TEMPORAL's STORED PAYLOADS stay in ciphertext: CIPHERTEXT
+    ONLY.
 
 ## 08 Change Temporal, not your code
 
@@ -310,8 +311,8 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 09 What you get
 
-- **2:51** Your code stays home, every connection is verified, Temporal
-  sees only ciphertext, Workers hold no secrets.
+- **2:51** Your code stays home, every connection is verified, payloads
+  stay encrypted, Workers hold no secrets.
   - Visuals: 4 tall benefit tiles drop in one at a time across the frame
     as the subtitle names them, each lighting up as it lands while the
     padlock badge on its top edge snaps shut with neon ripples: NO INBOUND
@@ -329,14 +330,14 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     "passport scans, encrypted" / PAYROLL RUNS (calendar) "salaries never
     in clear" / AI AGENTS ON CUSTOMER DATA (robot) "prompts and replies
     sealed".
-- **3:06** Health claims, KYC onboarding, payroll runs, AI agents on
+- **3:05** Health claims, KYC onboarding, payroll runs, AI agents on
   customer data: the data stays yours.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **3:14** With Temporal, your code, your keys and your data stay yours.
+- **3:13** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.
