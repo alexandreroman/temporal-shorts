@@ -12,13 +12,14 @@ The theme picker (`src/index.html`, `src/home.css`) follows these rules:
 - Cards sit in a flexible grid (auto-fit columns, equal row heights) that
   takes any number of videos: adding a card needs no CSS change.
 - Card size is responsive: columns are at least 260 px wide and stretch to
-  share the available width. With 5 cards: 5 in a row from a ~1530 px
-  window (so at 1920 px), 4+1 from ~1220 px (so at 1280 px), 3+2 from
-  ~910 px, 2 columns from ~590 px, 1 column on phones. Padding and icon
+  share the available width: 5 columns at most from a ~1530 px window
+  (so at 1920 px), 4 from ~1220 px (so at 1280 px), 3 from ~910 px, 2
+  from ~590 px, 1 column on phones. With 6 cards: 5+1 at 1920 px, 4+2 at
+  1280 px. Padding and icon
   scale with `clamp()`.
 - Card order: Meet Temporal (the entry point for newcomers, with a
   handshake icon), Introduction to Durable Execution, Human-in-the-Loop,
-  Durable AI Agents, Temporal Agent Harness.
+  Durable AI Agents, Temporal Agent Harness, Tuning Temporal Workers.
 - The home page `<meta name="description">` names the themes and is
   edited by hand.
 - Cards show no video duration.

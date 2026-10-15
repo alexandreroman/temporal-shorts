@@ -11,8 +11,6 @@
   const GHOST = { left: 1180, top: DIAGRAM.readout.top, w: 620, h: 264, label: 30 };
   const GHOST_X = GHOST.left + GHOST.w / 2, GHOST_Y = GHOST.top + GHOST.h / 2;
   const WORKER_X = DIAGRAM.worker.left + DIAGRAM.worker.w / 2, WORKER_Y = DIAGRAM.worker.top + DIAGRAM.worker.h / 2;
-  // SCHEDULE-TO-START, in seconds: one decimal below 10 s
-  const formatWait = v => (v < 10 ? v.toFixed(1) : String(Math.round(v))) + ' s';
 
   scene({
     chapter: 1, title: 'The backlog grows',

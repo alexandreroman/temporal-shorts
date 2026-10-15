@@ -25,6 +25,8 @@ const ORDER_ACTIVITIES = [
 const activityIcon = k => ORDER_ACTIVITIES[k % ORDER_ACTIVITIES.length].icon;
 // A count with thousands separators, the same whatever the locale: 2400 -> '2,400'
 const withCommas = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+// A SCHEDULE-TO-START value in seconds: one decimal below 10 s ('9.4 s', '44 s')
+const formatWait = v => (v < 10 ? v.toFixed(1) : String(Math.round(v))) + ' s';
 // Shows a label positioned by its top left corner (whole pixels, so its text always rasters the same way)
 function showAt(e, left, top, o) {
   e.style.left = left + 'px';
@@ -169,6 +171,9 @@ const SLOT_ORDER = [
 ];
 // The Slots of a grid of n that stay free with `busy` of them busy, in filling order: targets for a flow
 const freeSlots = (n, busy) => SLOT_ORDER.filter(i => i < n).slice(busy);
+// Icon of steadily busy Activity Slot i (the default `icon` of the slots state): a flow that lands its task with this
+// icon (its `icon` option) leaves the Slot looking the same once a chapter counts it as steadily busy
+const steadySlotIcon = i => activityIcon(i * 2 + Math.floor(i / 10));
 const slotRows = n => Math.ceil(n / DIAGRAM.slot.cols);
 // Middle of Activity Slot i in a grid of `rows` rows, the rows centered on the Activity lane
 function slotCenter(i, rows) {
@@ -197,6 +202,8 @@ function flowDeparted(flow, t) {
 }
 // Number of tasks of a flow that have landed in their Slot by t: key the meters to it
 const flowLanded = (flow, t) => flowDeparted(flow, t - FLIGHT.land);
+// Number of tasks of a flow that hold their Slot at t: landed, and not yet past their `hold`
+const flowHolding = (flow, t) => flowLanded(flow, t) - (flow.hold === undefined ? 0 : flowLanded(flow, t - flow.hold));
 // Where a chip is u seconds after leaving the head: on its way to the Poller, then to the Slot (each leg eased)
 function flightPoint(u, head, poller, slot) {
   if (u < FLIGHT.leg) {
@@ -322,8 +329,9 @@ function makeMark(root) {
 }
 // box: { left, top, w, h } of the outline; spot: where the tag sits, 'above' (centered over the outline),
 // 'above-right' (over its right end) or 'astride' (centered on its top edge); m: { at, fixedAt, out }, when the
-// marker shows (BOTTLENECK), turns FIXED and fades out (undefined: hidden)
-function placeMark(mark, t, box, spot, m) {
+// marker shows (BOTTLENECK), turns FIXED and fades out (undefined: hidden); minLeft: the leftmost x of the tag, which
+// keeps it clear of a label on its left
+function placeMark(mark, t, box, spot, m, minLeft = -Infinity) {
   const on = m ? P(t, m.at, 0.3) * (1 - P(t, m.out ?? Infinity, 0.4)) : 0;
   const fixed = m && m.fixedAt !== undefined && t >= m.fixedAt;
   Object.assign(mark.box.style, { width: box.w + 'px', height: box.h + 'px' });
@@ -337,7 +345,7 @@ function placeMark(mark, t, box, spot, m) {
   setStatus(mark.tag, fixed ? 'FIXED' : 'BOTTLENECK', fixed ? 'fixed' : 'bottleneck');
   const w = parseFloat(mark.tag.style.width) || 0;
   const right = box.left + box.w;
-  const left = spot === 'above-right' ? right - w : box.left + box.w / 2 - w / 2;
+  const left = Math.max(minLeft, spot === 'above-right' ? right - w : box.left + box.w / 2 - w / 2);
   const top = spot === 'astride' ? box.top - 16 : box.top - 38;
   mark.tag.style.left = left + 'px';
   mark.tag.style.top = top + 'px';
@@ -448,10 +456,10 @@ function placeWorkerDiagram(dg, t, state = {}) {
   placeMarks(dg, t, state, layout);
 }
 
-// The Activity Slot grid at t: n Slots, the rows its layout has (fractional while it grows), how each Slot shows
-// ({ s, o } for place()) and `last`, the index of the last Slot of the rows it shows
+// The Activity Slot grid at t: n Slots, the rows its layout has (fractional while it grows) and how each Slot shows
+// ({ s, o } for place())
 function slotLayout({ n = 10, grow }, t) {
-  if (!grow) return { n, rowsAt: () => slotRows(n), shownAt: () => ({ s: 1, o: 1 }), last: n - 1 };
+  if (!grow) return { n, rowsAt: () => slotRows(n), shownAt: () => ({ s: 1, o: 1 }) };
   const spread = P(t, grow.at, 0.5);
   const fromRows = slotRows(grow.from), toRows = slotRows(n);
   return {
@@ -459,7 +467,6 @@ function slotLayout({ n = 10, grow }, t) {
     // the rows spread out first, then the new Slots pop in, 0.02 s apart
     rowsAt: () => lerp(fromRows, toRows, spread),
     shownAt: i => (i < grow.from ? { s: 1, o: 1 } : backPop(t, grow.at + 0.45 + (i - grow.from) * 0.02, 0.35)),
-    last: t < grow.at ? grow.from - 1 : n - 1,
   };
 }
 // Middle of Activity Slot i at t, on whole pixels: while the grid grows, each row eases from its place in the old
@@ -520,7 +527,7 @@ function placeLanes(dg, t, state, o) {
 }
 // Activity and Workflow Slots: steadily busy ones, then those the flows hold (a swell as each task lands), replays
 function placeSlots(dg, t, state, layout, flights, slotsO, wfO) {
-  const { n = 10, busy = 0, replay = [], icon = i => activityIcon(i * 2 + Math.floor(i / 10)) } = state.slots ?? {};
+  const { n = 10, busy = 0, replay = [], icon = steadySlotIcon } = state.slots ?? {};
   const iconOf = state.taskIcon ?? activityIcon;
   const looks = dg.slots.map(() => ({ look: 'free', icon: null, s: 1 }));
   SLOT_ORDER.filter(i => i < n).slice(0, busy).forEach(i => { looks[i] = { look: 'busy', icon: icon(i), s: 1 }; });
@@ -752,27 +759,28 @@ function placeMarks(dg, t, state, layout) {
   const marks = state.marks ?? {};
   const pad = 8;
   const { slot, cache, poller, meter } = DIAGRAM;
-  // the Activity Slot grid, from its first row to its last one, following the rows while the grid grows
+  // the Activity Slot grid, from its first row to its last one, following the rows while the grid grows: the rows are
+  // centered on the Activity lane, so the outline opens evenly up and down as they spread out
   const gridW = (slot.cols - 1) * slot.pitchX + slot.w;
   const gridTop = slotPoint(layout, 0)[1] - slot.h / 2;
-  const gridBottom = slotPoint(layout, layout.last)[1] + slot.h / 2;
+  const gridBottom = 2 * DIAGRAM.actY - gridTop;
   placeMark(dg.marks.slots, t, {
     left: slot.left - pad, top: gridTop - pad, w: gridW + 2 * pad, h: gridBottom - gridTop + 2 * pad,
   }, 'above-right', marks.slots);
-  // the Activity Pollers' column
-  const n = activityPollers(state.pollers ?? {}, t).working;
-  const colH = (n - 1) * poller.pitch + poller.size;
+  // the Activity Pollers' column, from its first Poller to its last one, following them while the column spreads out
+  const act = activityPollers(state.pollers ?? {}, t);
   const pollPad = 10;
+  const colTop = act.y(0) - poller.size / 2 - pollPad;
+  const colBottom = act.y(act.n - 1) + poller.size / 2 + pollPad;
   placeMark(dg.marks.pollers, t, {
-    left: poller.x - poller.size / 2 - pollPad, top: DIAGRAM.actY - colH / 2 - pollPad,
-    w: poller.size + 2 * pollPad, h: colH + 2 * pollPad,
+    left: poller.x - poller.size / 2 - pollPad, top: colTop, w: poller.size + 2 * pollPad, h: colBottom - colTop,
   }, 'above', marks.pollers);
-  // the cache strip
+  // the cache strip; over a short strip, the tag stays 20 px right of the WORKFLOW CACHE label
   const cells = state.cache?.cells ?? 4;
   placeMark(dg.marks.cache, t, {
     left: cache.left - pad, top: DIAGRAM.wfY - cache.h / 2 - pad,
     w: (cells - 1) * cache.pitch + cache.w + 2 * pad, h: cache.h + 2 * pad,
-  }, 'above-right', marks.cache);
+  }, 'above-right', marks.cache, cache.left + dg.labels.cache.offsetWidth + 20);
   // the CPU meter
   placeMark(dg.marks.cpu, t, {
     left: meter.left - pad, top: meter.top.cpu - pad, w: meter.w + 2 * pad, h: meter.h + 2 * pad,

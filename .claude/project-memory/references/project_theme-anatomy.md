@@ -51,7 +51,8 @@ the visuals belong to each theme (last section).
   chapter, so every chapter title stays true to its content.
 - Use cases: every explainer has a **What you can build** chapter after
   the recap, right before the outro (`NN-use-cases.js`); a product
-  presentation (agent-harness) ends on its recap. Topic lists in
+  presentation (agent-harness) and a guide (worker-tuning) end on their
+  recap. Topic lists in
   `script.md` leave out both chapters.
   - The scene is one `useCaseScene({ chapter, uses, namedAt, subs })`
     call (`src/shared.js`). 4 `useCaseTile`s (icon, uppercase label,
@@ -363,6 +364,41 @@ below and the card order in [Home page design](feedback_home-page.md).
   between zones; chapters place elements at final positions, with no fixed
   `shift`; ch2 is the model. Pans: ch1 (SDK tags fade), ch4 (console slides in),
   ch8 (code column centered alone, then the UI window enters).
+
+### worker-tuning
+
+- A guide for developers and SREs who already run Workers: one symptom, a
+  growing Task Queue backlog, and its four causes, told as one Black
+  Friday night where each fix moves the bottleneck: Slots (ch3), Pollers
+  (ch4), the Workflow cache (ch5), the CPU (ch6). The hook "add more
+  Workers?" gets its answer only in ch6, once the CPU is full. Ch7, "Read
+  the signals", is the recap (symptom / signal / fix table and the loop
+  change one setting, watch, next bottleneck); no "What you can build"
+  chapter, as for agent-harness.
+- Inspired by the Temporal Worker Tuning Simulator
+  (https://github.com/cvilenio/temporal-worker-tuning-simulator), concepts
+  only: the repository has no license, so no code, image or color comes
+  from it.
+- Every setting, default and metric matches the Temporal docs and the
+  TypeScript SDK (`### Sources` in `script.md`): defaults are 100 Activity
+  Slots, so the story's Worker is set to 10 "for normal days"; the Poller
+  fix is Poller Autoscaling (`activityTaskPollerBehavior: { type:
+  'autoscaling' }`), never a manual poller count, as the docs recommend;
+  more Workers only when the hosts are fully used. Resource-based tuners,
+  rate limits and partitions stay out.
+- Running example: the durable-execution shop, orders x10; five
+  Activities, `chargeCard`, `reserveItem`, `renderInvoice` (CPU-heavy
+  PDF, `invoice` icon), `shipPackage`, `emailReceipt`. One set of figures:
+  10 Activity Slots raised to 50; cache 500 raised to 2000 with memory
+  2 GB to 4 GB; Workers A, then B and C.
+- One stage for ch1-6, the Worker diagram (`makeWorkerDiagram`,
+  `placeWorkerDiagram` in its `shared.js`): TEMPORAL panel with the
+  Workflow and Activity lanes, WORKER panel with Pollers, Slots and the
+  WORKFLOW CACHE, readouts, CPU and MEMORY meters, the `Worker.create()`
+  code card; a bottleneck gets a red outline and BOTTLENECK tag, then a
+  neon FIXED tag. Each bottleneck chapter: symptom, what is full, the
+  setting, relief, the next bottleneck showing.
+- Slower pacing, as agent-harness: `pre: 1.5, post: 2.0` on chapters.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title
