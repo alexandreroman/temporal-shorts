@@ -4,7 +4,8 @@
 // lane (PAYLOAD_IN_WORKER).
 // The block keeps every name declared in this file local to this scene.
 {
-  // title block and card, measured: x 138-1780, each centered on y 515 (the card's lock badge included)
+  // title block and card, measured: x 138-1780. The title block spans y 287-743, centered on y 515; the card is
+  // centered on y 530, so that with its lock badge it spans y 299-732, centered on y 515 too
   const TITLE = { x: 590, y: 515 };
   const CARD = { x: 1480, y: 530, w: 600 };
   // one pass of the loop, in seconds from its start: the lock snaps shut, the two IBANs scramble one after the

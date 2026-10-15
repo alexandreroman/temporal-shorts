@@ -23,6 +23,30 @@ Object.assign(ICONS, {
   medical: '<path d="M9 3.5h6V9h5.5v6H15v5.5H9V15H3.5V9H9z"/>',
 });
 
+// ---------- DOM writes that skip unchanged values: update() runs every frame, and rewriting the same HTML, text or
+// path costs a relayout for nothing
+// Sets an element's HTML, rewritten only when it changes
+function setHtml(e, html) {
+  if (e._html !== html) {
+    e.innerHTML = html;
+    e._html = html;
+  }
+}
+// Sets an element's text, rewritten only when it changes
+function setText(e, text) {
+  if (e._text !== text) {
+    e.textContent = text;
+    e._text = text;
+  }
+}
+// Sets a path's d, and its length (for draw()), only when it changes
+function setD(pathEl, d) {
+  if (pathEl._d === d) return;
+  pathEl.setAttribute('d', d);
+  pathEl._L = pathEl.getTotalLength();
+  pathEl._d = d;
+}
+
 // ---------- the running example: Nora sends €25,000 to Leo, one payload carried through every chapter
 // The payload's fields, [key, value], in the order the card lists them
 const TRANSFER = [
@@ -163,12 +187,7 @@ function setPayload(card, { seal = 0, scramble = 0, red = 0, fromRight = false }
   card.lockBadge.style.borderColor = seal >= LOCK_SHUT ? C.neon : C.line;
   card.rows.forEach(row => {
     const s = Array.isArray(scramble) ? scramble[row.i] : scramble;
-    const html = scrambledHtml(row.i, TRANSFER[row.i][1], s, fromRight);
-    // rewritten only when it changes: the same state always gives the same text
-    if (row.value._html !== html) {
-      row.value.innerHTML = html;
-      row.value._html = html;
-    }
+    setHtml(row.value, scrambledHtml(row.i, TRANSFER[row.i][1], s, fromRight));
   });
   card.alarm.style.opacity = clamp(red);
   card.style.boxShadow = glowShadow(RGB.red, clamp(red), { blur: Math.round(40 * card.u), alpha: 0.45 });
@@ -259,7 +278,7 @@ function frameLaneEdges(lane, cam) {
   const { top, bottom } = contentBand(cam);
   lane.frameClip.setAttribute('y', top.toFixed(2));
   lane.frameClip.setAttribute('height', (bottom - top).toFixed(2));
-  const zones = lane.zones ?? LANE;
+  const { zones } = lane;
   [[lane.env, zones.env], [lane.temporal, zones.temporal]].forEach(([el, zone]) => {
     clipToContent(el, zone.y, zone.h, cam);
     const zoneBottom = zone.y + zone.h;
@@ -396,39 +415,38 @@ function placeLane(lane, o = {}) {
 // label sits above it, centered on label.
 const TUBE = { x0: LANE.worker.x + LANE.worker.w / 2, x1: LANE.temporal.x + 24, y: LANE.wire.y, h: 176, k: 0.6 };
 TUBE.label = { x: TUBE.x0 + 120, y: TUBE.y - TUBE.h / 2 - 42 };
-// The tube: a glass pipe with neon walls, a neon ring at each mouth and a flow of light running along it toward
-// Temporal; then its TLS label (tube.label). placeTube() shows them.
-function makeTube(root) {
-  const tube = glassTube(root, TUBE.x1 - TUBE.x0, TUBE.h);
-  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
-  Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
-  return tube;
-}
-// A glass pipe w x h px with neon walls, a neon ring at each mouth and a flow of light inside it (tube.flow), which
-// runs on the ambient clock G (see placeTube)
-function glassTube(root, w, h) {
+// A TLS tube along a connection, for its geometry geom (TUBE, or PROXY_TUBE from chapter 6: x0 and x1, its ends; y,
+// its line; h, its height; label, its label's center): a glass pipe with neon walls, a neon ring at each mouth and a
+// flow of light inside it (tube.flow) running toward Temporal; then its TLS label (tube.label). placeTube() shows them.
+function makeTube(root, { x0, x1, h }) {
   const mouth = side => `<div style="position:absolute;${side}:-12px;top:-2px;width:24px;height:${h}px;`
     + `border:2px solid ${C.neon};border-radius:50%"></div>`;
   const tube = E(root,
     '<div class="flow" style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,'
     + `rgba(${RGB.neon},0) 0 40px,rgba(${RGB.neon},.16) 40px 42px)"></div>${mouth('left')}${mouth('right')}`,
     '', {
-      width: w + 'px', height: h + 'px', borderTop: `2px solid ${C.neon}`, borderBottom: `2px solid ${C.neon}`,
+      width: (x1 - x0) + 'px', height: h + 'px', borderTop: `2px solid ${C.neon}`,
+      borderBottom: `2px solid ${C.neon}`,
       background: `linear-gradient(to bottom, rgba(${RGB.neon},.16), rgba(${RGB.neon},.03) 45%, `
         + `rgba(${RGB.neon},.08))`,
       boxShadow: `0 0 28px rgba(${RGB.neon},.22)`,
     });
   tube.flow = tube.querySelector('.flow');
+  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
+  Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
   return tube;
 }
-// The tube drawn from its Worker end up to drawn (0 to 1), with opacity o, and its label with opacity label. Its
-// light flows on the ambient clock G, so it runs on across the cut into chapter 3.
-function placeTube(tube, drawn, o = 1, label = 1) {
-  place(tube, (TUBE.x0 + TUBE.x1) / 2, TUBE.y, 1, drawn > 0 ? o : 0);
+// The tube from x0 to x1 of geom (see makeTube; a scene may pass a shorter x1, the tube's width follows), drawn from
+// its x0 end up to drawn (0 to 1), with opacity o; its label at geom.label with opacity label (o by default) and scale
+// labelS. Its light flows on the ambient clock G, so it runs on across a cut.
+function placeTube(tube, geom, { drawn = 1, o = 1, label = o, labelS = 1 } = {}) {
+  const { x0, x1, y } = geom;
+  tube.style.width = (x1 - x0) + 'px';
+  place(tube, (x0 + x1) / 2, y, 1, drawn > 0 ? o : 0);
   // the clip keeps the glow round the tube, and cuts it on the right while it draws
   tube.style.clipPath = drawn < 1 ? `inset(-40px ${((1 - drawn) * 100).toFixed(3)}% -40px -40px)` : 'none';
   tube.flow.style.backgroundPosition = `${((G * 90) % 42).toFixed(2)}px 0`;
-  place(tube.label, TUBE.label.x, TUBE.label.y, 1, label * o);
+  place(tube.label, geom.label.x, geom.label.y, labelS, label);
 }
 
 // ---------- the Namespaces (chapters 2 and 3)
@@ -622,11 +640,7 @@ function makeWebUI(root) {
 function setWebUI(win, { scramble = 0, red = 0 } = {}) {
   win.values.forEach((value, i) => {
     const row = WEBUI_FIELDS[i];
-    const html = scrambledHtml(row, TRANSFER[row][1], scramble);
-    if (value._html !== html) {
-      value.innerHTML = html;
-      value._html = html;
-    }
+    setHtml(value, scrambledHtml(row, TRANSFER[row][1], scramble));
   });
   win.values[0].style.background = `rgba(${RGB.red},${(0.24 * clamp(red)).toFixed(3)})`;
 }
@@ -750,6 +764,8 @@ function makeWorkerTile(root, worker) {
 const PROXY = { x: FLEET.proxyEnv.x + FLEET.proxyEnv.w, y: LANE.wire.y, w: 200, h: 300 };
 PROXY.head = { top: 22, icon: 32, gap: 10, line: 22 };
 PROXY.head.bottom = PROXY.head.top + PROXY.head.icon + PROXY.head.gap + PROXY.head.line;
+// Where the apps' connections end on the box's left, 4 px short of its edge, so their round caps stay off its border
+PROXY.linkEnd = PROXY.x - PROXY.w / 2 - 4;
 // The proxy's connection to TEMPORAL, from the box's right edge to TEMPORAL's left edge in the fleet layout
 const PROXY_WIRE = { x0: PROXY.x + PROXY.w / 2, x1: FLEET.proxyTemporal.x, y: LANE.wire.y };
 // The TEMPORAL PROXY box: a violet tile, its shield and name at its top (21 px: 18.5 px on screen at 0.88; with no
@@ -770,6 +786,20 @@ function makeProxy(root) {
 function placeProxy(box, { dx = 0, o = 1, glow = 0 } = {}) {
   place(box, PROXY.x + dx, PROXY.y, 1, o);
   box.style.boxShadow = glowShadow(RGB.violet, 0.35 + 0.65 * clamp(glow), { blur: 48, alpha: 0.55 });
+}
+// The parts of the fleet with the proxy that chapters 6 to 8 build first, in this order, so their match cuts show the
+// same stack: the lane (makeLane), every app's connection to the proxy (links, under the tiles, one per app of apps:
+// the Workers, then the SDK client and the Web UI), the proxy's connection to TEMPORAL (out, an arrow; setD() may
+// redraw it), the Worker tiles (tiles) and the other apps' tiles (clients). The scenes place them.
+function makeFleet(root) {
+  const lane = makeLane(root);
+  const apps = [...WORKERS, ...FLEET_CLIENTS];
+  const links = apps.map(app => path(lane.svg, fleetLinkD(app, PROXY.linkEnd), C.slate, 2, false));
+  const { x0, x1, y } = PROXY_WIRE;
+  const out = path(lane.svg, `M ${x0} ${y} L ${x1 - 4} ${y}`, C.violet, 3);
+  const tiles = WORKERS.map(worker => makeWorkerTile(root, worker));
+  const clients = FLEET_CLIENTS.map(app => iconTile(root, app.icon, app.name, FLEET.tile.w, FLEET.tile.h));
+  return { lane, apps, links, out, tiles, clients };
 }
 // The two lines each Worker knows from chapter 6 on: the proxy's local address and the short Namespace name. FULL_NS:
 // the full Namespace name that the proxy writes over the short one on the way out.
@@ -795,13 +825,6 @@ PROXY_CARD.keyDy = PROXY_CARD.h / 2 + PROXY_CARD.tagH / 2 + PROXY_CARD.tagGap + 
 // card rests in it, under its name
 const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 250 };
 PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 64 + PROXY_CARD.h / 2 };
-// The TLS tube (PROXY_TUBE) and its TLS label (tube.label)
-function makeProxyTube(root) {
-  const tube = glassTube(root, PROXY_TUBE.x1 - PROXY_TUBE.x0, PROXY_TUBE.h);
-  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
-  Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
-  return tube;
-}
 // The payments Namespace band (PROXY_BAND), labelled with its full name at its top left
 const makeProxyBand = root => E(root,
   '<div style="position:absolute;left:16.5px;top:12.5px">'
@@ -881,7 +904,7 @@ const WIRE_LANE = { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, heads: 0 };
 // of the stored history (to: HIST_SHOT, where chapter 3 holds as the history grows) and the card to the lane's
 // history (cardTo) over d seconds. Chapter 2 plays its first `cut` seconds and ends there (fadeOut:
 // 0); chapter 3 opens there (fadeIn: 0) and plays the rest: read both sides from tubeWhip(). At the cut: placeLane()
-// with `lane` (the environment and the Worker, cropped at the left edge, dimmed), placeTube(tube, 1),
+// with `lane` (the environment and the Worker, cropped at the left edge, dimmed), placeTube(tube, TUBE),
 // placeNamespaces(ns, 1, 1, [1, 1]).
 const TUBE_HANDOFF = {
   from: [1153, 515, 1.4], to: HIST_SHOT,

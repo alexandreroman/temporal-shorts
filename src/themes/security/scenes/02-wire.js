@@ -81,7 +81,7 @@
       s.beam.setAttribute('stroke-width', '1.5');
       s.lane.svg.appendChild(s.beam);
       s.request = path(s.lane.svg, REQUEST_PATH, C.slate, 2.5, false);
-      s.tube = makeTube(root);
+      s.tube = makeTube(root, TUBE);
 
       s.spy = makeOutsider(root, 'eye', 'Eavesdropper', C.red,
         '<div class="readout mono" style="position:absolute;left:18.5px;right:18.5px;top:52.5px;height:52px;'
@@ -158,7 +158,7 @@
       });
       // after placeLane(), whose zones it clips
       frameLaneEdges(s.lane, cam);
-      placeTube(s.tube, P(t, c[0] + T0.tube, T0.tubeD, linear), 1, popIn(t, c[0] + T0.label).o);
+      placeTube(s.tube, TUBE, { drawn: P(t, c[0] + T0.tube, T0.tubeD, linear), label: popIn(t, c[0] + T0.label).o });
       s.tube.label.style.transform += ` scale(${popIn(t, c[0] + T0.label).s})`;
 
       // the card: out of the Worker into the tube, along it to TEMPORAL's edge, into payments, then the whip
@@ -188,10 +188,7 @@
       // the readout: listening, then the ciphertext the beam reads, redrawn 15 times a second, then frozen
       const salt = locked ? 1 + Math.floor(t * 15) : 0;
       const readout = t < lockAt ? 'LISTENING' : `${noiseLine(0, salt)}\n${noiseLine(1, salt)}`;
-      if (s.spy.readout._text !== readout) {
-        s.spy.readout.textContent = readout;
-        s.spy.readout._text = readout;
-      }
+      setText(s.spy.readout, readout);
       s.spy.readout.style.color = t < lockAt ? C.slate : C.red;
       s.glyphs.forEach((e, i) => {
         const f = ((t - lockAt) * 1.6 + i / GLYPHS) % 1;

@@ -304,10 +304,7 @@
       const packetY = goingUp ? lerp(TRIP.y1, TRIP.y0, up) : lerp(TRIP.y0, TRIP.y1, down);
       const inFlight = t >= downAt && t < upAt + T3.tripD;
       const packetText = goingUp ? TRIP_TEXT : scrambledHtml(0, TRIP_TEXT, 1);
-      if (s.packet._html !== packetText) {
-        s.packet.innerHTML = packetText;
-        s.packet._html = packetText;
-      }
+      setHtml(s.packet, packetText);
       s.packet.style.borderColor = goingUp ? C.neon : C.violet;
       place(s.packet, goingUp ? TRIP.up : TRIP.down, packetY, 1, inFlight ? 1 : 0);
 

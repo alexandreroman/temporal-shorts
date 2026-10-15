@@ -64,20 +64,6 @@
   }
   // The first round(p * length) characters of text: it types in as p goes from 0 to 1
   const typed = (text, p) => text.slice(0, Math.round(clamp(p) * text.length));
-  // Sets an element's HTML, rewritten only when it changes
-  function setHtml(e, html) {
-    if (e._html !== html) {
-      e.innerHTML = html;
-      e._html = html;
-    }
-  }
-  // Sets an element's text, rewritten only when it changes
-  function setText(e, text) {
-    if (e._text !== text) {
-      e.textContent = text;
-      e._text = text;
-    }
-  }
 
   scene({
     chapter: 6, title: 'Meet Temporal Proxy',
@@ -94,17 +80,9 @@
     build(stage, s) {
       // the lane and the Worker tiles first, in chapter 5's order, so the cut shows the same stack
       const root = s.cam = makeCamera(stage);
-      s.lane = makeLane(root);
-      const proxyLeft = PROXY.x - PROXY.w / 2 - 4;
-      // every app's connection to the proxy, under the tiles, and the proxy's own connection to Temporal
-      s.apps = [...WORKERS, ...FLEET_CLIENTS];
-      s.links = s.apps.map(app => path(s.lane.svg, fleetLinkD(app, proxyLeft), C.slate, 2, false));
-      const { x0, x1, y } = PROXY_WIRE;
-      s.out = path(s.lane.svg, `M ${x0} ${y} L ${x1 - 4} ${y}`, C.violet, 3);
-      s.tiles = WORKERS.map(w => makeWorkerTile(root, w));
-      s.clients = FLEET_CLIENTS.map(app => iconTile(root, app.icon, app.name, FLEET.tile.w, FLEET.tile.h));
+      Object.assign(s, makeFleet(root));
       s.band = makeProxyBand(root);
-      s.tube = makeProxyTube(root);
+      s.tube = makeTube(root, PROXY_TUBE);
       s.proxy = makeProxy(root);
       s.landing = makeRipples(root, 2, RGB.violet);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
@@ -199,10 +177,9 @@
       // border turns neon), the API KEY, and the full Namespace name, typed over the short one. Then it goes out
       // through the tube into its Namespace in Temporal.
       const sender = WORKERS[SENDER];
-      const trackEnd = PROXY.x - PROXY.w / 2 - 4;
       const ride = P(t, cardAt, T2.cardD);
-      let [cardX, cardY] = alongRoute([[sender.x, sender.y], [sender.x, sender.trackY], [trackEnd, sender.trackY],
-        [IN_PROXY.x, IN_PROXY.y]], ride);
+      let [cardX, cardY] = alongRoute([[sender.x, sender.y], [sender.x, sender.trackY],
+        [PROXY.linkEnd, sender.trackY], [IN_PROXY.x, IN_PROXY.y]], ride);
       const exit = P(t, exitAt, T2.exitD);
       if (exit > 0) {
         [cardX, cardY] = bezier([[IN_PROXY.x, IN_PROXY.y], [PROXY_TUBE.x0 + 40, PROXY_TUBE.y - GROUP.dy],
@@ -230,12 +207,8 @@
       });
 
       // the TLS tube draws from the proxy to Temporal, its label pops in above it
-      const tube = P(t, tlsAt, T2.tubeD, linear);
-      place(s.tube, (PROXY_TUBE.x0 + PROXY_TUBE.x1) / 2, PROXY_TUBE.y, 1, tube > 0 ? 1 : 0);
-      s.tube.style.clipPath = tube < 1 ? `inset(-40px ${((1 - tube) * 100).toFixed(3)}% -40px -40px)` : 'none';
-      s.tube.flow.style.backgroundPosition = `${((G * 90) % 42).toFixed(2)}px 0`;
       const label = popIn(t, tlsAt + 0.2);
-      place(s.tube.label, PROXY_TUBE.label.x, PROXY_TUBE.label.y, label.s, label.o);
+      placeTube(s.tube, PROXY_TUBE, { drawn: P(t, tlsAt, T2.tubeD, linear), label: label.o, labelS: label.s });
 
       // the payments Namespace waits in Temporal, under its full name, and lights up as the card lands in it
       const lit = P(t, landAt, 0.3);

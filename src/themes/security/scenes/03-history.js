@@ -95,7 +95,7 @@
       const root = s.cam = makeCamera(stage);
       s.lane = makeLane(root);
       s.ns = makeNamespaces(s.lane);
-      s.tube = makeTube(root);
+      s.tube = makeTube(root, TUBE);
       s.hist = makeStoredHistory(root);
       s.webui = makeWebUI(root);
       s.viewers = ['Operator', 'Web UI user'].map(name => makeViewer(root, name));
@@ -162,7 +162,7 @@
       });
       // after placeLane(), whose zones it clips
       frameLaneEdges(s.lane, cam);
-      placeTube(s.tube, 1, lerp(1, OFF_SHOT, settled) * (1 - tubeOut));
+      placeTube(s.tube, TUBE, { o: lerp(1, OFF_SHOT, settled) * (1 - tubeOut) });
       // the Namespaces have made their point: they fade as the history grows over them
       placeNamespaces(s.ns, 1, 1, [1, 1], 1 - P(t, c[0] + T0.ns, 0.4));
 

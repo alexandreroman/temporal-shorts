@@ -12,7 +12,8 @@
 
   scene({
     pre: 0.4, post: 2.6,
-    // shield and end card, measured: y 192-718, centered on y 515 once shifted
+    // shield and end card, measured: y 252-778 once shifted (192-718 before), centered on y 515; only the padlock's
+    // ripples reach higher, up to y 229, as they fade
     shift: [0, 60],
     subs: [
       { text: "With Temporal, your code, your keys and your data stay yours." },

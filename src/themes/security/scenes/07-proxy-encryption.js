@@ -128,13 +128,6 @@
     pathEl.setAttribute('stroke-dashoffset', -L * (1 - clamp(q)));
     pathEl.style.opacity = q > 0.001 ? o : 0;
   }
-  // Sets an element's HTML, rewritten only when it changes
-  function setHtml(e, html) {
-    if (e._html !== html) {
-      e.innerHTML = html;
-      e._html = html;
-    }
-  }
   // A tag of the close shot, sized in screen px (font): its HTML after the leading icon of a statusTag kind, in that
   // kind's look; solid, an opaque fill for a tag over other parts
   function closeTag(root, html, kind, font, solid = null) {
@@ -272,17 +265,9 @@
     build(stage, s) {
       // chapter 6's parts first, in its order, so the cut shows the same stack
       const root = s.cam = makeCamera(stage);
-      s.lane = makeLane(root);
-      s.apps = [...WORKERS, ...FLEET_CLIENTS];
-      const proxyLeft = PROXY.x - PROXY.w / 2 - 4;
-      s.links = s.apps.map(app => path(s.lane.svg, fleetLinkD(app, proxyLeft), C.slate, 2, false));
-      const { x0: outX0, x1: outX1, y: outY } = PROXY_WIRE;
-      s.out = path(s.lane.svg, `M ${outX0} ${outY} L ${outX1 - 4} ${outY}`, C.violet, 3);
-      s.outKey = PROXY_WIRE.x1;
-      s.tiles = WORKERS.map(w => makeWorkerTile(root, w));
-      s.clients = FLEET_CLIENTS.map(app => iconTile(root, app.icon, app.name, FLEET.tile.w, FLEET.tile.h));
+      Object.assign(s, makeFleet(root));
       s.band = makeProxyBand(root);
-      s.tube = makeProxyTube(root);
+      s.tube = makeTube(root, PROXY_TUBE);
       s.proxy = makeProxy(root);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
       s.outSparks = [0, 1].map(() => makeSpark(root, 12, RGB.violet));
@@ -390,9 +375,7 @@
       s.tiles.forEach((tile, w) => {
         gearSpin(tile, 1);
         place(tile, WORKERS[w].x, WORKERS[w].y, 1, offShot);
-        tile.lines.forEach((line, k) => {
-          if (line.textContent !== WORKER_LINES[k]) line.textContent = WORKER_LINES[k];
-        });
+        tile.lines.forEach((line, k) => setText(line, WORKER_LINES[k]));
         tile.lines[1].style.color = C.violet;
       });
       // the SDK client and the Web UI, cropped by the close shot into the header and subtitle bands, fade out with
@@ -406,11 +389,7 @@
         sparkOnPath(s.sparks[i], link, (G / PROXY_FLOW_PERIOD + i / s.apps.length) % 1);
         s.sparks[i].style.opacity = (+s.sparks[i].style.opacity * offShot).toFixed(3);
       });
-      if (s.outKey !== temporalZone.x) {
-        s.out.setAttribute('d', `M ${PROXY_WIRE.x0} ${PROXY_WIRE.y} L ${temporalZone.x - 4} ${PROXY_WIRE.y}`);
-        s.out._L = s.out.getTotalLength();
-        s.outKey = temporalZone.x;
-      }
+      setD(s.out, `M ${PROXY_WIRE.x0} ${PROXY_WIRE.y} L ${temporalZone.x - 4} ${PROXY_WIRE.y}`);
       // nothing leaves while the call fails: the wire dims and its light stops
       const failed = P(t, hitAt, 0.3) * (1 - P(t, healAt, 0.4));
       draw(s.out, 1, 1 - 0.6 * failed);
@@ -420,13 +399,13 @@
       });
 
       // the TLS tube, as long as the way to TEMPORAL, dimmed while the call fails; its label smaller in the close shot
-      const tubeW = temporalZone.x + 12 - PROXY_TUBE.x0;
-      s.tube.style.width = tubeW + 'px';
-      place(s.tube, PROXY_TUBE.x0 + tubeW / 2, PROXY_TUBE.y, 1, (1 - 0.55 * failed) * (1 - clear));
-      s.tube.style.clipPath = 'none';
-      s.tube.flow.style.backgroundPosition = `${((G * 90) % 42).toFixed(2)}px 0`;
+      const tubeX1 = temporalZone.x + 12;
+      const tubeMid = (PROXY_TUBE.x0 + tubeX1) / 2;
+      const tubeGeom = { ...PROXY_TUBE, x1: tubeX1, label: { x: tubeMid, y: PROXY_TUBE.label.y } };
+      placeTube(s.tube, tubeGeom, {
+        o: (1 - 0.55 * failed) * (1 - clear), label: 1 - clear, labelS: lerp(1, 0.55, zoneIn),
+      });
       s.tube.flow.style.opacity = 1 - failed;
-      place(s.tube.label, PROXY_TUBE.x0 + tubeW / 2, PROXY_TUBE.label.y, lerp(1, 0.55, zoneIn), 1 - clear);
 
       // the proxy, its glow swelling as it seals a card and as its Codec Server decrypts
       const glowAt = [...RUNS.filter(run => !run.fails).map(run => runAt(run) + run.seal), c[4] + T4.deliver - 0.1];
@@ -499,7 +478,7 @@
       const nextAt = c[2] + T2.flips[Math.min(flipsDone, T2.flips.length - 1)];
       const turnAway = flipsDone < T2.flips.length ? P(t, nextAt - 0.15, 0.15, easeIn) : 0;
       const turnIn = flipsDone > 0 ? 1 - P(t, flipAt, 0.15, easeOut) : 0;
-      if (s.dataKey.num.textContent !== String(1 + flipsDone)) s.dataKey.num.textContent = String(1 + flipsDone);
+      setText(s.dataKey.num, String(1 + flipsDone));
       const angle = 90 * Math.max(turnAway, turnIn);
       s.dataKey.num.style.transform = angle > 0 ? `perspective(${px(60)}) rotateX(${angle.toFixed(2)}deg)` : 'none';
       s.dataKey.style.transform += ` scale(${swell(t, flipAt, flipsDone ? 0.12 : 0).toFixed(4)})`;
@@ -603,7 +582,7 @@
       place(s.callFailed, STOP.x, STOP.y + CARD.h / 2 + 1, lerp(1.7, 1, callSlam),
         P(t, c[3] + T3.callFailed, 0.08, linear) * healed);
       const stamp = P(t, c[3] + T3.failClosed, T3.slamD, easeIn);
-      place(s.failClosed, PROXY_TUBE.x0 + tubeW / 2, PROXY_TUBE.y, lerp(2.2, 1, stamp),
+      place(s.failClosed, tubeMid, PROXY_TUBE.y, lerp(2.2, 1, stamp),
         P(t, c[3] + T3.failClosed, 0.08, linear) * healed, -8);
 
       // after the pull-back: the proxy's built-in Codec Server, and the CLI and the Web UI, which open over their

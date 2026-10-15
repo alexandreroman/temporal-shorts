@@ -55,13 +55,6 @@
     return `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + dir * r} V ${y - dir * r} Q ${x} ${y} ${x + r} ${y}`
       + ` H ${x1}`;
   }
-  // Sets a path's d, and its length, only when it changes
-  function setD(pathEl, d) {
-    if (pathEl._d === d) return;
-    pathEl.setAttribute('d', d);
-    pathEl._L = pathEl.getTotalLength();
-    pathEl._d = d;
-  }
   // An upstream's body: its name under its heading's lockup, and its icon in the middle
   function upstreamBody(name, icon) {
     return `<div style="position:absolute;left:24px;top:${TITLE.nameTop}px;font-size:${TITLE.name}px;`
@@ -84,13 +77,7 @@
     build(stage, s) {
       // chapter 7's parts first, in its order, so the cut shows the same stack
       const root = s.cam = makeCamera(stage);
-      s.lane = makeLane(root);
-      s.apps = [...WORKERS, ...FLEET_CLIENTS];
-      const proxyLeft = PROXY.x - PROXY.w / 2 - 4;
-      s.links = s.apps.map(app => path(s.lane.svg, fleetLinkD(app, proxyLeft), C.slate, 2, false));
-      s.out = path(s.lane.svg, wireD(PROXY_WIRE.x1 - 4, PROXY_WIRE.y), C.violet, 3);
-      s.tiles = WORKERS.map(w => makeWorkerTile(root, w));
-      s.clients = FLEET_CLIENTS.map(app => iconTile(root, app.icon, app.name, FLEET.tile.w, FLEET.tile.h));
+      Object.assign(s, makeFleet(root));
       // the self-hosted service's body, in the lane's TEMPORAL zone, and Temporal Cloud
       s.self = E(root, upstreamBody('Self-hosted', 'server'), '', {
         width: SELF_ZONE.w + 'px', height: SELF_ZONE.h + 'px',
@@ -157,9 +144,7 @@
       s.tiles.forEach((tile, w) => {
         gearSpin(tile, 1);
         place(tile, WORKERS[w].x, WORKERS[w].y, 1, 1);
-        tile.lines.forEach((line, k) => {
-          if (line.textContent !== WORKER_LINES[k]) line.textContent = WORKER_LINES[k];
-        });
+        tile.lines.forEach((line, k) => setText(line, WORKER_LINES[k]));
         tile.lines[1].style.color = C.violet;
       });
       s.clients.forEach((tile, i) => place(tile, FLEET_CLIENTS[i].x, FLEET_CLIENTS[i].y, 1, 1));
