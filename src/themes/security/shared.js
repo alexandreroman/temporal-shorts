@@ -222,7 +222,8 @@ function contentBand({ scale, dy }) {
   return { top: stageY(CONTENT_FRAME.top), bottom: stageY(CONTENT_FRAME.bottom) };
 }
 // Clips an element whose box spans stage y top to top + h (at scale 1) to the content band of the shot cam, so a close
-// shot never runs it under the chapter header or the subtitles; no clip when it lies inside
+// shot never runs it under the chapter header or the subtitles; no clip when it lies inside. For the zones only, which
+// show as their border: content is either wholly in a shot or dimmed at its edge, never cut by a clip.
 function clipToContent(el, top, h, cam) {
   const band = contentBand(cam);
   const cutTop = Math.max(0, band.top - top), cutBottom = Math.max(0, top + h - band.bottom);
@@ -303,16 +304,25 @@ function makeLane(root) {
 }
 // Shows the lane's parts in place, each with its opacity in o (1 by default): env (with its dashed edge), temporal,
 // worker, history, wire, door, and heads, the zones' headings (YOUR ENVIRONMENT and the logo), which a close shot
-// pushes up under the chapter header. The Worker runs, its gear turning; the door is in its slate and white look.
-// The zone captions (env.cap, temporal.cap) keep the opacity a scene gives them.
+// pushes up under the chapter header; close, TEMPORAL's widening into the close layout (CLOSE). The Worker runs, its
+// gear turning; the door is in its slate and white look. The zone captions (env.cap, temporal.cap) keep the opacity
+// a scene gives them.
 function placeLane(lane, o = {}) {
-  const { env = 1, temporal = 1, worker = 1, history = 1, wire = 1, door = 1, heads = 1 } = o;
+  const { env = 1, temporal = 1, worker = 1, history = 1, wire = 1, door = 1, heads = 1, close = 0 } = o;
   lane.env.head.style.opacity = heads;
   lane.temporal.head.style.opacity = heads;
   const center = zone => [zone.x + zone.w / 2, zone.y + zone.h / 2];
   place(lane.env, ...center(LANE.env), 1, env);
   lane.envEdges.forEach(edge => drawDashed(edge, 1, env));
-  place(lane.temporal, ...center(LANE.temporal), 1, temporal);
+  // close (0 to 1): TEMPORAL widens to the close layout of chapters 3 and 4 (CLOSE.zone); even widths, so the zone
+  // rests on whole pixels
+  const zone = {
+    ...LANE.temporal,
+    x: Math.round(lerp(LANE.temporal.x, CLOSE.zone.x, close)),
+    w: 2 * Math.round(lerp(LANE.temporal.w, CLOSE.zone.w, close) / 2),
+  };
+  lane.temporal.style.width = zone.w + 'px';
+  place(lane.temporal, ...center(zone), 1, temporal);
   place(lane.worker, LANE.worker.x, LANE.worker.y, 1, worker);
   setAppStatus(lane.worker, 'RUNNING', 'running');
   place(lane.history, LANE.history.x, LANE.history.y, 1, history);
@@ -443,15 +453,17 @@ HIST_CHIP.h = payloadLayout(PAYLOAD_IN_WORKER.w).h * HIST_CHIP.k;
 HIST_CHIP.x = HIST.x - HIST.w / 2 + 70 + HIST_CHIP.w / 2;
 HIST_CHIP.y = HIST.y - HIST.h / 2 + 138 + HIST_CHIP.h / 2;
 HIST_CHIP.tagY = HIST_CHIP.y + HIST_CHIP.h / 2 + 3;
-// The slot beside the Web UI, right-aligned with the history: its center and size
-const BESIDE_UI = { w: HIST.w - LANE.ui.w - 16, h: LANE.ui.h, y: LANE.ui.y };
-BESIDE_UI.x = HIST.x + HIST.w / 2 - BESIDE_UI.w / 2;
-// The close shots that read the small text of TEMPORAL, [x, y, scale] for shot(): at 1.6 the chip's values render
-// at 19 px and its labels at 14.5 px. HIST_SHOT frames the whole stored history. CHIP_SHOT frames the payload chip
-// and its verdict over the row under the history (the Web UI and the slot beside it); the history card, cut by the
-// frame's top edge there, dims to OFF_SHOT while the chip stays bright. TEMPORAL's zone, cut in both, dims too.
+// The close shot that reads the small text of TEMPORAL, [x, y, scale] for shot(): the stored history, centered; at 1.6
+// the chip's values render at 19.7 px and its labels at 14.5 px. TEMPORAL's zone, cut by the frame there, dims.
 const HIST_SHOT = [HIST.x, HIST.y, 1.6];
-const CHIP_SHOT = [HIST.x, 600, 1.6];
+// The close layout of TEMPORAL in HIST_SHOT, when the message needs more than the history: rather than the camera
+// moving, the content comes to it. The zone widens on both sides (zone: its left edge x and width; it narrows back
+// before any wider shot), the history slides left (hist: its center x) and a column comes in on its right, the Web
+// UI (ui: its center y, LANE.ui's size) over a slot of the same size (slot: its center y; the viewers in chapter 3,
+// the Search Attributes in chapter 4). On screen it spans x 160-1760 and y 201-829.
+const CLOSE = { zone: { x: 956, w: 1048 }, hist: { x: 1260 }, column: { x: 1830 }, ui: { y: 367 }, slot: { y: 541 } };
+// How far the history and its chip move left in the close layout, at progress `close` (0 to 1)
+const closeDx = close => Math.round(lerp(0, CLOSE.hist.x - HIST.x, close));
 // The stored Event History: the white card (HIST) with its rows, a SAVED tag per row and the lane history's EMPTY
 // note, then its payload chip (card.chip, a makePayload). placeStoredHistory() shows them; the chip's state
 // (setPayload) stays with the scenes.
@@ -468,27 +480,21 @@ function makeStoredHistory(root) {
 }
 // grow (0 to 1): the card grows from the lane's history, EMPTY, to HIST, as EMPTY fades; o: the opacity of the card;
 // rows: the progress of each row as it slides in (showRow); saved: the opacity of each row's SAVED tag; chip: the
-// opacity of the chip, which rests at HIST_CHIP (a close shot keeps it bright while the card dims).
-function placeStoredHistory(card, { grow = 1, o = 1, rows = [1, 1, 1], saved = [1, 1, 1], chip = 1 } = {}) {
+// opacity of the chip, which rests at HIST_CHIP; close: the slide of both into the close layout (closeDx).
+function placeStoredHistory(card, { grow = 1, o = 1, rows = [1, 1, 1], saved = [1, 1, 1], chip = 1, close = 0 } = {}) {
   const { history } = LANE;
   // even sizes, so the card rests on whole pixels
   card.style.width = 2 * Math.round(lerp(history.w, HIST.w, grow) / 2) + 'px';
   card.style.height = 2 * Math.round(lerp(history.h, HIST.h, grow) / 2) + 'px';
-  place(card, Math.round(lerp(history.x, HIST.x, grow)), Math.round(lerp(history.y, HIST.y, grow)), 1, o);
-  // its box on the stage, for frameStoredHistory()
-  card.top = Math.round(lerp(history.y, HIST.y, grow)) - parseFloat(card.style.height) / 2;
+  const dx = closeDx(close);
+  place(card, Math.round(lerp(history.x, HIST.x, grow)) + dx, Math.round(lerp(history.y, HIST.y, grow)), 1, o);
   card.empty.style.opacity = 1 - clamp(grow * 3);
   card.rows.forEach((row, i) => showRow(row, rows[i], 26, true));
   card.tags.forEach((tag, i) => {
     setStatus(tag, 'SAVED', 'saved');
     tag.style.opacity = saved[i];
   });
-  place(card.chip, HIST_CHIP.x, HIST_CHIP.y, HIST_CHIP.k, chip);
-}
-// Clips the stored history card to the content frame for the shot cam (see contentBand): CHIP_SHOT crops its top.
-// Call it after placeStoredHistory().
-function frameStoredHistory(card, cam) {
-  clipToContent(card, card.top, parseFloat(card.style.height), cam);
+  place(card.chip, HIST_CHIP.x + dx, HIST_CHIP.y, HIST_CHIP.k, chip);
 }
 // The verdict tag on the payload chip (statusTag, 30 px high, so it centers on whole pixels); setChipVerdict() sets it
 function makeChipVerdict(root) {
@@ -498,12 +504,12 @@ function makeChipVerdict(root) {
 }
 // The opaque fill of each verdict kind: the tag straddles the chip's edge, which must not show through it
 const VERDICT_FILL = { denied: 'var(--red-solid)', wait: 'var(--violet-solid)' };
-// The verdict tag at HIST_CHIP.tagY: its label and kind (setStatus; 'denied' or 'wait'), its scale and opacity, and
-// flip, its height as it flips over (1 flat on the chip, 0 edge on)
-function setChipVerdict(e, label, kind, { s = 1, o = 1, flip = 1 } = {}) {
+// The verdict tag at HIST_CHIP.tagY: its label and kind (setStatus; 'denied' or 'wait'), its scale and opacity, flip,
+// its height as it flips over (1 flat on the chip, 0 edge on), and close, the chip's slide (closeDx)
+function setChipVerdict(e, label, kind, { s = 1, o = 1, flip = 1, close = 0 } = {}) {
   setStatus(e, label, kind);
   e.style.background = VERDICT_FILL[kind];
-  place(e, HIST_CHIP.x, HIST_CHIP.tagY, s, o);
+  place(e, HIST_CHIP.x + closeDx(close), HIST_CHIP.tagY, s, o);
   if (flip < 1) e.style.transform += ` scaleY(${flip.toFixed(3)})`;
 }
 
