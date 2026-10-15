@@ -191,9 +191,10 @@ Lisbon.
     appear one by one under a LIVE badge.
 - **3:03** Or replay it afterward: exactly what it did, what it cost and
   where a human stepped in.
-  - Visuals: the badge switches to REPLAY, the playhead rewinds and sweeps
-    the rows again; "approved by a human" gets a HUMAN tag and the TURN row
-    "turn total · 2,140 tokens" a COST tag.
+  - Visuals: the badge switches to REPLAY, the playhead rewinds and replays
+    the rows, the highlight snapping from one event to the next; "approved by
+    a human" gets a HUMAN tag and the TURN row "turn total · 2,140 tokens" a
+    COST tag.
 
 ## 05 Typed, composable agents
 
