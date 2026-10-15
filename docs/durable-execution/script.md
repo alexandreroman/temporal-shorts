@@ -136,12 +136,13 @@ tracked by a CARD CHARGED counter in dollars.
 
 - **1:12** Durable Execution takes another path: your code runs to
   completion, even when servers fail.
-  - Visuals: Temporal logo; the code card alone, a highlight walks the
-    Workflow, a neon RUNS TO COMPLETION badge; a barrage of red bolts hits
-    the card from the right, the left and both top corners, then a bigger
-    one from the right: each sparks red at its impact, jolts the card a
-    few pixels and lights a neon ring around it, then bounces off,
-    spinning. The card stays intact.
+  - Visuals: Temporal logo; the code card alone, a highlight steps down
+    the Workflow, resting on each line, then snapping to the next, a neon
+    RUNS TO COMPLETION badge; a barrage of red bolts hits the card from
+    the right, the left and both top corners, then a bigger one from the
+    right: each sparks red at its impact, jolts the card a few pixels and
+    lights a neon ring around it, then bounces off, spinning. The card
+    stays intact.
 - **1:19** With Temporal, you write the process as a Workflow, and each
   step that calls a service as an Activity.
   - Visuals: The card slides left, the badge with it, and its WORKFLOW tab

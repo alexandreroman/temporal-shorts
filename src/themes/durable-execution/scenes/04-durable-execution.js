@@ -25,6 +25,8 @@
   const DECLARATION_LINES = WORKFLOWS_TS.indexOf('');
   const FUNCTION_LINE = WORKFLOWS_TS.indexOf(WORKFLOW_CODE[0]);
   const LAST_LINE = WORKFLOWS_TS.length - 1;
+  // share of a line interval the c[0] code highlight takes to snap to the next line
+  const SNAP = 0.3;
   const TILE = { x: 1139, w: 190, h: 120 }; // x 1044..1234, 104 px right of the card
   const SERVICE = { x: 1706, w: 188, h: 64 }; // x 1612..1800
   // Ship package retry line: attempt markers on its link to the Carrier, the gaps grow with the delays; the first
@@ -211,8 +213,10 @@
       // the highlight follows the await line of the running Activity, red while Ship package waits to retry
       const active = run.findLastIndex(a => t >= a);
       if (t < c[1]) {
-        // c[0]: the highlight walks the whole Workflow function, top to bottom
-        const walk = lerp(FUNCTION_LINE, LAST_LINE, P(t, c[0] + 1.2, 1.6));
+        // c[0]: the highlight walks the whole Workflow function, top to bottom, at a steady pace: it rests on each
+        // line, then snaps to the next one in the last SNAP of the line interval
+        const walkLine = P(t, c[0] + 1.2, 1.6, linear) * (LAST_LINE - FUNCTION_LINE);
+        const walk = FUNCTION_LINE + Math.floor(walkLine) + P(walkLine % 1, 1 - SNAP, SNAP);
         setCodeLine(s.card, walk, win(t, c[0] + 1.1, c[0] + 3.0, 0.25));
       } else if (t < c[2]) {
         // c[1]: the Activities declaration lights up while the Activity tiles appear
