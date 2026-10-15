@@ -14,8 +14,8 @@ The theme picker (`src/index.html`, `src/home.css`) follows these rules:
 - Card size is responsive: columns are at least 260 px wide and stretch to
   share the available width: 5 columns at most from a ~1530 px window
   (so at 1920 px), 4 from ~1220 px (so at 1280 px), 3 from ~910 px, 2
-  from ~590 px, 1 column on phones. With 6 cards: 5+1 at 1920 px, 4+2 at
-  1280 px. Padding and icon
+  from ~590 px, 1 column on phones; the last row holds the remaining
+  cards, aligned left. Padding and icon
   scale with `clamp()`.
 - Card order: Meet Temporal (the entry point for newcomers, with a
   handshake icon), Introduction to Durable Execution, Human-in-the-Loop,

@@ -4,14 +4,14 @@
 // evicts #1045 (EVICTED), the next order takes its cell, and the next Workflow Task of #1045 takes a Workflow Slot
 // that turns dashed, its retry icon spinning: a replay. More evictions follow, both Workflow Slots replay, the cache
 // gets a red outline and a BOTTLENECK tag, the eviction and replay metrics climb, the CPU jumps and the backlog grows
-// again. The memory goes from 2 GB to 4 GB, the code card gains maxCachedWorkflows: 500, raised to 2000, and the strip
-// widens: the waiting orders move into its new cells, the tag turns FIXED and the replays stop.
+// again. The memory goes from 2 GB to 4 GB, the maxCachedWorkflows line of the code card lights and goes from 500 to
+// 2000, and the strip widens: the waiting orders move into its new cells, the tag turns FIXED and the replays stop.
 // The block keeps every name declared in this file local to this scene.
 {
   const SLOTS = 50;
   const BUSY = 44;
-  // the open orders waiting for a cache cell: dashed cells right of the strip, PRESS.gap px from its outline, then a
-  // "+N" count of the others
+  // the open orders waiting for a cache cell: dashed cells right of the strip, 24 px from its outline, then a "+N"
+  // count of the others
   const PRESS = { left: 1522, n: 3, countLeft: 1732 };
   const pressX = r => PRESS.left + DIAGRAM.cache.w / 2 + r * DIAGRAM.cache.pitch;
   const cellX = i => cacheCellLeft(i) + DIAGRAM.cache.w / 2;
@@ -57,7 +57,8 @@
     subs: [
       { text: "More orders are open at once than the Workflow cache can hold.", after: 1.5 },
       {
-        text: "The cache <b>evicts</b> Workflows. An evicted Workflow replays its whole Event History on its next task.",
+        text: "The cache <b>evicts</b> Workflows. "
+          + "An evicted Workflow replays its whole Event History on its next task.",
         after: 2.0,
       },
       { text: "Replays burn CPU and hold Slots without moving any order forward.", after: 2.0 },
@@ -84,11 +85,12 @@
     },
     update(t, c, s) {
       // c[0]: the open orders line up; c[1]: the first eviction, then the replay of #1045; c[2]: three more
-      // evictions, a second replay; c[3]: the memory, the code line and the strip grow, and the replays stop
+      // evictions, a second replay; c[3]: the memory grows, the cache line lights and its value swaps, the strip
+      // grows, and the replays stop
       const evictions = [c[1] + 0.8, c[2] + 0.2, c[2] + 1.5, c[2] + 2.8].map((at, j) => ({
         cell: EVICTED_CELLS[j], at, next: FIRST_WAITING + j,
       }));
-      const memAt = c[3] + 0.6, insertAt = c[3] + 1.3, swapAt = c[3] + 2.3, growAt = c[3] + 2.9;
+      const memAt = c[3] + 0.6, lightAt = c[3] + 1.4, swapAt = c[3] + 2.3, growAt = c[3] + 2.9;
       const fixAt = c[3] + 3.8;
       // the next Workflow Task of an evicted order replays in a Workflow Slot, which it holds until the fix
       const replayFlow = (from, slot) => ({
@@ -148,8 +150,8 @@
         ],
         code: {
           swap: { slots: ['50', -10], cache: ['2000', swapAt] },
-          insert: { poller: -10, cache: insertAt },
-          light: ['cache', insertAt + 0.1, swapAt + 2.0],
+          insert: { poller: -10 },
+          light: ['cache', lightAt, swapAt + 2.0],
         },
         status: replaying.length > 0 ? ['REPLAYING', 'running'] : ['RUNNING', 'running'],
         marks: { cache: { at: c[2] + 0.3, fixedAt: fixAt } },

@@ -94,7 +94,7 @@
         after: 2.0,
       },
       {
-        text: "More Slots would not help: a Slot adds no CPU. This Worker has reached the limit of its machine.",
+        text: "More Slots would not help: a Slot adds no CPU. This Worker has used all the CPU it has.",
         after: 2.0,
       },
       {
@@ -150,7 +150,8 @@
 
       // the queue grows while the CPU is full, then drains to 0 once B and C take tasks
       const drain = P(t, drainFrom, drainEnd - drainFrom);
-      const act = (620 + 700 * P(t, c[0], drainFrom - c[0], linear)) * (1 - drain);
+      // it starts at 990 + 4 = 994, about where chapter 5 leaves it
+      const act = (990 + 700 * P(t, c[0], drainFrom - c[0], linear)) * (1 - drain);
       const wf = 4 * (1 - drain);
       const trend = t >= pinAt && t < drainFrom ? 'up' : 'down';
       const wait = lerp(4 + 10 * P(t, pinAt, 5.0), 0.3, drain);
@@ -166,7 +167,7 @@
         mem: { use: 0.55, label: '4 GB' },
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
-        code: { swap: { slots: ['50', -10], cache: ['2000', -10] }, insert: { poller: -10, cache: -10 } },
+        code: { swap: { slots: ['50', -10], cache: ['2000', -10] }, insert: { poller: -10 } },
         marks: { cpu: { at: c[0] + 1.6, fixedAt: fixAt } },
       });
 

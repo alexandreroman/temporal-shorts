@@ -18,7 +18,7 @@
       },
     ],
     build(root, s) {
-      s.t = makeEndCard(root, 'Tuning Temporal Workers', 'FIND WHAT IS FULL, FIX IT, LOOK AGAIN');
+      s.t = makeEndCard(root, 'Tuning Temporal Workers', 'WORKERS THAT KEEP UP WITH YOUR TRAFFIC');
       s.worker = makeMiniWorker(root, 'WORKER', WORKER.cols, WORKER.rows);
     },
     update(t, c, s) {

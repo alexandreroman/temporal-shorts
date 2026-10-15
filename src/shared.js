@@ -756,7 +756,7 @@ function makeCallCard(p, isModelCall, { modelLabel = 'LLM CALL', w = null } = {}
 
 // ---------- code card: white card showing a few lines of TypeScript, one div per line
 // Default text metrics and tab height. Card height = 2 * padY + lines * lineH (256 px for 6 lines).
-const CODE = { w: 680, font: 24, lineH: 36, padY: 20, padX: 20, gutter: 40, tabH: 34 };
+const CODE_CARD = { w: 680, font: 24, lineH: 36, padY: 20, padX: 20, gutter: 40, tabH: 34 };
 // Light syntax coloring of one plain TypeScript line (no HTML): keywords UV, strings violet, called function names
 // bold, comments and punctuation slate (angle brackets escaped), everything else (names, types) default ink
 function highlightJs(line) {
@@ -773,13 +773,13 @@ function highlightJs(line) {
 }
 // opts.lines: plain TypeScript lines (required); opts.header: label of the tab on top of the card and opts.file: file
 // name shown next to it (both hidden until card.hdr.style.opacity is set); opts.font, opts.lineH, opts.padY,
-// opts.padX, opts.gutter: text metrics (default: CODE).
+// opts.padX, opts.gutter: text metrics (default: CODE_CARD).
 // Returns the card element with: w, h, lineH, padY, lines (one div per line), bar (highlight, see setCodeLine),
 // hdr (tab or null) and lineY(i): y of the middle of line i relative to the card center.
 function makeCodeCard(parent, opts) {
   const {
-    lines, header = null, file = null, w = CODE.w, font = CODE.font, lineH = CODE.lineH,
-    padY = CODE.padY, padX = CODE.padX, gutter = CODE.gutter,
+    lines, header = null, file = null, w = CODE_CARD.w, font = CODE_CARD.font, lineH = CODE_CARD.lineH,
+    padY = CODE_CARD.padY, padX = CODE_CARD.padX, gutter = CODE_CARD.gutter,
   } = opts;
   const h = padY * 2 + lines.length * lineH;
   const card = E(parent, '', 'paper', { width: w + 'px', height: h + 'px' });
@@ -800,12 +800,12 @@ function makeCodeCard(parent, opts) {
     const fileLabel = file
       ? `<span style="font-size:16px;letter-spacing:.04em;color:${C.slate}">${file}</span>` : '';
     card.hdr = E(card,
-      `<div style="height:${CODE.tabH}px;padding:0 14px 0 12px;display:flex;align-items:center;gap:8px;`
+      `<div style="height:${CODE_CARD.tabH}px;padding:0 14px 0 12px;display:flex;align-items:center;gap:8px;`
       + `background:${C.uv};color:#FFFFFF;font-size:15px;letter-spacing:.12em;text-transform:uppercase;`
       + `border-radius:var(--rs) var(--rs) 0 0">${ICON('code', 18, '#FFFFFF', 2)}<span>${header}</span></div>`
       + fileLabel,
       'mono', {
-        left: '18px', top: -CODE.tabH + 'px', height: CODE.tabH + 'px', display: 'flex', alignItems: 'center',
+        left: '18px', top: -CODE_CARD.tabH + 'px', height: CODE_CARD.tabH + 'px', display: 'flex', alignItems: 'center',
         gap: '16px', whiteSpace: 'nowrap',
       });
   }

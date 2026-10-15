@@ -29,7 +29,7 @@
   // pixels.
   const WK = { x: 520, y: 528, w: 800, h: 704 };
   // code card: x 152..888, y 294..572, 118 px below the panel top (under its tab), 4 lines of 56 px
-  const CODE_CARD = { x: 520, y: 433, w: EH.code.w, font: 28, lineH: 56, padY: 27 };
+  const CODE_CARD_STYLE = { x: 520, y: 433, w: EH.code.w, font: 28, lineH: 56, padY: 27 };
   // history card: x 1088..1768, y 256..572, 80 px below the panel top (under the logo header), 4 rows of 56 px
   const HIST_CARD = { x: EH.temporal.x, y: 414, w: EH.hist.w, h: 316 };
   const BLOCK = { y: 726, h: 244 };
@@ -37,8 +37,8 @@
   // chips leave and reach the code and the history at EH.lineEndX and EH.rowStartX, as in chapters 5 and 6; WAKE UP
   // lands on the sleep line short of its clock badge
   const WAKE_X = 740;
-  const lineY = i => CODE_CARD.y - (CODE_CARD.padY * 2 + WAIT_CODE.length * CODE_CARD.lineH) / 2
-    + CODE_CARD.padY + (i + 0.5) * CODE_CARD.lineH;
+  const lineY = i => CODE_CARD_STYLE.y - (CODE_CARD_STYLE.padY * 2 + WAIT_CODE.length * CODE_CARD_STYLE.lineH) / 2
+    + CODE_CARD_STYLE.padY + (i + 0.5) * CODE_CARD_STYLE.lineH;
   const rowY = i => HIST_CARD.y - HIST_CARD.h / 2 + HIST.row0 + (i + 0.5) * HIST.rowGap;
 
   // Worker status shown in the block: label, icon (spin: a running spinner) and colors
@@ -70,7 +70,7 @@
       + `<div class="ic" style="position:relative;width:48px;height:48px">${icons}`
       + `<div data-icon="spin" style="position:absolute;inset:3px;opacity:0">${spinnerRing(42)}</div></div>`
       + '<div class="tx mono" style="font-size:36px;letter-spacing:.08em;white-space:nowrap"></div></div>',
-      'tile', { width: CODE_CARD.w + 'px', height: BLOCK.h + 'px' });
+      'tile', { width: CODE_CARD_STYLE.w + 'px', height: BLOCK.h + 'px' });
     e.icons = [...e.querySelectorAll('[data-icon]')];
     e.ring = e.querySelector('[data-icon="spin"]').firstChild;
     e.tx = e.querySelector('.tx');
@@ -131,7 +131,7 @@
     ],
     build(root, s) {
       s.workers = ['WORKER A', 'WORKER B'].map(name => makeAppPanel(root, name, WK.w, WK.h));
-      const { w, font, lineH, padY } = CODE_CARD;
+      const { w, font, lineH, padY } = CODE_CARD_STYLE;
       s.code = makeCodeCard(root, { lines: WAIT_CODE, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY });
       s.code.hdr.style.opacity = 1;
       const check = ICON('check', 20, C.neon, 2.6);
@@ -199,7 +199,7 @@
       // the code card dims while the Worker restarts and no Worker runs it
       const down = win(t, restartAt, backAt, 0.3);
       const codeOn = P(t, c[0] + 0.4, 0.4) * (1 - 0.65 * down) * rider.o;
-      place(s.code, CODE_CARD.x + rider.dx, CODE_CARD.y + rider.dy, 1, codeOn);
+      place(s.code, CODE_CARD_STYLE.x + rider.dx, CODE_CARD_STYLE.y + rider.dy, 1, codeOn);
 
       // code highlight: shipPackage, then the sleep line until the Worker lets go; on wake-up it replays from the
       // top to the sleep line (already fired), then runs askForReview
@@ -210,7 +210,8 @@
       const barOn = P(t, shipAt, 0.3) * (1 - P(t, freeAt, 0.4)) + P(t, replayAt, 0.2) * (1 - P(t, doneAt, 0.4));
       setCodeLine(s.code, line, barOn);
       const spinOn = win(t, shipAt + 0.2, shipRes, 0.15) + win(t, runAt + 0.2, reviewRes, 0.15);
-      s.spin.style.top = (CODE_CARD.padY + line * CODE_CARD.lineH + (CODE_CARD.lineH - 28) / 2) + 'px';
+      const { padY, lineH } = CODE_CARD_STYLE;
+      s.spin.style.top = (padY + line * lineH + (lineH - 28) / 2) + 'px';
       s.spin.style.opacity = spinOn;
       s.spin.firstChild.style.transform = `rotate(${G * 400}deg)`;
       // checks: shipPackage once saved, the sleep line once the replay passes it, askForReview once saved

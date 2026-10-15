@@ -24,7 +24,7 @@ const ORDER_ACTIVITIES = [
 // Icon of Activity Task k of a lane: the five steps of an order, in turn
 const activityIcon = k => ORDER_ACTIVITIES[k % ORDER_ACTIVITIES.length].icon;
 // A count with thousands separators, the same whatever the locale: 2400 -> '2,400'
-const withCommas = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const withCommas = n => Math.round(n).toLocaleString('en-US');
 // A SCHEDULE-TO-START value in seconds: one decimal below 10 s ('9.4 s', '44 s')
 const formatWait = v => (v < 10 ? v.toFixed(1) : String(Math.round(v))) + ' s';
 // Shows a label positioned by its top left corner (whole pixels, so its text always rasters the same way)
@@ -279,13 +279,14 @@ function setMetricLine(e, name, value, color = C.ink) {
 
 // ---------- the Worker.create() code card
 // Its lines, in order: `value` marks the number a chapter swaps, `inserted` a line that only shows once a chapter
-// inserts it (see the code state of placeWorkerDiagram)
+// inserts it (see the code state of placeWorkerDiagram). The normal-days settings, the Slot limit and the cache size,
+// show whenever the card does; chapter 4 inserts the Poller line between them.
 const WORKER_CODE = [
   { key: 'open', src: 'const worker = await Worker.create({' },
   { key: 'queue', src: "  taskQueue: 'orders'," },
   { key: 'slots', src: '  maxConcurrentActivityTaskExecutions: 10,', value: '10' },
   { key: 'poller', src: "  activityTaskPollerBehavior: { type: 'autoscaling' },", inserted: true },
-  { key: 'cache', src: '  maxCachedWorkflows: 500,', value: '500', inserted: true },
+  { key: 'cache', src: '  maxCachedWorkflows: 500,', value: '500' },
   { key: 'close', src: '});' },
 ];
 // Wraps the first `value` of a code line in its own span, so it can be swapped and swell: the value is plain text
@@ -384,12 +385,13 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
   // the poll lines run above the panels, from each Poller to the end of its lane; their `d` is set on each frame
   dg.svg = svgLayer(root);
   const pollLine = () => path(dg.svg, 'M 0 0 L 1 0', C.violet, 2, false, '5,7');
-  dg.pollLines = { wf: [0, 1].map(pollLine), act: Array.from({ length: DIAGRAM.poller.max.act }, pollLine) };
+  const { max } = DIAGRAM.poller;
+  dg.pollLines = { wf: Array.from({ length: max.wf }, pollLine), act: Array.from({ length: max.act }, pollLine) };
   const poller = () => E(root, '', '', {
     width: DIAGRAM.poller.size + 'px', height: DIAGRAM.poller.size + 'px', borderRadius: '50%',
     border: '2px solid ' + C.violet, background: 'var(--surface)',
   });
-  dg.pollers = { wf: [0, 1].map(poller), act: Array.from({ length: DIAGRAM.poller.max.act }, poller) };
+  dg.pollers = { wf: Array.from({ length: max.wf }, poller), act: Array.from({ length: max.act }, poller) };
   // chips in flight, reused in turn
   dg.flying = {
     wf: Array.from({ length: 6 }, () => makeTaskChip(root, 'wf')),
@@ -432,8 +434,8 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 //   'down' (neon); wait: { text, trend }, the SCHEDULE-TO-START value ('38 s')
 // - metrics: up to 2 metric lines [{ name, value, at, color }], each rising in at `at`
 // - code: { swap, insert, light }: swap { slots: [value, at], cache: [value, at] } replaces a value (10, 500) at
-//   `at`; insert { poller: at, cache: at } opens an inserted line; light [key, from, to] highlights a line
-//   ('slots', 'poller', 'cache')
+//   `at`; insert { poller: at } opens the inserted Poller line; light [key, from, to] highlights a line ('slots',
+//   'poller', 'cache')
 // - status: [text, state], the WORKER panel's status (see setAppStatus; default ['RUNNING', 'running'])
 // - marks: { slots, pollers, cache, cpu }, the bottleneck markers, each { at, fixedAt, out } (see placeMark)
 function placeWorkerDiagram(dg, t, state = {}) {

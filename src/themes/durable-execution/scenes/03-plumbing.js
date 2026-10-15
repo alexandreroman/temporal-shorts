@@ -25,7 +25,7 @@
   const tileY = p => Y0 + (p.row - 1) * TILE.pitch;
   const wireY = p => CARD.y + (p.row - 1) * 80; // where the wire meets the card edge
   // LINES OF CODE bar: business logic stays thin, plumbing grows to fill the rest (whole pixels at rest)
-  const BAR = { w: CODE.w, h: 44, biz: 96, gap: 4 };
+  const BAR = { w: CODE_CARD.w, h: 44, biz: 96, gap: 4 };
   const plumbingWidth = BAR.w - BAR.biz - BAR.gap;
   const BAR_HALF_H = 56.5; // half the measured height (113 px) of the bar block: its edges land on whole pixels
   // Bug badges in landing order; at: when the badge lands (s after c[1]). The first four land one by one, then the

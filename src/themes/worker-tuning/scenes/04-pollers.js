@@ -59,7 +59,8 @@
 
       // the queue grows until the stream starts, then falls; the wait climbs to 44 s, then falls to 3 s
       const act = 2880 + 20 * Math.min(t, streamFrom) - 175 * Math.max(0, t - streamFrom);
-      const wait = lerp(28, 44, P(t, 0.3, c[1] + 0.5, linear)) - 41 * P(t, streamFrom, 7.0);
+      const climbFrom = 0.3, climbTo = c[1] + 0.8;
+      const wait = lerp(28, 44, P(t, climbFrom, climbTo - climbFrom, linear)) - 41 * P(t, streamFrom, 7.0);
       const trend = t < streamFrom ? 'up' : 'down';
       placeWorkerDiagram(s.dg, t, {
         queue: { wf: 6, act },

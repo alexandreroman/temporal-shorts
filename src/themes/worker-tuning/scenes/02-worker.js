@@ -11,7 +11,8 @@
     pre: 1.5, post: 2.0,
     subs: [
       {
-        text: "Workflow Tasks and Activity Tasks wait in two separate queues, even under one Task Queue name.",
+        text: "<b>Workflow Tasks</b> and <b>Activity Tasks</b> wait in two separate queues, "
+          + "even under one Task Queue name.",
         after: 1.5,
       },
       {

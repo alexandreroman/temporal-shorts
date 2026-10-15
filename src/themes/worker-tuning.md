@@ -31,7 +31,7 @@ their next task skips replaying the history.
 
 [Watch from 1:16](/themes/worker-tuning/#t=76)
 
-The Worker was set for normal days: 10 Activity Slots. All 10 are busy, and the
+The Worker is set for normal days: 10 Activity Slots. All 10 are busy, and the
 CPU sits at 35%. Tasks wait for a Slot, not for the machine: the Slots available
 metric stays at zero. Raise the limit from 10 to 50 Slots, and five times more
 tasks run at once. Throughput climbs, yet the backlog grows again. Something
@@ -62,22 +62,22 @@ stop.
 [Watch from 3:00](/themes/worker-tuning/#t=180)
 
 Now renderInvoice keeps the CPU at 100%: every task slows down and holds its
-Slot longer. More Slots would not help: a Slot adds no CPU. This Worker has
-reached the limit of its machine. This is the moment to add Workers: B and C
-poll the same Task Queue and share the load. The backlog drains, and new orders
-start right away again.
+Slot longer. More Slots would not help: a Slot adds no CPU. This Worker has used
+all the CPU it has. This is the moment to add Workers: B and C poll the same
+Task Queue and share the load. The backlog drains, and new orders start right
+away again.
 
 ## Chapter 7: Read the signals
 
 [Watch from 3:35](/themes/worker-tuning/#t=215)
 
-A growing backlog has four causes: full Slots, slow Pollers, a small cache or a
-full CPU. Change one setting at a time, watch the signals, then look for the
-next bottleneck.
+A growing backlog has four common causes: full Slots, slow Pollers, a small
+cache or a full CPU. Change one setting at a time, watch the signals, then look
+for the next bottleneck.
 
 ## Outro
 
-[Watch from 3:55](/themes/worker-tuning/#t=235)
+[Watch from 3:54](/themes/worker-tuning/#t=234)
 
 Tune one bottleneck at a time, and your Temporal Workers keep up when traffic
 spikes.

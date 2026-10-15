@@ -370,8 +370,9 @@ below and the card order in [Home page design](feedback_home-page.md).
 - A guide for developers and SREs who already run Workers: one symptom, a
   growing Task Queue backlog, and its four causes, told as one Black
   Friday night where each fix moves the bottleneck: Slots (ch3), Pollers
-  (ch4), the Workflow cache (ch5), the CPU (ch6). The hook "add more
-  Workers?" gets its answer only in ch6, once the CPU is full. Ch7, "Read
+  (ch4), the Workflow cache (ch5), the CPU (ch6). Ch1's first reflex,
+  "add more Workers?", gets its answer only in ch6, once the CPU is full;
+  "a growing backlog has four common causes", never "four causes". Ch7, "Read
   the signals", is the recap (symptom / signal / fix table and the loop
   change one setting, watch, next bottleneck); no "What you can build"
   chapter, as for agent-harness.
@@ -384,13 +385,16 @@ below and the card order in [Home page design](feedback_home-page.md).
   Slots, so the story's Worker is set to 10 "for normal days"; the Poller
   fix is Poller Autoscaling (`activityTaskPollerBehavior: { type:
   'autoscaling' }`), never a manual poller count, as the docs recommend;
-  more Workers only when the hosts are fully used. Resource-based tuners,
+  more Workers only when the hosts are fully used. Poller and Workflow
+  Slot counts in the diagram are schematic (2 Pollers growing to 5, 2
+  Workflow Slots), stated as such in `script.md`. Resource-based tuners,
   rate limits and partitions stay out.
 - Running example: the durable-execution shop, orders x10; five
   Activities, `chargeCard`, `reserveItem`, `renderInvoice` (CPU-heavy
   PDF, `invoice` icon), `shipPackage`, `emailReceipt`. One set of figures:
   10 Activity Slots raised to 50; cache 500 raised to 2000 with memory
-  2 GB to 4 GB; Workers A, then B and C.
+  2 GB to 4 GB; Workers A, then B and C. The code card shows both
+  "normal days" settings (10 Slots, cache 500) from ch3 on.
 - One stage for ch1-6, the Worker diagram (`makeWorkerDiagram`,
   `placeWorkerDiagram` in its `shared.js`): TEMPORAL panel with the
   Workflow and Activity lanes, WORKER panel with Pollers, Slots and the
@@ -398,7 +402,8 @@ below and the card order in [Home page design](feedback_home-page.md).
   code card; a bottleneck gets a red outline and BOTTLENECK tag, then a
   neon FIXED tag. Each bottleneck chapter: symptom, what is full, the
   setting, relief, the next bottleneck showing.
-- Slower pacing, as agent-harness: `pre: 1.5, post: 2.0` on chapters.
+- Slower pacing, as agent-harness: `pre: 1.5, post: 2.0` on chapters,
+  intro `pre: 1.5`, outro `pre: 1.0, post: 3.0`.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title

@@ -1,8 +1,9 @@
 // ===================== 3. EVERY SLOT IS BUSY
 // The Worker diagram as chapter 2 leaves it: the 10 Activity Slots busy, the queues long, the CPU at 35%. The code
-// card shows the Slot limit, maxConcurrentActivityTaskExecutions: 10, and its line lights. The Slot grid gets a red
-// outline and a BOTTLENECK tag, and a temporal_worker_task_slots_available metric line reads 0. The limit goes from
-// 10 to 50: the grid grows to 5 rows, tasks stream into the new Slots, the tag turns FIXED and the backlog falls.
+// card shows the normal-days settings, the Slot limit (maxConcurrentActivityTaskExecutions: 10) and the cache size
+// (maxCachedWorkflows: 500), and the Slot limit line lights. The Slot grid gets a red outline and a BOTTLENECK tag,
+// and a temporal_worker_task_slots_available metric line reads 0. The limit goes from 10 to 50: the grid grows to 5
+// rows, tasks stream into the new Slots, the tag turns FIXED and the backlog falls.
 // Last, the Slots start to empty while only a trickle of tasks comes through the Pollers, and the queue grows again.
 // The block keeps every name declared in this file local to this scene.
 {
@@ -23,7 +24,7 @@
     pre: 1.5, post: 2.0,
     subs: [
       {
-        text: "The Worker was set for normal days: 10 Activity Slots. All 10 are busy, and the CPU sits at 35%.",
+        text: "The Worker is set for normal days: 10 Activity Slots. All 10 are busy, and the CPU sits at 35%.",
         after: 1.5,
       },
       {

@@ -5,8 +5,9 @@
 // subtitle reads it: CHANGE ONE SETTING, WATCH THE SIGNALS, NEXT BOTTLENECK, and an arrow back to the start.
 // The block keeps every name declared in this file local to this scene.
 {
-  // The four causes, in the order the first subtitle names them (name: its words in the subtitle). The signal is an
-  // SDK metric and its reading; the fix, what to change and the Worker option that does it.
+  // The four causes, in the order the first subtitle names them (name: its words in the subtitle). The signal: an SDK
+  // metric (named without the temporal_ prefix, as in the docs headings) and its reading, or plain words (signalText)
+  // in the text font; the fix: what to change, and the Worker option that does it.
   const ROWS = [
     {
       name: 'full Slots', part: 'slots', symptom: 'Slots full, CPU low',
@@ -25,7 +26,7 @@
     },
     {
       name: 'full CPU', part: 'cpu', symptom: 'CPU at 100%',
-      metric: 'CPU usage', reading: '',
+      signalText: 'CPU usage',
       fix: 'More Workers', option: '',
     },
   ];
@@ -36,7 +37,7 @@
     { name: 'next bottleneck', label: 'Next bottleneck' },
   ];
   const SUBS = [
-    "A growing backlog has four causes: full Slots, slow Pollers, a small cache or a full CPU.",
+    "A growing backlog has four common causes: full Slots, slow Pollers, a small cache or a full CPU.",
     "Change one setting at a time, watch the signals, then look for the next bottleneck.",
   ];
   // Seconds after its subtitle starts when it reads `name`: 16 characters per second, plus 0.3 s, as useCaseScene
@@ -104,17 +105,19 @@
   }
   const PART_MAKERS = { slots: makeSlotsPart, poller: makePollerPart, cache: makeCachePart, cpu: makeCpuPart };
 
-  // A row of the table: its part, then the symptom, the signal (metric in mono, its reading in red) and the fix (the
-  // Worker option after it, in slate mono)
+  // A row of the table: its part, then the symptom, the signal (metric in mono, its reading in red; plain words as the
+  // symptom) and the fix (the Worker option after it, in slate mono)
   function makeRow(root, row) {
+    const textCss = 'font-size:28px;line-height:36px';
     const reading = row.reading ? `<span style="color:${C.red}">${row.reading}</span>` : '';
+    const signal = row.metric
+      ? cell(COL.signal, `<span>${row.metric}</span>${reading}`, 'font-family:Mono;font-size:20px;line-height:28px')
+      : cell(COL.signal, row.signalText, textCss);
     const option = row.option
       ? `<span class="mono" style="font-size:18px;line-height:28px;color:${C.slate}">${row.option}</span>`
       : '';
     const e = E(root,
-      cell(COL.symptom, row.symptom, 'font-size:28px;line-height:36px')
-      + cell(COL.signal, `<span>${row.metric}</span>${reading}`, 'font-family:Mono;font-size:20px;line-height:28px')
-      + cell(COL.fix, `<span>${row.fix}</span>${option}`, 'font-size:28px;line-height:36px'),
+      cell(COL.symptom, row.symptom, textCss) + signal + cell(COL.fix, `<span>${row.fix}</span>${option}`, textCss),
       'tile', { width: TABLE.w + 'px', height: TABLE.rowH + 'px', textAlign: 'left' });
     e.partBox = E(e, '', '', {
       left: (COL.part - BORDER) + 'px', top: ((TABLE.rowH - PART.h) / 2 - BORDER) + 'px',
@@ -128,7 +131,7 @@
     chapter: 7, title: 'Read the signals',
     pre: 1.5, post: 2.0,
     subs: [
-      // the last row is lit until c[0] + 6.5, then the table holds to the end of this pause
+      // the last row is lit until c[0] + 6.9, then the table holds to the end of this pause
       { text: SUBS[0], after: 1.5 },
       // the arrow back closes the loop at c[1] + 5.6; the whole loop holds to the end of this pause, then the fade
       { text: SUBS[1], after: 2.0 },
