@@ -219,8 +219,8 @@
       s.lens.text.style.top = (inner - LENS.zoom * (lensY - IBAN.y)).toFixed(2) + 'px';
 
       // the rewind: a copy of the card leaves the chip in the close layout (the chip keeps what was stored, and slides
-      // back with the history) and streaks back along the
-      // wire into the Worker, growing back to its lane size, its red fading, fading outlines behind it
+      // back with the history) and streaks back along the wire into the Worker, growing back to its lane size, its red
+      // fading, fading outlines behind it
       const streak = P(t, streakAt, REWIND.d);
       const route = [
         [HIST_CHIP.x + closeDx(1), HIST_CHIP.y], [HIST_CHIP.x + closeDx(1) - 360, LANE.wire.y],

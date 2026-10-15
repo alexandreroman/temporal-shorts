@@ -166,10 +166,11 @@ function setPayload(card, { seal = 0, scramble = 0, red = 0, fromRight = false }
 // ---------- the journey lane
 // Stage coordinates of the lane shared by every lane scene, at camera rest (scale 1), left to right: YOUR
 // ENVIRONMENT (env) with the Worker panel in it, the wire from x0 to x1, TEMPORAL with the Event History and the Web
-// UI (ui: the Web UI window, under the stored Event History of chapters 3 and 4, on its left), the TEMPORAL PROXY box
-// at the environment's right edge (from chapter 6) and the closed door on that edge. The two zones give their top
-// left corner and size, the other parts their center (and size). Every lane scene reads them: adjust them here,
-// never in a scene.
+// UI (ui: the size of the Web UI window, and its place under the stored Event History, where its dashed outline rests
+// in chapter 4; the close layout of chapters 3 and 4 shows the window on the history's right, see CLOSE), the
+// TEMPORAL PROXY box at the environment's right edge (from chapter 6) and the closed door on that edge. The two zones
+// give their top left corner and size, the other parts their center (and size). Every lane scene reads them: adjust
+// them here, never in a scene.
 const LANE = {
   env: { x: 120, y: 190, w: 640, h: 650 },
   worker: { x: 340, y: 515, w: 380, h: 392 },
@@ -201,9 +202,17 @@ function drawDashed(p, prog, o = 1, dash = 10, gap = 8) {
 const roundRectD = (x, y, w, h, r) => `M ${x + w / 2} ${y} H ${x + w - r} A ${r} ${r} 0 0 1 ${x + w} ${y + r}`
   + ` V ${y + h - r} A ${r} ${r} 0 0 1 ${x + w - r} ${y + h} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + h - r}`
   + ` V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
-// A zone's caption, centered 24 px above its bottom edge; hidden until a scene sets its opacity (zone.cap)
-const zoneCaption = text => '<div class="cap lbl" style="position:absolute;left:0;right:0;bottom:24px;'
-  + `text-align:center;font-size:18px;color:var(--ink);opacity:0">${text}</div>`;
+// How far a zone's labels sit inside it: its heading under its top edge, its caption above its bottom edge, in px
+const ZONE_LABEL_INSET = { head: 20, cap: 24 };
+// A zone's heading (zone.head), 24 px from its left edge, inside a frame of its own (zone.headFrame): placeLane() sets
+// the heading's opacity, frameLaneEdges() the frame's
+const zoneHeading = html => '<div class="head-frame" style="position:absolute;left:24px;'
+  + `top:${ZONE_LABEL_INSET.head}px">${html}</div>`;
+// A zone's caption (zone.cap), centered, inside a frame of its own (zone.capFrame) like the heading; hidden until a
+// scene sets its opacity
+const zoneCaption = text => '<div class="cap-frame" style="position:absolute;left:0;right:0;'
+  + `bottom:${ZONE_LABEL_INSET.cap}px"><div class="cap lbl" style="text-align:center;font-size:18px;`
+  + `color:var(--ink);opacity:0">${text}</div></div>`;
 
 // The slate EMPTY note of the lane's Event History, centered across the card, 150 px under its top
 const historyEmptyNote = () => '<div class="empty mono" style="position:absolute;left:0;right:0;top:150px;'
@@ -223,7 +232,8 @@ function contentBand({ scale, dy }) {
 }
 // Clips an element whose box spans stage y top to top + h (at scale 1) to the content band of the shot cam, so a close
 // shot never runs it under the chapter header or the subtitles; no clip when it lies inside. For the zones only, which
-// show as their border: content is either wholly in a shot or dimmed at its edge, never cut by a clip.
+// show as their border and fill: content is either wholly in a shot or dimmed at its edge, never cut by a clip, and
+// the zones' labels fade out before the clip reaches them (frameLaneEdges).
 function clipToContent(el, top, h, cam) {
   const band = contentBand(cam);
   const cutTop = Math.max(0, band.top - top), cutBottom = Math.max(0, top + h - band.bottom);
@@ -231,13 +241,22 @@ function clipToContent(el, top, h, cam) {
     ? `inset(${cutTop.toFixed(2)}px -200px ${cutBottom.toFixed(2)}px -200px)` : 'none';
 }
 // Clips the lane's zones and the environment's dashed edge to the content frame for the shot cam (see contentBand).
-// At rest they lie inside the frame and show whole.
+// At rest they lie inside the frame and show whole. A zone's heading fades out as the frame's top edge moves from the
+// zone's top edge down to the heading, and its caption likewise at the bottom, so the clip never cuts a label: both
+// show whole until the clip starts, and are gone before it reaches them. It reads the camera alone, so the two sides
+// of a match cut agree.
 function frameLaneEdges(lane, cam) {
   const { top, bottom } = contentBand(cam);
   lane.frameClip.setAttribute('y', top.toFixed(2));
   lane.frameClip.setAttribute('height', (bottom - top).toFixed(2));
-  clipToContent(lane.env, LANE.env.y, LANE.env.h, cam);
-  clipToContent(lane.temporal, LANE.temporal.y, LANE.temporal.h, cam);
+  [[lane.env, LANE.env], [lane.temporal, LANE.temporal]].forEach(([el, zone]) => {
+    clipToContent(el, zone.y, zone.h, cam);
+    const zoneBottom = zone.y + zone.h;
+    const headRoom = clamp((zone.y + ZONE_LABEL_INSET.head - top) / ZONE_LABEL_INSET.head);
+    const capRoom = clamp((bottom - (zoneBottom - ZONE_LABEL_INSET.cap)) / ZONE_LABEL_INSET.cap);
+    el.headFrame.style.opacity = headRoom;
+    el.capFrame.style.opacity = capRoom;
+  });
 }
 
 // The lane's parts (LANE), in their stacking order: the two zones, an SVG layer (the environment's dashed edge and the
@@ -247,23 +266,24 @@ function makeLane(root) {
   const { env, temporal, worker, history, wire } = LANE;
   const lane = {};
   lane.env = E(root,
-    '<div class="head lbl" style="position:absolute;left:24px;top:20px;padding-left:0;font-size:18px">'
-    + 'Your environment</div>' + zoneCaption('Your code runs here'),
+    zoneHeading('<div class="head lbl" style="padding-left:0;font-size:18px">Your environment</div>')
+    + zoneCaption('Your code runs here'),
     '', {
       width: env.w + 'px', height: env.h + 'px', background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)',
     });
-  lane.env.head = lane.env.querySelector('.head');
-  lane.env.cap = lane.env.querySelector('.cap');
   // clipped, for the light sweep of the Namespaces (makeNamespaces)
   lane.temporal = E(root,
-    `<img class="head" src="${LOGO}" style="position:absolute;left:24px;top:20px;height:34px;display:block">`
-    + zoneCaption('Never your code'),
+    zoneHeading(`<img class="head" src="${LOGO}" style="height:34px;display:block">`) + zoneCaption('Never your code'),
     'tile', {
       width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: '#17182A',
       overflow: 'hidden',
     });
-  lane.temporal.head = lane.temporal.querySelector('.head');
-  lane.temporal.cap = lane.temporal.querySelector('.cap');
+  [lane.env, lane.temporal].forEach(zone => {
+    zone.head = zone.querySelector('.head');
+    zone.headFrame = zone.querySelector('.head-frame');
+    zone.cap = zone.querySelector('.cap');
+    zone.capFrame = zone.querySelector('.cap-frame');
+  });
 
   lane.svg = svgLayer(root);
   // the environment's dashed edge, in two halves from the wire's exit on its right edge round to its left edge
@@ -304,9 +324,9 @@ function makeLane(root) {
 }
 // Shows the lane's parts in place, each with its opacity in o (1 by default): env (with its dashed edge), temporal,
 // worker, history, wire, door, and heads, the zones' headings (YOUR ENVIRONMENT and the logo), which a close shot
-// pushes up under the chapter header; close, TEMPORAL's widening into the close layout (CLOSE). The Worker runs, its
-// gear turning; the door is in its slate and white look. The zone captions (env.cap, temporal.cap) keep the opacity
-// a scene gives them.
+// pushes up under the chapter header (frameLaneEdges also fades them out at the frame's top edge); close, TEMPORAL's
+// widening into the close layout (CLOSE). The Worker runs, its gear turning; the door is in its slate and white look.
+// The zone captions (env.cap, temporal.cap) keep the opacity a scene gives them.
 function placeLane(lane, o = {}) {
   const { env = 1, temporal = 1, worker = 1, history = 1, wire = 1, door = 1, heads = 1, close = 0 } = o;
   lane.env.head.style.opacity = heads;
@@ -434,9 +454,10 @@ function placeNamespaces(ns, split, lit = 0, seals = [0, 0], o = 1) {
 }
 
 // ---------- the Event History that stores the payload, and the Web UI (chapters 3 and 4)
-// Inside TEMPORAL, at camera rest: the stored Event History on top, then a row under it, the Web UI window (LANE.ui)
-// on the left and a slot on the right (BESIDE_UI: the viewers in chapter 3, the Search Attributes in chapter 4).
-// The Event History grows from the lane's (LANE.history) to HIST, 24 px clear of the TLS tube's mouth on its left.
+// Inside TEMPORAL, at camera rest: the stored Event History, with the Web UI's place (LANE.ui) under it; in the close
+// layout (CLOSE), the history on the left and a column on its right, the Web UI over the viewers (chapter 3) or the
+// Search Attributes (chapter 4). The Event History grows from the lane's (LANE.history) to HIST, 24 px clear of the
+// TLS tube's mouth on its left.
 const HIST = { x: 1480, y: 454, w: 560, h: 392 };
 // Its rows; row 2 holds the payload. HIST_ROW: each row's top in the card, the row height and the text size.
 const HIST_ROWS = [

@@ -256,8 +256,8 @@
 
       // the Web UI comes back on the history's right, showing the same ciphertext; it then leaves Temporal's side for
       // your environment, growing into a browser, which shows the payload in clear once the Codec Server has
-      // decrypted it. Its place stays as a faint dashed outline, which narrows back with TEMPORAL to the Web UI's
-      // place under the history (LANE.ui).
+      // decrypted it. Once the pull-back has narrowed TEMPORAL back, a faint dashed outline marks the Web UI's place
+      // under the history (LANE.ui).
       const webuiPop = backPop(t, c[1] + T1.webui);
       const move = P(t, c[3] + T3.move, T3.moveD);
       const column = [CLOSE.column.x, CLOSE.ui.y];
@@ -265,8 +265,7 @@
         [BROWSER.x + 400, BROWSER.y - 60], [BROWSER.x, BROWSER.y]], move);
       place(s.webui, winX, winY, webuiPop.s * lerp(1, BROWSER.k, move), webuiPop.o * done);
       s.webui.caption.textContent = move >= 0.5 ? 'YOUR BROWSER · WEB UI' : 'TEMPORAL WEB UI';
-      place(s.webuiSlot, lerp(column[0], WEBUI.x, wide), lerp(column[1], WEBUI.y, wide), 1,
-        0.6 * P(t, c[3] + T3.move + 0.2, 0.4) * done);
+      place(s.webuiSlot, WEBUI.x, WEBUI.y, 1, 0.6 * P(t, c[3] + T3.move + T3.moveD, 0.4) * done);
       const clearAt = c[3] + T3.clear;
       setWebUI(s.webui, { scramble: 1 - P(t, clearAt, 0.5, linear) });
       const decrypted = P(t, clearAt + 0.4, 0.2) * (1 - P(t, clearAt + 1.2, 0.5));
