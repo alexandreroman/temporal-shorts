@@ -60,7 +60,7 @@
       s.links = s.steps.xs.map(x => path(s.svg, `M ${x} ${y0} L ${x} ${y1}`, C.line, 2, false));
       s.dots = s.steps.xs.map(() => makeGlowDot(root, 14, RGB.uv));
       s.services = ORDER_STEPS.map(step => makeService(root, step.service));
-      s.code = makeCodeCard(root, { w: ABOVE_W });
+      s.code = makeCodeCard(root, { lines: ORDER_CODE, w: ABOVE_W });
       s.done = tag(root, `${ICON('check', 28, C.neon, 2.6)}Order complete`, 'neon');
       // whole-pixel width (content: 295.8 px; the pill is 50 px high), so the centered tag lands on whole pixels
       Object.assign(s.done.style, {

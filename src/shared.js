@@ -754,6 +754,72 @@ function makeCallCard(p, isModelCall, { modelLabel = 'LLM CALL', w = null } = {}
   return e;
 }
 
+// ---------- code card: white card showing a few lines of TypeScript, one div per line
+// Default text metrics and tab height. Card height = 2 * padY + lines * lineH (256 px for 6 lines).
+const CODE = { w: 680, font: 24, lineH: 36, padY: 20, padX: 20, gutter: 40, tabH: 34 };
+// Light syntax coloring of one plain TypeScript line (no HTML): keywords UV, strings violet, called function names
+// bold, comments and punctuation slate (angle brackets escaped), everything else (names, types) default ink
+function highlightJs(line) {
+  const token =
+    /('[^']*')|(\/\/.*)|\b(export|async|function|await|const|typeof)\b|([A-Za-z_]\w*)(?=[(<])|([(){}<>:;,.=])/g;
+  const escaped = { '<': '&lt;', '>': '&gt;' };
+  return line.replace(token, (m, str, comment, kw, fn, punct) => {
+    if (str) return `<span style="color:${C.violet}">${str}</span>`;
+    if (comment) return `<span style="color:#7C8698">${comment}</span>`;
+    if (kw) return `<span style="color:${C.uv}">${kw}</span>`;
+    if (fn) return `<span style="font-weight:700">${fn}</span>`;
+    return `<span style="color:#7C8698">${escaped[punct] || punct}</span>`;
+  });
+}
+// opts.lines: plain TypeScript lines (required); opts.header: label of the tab on top of the card and opts.file: file
+// name shown next to it (both hidden until card.hdr.style.opacity is set); opts.font, opts.lineH, opts.padY,
+// opts.padX, opts.gutter: text metrics (default: CODE).
+// Returns the card element with: w, h, lineH, padY, lines (one div per line), bar (highlight, see setCodeLine),
+// hdr (tab or null) and lineY(i): y of the middle of line i relative to the card center.
+function makeCodeCard(parent, opts) {
+  const {
+    lines, header = null, file = null, w = CODE.w, font = CODE.font, lineH = CODE.lineH,
+    padY = CODE.padY, padX = CODE.padX, gutter = CODE.gutter,
+  } = opts;
+  const h = padY * 2 + lines.length * lineH;
+  const card = E(parent, '', 'paper', { width: w + 'px', height: h + 'px' });
+  card.w = w; card.h = h; card.lineH = lineH; card.padY = padY;
+  // the highlight sits under the text, so it is created first
+  card.bar = E(card, '', '', {
+    left: '8px', width: (w - 16) + 'px', height: lineH + 'px', borderRadius: 'var(--rs)',
+  });
+  card.lines = lines.map((src, i) => E(card,
+    `<span style="display:inline-block;width:${gutter}px;color:#B4BCCB">${i + 1}</span>${highlightJs(src)}`,
+    'mono', {
+      left: padX + 'px', top: (padY + i * lineH) + 'px', height: lineH + 'px',
+      lineHeight: lineH + 'px', fontSize: font + 'px', whiteSpace: 'pre', opacity: 1,
+    }));
+  card.hdr = null;
+  if (header) {
+    // a tab standing on the top edge, so showing it never moves the code; the file name follows it, in slate
+    const fileLabel = file
+      ? `<span style="font-size:16px;letter-spacing:.04em;color:${C.slate}">${file}</span>` : '';
+    card.hdr = E(card,
+      `<div style="height:${CODE.tabH}px;padding:0 14px 0 12px;display:flex;align-items:center;gap:8px;`
+      + `background:${C.uv};color:#FFFFFF;font-size:15px;letter-spacing:.12em;text-transform:uppercase;`
+      + `border-radius:var(--rs) var(--rs) 0 0">${ICON('code', 18, '#FFFFFF', 2)}<span>${header}</span></div>`
+      + fileLabel,
+      'mono', {
+        left: '18px', top: -CODE.tabH + 'px', height: CODE.tabH + 'px', display: 'flex', alignItems: 'center',
+        gap: '16px', whiteSpace: 'nowrap',
+      });
+  }
+  card.lineY = i => -h / 2 + padY + (i + 0.5) * lineH;
+  return card;
+}
+// Highlight n lines from line i (0-based; a fractional i slides between lines) with opacity o
+function setCodeLine(card, i, o, color = C.highlight, n = 1) {
+  card.bar.style.top = (card.padY + i * card.lineH) + 'px';
+  card.bar.style.height = (n * card.lineH) + 'px';
+  card.bar.style.background = color;
+  card.bar.style.opacity = clamp(o);
+}
+
 // ---------- counter tile
 // Counter tile: a small label, a big number and a short mono note (e.g. MODEL CALLS BILLED: 3 NOT RE-BILLED); w:
 // its width in px. Options:

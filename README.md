@@ -30,6 +30,9 @@ Each video is a theme:
   experimental [project of the same name][agent-harness]: AI agents that
   run as durable Temporal Workflows while you keep your AI SDK, with human
   approvals, one event stream, typed subagents and Code Mode.
+- **Tuning Temporal Workers** (`worker-tuning`): for developers and SREs,
+  how a Worker takes work, and how to find and fix the bottleneck behind a
+  growing Task Queue backlog: Slots, Pollers, the Workflow cache, CPU.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal hands back the saved results from the Event
@@ -70,9 +73,9 @@ src/shared.js          brand helpers shared by the themes (colors, tiles,
                        the lunch example with its context panel and
                        blocks, crash and takeover effects, status tags,
                        app and Temporal panels, the app panel of numbered
-                       step lines, Event History card, counters, small
-                       animation helpers) and the "What you can build"
-                       chapter (useCaseScene)
+                       step lines, Event History card, code card,
+                       counters, small animation helpers) and the "What
+                       you can build" chapter (useCaseScene)
 src/player.js          live player: controls, fit-to-window, shortcuts
 src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        theme page (background, subtitles, header, script
@@ -363,8 +366,7 @@ commit:
   appear in the image
 - an icon of the order steps (`card`, `box`, `truck`, `mail`) or of the
   `check` and `retry` badges: `src/social.html` holds inline copies of
-  their paths, to update with their source (`ICONS` in `src/engine.js`,
-  `src/themes/durable-execution/shared.js`)
+  their paths, to update with their source (`ICONS` in `src/engine.js`)
 - a page `<title>` or `<meta name="description">`: check that the image
   still matches the text
 - a new theme: `make html` fails without its `social.png`

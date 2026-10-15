@@ -86,7 +86,7 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 
 ## Intro
 
-- **0:01** Your Task Queue is backing up and orders are waiting. Which
+- **0:02** Your Task Queue is backing up and orders are waiting. Which
   Worker setting do you change?
   - Visuals: Temporal logo, kicker "A GUIDE FOR DEVELOPERS AND SRES",
     title "Why is my Task Queue backing up?", tagline "TUNE TEMPORAL
@@ -96,37 +96,37 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 
 ## 01 The backlog grows
 
-- **0:00** Black Friday: the shop gets ten times more orders than usual,
+- **0:12** Black Friday: the shop gets ten times more orders than usual,
   and every order is a Temporal Workflow.
   - Visuals: an orders counter speeds up ("ORDERS / MIN" x10); order
     chips stream into the "orders" Task Queue.
-- **0:00** Tasks pile up in the Task Queue: the backlog
+- **0:20** Tasks pile up in the Task Queue: the backlog
   grows, and each order waits longer to start.
   - Visuals: the queue lengthens; the BACKLOG counter
     (`ApproximateBacklogCount`) climbs in red; a SCHEDULE-TO-START readout
     rises.
-- **0:00** The first reflex is to add more Workers. Before that, find out
+- **0:29** The first reflex is to add more Workers. Before that, find out
   what is actually full.
   - Visuals: a dashed "+ WORKER" ghost appears, crossed out; a magnifier
     tag "WHAT IS FULL?" over the Worker.
 
 ## 02 How a Worker takes work
 
-- **0:00** Workflow Tasks and Activity Tasks wait in two separate queues,
+- **0:40** Workflow Tasks and Activity Tasks wait in two separate queues,
   even under one Task Queue name.
   - Visuals: the TEMPORAL panel splits the "orders" Task Queue into two
     lanes, WORKFLOW TASKS (UV chips) and ACTIVITY TASKS (chips with step
     icons).
-- **0:00** A Poller in the Worker asks a queue for a task, but only
+- **0:49** A Poller in the Worker asks a queue for a task, but only
   while a Slot is free.
   - Visuals: the WORKER A panel draws in; Pollers sit at the end of each
     lane, a dashed poll line pulsing toward the queue; a task jumps from
     the queue through a Poller into a free Slot.
-- **0:00** A Slot is the permission to run one task. The task itself uses
+- **0:56** A Slot is the permission to run one task. The task itself uses
   the Worker's CPU and memory.
   - Visuals: the Slot grid lights; CPU and MEMORY meters under the Worker
     rise as Slots fill.
-- **0:00** The Workflow cache keeps Workflows in memory, so their
+- **1:05** The Workflow cache keeps Workflows in memory, so their
   next task skips replaying the history.
   - Visuals: the WORKFLOW CACHE strip fills with order cells (#1042,
     #1043, ...); a Workflow Task hits a cached cell, which flashes.

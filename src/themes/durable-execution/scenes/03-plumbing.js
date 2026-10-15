@@ -90,7 +90,7 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.card = makeCodeCard(root);
+      s.card = makeCodeCard(root, { lines: ORDER_CODE });
       s.cardL = E(root, 'Business logic', 'lbl', { fontSize: '20px' });
       // wires run from the tile's inner edge to the card edge, with horizontal tangents at both ends
       s.wires = PLUMBING.map(p => {
