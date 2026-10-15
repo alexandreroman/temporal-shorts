@@ -17,6 +17,8 @@ Object.assign(ICONS, {
   window: '<rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M6.5 6.5h.01M9.5 6.5h.01"/>',
   // a cloud on a flat base: a managed service
   cloud: '<path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.7 4.7 0 0 0 7 18.5z"/>',
+  // a medical cross, outlined: health data
+  medical: '<path d="M9 3.5h6V9h5.5v6H15v5.5H9V15H3.5V9H9z"/>',
 });
 
 // ---------- the running example: Nora sends €25,000 to Leo, one payload carried through every chapter
@@ -820,6 +822,47 @@ function namespaceHtml(shown, caret) {
     ? `<span style="position:absolute;top:0;left:calc(${shown} * (1ch + .06em))">▌</span>` : '';
   return `<span style="position:relative">${FULL_NS.slice(0, shown)}`
     + `<span style="opacity:0">${FULL_NS.slice(shown)}</span>${cursor}</span>`;
+}
+
+// ---------- the recap tiles (chapters 9 and 10)
+// The benefits of the recap, [icon, label], one tile each in the use cases' row (USE_CASE_ROW); a <br> splits a label
+// that would crowd its tile
+const RECAP = [
+  ['door', 'No inbound ports'], ['badge', 'Verified<br>connections'], ['key', 'Your keys only'],
+  ['lock', 'No secrets<br>in Workers'],
+];
+// The label height of the recap and use-case tiles, in lines (padTileLabel): one label in a row may take two lines,
+// and the tiles keep their icons aligned
+const TILE_LABEL_LINES = 2;
+// The padlock badge centered on a recap tile's top edge, as on the payload card: its diameter and the padlock's size,
+// px, both even, so they center on whole pixels
+const RECAP_BADGE = { size: 56, lock: 32 };
+// A recap tile of USE_CASE_ROW's size and type scale for a benefit of RECAP, with its padlock badge (.badge, .lock),
+// open and unlit until setRecapTile() sets its state. Chapter 9 lands these tiles; chapter 10 opens on them, padlocks
+// shut, and flips them over into the use cases.
+function makeRecapTile(p, [icon, label]) {
+  const { w, h } = USE_CASE_ROW;
+  const { size, lock } = RECAP_BADGE;
+  const tile = iconTile(p, icon, label, w, h, C.ink, USE_CASE_TYPE);
+  padTileLabel(tile, TILE_LABEL_LINES);
+  // offsets from the tile's padding box, inside its 1.5 px border; out of the flex flow, as absolutely positioned
+  tile.badge = E(tile, '', '', {
+    left: (w - size) / 2 - 1.5 + 'px', top: -size / 2 - 1.5 + 'px', width: size + 'px', height: size + 'px',
+    borderRadius: '50%', background: C.bg, border: `1.5px solid ${C.line}`, opacity: 1,
+  });
+  // centered in the badge, offsets from inside its 1.5 px border
+  tile.lock = makeLock(tile.badge, lock, 1.9, {
+    left: (size - lock) / 2 - 1.5 + 'px', top: (size - lock) / 2 - 1.5 + 'px', opacity: 1,
+  });
+  setRecapTile(tile);
+  return tile;
+}
+// State of a recap tile: seal (0 to 1, a linear progress) snaps its padlock shut (setLock), which turns the badge's
+// border neon; lit gives the tile the UV border of a tile that lights up
+function setRecapTile(tile, { seal = 0, lit = false } = {}) {
+  setLock(tile.lock, seal);
+  tile.badge.style.borderColor = seal >= LOCK_SHUT ? C.neon : C.line;
+  tile.style.borderColor = lit ? C.uv : C.line;
 }
 
 // ---------- hand-offs (match cuts: a chapter ends on the next one's first frame, see the plan's motion direction)
