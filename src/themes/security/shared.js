@@ -401,7 +401,9 @@ const NS_BAND = { x: LANE.temporal.x + LANE.temporal.w / 2, w: LANE.temporal.w -
 // The light that sweeps across TEMPORAL as it splits into Namespaces, px wide
 const NS_SWEEP_W = 160;
 // The Namespace bands, under the lane's SVG layer and the Event History, each labelled at its top left, a padlock on
-// the right of the others; and the light sweep, inside TEMPORAL. placeNamespaces() shows them.
+// the right of the others; and the light sweep over them, in a box across TEMPORAL's width that holds only the bands'
+// height (12 px round them), so the sweep stays inside a close shot that crops TEMPORAL itself. placeNamespaces()
+// shows them.
 function makeNamespaces(lane) {
   const bands = NAMESPACES.map(ns => {
     // offsets from inside the band's 1.5 px border, so its label and lock rest on whole pixels
@@ -419,11 +421,18 @@ function makeNamespaces(lane) {
     }
     return band;
   });
-  const sweep = E(lane.temporal, '', '', {
-    top: '-1.5px', width: NS_SWEEP_W + 'px', height: LANE.temporal.h + 'px',
+  const first = NAMESPACES[0], last = NAMESPACES[NAMESPACES.length - 1];
+  const top = first.y - first.h / 2 - 12, bottom = last.y + last.h / 2 + 12;
+  const sweepBox = E(lane.temporal.parentNode, '', '', {
+    left: LANE.temporal.x + 'px', top: top + 'px', width: LANE.temporal.w + 'px', height: (bottom - top) + 'px',
+    overflow: 'hidden',
+  });
+  lane.svg.before(sweepBox);
+  const sweep = E(sweepBox, '', '', {
+    width: NS_SWEEP_W + 'px', height: '100%', opacity: 1,
     background: `linear-gradient(90deg, rgba(${RGB.ink},0), rgba(${RGB.ink},.28), rgba(${RGB.ink},0))`,
   });
-  return { bands, sweep };
+  return { bands, sweep, sweepBox };
 }
 // Center of the padlock on the band of Namespace i (one of the others)
 const nsLockAt = i => [NS_BAND.x + NS_BAND.w / 2 - 39, NAMESPACES[i].y];
@@ -433,7 +442,7 @@ const nsLockAt = i => [NS_BAND.x + NS_BAND.w / 2 - 39, NAMESPACES[i].y];
 function placeNamespaces(ns, split, lit = 0, seals = [0, 0], o = 1) {
   const sweepX = lerp(-NS_SWEEP_W / 2, LANE.temporal.w + NS_SWEEP_W / 2, split); // from TEMPORAL's left edge
   ns.sweep.style.transform = `translateX(${(sweepX - NS_SWEEP_W / 2).toFixed(2)}px)`;
-  ns.sweep.style.opacity = split > 0 && split < 1 ? 1 : 0;
+  ns.sweepBox.style.opacity = split > 0 && split < 1 ? 1 : 0;
   const bandLeft = NS_BAND.x - NS_BAND.w / 2 - LANE.temporal.x;
   let other = 0;
   ns.bands.forEach(band => {
@@ -606,10 +615,10 @@ const WIRE_LANE = { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, heads: 0 };
 // with `lane` (the environment and the Worker, cropped at the left edge, dimmed), placeTube(tube, 1),
 // placeNamespaces(ns, 1, 1, [1, 1]).
 const TUBE_HANDOFF = {
-  from: [1164, 515, 1.1], to: HIST_SHOT,
+  from: [1153, 515, 1.4], to: HIST_SHOT,
   card: [TUBE.x1 - 62, TUBE.y], cardTo: [LANE.history.x, LANE.history.y],
   d: 0.7, cut: 0.25,
-  lane: { env: OFF_SHOT, worker: OFF_SHOT, wire: 0, door: 0 },
+  lane: { env: OFF_SHOT, worker: OFF_SHOT, temporal: OFF_SHOT, wire: 0, door: 0 },
 };
 // The whip u seconds after it starts (chapter 2: u = t - (dur - TUBE_HANDOFF.cut); chapter 3: u = t +
 // TUBE_HANDOFF.cut): camera, the shot() offsets, and card, the card's center

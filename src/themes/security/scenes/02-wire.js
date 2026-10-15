@@ -1,15 +1,17 @@
 // ===================== 2. ON THE WIRE
 // Opens on the push-in that ended chapter 1 (WIRE_SHOT). A neon TLS tube draws along the wire and the payload card
 // rides it toward Temporal while an eavesdropper's beam scans it and reads only ciphertext. The Worker's identity
-// badge is checked and turns VERIFIED; an unknown client is REJECTED. TEMPORAL splits into three Namespaces under a
-// sweep of light, the card enters payments only, and the camera starts its whip right (TUBE_HANDOFF) into chapter 3.
+// badge slides into the shot and turns VERIFIED; an unknown client comes in under the wire and is REJECTED. TEMPORAL
+// splits into three Namespaces under a sweep of light, the card enters payments only, and the camera starts its whip
+// right (TUBE_HANDOFF) into chapter 3. The camera only moves forward: right along the lane, its scale never shrinking
+// (1.35, 1.4, then the whip's 1.6); what the story needs from the Worker comes to it.
 // The block keeps every name declared in this file local to this scene.
 {
-  // camera framings, [x, y, scale] for shot(): along the tube as the card rides it (from, then to), then back to
-  // the whole way from the Worker to TEMPORAL for the identity check, then on TEMPORAL's Namespaces
-  const TUBE_FROM = [760, 560, 1.4];
-  const TUBE_TO = [900, 560, 1.4];
-  const ID_SHOT = [960, 515, 1.1];
+  // camera framings, [x, y, scale] for shot(): along the tube as the card rides it (from, then to, held while the
+  // identities come to the camera: it centers the tube and TEMPORAL's edge), then on TEMPORAL's Namespaces, from the
+  // tube's mouth to the bands' right edge (TUBE_HANDOFF.from)
+  const TUBE_FROM = [760, 548, 1.4];
+  const TUBE_TO = [900, 548, 1.4];
   // the move into the tube shot, from c[0]: start and duration
   const TUBE_AT = 0.6, TUBE_D = 1.0;
   const NS_SHOT = TUBE_HANDOFF.from;
@@ -17,7 +19,7 @@
   const RIDE = { x0: TUBE.x0 + 120, x1: TUBE.x1 - 120 };
   // the outsiders under the wire, between the zones, one after the other: the eavesdropper, then the unknown client;
   // their verdict tags straddle their bottom edge
-  const OUTSIDER = { x: (LANE.wire.x0 + LANE.wire.x1) / 2, y: 735, w: 320, h: 132 };
+  const OUTSIDER = { x: (LANE.wire.x0 + LANE.wire.x1) / 2, y: 725, w: 320, h: 132 };
   const VERDICT_Y = OUTSIDER.y + OUTSIDER.h / 2;
   // the beam rises from the eavesdropper's top to the tube's bottom wall, spread over BEAM_W there
   const BEAM_FROM = OUTSIDER.y - OUTSIDER.h / 2;
@@ -25,15 +27,16 @@
   // ciphertext glyphs on the eavesdropper's readout: two lines of NOISE_COLS; GLYPHS of them pour down the beam
   const NOISE_COLS = 24;
   const GLYPHS = 8;
-  // the identity badge: it leaves the Worker's top right and lands above the tube's end, by TEMPORAL's edge
-  const BADGE = { x: 990, y: 330, w: 320, h: 150, from: [450, 380] };
-  // the unknown client's request, up to TEMPORAL's edge, where a red barrier stops it
-  const REQUEST_PATH = `M 1050 676 Q 1110 650 ${LANE.temporal.x - 6} 628`;
-  const BARRIER = { x: LANE.temporal.x, y: 625, h: 150 };
+  // the identity badge: it leaves the Worker's top right, at the shot's left edge, and slides in over the tube's
+  // label to land above the tube's end, by TEMPORAL's edge, inside the tube shot
+  const BADGE = { x: 990, y: 350, w: 280, h: 120, route: [[540, 340], [690, 300], [860, 310]] };
+  // the unknown client's request, up to TEMPORAL's edge under the tube, where a red barrier stops it
+  const BARRIER = { x: LANE.temporal.x, y: 655, h: 100 };
+  const REQUEST_PATH = `M 1070 ${OUTSIDER.y - OUTSIDER.h / 2 + 3} Q 1120 630 ${BARRIER.x - 6} ${BARRIER.y}`;
   // the beats, in seconds from their cue: c[0] the tube and the eavesdropper, c[1] the identities, c[2] the split
   const T0 = { door: 0, tube: 0.1, tubeD: 0.8, label: 0.7, lift: 0.6, liftD: 0.7, ride: 1.4, rideD: 3.0,
     spy: 1.0, beam: 1.4, lock: 2.6, unlock: 3.8 };
-  const T1 = { cam: 0.2, spyOut: 0.1, badge: 0.6, badgeD: 1.2, scan: 2.0, scanD: 0.6, verified: 2.6, client: 3.4,
+  const T1 = { spyOut: 0.1, badge: 0.6, badgeD: 1.2, scan: 2.0, scanD: 0.6, verified: 2.6, client: 3.4,
     request: 3.9, requestD: 0.4 };
   const T2 = { out: 0.1, cam: 0.2, sweep: 1.1, sweepD: 0.9, lit: 2.0, locks: [2.4, 2.6], enter: 3.2, enterD: 0.6 };
 
@@ -89,21 +92,22 @@
       s.client = makeOutsider(root, 'server', 'Unknown client', C.ink,
         `<div class="mono" style="position:absolute;left:18.5px;top:62.5px;font-size:15px;color:${C.slate}">`
         + 'no credentials</div>', {});
+      // sized for the 1.4 tube shot: its tabs render at 17 px, its heading and verdict at 18 px or more
       s.badge = E(root,
-        '<div style="position:absolute;left:18.5px;top:14.5px;display:flex;gap:10px;align-items:center">'
-        + `${ICON('badge', 26, C.ink, 1.8)}<span class="lbl" style="font-size:16px;color:var(--ink)">Identity</span>`
+        '<div style="position:absolute;left:14.5px;top:10.5px;display:flex;gap:8px;align-items:center">'
+        + `${ICON('badge', 22, C.ink, 1.8)}<span class="lbl" style="font-size:14px;color:var(--ink)">Identity</span>`
         + '</div>'
         + ['mTLS CERTIFICATE · YOUR CA', 'API KEY'].map((text, i) => '<div class="mono" style="position:absolute;'
-          + `left:18.5px;right:18.5px;top:${54.5 + i * 42}px;height:34px;line-height:31px;padding-left:12px;`
-          + `font-size:14px;letter-spacing:.06em;border:1.5px solid ${C.lineLight};border-radius:var(--rs)">`
+          + `left:14.5px;right:14.5px;top:${44.5 + i * 36}px;height:28px;line-height:25px;padding-left:10px;`
+          + `font-size:12px;letter-spacing:.06em;border:1.5px solid ${C.lineLight};border-radius:var(--rs)">`
           + `${text}</div>`).join(''),
         'tile', { width: BADGE.w + 'px', height: BADGE.h + 'px', textAlign: 'left' });
       s.badge.scan = E(s.badge, '', '', {
         left: '0', width: '100%', height: '2px', background: C.neon, boxShadow: `0 0 10px 2px rgba(${RGB.neon},.5)`,
       });
-      s.verified = statusTag(s.badge, { font: 14, icon: 14 });
+      s.verified = statusTag(s.badge, { font: 13, icon: 13 });
       Object.assign(s.verified.style, {
-        left: 'auto', right: '16.5px', top: '14.5px', transformOrigin: 'right center',
+        left: 'auto', right: '12.5px', top: '9.5px', transformOrigin: 'right center',
       });
 
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
@@ -130,28 +134,27 @@
       const whip = tubeWhip(t - whipAt);
       const rejectAt = c[1] + T1.request + T1.requestD;
 
-      // the camera: along the tube with the card, back to the whole way for the identities, on to the Namespaces,
-      // then the whip toward the Event History; the rejection shakes it
+      // the camera, forward only: along the tube with the card, held there while the identities come to it, on to
+      // the Namespaces, then the whip toward the Event History; the rejection shakes it
       const cam = t < whipAt ? shot(t, WIRE_SHOT, [
-        [c[0] + TUBE_AT, ...TUBE_FROM, TUBE_D], [c[0] + 1.6, ...TUBE_TO, 2.6],
-        [c[1] + T1.cam, ...ID_SHOT, 1.0], [c[2] + T2.cam, ...NS_SHOT, 1.0],
+        [c[0] + TUBE_AT, ...TUBE_FROM, TUBE_D], [c[0] + 1.6, ...TUBE_TO, 2.6], [c[2] + T2.cam, ...NS_SHOT, 1.0],
       ]) : whip.camera;
       const [shakeX, shakeY] = shake(t, rejectAt, 10, 0.4);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
       frameLaneEdges(s.lane, cam);
       placeFlash(s.flash, t, rejectAt, 0.3);
 
-      // the lane, as chapter 1 left it: the zones and the history come back as the camera pulls back; the tube
-      // replaces the wire, and the door, its work done, fades. What a held shot crops at the frame's edge dims with
-      // the move into that shot: the Worker along the tube, the environment and the Worker on the Namespaces.
-      const back = P(t, c[1] + T1.cam, 1.0);
-      const undim = k => lerp(k, 1, back);
-      const onTube = P(t, c[0] + TUBE_AT, TUBE_D) * (1 - back);
+      // the lane, as chapter 1 left it; the tube replaces the wire, and the door, its work done, fades. What a held
+      // shot crops at the frame's edge stays dimmed (the zones) or dims with the move into the shot (the Worker,
+      // with the tube shot). The history and the headings come back with the move to the Namespaces, which frames
+      // the history and the bands whole; TEMPORAL's zone, cropped there too, stays dimmed behind its bands.
+      const onTube = P(t, c[0] + TUBE_AT, TUBE_D);
       const onNs = P(t, c[2] + T2.cam, 1.0);
-      const workerO = lerp(lerp(1, OFF_SHOT, onTube), TUBE_HANDOFF.lane.worker, onNs);
+      const end = { temporal: 1, history: 1, heads: 1, ...TUBE_HANDOFF.lane };
       placeLane(s.lane, {
-        env: lerp(undim(WIRE_LANE.env), TUBE_HANDOFF.lane.env, onNs), worker: workerO,
-        temporal: undim(WIRE_LANE.temporal), history: undim(WIRE_LANE.history), heads: undim(WIRE_LANE.heads),
+        env: lerp(WIRE_LANE.env, end.env, onNs), worker: lerp(1, end.worker, onTube),
+        temporal: lerp(WIRE_LANE.temporal, end.temporal, onNs), history: lerp(WIRE_LANE.history, end.history, onNs),
+        heads: lerp(WIRE_LANE.heads, end.heads, onNs),
         wire: 1 - P(t, c[0] + T0.tube, T0.tubeD), door: 1 - P(t, c[0] + T0.door, 0.4),
       });
       placeTube(s.tube, P(t, c[0] + T0.tube, T0.tubeD, linear), 1, popIn(t, c[0] + T0.label).o);
@@ -202,7 +205,7 @@
       // the identity badge slides out of the Worker, along an arc over the tube, to TEMPORAL's edge; a scan line
       // checks it, and it turns VERIFIED
       const badgeP = P(t, c[1] + T1.badge, T1.badgeD);
-      const [bx, by] = bezier([BADGE.from, [600, 250], [850, 250], [BADGE.x, BADGE.y]], badgeP);
+      const [bx, by] = bezier([...BADGE.route, [BADGE.x, BADGE.y]], badgeP);
       const out2 = 1 - P(t, c[2] + T2.out, 0.4);
       place(s.badge, bx, by, lerp(0.3, 1, badgeP), P(t, c[1] + T1.badge, 0.2) * out2);
       const scan = P(t, c[1] + T1.scan, T1.scanD, linear);
@@ -221,7 +224,7 @@
       sparkOnPath(s.requestHead, s.request, request);
       const barrier = t >= rejectAt ? 1 - P(t, rejectAt + 0.2, 0.6) : 0;
       place(s.barrier, BARRIER.x, BARRIER.y, 1, barrier);
-      placeRipples(s.redRipples, t, rejectAt, BARRIER.x, BARRIER.y - 3, 40, 200, { d: 0.8, step: 0.15 });
+      placeRipples(s.redRipples, t, rejectAt, BARRIER.x, BARRIER.y, 40, 200, { d: 0.8, step: 0.15 });
       const rejected = popIn(t, rejectAt + 0.1);
       setStatus(s.rejected, 'REJECTED', 'denied');
       place(s.rejected, OUTSIDER.x, VERDICT_Y, rejected.s, rejected.o * out2);
