@@ -1,6 +1,7 @@
 // ===================== 6. MEET TEMPORAL PROXY
-// Opens on the bare Workers that chapter 5 ended on (BARE_WORKERS_HANDOFF). Your environment widens, an SDK client and
-// the Web UI join the Workers, and the TEMPORAL PROXY box slides into its right edge with a violet glow. Every app's
+// Opens on the bare Workers that chapter 5 ended on (BARE_WORKERS_HANDOFF), in chapter 4's wide shot. Your environment
+// widens as TEMPORAL narrows to the right, an SDK client and the Web UI join the Workers, and the TEMPORAL PROXY box
+// slides into the environment's right edge with a violet glow. Every app's
 // connection converges on it, and one connection leaves it for Temporal. Each Worker learns two lines only, the
 // proxy's local address and a short Namespace name: NO SECRETS. Then the camera pushes in toward the proxy as a
 // payload card leaves a Worker in a plain connection: at the proxy it gains, one at a time, the TLS tube, the API KEY
@@ -11,8 +12,9 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // camera framings, [x, y, scale] for shot(): from c[2], on the proxy's side of the fleet, the two right columns, the
-  // proxy, the TLS tube and TEMPORAL whole (x 120-1800 on screen; text renders at 1.35x), on the way to PROXY_SHOT
-  const SEND_SHOT = [1200, 515, 1.35];
+  // proxy, the TLS tube and TEMPORAL whole (x 230-1690, y 158-872 on screen; text renders at 1.2x), on the way from
+  // the wide shot to PROXY_SHOT
+  const SEND_SHOT = [1292, 515, 1.2];
   // the push-in into the proxy that ends the chapter: it starts PUSH_BEFORE_END seconds before the end and lands
   // 0.15 s before the cut
   const PUSH_BEFORE_END = 1.3;
@@ -48,7 +50,7 @@
   // group of the three
   const CARD = { w: PAYLOAD_IN_WORKER.w, k: 0.45 };
   CARD.h = payloadLayout(CARD.w).h * CARD.k;
-  const TAG = { h: 26, nsW: 152, keyW: 110, gap: 6 };
+  const TAG = { h: 28, nsW: 172, keyW: 124, gap: 6 };
   const KEY_DY = CARD.h / 2 + TAG.h / 2 + TAG.gap + TAG.h;
   const GROUP = { top: -CARD.h / 2, bottom: KEY_DY + TAG.h / 2 };
   GROUP.dy = (GROUP.top + GROUP.bottom) / 2;
@@ -56,14 +58,16 @@
   const IN_PROXY = { x: PROXY.x, y: PROXY.y + PROXY.head.bottom / 2 - GROUP.dy };
   // the TLS tube, from the proxy's right edge to 12 px inside TEMPORAL, on the wire's line, high enough to hold the
   // group; its label above it
-  const TUBE6 = { x0: PROXY_WIRE.x0, x1: FLEET.temporalX + 12, y: LANE.wire.y, h: 176 };
+  const TUBE6 = { x0: PROXY_WIRE.x0, x1: PROXY_WIRE.x1 + 12, y: LANE.wire.y, h: 176 };
   TUBE6.label = { x: (TUBE6.x0 + TUBE6.x1) / 2, y: TUBE6.y - TUBE6.h / 2 - 36 };
   // the payments Namespace inside TEMPORAL, the card's destination: its center and size; the card lands under its
   // name
-  const BAND = { x: (FLEET.temporalX + LANE.temporal.x + LANE.temporal.w) / 2, y: LANE.wire.y, w: 180, h: 250 };
+  const BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 250 };
   const IN_BAND = { x: BAND.x, y: BAND.y - BAND.h / 2 + 64 + CARD.h / 2 };
   // NO SECRETS, centered under the Workers; CREDENTIALS IN ONE PLACE, under the proxy
-  const NO_SECRETS = { x: (WORKERS[0].x + WORKERS[2].x) / 2, y: 812 };
+  const NO_SECRETS = {
+    x: (WORKERS[0].x + WORKERS[2].x) / 2, y: (FLEET.rows[1] + FLEET.tile.h / 2 + FLEET.y + FLEET.h) / 2,
+  };
   const CREDENTIALS = { x: PROXY.x, y: PROXY.y + PROXY.h / 2 + 38 };
   // how long the light takes to run along a connection, seconds
   const FLOW_PERIOD = 2.0;
@@ -83,6 +87,21 @@
   }
   // The first round(p * length) characters of text: it types in as p goes from 0 to 1
   const typed = (text, p) => text.slice(0, Math.round(clamp(p) * text.length));
+  // The Namespace tag's text: the full name's room always laid out (the tag's font is monospace), its first `shown`
+  // characters visible, then a caret if `caret`, the rest invisible, so the visible text never moves as it types
+  function namespaceHtml(shown, caret) {
+    const room = FULL_NS + ' ';
+    const cursor = caret ? '<span>▌</span>' : `<span style="opacity:0">${room[shown]}</span>`;
+    // one span, so the tag's flex gap never opens between its parts
+    return `<span>${room.slice(0, shown)}${cursor}<span style="opacity:0">${room.slice(shown + 1)}</span></span>`;
+  }
+  // Sets an element's HTML, rewritten only when it changes
+  function setHtml(e, html) {
+    if (e._html !== html) {
+      e.innerHTML = html;
+      e._html = html;
+    }
+  }
   // Sets an element's text, rewritten only when it changes
   function setText(e, text) {
     if (e._text !== text) {
@@ -93,7 +112,7 @@
   // A small tag beside the card: a fixed width w, its HTML centered, in the violet look
   const cardTag = (root, html, w) => E(root, html, 'mono', {
     width: w + 'px', height: TAG.h + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    gap: '6px', fontSize: '14px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1.5px solid ${C.violet}`,
+    gap: '6px', fontSize: '16px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1.5px solid ${C.violet}`,
     borderRadius: 'var(--rs)', background: 'var(--violet-solid)',
   });
 
@@ -134,14 +153,14 @@
       s.landing = makeRipples(root, 2, RGB.violet);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
       s.outSparks = [0, 1].map(() => makeSpark(root, 12, RGB.violet));
-      s.noSecrets = statusTag(root, { font: 16, icon: 16 });
-      s.noSecrets.style.height = '32px';
+      s.noSecrets = statusTag(root, { font: 17, icon: 17 });
+      s.noSecrets.style.height = '34px';
       s.credentials = statusTag(root, { font: 15, icon: 15 });
       s.credentials.style.height = '30px';
       // the card and its tags, over the proxy and the tube
       s.card = makePayload(root, { w: CARD.w });
       s.ns = cardTag(root, '', TAG.nsW);
-      s.key = cardTag(root, `${ICON('key', 16, C.violet, 2)}API KEY`, TAG.keyW);
+      s.key = cardTag(root, `${ICON('key', 17, C.violet, 2)}API KEY`, TAG.keyW);
       s.clicks = [0, 1, 2].map(() => makeRipples(root, 2, RGB.neon));
     },
     update(t, c, s) {
@@ -150,12 +169,12 @@
       const tlsAt = c[2] + T2.tls, keyAt = c[2] + T2.key, nsAt = c[2] + T2.ns, nsDone = nsAt + T2.nsD;
       const exitAt = c[2] + T2.exit, landAt = exitAt + T2.exitD;
 
-      // the camera: at rest on the fleet, then right and in toward the proxy with the card, then into the proxy box
+      // the camera: chapter 4's wide shot on the fleet, then right and in toward the proxy with the card, then into
+      // the proxy box
       const cam = shot(t, BARE_WORKERS_HANDOFF.shot, [
         [c[2] + T2.cam, ...SEND_SHOT, T2.camD], [pushAt, ...PROXY_SHOT, PUSH_D],
       ]);
       setCamera(s.cam, t, this.dur, { ...cam, enter: 1, exit: 1 });
-      frameLaneEdges(s.lane, cam);
       // what each shot crops at the frame's edge dims as the camera moves into it: the environment, the two left
       // columns and TEMPORAL with the push toward the proxy; the two right columns, the Namespace and the card in it
       // with the push into the proxy box
@@ -166,12 +185,15 @@
       const columnO = col => (col < 2 ? dimSend : dimPush);
 
       // the lane, as chapter 5 left it; the environment widens to make room for the SDK client, the Web UI and the
-      // proxy on its right edge
+      // proxy on its right edge, as TEMPORAL narrows to the right
+      const widen = P(t, c[0] + T0.widen, T0.widenD);
       placeLane(s.lane, {
         ...BARE_WORKERS_HANDOFF.lane,
-        envW: lerp(FLEET.envW, FLEET.proxyEnvW, P(t, c[0] + T0.widen, T0.widenD)),
+        envZone: lerpZone(FLEET_ZONES.env, PROXY_ZONES.env, widen),
+        temporalZone: lerpZone(FLEET_ZONES.temporal, PROXY_ZONES.temporal, widen),
         env: dimSend, temporal: dimSend,
       });
+      frameLaneEdges(s.lane, cam);
 
       // the Workers, bare, then each with its two lines: the proxy's local address and the short Namespace name
       s.tiles.forEach((tile, w) => {
@@ -240,9 +262,8 @@
       const click = at => swell(t, at, 0.12);
       place(s.card, cardX, cardY, cardK * click(tlsAt), cardO);
       if (tls) s.card.style.boxShadow = glowShadow(RGB.neon, 1, { blur: 24, alpha: 0.4 });
-      const nsText = typed(FULL_NS.slice(SHORT_NS.length), P(t, nsAt, T2.nsD, linear));
-      const caret = t >= nsAt && t < nsDone + 0.3 ? '▌' : '';
-      setText(s.ns, `${SHORT_NS}${nsText}${caret}`);
+      const nsTyped = typed(FULL_NS.slice(SHORT_NS.length), P(t, nsAt, T2.nsD, linear));
+      setHtml(s.ns, namespaceHtml(SHORT_NS.length + nsTyped.length, t >= nsAt && t < nsDone + 0.3));
       s.ns.style.color = t >= nsAt ? C.neon : C.ink;
       s.ns.style.borderColor = t >= nsDone ? C.neon : C.violet;
       place(s.ns, cardX, cardY + CARD.h / 2, click(nsDone), cardO);

@@ -1,19 +1,21 @@
 // ===================== 5. THE SAME WORK IN EVERY WORKER
-// Opens on the bare lane that chapter 4 pulled back to (WIDE_SHOT). The lane opens into the fleet layout (FLEET) as
-// the camera pushes in to rest: your environment widens, TEMPORAL narrows to the right, and the Worker shrinks into
-// the first of six slots; five copies peel off it, one after the other, each with its language. Every Worker stacks
-// the same four chips (ADDRESS, CERTIFICATE, API KEY, CODEC) and opens a connection of its own to Temporal. A ROTATE
-// pill sweeps between the rows and each Worker flashes UPDATE as it passes. One Worker has no CODEC chip: its payload
-// card goes out in clear, a red IN CLEAR alarm slams onto it with a flash and a shake. Then every chip drops off every
-// Worker and the connections go, leaving the bare Workers (BARE_WORKERS_HANDOFF). The camera pushes in once.
+// Opens on the bare lane that chapter 4 pulled back to (WIDE_SHOT), and holds that framing: as the pull-back lands,
+// the lane opens into the fleet layout (FLEET), sized for it. Your environment grows, TEMPORAL grows to the right, and
+// the Worker shrinks into the first of six slots; five copies peel off it, one after the other, each with its
+// language. Every Worker stacks the same four chips (ADDRESS, CERTIFICATE, API KEY, CODEC) and opens a connection of
+// its own to Temporal, which lists the six connections. A ROTATE pill sweeps between the rows and each Worker flashes
+// UPDATE as it passes. One Worker has no CODEC chip: its payload card goes out in clear into TEMPORAL, where a red IN
+// CLEAR alarm slams onto it with a flash and a shake. Then every chip drops off every Worker and the connections go,
+// leaving the bare Workers (BARE_WORKERS_HANDOFF). The camera holds still (the alarm shakes it).
 // The block keeps every name declared in this file local to this scene.
 {
-  // from c[0]: the lane opens into the fleet layout and the camera pushes in (open, openD); the copies peel off the
-  // first Worker (copies, copyStep, copyD); the language tags pop in (langs, langStep); each chip drops into its slot
+  // from c[0]: the lane opens into the fleet layout from the scene's first frame, as chapter 4's pull-back lands
+  // (open, openD); the copies peel off the first Worker (copies, copyStep, copyD); the language tags pop in (langs,
+  // langStep); each chip drops into its slot
   // (chips, as the subtitle names it, chipStep from one Worker to the next, chipD), and each Worker's connection draws
   // once its address is in (link, linkD); then light flows along the connections (flow)
   const T0 = {
-    open: -0.1, openD: 1.1, copies: 0.8, copyStep: 0.12, copyD: 0.6, langs: 2.4, langStep: 0.08,
+    open: -0.6, openD: 0.8, copies: -0.2, copyStep: 0.1, copyD: 0.6, langs: 2.4, langStep: 0.08,
     chips: [3.25, 3.8, 4.15, 4.6], chipStep: 0.07, chipD: 0.35, link: 0.2, linkD: 0.6, flow: 5.0,
   };
   // from c[1]: the ROTATE pill pops in, sweeps between the rows (sweep, sweepD) and pops out; each Worker flashes
@@ -28,18 +30,21 @@
   // the Worker that forgets its codec (in WORKERS) and the CODEC chip (in WORKER_CHIPS)
   const FORGETFUL = 5;
   const CODEC = 3;
-  // the lane's Worker panel shrinks into the first slot at this scale (FLEET.tile is its size there)
-  const MORPH_K = 0.6;
+  // the lane's Worker panel shrinks into the first slot at this scale (FLEET.tile is about its size there)
+  const MORPH_K = 0.75;
   // the ROTATE pill's path between the rows: from x0 to x1, on the channel's line
-  const PILL = { x0: WORKERS[0].x - 70, x1: WORKERS[2].x + 70, w: 180 };
-  // the payload card that goes out in clear: a larger card (its values render at 19 px at rest), where it stops on
-  // the way to Temporal, halfway between the zones, and the scale it leaves the Worker at
-  const CARD = { w: 420, x: (LANE.env.x + FLEET.envW + FLEET.temporalX) / 2, y: LANE.wire.y, k0: 0.3 };
+  const PILL = { x0: WORKERS[0].x - 100, x1: WORKERS[2].x + 100, w: 200 };
+  // TEMPORAL's list of the six connections, under its logo: its label's top, the rows' top, pitch, height and width
+  const LIST = { x: FLEET.temporal.x + FLEET.temporal.w / 2, label: 226, top: 256, pitch: 36, h: 32, w: 560 };
+  // the payload card that goes out in clear: a larger card (its values render at 19 px at 0.88), where it lands, in
+  // TEMPORAL under the list, and the scale it leaves the Worker at
+  const CARD = { w: 480, x: LIST.x, k0: 0.25 };
   CARD.h = payloadLayout(CARD.w).h;
+  CARD.y = LIST.top + WORKERS.length * LIST.pitch + 26 + CARD.h / 2;
   // the UPDATE panel, which flips over a Worker's two credential chips (CERTIFICATE and API KEY), as wide and as high
   // as both: its size and its offset from the tile's center
   const UPDATE = {
-    w: FLEET.tile.w - 32, h: workerSlotTop(2) + WORKER_TILE.chipH - workerSlotTop(1),
+    w: FLEET.tile.w - 2 * WORKER_TILE.inset, h: workerSlotTop(2) + WORKER_TILE.chipH - workerSlotTop(1),
     dy: (workerSlotTop(1) + workerSlotTop(2) + WORKER_TILE.chipH) / 2 - FLEET.tile.h / 2,
   };
   // how far a chip falls when it drops off, px, and how far it may tilt, degrees
@@ -70,23 +75,34 @@
       const root = s.cam = makeCamera(stage);
       s.lane = makeLane(root);
       // each Worker's connection to Temporal, under the tiles
-      s.links = WORKERS.map(w => path(s.lane.svg, fleetLinkD(w, FLEET.temporalX - 4), C.slate, 2, false));
+      s.links = WORKERS.map(w => path(s.lane.svg, fleetLinkD(w, FLEET.temporal.x - 4), C.slate, 2, false));
       s.tiles = WORKERS.map(w => makeWorkerTile(root, w));
-      s.updates = WORKERS.map(() => E(root, `${ICON('retry', 18, C.neon, 2.2)}UPDATE`, 'mono', {
+      // TEMPORAL's list: one row per connection, the Worker's name and language, and its own credentials
+      s.listLabel = E(root, 'Connections', 'lbl', { fontSize: '17px', width: LIST.w + 'px', paddingLeft: '0' });
+      s.rows = WORKERS.map((w, i) => E(root,
+        `<span class="mono" style="font-size:18px">worker-${i + 1} <span style="color:${C.slate}">·</span> `
+        + `${w.lang}</span><span style="display:flex;gap:10px">${ICON('badge', 20, C.violet, 1.9)}`
+        + `${ICON('key', 20, C.violet, 1.9)}</span>`,
+        '', {
+          width: LIST.w + 'px', height: LIST.h + 'px', display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', padding: '0 14px', border: `1.5px solid ${C.lineLight}`,
+          borderRadius: 'var(--rs)',
+        }));
+      s.updates = WORKERS.map(() => E(root, `${ICON('retry', 22, C.neon, 2.2)}UPDATE`, 'mono', {
         width: UPDATE.w + 'px', height: UPDATE.h + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', gap: '10px', fontSize: '18px', letterSpacing: '.12em', color: C.neon,
+        justifyContent: 'center', gap: '12px', fontSize: '22px', letterSpacing: '.12em', color: C.neon,
         border: `1.5px solid ${C.neon}`, borderRadius: 'var(--rs)', background: 'var(--neon-solid)',
         boxShadow: `0 0 18px rgba(${RGB.neon},.4)`,
       }));
       // the forgetful Worker's empty CODEC slot, outlined in red
       s.missing = E(root, 'NO CODEC', 'mono', {
-        width: (FLEET.tile.w - 32) + 'px', height: WORKER_TILE.chipH + 'px', lineHeight: (WORKER_TILE.chipH - 3) + 'px',
-        textAlign: 'center', fontSize: '14px', letterSpacing: '.1em', color: C.red, border: `1.5px dashed ${C.red}`,
+        width: UPDATE.w + 'px', height: WORKER_TILE.chipH + 'px', lineHeight: (WORKER_TILE.chipH - 3) + 'px',
+        textAlign: 'center', fontSize: '19px', letterSpacing: '.1em', color: C.red, border: `1.5px dashed ${C.red}`,
         borderRadius: 'var(--rs)', background: `rgba(${RGB.red},.1)`,
       });
-      s.pill = fixedTag(root, `${ICON('retry', 20, C.violet, 2)}Rotate`, 'violet solid', PILL.w);
+      s.pill = fixedTag(root, `${ICON('retry', 22, C.violet, 2)}Rotate`, 'violet solid', PILL.w);
       Object.assign(s.pill.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' });
-      s.sparks = WORKERS.map(() => makeSpark(root, 10, RGB.violet));
+      s.sparks = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       s.card = makePayload(root, { w: CARD.w });
       s.alarm = makeRipples(root, 2, RGB.red);
       s.inClear = fixedTag(root, `${ICON('eye', 20, C.red, 2)}In clear`, 'red solid', 200);
@@ -101,24 +117,24 @@
       const fallAt = this.dur - END.fall;
       const cleared = 1 - P(t, fallAt, END.clear);
 
-      // the camera, in once: from chapter 4's wide shot to rest as the lane opens into the fleet layout; the alarm
-      // shakes it
-      const cam = shot(t, WIDE_SHOT, [[openAt, ...BARE_WORKERS_HANDOFF.shot, T0.openD]]);
-      const [shakeX, shakeY] = shake(t, hitAt, 10, 0.4);
-      setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
-      frameLaneEdges(s.lane, cam);
-      placeFlash(s.flash, t, hitAt, 0.3);
-
-      // the lane, as chapter 4 left it, opens into the fleet layout: the environment widens, TEMPORAL narrows to the
-      // right, the wire goes, and the Worker panel shrinks into the first slot, where the first Worker tile takes over
+      // the lane, as chapter 4 left it, opens into the fleet layout: the zones grow, the wire goes, and the Worker
+      // panel shrinks into the first slot, where the first Worker tile takes over
       const open = P(t, openAt, T0.openD);
       const handoff = BARE_WORKERS_HANDOFF.lane;
       const takeOver = P(t, openAt + T0.openD - 0.35, 0.35);
       placeLane(s.lane, {
         ...WIDE_LANE,
-        envW: lerp(LANE.env.w, handoff.envW, open), temporalX: lerp(LANE.temporal.x, handoff.temporalX, open),
+        envZone: lerpZone(LANE.env, handoff.envZone, open),
+        temporalZone: lerpZone(LANE.temporal, handoff.temporalZone, open),
         wire: 1 - P(t, openAt, 0.4),
       });
+
+      // the camera holds chapter 4's wide shot, which the fleet layout fills; the alarm shakes it
+      const cam = shot(t, BARE_WORKERS_HANDOFF.shot, []);
+      const [shakeX, shakeY] = shake(t, hitAt, 10, 0.4);
+      setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
+      frameLaneEdges(s.lane, cam);
+      placeFlash(s.flash, t, hitAt, 0.3);
       const first = WORKERS[0];
       place(s.lane.worker, lerp(LANE.worker.x, first.x, open), lerp(LANE.worker.y, first.y, open),
         lerp(1, MORPH_K, open), 1 - takeOver);
@@ -160,7 +176,13 @@
         link.setAttribute('stroke', w === FORGETFUL && t >= cardAt ? C.red : C.slate);
         sparkOnPath(s.sparks[w], link, (G / FLOW_PERIOD + w / WORKERS.length) % 1);
         s.sparks[w].style.opacity = (+s.sparks[w].style.opacity * flow).toFixed(3);
+        // its row in TEMPORAL's list rises in as the connection arrives
+        const arrived = P(t, c[0] + T0.chips[0] + w * T0.chipStep + T0.link + T0.linkD - 0.1, 0.4);
+        rise(s.rows[w], LIST.x, LIST.top + w * LIST.pitch + LIST.h / 2, arrived * linksO, 16);
+        s.rows[w].style.borderColor = w === FORGETFUL && t >= cardAt ? C.red : C.lineLight;
       });
+      const listLabel = P(t, c[0] + T0.chips[0] + T0.link + T0.linkD - 0.3, 0.4) * linksO;
+      place(s.listLabel, LIST.x, LIST.label + 10, 1, listLabel);
 
       // the rotation: the ROTATE pill sweeps between the rows, and each Worker flashes UPDATE as it passes: its
       // border lights up neon and the UPDATE panel flips over its credential chips, then flips back
@@ -187,17 +209,17 @@
       const missingO = t < missingAt ? 0 : blinking && !blinkOn ? 0.25 : 1;
       place(s.missing, ...slotCenter(forgetful, CODEC), 1, missingO * cleared);
 
-      // the dramatic beat: the card leaves that Worker in clear and heads for Temporal, growing as it goes; IN CLEAR
-      // slams onto it from above its size, red rings, a red flash and a shake, and the card turns red
+      // the dramatic beat: the card leaves that Worker in clear and goes out into Temporal, growing as it goes; IN
+      // CLEAR slams onto it from above its size, red rings, a red flash and a shake, and the card turns red
       const cardP = P(t, cardAt, T2.cardD);
-      const [cardX, cardY] = bezier([[forgetful.x, forgetful.y], [forgetful.x + 160, forgetful.y],
-        [CARD.x - 170, CARD.y], [CARD.x, CARD.y]], cardP);
+      const [cardX, cardY] = bezier([[forgetful.x, forgetful.y], [forgetful.x + 200, forgetful.y],
+        [CARD.x - 300, CARD.y], [CARD.x, CARD.y]], cardP);
       setPayload(s.card, { red: P(t, hitAt, 0.2) });
       place(s.card, cardX, cardY, lerp(CARD.k0, 1, cardP), P(t, cardAt, 0.15) * cleared);
       const tagY = CARD.y + CARD.h / 2;
       const slam = P(t, c[2] + T2.slam, T2.slamD, easeIn);
       place(s.inClear, CARD.x, tagY, lerp(1.7, 1, slam), P(t, c[2] + T2.slam, 0.08, linear) * cleared);
-      placeRipples(s.alarm, t, hitAt, CARD.x, tagY, 60, 320, { d: 0.8, step: 0.16 });
+      placeRipples(s.alarm, t, hitAt, CARD.x, tagY, 60, 200, { d: 0.8, step: 0.16 });
     }
   });
 }

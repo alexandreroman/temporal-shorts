@@ -247,13 +247,15 @@ function clipToContent(el, top, h, cam) {
 // Clips the lane's zones and the environment's dashed edge to the content frame for the shot cam (see contentBand).
 // At rest they lie inside the frame and show whole. A zone's heading fades out as the frame's top edge moves from the
 // zone's top edge down to the heading, and its caption likewise at the bottom, so the clip never cuts a label: both
-// show whole until the clip starts, and are gone before it reaches them. It reads the camera alone, so the two sides
+// show whole until the clip starts, and are gone before it reaches them. It reads the camera and the zones alone (as
+// placeLane() last placed them, LANE until then: a scene whose zones move calls placeLane() first), so the two sides
 // of a match cut agree.
 function frameLaneEdges(lane, cam) {
   const { top, bottom } = contentBand(cam);
   lane.frameClip.setAttribute('y', top.toFixed(2));
   lane.frameClip.setAttribute('height', (bottom - top).toFixed(2));
-  [[lane.env, LANE.env], [lane.temporal, LANE.temporal]].forEach(([el, zone]) => {
+  const zones = lane.zones ?? LANE;
+  [[lane.env, zones.env], [lane.temporal, zones.temporal]].forEach(([el, zone]) => {
     clipToContent(el, zone.y, zone.h, cam);
     const zoneBottom = zone.y + zone.h;
     const headRoom = clamp((zone.y + ZONE_LABEL_INSET.head - top) / ZONE_LABEL_INSET.head);
@@ -263,6 +265,14 @@ function frameLaneEdges(lane, cam) {
   });
 }
 
+// A zone's rectangle as a string, to tell when it has moved
+const zoneKey = ({ x, y, w, h }) => `${x},${y},${w},${h}`;
+// The zone rectangle at progress p from zone a to zone b, on whole pixels with even sizes, so the zone rests on whole
+// pixels
+const lerpZone = (a, b, p) => ({
+  x: Math.round(lerp(a.x, b.x, p)), y: Math.round(lerp(a.y, b.y, p)),
+  w: 2 * Math.round(lerp(a.w, b.w, p) / 2), h: 2 * Math.round(lerp(a.h, b.h, p) / 2),
+});
 // The environment's dashed edge round the zone env (LANE.env, or a wider one), as two SVG paths: halves from the
 // wire's exit on its right edge round to its left edge
 function envEdgeDs(env) {
@@ -298,9 +308,9 @@ function makeLane(root) {
   });
 
   lane.svg = svgLayer(root);
-  // the environment's dashed edge (placeLane() redraws it when the zone widens)
+  // the environment's dashed edge (placeLane() redraws it when the zone moves)
   lane.envEdges = envEdgeDs(env).map(d => path(lane.svg, d, C.slate, 2, false));
-  lane.envW = env.w;
+  lane.envKey = zoneKey(env);
   // the dashed edge shows only inside the content frame, so a close shot never runs it under the chapter header or
   // the subtitles (see frameLaneEdges)
   laneClipCount += 1;
@@ -332,38 +342,40 @@ function makeLane(root) {
 // Shows the lane's parts in place, each with its opacity in o (1 by default): env (with its dashed edge), temporal,
 // worker, history, wire, door, and heads, the zones' headings (YOUR ENVIRONMENT and the logo), which a close shot
 // pushes up under the chapter header (frameLaneEdges also fades them out at the frame's top edge); close, TEMPORAL's
-// widening into the close layout (CLOSE); envW, the environment's width, as it widens to the right, and temporalX,
-// TEMPORAL's left edge, as it narrows toward its right edge (the fleet layout, FLEET). The Worker runs, its gear
-// turning; the door is in its slate and white look. The zone captions (env.cap, temporal.cap) keep the opacity a
-// scene gives them.
+// widening into the close layout (CLOSE); envZone and temporalZone, the zones' rectangles when they move away from
+// LANE's (the fleet layout, FLEET; see lerpZone). The Worker runs, its gear turning; the door is in its slate and white
+// look. The zone captions (env.cap, temporal.cap) keep the opacity a scene gives them.
 function placeLane(lane, o = {}) {
   const { env = 1, temporal = 1, worker = 1, history = 1, wire = 1, door = 1, heads = 1, close = 0 } = o;
   lane.env.head.style.opacity = heads;
   lane.temporal.head.style.opacity = heads;
   const center = zone => [zone.x + zone.w / 2, zone.y + zone.h / 2];
-  // even widths, so the zones rest on whole pixels
-  const envZone = { ...LANE.env, w: 2 * Math.round((o.envW ?? LANE.env.w) / 2) };
-  if (lane.envW !== envZone.w) {
+  const envZone = o.envZone ?? LANE.env;
+  if (lane.envKey !== zoneKey(envZone)) {
     lane.env.style.width = envZone.w + 'px';
+    lane.env.style.height = envZone.h + 'px';
     envEdgeDs(envZone).forEach((d, i) => {
       const edge = lane.envEdges[i];
       edge.setAttribute('d', d);
       edge._L = edge.getTotalLength();
     });
-    lane.envW = envZone.w;
+    lane.envKey = zoneKey(envZone);
   }
   place(lane.env, ...center(envZone), 1, env);
   lane.envEdges.forEach(edge => drawDashed(edge, 1, env));
-  // close (0 to 1): TEMPORAL widens to the close layout of chapters 3 and 4 (CLOSE.zone)
-  const temporalX = o.temporalX ?? LANE.temporal.x;
-  const temporalRight = LANE.temporal.x + LANE.temporal.w;
+  // close (0 to 1): TEMPORAL widens to the close layout of chapters 3 and 4 (CLOSE.zone); even widths, so the zone
+  // rests on whole pixels
+  const temporalZone = o.temporalZone ?? LANE.temporal;
   const zone = {
-    ...LANE.temporal,
-    x: Math.round(lerp(temporalX, CLOSE.zone.x, close)),
-    w: 2 * Math.round(lerp(temporalRight - temporalX, CLOSE.zone.w, close) / 2),
+    ...temporalZone,
+    x: Math.round(lerp(temporalZone.x, CLOSE.zone.x, close)),
+    w: 2 * Math.round(lerp(temporalZone.w, CLOSE.zone.w, close) / 2),
   };
   lane.temporal.style.width = zone.w + 'px';
+  lane.temporal.style.height = zone.h + 'px';
   place(lane.temporal, ...center(zone), 1, temporal);
+  // what frameLaneEdges() clips and fades the labels by
+  lane.zones = { env: envZone, temporal: zone };
   place(lane.worker, LANE.worker.x, LANE.worker.y, 1, worker);
   setAppStatus(lane.worker, 'RUNNING', 'running');
   place(lane.history, LANE.history.x, LANE.history.y, 1, history);
@@ -625,19 +637,27 @@ const CONVERTER = {
 };
 
 // ---------- the fleet of Workers (chapters 5 to 8)
-// The fleet layout, at camera rest: YOUR ENVIRONMENT widens to the right to hold the Workers (envW: its width in
-// chapter 5; proxyEnvW: from chapter 6, its right edge on the proxy box, PROXY) and TEMPORAL narrows toward the lane's
-// right end (temporalX: its left edge); see placeLane(). The tiles (tile: their size, the lane's Worker panel at 0.6)
-// sit in a grid of two rows (rows: their center y) and up to four columns (cols: their center x): the Workers in the
-// first three, the SDK client and the Web UI in the fourth (chapter 6 on). Between the rows runs the channel, on the
-// wire's line, where each tile's connection has a track of its own, `track` px from the next (see fleetLinkD).
+// The fleet layout, in stage px, sized for chapter 4's wide shot (WIDE_SHOT, 0.88), which frames stage x 5-1915 and
+// y 100-930 as the content frame x 120-1800, y 150-880: the zones grow to y 150-880 (y, h; on screen y 193-836).
+// env and temporal: the zones' left edge and width in chapter 5, YOUR ENVIRONMENT holding the Workers and TEMPORAL
+// wide enough for a card; proxyEnv and proxyTemporal: from chapter 6, the environment wider, its right edge on the
+// proxy box (PROXY), and TEMPORAL narrower, at the right end. The tiles (tile: their size, the lane's Worker panel at
+// 0.75) sit in a grid of two rows (rows: their center y) and up to four columns (cols: their center x): the Workers
+// in the first three, the SDK client and the Web UI in the fourth (chapter 6 on). Between the rows runs the channel,
+// on the wire's line, where each tile's connection has a track of its own, `track` px from the next (fleetLinkD).
 const FLEET = {
-  envW: 780, proxyEnvW: 1150, temporalX: 1560,
-  tile: { w: 228, h: 236 },
-  rows: [368, 662],
-  cols: [258, 510, 762, 1014],
+  y: 150, h: 730,
+  env: { x: 20, w: 990 }, temporal: { x: 1240, w: 660 },
+  proxyEnv: { x: 20, w: 1410 }, proxyTemporal: { x: 1680, w: 220 },
+  tile: { w: 296, h: 276 },
+  rows: [353, 677],
+  cols: [192, 512, 832, 1152],
   track: 6,
 };
+// The zone rectangles of the fleet layout for placeLane(): chapter 5's, and chapter 6's on, with the proxy
+const fleetZone = ({ x, w }) => ({ x, y: FLEET.y, w, h: FLEET.h });
+const FLEET_ZONES = { env: fleetZone(FLEET.env), temporal: fleetZone(FLEET.temporal) };
+const PROXY_ZONES = { env: fleetZone(FLEET.proxyEnv), temporal: fleetZone(FLEET.proxyTemporal) };
 // The fleet tile at column col and row row: its center (x, y) and the y of its connection's track in the channel. A
 // tile's track lies closer to the channel's middle the further left its column, so no connection crosses another
 // tile's link down to its track.
@@ -664,9 +684,9 @@ function fleetLinkD({ x, row, trackY }, x1) {
 // The official logo of each Workers' language (their sources and licenses are in the README of their folder), its
 // size in a Worker tile, px, and named when the logo spells the language's name, which the tag then leaves out
 const LANGUAGE_LOGOS = {
-  Go: { url: assetUrl('assets/languages/go.svg'), w: 40, h: 15, named: true },
-  Java: { url: assetUrl('assets/languages/java.svg'), w: 14, h: 18 },
-  TypeScript: { url: assetUrl('assets/languages/typescript.svg'), w: 16, h: 16 },
+  Go: { url: assetUrl('assets/languages/go.svg'), w: 48, h: 18, named: true },
+  Java: { url: assetUrl('assets/languages/java.svg'), w: 16, h: 22 },
+  TypeScript: { url: assetUrl('assets/languages/typescript.svg'), w: 19, h: 19 },
 };
 // The SVG filter that paints a logo in ink, its shape untouched; added to the stage by the first Worker tile
 const LOGO_INK_ID = 'security-logo-ink';
@@ -680,9 +700,10 @@ function addLogoInkFilter() {
 }
 // The four chips a Worker carries in chapter 5, top to bottom: icon and label
 const WORKER_CHIPS = [['globe', 'Address'], ['badge', 'Certificate'], ['key', 'API key'], ['lock', 'Codec']];
-// Inside a Worker tile, px from its top: the chips' slots (chipTop, chipH apart by chipGap); the two lines of chapter
-// 6 take the first two slots
-const WORKER_TILE = { chipTop: 82, chipH: 28, chipGap: 6 };
+// Inside a Worker tile, px from its top: the chips' slots (chipTop, chipH apart by chipGap), inset px from its sides;
+// the two lines of chapter 6 take the first two slots. At 0.88, the chips' labels render at 16.7 px, the lines at
+// 18.5 px.
+const WORKER_TILE = { chipTop: 100, chipH: 34, chipGap: 6, inset: 20 };
 const workerSlotTop = i => WORKER_TILE.chipTop + i * (WORKER_TILE.chipH + WORKER_TILE.chipGap);
 // A Worker tile of the fleet (FLEET.tile) for worker (WORKERS): the gear and WORKER, the language tag with its logo
 // (tile.langTag), then its four chips (tile.chips, hidden) and two code lines in the first two slots (tile.lines,
@@ -690,22 +711,23 @@ const workerSlotTop = i => WORKER_TILE.chipTop + i * (WORKER_TILE.chipH + WORKER
 function makeWorkerTile(root, worker) {
   addLogoInkFilter();
   const logo = LANGUAGE_LOGOS[worker.lang];
-  const name = logo.named ? '' : `<span class="mono" style="font-size:14px">${worker.lang}</span>`;
-  const slot = (i, css) => `position:absolute;left:16px;right:16px;top:${workerSlotTop(i)}px;`
+  const name = logo.named ? '' : `<span class="mono" style="font-size:16px">${worker.lang}</span>`;
+  const inset = WORKER_TILE.inset;
+  const slot = (i, css) => `position:absolute;left:${inset}px;right:${inset}px;top:${workerSlotTop(i)}px;`
     + `height:${WORKER_TILE.chipH}px;${css}`;
   const tile = E(root,
-    '<div style="position:absolute;left:16px;top:14px;display:flex;align-items:center;gap:10px">'
-    + `<div class="gear">${ICON('gear', 24, C.ink, 1.8)}</div>`
-    + '<span class="mono" style="font-size:16px;letter-spacing:.1em">WORKER</span></div>'
-    + '<div class="lang" style="position:absolute;left:16px;top:44px;height:28px;display:flex;align-items:center;'
-    + `gap:8px;padding:0 10px;border:1.5px solid ${C.lineLight};border-radius:var(--rs)">`
+    `<div style="position:absolute;left:${inset}px;top:16px;display:flex;align-items:center;gap:12px">`
+    + `<div class="gear">${ICON('gear', 30, C.ink, 1.8)}</div>`
+    + '<span class="mono" style="font-size:20px;letter-spacing:.1em">WORKER</span></div>'
+    + `<div class="lang" style="position:absolute;left:${inset}px;top:56px;height:32px;display:flex;`
+    + `align-items:center;gap:8px;padding:0 12px;border:1.5px solid ${C.lineLight};border-radius:var(--rs)">`
     + `<img src="${logo.url}" alt="" width="${logo.w}" height="${logo.h}" style="display:block;`
     + `filter:url(#${LOGO_INK_ID})">${name}</div>`
     + WORKER_CHIPS.map(([icon, label], i) => `<div class="chip" style="${slot(i, 'display:flex;align-items:center;'
-      + `gap:8px;padding-left:10px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);background:${C.bg};`
-      + `opacity:0`)}">${ICON(icon, 16, C.violet, 1.9)}<span class="mono" style="font-size:14px;letter-spacing:.08em">`
+      + `gap:10px;padding-left:12px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);background:${C.bg};`
+      + `opacity:0`)}">${ICON(icon, 20, C.violet, 1.9)}<span class="mono" style="font-size:19px;letter-spacing:.08em">`
       + `${label.toUpperCase()}</span></div>`).join('')
-    + [0, 1].map(i => `<div class="code mono" style="${slot(i, `font-size:18px;line-height:${WORKER_TILE.chipH}px;`
+    + [0, 1].map(i => `<div class="code mono" style="${slot(i, `font-size:21px;line-height:${WORKER_TILE.chipH}px;`
       + 'white-space:pre')}"></div>`).join(''),
     'tile', { width: FLEET.tile.w + 'px', height: FLEET.tile.h + 'px', textAlign: 'left', borderColor: C.violet });
   tile.gear = tile.querySelector('.gear');
@@ -716,22 +738,23 @@ function makeWorkerTile(root, worker) {
 }
 
 // ---------- Temporal Proxy (chapters 6 to 8)
-// The TEMPORAL PROXY box, at camera rest: centered on the right edge of the widened environment (FLEET.proxyEnvW), on
-// the wire's line, its size; head: its shield and name at its top (top, the shield's size, the gap under it, the
+// The TEMPORAL PROXY box: centered on the right edge of the widened environment (PROXY_ZONES.env), on the wire's
+// line, its size; head: its shield and name at its top (top, the shield's size, the gap under it, the
 // name's line height) and where they end, px under the box's top, which leaves the room under them to what the proxy
 // handles
-const PROXY = { x: LANE.env.x + FLEET.proxyEnvW, y: LANE.wire.y, w: 200, h: 300 };
+const PROXY = { x: FLEET.proxyEnv.x + FLEET.proxyEnv.w, y: LANE.wire.y, w: 200, h: 300 };
 PROXY.head = { top: 22, icon: 32, gap: 10, line: 22 };
 PROXY.head.bottom = PROXY.head.top + PROXY.head.icon + PROXY.head.gap + PROXY.head.line;
 // The proxy's connection to TEMPORAL, from the box's right edge to TEMPORAL's left edge in the fleet layout
-const PROXY_WIRE = { x0: PROXY.x + PROXY.w / 2, x1: FLEET.temporalX, y: LANE.wire.y };
-// The TEMPORAL PROXY box: a violet tile, its shield and name at its top. placeProxy() shows it.
+const PROXY_WIRE = { x0: PROXY.x + PROXY.w / 2, x1: FLEET.proxyTemporal.x, y: LANE.wire.y };
+// The TEMPORAL PROXY box: a violet tile, its shield and name at its top (17 px: 15 px on screen at 0.88).
+// placeProxy() shows it.
 function makeProxy(root) {
   const { top, icon, gap, line } = PROXY.head;
   return E(root,
     `<div style="position:absolute;left:0;right:0;top:${top}px;display:flex;flex-direction:column;`
     + `align-items:center;gap:${gap}px">${ICON('shield', icon, C.violet, 1.8)}`
-    + `<div class="lbl" style="font-size:15px;line-height:${line}px;color:var(--ink)">Temporal Proxy</div></div>`,
+    + `<div class="lbl" style="font-size:17px;line-height:${line}px;color:var(--ink)">Temporal Proxy</div></div>`,
     'tile', {
       width: PROXY.w + 'px', height: PROXY.h + 'px', borderColor: C.violet, background: 'var(--violet-solid)',
     });
@@ -794,13 +817,14 @@ const REWIND_HANDOFF = {
 const WIDE_SHOT = [960, 515, 0.88];
 const WIDE_LANE = { history: 0, door: 0 };
 // Chapter 5 to 6: the six Workers, bare, that chapter 5 ends on once their chips have fallen, and chapter 6 opens on.
-// shot: the framing, [x, y, scale] for shot(), the whole fleet layout at rest. lane: placeLane()'s options there (the
-// others are 1): the fleet layout of chapter 5, the lane's Worker panel, wire, history and door hidden. The six Worker
-// tiles (makeWorkerTile at WORKERS, built after the lane) show their gear turning and their language tag, no chip and
-// no code line. Nothing else shows. Call frameLaneEdges() with the camera.
+// shot: the framing, [x, y, scale] for shot(), chapter 4's wide shot, which chapter 5 holds throughout. lane:
+// placeLane()'s options there (the others are 1): the fleet layout of chapter 5 (FLEET_ZONES), the lane's Worker panel,
+// wire, history and door hidden. The six Worker tiles (makeWorkerTile at WORKERS, built after the lane) show their
+// gear turning and their language tag, no chip and no code line. Nothing else shows. Call placeLane(), then
+// frameLaneEdges() with the camera.
 const BARE_WORKERS_HANDOFF = {
-  shot: [960, 515, 1],
-  lane: { envW: FLEET.envW, temporalX: FLEET.temporalX, worker: 0, wire: 0, history: 0, door: 0 },
+  shot: WIDE_SHOT,
+  lane: { envZone: FLEET_ZONES.env, temporalZone: FLEET_ZONES.temporal, worker: 0, wire: 0, history: 0, door: 0 },
 };
 // Chapter 6 to 7: the push into the TEMPORAL PROXY box that chapter 6 ends on and chapter 7 opens on, [x, y, scale]
 // for shot(): the box fills the content frame's height (y 155-875). See chapter 6's header for what shows there.
