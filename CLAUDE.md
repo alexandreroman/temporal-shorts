@@ -111,9 +111,10 @@ workspaces run `make setup` automatically.
     the app panel of numbered step lines (`makeLinesApp()`), the Event
     History card, the code card of TypeScript lines (`makeCodeCard()`,
     `highlightJs()`, `setCodeLine()`), status tags, counters, crash and
-    takeover effects, small animation helpers such as `backPop()`, title
-    and end cards) and the
-    whole "What you can build" chapter, `useCaseScene()`; icons used by
+    takeover effects, small animation helpers such as `backPop()`, camera
+    and motion helpers (`makeCamera`, `setCamera`, `hash`, ripples, sparks
+    on paths), title and end cards) and the whole "What you can build"
+    chapter, `useCaseScene()`; icons used by
     two or more themes are in `ICONS` in `engine.js`, the others in their
     theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to

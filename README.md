@@ -74,8 +74,9 @@ src/shared.js          brand helpers shared by the themes (colors, tiles,
                        blocks, crash and takeover effects, status tags,
                        app and Temporal panels, the app panel of numbered
                        step lines, Event History card, code card,
-                       counters, small animation helpers) and the "What
-                       you can build" chapter (useCaseScene)
+                       counters, small animation helpers, camera and
+                       motion helpers) and the "What you can build"
+                       chapter (useCaseScene)
 src/player.js          live player: controls, fit-to-window, shortcuts
 src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        theme page (background, subtitles, header, script

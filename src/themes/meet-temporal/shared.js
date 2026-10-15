@@ -55,54 +55,7 @@ function makeFace(p, founder, size) {
   });
 }
 
-// ===================== motion helpers (this theme is livelier than the others: camera moves, trails, sparks)
-// Deterministic pseudo-random number in [0, 1) for an integer n: the same n gives the same value on every page and
-// render worker, so scattered particles and glitches render identically in parallel
-function hash(n) {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-// Camera of a scene: a full-stage layer that holds the scene's elements, so the whole composition can be scaled and
-// moved around the stage center. Build the scene's elements in it.
-function makeCamera(root) {
-  return E(root, '', 'cam', { width: '1920px', height: '1080px', transformOrigin: '960px 540px', opacity: 1 });
-}
-// Zoom-through between scenes: the composition grows from `enter` (0.94; 1 for none) to 1 over enterD seconds as
-// the scene fades in, and on to 1.06 as it fades out (dur: the scene duration). scale, dx, dy: an extra camera move
-// of the scene, at rest 1, 0, 0 so that a resting frame sits on whole pixels.
-// The exit zoom runs over the scene's default fade-out (SCENE_FADE): the presenter's end-of-scene stop, at the start
-// of that fade, falls just before it, and the zoom plays with the fade into the next scene.
-function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enterD = 0.6, exit = 1.06 } = {}) {
-  const zoom = lerp(enter, 1, P(t, 0, enterD)) * lerp(1, exit, P(t, dur - SCENE_FADE, SCENE_FADE, easeIn));
-  cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
-}
-
-// Puts a spark on the head of a path drawn to prog (0 to 1): it shows only while the path draws
-function sparkOnPath(spark, pathEl, prog, dx = 0, dy = 0) {
-  if (prog <= 0 || prog >= 1) {
-    place(spark, 0, 0, 1, 0);
-    return;
-  }
-  const point = pathEl.getPointAtLength(pathEl._L * prog);
-  place(spark, point.x + dx, point.y + dy, 1, Math.min(1, prog * 6, (1 - prog) * 6));
-}
-
-// Ripple rings: n circles of a color growing from size0 to size1 px and fading, one after the other, from `at`
-function makeRipples(p, n, rgb) {
-  return Array.from({ length: n }, () => E(p, '', '', { borderRadius: '50%', border: `3px solid rgb(${rgb})` }));
-}
-// Each ring grows over d seconds, step seconds after the one before it
-function placeRipples(rings, t, at, x, y, size0, size1, { d = 1.2, step = 0.25 } = {}) {
-  rings.forEach((e, i) => {
-    const p = P(t, at + i * step, d, x => 1 - Math.pow(1 - x, 2));
-    // sized, not scaled, so the ring keeps its 3 px line
-    const size = Math.round(lerp(size0, size1, p) / 2) * 2;
-    e.style.width = e.style.height = size + 'px';
-    place(e, x, y, 1, p > 0 && p < 1 ? (1 - p) * 0.9 : 0);
-  });
-}
-
+// ===================== hand-off helpers (the symbol drawn stroke by stroke)
 // The official symbol's outline (the path of src/assets/temporal-symbol-light-cropped.svg, same viewBox), drawn
 // stroke by stroke before the official file itself fades in over it
 const SYMBOL_PATH = {
