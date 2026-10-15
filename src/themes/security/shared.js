@@ -247,9 +247,8 @@ function clipToContent(el, top, h, cam) {
 // Clips the lane's zones and the environment's dashed edge to the content frame for the shot cam (see contentBand).
 // At rest they lie inside the frame and show whole. A zone's heading fades out as the frame's top edge moves from the
 // zone's top edge down to the heading, and its caption likewise at the bottom, so the clip never cuts a label: both
-// show whole until the clip starts, and are gone before it reaches them. It reads the camera and the zones alone (as
-// placeLane() last placed them, LANE until then: a scene whose zones move calls placeLane() first), so the two sides
-// of a match cut agree.
+// show whole until the clip starts, and are gone before it reaches them. It reads the camera and the zones alone, as
+// placeLane() placed them in the same frame: call it after placeLane(). So the two sides of a match cut agree.
 function frameLaneEdges(lane, cam) {
   const { top, bottom } = contentBand(cam);
   lane.frameClip.setAttribute('y', top.toFixed(2));

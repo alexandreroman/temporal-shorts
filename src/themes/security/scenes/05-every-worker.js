@@ -77,12 +77,13 @@
       // each Worker's connection to Temporal, under the tiles
       s.links = WORKERS.map(w => path(s.lane.svg, fleetLinkD(w, FLEET.temporal.x - 4), C.slate, 2, false));
       s.tiles = WORKERS.map(w => makeWorkerTile(root, w));
-      // TEMPORAL's list: one row per connection, the Worker's name and language, and its own credentials
+      // TEMPORAL's list: one row per connection, the Worker's name and language, and a quiet VERIFIED: Temporal
+      // checked the credentials that Worker presented (as in chapter 2), it does not keep them
       s.listLabel = E(root, 'Connections', 'lbl', { fontSize: '17px', width: LIST.w + 'px', paddingLeft: '0' });
       s.rows = WORKERS.map((w, i) => E(root,
         `<span class="mono" style="font-size:18px">worker-${i + 1} <span style="color:${C.slate}">·</span> `
-        + `${w.lang}</span><span style="display:flex;gap:10px">${ICON('badge', 20, C.violet, 1.9)}`
-        + `${ICON('key', 20, C.violet, 1.9)}</span>`,
+        + `${w.lang}</span><span class="mono" style="display:flex;align-items:center;gap:6px;font-size:16px;`
+        + `letter-spacing:.1em;color:${C.neon}">${ICON('check', 16, C.neon, 2.6)}VERIFIED</span>`,
         '', {
           width: LIST.w + 'px', height: LIST.h + 'px', display: 'flex', alignItems: 'center',
           justifyContent: 'space-between', padding: '0 14px', border: `1.5px solid ${C.lineLight}`,

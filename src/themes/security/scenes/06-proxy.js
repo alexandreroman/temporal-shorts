@@ -88,12 +88,13 @@
   // The first round(p * length) characters of text: it types in as p goes from 0 to 1
   const typed = (text, p) => text.slice(0, Math.round(clamp(p) * text.length));
   // The Namespace tag's text: the full name's room always laid out (the tag's font is monospace), its first `shown`
-  // characters visible, then a caret if `caret`, the rest invisible, so the visible text never moves as it types
+  // characters visible and the rest invisible, so the visible text never moves as it types and the full name sits
+  // centered; the caret, if `caret`, overlays the next character's cell (past the last one once the name is whole)
   function namespaceHtml(shown, caret) {
-    const room = FULL_NS + ' ';
-    const cursor = caret ? '<span>▌</span>' : `<span style="opacity:0">${room[shown]}</span>`;
-    // one span, so the tag's flex gap never opens between its parts
-    return `<span>${room.slice(0, shown)}${cursor}<span style="opacity:0">${room.slice(shown + 1)}</span></span>`;
+    const cursor = caret
+      ? `<span style="position:absolute;top:0;left:calc(${shown} * (1ch + .06em))">▌</span>` : '';
+    return `<span style="position:relative">${FULL_NS.slice(0, shown)}`
+      + `<span style="opacity:0">${FULL_NS.slice(shown)}</span>${cursor}</span>`;
   }
   // Sets an element's HTML, rewritten only when it changes
   function setHtml(e, html) {

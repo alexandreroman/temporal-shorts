@@ -131,7 +131,6 @@
       const [shakeX, shakeY] = shake(t, hitAt, 8, 0.35);
       const jolt = stutter(t, stutterAt, REWIND.stutterD);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX + jolt.dx, dy: cam.dy + shakeY, enter: 1, exit: 1 });
-      frameLaneEdges(s.lane, cam);
       s.cam.style.filter = jolt.split
         ? `drop-shadow(${jolt.split}px 0 0 rgba(${RGB.red},.7)) drop-shadow(${-jolt.split}px 0 0 rgba(${RGB.uv},.7))`
         : 'none';
@@ -161,6 +160,8 @@
         heads: lerp(lerp(open.heads, 0, headsOut), rewind.heads, away),
         close,
       });
+      // after placeLane(), whose zones it clips
+      frameLaneEdges(s.lane, cam);
       placeTube(s.tube, 1, lerp(1, OFF_SHOT, settled) * (1 - tubeOut));
       // the Namespaces have made their point: they fade as the history grows over them
       placeNamespaces(s.ns, 1, 1, [1, 1], 1 - P(t, c[0] + T0.ns, 0.4));

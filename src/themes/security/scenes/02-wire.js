@@ -141,7 +141,6 @@
       ]) : whip.camera;
       const [shakeX, shakeY] = shake(t, rejectAt, 10, 0.4);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
-      frameLaneEdges(s.lane, cam);
       placeFlash(s.flash, t, rejectAt, 0.3);
 
       // the lane, as chapter 1 left it; the tube replaces the wire, and the door, its work done, fades. What a held
@@ -157,6 +156,8 @@
         heads: lerp(WIRE_LANE.heads, end.heads, onNs),
         wire: 1 - P(t, c[0] + T0.tube, T0.tubeD), door: 1 - P(t, c[0] + T0.door, 0.4),
       });
+      // after placeLane(), whose zones it clips
+      frameLaneEdges(s.lane, cam);
       placeTube(s.tube, P(t, c[0] + T0.tube, T0.tubeD, linear), 1, popIn(t, c[0] + T0.label).o);
       s.tube.label.style.transform += ` scale(${popIn(t, c[0] + T0.label).s})`;
 

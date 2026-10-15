@@ -81,7 +81,6 @@
       const cam = shot(t, REST, [[c[0] + LEAN_AT, ...LEAN_SHOT, LEAN_D], [pushAt, ...WIRE_SHOT, PUSH_D]]);
       const [shakeX, shakeY] = shake(t, landed, 9, 0.35);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
-      frameLaneEdges(s.lane, cam);
 
       // the push-in dims what it pushes off the frame (WIRE_LANE) and clears the annotations
       const push = P(t, pushAt, PUSH_D);
@@ -99,6 +98,8 @@
         door: P(t, c[1] + 3.4, 0.25),
         heads: dim(WIRE_LANE.heads),
       });
+      // after placeLane(), whose zones it clips
+      frameLaneEdges(s.lane, cam);
       s.lane.envEdges.forEach(edge => drawDashed(edge, P(t, strokeAt('env'), 1.1), dim(WIRE_LANE.env)));
       draw(s.lane.wire, P(t, strokeAt('wire'), 0.5));
       draw(s.outlines.worker, P(t, strokeAt('worker'), 0.6), 1 - P(t, strokeAt('worker') + 0.6, 0.3));

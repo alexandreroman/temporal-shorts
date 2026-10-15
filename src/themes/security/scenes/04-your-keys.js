@@ -164,7 +164,6 @@
       ]);
       const [shakeX, shakeY] = shake(t, sealAt + 0.35 * LOCK_SHUT, 6, 0.3);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
-      frameLaneEdges(s.lane, cam);
 
       // the lane, as chapter 3 left it. The track to HIST_SHOT crops the Worker, the wire and the converter at the
       // frame's left edge, which dim with it, and widens TEMPORAL into the close layout; TEMPORAL and the environment
@@ -184,6 +183,8 @@
         worker: leftSide * (1 - workerAway), wire: (1 - close) * (1 - workerAway),
         history: WIDE_LANE.history, door: WIDE_LANE.door, close,
       });
+      // after placeLane(), whose zones it clips
+      frameLaneEdges(s.lane, cam);
       const converterO = done * lerp(1, OFF_SHOT, track) * (1 - stepAside);
 
       // the stored history, its chip still in clear and red until the sealed card lands on it: dim at the frame's
