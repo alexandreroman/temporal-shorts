@@ -150,21 +150,246 @@ function setPayload(card, { seal = 0, scramble = 0, red = 0 } = {}) {
 
 // ---------- the journey lane
 // Stage coordinates of the lane shared by every lane scene, at camera rest (scale 1), left to right: YOUR
-// ENVIRONMENT (env, a box) with the Worker in it, the wire from x0 to x1, TEMPORAL (a box) with the Event History
-// and the Web UI, and the TEMPORAL PROXY box at the environment's right edge (from chapter 6). Every lane scene
-// reads them: adjust them here, never in a scene.
+// ENVIRONMENT (env) with the Worker panel in it, the wire from x0 to x1, TEMPORAL with the Event History and the Web
+// UI, the TEMPORAL PROXY box at the environment's right edge (from chapter 6) and the closed door on that edge. The
+// two zones give their top left corner and size, the other parts their center (and size). Every lane scene reads
+// them: adjust them here, never in a scene.
 const LANE = {
-  env: { x: 120, y: 190, w: 700, h: 650 },
-  worker: { x: 300, y: 515 },
-  wire: { x0: 820, x1: 1100, y: 515 },
-  temporal: { x: 1100, y: 190, w: 700, h: 650 },
-  history: { x: 1450, y: 470 },
-  ui: { x: 1450, y: 760 },
-  proxy: { x: 760, y: 515 },
+  env: { x: 120, y: 190, w: 640, h: 650 },
+  worker: { x: 340, y: 515, w: 380, h: 392 },
+  wire: { x0: 760, x1: 1160, y: 515 },
+  temporal: { x: 1160, y: 190, w: 640, h: 650 },
+  history: { x: 1560, y: 515, w: 392, h: 260 },
+  ui: { x: 1480, y: 760 },
+  proxy: { x: 700, y: 515 },
+  door: { x: 760, y: 720 },
 };
 // Hand-off from the intro to chapter 1: the payload card in the Worker, its center and width. The intro's card flies
-// there and shrinks to this width; chapter 1 opens on it. Below the Worker's center, under the panel's heading.
-const PAYLOAD_IN_WORKER = { x: LANE.worker.x, y: LANE.worker.y + 30, w: 320 };
+// there and shrinks to this width; chapter 1 opens on it. In the Worker panel, under its heading and code line.
+const PAYLOAD_IN_WORKER = { x: LANE.worker.x, y: LANE.worker.y + 55, w: 340 };
+
+// Draws path p as a dashed line up to prog (0 to 1) of its length, with opacity o: dashes of `dash` px, `gap` px
+// apart, which stay in place as it draws (draw() makes its dashes flow)
+function drawDashed(p, prog, o = 1, dash = 10, gap = 8) {
+  const drawn = p._L * clamp(prog);
+  const period = dash + gap;
+  const full = Math.floor(drawn / period);
+  const parts = [];
+  for (let i = 0; i < full; i++) parts.push(dash, gap);
+  parts.push(Math.min(drawn - full * period, dash), p._L + period);
+  p.setAttribute('stroke-dasharray', parts.join(' '));
+  p.style.opacity = prog > 0.001 ? o : 0;
+}
+// SVG path of a rounded rectangle (top left corner x, y; size w, h; corner radius r), clockwise from the middle of its
+// top edge, for an outline that draws itself
+const roundRectD = (x, y, w, h, r) => `M ${x + w / 2} ${y} H ${x + w - r} A ${r} ${r} 0 0 1 ${x + w} ${y + r}`
+  + ` V ${y + h - r} A ${r} ${r} 0 0 1 ${x + w - r} ${y + h} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + h - r}`
+  + ` V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
+// A zone's caption, centered 24 px above its bottom edge; hidden until a scene sets its opacity (zone.cap)
+const zoneCaption = text => '<div class="cap lbl" style="position:absolute;left:0;right:0;bottom:24px;'
+  + `text-align:center;font-size:18px;color:var(--ink);opacity:0">${text}</div>`;
+
+// The lane's parts (LANE), in their stacking order: the two zones, an SVG layer (the environment's dashed edge and the
+// wire, an arrow to TEMPORAL; scenes draw their own strokes in it, under the panels), the Worker panel running the
+// TransferWorkflow, the empty Event History card and the closed door. placeLane() shows them.
+function makeLane(root) {
+  const { env, temporal, worker, history, wire } = LANE;
+  const lane = {};
+  lane.env = E(root,
+    '<div class="head lbl" style="position:absolute;left:24px;top:20px;padding-left:0;font-size:18px">'
+    + 'Your environment</div>' + zoneCaption('Your code runs here'),
+    '', {
+      width: env.w + 'px', height: env.h + 'px', background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)',
+    });
+  lane.env.head = lane.env.querySelector('.head');
+  lane.env.cap = lane.env.querySelector('.cap');
+  // clipped, for the light sweep of the Namespaces (makeNamespaces)
+  lane.temporal = E(root,
+    `<img class="head" src="${LOGO}" style="position:absolute;left:24px;top:20px;height:34px;display:block">`
+    + zoneCaption('Never your code'),
+    'tile', {
+      width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: '#17182A',
+      overflow: 'hidden',
+    });
+  lane.temporal.head = lane.temporal.querySelector('.head');
+  lane.temporal.cap = lane.temporal.querySelector('.cap');
+
+  lane.svg = svgLayer(root);
+  // the environment's dashed edge, in two halves from the wire's exit on its right edge round to its left edge
+  const right = env.x + env.w, bottom = env.y + env.h, r = 10;
+  lane.envEdges = [
+    `M ${right} ${wire.y} V ${env.y + r} A ${r} ${r} 0 0 0 ${right - r} ${env.y} H ${env.x + r}`
+      + ` A ${r} ${r} 0 0 0 ${env.x} ${env.y + r} V ${wire.y}`,
+    `M ${right} ${wire.y} V ${bottom - r} A ${r} ${r} 0 0 1 ${right - r} ${bottom} H ${env.x + r}`
+      + ` A ${r} ${r} 0 0 1 ${env.x} ${bottom - r} V ${wire.y}`,
+  ].map(d => path(lane.svg, d, C.slate, 2, false));
+  lane.wire = path(lane.svg, `M ${worker.x + worker.w / 2} ${wire.y} L ${temporal.x - 4} ${wire.y}`, C.slate, 2.5);
+
+  lane.worker = makeAppPanel(root, 'WORKER', worker.w, worker.h);
+  lane.worker.insertAdjacentHTML('beforeend', '<div class="mono" style="position:absolute;left:24px;top:66px;'
+    + `font-size:18px;line-height:26px;color:var(--slate)"><span style="color:${C.violet}">workflow</span> `
+    + 'TransferWorkflow</div>');
+  lane.history = makeHistoryCard(root, [], { w: history.w, h: history.h, rowTop: () => 0, tagTop: () => 0 });
+  lane.history.insertAdjacentHTML('beforeend', '<div class="mono" style="position:absolute;left:0;right:0;'
+    + `top:150px;text-align:center;font-size:18px;letter-spacing:.14em;padding-left:.14em;color:${C.slateDark}">`
+    + 'EMPTY</div>');
+  // on the dashed edge, which it hides
+  lane.door = E(root, ICON('door', 32, C.ink, 1.8), '', {
+    width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: C.bg, border: `1.5px solid ${C.slate}`, borderRadius: 'var(--rs)',
+  });
+  lane.door.icon = lane.door.querySelector('svg');
+  return lane;
+}
+// Shows the lane's parts in place, each with its opacity in o (1 by default): env (with its dashed edge), temporal,
+// worker, history, wire, door, and heads, the zones' headings (YOUR ENVIRONMENT and the logo), which a close shot
+// pushes up under the chapter header. The Worker runs, its gear turning; the door is in its slate and white look.
+// The zone captions (env.cap, temporal.cap) keep the opacity a scene gives them.
+function placeLane(lane, o = {}) {
+  const { env = 1, temporal = 1, worker = 1, history = 1, wire = 1, door = 1, heads = 1 } = o;
+  lane.env.head.style.opacity = heads;
+  lane.temporal.head.style.opacity = heads;
+  const center = zone => [zone.x + zone.w / 2, zone.y + zone.h / 2];
+  place(lane.env, ...center(LANE.env), 1, env);
+  lane.envEdges.forEach(edge => drawDashed(edge, 1, env));
+  place(lane.temporal, ...center(LANE.temporal), 1, temporal);
+  place(lane.worker, LANE.worker.x, LANE.worker.y, 1, worker);
+  setAppStatus(lane.worker, 'RUNNING', 'running');
+  place(lane.history, LANE.history.x, LANE.history.y, 1, history);
+  draw(lane.wire, 1, wire);
+  place(lane.door, LANE.door.x, LANE.door.y, 1, door);
+  lane.door.style.borderColor = C.slate;
+  lane.door.icon.setAttribute('stroke', C.ink);
+}
+
+// ---------- the TLS tube (chapters 2 and 3)
+// The TLS tube along the wire, at camera rest: from the Worker panel's right edge (x0) to 24 px inside TEMPORAL (x1),
+// where the payments Namespace begins, on the wire's line y, h px high. The payload card rides it at scale k; its TLS
+// label sits above it, centered on label.
+const TUBE = { x0: LANE.worker.x + LANE.worker.w / 2, x1: LANE.temporal.x + 24, y: LANE.wire.y, h: 176, k: 0.6 };
+TUBE.label = { x: TUBE.x0 + 120, y: TUBE.y - TUBE.h / 2 - 42 };
+// The tube: a glass pipe with neon walls, a neon ring at each mouth and a flow of light running along it toward
+// Temporal; then its TLS label (tube.label). placeTube() shows them.
+function makeTube(root) {
+  const w = TUBE.x1 - TUBE.x0, h = TUBE.h;
+  const mouth = side => `<div style="position:absolute;${side}:-12px;top:-2px;width:24px;height:${h}px;`
+    + `border:2px solid ${C.neon};border-radius:50%"></div>`;
+  const tube = E(root,
+    '<div class="flow" style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,'
+    + `rgba(${RGB.neon},0) 0 40px,rgba(${RGB.neon},.16) 40px 42px)"></div>${mouth('left')}${mouth('right')}`,
+    '', {
+      width: w + 'px', height: h + 'px', borderTop: `2px solid ${C.neon}`, borderBottom: `2px solid ${C.neon}`,
+      background: `linear-gradient(to bottom, rgba(${RGB.neon},.16), rgba(${RGB.neon},.03) 45%, `
+        + `rgba(${RGB.neon},.08))`,
+      boxShadow: `0 0 28px rgba(${RGB.neon},.22)`,
+    });
+  tube.flow = tube.querySelector('.flow');
+  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
+  Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
+  return tube;
+}
+// The tube drawn from its Worker end up to drawn (0 to 1), with opacity o, and its label with opacity label. Its
+// light flows on the ambient clock G, so it runs on across the cut into chapter 3.
+function placeTube(tube, drawn, o = 1, label = 1) {
+  place(tube, (TUBE.x0 + TUBE.x1) / 2, TUBE.y, 1, drawn > 0 ? o : 0);
+  // the clip keeps the glow round the tube, and cuts it on the right while it draws
+  tube.style.clipPath = drawn < 1 ? `inset(-40px ${((1 - drawn) * 100).toFixed(3)}% -40px -40px)` : 'none';
+  tube.flow.style.backgroundPosition = `${((G * 90) % 42).toFixed(2)}px 0`;
+  place(tube.label, TUBE.label.x, TUBE.label.y, 1, label * o);
+}
+
+// ---------- the Namespaces (chapters 2 and 3)
+// The Namespaces inside TEMPORAL, top to bottom: each one's name, the middle y and height of its band. The Worker's
+// own, payments, surrounds the Event History, level with the wire and the tube.
+const NAMESPACES = [
+  { name: 'support', y: 310, h: 86 },
+  { name: 'payments', y: 515, h: 300, mine: true },
+  { name: 'analytics', y: 720, h: 86 },
+];
+// The bands span TEMPORAL 24 px inside its sides: their center x and width
+const NS_BAND = { x: LANE.temporal.x + LANE.temporal.w / 2, w: LANE.temporal.w - 48 };
+// The light that sweeps across TEMPORAL as it splits into Namespaces, px wide
+const NS_SWEEP_W = 160;
+// The Namespace bands, under the lane's SVG layer and the Event History, each labelled at its top left, a padlock on
+// the right of the others; and the light sweep, inside TEMPORAL. placeNamespaces() shows them.
+function makeNamespaces(lane) {
+  const bands = NAMESPACES.map(ns => {
+    // offsets from inside the band's 1.5 px border, so its label and lock rest on whole pixels
+    const labelTop = (ns.mine ? 20 : (ns.h - 44) / 2) - 1.5;
+    const band = E(lane.temporal.parentNode,
+      `<div style="position:absolute;left:18.5px;top:${labelTop}px">`
+      + `<div class="mono" style="font-size:13px;line-height:18px;letter-spacing:.14em;color:${C.slate}">`
+      + 'NAMESPACE</div>'
+      + `<div class="mono" style="font-size:20px;line-height:26px">${ns.name}</div></div>`,
+      '', { width: NS_BAND.w + 'px', height: ns.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)' });
+    lane.svg.before(band);
+    band.ns = ns;
+    if (!ns.mine) {
+      band.lock = makeLock(band, 30, 1.9, { left: NS_BAND.w - 54 - 1.5 + 'px', top: (ns.h - 30) / 2 - 1.5 + 'px' });
+    }
+    return band;
+  });
+  const sweep = E(lane.temporal, '', '', {
+    top: '-1.5px', width: NS_SWEEP_W + 'px', height: LANE.temporal.h + 'px',
+    background: `linear-gradient(90deg, rgba(${RGB.ink},0), rgba(${RGB.ink},.28), rgba(${RGB.ink},0))`,
+  });
+  return { bands, sweep };
+}
+// Center of the padlock on the band of Namespace i (one of the others)
+const nsLockAt = i => [NS_BAND.x + NS_BAND.w / 2 - 39, NAMESPACES[i].y];
+// split (0 to 1): the light sweeps across TEMPORAL from left to right and reveals the bands as it passes; lit (0 to
+// 1): payments turns violet and glows while the others dim; seals: one seal per other Namespace, top to bottom (see
+// setLock; its padlock shows once its seal starts).
+function placeNamespaces(ns, split, lit = 0, seals = [0, 0]) {
+  const sweepX = lerp(-NS_SWEEP_W / 2, LANE.temporal.w + NS_SWEEP_W / 2, split); // from TEMPORAL's left edge
+  ns.sweep.style.transform = `translateX(${(sweepX - NS_SWEEP_W / 2).toFixed(2)}px)`;
+  ns.sweep.style.opacity = split > 0 && split < 1 ? 1 : 0;
+  const bandLeft = NS_BAND.x - NS_BAND.w / 2 - LANE.temporal.x;
+  let other = 0;
+  ns.bands.forEach(band => {
+    const reveal = clamp((sweepX - bandLeft) / NS_BAND.w);
+    const o = band.ns.mine ? 1 : 1 - 0.4 * lit;
+    place(band, NS_BAND.x, band.ns.y, 1, reveal > 0 ? o : 0);
+    band.style.clipPath = reveal < 1 ? `inset(-40px ${((1 - reveal) * 100).toFixed(3)}% -40px -40px)` : 'none';
+    if (band.ns.mine) {
+      band.style.borderColor = lit > 0 ? C.violet : C.uv;
+      band.style.background = `rgba(${RGB.violet},${(0.03 + 0.07 * lit).toFixed(3)})`;
+      band.style.boxShadow = glowShadow(RGB.violet, lit, { blur: 36, alpha: 0.4 });
+    } else {
+      const seal = seals[other++];
+      setLock(band.lock, seal);
+      band.lock.style.opacity = seal > 0 ? 1 : 0;
+    }
+  });
+}
+
+// ---------- hand-offs (match cuts: a chapter ends on the next one's first frame, see the plan's motion direction)
+// Chapter 1 to 2: the framing chapter 1 pushes in to at its end and chapter 2 opens on, [x, y, scale] for shot(): the
+// Worker and its card on the left, the wire's start in the middle. WIRE_LANE: the lane's opacities there (placeLane):
+// the zones, pushed off the frame, dimmed below half, their headings and the history hidden.
+const WIRE_SHOT = [620, 515, 1.35];
+const WIRE_LANE = { env: 0.3, temporal: 0.3, history: 0, heads: 0 };
+// Chapter 2 to 3: the whip right, from the Namespaces to the Event History. Chapter 2 frames TEMPORAL's split (from),
+// the card at its tube scale (TUBE.k) crossing into payments (card); the whip then eases the camera to the history
+// (to) and the card to it (cardTo) over d seconds. Chapter 2 plays its first `cut` seconds and ends there (fadeOut:
+// 0); chapter 3 opens there (fadeIn: 0) and plays the rest: read both sides from tubeWhip(). At the cut: placeLane()
+// with `lane`, placeTube(tube, 1), placeNamespaces(ns, 1, 1, [1, 1]).
+const TUBE_HANDOFF = {
+  from: [1164, 515, 1.1], to: [LANE.history.x, LANE.history.y, 1.6],
+  card: [TUBE.x1 - 62, TUBE.y], cardTo: [LANE.history.x, LANE.history.y],
+  d: 0.7, cut: 0.25,
+  lane: { wire: 0, door: 0 },
+};
+// The whip u seconds after it starts (chapter 2: u = t - (dur - TUBE_HANDOFF.cut); chapter 3: u = t +
+// TUBE_HANDOFF.cut): camera, the shot() offsets, and card, the card's center
+function tubeWhip(u) {
+  const { from, to, card, cardTo, d } = TUBE_HANDOFF;
+  const p = P(u, 0, d);
+  return {
+    camera: shot(u, from, [[0, ...to, d]]),
+    card: [lerp(card[0], cardTo[0], p), lerp(card[1], cardTo[1], p)],
+  };
+}
 
 // ---------- camera and motion
 // Camera framing eased between stops, like pan(): from and each stop give [x, y, scale], the stage point (x, y)

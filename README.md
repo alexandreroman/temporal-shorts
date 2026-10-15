@@ -210,8 +210,9 @@ coins, may leave it. A scene shorter than the frame is centered on y 515
 within 25 px, and every scene spans at least 440 px, 60 % of the frame. The
 check renders each scene inside each subtitle and just before its end,
 measures the visible content at its resting size (an element a pop is
-still scaling counts at its unscaled size), scene `shift` included, and
-prints one line per scene: its top, bottom, height, middle and a verdict,
+still scaling counts at its unscaled size), scene `shift` included (and a
+scene camera's zoom, `makeCamera()`, which frames a shot), and prints one
+line per scene: its top, bottom, height, middle and a verdict,
 `ok`, `OUT`, `THIN` or `OFF-CENTER`. `OUT` allows 2 px past the frame, as
 sub-pixel borders and strokes (a 1.5 px border) round past a whole-pixel
 edge; an `OUT` scene also names the element that leaves the frame and

@@ -36,6 +36,8 @@
 
   scene({
     pre: 1.0,
+    // a hard cut: the card lands in the Worker, where chapter 1 opens on it
+    fadeOut: 0,
     // presenter mode holds before the card returns to clear, then plays the flight into chapter 1 in one go
     holdBeforeEnd: CLEAR_BEFORE_END,
     subs: [
