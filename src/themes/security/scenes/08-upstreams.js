@@ -55,7 +55,7 @@
   // The two upstreams' titles, a pair: the official lockup at the zone's heading place (the lane's TEMPORAL heading
   // grows to it from its 34 px as TEMPORAL splits), then under it the upstream's name in the brand font: Self-hosted
   // and Cloud (logo: the lockup's height, its wordmark about 20 px on screen; name: its top and size, 21 px on screen)
-  const TITLE = { logo: 40, laneLogo: ZONE_LOGO_H, nameTop: 72, name: 24 };
+  const TITLE = { logo: 40, laneLogo: ZONE_HEAD.h, nameTop: 72, name: 24 };
   // Both titles are centered in their box: the lockup's left edge, on a whole pixel (see LOCKUP), and the lane
   // heading's resting left edge before the split (zoneHeading())
   TITLE.logoLeft = Math.round((SELF_ZONE.w - TITLE.logo * LOCKUP.w / LOCKUP.h) / 2);

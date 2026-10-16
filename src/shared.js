@@ -48,24 +48,20 @@ const lockupWord = h => {
     font: (LOCKUP.baseline - LOCKUP.capTop) * unit / LOCKUP.capEm,
   };
 };
-// The title of Temporal Cloud: LOGO, h px high, then "Cloud" in the wordmark's color, set as lockupWord(h) with its
-// font rounded to 1/100 px; gap: a word space (0.2 em of that font) after the wordmark's last letter, which ends at
-// the image's right edge
-const CLOUD_TITLE = (() => {
-  const h = 34;
-  const word = lockupWord(h);
-  const font = +word.font.toFixed(2);
-  return { h, rise: word.rise, font, gap: Math.round(0.2 * font) };
-})();
-const cloudTitleHtml = () =>
-  `<img src="${LOGO}" style="height:${CLOUD_TITLE.h}px;vertical-align:-${CLOUD_TITLE.rise}px">`
-  + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`;
-// A Temporal Cloud zone: a tile in TEMPORAL's look, titled with Temporal Cloud 24 px from its left edge and 20 px
-// under its top. The scene sizes and places it.
+// A zone's heading: how far it sits from the zone's left edge and under its top edge, and its height, px
+const ZONE_HEAD = { left: 24, top: 20, h: 34 };
+// A Temporal Cloud zone: a tile in TEMPORAL's look, titled with Temporal Cloud at ZONE_HEAD. The title is LOGO, then
+// "Cloud" in the wordmark's color, set as lockupWord() with its font rounded to 1/100 px, a word space (0.2 em of that
+// font) after the wordmark's last letter, which ends at the image's right edge. The scene sizes and places the zone.
 function makeCloudZone(root) {
+  const word = lockupWord(ZONE_HEAD.h);
+  const font = +word.font.toFixed(2);
+  const gap = Math.round(0.2 * font);
+  const title = `<img src="${LOGO}" style="height:${ZONE_HEAD.h}px;vertical-align:-${word.rise}px">`
+    + `<span style="font-size:${font}px;margin-left:${gap}px;color:#F2F2F2">Cloud</span>`;
   return E(root,
-    `<div style="position:absolute;left:24px;top:20px;height:${CLOUD_TITLE.h}px;line-height:0;white-space:nowrap">`
-    + `${cloudTitleHtml()}</div>`,
+    `<div style="position:absolute;left:${ZONE_HEAD.left}px;top:${ZONE_HEAD.top}px;height:${ZONE_HEAD.h}px;`
+    + `line-height:0;white-space:nowrap">${title}</div>`,
     'tile', { borderColor: C.uv, background: C.temporalSurface });
 }
 // The SVG filter that paints a monochrome logo in ink, its shape untouched: it floods the logo's opaque parts with

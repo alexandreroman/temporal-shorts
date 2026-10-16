@@ -216,11 +216,9 @@ function drawDashed(p, prog, o = 1, dash = ENV_EDGE.dash, gap = ENV_EDGE.gap) {
 const roundRectD = (x, y, w, h, r) => `M ${x + w / 2} ${y} H ${x + w - r} A ${r} ${r} 0 0 1 ${x + w} ${y + r}`
   + ` V ${y + h - r} A ${r} ${r} 0 0 1 ${x + w - r} ${y + h} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + h - r}`
   + ` V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
-// How far a zone's labels sit inside it: its heading under its top edge and from its left edge, its caption above its
-// bottom edge, in px
-const ZONE_LABEL_INSET = { head: 20, left: 24, cap: 24 };
-// The height of TEMPORAL's heading, the official lockup, px; YOUR ENVIRONMENT's line is as high
-const ZONE_LOGO_H = 34;
+// How far a zone's labels sit inside it: its heading under its top edge and from its left edge (ZONE_HEAD), its
+// caption above its bottom edge, in px. TEMPORAL's heading, the official lockup, is ZONE_HEAD.h high.
+const ZONE_LABEL_INSET = { head: ZONE_HEAD.top, left: ZONE_HEAD.left, cap: 24 };
 // A zone's heading (zone.head), inside a frame of its own (zone.headFrame): placeLane() sets the heading's opacity,
 // frameLaneEdges() the frame's
 const zoneHeading = html => '<div class="head-frame" style="position:absolute;'
@@ -306,7 +304,7 @@ function makeLane(root) {
   const lane = {};
   lane.env = E(root,
     // its line as high as TEMPORAL's logo, so both headings share a center line
-    zoneHeading(`<div class="head lbl" style="padding-left:0;font-size:18px;line-height:${ZONE_LOGO_H}px">`
+    zoneHeading(`<div class="head lbl" style="padding-left:0;font-size:18px;line-height:${ZONE_HEAD.h}px">`
       + 'Your environment</div>')
     + zoneCaption('Your code runs here'),
     // a transparent border as thick as TEMPORAL's, so both zones' labels sit as far from their edges
@@ -315,7 +313,7 @@ function makeLane(root) {
       border: '1px solid transparent',
     });
   lane.temporal = E(root,
-    zoneHeading(`<img class="head" src="${LOGO}" style="height:${ZONE_LOGO_H}px;display:block">`)
+    zoneHeading(`<img class="head" src="${LOGO}" style="height:${ZONE_HEAD.h}px;display:block">`)
     + zoneCaption('Your code never runs here'),
     'tile', { width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: C.temporalSurface });
   [lane.env, lane.temporal].forEach(zone => {

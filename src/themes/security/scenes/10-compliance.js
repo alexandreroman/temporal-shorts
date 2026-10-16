@@ -26,9 +26,9 @@
   // (both centered on x 960; the first on y 515, the second with the row under it)
   const ZONE_STAMPS = { x: 120, y: 285, w: 1680, h: 460 };
   const ZONE_REPORTS = { x: 120, y: 175, w: 1680, h: 400 };
-  // the room the heading takes at the zone's top: its inset and the lockup's height; the seals center in the rest
-  const HEAD = { inset: ZONE_LABEL_INSET.head, logo: ZONE_LOGO_H };
-  const sealY = zone => zone.y + HEAD.inset + HEAD.logo + (zone.h - HEAD.inset - HEAD.logo) / 2;
+  // the room the heading takes at the zone's top: its inset and its height (ZONE_HEAD); the seals center in the rest
+  const HEAD_ROOM = ZONE_HEAD.top + ZONE_HEAD.h;
+  const sealY = zone => zone.y + HEAD_ROOM + (zone.h - HEAD_ROOM) / 2;
 
   // The seals, one per column of the use cases' row (useCaseX): [name lines, status]. Each is a round badge of
   // SEAL.size px, a dashed inner ring SEAL.ring px inside its edge, a neon check, its name in two lines' room (so the
