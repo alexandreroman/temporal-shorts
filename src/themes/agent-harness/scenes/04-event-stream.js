@@ -1,13 +1,19 @@
 // ===================== 4. ONE EVENT STREAM
 // The block keeps every name declared in this file local to this scene.
 {
-  // one color per event type, the same on the dark stage and on the white console
+  // one color per event type, the same on the dark stage and on the white console, except TOKENS (below)
   const EVENT_TYPES = {
     TURN: { background: C.slate, color: C.bg, borderColor: C.slate },
     MODEL: { background: C.uv, color: '#FFFFFF', borderColor: C.uv },
     TOOL: { background: C.ink, color: C.bg, borderColor: C.slateDark },
     APPROVAL: { background: C.violet, color: C.bg, borderColor: C.violet },
     TOKENS: { background: 'transparent', color: C.slate, borderColor: C.slate },
+  };
+  // on the white console, the outlined TOKENS chip takes the dark slate of labels on white cards: the stage's slate
+  // would be too pale there
+  const CONSOLE_TYPES = {
+    ...EVENT_TYPES,
+    TOKENS: { background: 'transparent', color: C.slateDark, borderColor: C.slateDark },
   };
   const TYPE_ORDER = ['TURN', 'MODEL', 'TOOL', 'APPROVAL', 'TOKENS'];
   const SDKS = ['OpenAI Agents SDK', 'Google Gemini', 'Pydantic AI'];
@@ -57,7 +63,7 @@
   const CONSOLE_LINE = 22, CONSOLE_TAG_H = 32;
   // the same chip, as inline HTML for the console rows (fixed width so the row texts line up)
   const chipHtml = type => {
-    const css = EVENT_TYPES[type];
+    const css = CONSOLE_TYPES[type];
     return `<span class="mono" style="display:inline-block;width:132px;text-align:center;font-size:16px;`
       + `line-height:${CONSOLE_LINE}px;`
       + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1px solid ${css.borderColor};border-radius:4px;`
