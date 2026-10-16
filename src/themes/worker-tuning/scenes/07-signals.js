@@ -67,9 +67,9 @@
   const COL = { symptom: 150, signal: 570, fix: 1194 };
   const LOOP = { top: recapRowY(ROWS.length - 1) + RECAP.rowH / 2 + GRID.zone, w: 360, h: 50, xs: [460, 960, 1460] };
   LOOP.backY = LOOP.top + LOOP.h + 36;
-  // The symptom row stands apart: a violet border at rest (the others: the line color) and a WATCH FIRST badge, a
-  // violet pill as chapter 1's x10 tag in 16 px type, w x h px, astride its top border, its right edge on the row's
-  // inner padding line (GRID.pad), whole pixels; small enough to end 20 px clear of the fix under it (measured)
+  // The symptom row stands apart: a violet border at rest (the others: the line color), a glow and a WATCH FIRST
+  // badge, a violet pill as chapter 1's x10 tag in 16 px type, w x h px, astride its top border, its right edge on the
+  // row's inner padding line (GRID.pad), whole pixels; small enough to end 20 px clear of the fix under it (measured)
   const BADGE = { text: 'Watch first', w: 148, h: 32 };
   BADGE.x = RECAP.left + RECAP.w - GRID.pad - BADGE.w / 2;
   const rowTop = i => recapRowY(i) - RECAP.rowH / 2;
@@ -132,6 +132,9 @@
       });
       s.headings = [heading('Symptom', COL.symptom), heading('Signal', COL.signal), heading('Fix', COL.fix)];
       s.rows = ROWS.map(row => makeRow(root, row));
+      // a soft, steady violet glow round the symptom row, which shows and leaves with it (the row's opacity); low and
+      // tight enough to stay clear of the column headings above
+      s.rows[0].style.boxShadow = glowShadow(RGB.violet, 1, { blur: 20, alpha: 0.3 });
       s.badge = fixedTag(root, BADGE.text, 'violet solid', BADGE.w, BADGE.h);
       // smaller than a pill, with less padding: it stands on the row's border, as the x10 tag
       Object.assign(s.badge.style, { fontSize: '16px', lineHeight: '22px', padding: '4px 10px 4px calc(10px + .1em)' });
