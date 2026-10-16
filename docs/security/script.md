@@ -83,9 +83,11 @@ recap.
   encrypted by the sender (caller encrypts input, handler encrypts
   result)". "Never need to know" is decoupling, not a confidentiality
   control: the video says the handler's side is not exposed to callers,
-  never that they cannot see it. Self-hosted Nexus relies on the cluster's
-  own security: the chapter shows Temporal Cloud only, and claims its mTLS
-  for Cloud alone.
+  never that they cannot see it. The Endpoint allowlist is Temporal
+  Cloud's: a self-hosted cluster authorizes Nexus calls with a custom
+  Authorizer and relies on its own security, so the subtitle says "In
+  Temporal Cloud", and the chapter shows Temporal Cloud only and claims its
+  mTLS for Cloud alone.
 - Compliance: <https://trust.temporal.io/> (Temporal Trust Center, updated
   May 29, 2026): SOC 2 Type II, GDPR, HIPAA and CCPA (CCPA comes from the
   badge here: the docs security page lists SOC 2 Type 2, GDPR and HIPAA only);
@@ -405,8 +407,8 @@ recap.
     through the Endpoint. The Namespaces glow at "across Namespaces", and the
     transfer Workflow's call line draws from the middle of its tile up to the
     boundary.
-- **3:01** The Endpoint lets in only the Namespaces on its allowlist, and
-  callers never need to know what is behind it.
+- **3:00** In Temporal Cloud, an Endpoint admits only allowlisted
+  Namespaces; callers need only its name.
   - Visuals: Dramatic beat: a call from analytics races up to the gate and
     slams into the boundary, which flashes red, with a red flash, a shake and
     red rings, then turns back to its slate dashes; the allowlist flashes red
@@ -418,7 +420,7 @@ recap.
     call goes through it on to the handler. A hatched veil wipes over the
     fraud Namespace from the gate's side: an eye struck through, NOT EXPOSED
     TO CALLERS, "Namespace, Task Queue, implementation".
-- **3:08** Calls between Namespaces travel over mTLS, and your Data
+- **3:06** Calls between Namespaces travel over mTLS, and your Data
   Converter still encrypts the payloads.
   - Visuals: The call line turns into a neon tube from the transfer
     Workflow through the Endpoint's opening in the boundary into the veiled
@@ -439,7 +441,7 @@ recap.
 
 ## 10 Audited and certified
 
-- **3:17** Temporal Cloud is SOC 2 Type 2 certified and compliant
+- **3:15** Temporal Cloud is SOC 2 Type 2 certified and compliant
   with HIPAA, GDPR and CCPA.
   - Visuals: The camera zoom-through (setCamera) brings in a wide Temporal Cloud
     zone (the official lockup followed by "Cloud") holding four empty dashed
@@ -449,7 +451,7 @@ recap.
     landing flat with a press, a violet glow, neon ripples and a jolt of the
     frame: SOC 2 TYPE 2 (CERTIFIED), then HIPAA, GDPR and CCPA (COMPLIANT), each
     with a neon check.
-- **3:24** Third parties audit and pen test it every year: audit results
+- **3:22** Third parties audit and pen test it every year: audit results
   are in the Temporal Trust Center.
   - Visuals: The zone moves up with its seals and a TRUST CENTER card
     rises in under it (a shield, `trust.temporal.io`), listing the SOC 2
@@ -464,7 +466,7 @@ recap.
 
 ## 11 What you get
 
-- **3:33** Your code stays home, Temporal verifies every client, your keys
+- **3:31** Your code stays home, Temporal verifies every client, your keys
   encrypt, Workers need no secrets.
   - Visuals: 4 tall benefit tiles drop in one at a time across the frame
     as the subtitle names them, each lighting up as it lands while the
@@ -474,7 +476,7 @@ recap.
 
 ## 12 What you can build
 
-- **3:41** A bank transfer is one example: any Workflow that handles
+- **3:39** A bank transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use
@@ -483,14 +485,14 @@ recap.
     "passport scans, encrypted" / PAYROLL RUNS (calendar) "salaries never
     in clear" / AI AGENTS ON CUSTOMER DATA (robot) "prompts and replies
     sealed".
-- **3:47** Health claims, KYC onboarding, payroll runs, AI agents on
+- **3:45** Health claims, KYC onboarding, payroll runs, AI agents on
   customer data: the data stays yours.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **3:55** With Temporal, your code, your keys and your data stay yours.
+- **3:53** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.

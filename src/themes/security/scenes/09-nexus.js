@@ -124,19 +124,20 @@
     x: NEXUS_TUBE.label.x, y: CALL_Y + 6,
   };
 
-  // the beats, in seconds from their cue. c[0]: the transfer Workflow (workflow) and the handler (handler) come in,
-  // the Namespaces light up (across), the gate rises (gate), its boundary draws down (boundary, boundaryD) and the
-  // call line draws to it (call, callD). c[1]: the analytics call (deny, denyD) hits the boundary; the payments call
-  // (allow, allowD) reaches it, the allowlist row lights, ALLOWED (allowed), the Endpoint opens the boundary (open,
-  // openD) and the call goes on to the handler (pass, passD); the veil wipes over fraud (veil, veilD), its caption
-  // (caption). c[2]: the tube draws (tube, tubeD), its label (label); the payload card, sealed by the caller's Worker,
-  // comes out (card) and rides behind the veil (ride, rideD); the result comes back (back, backD)
+  // the beats, in seconds from their cue. c[0]: the transfer Workflow (workflow) and the handler (handler) come in, the
+  // Namespaces light up (across), the gate rises (gate), its boundary draws down (boundary, boundaryD) and the call
+  // line draws to it (call, callD). c[1]: the analytics call (deny, denyD) hits the boundary as "Endpoint" is read; the
+  // payments call (allow, allowD) reaches it, the allowlist row lights, ALLOWED as "allowlisted" is read (allowed), the
+  // Endpoint opens the boundary (open, openD) and the call goes on to the handler (pass, passD); the veil wipes over
+  // fraud as "callers" is read (veil, veilD), its caption (caption); each word at its position at 16 characters per
+  // second plus 0.3 s. c[2]: the tube draws (tube, tubeD), its label (label); the payload card, sealed by the caller's
+  // Worker, comes out (card) and rides behind the veil (ride, rideD); the result comes back (back, backD)
   const T0 = {
     workflow: 1.3, handler: 2.6, gate: 3.9, boundary: 4.3, boundaryD: 0.4, across: 4.4, call: 5.4, callD: 0.6,
   };
   const T1 = {
-    deny: 1.0, denyD: 0.45, allow: 2.5, allowD: 0.5, allowed: 3.2, open: 3.3, openD: 0.3, pass: 3.5, passD: 0.5,
-    veil: 4.2, veilD: 0.7, caption: 4.8,
+    deny: 1.0, denyD: 0.45, allow: 2.3, allowD: 0.5, allowed: 3.0, open: 3.1, openD: 0.3, pass: 3.3, passD: 0.5,
+    veil: 4.45, veilD: 0.7, caption: 5.05,
   };
   const T2 = { tube: 0.3, tubeD: 0.9, label: 2.4, card: 3.3, ride: 3.8, rideD: 1.1, back: 5.0, backD: 1.2 };
 
@@ -280,8 +281,7 @@
         after: 0.4,
       },
       {
-        text: 'The Endpoint lets in only the Namespaces on its <b>allowlist</b>, and callers never need to know '
-          + 'what is behind it.',
+        text: 'In Temporal Cloud, an Endpoint admits only <b>allowlisted</b> Namespaces; callers need only its name.',
       },
       {
         text: 'Calls between Namespaces travel over <b>mTLS</b>, and your Data Converter still encrypts the payloads.',

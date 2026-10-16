@@ -83,14 +83,13 @@ change.
 [Watch from 2:52](/themes/security/#t=172)
 
 With Temporal Nexus, your Workflow can call another team's service, across
-Namespaces, through an Endpoint. The Endpoint lets in only the Namespaces on its
-allowlist, and callers never need to know what is behind it. Calls between
-Namespaces travel over mTLS, and your Data Converter still encrypts the
-payloads.
+Namespaces, through an Endpoint. In Temporal Cloud, an Endpoint admits only
+allowlisted Namespaces; callers need only its name. Calls between Namespaces
+travel over mTLS, and your Data Converter still encrypts the payloads.
 
 ## Chapter 10: Audited and certified
 
-[Watch from 3:16](/themes/security/#t=196)
+[Watch from 3:15](/themes/security/#t=195)
 
 Temporal Cloud is SOC 2 Type 2 certified and compliant with HIPAA, GDPR and
 CCPA. Third parties audit and pen test it every year: audit results are in the
@@ -98,14 +97,14 @@ Temporal Trust Center.
 
 ## Chapter 11: What you get
 
-[Watch from 3:32](/themes/security/#t=212)
+[Watch from 3:31](/themes/security/#t=211)
 
 Your code stays home, Temporal verifies every client, your keys encrypt, Workers
 need no secrets.
 
 ## Chapter 12: What you can build
 
-[Watch from 3:40](/themes/security/#t=220)
+[Watch from 3:39](/themes/security/#t=219)
 
 A bank transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -113,6 +112,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 3:54](/themes/security/#t=234)
+[Watch from 3:53](/themes/security/#t=233)
 
 With Temporal, your code, your keys and your data stay yours.
