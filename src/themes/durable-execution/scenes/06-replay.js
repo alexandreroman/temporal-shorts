@@ -30,6 +30,7 @@
   const STATUS_AT = { x: workerRight - 100, y: EH.worker.y - EH.worker.h / 2 + 36 };
   scene({
     chapter: 6, title: 'When a Worker crashes',
+    fadeIn: 0, // a hard cut: the previous chapter ends on this chapter's first frame
     subs: [
       {
         text: "Now the Worker crashes mid-order, during <b>shipPackage</b>. "
