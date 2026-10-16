@@ -929,16 +929,19 @@ function makeProxyTube(root, out) {
   svgLayer(root).appendChild(out);
   return tube;
 }
-// The card that goes through the proxy in chapter 6, a lane-size card at scale k, with its Namespace tag straddling
-// its bottom edge and the API KEY under it (tagH: their height; nsW and keyW: their widths; tagGap: the gap between
-// them); h: its height on the stage; keyDy: from its center to the API KEY's
-const PROXY_CARD = { w: PAYLOAD_IN_WORKER.w, k: 0.45, tagH: 28, nsW: 156, keyW: 124, tagGap: 6 };
+// The card that goes through the proxy in chapter 6, a lane-size card at scale k, with its Namespace tag under it and
+// the API KEY under that (tagH: their height; nsW and keyW: their widths; gap: the clear space between the card and
+// each tag, 14 px: 16.8 px on screen in chapter 6's shot, 33.6 px in the push into the proxy); h: its height on the
+// stage; nsDy and keyDy: from its center to the Namespace tag's and to the API KEY's
+const PROXY_CARD = { w: PAYLOAD_IN_WORKER.w, k: 0.45, tagH: 28, nsW: 156, keyW: 124, gap: 14 };
 PROXY_CARD.h = payloadLayout(PROXY_CARD.w).h * PROXY_CARD.k;
-PROXY_CARD.keyDy = PROXY_CARD.h / 2 + PROXY_CARD.tagH / 2 + PROXY_CARD.tagGap + PROXY_CARD.tagH;
+PROXY_CARD.nsDy = PROXY_CARD.h / 2 + PROXY_CARD.gap + PROXY_CARD.tagH / 2;
+PROXY_CARD.keyDy = PROXY_CARD.nsDy + PROXY_CARD.tagH + PROXY_CARD.gap;
 // The payments Namespace inside TEMPORAL that the card goes into in chapter 6: its center and size; card: where the
-// card rests in it, under its name, its padlock clear of the name
-const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 266 };
-PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 80 + PROXY_CARD.h / 2 };
+// card rests in it, under its name, its padlock clear of the name; the API KEY ends about as far above the band's
+// bottom edge as the tags are apart
+const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 280 };
+PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 78 + PROXY_CARD.h / 2 };
 // The payments Namespace band (PROXY_BAND), labelled with its full name at its top left
 const makeProxyBand = root => E(root,
   '<div style="position:absolute;left:16.5px;top:12.5px">'

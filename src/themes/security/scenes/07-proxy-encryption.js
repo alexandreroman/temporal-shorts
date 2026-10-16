@@ -380,10 +380,9 @@
         tile.lines.forEach((line, k) => setText(line, WORKER_LINES[k]));
         tile.lines[1].style.color = C.violet;
       });
-      // the SDK client and the Web UI, cropped by the close shot into the header and subtitle bands, fade out with
-      // TEMPORAL's move, and come back once the pull-back frames them whole
-      const clientsO = lerp(OFF_SHOT * (1 - P(t, c[0] + T0.close, 0.5)), 1, reveal);
-      s.clients.forEach((tile, i) => place(tile, FLEET_CLIENTS[i].x, FLEET_CLIENTS[i].y, 1, clientsO));
+      // the SDK client and the Web UI, which the close shot crops into the header and subtitle bands: out, as chapter 6
+      // left them, until the pull-back frames them whole
+      s.clients.forEach((tile, i) => place(tile, FLEET_CLIENTS[i].x, FLEET_CLIENTS[i].y, 1, reveal));
 
       // the connections and their light; the proxy's connection to TEMPORAL follows TEMPORAL's edge
       s.links.forEach((link, i) => {
@@ -419,7 +418,7 @@
       place(s.sent, sentAt.x, sentAt.y, PROXY_CARD.k, sentO);
       s.sentNs.style.color = C.neon;
       s.sentNs.style.borderColor = C.neon;
-      place(s.sentNs, sentAt.x, sentAt.y + PROXY_CARD.h / 2, 1, sentO);
+      place(s.sentNs, sentAt.x, sentAt.y + PROXY_CARD.nsDy, 1, sentO);
       place(s.sentKey, sentAt.x, sentAt.y + PROXY_CARD.keyDy, 1, sentO);
 
       // YOUR KMS beside the proxy, and its link to the data key; the KMS key NEVER LEAVES

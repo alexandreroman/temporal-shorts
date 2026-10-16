@@ -7,8 +7,8 @@
 // payload card leaves a Worker in a plain connection: at the proxy it gains, one at a time, the TLS tube, the API KEY
 // and the full Namespace name (payments typed over into payments.a1b2c), each with a click, and goes out to Temporal:
 // CREDENTIALS IN ONE PLACE. The chapter ends pushing into the proxy box (PROXY_SHOT), where the box fills the content
-// frame's height: only the box, the TLS tube and its label stay bright; everything else is dimmed (OFF_SHOT) or out
-// of the frame. The camera travels one way: right and in.
+// frame's height: only the box, the TLS tube and its label stay bright; everything else is dimmed (OFF_SHOT), faded
+// out (the SDK client and the Web UI, which it crops into the header and subtitle bands) or out of the frame. The camera travels one way: right and in.
 // The block keeps every name declared in this file local to this scene.
 {
   // camera framings, [x, y, scale] for shot(): from c[2], on the proxy's side of the fleet, the two right columns, the
@@ -142,9 +142,12 @@
         setText(tile.lines[1], typed(WORKER_LINES[1], P(t, typeAt(1), T1.typeD, linear)));
         tile.lines[1].style.color = C.violet;
       });
+      // the SDK client and the Web UI: the push into the proxy crops them into the header and subtitle bands, so they
+      // fade out early in the push, as chapter 7 keeps them until its pull-back
+      const clientsOut = 1 - P(t, pushAt, PUSH_D * 0.6);
       s.clients.forEach((tile, i) => {
         const pop = backPop(t, c[0] + T0.clients + i * T0.clientStep);
-        place(tile, FLEET_CLIENTS[i].x, FLEET_CLIENTS[i].y, pop.s, pop.o * columnO(FLEET_CLIENTS[i].col));
+        place(tile, FLEET_CLIENTS[i].x, FLEET_CLIENTS[i].y, pop.s, pop.o * clientsOut);
       });
       // under the Workers, out of the frame once the camera pushes toward the proxy
       const noSecrets = popIn(t, c[1] + T1.noSecrets);
@@ -202,7 +205,7 @@
       setHtml(s.ns, namespaceHtml(WORKER_LINES[1].length + nsTyped.length, t >= nsAt && t < nsDone + 0.3));
       s.ns.style.color = t >= nsAt ? C.neon : C.ink;
       s.ns.style.borderColor = t >= nsDone ? C.neon : C.violet;
-      place(s.ns, cardX, cardY + CARD.h / 2, click(nsDone), cardO);
+      place(s.ns, cardX, cardY + CARD.nsDy, click(nsDone), cardO);
       const keyPop = backPop(t, keyAt, 0.35);
       place(s.key, cardX, cardY + CARD.keyDy, keyPop.s * click(keyAt + 0.2), keyPop.o * cardO);
       [tlsAt, keyAt + 0.2, nsDone].forEach((at, k) => {

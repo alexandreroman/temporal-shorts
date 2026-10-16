@@ -310,13 +310,14 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     `payments`; a NO SECRETS tag appears under the Workers.
 - **2:05** On the way out, the proxy adds TLS, the credentials and the full
   Namespace name.
-  - Visuals: A payload card, its `payments` tag on its edge, rides from a
+  - Visuals: A payload card, its `payments` tag under it, rides from a
     Worker into the proxy as the camera pushes right and in. Dramatic
     beat, three clicks at the proxy, each a swell with neon rings: the TLS
-    tube draws out to TEMPORAL, an API KEY tag docks under the card, and
-    `.a1b2c` types after `payments`. The card goes out through the tube
-    into a payments.a1b2c Namespace risen in TEMPORAL; CREDENTIALS IN ONE
-    PLACE. At the end the camera pushes into the proxy box.
+    tube draws out to TEMPORAL, an API KEY tag docks under the Namespace
+    tag, and `.a1b2c` types after `payments`. The card goes out through
+    the tube into a payments.a1b2c Namespace risen in TEMPORAL; CREDENTIALS
+    IN ONE PLACE. At the end the camera pushes into the proxy box, as the
+    SDK CLIENT and WEB UI tiles fade out.
 
 ## 07 Encryption without code changes
 
