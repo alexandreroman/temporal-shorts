@@ -801,16 +801,6 @@ const LANGUAGE_LOGOS = {
   Java: { url: assetUrl('assets/languages/java.svg'), w: 16, h: 22 },
   TypeScript: { url: assetUrl('assets/languages/typescript.svg'), w: 19, h: 19 },
 };
-// The SVG filter that paints a logo in ink, its shape untouched; added to the stage by the first Worker tile
-const LOGO_INK_ID = 'security-logo-ink';
-function addLogoInkFilter() {
-  if (document.getElementById(LOGO_INK_ID)) return;
-  const svg = document.createElementNS(SVGNS, 'svg');
-  Object.assign(svg.style, { position: 'absolute', width: 0, height: 0 });
-  svg.innerHTML = `<filter id="${LOGO_INK_ID}" color-interpolation-filters="sRGB"><feFlood flood-color="${C.ink}"/>`
-    + '<feComposite in2="SourceAlpha" operator="in"/></filter>';
-  stage.appendChild(svg);
-}
 // The four chips a Worker carries in chapter 5, top to bottom: icon and label
 const WORKER_CHIPS = [['globe', 'Address'], ['badge', 'Certificate'], ['key', 'API key'], ['lock', 'Codec']];
 // Inside a Worker tile, px from its top: the chips' slots (chipTop, chipH apart by chipGap), inset px from its sides;
@@ -822,7 +812,7 @@ const workerSlotTop = i => WORKER_TILE.chipTop + i * (WORKER_TILE.chipH + WORKER
 // (tile.langTag), then its four chips (tile.chips, hidden) and two code lines in the first two slots (tile.lines,
 // empty). The scenes show its parts; gearSpin() turns its gear (tile.gear).
 function makeWorkerTile(root, worker) {
-  addLogoInkFilter();
+  addInkFilter();
   const logo = LANGUAGE_LOGOS[worker.lang];
   const name = logo.named ? '' : `<span class="mono" style="font-size:16px">${worker.lang}</span>`;
   const inset = WORKER_TILE.inset;
@@ -835,7 +825,7 @@ function makeWorkerTile(root, worker) {
     + `<div class="lang" style="position:absolute;left:${inset}px;top:56px;height:32px;display:flex;`
     + `align-items:center;gap:8px;padding:0 12px;border:1.5px solid ${C.lineLight};border-radius:var(--rs)">`
     + `<img src="${logo.url}" alt="" width="${logo.w}" height="${logo.h}" style="display:block;`
-    + `filter:url(#${LOGO_INK_ID})">${name}</div>`
+    + `filter:url(#${INK_FILTER_ID})">${name}</div>`
     + WORKER_CHIPS.map(([icon, label], i) => `<div class="chip" style="${slot(i, 'display:flex;align-items:center;'
       + `gap:10px;padding-left:12px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);background:${C.bg};`
       + `opacity:0`)}">${ICON(icon, 20, C.violet, 1.9)}<span class="mono" style="font-size:19px;letter-spacing:.08em">`

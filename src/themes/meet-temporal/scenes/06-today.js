@@ -216,12 +216,8 @@
         link.setAttribute('d', linkD(edgePoint(at, LANG_CHIP, SYMBOL_SIZE / 2 + 12)));
         link._L = link.getTotalLength();
       };
-      // Each logo, a monochrome mark, in ink: an SVG filter floods its shape (its opaque parts) with the ink colour
-      s.inkDefs = document.createElementNS(SVGNS, 'svg');
-      Object.assign(s.inkDefs.style, { position: 'absolute', width: 0, height: 0 });
-      s.inkDefs.innerHTML = '<filter id="logo-ink" color-interpolation-filters="sRGB">'
-        + `<feFlood flood-color="${C.ink}"/><feComposite in2="SourceAlpha" operator="in"/></filter>`;
-      root.appendChild(s.inkDefs);
+      // each logo, a monochrome mark, in ink
+      addInkFilter();
       s.symbolGlow = E(root, '', '', {
         width: '460px', height: '460px', borderRadius: '50%',
         background: `radial-gradient(circle, rgba(${RGB.violet},.35) 0, `
@@ -231,7 +227,7 @@
       // the logo alone, the subtitle names the language; whole-pixel sizes keep its edges crisp
       s.langs = LANGUAGES.map(([name, logo]) => makeChip(root,
         `<img src="${logo}" alt="${name}" width="${LOGO_SIZE[name][0]}" height="${LOGO_SIZE[name][1]}" `
-        + 'style="display:block;filter:url(#logo-ink)">', LANG_CHIP, { ...TILE, padding: '0' }));
+        + `style="display:block;filter:url(#${INK_FILTER_ID})">`, LANG_CHIP, { ...TILE, padding: '0' }));
       s.ais = AI.map(name => makeChip(root, `${ICON('sparkle', 24, C.violet, 1.8)}<span>${name}</span>`, AI_CHIP,
         TILE));
       // and more: the same tile, dashed and a little dimmer

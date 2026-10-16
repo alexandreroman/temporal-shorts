@@ -61,6 +61,17 @@ function makeCloudZone(root) {
     + `${cloudTitleHtml()}</div>`,
     'tile', { borderColor: C.uv, background: C.temporalSurface });
 }
+// The SVG filter that paints a monochrome logo in ink, its shape untouched: it floods the logo's opaque parts with
+// the ink color. An <img> uses it with filter:url(#INK_FILTER_ID); addInkFilter() adds it to the stage once.
+const INK_FILTER_ID = 'logo-ink';
+function addInkFilter() {
+  if (document.getElementById(INK_FILTER_ID)) return;
+  const svg = document.createElementNS(SVGNS, 'svg');
+  Object.assign(svg.style, { position: 'absolute', width: 0, height: 0 });
+  svg.innerHTML = `<filter id="${INK_FILTER_ID}" color-interpolation-filters="sRGB"><feFlood flood-color="${C.ink}"/>`
+    + '<feComposite in2="SourceAlpha" operator="in"/></filter>';
+  stage.appendChild(svg);
+}
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
 // A tag of a fixed even width w (and height h if given), its label centered in it. The .1em letter spacing gives
 // fractional natural widths: with an even size, a tag centered on a whole pixel rests on whole pixels.
