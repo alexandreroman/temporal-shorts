@@ -1,8 +1,8 @@
 // ===================== 1. THE BACKLOG GROWS
-// The Worker diagram, closed: the TEMPORAL panel holds the "orders" Task Queue as one lane, the WORKER panel shows no
-// parts yet. Black Friday: the ORDERS / MIN readout climbs tenfold and task chips stream into the queue faster than
-// the Worker takes them. The queue overflows, BACKLOG and SCHEDULE-TO-START climb in red. A dashed "+ WORKER" ghost
-// is crossed out, and a WHAT IS FULL? tag lands on the Worker.
+// The Worker diagram, closed: the TEMPORAL panel holds the "orders" Task Queue as one lane, the WORKER panel only its
+// 10 Activity Slots, all busy. Black Friday: the ORDERS / MIN readout climbs tenfold and task chips stream into the
+// queue faster than the Worker takes them: each one lands in a Slot as it frees up. The queue overflows, BACKLOG and SCHEDULE-TO-START climb in red. A dashed "+ WORKER" ghost
+// is crossed out, and a WHAT IS FULL? tag lands on the Worker, above its Slots.
 // The block keeps every name declared in this file local to this scene.
 {
   // ORDERS / MIN: a readout like BACKLOG, under the Worker; its x10 tag astride its top right corner
@@ -10,7 +10,9 @@
   // the "+ WORKER" ghost: a dashed panel right of ORDERS / MIN, 40 px away, its label struck through
   const GHOST = { left: 1180, top: DIAGRAM.readout.top, w: 620, h: 264, label: 30 };
   const GHOST_X = GHOST.left + GHOST.w / 2, GHOST_Y = GHOST.top + GHOST.h / 2;
-  const WORKER_X = DIAGRAM.worker.left + DIAGRAM.worker.w / 2, WORKER_Y = DIAGRAM.worker.top + DIAGRAM.worker.h / 2;
+  // WHAT IS FULL?: centered on the Worker panel, and between its header (bottom y 201) and the ACTIVITY SLOTS label
+  // (top y 404), some 68 px clear of each
+  const WHAT_X = DIAGRAM.worker.left + DIAGRAM.worker.w / 2, WHAT_Y = 302;
 
   scene({
     chapter: 1, title: 'The backlog grows',
@@ -47,24 +49,28 @@
     },
     update(t, c, s) {
       // c[0]: the orders climb tenfold, and tasks stream in (2.4 a second) faster than the Worker takes them (one
-      // every 0.9 s)
+      // every 0.9 s): every Slot is busy, and each task waits for one to free up, just before it leaves the queue.
+      // The steady icons of the busy Slots match those of the tasks landing in them (see steadySlotIcon); the last
+      // task lands before the scene fades out, so every Slot is busy at the cut, as chapter 2 starts.
       const rush = c[0] + 0.9;
-      const flow = { lane: 'act', from: c[0] + 1.2, every: 0.9, count: 30, hold: 0.1, slots: [0, 3, 6, 9, 2] };
+      const flow = { lane: 'act', from: c[0] + 1.2, every: 0.9, count: 28, freeAhead: 1.0, slots: [0, 3, 6, 9, 2] };
       // c[1]: the queue overflows: thousands of tasks wait; c[2]: it keeps growing
       const waiting = 4 + 2.4 * Math.max(0, t - rush) + 2370 * P(t, c[1] + 0.4, 4.0, easeIn)
         + 400 * P(t, c[2], 6.0, linear);
       const departed = flowDeparted(flow, t);
       const wait = 0.2 + 37.8 * P(t, c[1] + 0.4, 4.0, easeIn) + 6 * P(t, c[2], 6.0, linear);
       const growing = t >= c[1] + 0.4;
+      const worker = P(t, 0.3, 0.5);
       placeWorkerDiagram(s.dg, t, {
         show: {
-          temporal: P(t, 0.2, 0.5), lanes: P(t, 0.5, 0.5), worker: P(t, 0.3, 0.5),
-          pollers: 0, wfSlots: 0, slots: 0, cache: 0,
+          temporal: P(t, 0.2, 0.5), lanes: P(t, 0.5, 0.5), worker, slots: worker,
+          pollers: 0, wfSlots: 0, cache: 0,
           backlog: P(t, 0.7, 0.5), wait: P(t, 0.8, 0.5), cpu: 0, mem: 0, code: 0,
         },
         split: 0,
         queue: { act: Math.max(0, waiting - departed) },
         flows: [flow],
+        slots: { busy: 10 },
         backlog: { trend: growing ? 'up' : null },
         wait: { text: formatWait(wait), trend: growing ? 'up' : null },
         status: ['BUSY', 'running'],
@@ -82,7 +88,7 @@
       s.ghost.style.borderColor = t >= strikeAt ? C.red : C.lineLight;
       draw(s.strike, P(t, strikeAt, 0.35, easeOut));
       const what = backPop(t, c[2] + 3.4);
-      place(s.what, WORKER_X, WORKER_Y, what.s, what.o);
+      place(s.what, WHAT_X, WHAT_Y, what.s, what.o);
     },
   });
 }

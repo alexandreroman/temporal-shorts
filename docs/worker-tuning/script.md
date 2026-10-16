@@ -106,7 +106,9 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 - **0:12** Black Friday: the shop gets ten times more orders than usual,
   and every order is a Temporal Workflow.
   - Visuals: an orders counter speeds up ("ORDERS / MIN" x10); order
-    chips stream into the "orders" Task Queue.
+    chips stream into the "orders" Task Queue. The WORKER panel shows its
+    10 Activity Slots, all busy: each task waits in the queue until a Slot
+    frees up, then lands in it.
 - **0:20** Tasks pile up in the Task Queue: the backlog
   grows, and each order waits longer to start.
   - Visuals: the queue lengthens; the BACKLOG counter

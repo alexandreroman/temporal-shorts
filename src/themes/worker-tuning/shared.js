@@ -187,10 +187,12 @@ const wfSlotCenter = i => [DIAGRAM.slot.left + DIAGRAM.slot.w / 2 + i * DIAGRAM.
 const pollerY = (laneY, i, n) => laneY + (i - (n - 1) / 2) * DIAGRAM.poller.pitch;
 
 // ---------- task flows: chips from a lane through a Poller into a Slot
-// A flow is a stream of tasks, a pure function of time: { lane, from, every, count, hold, slots, icon }. Task k
-// (0 to count - 1) leaves the head of its lane ('wf' or 'act') at from + k * every, passes a Poller FLIGHT.leg s
-// later and lands in Slot slots[k % slots.length] FLIGHT.land s after leaving; it holds that Slot `hold` seconds
-// (default: for good). icon(k): the icon of an Activity Task (default: the lane's icons, see taskIcon).
+// A flow is a stream of tasks, a pure function of time: { lane, from, every, count, hold, slots, icon, freeAhead }.
+// Task k (0 to count - 1) leaves the head of its lane ('wf' or 'act') at from + k * every, passes a Poller FLIGHT.leg
+// s later and lands in Slot slots[k % slots.length] FLIGHT.land s after leaving; it holds that Slot `hold` seconds
+// (default: for good). icon(k): the icon of an Activity Task (default: the lane's icons, see taskIcon). freeAhead
+// (Activity flows only): the busy Slot a task lands in shows free from freeAhead s before it lands, its previous task
+// done, so tasks land in Slots as they free up.
 const FLIGHT = { leg: 0.35, land: 0.7 };
 const flowLeave = (flow, k) => flow.from + k * flow.every;
 // When task k of a flow lands in its Slot: key a cache hit or a meter to it
@@ -204,6 +206,18 @@ function flowDeparted(flow, t) {
 const flowLanded = (flow, t) => flowDeparted(flow, t - FLIGHT.land);
 // Number of tasks of a flow that hold their Slot at t: landed, and not yet past their `hold`
 const flowHolding = (flow, t) => flowLanded(flow, t) - (flow.hold === undefined ? 0 : flowLanded(flow, t - flow.hold));
+// Activity Slots that sit free at t, waiting for a task of the flows that lands within its flow's `freeAhead` seconds
+function freeingSlots(flows, t) {
+  const slots = [];
+  for (const flow of flows) {
+    if (flow.lane !== 'act' || !flow.freeAhead) continue;
+    for (let k = 0; k < flow.count; k++) {
+      const land = flowLandAt(flow, k);
+      if (t >= land - flow.freeAhead && t < land) slots.push(flow.slots[k % flow.slots.length]);
+    }
+  }
+  return slots;
+}
 // Where a chip is u seconds after leaving the head: on its way to the Poller, then to the Slot (each leg eased)
 function flightPoint(u, head, poller, slot) {
   if (u < FLIGHT.leg) {
@@ -416,10 +430,10 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 // - queue: { wf, act }, the tasks waiting in each lane (see placeLane); taskIcon(k): the icon of Activity Task k of
 //   its lane (default activityIcon)
 // - flows: task flows from the lanes into the Slots (see FLIGHT), in order of their `from`
-// - slots: { n, grow, busy, replay, icon }, the Activity Slots: n of them (default 10); grow { from, at }: the grid
-//   grows from `from` Slots at `at` (its rows spread out, then the new Slots pop in); busy: how many are steadily
-//   busy, in SLOT_ORDER, besides those the flows hold; replay: indices of the Slots replaying; icon(i): the icon of
-//   a steadily busy Slot
+// - slots: { n, grow, busy, replay, icon, glow }, the Activity Slots: n of them (default 10); grow { from, at }: the
+//   grid grows from `from` Slots at `at` (its rows spread out, then the new Slots pop in); busy: how many are
+//   steadily busy, in SLOT_ORDER, besides those the flows hold; replay: indices of the Slots replaying; icon(i): the
+//   icon of a steadily busy Slot; glow: when the grid and its ACTIVITY SLOTS label light up briefly (an emphasis)
 // - wfSlots: { busy, replay }, the Workflow Slots (busy: how many, from the first)
 // - pollers: { wf, act, grow, polling }: Pollers per lane (default 2 each, up to DIAGRAM.poller.max); grow { from,
 //   at }: Activity Pollers from `from` on pop in at `at`; polling { wf, act }: whether a lane's poll lines pulse
@@ -527,9 +541,10 @@ function placeLanes(dg, t, state, o) {
     });
   }
 }
-// Activity and Workflow Slots: steadily busy ones, then those the flows hold (a swell as each task lands), replays
+// Activity and Workflow Slots: steadily busy ones, then those the flows hold (a swell as each task lands), those
+// freeing up for a flow's next task, replays
 function placeSlots(dg, t, state, layout, flights, slotsO, wfO) {
-  const { n = 10, busy = 0, replay = [], icon = steadySlotIcon } = state.slots ?? {};
+  const { n = 10, busy = 0, replay = [], icon = steadySlotIcon, glow } = state.slots ?? {};
   const iconOf = state.taskIcon ?? activityIcon;
   const looks = dg.slots.map(() => ({ look: 'free', icon: null, s: 1 }));
   SLOT_ORDER.filter(i => i < n).slice(0, busy).forEach(i => { looks[i] = { look: 'busy', icon: icon(i), s: 1 }; });
@@ -541,8 +556,11 @@ function placeSlots(dg, t, state, layout, flights, slotsO, wfO) {
     if (f.flow.lane === 'act') looks[slot] = { look: 'busy', icon: f.flow.icon?.(f.k) ?? iconOf(f.index), s };
     else wfLooks[slot] = { look: 'wfBusy', s };
   }
+  freeingSlots(state.flows ?? [], t).forEach(i => { looks[i] = { look: 'free', icon: null, s: 1 }; });
   replay.forEach(i => { looks[i] = { look: 'replay', icon: null, s: 1 }; });
   (state.wfSlots?.replay ?? []).forEach(i => { wfLooks[i] = { look: 'replay', s: 1 }; });
+  const light = glow === undefined ? 0 : win(t, glow, glow + 1.0, 0.3);
+  const cellGlow = glowShadow(RGB.violet, light, { blur: 18, spread: 2, alpha: 0.7 });
   dg.slots.forEach((cell, i) => {
     if (i >= n) {
       place(cell, 0, 0, 1, 0);
@@ -551,6 +569,7 @@ function placeSlots(dg, t, state, layout, flights, slotsO, wfO) {
     setSlot(cell, looks[i].look, looks[i].icon);
     const [x, y] = slotPoint(layout, i);
     const shown = layout.shownAt(i);
+    cell.style.boxShadow = cellGlow;
     place(cell, x, y, shown.s * looks[i].s, shown.o * slotsO);
   });
   dg.wfSlots.forEach((cell, i) => {
@@ -561,6 +580,8 @@ function placeSlots(dg, t, state, layout, flights, slotsO, wfO) {
   const { labelTop, labelGap, slot } = DIAGRAM;
   showAt(dg.labels.wfSlots, slot.left, labelTop, wfO);
   showAt(dg.labels.slots, slot.left, slotPoint(layout, 0)[1] - slot.h / 2 - labelGap, slotsO);
+  dg.labels.slots.style.color = light > 0.5 ? C.violet : '';
+  dg.labels.slots.style.textShadow = glowShadow(RGB.violet, light, { blur: 14, alpha: 0.8 });
 }
 // The Activity Pollers at t: n of them in the end, `working` of them taking tasks (those shown before they grow), the
 // y of Poller i and how it shows ({ s, o }): while they grow, the column spreads out like the Slots
@@ -598,6 +619,7 @@ function placePollers(dg, t, state, layout, flights, o) {
     const slot = f.flow.slots[f.k % f.flow.slots.length];
     (f.flow.lane === 'act' ? busyAct : busyWf).add(slot);
   }
+  freeingSlots(state.flows ?? [], t).forEach(i => busyAct.delete(i));
   const polling = {
     wf: pollers.polling?.wf ?? busyWf.size < DIAGRAM.wfSlots,
     act: pollers.polling?.act ?? busyAct.size < nSlots,
@@ -624,7 +646,7 @@ function placePollers(dg, t, state, layout, flights, o) {
 }
 // Chips in flight: from the head of their lane, through a Poller, into their Slot, shrinking a little on the way.
 // slotsO: { wf, act }, the opacity of each lane's Slots: past the Poller, a chip fades to it, so it vanishes into a
-// Worker whose Slots are hidden (chapter 1)
+// Worker whose Slots are hidden
 function placeFlights(dg, t, state, layout, flights, o, slotsO) {
   const used = { wf: 0, act: 0 };
   const iconOf = state.taskIcon ?? activityIcon;
