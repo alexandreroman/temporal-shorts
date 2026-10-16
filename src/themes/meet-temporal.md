@@ -42,12 +42,12 @@ AI agents are long processes too: many LLM calls, tools to run, and waits for a
 person. With Temporal, every step the agent takes is saved in an Event History,
 outside the app. When the app crashes in production, a new instance replays the
 history: the agent keeps its context. No progress is lost and no tokens are
-wasted: no finished LLM call is paid twice. That's why OpenAI built Codex on
-Temporal, and Cursor and Lovable rely on it too.
+wasted: no finished LLM call is paid twice. OpenAI runs Codex on Temporal, and
+Cursor and Lovable rely on it too.
 
 ## Chapter 5: How Temporal Cloud works
 
-[Watch from 2:01](/themes/meet-temporal/#t=121)
+[Watch from 2:00](/themes/meet-temporal/#t=120)
 
 With Temporal Cloud, your Workers run your Workflow and Activity code in your
 own environment. Temporal Cloud orchestrates your Workflows and Activities, and
@@ -56,7 +56,7 @@ leaves: Temporal never sees your payloads.
 
 ## Chapter 6: Temporal today
 
-[Watch from 2:58](/themes/meet-temporal/#t=178)
+[Watch from 2:57](/themes/meet-temporal/#t=177)
 
 Today, more than 4,300 companies pay for Temporal, and the team has doubled in a
 year. Its open source SDKs support Go, Java, Python, TypeScript, .NET, PHP, Ruby
@@ -67,7 +67,7 @@ investors see it as core infrastructure for AI.
 
 ## Outro
 
-[Watch from 3:47](/themes/meet-temporal/#t=227)
+[Watch from 3:46](/themes/meet-temporal/#t=226)
 
 Temporal keeps code running through crashes and outages, from everyday apps to
 AI agents.

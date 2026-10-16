@@ -236,8 +236,8 @@ its visuals.
   call is paid twice.
   - Visuals: Under the history, two compact neon pills with a soft glow
     pop in turn, side by side: NO PROGRESS LOST, then NO TOKENS WASTED.
-- **1:53** That's why OpenAI built Codex on Temporal, and Cursor and Lovable
-  rely on it too.
+- **1:53** OpenAI runs Codex on Temporal, and Cursor and Lovable rely on it
+  too.
   - Visuals: The completed state holds.
 
 ## 05 How Temporal Cloud works
