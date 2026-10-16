@@ -617,7 +617,7 @@
     // the window is laid out centered at (960, 515), the middle of the content frame
     subs: [
       {
-        text: "Temporal also shows every Workflow in its <b>web UI</b>: which ones are running, completed or failed.",
+        text: "Temporal also shows every Workflow in its <b>Web UI</b>: which ones are running, completed or failed.",
         after: 1.0,
       },
       {

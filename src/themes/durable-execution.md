@@ -64,7 +64,7 @@ stopped: shipPackage runs again, and the order completes.
 
 [Watch from 2:16](/themes/durable-execution/#t=136)
 
-Temporal also shows every Workflow in its web UI: which ones are running,
+Temporal also shows every Workflow in its Web UI: which ones are running,
 completed or failed. Open order #1042: its timeline shows every Activity, how
 long it took, and the retry after the crash. Order #1045 is running: you see
 shipPackage retrying, its attempt count and its last error, live.
