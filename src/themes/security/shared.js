@@ -340,7 +340,7 @@ function makeLane(root) {
   lane.temporal = E(root,
     zoneHeading(`<img class="head" src="${LOGO}" style="height:${ZONE_LOGO_H}px;display:block">`)
     + zoneCaption('Your code never runs here'),
-    'tile', { width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: '#17182A' });
+    'tile', { width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: C.temporalSurface });
   [lane.env, lane.temporal].forEach(zone => {
     zone.head = zone.querySelector('.head');
     zone.headFrame = zone.querySelector('.head-frame');
@@ -965,28 +965,6 @@ function namespaceHtml(shown, caret) {
     ? `<span style="position:absolute;top:0;left:calc(${shown} * (1ch + .06em))">▌</span>` : '';
   return `<span style="position:relative">${FULL_NS.slice(0, shown)}`
     + `<span style="opacity:0">${FULL_NS.slice(shown)}</span>${cursor}</span>`;
-}
-
-// ---------- the Temporal Cloud zone (chapters 9 and 10)
-// The title of Temporal Cloud: the official lockup, ZONE_LOGO_H high, then "Cloud" in the brand font and the
-// wordmark's color, its capitals as tall as the wordmark's and on its baseline. The lockup's viewBox is 1570 x 410
-// units, from y 395: the wordmark's capitals run from y 519 to its baseline at y 684.7, 805 being the image's bottom;
-// Instrument Sans capitals are 0.72 em tall. rise: how far the word's baseline sits above the image's bottom; font:
-// its size; gap: a word space (0.2 em of that font) after the wordmark's last letter.
-const CLOUD_TITLE = (() => {
-  const unit = ZONE_LOGO_H / 410;
-  const font = +((684.7 - 519) * unit / 0.72).toFixed(2);
-  return { rise: Math.round((805 - 684.7) * unit), font, gap: Math.round(0.2 * font) };
-})();
-// A Temporal Cloud zone: a tile in TEMPORAL's look, titled with CLOUD_TITLE at the zone's heading place (24 px from
-// its left edge, ZONE_LABEL_INSET.head under its top). The scene sizes and places it.
-function makeCloudZone(root) {
-  return E(root,
-    `<div style="position:absolute;left:24px;top:${ZONE_LABEL_INSET.head}px;height:${ZONE_LOGO_H}px;line-height:0;`
-    + `white-space:nowrap"><img src="${LOGO}" style="height:${ZONE_LOGO_H}px;vertical-align:-${CLOUD_TITLE.rise}px">`
-    + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`
-    + '</div>',
-    'tile', { borderColor: C.uv, background: '#17182A' });
 }
 
 // ---------- the recap tiles (chapters 11 and 12)

@@ -86,33 +86,17 @@
   const scrambleHex = (text, n, frame) => [...text].map((ch, i) => (i < n && ch !== ' '
     ? HEX[Math.floor(hash(i * 31 + frame) * HEX.length)] : ch)).join('');
 
-  // Temporal Cloud's title: the official lockup, 34 px high, then "Cloud" in the brand font and the wordmark's
-  // color, its capitals as tall as the wordmark's and on its baseline. The lockup's viewBox is 1570x410 units: the
-  // wordmark's capitals run from y 519 to its baseline at y 684.7, 805 being the image's bottom; Instrument Sans
-  // capitals are 0.72 em tall. gap: a word space (0.2 em of that font) after the wordmark's last letter, which ends
-  // at the image's right edge
-  const CLOUD_UNIT = 34 / 410;
-  const CLOUD_TITLE = {
-    rise: Math.round((805 - 684.7) * CLOUD_UNIT), font: +((684.7 - 519) * CLOUD_UNIT / 0.72).toFixed(2),
-  };
-  CLOUD_TITLE.gap = Math.round(0.2 * CLOUD_TITLE.font);
-  // A zone with a label at its top left (yours) or the title Temporal Cloud (Temporal's), and a caption at its
-  // bottom
-  const makeZone = (root, zone, caption, mine) => {
-    const head = mine
-      ? '<div class="lbl" style="position:absolute;left:24px;top:20px;padding-left:0;font-size:18px">'
-        + 'Your environment</div>'
-      : '<div style="position:absolute;left:24px;top:20px;height:34px;line-height:0;white-space:nowrap">'
-        + `<img src="${LOGO}" style="height:34px;vertical-align:-${CLOUD_TITLE.rise}px">`
-        + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`
-        + '</div>';
-    const look = mine
-      ? { border: '2px dashed ' + C.slate, background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)' }
-      : { borderColor: C.uv, background: '#17182A' };
-    const e = E(root, head
-      + '<div class="cap lbl" style="position:absolute;left:0;right:0;bottom:24px;text-align:center;font-size:18px;'
-      + `color:var(--ink)">${caption}</div>`, mine ? '' : 'tile',
-    { width: zone.w + 'px', height: zone.h + 'px', ...look });
+  // The zone where your code runs: a dashed frame with a label at its top left
+  const makeYoursZone = root => E(root,
+    '<div class="lbl" style="position:absolute;left:24px;top:20px;padding-left:0;font-size:18px">'
+    + 'Your environment</div>', '',
+    { border: '2px dashed ' + C.slate, background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)' });
+  // Sizes a zone (yours or Temporal Cloud's) and adds its caption at its bottom
+  const finishZone = (e, zone, caption) => {
+    Object.assign(e.style, { width: zone.w + 'px', height: zone.h + 'px' });
+    e.insertAdjacentHTML('beforeend',
+      '<div class="cap lbl" style="position:absolute;left:0;right:0;bottom:24px;text-align:center;font-size:18px;'
+      + `color:var(--ink)">${caption}</div>`);
     e.cap = e.querySelector('.cap');
     return e;
   };
@@ -209,8 +193,8 @@
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-      s.yours = makeZone(root, YOURS, 'Your code runs here', true);
-      s.cloud = makeZone(root, CLOUD, 'Only Workflow & Activity data, never your code', false);
+      s.yours = finishZone(makeYoursZone(root), YOURS, 'Your code runs here');
+      s.cloud = finishZone(makeCloudZone(root), CLOUD, 'Only Workflow & Activity data, never your code');
       s.workers = WORKERS.map((lines, k) => makeWorker(root, k, lines));
       s.conv = makeConverter(root);
       s.orch = makeBlock(root, 'clock', 'Orchestration · task queue', ORCH.h, (ORCH.h - 26) / 2);
@@ -239,7 +223,7 @@
       s.line = path(s.svg, `M ${CONV.x + CONV.w / 2} ${CONV.y} L ${DOT.x - DOT.size / 2 - 8} ${DOT.y}`, C.ink, 3);
       s.routes = WORKERS.map((_, k) => path(s.svg, `${wire(k)} L ${DOT.x} ${DOT.y}`, 'none', 1, false));
       s.dot = E(root, '', '', {
-        width: DOT.size + 'px', height: DOT.size + 'px', borderRadius: '50%', background: '#17182A',
+        width: DOT.size + 'px', height: DOT.size + 'px', borderRadius: '50%', background: C.temporalSurface,
         border: '3px solid ' + C.ink,
       });
       s.outbound = E(root, 'Outbound only', 'lbl', { color: 'var(--ink)', fontSize: '16px' });

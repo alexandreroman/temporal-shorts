@@ -87,8 +87,10 @@
   const AI_AT = [...AI, 'more'].map((_, j) => [960 + (j % 3 - 1) * (AI_CHIP.w + AI_CHIP.gapX),
     AI_Y[Math.floor(j / 3)]]);
   // the tiles of both groups: one style, well rounded
-  const TILE = { background: '#17182A', color: C.ink, border: '1.5px solid ' + C.uv, fontSize: '24px', gap: '14px',
-    padding: '0 24px', borderRadius: '22px' };
+  const TILE = {
+    background: C.temporalSurface, color: C.ink, border: '1.5px solid ' + C.uv, fontSize: '24px', gap: '14px',
+    padding: '0 24px', borderRadius: '22px',
+  };
 
   // ---------- beat 3: the valuation, drawn on a full-stage canvas. Every round with a reported valuation as a world
   // point (x right, y up the value, both scales shaped by hand), joined by one curve per step; the camera keeps the
@@ -241,7 +243,9 @@
         `<div class="lbl" style="font-size:16px;color:var(--slate)">${round.date}</div>`
         + `<div style="font-size:34px;font-weight:700;line-height:1.15;color:var(--ink)">${round.label}</div>`
         + `<div class="lbl" style="font-size:14px;color:var(--violet)">${round.series}</div>`,
-        'tile', { width: '176px', height: '104px', padding: '12px 0', textAlign: 'center', background: '#17182A' }));
+        'tile', {
+          width: '176px', height: '104px', padding: '12px 0', textAlign: 'center', background: C.temporalSurface,
+        }));
       s.value = makeNumber(root, 200);
       s.valueLabel = makeLabel(root, 'Valuation · September 2026');
       // the ×8 bracket: its dashed guides, its line drawn bottom to top with an arrowhead, its ticks, its pulse, its

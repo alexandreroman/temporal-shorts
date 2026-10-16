@@ -98,7 +98,9 @@
       s.cloud = E(root,
         `<img src="${LOGO}" style="position:absolute;left:${TITLE.logoLeft}px;top:${ZONE_LABEL_INSET.head}px;height:${TITLE.logo}px;`
         + `display:block">${upstreamBody('Cloud', 'cloud')}`,
-        'tile', { width: CLOUD_ZONE.w + 'px', height: CLOUD_ZONE.h + 'px', borderColor: C.uv, background: '#17182A' });
+        'tile', {
+          width: CLOUD_ZONE.w + 'px', height: CLOUD_ZONE.h + 'px', borderColor: C.uv, background: C.temporalSurface,
+        });
       s.proxy = makeProxy(root);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
       s.outSparks = [0, 1].map(() => makeSpark(root, 12, RGB.violet));

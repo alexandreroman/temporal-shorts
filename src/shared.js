@@ -12,6 +12,8 @@ const C = {
   // a light violet tint (a Workflow handed to a new instance)
   uvTint: '#E6E7FC', neonTint: '#F3FBD2', neonDark: '#9DB82A', highlight: `rgba(${RGB.violet},.28)`,
   violetTint: '#F2E6FF',
+  // TEMPORAL's surface: the fill of Temporal's tiles and zones on the stage
+  temporalSurface: '#17182A',
 };
 // URL of this script, in src/: asset URLs resolve against it, not against the page, as theme pages live in
 // subfolders. Read while the script loads, the only time document.currentScript is set.
@@ -22,6 +24,43 @@ const SRC_BASE = document.currentScript.src || document.baseURI;
 const assetUrl = path => new URL(path, SRC_BASE).href;
 // Official Temporal logo (white horizontal lockup)
 const LOGO = assetUrl('assets/temporal-logo-horizontal-light-cropped.svg');
+// LOGO's geometry in its viewBox units (405 395 1570 410): the image's left edge and size, its symbol's left and right
+// edges, the wordmark's left edge, the wordmark's capitals from capTop to the baseline, the image's bottom; capEm: the
+// height of Instrument Sans capitals, em
+const LOCKUP = {
+  x: 405, w: 1570, h: 410, symbolLeft: 414, symbolRight: 804, wordLeft: 915,
+  capTop: 519, baseline: 684.7, bottom: 805, capEm: 0.72,
+};
+// A word in the brand font beside LOGO drawn h px high, its capitals as tall as the wordmark's and on its baseline:
+// unit, px per viewBox unit; rise, how far the baseline sits above the image's bottom, whole px; font, its size, px
+const lockupWord = h => {
+  const unit = h / LOCKUP.h;
+  return {
+    unit,
+    rise: Math.round((LOCKUP.bottom - LOCKUP.baseline) * unit),
+    font: (LOCKUP.baseline - LOCKUP.capTop) * unit / LOCKUP.capEm,
+  };
+};
+// The title of Temporal Cloud: LOGO, h px high, then "Cloud" in the wordmark's color, set as lockupWord(h) with its
+// font rounded to 1/100 px; gap: a word space (0.2 em of that font) after the wordmark's last letter, which ends at
+// the image's right edge
+const CLOUD_TITLE = (() => {
+  const h = 34;
+  const word = lockupWord(h);
+  const font = +word.font.toFixed(2);
+  return { h, rise: word.rise, font, gap: Math.round(0.2 * font) };
+})();
+const cloudTitleHtml = () =>
+  `<img src="${LOGO}" style="height:${CLOUD_TITLE.h}px;vertical-align:-${CLOUD_TITLE.rise}px">`
+  + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`;
+// A Temporal Cloud zone: a tile in TEMPORAL's look, titled with Temporal Cloud 24 px from its left edge and 20 px
+// under its top. The scene sizes and places it.
+function makeCloudZone(root) {
+  return E(root,
+    `<div style="position:absolute;left:24px;top:20px;height:${CLOUD_TITLE.h}px;line-height:0;white-space:nowrap">`
+    + `${cloudTitleHtml()}</div>`,
+    'tile', { borderColor: C.uv, background: C.temporalSurface });
+}
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
 // A tag of a fixed even width w (and height h if given), its label centered in it. The .1em letter spacing gives
 // fractional natural widths: with an even size, a tag centered on a whole pixel rests on whole pixels.
