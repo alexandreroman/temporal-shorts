@@ -70,7 +70,7 @@
   // An upstream's body: its name, centered under its heading's lockup, and its icon in the middle
   const upstreamBody = (name, icon) => {
     return `<div style="position:absolute;left:0;right:0;top:${TITLE.nameTop}px;font-size:${TITLE.name}px;`
-      + `line-height:30px;text-align:center;color:#F2F2F2">${name}</div>`
+      + `line-height:30px;text-align:center;color:${C.wordmark}">${name}</div>`
       + '<div style="position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;'
       + `transform:translateY(-50%);margin-top:${UPSTREAM.icon / 2}px">`
       + `${ICON(icon, UPSTREAM.icon, C.slate, 1.6)}</div>`;

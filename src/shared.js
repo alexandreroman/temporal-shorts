@@ -14,6 +14,8 @@ const C = {
   violetTint: '#F2E6FF',
   // TEMPORAL's surface: the fill of Temporal's tiles and zones on the stage
   temporalSurface: '#17182A',
+  // the grey of the official logo's wordmark (LOGO), for words set with it
+  wordmark: '#F2F2F2',
 };
 // Temporal Web UI colors, sampled from the real UI in dark mode: the page background, and the panels (sidebar, top
 // bar, cards) and window title bars
@@ -58,7 +60,7 @@ function makeCloudZone(root) {
   const font = +word.font.toFixed(2);
   const gap = Math.round(0.2 * font);
   const title = `<img src="${LOGO}" style="height:${ZONE_HEAD.h}px;vertical-align:-${word.rise}px">`
-    + `<span style="font-size:${font}px;margin-left:${gap}px;color:#F2F2F2">Cloud</span>`;
+    + `<span style="font-size:${font}px;margin-left:${gap}px;color:${C.wordmark}">Cloud</span>`;
   return E(root,
     `<div style="position:absolute;left:${ZONE_HEAD.left}px;top:${ZONE_HEAD.top}px;height:${ZONE_HEAD.h}px;`
     + `line-height:0;white-space:nowrap">${title}</div>`,
