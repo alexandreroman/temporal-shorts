@@ -71,7 +71,7 @@
     ],
     build(root, s) {
       s.dg = makeWorkerDiagram(root);
-      // the intro's strip and mini Worker, until the diagram takes over (the lane holds up to the diagram's 9 chips)
+      // the intro's strip and mini Worker, until the diagram takes over (the lane holds up to the diagram's 11 chips)
       s.lane = makeQueueLane(root, null, 'act');
       s.mini = makeMiniWorker(root, 'WORKER', INTRO_WORKER.cols, INTRO_WORKER.rows);
       s.orders = makeReadout(root, 'Orders / min', ORDERS.w, ORDERS.h);
