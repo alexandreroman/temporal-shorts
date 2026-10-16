@@ -3,10 +3,15 @@
   python scripts/export_srt.py --theme <theme>
 """
 import argparse, json, re, sys
+from html import unescape
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import OUTPUT, add_theme_argument, open_page
 from playwright.sync_api import sync_playwright
+
+def subtitle_text(html):
+    """Subtitle text without its HTML tags and entities (&amp; reads &), as in export_markdown.py."""
+    return unescape(re.sub("<[^>]+>", "", html))
 
 def ts(t):
     ms = int(round(t * 1000))
@@ -21,6 +26,6 @@ with sync_playwright() as pw:
     browser.close()
 OUTPUT.mkdir(exist_ok=True)
 out = OUTPUT / f"{args.theme}.srt"
-cues = [f"{i}\n{ts(a)} --> {ts(b)}\n{re.sub('<[^>]+>', '', t)}\n\n" for i, (a, b, t) in enumerate(subs, 1)]
+cues = [f"{i}\n{ts(a)} --> {ts(b)}\n{subtitle_text(t)}\n\n" for i, (a, b, t) in enumerate(subs, 1)]
 out.write_text("".join(cues), encoding="utf-8")
 print(out)

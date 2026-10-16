@@ -22,8 +22,6 @@ HOME_CARD = SRC / "social.html"
 # The same ratio in stage pixels: the centered 1920x1008 band of the 1920x1080 stage.
 BAND_HEIGHT = 1008
 BAND_TOP = (HEIGHT - BAND_HEIGHT) // 2
-# Hides the subtitle for the capture only: styles.css stays untouched, so video frames do not change.
-HIDE_SUBTITLES = "#subw{visibility:hidden !important}"
 # The site icon and its PNG version for the home screens of phones, at the size of current iPhones.
 SITE_ICON = SRC / "favicon.svg"
 TOUCH_ICON = SRC / "apple-touch-icon.png"
@@ -40,10 +38,9 @@ def save_social_image(png, path):
 
 
 def write_theme_image(pw, theme):
-    """Capture the intro title card of a theme, once the first subtitle ends and the title is in place."""
+    """Capture the intro title card of a theme, title in place, as its only subtitle ends: renderAt() hides it."""
     browser, page = open_page(pw, theme)
     warm_up(page)
-    page.add_style_tag(content=HIDE_SUBTITLES)
     page.evaluate("renderAt(scenes[0].subs[0].end)")
     png = page.screenshot(clip={"x": 0, "y": BAND_TOP, "width": WIDTH, "height": BAND_HEIGHT})
     browser.close()
