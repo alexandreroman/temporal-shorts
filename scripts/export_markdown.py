@@ -16,11 +16,10 @@ import math
 import re
 import sys
 import textwrap
-from html import unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import ROOT, add_theme_argument, open_page, theme_markdown
+from common import ROOT, add_theme_argument, open_page, subtitle_text, theme_markdown
 from playwright.sync_api import sync_playwright
 
 LINE_WIDTH = 80
@@ -35,7 +34,6 @@ READ_PAGE = """JSON.stringify({
                             subs: s.subs.map(x => x.text)})),
 })"""
 
-HTML_TAG = re.compile(r"<[^>]+>")
 # Characters that would start emphasis, code, a link or an HTML tag anywhere in a line.
 INLINE_MARKUP = re.compile(r"([\\`*_\[\]<])")
 # Line starts that would turn a wrapped line of prose into a heading, a quote, a list item or a setext underline.
@@ -60,11 +58,6 @@ def read_page(theme):
 def plain_text(text):
     """Collapse whitespace and escape the characters Markdown would read as inline markup."""
     return INLINE_MARKUP.sub(r"\\\1", " ".join(text.split()))
-
-
-def subtitle_text(html):
-    """The plain text of a subtitle: its HTML tags stripped, as in the SRT export, and its entities decoded."""
-    return plain_text(unescape(HTML_TAG.sub("", html)))
 
 
 def escape_line_start(line):
@@ -101,7 +94,7 @@ def sections(scenes):
         elif current["heading"] not in (None, OUTRO_HEADING):
             current = {"heading": OUTRO_HEADING, "start": scene["start"], "subs": []}
             result.append(current)
-        current["subs"] += [subtitle_text(sub) for sub in scene["subs"]]
+        current["subs"] += [plain_text(subtitle_text(sub)) for sub in scene["subs"]]
     return result
 
 
