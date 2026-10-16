@@ -6,16 +6,18 @@
   // link. Both headings share one baseline; both zones start at y 196 and end at y 880 (the TypeScript card, the
   // SDK row).
   const TOP = 196, BOTTOM = 880, HEADING_Y = 163;
-  // Code cards: a 52 px header (file name), then 18 px code lines of 24 px from y 66, 16 px of bottom padding.
-  // At 18 px, a Noto Sans Mono character advances 10.8 px: the longest lines (66 characters, 713 px) fit the
-  // column with 28 px of padding on each side.
-  const CODE = { x: 530, w: 780, head: 52, lineTop: 66, lineH: 24, font: 18, textX: 28, bottom: 16 };
+  // Code cards: a 52 px header (file name), then 18 px code lines of 23 px from y 66, 15 px of bottom padding: with
+  // an odd line count and padding sum, both cards have even heights and rest on whole pixels, and the 11 Python
+  // lines leave room for the GENERATED TYPES arrow. At 18 px, a Noto Sans Mono character advances 10.8 px: the
+  // longest lines (66 characters, 713 px) fit the column with 28 px of padding on each side.
+  const CODE = { x: 530, w: 780, head: 52, lineTop: 66, lineH: 23, font: 18, textX: 28, bottom: 15 };
   const cardHeight = lineCount => CODE.lineTop + lineCount * CODE.lineH + CODE.bottom;
 
   // The agent's Python class (top of the column) and the TypeScript generated from it (bottom of the column).
   // Same names as chapter 5 (TravelAgent, plan_trip, PlanTrip, Itinerary); the state follows the harness's
   // HarnessState / agent.state() API and the TypeScript the shape harness-codegen writes (initData, null for an
-  // agent without init data, then handlers and states).
+  // agent without init data, then handlers and states). @agent.defn requires an @agent.init __init__ taking the
+  // AgentConfig; the stub methods sit together, without blank lines between them, as PEP 8 allows for one-liners.
   const PYTHON = [
     'class Trip(HarnessState):',
     '    items: list[Item] = []',
@@ -24,7 +26,8 @@
     '@agent.defn',
     'class TravelAgent:',
     '    trip = agent.state(Trip)',
-    '',
+    '    @agent.init',
+    '    def __init__(self, config: AgentConfig) -> None: ...',
     '    @agent.accepts',
     '    async def plan_trip(self, request: PlanTrip) -> Itinerary: ...',
   ];
@@ -50,7 +53,7 @@
   const PAIRS = [
     { py: [0, 2], ts: [0, 3] },
     { py: [6, 6], ts: [7, 7] },
-    { py: [8, 9], ts: [6, 6] },
+    { py: [9, 10], ts: [6, 6] },
   ];
   // the Trip fields the UI binds to, in the TypeScript card
   const TS_ITEMS = 1, TS_TOTAL = 2;
@@ -70,7 +73,10 @@
 
   // Simple syntax colors, as in chapter 6: keywords and decorators violet, types light UV, the rest ink or slate
   const KEYWORDS = ['class', 'async', 'def', 'export', 'interface'];
-  const TYPES = ['Trip', 'HarnessState', 'Item', 'TravelAgent', 'PlanTrip', 'Itinerary', 'int', 'number', 'list'];
+  const TYPES = [
+    'Trip', 'HarnessState', 'Item', 'TravelAgent', 'AgentConfig', 'PlanTrip', 'Itinerary', 'int', 'number', 'list',
+    'None',
+  ];
   // the generated TypeScript may hold generics (Array<Item>), so the code is escaped
   const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const codeHtml = line => codeTokens(line, KEYWORDS, TYPES)

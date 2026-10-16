@@ -277,7 +277,10 @@ Lisbon.
   - Visuals: YOUR AGENT, one centered column: a `travel_agent.py` card
     (PYTHON) holds `class Trip(HarnessState)` with `items: list[Item] = []`
     and `total_usd: int = 0`, then `@agent.defn class TravelAgent` with
-    `trip = agent.state(Trip)` and an `@agent.accepts` handler
+    `trip = agent.state(Trip)`, the `@agent.init` constructor that
+    `@agent.defn` requires,
+    `def __init__(self, config: AgentConfig) -> None: ...`, and an
+    `@agent.accepts` handler
     `async def plan_trip(self, request: PlanTrip) -> Itinerary: ...`; a
     GENERATED TYPES arrow leads down to a `client_sdk/TravelAgent.ts` card
     (GENERATED): `export interface Trip { items: Item[]; total_usd:
