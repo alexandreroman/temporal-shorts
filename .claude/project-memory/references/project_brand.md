@@ -1,6 +1,6 @@
 ---
 name: "Temporal brand rules"
-description: "Colors, style, fonts and icon rules applied to the video, with their source"
+description: "Colors, style and icon rules applied to the video, with their source"
 type: project
 ---
 
@@ -21,13 +21,10 @@ Source: https://temporal.io/brand (official colors) plus the temporal.io site.
   monospace labels, subtle starry sky, gradient glow anchored to the bottom
   edge with no hard edge (the background runs continuously behind the
   subtitles).
-- Fonts: Noto Sans Mono (`Mono`, open source, from Fontsource) is the brand
-  mono; Aeonik is unavailable, so Instrument Sans (`Brand`) stands in for
-  it.
+- Fonts: see `src/fonts/README.md`.
 - Icons: hand-drawn stroke SVG set in `engine.js`; no emoji (off-brand).
 
 **Why:** the video is published under the Temporal brand.
 
 **How to apply:** reuse the CSS variables, the `C` constants and the `RGB`
-triplets (tints and glows); use neon only as a status signal; swap in
-Aeonik if it becomes available.
+triplets (tints and glows); use neon only as a status signal.

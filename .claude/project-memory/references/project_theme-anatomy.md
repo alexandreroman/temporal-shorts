@@ -14,11 +14,13 @@ the visuals belong to each theme (last section).
 
 ## Page and home card
 
-- `<title>` is "<card title> with Temporal" ("Durable AI Agents with
-  Temporal"); a card title that already contains "Temporal" stands alone
-  ("Temporal Agent Harness").
-- `<meta name="description">` is one sentence ending with a period, word
-  for word the card's `.theme-text`, about the topic.
+- `<meta name="markdown-title">` is "<card title> with Temporal"
+  ("Durable AI Agents with Temporal"); a card title that already contains
+  "Temporal" stands alone ("Temporal Agent Harness").
+- `<title>` and `<meta name="description">` are written for search results
+  (see [Search engine optimization of the site](project_seo.md)); the
+  description is one sentence ending with a period, about the topic, and
+  the card's `.theme-text` is a shorter form of it.
 - Same page skeleton everywhere: `#stage` with `#sky`, `#band`, `#hdr`,
   `#segs`, `#mark`, `#subw > #sub`; scripts `../../engine.js`,
   `../../shared.js`, `shared.js`, scenes `00-intro.js` to `99-outro.js`,
@@ -33,8 +35,9 @@ the visuals belong to each theme (last section).
 
 - One scene per chapter: `00-intro.js`, `01-…` to `NN-…`, `99-outro.js`.
   Line 1 is `// ===================== N. CHAPTER TITLE`, the scene `title`
-  in caps (or `INTRO`, `OUTRO`), then the comment "The block keeps every
-  name declared in this file local to this scene." and the `{ … }` block.
+  in caps (or `INTRO`, `OUTRO`), then an optional comment describing the
+  scene, then the comment "The block keeps every name declared in this
+  file local to this scene." and the `{ … }` block.
 - Intro: `makeTitleBlock(root, kicker, titleHtml, tagline)` on the left
   (official logo, slate mono kicker, two-line title, violet mono tagline),
   a theme visual on the right, one subtitle. The kicker names the audience
@@ -60,12 +63,12 @@ the visuals belong to each theme (last section).
     ("<running example> is one example: any … fits"); the second names the
     4 tiles in order and ends on the benefit; each tile lights (UV border)
     as its name is read: `namedAt` offsets from `c[1]` = name position at
-    16 characters per second + 0.3 s, the last one lit for `lastLit`
-    (1.2 s). Opt-in options, off by default: `labelLines` (room for
-    two-line labels in every tile, so icons stay aligned), `front` (tiles
-    that flip in 3D from the previous scene's tiles in the same slots),
-    `camera` and `fadeIn` (for a match cut from the recap); security uses
-    them.
+    16 characters per second + 0.3 s, the last one lit for
+    `USE_CASE_LAST_LIT` (1.2 s). Opt-in options, off by default:
+    `labelLines` (room for two-line labels in every tile, so icons stay
+    aligned), `front` (tiles that flip in 3D from the previous scene's
+    tiles in the same slots), `camera` and `fadeIn` (for a match cut from
+    the recap); security uses them.
   - Tiles are concrete use cases, named scenarios matched to the audience
     ("Fraud reviews", "Money transfers", "Deep research"), never generic
     actions or broad categories ("Approvals", "Payments", "Documents").
@@ -90,8 +93,8 @@ the visuals belong to each theme (last section).
 - Pacing: intro `pre: 1.0`, outro `pre: 0.4, post: 2.6` (about 3 s of
   hold after the last subtitle), engine defaults in chapters.
   agent-harness is slower (below).
-- Animations key to `c[i]` and fit within their subtitle window (duration
-  plus `after`); `after` grows when they do not.
+- Animations fit within their subtitle window (duration plus `after`);
+  `after` grows when they do not.
 
 ## Layout
 
@@ -99,11 +102,10 @@ the visuals belong to each theme (last section).
   effects (flash, glitch, crash bolt, flying coin, a pop's overshoot)
   leave the frame. Horizontally, compositions spread over about
   x 120-1800.
-- Every scene spans at least 440 px (60 % of the frame), with generous
-  gaps, not a compact cluster in the middle. A dense scene fits by
-  tightening gaps first, then component heights (rows, panels, tiles);
-  font sizes and CSS scaling stay untouched. A thin scene grows its
-  tiles, type and gaps.
+- Scenes have generous gaps, not a compact cluster in the middle. A dense
+  scene fits by tightening gaps first, then component heights (rows,
+  panels, tiles); font sizes and CSS scaling stay untouched. A thin scene
+  grows its tiles, type and gaps.
 - Components share alignment lines, measured in the rendered DOM to the
   pixel: stacked ones share a left or right edge, side-by-side ones a top
   or bottom edge, equal relations get equal gaps; a component whose text
@@ -114,10 +116,8 @@ the visuals belong to each theme (last section).
   to their `letter-spacing`.
 - Tags and labels keep about 20 px of clear space from their neighbors; a
   label beside the Temporal logo is never larger than its wordmark.
-- Centering: each composition is centered at (960, 515) within about
-  25 px, the middle of the content frame. The scene `shift` is a fixed
-  whole-number `[dx, dy]`, one compromise across phases, measured from the
-  rendered content box;
+- Centering: the scene `shift` is a fixed whole-number `[dx, dy]`, one
+  compromise across phases, measured from the rendered content box;
   `pan(t, from, stops, d)` eases between offsets only where content
   already fades or moves. Brief one-off elements do not drive the offset;
   clearance above the subtitles beats exact centering. Full-screen
@@ -136,8 +136,7 @@ the visuals belong to each theme (last section).
   HERE"), status tags (`statusTag`), crash effects (`shakeAt`,
   `makeFlash`, `crashGlitch`, `makeCrashMarks`), the takeover by a new
   instance (`leavingInstance`, `arrivingInstance`, `setArrivalGlow`,
-  `makeNewTag`, `makeHandOffCard`). A helper used by two themes lives in
-  `src/shared.js`.
+  `makeNewTag`, `makeHandOffCard`).
 - The runtime is **"the app"** (APP MEMORY, APP CRASH, APP INSTANCE A / B,
   "OUTSIDE THE APP"); "server" would blur with the LLM's server.
   durable-execution, which teaches Workers, says "server" then "Worker".
@@ -151,7 +150,7 @@ the visuals belong to each theme (last section).
 - 30 px text in a box at most 1760 px wide, always on one line: measure
   the rendered `#sub` after lengthening one, rephrase if it wraps.
 - Plain present tense, concrete; colons and commas; straight quotes and
-  apostrophes; no em dash. Each subtitle is complete on its own (no "…"
+  apostrophes. Each subtitle is complete on its own (no "…"
   carrying a sentence into the next one).
 - `<b>` marks each key term at its first mention.
 - The first subtitle is a hook ending in a question, or "Meet …" for a
@@ -163,8 +162,6 @@ the visuals belong to each theme (last section).
 - Theme-local `shared.js`: header `// ===================== <Theme name>
   helpers (shared by the scenes of this theme)`; extends `ICONS` with
   `Object.assign`; holds the running example and theme-only components.
-  An icon used by two themes or more is defined once, in `ICONS` in
-  `src/engine.js`; a theme's `shared.js` holds only its own icons.
 - `docs/<theme>/script.md`: `# Script and timeline: <card title>`, the
   shared preamble (subtitles are the only narration, `autoDur` + `after`,
   `make timeline THEME=<theme>`, dated snapshot), `## Audience and goal`
@@ -210,8 +207,9 @@ below and the card order in [Home page design](feedback_home-page.md).
   Workers run the customer's code in their environment (Temporal Cloud
   holds no app code), Temporal Cloud orchestrates Workflows and
   Activities and persists their history, and payloads can be encrypted
-  with the customer's keys (Data Converter) so Temporal never sees them;
-  connections are outbound only (mTLS or PrivateLink). Its right zone is
+  with the customer's keys (Data Converter, in each Worker) so Temporal
+  never sees them; connections are outbound only, authenticated by mTLS
+  or API key, over the internet or private connectivity. Its right zone is
   titled with the lockup followed by "Cloud". Simple Workflow Service is
   dated 2009, the launch Max and Samar led.
 - Founders are told by their careers only, never by country of origin: Maxim
@@ -238,7 +236,7 @@ below and the card order in [Home page design](feedback_home-page.md).
   instance replays it and finishes, ending on NO PROGRESS LOST and NO
   TOKENS WASTED. The theme shows the Temporal run only.
 - Ch2 is the short series arc: steps run strictly one after the other,
-  each saved before the next starts.
+  each saved before the next starts. Ch1 uses `pre: 2.0`.
 - Outro departs from `makeEndCard`: a constellation of Ziggy, Temporal's
   mascot (a tardigrade), drawn star by star then line by line; the title
   is "Meet" followed by the official lockup, "Meet" matching the
@@ -309,7 +307,7 @@ below and the card order in [Home page design](feedback_home-page.md).
   after a crash another copy re-runs from the start and Temporal hands
   back every saved result (no LLM call, CONTEXT rebuilt for free), then
   the first unsaved step runs. The LLM CALLS BILLED counter stays put
-  during replay; the recap states "43% fewer LLM calls, in this example"
+  during replay; the recap states "43% fewer LLM calls in this example"
   (`### Budget figure` in `script.md`): it counts calls, not spend, as
   the wasted calls are the early ones with the smallest context.
 - Ch7 mirrors ch6: same step tiles, CONTEXT panel and LLM CALLS BILLED
@@ -331,6 +329,8 @@ below and the card order in [Home page design](feedback_home-page.md).
   its helpers), chatbots with human approval, background agents (clock,
   "watch for days, then act").
 - Pans: ch1, ch5, ch7.
+- The ch8 recap's first tile, the budget benefit, is neon: the one tile of
+  a group that stands out on purpose.
 
 ### agent-harness
 
@@ -474,13 +474,15 @@ below and the card order in [Home page design](feedback_home-page.md).
 - Red verdict tags (UNREADABLE, REJECTED, READABLE, IN CLEAR, NOT ON
   ALLOWLIST) share a theme-only style: bold near-black text on solid red,
   about 19-20 px on screen, in their tile's heading row, never straddling a
-  border; text-only tags offset their trailing letter-spacing so the ink
-  sits centered.
-- 08 → 09, 09 → 10, 10 → 11 and 12 → outro use the engine zoom-through;
-  ch9 and ch10 hold Temporal Cloud's side alone, each in a Temporal Cloud
-  zone titled with the lockup followed by "Cloud" (`makeCloudZone()` in the
-  theme's `shared.js`). 11's recap tiles flip in 3D into 12's use-case
-  tiles in the same slots.
+  border.
+- 08 → 09, 09 → 10, 10 → 11 and 12 → outro use the camera zoom-through
+  (`setCamera`); ch9 and ch10 hold Temporal Cloud's side alone, each in a
+  Temporal Cloud zone titled with the lockup followed by "Cloud"
+  (`makeCloudZone()`, shared with meet-temporal). Ch8 holds a single
+  subtitle. 11's recap tiles flip in 3D into 12's use-case tiles in the
+  same slots. The recap tiles carry padlock badges above them, so the
+  camera lowers both chapters by `RECAP_DY` to center the composition with
+  its badges: 12's use-case row sits 14 px below `USE_CASE_ROW`.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title
