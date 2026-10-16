@@ -252,11 +252,12 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     place, crossed out.
 - **3:18** This is the moment to add Workers: B and C poll the same Task
   Queue and share the load.
-  - Visuals: MEMORY fades; WORKER B and WORKER C slide in from the right
-    under WORKER A, compact panels with 5 Slots and a CPU gauge each;
-    their poll line branches off the Activity lane's connector and tasks
-    travel along it to them; the CPU meters settle at 60, 62 and 58%;
-    A's CPU tag turns neon (FIXED).
+  - Visuals: MEMORY fades and A's CPU meter drops into its place; WORKER
+    B and WORKER C slide in at the right, stacked, compact panels with a
+    Poller, 5 Slots and a CPU gauge each; their poll line runs down the
+    Activity trunk, under WORKER A and down its own corridor into their
+    Pollers, and tasks travel along it to them; the CPU meters settle at
+    60, 62 and 58%; A's CPU tag turns neon (FIXED).
 - **3:27** The backlog drains, and new orders start right away again.
   - Visuals: `temporal_activity_execution_latency` falls back to 2.0 s in
     neon; the queues empty; BACKLOG falls to 0 and SCHEDULE-TO-START to 0.3
