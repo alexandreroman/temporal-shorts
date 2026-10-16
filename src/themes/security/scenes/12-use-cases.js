@@ -29,7 +29,7 @@
     fadeIn: 0,
     subs: [
       {
-        text: "Nora's transfer is one example: any Workflow that handles sensitive data fits.",
+        text: 'A bank transfer is one example: any Workflow that handles sensitive data fits.',
         // the last tile has flipped by c[0] + 5.1, within the subtitle
       },
       {

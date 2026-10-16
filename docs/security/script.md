@@ -464,7 +464,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 12 What you can build
 
-- **3:41** Nora's transfer is one example: any Workflow that handles
+- **3:41** A bank transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use

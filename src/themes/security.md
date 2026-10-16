@@ -107,7 +107,7 @@ Workers hold no secrets.
 
 [Watch from 3:41](/themes/security/#t=221)
 
-Nora's transfer is one example: any Workflow that handles sensitive data fits.
+A bank transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
 data stays yours.
 
