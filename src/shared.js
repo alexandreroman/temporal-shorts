@@ -1105,8 +1105,8 @@ function sparkOnPath(spark, pathEl, prog, o) {
   }
   const point = pathEl.getPointAtLength(pathEl._L * prog);
   const opacity = Math.min(1, prog * 6, (1 - prog) * 6);
-  // with a factor, the opacity is rounded to 3 decimals, as the flowing sparks of the security scenes have always
-  // been drawn: unrounded, their frames would change by a color level here and there
+  // with a factor, the opacity is rounded to 3 decimals, which keeps the security scenes' flowing sparks on the same
+  // color levels
   place(spark, point.x, point.y, 1, o === undefined ? opacity : +(opacity * o).toFixed(3));
 }
 

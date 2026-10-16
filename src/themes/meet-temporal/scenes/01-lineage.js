@@ -35,7 +35,7 @@
     { company: null, name: null, detail: 'Open source, MIT license', year: '2019' },
   ];
   const LAST = MILESTONES.length - 1;
-  // the fork's arch, from Cadence's year to Temporal's, over the line, clear of the faces on it
+  // the fork's arch, from the Cadence milestone to Temporal's, over the line, clear of the faces on it
   const FORK = { x0: NODE_X[3] + 52, x1: NODE_X[4] - 52, y: YEAR_Y, top: YEAR_Y - 64 };
   const FLY_D = 1.2; // duration of a face's flight onto the line, in seconds
   const TRAIL = [0.06, 0.12, 0.18]; // how far each ghost of a travelling face lags behind it, in seconds
