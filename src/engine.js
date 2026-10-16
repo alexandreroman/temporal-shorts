@@ -30,14 +30,11 @@ function bezier([p0, p1, p2, p3], u) {
   const at = k => v * v * v * p0[k] + 3 * v * v * u * p1[k] + 3 * v * u * u * p2[k] + u * u * u * p3[k];
   return [at(0), at(1)];
 }
-let G = 0; // global time
-// Ambient clock of a scene: G counted from the scene's start, so it equals the scene time t in frozen frames.
-// Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G keeps real time while t
-// slows down at 0.5x, and the player only counts the story moving on t as motion. Call it from update()
-// as ambientTime(this). Story animations stay on t.
-function ambientTime(sc) {
-  return G - sc.start;
-}
+// Global time, the ambient clock. Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G
+// keeps real time while the scene time t slows down at 0.5x, and the player only counts the story moving on t as
+// motion. A loop that starts with its scene reads G - this.start in update(), which equals t in frozen frames.
+// Story animations stay on t.
+let G = 0;
 
 const stage = document.getElementById('stage');
 

@@ -241,7 +241,7 @@
       // session traffic: once the link is drawn, a pulse runs along it in an endless loop. It starts on the story
       // clock t but runs its laps on the ambient clock, which equals t in frozen frames
       const pulseStart = c[1] + 3.9, pulseLap = 1.4;
-      const lap = ((ambientTime(this) - pulseStart) % pulseLap) / pulseLap;
+      const lap = ((G - this.start - pulseStart) % pulseLap) / pulseLap;
       const pulseOn = t >= pulseStart ? Math.sin(Math.PI * lap) : 0;
       place(s.pulse, lerp(LINK.from + 10, LINK.to - 16, lap), LINK.y, 1, pulseOn);
       // bindings: the rows read trip.items, then the total reads trip.total_usd; each lights its Trip field

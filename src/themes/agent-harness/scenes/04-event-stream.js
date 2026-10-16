@@ -175,7 +175,7 @@
       // clock g. In the live player g may run ahead of t, so the flow can start mid-way: it fades in just before
       // chipsFrom, when no chip shows yet in frozen frames (there g equals t)
       const chipsFrom = c[0] + 3.0;
-      const g = ambientTime(this);
+      const g = G - this.start;
       const flowIn = P(t, chipsFrom - 0.3, 0.3, linear);
       s.agents.forEach((e, i) => {
         const p = backPop(t, c[0] + 0.1 + i * 0.4, 0.5);
