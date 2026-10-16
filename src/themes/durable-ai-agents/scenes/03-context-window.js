@@ -106,10 +106,11 @@
       s.bill = E(root,
         '<div style="display:flex;align-items:center;gap:16px">'
         + `<div class="coin">${ICON('coin', 46, C.neon, 1.6)}</div><div>`
-        // fixed width, sized for "12,400 tokens" in tabular figures, so the box and "+N" never move
+        // fixed width, sized for "12,400 tokens" in tabular figures, so the box and "+N" never move; the 7 px gap
+        // makes the text 72 px high (44 + 7 + 21), an even height that centers the big coin on a whole pixel
         + '<div class="tok" style="width:288px;font-size:44px;line-height:1;font-variant-numeric:tabular-nums">'
         + '0 tokens</div>'
-        + '<div class="lbl" style="font-size:16px;margin-top:6px;color:var(--neon)">billed so far</div>'
+        + '<div class="lbl" style="font-size:16px;margin-top:7px;color:var(--neon)">billed so far</div>'
         + '</div></div>',
         '', {
           padding: '16px 22px', border: '1px solid ' + C.neon, background: `rgba(${RGB.neon},.06)`,
@@ -177,8 +178,8 @@
       place(s.gaugeL, 1130, 810, 1, P(t, c[0] + 1.6, 0.5));
       // the token count arrives with the gauge and follows it part by part
       const bp = backPop(t, c[0] + 1.6, 0.5);
-      // the 105 px box ends on the sheet's bottom edge (480 + 300)
-      place(s.bill, 1560, 727.5, bp.s, bp.o);
+      // the 106 px box ends on the sheet's bottom edge (480 + 300)
+      place(s.bill, 1560, 727, bp.s, bp.o);
       s.tok.textContent = withCommas(tokensFor(used)) + ' tokens';
       // money spent at each part, mid-slide: the big coin swells, a small coin flies off, "+N" rises and fades
       const spendAt = partAt.map(at => at + 0.1);
