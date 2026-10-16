@@ -216,7 +216,8 @@ below and the card order in [Home page design](feedback_home-page.md).
   Fateev (co-founder, CTO) and Samar Abbas (co-founder, CEO). Lineage: 2004
   Simple Queue Service (Maxim tech lead), 2009 Simple Workflow Service, 2014
   Durable Task Framework (Microsoft, base of Azure Durable Functions), 2015
-  Cadence (Uber, open source 2017), 2019 Temporal (MIT). Ch1 opens on "20 YEARS
+  Uber (where they create Cadence, open source 2017; the tile reads
+  Cadence), 2019 Temporal (MIT). Ch1 opens on "20 YEARS
   IN THE MAKING" in large type, which shrinks into the heading, where it stands
   alone, as the timeline draws in. The founders appear as faces cropped from the
   official photo (`src/assets/temporal-founders.jpg`, temporal.io/about), never
@@ -435,8 +436,8 @@ below and the card order in [Home page design](feedback_home-page.md).
   polling (ch1), TLS, private connectivity (AWS PrivateLink or Google
   Private Service Connect; never the Web UI, never Azure), identity and
   Namespace isolation (ch2), the Event History storing it readable (ch3),
-  the Data Converter, Search Attributes in clear and the Codec Server
-  (ch4), the same work in every Worker
+  the Data Converter, Search Attributes and Workflow IDs in clear, and the
+  Codec Server (ch4), the same work in every Worker
   (ch5), then Temporal Proxy: a gateway holding the address, credentials
   and Namespace (ch6), encryption with the customer's KMS, data key
   rotation, built-in Codec Server (ch7), switching upstreams with no Worker
