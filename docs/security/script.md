@@ -22,9 +22,10 @@ the history, encryption with the customer's keys. Then it shows the cost of
 doing all that in every Worker, and Temporal Proxy as the answer: one
 gateway that carries credentials and encryption, with no change to Worker
 code. It shows how a Workflow calls another team's across Namespaces with
-Temporal Nexus, through an Endpoint that only lets in the Namespaces on its
-allowlist, and closes on Temporal Cloud's certifications and yearly
-third-party audits, the evidence a security review asks for.
+Temporal Nexus, through an Endpoint that, in Temporal Cloud, only lets in
+the Namespaces on its allowlist, and closes on Temporal Cloud's
+certifications and yearly third-party audits, the evidence a security
+review asks for.
 
 Running example: Nora sends €25,000 to Leo. One payload card carries it
 everywhere, the same in every chapter: `from: FR76 3000 6000 0112 3456
@@ -34,14 +35,14 @@ everywhere, the same in every chapter: `from: FR76 3000 6000 0112 3456
 Topics, in order: the Worker runs in your environment and calls out to Temporal
 (ch1); TLS, private connectivity, identity, Namespace isolation (ch2); the Event
 History stores payloads, readable without more (ch3); the Data Converter
-encrypts with your keys, Search Attributes stay in clear, a Codec Server
-decrypts for the Web UI (ch4); the same work in every Worker (ch5); Temporal
-Proxy, a gateway that holds the connection settings and credentials (ch6);
-encryption by the proxy (ch7); switching upstreams with no code change (ch8);
-calls across Namespaces with Temporal Nexus: the Endpoint, its allowlist, mTLS
-and payloads still encrypted by your Data Converter (ch9); Temporal Cloud's
-certifications, yearly audits and pen tests, and the Trust Center that holds
-the reports (ch10).
+encrypts with your keys, Search Attributes and Workflow IDs stay in clear, a
+Codec Server decrypts for the Web UI (ch4); the same work in every Worker (ch5);
+Temporal Proxy, a gateway that holds the connection settings and credentials
+(ch6); encryption by the proxy (ch7); switching upstreams with no code change
+(ch8); calls across Namespaces with Temporal Nexus: the Endpoint, its allowlist
+in Temporal Cloud, mTLS and payloads still encrypted by your Data Converter
+(ch9); Temporal Cloud's certifications, yearly audits and pen tests, and the
+Trust Center to ask for the reports (ch10).
 
 Out of scope: SSO, roles and audit logs (they govern people's access, not
 the payload's way), and the pre-release status of Temporal Proxy, which the
