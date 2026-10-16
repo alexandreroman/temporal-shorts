@@ -102,7 +102,7 @@
     subs: [
       { text: "On its way out, the payload travels over <b>TLS</b>, so nobody on the network can read it." },
       {
-        text: "With Temporal Cloud, AWS PrivateLink or Google Private Service Connect keep it off the "
+        text: "With Temporal Cloud, AWS PrivateLink or Google Private Service Connect can keep it off the "
           + "public internet.",
       },
       // REJECTED, then a hold to read it
@@ -261,9 +261,11 @@
       // public side, with no traffic to see. The band and its heading leave with the eavesdropper, the label with
       // the identity badge's arrival; the corridor stays to the end and on into chapter 3 (TUBE_HANDOFF).
       const beatOut = 1 - P(t, c[2] + T2.spyOut, 0.3);
-      const bandO = P(t, c[1] + T1.band, T1.bandD) * lerp(1, OFF_SHOT, P(t, c[1] + T1.dim, T1.dimD)) * beatOut;
+      // the heading names the band while the narration still says "public internet": only the fill dims
+      const headO = P(t, c[1] + T1.band, T1.bandD) * beatOut;
+      const bandO = headO * lerp(1, OFF_SHOT, P(t, c[1] + T1.dim, T1.dimD));
       place(s.publicNet, (PUBLIC.x0 + PUBLIC.x1) / 2, (PUBLIC.y0 + PUBLIC.y1) / 2, 1, bandO);
-      place(s.publicHead, OUTSIDER.x, PUBLIC.y0 + PUBLIC.headTop + 11, 1, bandO);
+      place(s.publicHead, OUTSIDER.x, PUBLIC.y0 + PUBLIC.headTop + 11, 1, headO);
       placeCorridor(s.corridor, { drawn: P(t, c[1] + T1.corridor, T1.corridorD) });
       const label = popIn(t, c[1] + T1.label);
       place(s.privateLabel, OUTSIDER.x, TUBE.label.y, label.s, label.o * beatOut);

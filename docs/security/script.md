@@ -63,7 +63,8 @@ ch8 and carries it into the recap.
 ### Sources
 
 - Compliance: <https://trust.temporal.io/> (Temporal Trust Center, updated
-  May 29, 2026): SOC 2 Type II, GDPR, HIPAA and CCPA; "Temporal Cloud —
+  May 29, 2026): SOC 2 Type II, GDPR, HIPAA and CCPA (CCPA comes from the badge here: the
+  docs security page lists SOC 2 Type 2, GDPR and HIPAA only); "Temporal Cloud —
   Certifications: SOC 2 Type 2, HIPAA"; "One or more annual third-party
   audit(s)" and "Annual third-party penetration testing"; the Trust Center
   "is regularly updated to reflect the latest audit results" and lists a
@@ -81,8 +82,8 @@ ch8 and carries it into the recap.
   Namespace is the unit of isolation.
 - Private connectivity: <https://docs.temporal.io/cloud/connectivity>:
   Temporal Cloud Namespaces can be reached over AWS PrivateLink or Google
-  Cloud Private Service Connect, so Worker and client traffic does not
-  cross the public internet; Connectivity Rules can enforce private-only
+  Cloud Private Service Connect, so Worker and client traffic can stay off
+  the public internet; Connectivity Rules can enforce private-only
   access ("Temporal Cloud immediately blocks any traffic that does not
   match a rule on that Namespace"); access to a Namespace is always
   authenticated (API keys or mTLS), whatever the path. The Web UI and the
@@ -157,7 +158,7 @@ ch8 and carries it into the recap.
     with base64 noise; the beam lets go and a solid red UNREADABLE tag
     pops beside the tile's name.
 - **0:32** With Temporal Cloud, AWS PrivateLink or Google Private Service
-  Connect keep it off the public internet.
+  Connect can keep it off the public internet.
   - Visuals: In the held tube shot, the gap between the two zones lights
     up as a PUBLIC INTERNET band (red tint, dashed red edge, a globe
     heading), the eavesdropper inside it. A private corridor draws across
@@ -390,7 +391,7 @@ ch8 and carries it into the recap.
 
 ## 11 What you can build
 
-- **3:23** Nora's transfer is one example: any Workflow that handles
+- **3:24** Nora's transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use
@@ -406,7 +407,7 @@ ch8 and carries it into the recap.
 
 ## Outro
 
-- **3:37** With Temporal, your code, your keys and your data stay yours.
+- **3:38** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.

@@ -21,10 +21,10 @@ with no inbound port open.
 [Watch from 0:25](/themes/security/#t=25)
 
 On its way out, the payload travels over TLS, so nobody on the network can read
-it. With Temporal Cloud, AWS PrivateLink or Google Private Service Connect keep
-it off the public internet. The Worker proves who it is: a certificate from your
-own CA, or an API key. Each Namespace is isolated: the Worker reaches only the
-Namespace its credentials allow.
+it. With Temporal Cloud, AWS PrivateLink or Google Private Service Connect can
+keep it off the public internet. The Worker proves who it is: a certificate from
+your own CA, or an API key. Each Namespace is isolated: the Worker reaches only
+the Namespace its credentials allow.
 
 ## Chapter 3: In the Event History
 
@@ -96,7 +96,7 @@ Workers hold no secrets.
 
 ## Chapter 11: What you can build
 
-[Watch from 3:23](/themes/security/#t=203)
+[Watch from 3:24](/themes/security/#t=204)
 
 Nora's transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -104,6 +104,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 3:37](/themes/security/#t=217)
+[Watch from 3:38](/themes/security/#t=218)
 
 With Temporal, your code, your keys and your data stay yours.

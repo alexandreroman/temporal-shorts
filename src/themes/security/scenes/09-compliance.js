@@ -27,7 +27,7 @@
   const ZONE_STAMPS = { x: 120, y: 285, w: 1680, h: 460 };
   const ZONE_REPORTS = { x: 120, y: 175, w: 1680, h: 400 };
   // the room the heading takes at the zone's top: its inset and the lockup's height; the seals center in the rest
-  const HEAD = { inset: ZONE_LABEL_INSET.head, logo: 40 };
+  const HEAD = { inset: ZONE_LABEL_INSET.head, logo: ZONE_LOGO_H };
   const sealY = zone => zone.y + HEAD.inset + HEAD.logo + (zone.h - HEAD.inset - HEAD.logo) / 2;
   // The title of Temporal Cloud: the official lockup, then "Cloud" in the brand font and the wordmark's color, its
   // capitals as tall as the wordmark's and on its baseline. The lockup's viewBox is 1570 x 410 units, from y 395: the
@@ -145,7 +145,7 @@
         after: 1.0,
       },
       {
-        text: 'Third parties audit and pen test it every year: audit results are in the Temporal Trust Center.',
+        text: 'Third parties audit and pen test it every year: audit results are in the <b>Temporal Trust Center</b>.',
         // the card lights up at c[1] + 4.86: the full composition then holds about 2.7 s before the fade
         after: 1.0,
       },

@@ -1,7 +1,7 @@
 // ===================== 8. CHANGE TEMPORAL, NOT YOUR CODE
 // Opens on the whole fleet that chapter 7 pulled back to (FULL_LANE_SHOT) and holds it. TEMPORAL splits into two
 // upstreams: your own Temporal Service on top, Self-hosted and lit, the proxy's connection bending up to it, and
-// Temporal Cloud under it (the official lockup followed by "Cloud"), dim. A ROUTING switch docks under the proxy. Then
+// Temporal Cloud under it (the official lockup above "Cloud"), dim. A ROUTING switch docks under the proxy. Then
 // the dramatic beat: the switch flips from SELF-HOSTED to CLOUD, the connection tears off the self-hosted service and
 // redraws down to Temporal Cloud with a spark running along it, and Temporal Cloud lights up, while the Workers and
 // their two lines stay perfectly still: WORKERS UNCHANGED. The camera holds; the default fade-out plays the engine's
