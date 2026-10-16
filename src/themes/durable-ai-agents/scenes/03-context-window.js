@@ -122,8 +122,9 @@
       s.spends = PART_PX.map(px => {
         const gain = tokensFor(pagePx + px) - tokensFor(pagePx);
         pagePx += px;
-        // 36 px icon, a 27 px coin, centered on the big coin (1 px border + 22 px padding + 23 px, and half a pixel)
-        const coin = E(s.bill, ICON('coin', 36, C.neon, 1.8), '', { left: '28.5px', top: 'calc(50% - 18px)' });
+        // 36 px icon, a 27 px coin, centered on the big coin. Offsets from the box's padding edge, inside its border
+        // (TILE_BORDER): 22 px of padding + 23 px to the big coin's center - 18 px, a whole pixel
+        const coin = E(s.bill, ICON('coin', 36, C.neon, 1.8), '', { left: '27px', top: 'calc(50% - 18px)' });
         coin.querySelector('circle').setAttribute('fill', `rgba(${RGB.neon},.2)`);
         const plus = E(s.bill, '+' + withCommas(gain), 'mono', {
           left: 'calc(100% + 20px)', top: '14px', fontSize: '22px', color: C.neon, whiteSpace: 'nowrap',
