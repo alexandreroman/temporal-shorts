@@ -23,12 +23,6 @@ function callCard(p, name, arg = '', cls = '') {
   });
 }
 
-// Turns the hands of the clockHands icon in e: the hour hand by `turns` full turns, the minute hand twelve times as
-// fast
-function setClockHands(e, turns) {
-  e.querySelector('.mh').setAttribute('transform', `rotate(${turns * 360 * 12} 12 12)`);
-  e.querySelector('.hh').setAttribute('transform', `rotate(${turns * 360} 12 12)`);
-}
 // place() anchored on the element's left edge, so a label or a pill keeps its gap to what it follows
 function placeLeft(e, x, y, o, s = 1) {
   e.style.transform = `translate(${x}px,${y}px) translateY(-50%) scale(${s})`;
@@ -63,10 +57,10 @@ function makeWaitCard(p, w, h, { gap = 10 } = {}) {
   return e;
 }
 // The waiting time races through `waits` (e.g. ['5 MIN', ..., '2 DAYS']) as race goes from 0 to 1, and the clock
-// hands spin with it
+// hands spin with it: 12 hours, one turn of the hour hand
 function setWaitRace(card, waits, race) {
   card.waitD.textContent = waits[Math.min(waits.length - 1, Math.floor(race * waits.length))];
-  setClockHands(card, race);
+  setClockHands(card, race * 12, 12);
 }
 // Pause badge: a 44 px violet square with a pause icon, beside the call or the agent that waits
 function makePauseBadge(p) {

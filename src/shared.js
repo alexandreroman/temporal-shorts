@@ -394,6 +394,13 @@ function showRow(e, p, dx = 26, round = false) {
   e.style.opacity = clamp(p);
   e.style.transform = `translateX(${round ? Math.round(x) : x}px)`;
 }
+// Turns the hands of a clock in root, the SVG paths .hh (hour) and .mh (minute) of a viewBox centered on
+// (center, center), from where they are drawn: hours is the clock time, the minute hand turns once per hour, the
+// hour hand once per 12 hours
+function setClockHands(root, hours, center) {
+  root.querySelector('.hh').setAttribute('transform', `rotate(${(hours * 30) % 360} ${center} ${center})`);
+  root.querySelector('.mh').setAttribute('transform', `rotate(${(hours * 360) % 360} ${center} ${center})`);
+}
 // Neon token that runs round an agentic loop
 const makeToken = root => makeGlowDot(root, 22, RGB.neon, { radius: '5px', spread: 6, alpha: 0.45 });
 

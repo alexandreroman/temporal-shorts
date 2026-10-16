@@ -89,9 +89,8 @@ function clockFace(size, col = C.ink) {
 // blur (0 to 1) dims the minute and seconds hands while days fly by: at several turns per second they would
 // only flicker.
 function setClock(root, hours, blur = 0) {
-  root.querySelector('.hh').setAttribute('transform', `rotate(${(hours * 30) % 360} 50 50)`);
+  setClockHands(root, hours, 50);
   const minute = root.querySelector('.mh'), seconds = root.querySelector('.sh');
-  minute.setAttribute('transform', `rotate(${(hours * 360) % 360} 50 50)`);
   minute.style.opacity = 1 - 0.85 * blur;
   seconds.setAttribute('transform', `rotate(${(G * 6) % 360} 50 50)`);
   seconds.style.opacity = 1 - blur;
