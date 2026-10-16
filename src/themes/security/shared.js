@@ -591,15 +591,6 @@ function placeNamespaces(ns, split, lit = 0, seals = [0, 0], o = 1) {
   });
 }
 
-// Centers the label of a statusTag (src/shared.js) of kind `kind` in its box, this theme's tags only (pad: the tag's
-// side padding). The letter spacing also trails the last letter: a label alone gets as much extra left padding, while
-// the margin round a leading icon's stroke inside its viewBox already offsets it. The 1-2 px that setStatus() adds to
-// round the width up to an even number go to both sides, not only to the right. Call it before setStatus(), which
-// measures the width.
-function balanceTagLabel(e, kind, pad = '10px') {
-  e.style.paddingLeft = STATUS_KINDS[kind].icon ? pad : `calc(${pad} + .1em)`;
-  e.style.justifyContent = 'center';
-}
 // The red alarm look of this theme's verdicts (UNREADABLE, REJECTED, READABLE; IN CLEAR in its pill): a solid red
 // fill under dark bold text, which reads at a glance. A statusTag kind of this theme only, so other themes keep theirs.
 STATUS_KINDS.alarm = { background: C.red, color: C.bg, borderColor: C.red, icon: ['x', C.bg, 2.8] };
@@ -656,7 +647,6 @@ function makeStoredHistory(root) {
   });
   card.tags.forEach(tag => {
     tag.style.height = '24px';
-    balanceTagLabel(tag, 'saved');
   });
   card.insertAdjacentHTML('beforeend', historyEmptyNote());
   card.empty = card.querySelector('.empty');
@@ -694,7 +684,6 @@ const VERDICT_FILL = { alarm: C.red, wait: 'var(--violet-solid)' };
 // scale and opacity, flip, its height as it flips over (1 flat on the chip, 0 edge on), and close, the chip's slide
 // (closeDx)
 function setChipVerdict(e, label, kind, { s = 1, o = 1, flip = 1, close = 0 } = {}) {
-  balanceTagLabel(e, kind);
   if (kind === 'alarm') {
     setAlarmTag(e, label);
   } else {

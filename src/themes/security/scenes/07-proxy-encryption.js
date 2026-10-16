@@ -142,7 +142,7 @@
   const closeTag = (root, html, kind, font, { solid = null, icon: withIcon = true } = {}) => {
     const { icon, ...look } = STATUS_KINDS[kind];
     const lead = icon && withIcon ? ICON(icon[0], font * U, icon[1], icon[2]) : '';
-    // centered, as balanceTagLabel() centers a statusTag: a label alone (icon: false) gets extra left padding for
+    // centered, as setStatus() centers a statusTag: a label alone (icon: false) gets extra left padding for
     // the letter spacing that trails its last letter, which the margin round a leading icon's stroke already offsets
     const e = E(root, lead + html, 'mono', {
       fontSize: px(font), lineHeight: px(font * 1.4), letterSpacing: '.1em', padding: `${px(6)} ${px(14)}`,

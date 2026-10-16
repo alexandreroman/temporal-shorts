@@ -67,7 +67,7 @@
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, TEMPORAL_HEADER_LARGE);
       s.history = makeHistoryCard(root, HISTORY, {
         w: HIST.w, h: HIST.h, headerFont: 20, rowTop, font: 23, rowH: HROW.h, tagTop: i => rowTop(i) + 6,
-        tag: { font: 18, pad: '4px 12px', icon: 18, border: false },
+        tag: { font: 18, padX: 12, icon: 18, border: false },
         crash: {
           keptTop: rowTop(0) - 8, keptH: HROW.gap + HROW.h + 16, cutTop: rowTop(2) - (HROW.gap - HROW.h) / 2 - 1,
           label: 'APP CRASHED HERE', labelX: '66%', labelFont: 15,

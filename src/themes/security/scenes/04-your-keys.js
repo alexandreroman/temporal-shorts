@@ -127,7 +127,6 @@
       s.strip.sweep = s.strip.querySelector('.sweep');
       s.indexed = statusTag(s.strip, { font: 11, icon: 11 });
       Object.assign(s.indexed.style, { left: '16.5px', top: '109.5px', height: '24px' });
-      balanceTagLabel(s.indexed, 'closed');
       s.codec = makeKeyTile(root, ICON('server', 28, C.ink, 1.8), 'Codec Server', CODEC.w, CODEC.h);
       s.packet = E(root, '', 'mono', {
         width: '190px', height: '34px', lineHeight: '31px', textAlign: 'center', fontSize: '18px', whiteSpace: 'pre',

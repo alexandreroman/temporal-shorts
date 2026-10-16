@@ -259,7 +259,7 @@ const ROW_TAG_KINDS = { 'SAVED': 'saved', 'REPLAYED': 'reused', 'STILL WAITING':
 function makeHistory(p, rows, w, h, scanH = null) {
   return makeHistoryCard(p, rows, {
     uvRow: i => rows[i].startsWith('Signal'), w, h, headerFont: 20, rowTop, font: 23, rowH: HROW.h,
-    tagTop: i => rowTop(i) + 4, tag: { font: 18, pad: '4px 12px', icon: 18, border: false }, scanH,
+    tagTop: i => rowTop(i) + 4, tag: { font: 18, padX: 12, icon: 18, border: false }, scanH,
   });
 }
 // The laptop order history of chapters 3 and 4, with a scan highlight for the replay, the pulsing line shown in

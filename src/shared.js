@@ -609,16 +609,17 @@ function makeHandOffCard(root, label) {
 }
 
 // ---------- status tags
-// Small status label (e.g. on an Event History row); its text and colors are set by setStatus(). font and pad
-// size the text; icon: size of the leading icon of the checked kinds; border: a 1.5 px border, transparent for
-// the filled kinds, so every kind keeps the same size.
-function statusTag(p, { font = 15, pad = '4px 10px', icon = 16, border = true } = {}) {
+// Small status label (e.g. on an Event History row); its text and colors are set by setStatus(). font sizes the
+// text; padX and padY: its side and top and bottom padding, px; icon: size of the leading icon of the checked kinds;
+// border: a 1.5 px border, transparent for the filled kinds, so every kind keeps the same size.
+function statusTag(p, { font = 15, padX = 10, padY = 4, icon = 16, border = true } = {}) {
   const e = E(p, '', 'mono', {
-    fontSize: font + 'px', letterSpacing: '.1em', padding: pad, borderRadius: '4px', whiteSpace: 'nowrap',
-    display: 'flex', alignItems: 'center', gap: '6px',
+    fontSize: font + 'px', letterSpacing: '.1em', padding: `${padY}px ${padX}px`, borderRadius: '4px',
+    whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
   });
   if (border) e.style.border = '1.5px solid';
   e.iconSize = icon;
+  e.padX = padX;
   return e;
 }
 // Looks of the statusTag kinds, each with an optional leading icon as [name, color, stroke width]:
@@ -635,16 +636,19 @@ const STATUS_KINDS = {
   closed: { background: 'transparent', color: C.slate, borderColor: C.slate },
 };
 // kind: a key of STATUS_KINDS; the DOM is only rewritten when label or kind changes.
+// The letter spacing also trails the last letter: a label alone gets as much extra left padding, so its ink sits
+// centered, while the margin round a leading icon's stroke inside its viewBox already offsets it.
 // The .1em letter spacing gives fractional widths, and a tag anchored by its right edge or centered then has
 // half-pixel edges, which rasterize differently depending on the frames drawn before. So the width is rounded up
-// to an even number of pixels: the edges land on whole pixels whichever way the tag is anchored. The text keeps
-// its left padding (the 1-2 px extra goes to the right), so it starts on a whole pixel too.
+// to an even number of pixels: the edges land on whole pixels whichever way the tag is anchored, and the label stays
+// centered in the 1-2 px extra.
 function setStatus(e, label, kind) {
   const key = kind + ':' + label;
   if (e._l === key) return;
   const { icon, ...colors } = STATUS_KINDS[kind];
   e.innerHTML = icon ? ICON(icon[0], e.iconSize, icon[1], icon[2]) + label : label;
   Object.assign(e.style, colors);
+  e.style.paddingLeft = icon ? e.padX + 'px' : `calc(${e.padX}px + .1em)`;
   e.style.width = '';
   const width = parseFloat(getComputedStyle(e).width);
   // no width while the scene is hidden: measured again on the next call

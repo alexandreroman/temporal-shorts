@@ -44,9 +44,9 @@
   const through = (at, row) => [[at, EXIT_X, LANE, 0.8], [at + 0.65, TOOLS.rowX, TOOLS.rows[row], 0.7]];
   const GATE_HIT = 0.42, LAND = 1.4;
 
-  // statusTag options of the tag under a call, a little larger than the shared one; its left padding offsets the
-  // trailing letter spacing. Kinds: 'ok' (allowed, approved, done), 'denied' or 'wait'
-  const CALL_TAG = { font: 17, pad: '4px 10px 4px calc(10px + .1em)' };
+  // statusTag options of the tag under a call, a little larger than the shared one. Kinds: 'ok' (allowed, approved,
+  // done), 'denied' or 'wait'
+  const CALL_TAG = { font: 17 };
 
   scene({
     chapter: 3, title: 'Human approvals',

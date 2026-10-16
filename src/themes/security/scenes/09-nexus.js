@@ -313,9 +313,7 @@
       // payments, the caller's Namespace, in violet
       s.payments = makeNamespaceBox(root, PAYMENTS, 'payments');
       Object.assign(s.payments.style, { borderColor: C.violet, background: `rgba(${RGB.violet},.08)` });
-      balanceTagLabel(s.payments.verdict, 'ok');
       s.analytics = makeNamespaceBox(root, ANALYTICS, 'analytics');
-      balanceTagLabel(s.analytics.verdict, 'alarm');
       s.fraud = makeNamespaceBox(root, FRAUD, 'fraud');
       s.endpoint = makeEndpointBlock(root);
       s.allowlist = makeAllowlistBlock(root);

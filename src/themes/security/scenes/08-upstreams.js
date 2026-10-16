@@ -130,7 +130,6 @@
       s.unchanged = statusTag(root, { font: 19, icon: 19 });
       s.unchanged.style.height = UNDER_WORKERS.h + 'px';
       s.unchanged.style.letterSpacing = '.04em';
-      balanceTagLabel(s.unchanged, 'ok');
     },
     update(t, c, s) {
       const flipAt = c[0] + T0.flip, tearAt = c[0] + T0.tear, redrawAt = c[0] + T0.redraw;
