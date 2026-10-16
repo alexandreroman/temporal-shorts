@@ -84,12 +84,15 @@ TITLE_TAG = re.compile(r"<title>(.*?)</title>", re.DOTALL)
 DESCRIPTION_TAG = re.compile(r'<meta name="description" content="([^"]*)">')
 # Who a theme's video is for, e.g. "Developers": read for the structured data, required on every theme page.
 AUDIENCE_TAG = re.compile(r'<meta name="audience" content="([^"]*)">')
-# A link carrying the standard hidden attribute, whatever its other attributes. The lookahead ends the attribute
-# name, and the leading whitespace starts it, so that an href such as themes/hidden-x/ never matches.
-HIDDEN_LINK_TAG = r'<a\s[^>]*\shidden(?=[\s>=])[^>]*>'
+# A link carrying the standard hidden attribute, whatever its other attributes and their order; match it
+# case-insensitively, like every HTML attribute name. The lookahead after the tag name leaves the whitespace before
+# a first attribute to start the name of hidden, and the lookahead after hidden ends it, so that an href such as
+# themes/hidden-x/ never matches.
+HIDDEN_LINK_TAG = r'<a(?=\s)[^>]*\shidden(?=[\s>=])[^>]*>'
 # A whole home page card of an unlisted theme, with its indentation and line break. Cards hold no nested <a>, so
 # the card ends at the first </a>.
-HIDDEN_CARD = re.compile(r'^[ \t]*' + HIDDEN_LINK_TAG + r'.*?</a>[ \t]*\n', re.DOTALL | re.MULTILINE)
+HIDDEN_CARD = re.compile(r'^[ \t]*' + HIDDEN_LINK_TAG + r'.*?</a>[ \t]*\n',
+                         re.DOTALL | re.MULTILINE | re.IGNORECASE)
 # The theme a home page card links to, e.g. themes/meet-temporal/.
 CARD_THEME = re.compile(r'\shref="themes/([^/"]+)/"')
 
@@ -531,7 +534,7 @@ def drop_hidden_cards(html):
 def check_no_hidden_cards(html):
     # Searches for the opening tag alone: a card that drop_hidden_cards() missed, e.g. sharing a line with another
     # tag, would otherwise leak the link to an unlisted theme.
-    if re.search(HIDDEN_LINK_TAG, html):
+    if re.search(HIDDEN_LINK_TAG, html, re.IGNORECASE):
         sys.exit("ERROR: the home page still holds a link with the hidden attribute")
 
 
