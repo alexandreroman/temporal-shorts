@@ -93,8 +93,8 @@
         return cell;
       });
       s.more = E(root, '', 'mono', { fontSize: '16px', lineHeight: '20px', color: C.slate, whiteSpace: 'nowrap' });
-      s.evicted = statusTag(root);
-      s.evicted.style.lineHeight = '21px'; // 32 px high, as the bottleneck tags: it rests on whole pixels
+      // as high as the bottleneck tags: it rests on whole pixels
+      s.evicted = markTag(root);
     },
     update(t, c, s) {
       // c[0]: the open orders line up; c[1]: the first eviction, then the replay of #1045; c[2]: three more
@@ -193,14 +193,14 @@
       // the count fades out before the strip grows: its last new cell pops in where the count was
       showAt(s.more, PRESS.countLeft, DIAGRAM.wfY - 10, P(t, c[0] + 1.8, 0.4) * (1 - P(t, growAt - 0.3, 0.3)));
 
-      // EVICTED over the first evicted cell until the replay has started, 20 px clear of the WORKFLOW CACHE label at
-      // least, as the bottleneck tag
+      // EVICTED over the first evicted cell until the replay has started, a label gap above the strip, and 20 px clear
+      // of the WORKFLOW CACHE label at least, as the bottleneck tag
       const first = evictions[0];
       placeStatusTag(s.evicted, t, 'EVICTED', 'denied', win(t, first.at, replayFrom + 1.0, 0.3), first.at);
       const tagW = parseFloat(s.evicted.style.width) || 0;
       const minLeft = DIAGRAM.cache.left + s.dg.labels.cache.offsetWidth + 20;
       s.evicted.style.left = Math.max(minLeft, cellX(first.cell) - tagW / 2) + 'px';
-      s.evicted.style.top = (DIAGRAM.wfY - DIAGRAM.cache.h / 2 - 12 - 32) + 'px';
+      s.evicted.style.top = (DIAGRAM.wfY - DIAGRAM.cache.h / 2 - GRID.label - TAG_H) + 'px';
     },
   });
 }

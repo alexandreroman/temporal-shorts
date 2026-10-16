@@ -478,12 +478,16 @@ function placeGhost(ghost, t, p, o, strikeAt, strikeO) {
 // ---------- bottleneck markers: a red outline round a part and a BOTTLENECK tag, which turn neon (FIXED)
 // A tag's height: 21 px of line, 8 of padding and 3 of border, so a tag centered on a whole pixel rests on whole pixels
 const TAG_H = 32;
+// A statusTag TAG_H px high: the bottleneck tags, and chapter 5's EVICTED
+function markTag(root) {
+  const tag = statusTag(root);
+  tag.style.lineHeight = '21px';
+  return tag;
+}
 function makeMark(root) {
   // the tag after the outline, so that it covers the outline where they cross
   const box = E(root, '', '', { border: '2px solid ' + C.red, borderRadius: 'var(--r)' });
-  const tag = statusTag(root);
-  tag.style.lineHeight = '21px';
-  return { box, tag };
+  return { box, tag: markTag(root) };
 }
 // The top left corner of a tag w px wide by an outline box at spot (see placeMark)
 function tagCorner(box, spot, w, minLeft) {
