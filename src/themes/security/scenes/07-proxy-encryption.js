@@ -284,7 +284,7 @@
       const root = s.cam = makeCamera(stage);
       Object.assign(s, makeFleet(root));
       s.band = makeProxyBand(root);
-      s.tube = makeTube(root, PROXY_TUBE);
+      s.tube = makeProxyTube(root, s.out);
       s.proxy = makeProxy(root);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
       s.outSparks = [0, 1].map(() => makeSpark(root, 12, RGB.violet));

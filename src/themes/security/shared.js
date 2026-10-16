@@ -435,9 +435,14 @@ TUBE.label = { x: TUBE.x0 + 120, y: TUBE.y - TUBE.h / 2 - 42 };
 // A TLS tube along a connection, for its geometry geom (TUBE, or PROXY_TUBE from chapter 6: x0 and x1, its ends; y,
 // its line; h, its height; label, its label's center): a glass pipe with neon walls, a neon ring at each mouth and a
 // flow of light inside it (tube.flow) running toward Temporal; then its TLS label (tube.label). placeTube() shows them.
-function makeTube(root, { x0, x1, h }) {
+// Its glass lies on an opaque body in the fill `body` (the stage's by default; a tube inside a zone takes the zone's
+// fill): build the tube after the lines it crosses (zone borders, dashed edges, rails, Namespace bands), which then
+// stop at its walls, so it reads as one channel. Whatever rides inside it (a card, a connection) goes after it. Under
+// it, a backing in the same fill (tube.backing), which keeps the body opaque while placeTube() dims the tube.
+function makeTube(root, { x0, x1, h }, body = C.bg) {
   const mouth = side => `<div style="position:absolute;${side}:-12px;top:-2px;width:24px;height:${h}px;`
     + `border:2px solid ${C.neon};border-radius:50%"></div>`;
+  const backing = E(root, '', '', { width: (x1 - x0) + 'px', height: h + 'px', background: body });
   const tube = E(root,
     '<div class="flow" style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,'
     + `rgba(${RGB.neon},0) 0 40px,rgba(${RGB.neon},.16) 40px 42px)"></div>${mouth('left')}${mouth('right')}`,
@@ -446,22 +451,31 @@ function makeTube(root, { x0, x1, h }) {
       borderBottom: `2px solid ${C.neon}`,
       background: `linear-gradient(to bottom, rgba(${RGB.neon},.16), rgba(${RGB.neon},.03) 45%, `
         + `rgba(${RGB.neon},.08))`,
+      backgroundColor: body,
       boxShadow: `0 0 28px rgba(${RGB.neon},.22)`,
     });
+  tube.backing = backing;
   tube.flow = tube.querySelector('.flow');
   tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
   Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
   return tube;
 }
 // The tube from x0 to x1 of geom (see makeTube; a scene may pass a shorter x1, the tube's width follows), drawn from
-// its x0 end up to drawn (0 to 1), with opacity o; its label at geom.label with opacity label (o by default) and scale
-// labelS. Its light flows on the ambient clock G, so it runs on across a cut.
-function placeTube(tube, geom, { drawn = 1, o = 1, label = o, labelS = 1 } = {}) {
+// its x0 end up to drawn (0 to 1), with opacity o, dimmed to dim (OFF_SHOT when the frame crops it); its label at
+// geom.label with opacity label (o by default) and scale labelS. Its light flows on the ambient clock G, so it runs on
+// across a cut. A dimmed tube lies on its backing, at opacity o, so the lines it crosses never show through it; at
+// full strength its own body hides them, and the backing stays hidden.
+function placeTube(tube, geom, { drawn = 1, o = 1, dim = 1, label = o, labelS = 1 } = {}) {
   const { x0, x1, y } = geom;
-  tube.style.width = (x1 - x0) + 'px';
-  place(tube, (x0 + x1) / 2, y, 1, drawn > 0 ? o : 0);
+  const shown = drawn > 0 ? o : 0;
   // the clip keeps the glow round the tube, and cuts it on the right while it draws
-  tube.style.clipPath = drawn < 1 ? `inset(-40px ${((1 - drawn) * 100).toFixed(3)}% -40px -40px)` : 'none';
+  const clip = drawn < 1 ? `inset(-40px ${((1 - drawn) * 100).toFixed(3)}% -40px -40px)` : 'none';
+  [tube, tube.backing].forEach(el => {
+    el.style.width = (x1 - x0) + 'px';
+    el.style.clipPath = clip;
+  });
+  place(tube, (x0 + x1) / 2, y, 1, shown * dim);
+  place(tube.backing, (x0 + x1) / 2, y, 1, dim < 1 ? shown : 0);
   tube.flow.style.backgroundPosition = `${((G * 90) % 42).toFixed(2)}px 0`;
   place(tube.label, geom.label.x, geom.label.y, labelS, label);
 }
@@ -893,6 +907,14 @@ const UNDER_WORKERS = {
 // TEMPORAL, on the wire's line, high enough to hold the card and its tags; its label above it
 const PROXY_TUBE = { x0: PROXY_WIRE.x0, x1: PROXY_WIRE.x1 + 12, y: LANE.wire.y, h: 176 };
 PROXY_TUBE.label = { x: (PROXY_TUBE.x0 + PROXY_TUBE.x1) / 2, y: PROXY_TUBE.y - PROXY_TUBE.h / 2 - 36 };
+// The tube out of the proxy (PROXY_TUBE), over TEMPORAL's edge, and the proxy's connection to TEMPORAL (out, from
+// makeFleet()), which runs inside it, lifted into an SVG layer of its own over the tube's opaque body. Build it after
+// makeFleet(), before the proxy box, which stays over the connection's start.
+function makeProxyTube(root, out) {
+  const tube = makeTube(root, PROXY_TUBE);
+  svgLayer(root).appendChild(out);
+  return tube;
+}
 // The card that goes through the proxy in chapter 6, a lane-size card at scale k, with its Namespace tag straddling
 // its bottom edge and the API KEY under it (tagH: their height; nsW and keyW: their widths; tagGap: the gap between
 // them); h: its height on the stage; keyDy: from its center to the API KEY's

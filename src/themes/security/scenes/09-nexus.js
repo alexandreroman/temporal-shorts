@@ -331,10 +331,9 @@
       s.handler = makeInfoTile(root, HANDLER, 'HANDLER', HANDLER_ROWS);
       s.queue = makeQueueTile(root);
 
-      s.tube = makeTube(root, NEXUS_TUBE);
-      // its glass on an opaque body in the zone's own fill, over the Namespaces: the borders it crosses (payments',
-      // fraud's) stop at its walls, so it reads as one channel, not as cut by the Namespaces' edges
-      s.tube.style.backgroundColor = s.zone.style.backgroundColor;
+      // its opaque body in the zone's own fill, over the Namespaces: the borders it crosses (payments', fraud's) stop
+      // at its walls, so it reads as one channel, not as cut by the Namespaces' edges
+      s.tube = makeTube(root, NEXUS_TUBE, s.zone.style.backgroundColor);
       // its label names mTLS, cased as written (a pill sets its text in capitals), in a big pill: chapter 2's TLS
       // label at its zoom
       s.tube.label.classList.add('big');

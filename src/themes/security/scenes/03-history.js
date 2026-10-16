@@ -166,10 +166,12 @@
       });
       // after placeLane(), whose zones it clips
       frameLaneEdges(s.lane, cam);
-      // the corridor round the tube goes with it
-      const tubeO = lerp(1, OFF_SHOT, settled) * (1 - tubeOut);
+      // the corridor round the tube goes with it. The tube dims over its opaque backing (placeTube's dim), so
+      // TEMPORAL's edge never shows through it
+      const tubeDim = lerp(1, OFF_SHOT, settled);
+      const tubeO = tubeDim * (1 - tubeOut);
       placeCorridor(s.corridor, { o: tubeO });
-      placeTube(s.tube, TUBE, { o: tubeO });
+      placeTube(s.tube, TUBE, { o: 1 - tubeOut, dim: tubeDim, label: tubeO });
       // the Namespaces have made their point: they fade as the history grows over them
       placeNamespaces(s.ns, 1, 1, [1, 1], 1 - P(t, c[0] + T0.ns, 0.4));
 
