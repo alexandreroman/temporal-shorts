@@ -49,9 +49,10 @@ html,body{margin:0;background:var(--bg)}
 #segs{position:absolute;right:80px;top:64px;display:flex;gap:6px;opacity:0}
 #segs i{display:block;width:56px;height:3px;border-radius:2px;background:rgba(248,250,252,.14);overflow:hidden}
 #segs b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--uv))}
-/* official Temporal symbol: shown on chapter scenes and hidden on the intro and outro; it fades in with the first
-   chapter scene and out with the last one (renderAt()), and stays fully visible across chapter scene changes;
-   aligned with the header, centered on the resting subtitle box; fixed position, also in the live player */
+/* official Temporal symbol: shown on chapter scenes and hidden on the intro and outro; it fades in over SCENE_FADE
+   from the first chapter scene's start and out over SCENE_FADE before the last one's end, whatever those scenes'
+   own fades (renderAt()), and stays fully visible across chapter scene changes; aligned with the header, centered
+   on the resting subtitle box; fixed position, also in the live player */
 #mark{
   position:absolute;left:80px;bottom:69px;width:32px;height:32px;opacity:0;
   background:url(assets/temporal-symbol-light-cropped.svg) center/contain no-repeat;

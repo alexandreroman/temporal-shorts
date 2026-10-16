@@ -325,8 +325,8 @@ function renderAt(t, g = t) {
     sub.parentNode.style.opacity = so;
   } else sub.parentNode.style.opacity = 0;
   // header, which fades in and out with each chapter, and the Temporal symbol, which stays fully visible across
-  // chapter changes: it fades in with the first chapter and out with the last one, with the same fades as their
-  // scene roots
+  // chapter changes: it fades in over SCENE_FADE from the first chapter's start and out over SCENE_FADE before the
+  // last chapter's end, whatever the fadeIn and fadeOut of those scenes
   const hdr = document.getElementById('hdr');
   const mark = document.getElementById('mark');
   if (cur && cur.chapter) {
