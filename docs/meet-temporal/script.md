@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=meet-temporal` for the live values; the start
-times below are a snapshot from 2026-10-13.
+times below are a snapshot from 2026-10-16.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -248,7 +248,7 @@ its visuals.
 
 ## 05 How Temporal Cloud works
 
-- **2:01** With Temporal Cloud, your Workers run your Workflow and Activity
+- **2:00** With Temporal Cloud, your Workers run your Workflow and Activity
   code in your own environment.
   - Visuals: As on slides 6 and 7 of Temporal's deck, two zones of equal
     width from the start. On the left, YOUR ENVIRONMENT (dashed slate):
@@ -265,7 +265,7 @@ its visuals.
     caption reads ONLY WORKFLOW & ACTIVITY DATA, NEVER YOUR CODE. The
     Workers poll out to Temporal Cloud one after the other (a violet pulse
     that lights the orchestration block) and read POLLING.
-- **2:11** Temporal Cloud orchestrates your Workflows and Activities, and
+- **2:10** Temporal Cloud orchestrates your Workflows and Activities, and
   persists their history.
   - Visuals: Slowly, a beat at a time, one task at a time in the queue;
     PERSISTENCE records each event the moment it happens, as a simplified
@@ -304,7 +304,7 @@ its visuals.
 
 ## 06 Temporal today
 
-- **2:58** Today, more than 4,300 companies pay for Temporal, and the team
+- **2:57** Today, more than 4,300 companies pay for Temporal, and the team
   has doubled in a year.
   - Visuals: A dark stage. One tiny dot per paying customer, 4,300 at
     seeded places over the band, ignites in rippling waves from the middle
@@ -315,7 +315,7 @@ its visuals.
     column each dot splits in two, the count climbing to 570, and a neon
     ×2 IN A YEAR stamp slams on. Then every dot flows into the outline of
     the Temporal symbol, which takes their place in the middle.
-- **3:14** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
+- **3:13** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
   PHP, Ruby and Rust.
   - Visuals: Eight rounded logo tiles, each the language's logo alone in
     monochrome ink, spiral out of the symbol one after the other in
@@ -323,13 +323,13 @@ its visuals.
     pop and a thin UV link back to the symbol. Once all have landed, the
     ring turns slowly round the symbol, the tiles upright, the links
     following them.
-- **3:21** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
+- **3:20** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
   SDK, Pydantic AI, Google ADK, LangGraph, and more.
   - Visuals: Under the ring, in the same rounded tile style, two rows of
     three tiles appear one by one with a calm pop: OpenAI Agents SDK, Vercel
     AI SDK, Pydantic AI, Google ADK, LangGraph (each with a violet sparkle),
     and a dashed "and more" tile with a plus, last, glowing softly.
-- **3:30** In September 2026, investors valued Temporal at $12.55 billion.
+- **3:29** In September 2026, investors valued Temporal at $12.55 billion.
   - Visuals: The chips and the symbol fall away as the camera starts to
     rise over a dark grid and parallax stars, riding the head of a glowing
     line from OCT 2020 ~$75M (Series A, the tilde marking an estimate),
@@ -343,7 +343,7 @@ its visuals.
     climb on the right, clear of the value, its Oct 2020 point low at its
     left, and "$12.55B" holds huge on the left, VALUATION · SEPTEMBER 2026
     under it.
-- **3:38** That's more than 8 times its 2022 value: investors see it as core
+- **3:37** That's more than 8 times its 2022 value: investors see it as core
   infrastructure for AI.
   - Visuals: On the settled chart, dashed guides run from the FEB 2022 and
     SEP 2026 points to a vertical bracket on the right of the climb, which
@@ -356,7 +356,7 @@ its visuals.
 
 ## Outro
 
-- **3:47** Temporal keeps code running through crashes and outages, from
+- **3:46** Temporal keeps code running through crashes and outages, from
   everyday apps to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,
