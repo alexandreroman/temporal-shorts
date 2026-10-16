@@ -475,8 +475,7 @@
       // Temporal Cloud never sees your payloads, held
       setStatus(s.never, 'NEVER SEES YOUR PAYLOADS', 'ok');
       const np = popIn(t, c[2] + 7.9);
-      s.never.style.opacity = np.o;
-      s.never.style.transform = `scale(${np.s})`;
+      popScale(s.never, np);
     }
   });
 }

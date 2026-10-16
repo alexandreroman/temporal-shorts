@@ -162,8 +162,7 @@
             clamp(copy * 6));
         }
         const lang = popIn(t, c[0] + T0.langs + w * T0.langStep);
-        tile.langTag.style.opacity = lang.o;
-        tile.langTag.style.transform = `scale(${lang.s})`;
+        popScale(tile.langTag, lang);
         tile.chips.forEach((chip, k) => {
           const at = c[0] + T0.chips[k] + w * T0.chipStep;
           const shown = w === FORGETFUL && k === CODEC ? 0 : 1;

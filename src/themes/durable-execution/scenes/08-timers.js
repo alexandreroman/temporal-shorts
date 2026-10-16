@@ -217,13 +217,11 @@
       // checks: shipPackage once saved, the sleep line once the replay passes it, askForReview once saved
       [shipSaved, slept, reviewSaved].forEach((at, i) => {
         const pop = popIn(t, at);
-        s.checks[i].style.opacity = pop.o;
-        s.checks[i].style.transform = `scale(${pop.s})`;
+        popScale(s.checks[i], pop);
       });
       // the sleep line carries a clock while the Workflow waits, until the replay checks it
       const zz = popIn(t, timerSaved);
-      s.sleeping.style.opacity = zz.o * (1 - P(t, slept - 0.2, 0.2));
-      s.sleeping.style.transform = `scale(${zz.s})`;
+      popScale(s.sleeping, { s: zz.s, o: zz.o * (1 - P(t, slept - 0.2, 0.2)) });
 
       // Temporal and its Event History
       const tp = backPop(t, c[0] + 0.3, 0.5);

@@ -24,12 +24,6 @@ function callCard(p, name, arg = '', cls = '') {
   });
 }
 
-// Pops in an element laid out by its CSS rather than by place() (a pill in a row, a badge on a card): the scale and
-// opacity of a backPop()
-function popScale(e, pop) {
-  e.style.transform = `scale(${pop.s})`;
-  e.style.opacity = pop.o;
-}
 // Turns the hands of the clockHands icon in e: the hour hand by `turns` full turns, the minute hand twelve times as
 // fast
 function setClockHands(e, turns) {

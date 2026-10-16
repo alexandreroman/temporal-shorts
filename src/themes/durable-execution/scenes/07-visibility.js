@@ -524,8 +524,7 @@
     note.leader.style.opacity = t >= at ? 1 : 0;
     note.path.setAttribute('stroke-dashoffset', String(note.length * (1 - P(t, at, 0.35))));
     const pop = popIn(t, at + 0.3);
-    note.pill.style.opacity = pop.o;
-    note.pill.style.transform = `scale(${pop.s})`;
+    popScale(note.pill, pop);
   };
   // Draws the chart at second `now` of the run: each bar shows its part before `now`, its squares and label show as
   // it starts and ends

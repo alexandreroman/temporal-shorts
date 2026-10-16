@@ -32,8 +32,7 @@
         const p = backPop(t, 0.1 + i * 0.12);
         place(e, ROW.x0 + i * ROW.gap, ROW.y, p.s, p.o);
         const okAt = 0.8 + i * 0.25, ok = popIn(t, okAt);
-        e.ok.style.opacity = ok.o;
-        e.ok.style.transform = `scale(${ok.s})`;
+        popScale(e.ok, ok);
         e.style.borderColor = t >= okAt ? C.neon : C.line;
       });
       s.links.forEach((l, i) => draw(l, P(t, 0.5 + i * 0.12, 0.35)));

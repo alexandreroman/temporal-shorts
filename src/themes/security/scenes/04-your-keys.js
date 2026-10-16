@@ -281,8 +281,7 @@
       rise(s.strip, STRIP.x, STRIP.y, stripIn * (1 - wide) * done);
       s.strip.attrs.forEach((e, i) => {
         const pop = backPop(t, c[2] + T2.attrs + i * 0.2, 0.4);
-        e.style.opacity = pop.o;
-        e.style.transform = `scale(${pop.s})`;
+        popScale(e, pop);
       });
       const sweep = P(t, c[2] + T2.sweep, T2.sweepD, linear);
       s.strip.sweep.style.transform = `translateX(${Math.round(lerp(-120, STRIP.w, sweep))}px)`;

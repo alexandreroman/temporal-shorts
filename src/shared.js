@@ -319,6 +319,12 @@ function backPop(t, at, d = 0.45) {
   const s = P(t, at, d, backOut);
   return { s, o: clamp(s * 2) };
 }
+// Pops in an element laid out by its CSS rather than by place() (a pill in a row, a badge on a card): the scale and
+// opacity of a popIn() or a backPop()
+function popScale(e, pop) {
+  e.style.transform = `scale(${pop.s})`;
+  e.style.opacity = pop.o;
+}
 // Damped shake of an element hit at `at`: `swings` half swings of amp px, fading out linearly over d seconds.
 // Exactly 0 outside them, so the element rests on the same pixels as before the hit.
 function dampedShake(t, at, amp, d, swings) {

@@ -223,8 +223,7 @@
       const restoredAt = landAt(5) + 0.45;
       setStatus(s.restored, 'CONTEXT RESTORED', 'ok');
       const rp = popIn(t, restoredAt);
-      s.restored.style.opacity = rp.o;
-      s.restored.style.transform = `scale(${rp.s})`;
+      popScale(s.restored, rp);
       placeCrashMarks(s.crash, t, crashAt, crashAt + 0.3, aOut, ax, ay);
       placeFlash(s.flash, t, crashAt);
       const cp = backPop(t, complete);

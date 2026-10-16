@@ -206,8 +206,7 @@
         rise(tile, CLOSE.column.x, VIEWER.ys[i], P(t, c[1] + T1.viewers + i * 0.15, 0.5) * unseen);
         tile.style.borderColor = t >= eyesAt ? C.red : C.line;
         const eye = popIn(t, eyesAt, 0.3);
-        tile.eye.style.opacity = eye.o;
-        tile.eye.style.transform = `scale(${eye.s})`;
+        popScale(tile.eye, eye);
       });
 
       // the dramatic beat: READABLE slams onto the chip from above its size, red rings, a red flash and a shake;

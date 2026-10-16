@@ -249,8 +249,7 @@
     if (kind === 'alarm') setAlarmTag(box.verdict, label);
     else setStatus(box.verdict, label, kind);
     const pop = popIn(t, at);
-    box.verdict.style.opacity = pop.o;
-    box.verdict.style.transform = `scale(${pop.s})`;
+    popScale(box.verdict, pop);
   };
   // The center of a box given by its left, top and size
   const center = box => [box.x + box.w / 2, box.y + box.h / 2];

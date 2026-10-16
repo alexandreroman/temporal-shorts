@@ -424,8 +424,7 @@
       const kmsPop = backPop(t, c[1] + T1.kms);
       place(s.kms, KMS.x, KMS.y, kmsPop.s, kmsPop.o * closeOnly);
       const never = popIn(t, c[2] + T2.never);
-      s.kms.never.style.opacity = never.o;
-      s.kms.never.style.transform = `scale(${never.s})`;
+      popScale(s.kms.never, never);
 
       // the link draws from the KMS to the data key
       draw(s.link, P(t, c[1] + T1.link, T1.linkD, linear), closeOnly);

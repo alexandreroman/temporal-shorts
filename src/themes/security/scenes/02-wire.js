@@ -90,8 +90,7 @@
   const popVerdict = (tile, t, label, at) => {
     setAlarmTag(tile.verdict, label);
     const pop = popIn(t, at);
-    tile.verdict.style.opacity = pop.o;
-    tile.verdict.style.transform = `scale(${pop.s})`;
+    popScale(tile.verdict, pop);
   };
 
   scene({
