@@ -32,8 +32,8 @@
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-      s.tiles = RECAP.map(benefit => makeRecapTile(root, benefit));
-      s.ripples = RECAP.map(() => makeRipples(root, 2, RGB.neon));
+      s.tiles = BENEFITS.map(benefit => makeRecapTile(root, benefit));
+      s.ripples = BENEFITS.map(() => makeRipples(root, 2, RGB.neon));
     },
     update(t, c, s) {
       // the engine's zoom-through in; no exit zoom, as chapter 12 opens on the last frame

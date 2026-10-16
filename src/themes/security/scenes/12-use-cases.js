@@ -20,7 +20,7 @@
     // the last label takes two lines: every label gets the room of two, so the icons stay aligned
     labelLines: TILE_LABEL_LINES,
     front: (root, i) => {
-      const tile = makeRecapTile(root, RECAP[i]);
+      const tile = makeRecapTile(root, BENEFITS[i]);
       setRecapTile(tile, { seal: 1 });
       return tile;
     },

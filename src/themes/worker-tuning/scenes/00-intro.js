@@ -46,7 +46,7 @@
       s.t = makeTitleBlock(root, 'A GUIDE FOR DEVELOPERS AND SRES', 'Why is my Task Queue<br>backing up?',
         'TUNE TEMPORAL WORKERS, ONE BOTTLENECK AT A TIME', TITLE.sizes);
       Object.assign(s.t.style, { width: TITLE.w + 'px', height: TITLE.h + 'px' });
-      s.lane = makeLane(root, null, 'act', { w: INTRO_LANE.w, cap: INTRO_LANE.cap });
+      s.lane = makeQueueLane(root, null, 'act', { w: INTRO_LANE.w, cap: INTRO_LANE.cap });
       s.worker = makeMiniWorker(root, 'WORKER', INTRO_WORKER.cols, INTRO_WORKER.rows);
       s.fly = makeTaskChip(root, 'act');
     },
@@ -64,7 +64,7 @@
       const flying = departed > 0 && t < departAt(departed - 1) + FLY ? departed - 1 : null;
       const queue = Math.max(0, arrived(t, this.dur) - departed);
       const shift = departed > 0 ? P(t, departAt(departed - 1), 0.3) : 1;
-      placeLane(s.lane, INTRO_LANE.left, laneY, P(t, 1.2, 0.5), { queue, departed, shift });
+      placeQueueLane(s.lane, INTRO_LANE.left, laneY, P(t, 1.2, 0.5), { queue, departed, shift });
 
       // every Slot is busy, but for the one a task just left: it frees 0.35 s before the next task flies in
       s.worker.cells.forEach((cell, i) => {

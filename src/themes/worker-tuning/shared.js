@@ -141,7 +141,7 @@ function setChipIcon(chip, icon) {
 }
 // Lane of a Task Queue: a track, an optional label above it, up to `cap` queued chips and a "+N" count of the tasks
 // beyond them. lane: 'wf' or 'act', the kind of chips; w: the track width.
-function makeLane(root, label, lane, { w = DIAGRAM.lane.w, cap = DIAGRAM.lane.cap } = {}) {
+function makeQueueLane(root, label, lane, { w = DIAGRAM.lane.w, cap = DIAGRAM.lane.cap } = {}) {
   return {
     lane, w, cap,
     track: E(root, '', '', {
@@ -168,7 +168,7 @@ const laneHeadX = (lane, x) => x + lane.w - DIAGRAM.lane.headInset;
 //   (iconOf(k), Activity lanes only)
 // - shift: 0 to 1, how far the queue has moved up since the last departure (1 at rest); past the cap, the tail
 //   chip fades in at its place as the queue moves, coming from the overflow
-function placeLane(lane, x, y, o, { queue = 0, departed = 0, shift = 1, iconOf = activityIcon, labelO = 1 } = {}) {
+function placeQueueLane(lane, x, y, o, { queue = 0, departed = 0, shift = 1, iconOf = activityIcon, labelO = 1 } = {}) {
   const { pitch } = DIAGRAM.lane;
   place(lane.track, x + lane.w / 2, y, 1, o);
   if (lane.label) showAt(lane.label, x, y - DIAGRAM.lane.labelTop, o * labelO);
@@ -483,7 +483,7 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
   const dg = {};
   dg.temporal = makeTemporalPanel(root, temporal.w, temporal.h, { ...TEMPORAL_HEADER_LARGE, note: QUEUE_NOTE });
   dg.worker = makeAppPanel(root, name, worker.w, worker.h, APP_TEXT_LARGE);
-  dg.lanes = { wf: makeLane(root, 'Workflow Tasks', 'wf'), act: makeLane(root, 'Activity Tasks', 'act') };
+  dg.lanes = { wf: makeQueueLane(root, 'Workflow Tasks', 'wf'), act: makeQueueLane(root, 'Activity Tasks', 'act') };
   const label = text => E(root, text, 'lbl', { fontSize: '16px' });
   // POLLERS is centered on the Poller column: a fixed even width, its text centered
   dg.labels = {
@@ -533,8 +533,8 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 // - show: { temporal, lanes, worker, pollers, wfSlots, slots, slotsLabel, cache, backlog, wait, cpu, mem, code },
 //   the opacity of each part, 1 by default (slotsLabel, the ACTIVITY SLOTS label: that of the slots by default)
 // - split: 0 to 1, from one "orders" lane (chapter 1) to two lanes, Workflow Tasks above Activity Tasks (default 1)
-// - queue: { wf, act }, the tasks waiting in each lane (see placeLane); taskIcon(k): the icon of Activity Task k of
-//   its lane (default activityIcon)
+// - queue: { wf, act }, the tasks waiting in each lane (see placeQueueLane); taskIcon(k): the icon of Activity Task k
+//   of its lane (default activityIcon)
 // - flows: task flows from the lanes into the Slots (see FLIGHT), in order of their `from`
 // - slots: { n, grow, busy, replay, icon, glow, closed, drop }, the Activity Slots: n of them (default 10); grow
 //   { from, at }: the grid grows from `from` Slots at `at` (its rows spread out, then the new Slots pop in); busy: how
@@ -648,7 +648,7 @@ function placeLanes(dg, t, state, o) {
     // the queue moves up after each departure, quicker than the departures come
     const shift = P(t, lastLeave, Math.min(0.3, every * 0.9));
     const laneO = lane === 'wf' ? o * split : o;
-    placeLane(dg.lanes[lane], DIAGRAM.lane.left, laneMidY(lane, split), laneO, {
+    placeQueueLane(dg.lanes[lane], DIAGRAM.lane.left, laneMidY(lane, split), laneO, {
       queue: state.queue?.[lane] ?? 0, departed, shift, iconOf, labelO: split,
     });
   }
@@ -989,7 +989,7 @@ const AT_CUT = {
 // The task flows of a chapter that ends on a cut are done REST_LEAD s before its end: no task flies, swells or frees
 // its Slot as the cut comes, so the cut and the hold of presenter mode before it fall on a still frame. Each chapter
 // takes a multiple of five tasks from the Activity lane: its queued chips then show at the cut the icons the next
-// chapter starts with (see placeLane).
+// chapter starts with (see placeQueueLane).
 const REST_LEAD = 0.4;
 // The parts that only one chapter shows (a metric line, a FIXED tag) leave LEAVE_LEAD s before its end, over 0.4 s;
 // presenter mode holds just before (holdBeforeEnd)

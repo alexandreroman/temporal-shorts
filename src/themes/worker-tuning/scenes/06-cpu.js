@@ -245,7 +245,7 @@
       const freed = Math.min(BUSY - BUSY_SLOW, Math.floor(Math.max(0, t - (c[0] + 2.2)) / 0.3));
 
       // invoices come in a wave from waveAt, 2 tasks out of 3: through the Slots in filling order, and through the
-      // queue from its head (queued chip p is task departed + p, see placeLane)
+      // queue from its head (queued chip p is task departed + p, see placeQueueLane)
       const waveAt = c[0] + 0.4;
       const isInvoice = k => k % 3 !== 2;
       const rankOf = i => SLOT_ORDER.indexOf(i);

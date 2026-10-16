@@ -913,7 +913,7 @@ function namespaceHtml(shown, caret) {
 // ---------- the recap tiles (chapters 11 and 12)
 // The benefits of the recap, [icon, label], one tile each in the use cases' row (USE_CASE_ROW); a <br> splits a label
 // that would crowd its tile
-const RECAP = [
+const BENEFITS = [
   ['door', 'No inbound ports'], ['badge', 'Verified<br>connections'], ['key', 'Your keys only'],
   ['keyOff', 'No secrets<br>in Workers'],
 ];
@@ -923,7 +923,7 @@ const TILE_LABEL_LINES = 2;
 // The padlock badge centered on a recap tile's top edge, as on the payload card: its diameter and the padlock's size,
 // px, both even, so they center on whole pixels
 const RECAP_BADGE = { size: 56, lock: 32 };
-// A recap tile of USE_CASE_ROW's size and type scale for a benefit of RECAP, with its padlock badge (.badge, .lock),
+// A recap tile of USE_CASE_ROW's size and type scale for one of BENEFITS, with its padlock badge (.badge, .lock),
 // open and unlit until setRecapTile() sets its state. Chapter 11 lands these tiles; chapter 12 opens on them, padlocks
 // shut, and flips them over into the use cases.
 function makeRecapTile(p, [icon, label]) {

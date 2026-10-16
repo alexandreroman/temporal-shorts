@@ -78,7 +78,7 @@
     build(root, s) {
       s.dg = makeWorkerDiagram(root);
       // the intro's strip and mini Worker, until the diagram takes over (the lane holds up to the diagram's 9 chips)
-      s.lane = makeLane(root, null, 'act');
+      s.lane = makeQueueLane(root, null, 'act');
       s.mini = makeMiniWorker(root, 'WORKER', INTRO_WORKER.cols, INTRO_WORKER.rows);
       s.orders = makeReadout(root, 'Orders / min', ORDERS.w, ORDERS.h);
       s.times10 = fixedTag(root, '&times;10', 'violet solid', TIMES10.w);
@@ -123,7 +123,7 @@
       const morphing = t < HANDOFF;
       resizeLane(s.lane, lerp(INTRO_LANE.w, DIAGRAM.lane.w, m), lerp(INTRO_LANE.cap, DIAGRAM.lane.cap, m));
       const laneLeft = lerp(INTRO_LANE.left, DIAGRAM.lane.left, m), laneY = lerp(INTRO_LANE.y, DIAGRAM.midY, m);
-      placeLane(s.lane, laneLeft, laneY, morphing ? 1 : 0, { queue });
+      placeQueueLane(s.lane, laneLeft, laneY, morphing ? 1 : 0, { queue });
       placeMorphingWorker(s.mini, m);
       s.mini.style.opacity = morphing ? 1 : 0;
       s.mini.style.visibility = morphing ? 'visible' : 'hidden';
