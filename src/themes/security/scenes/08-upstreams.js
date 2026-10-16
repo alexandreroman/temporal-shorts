@@ -9,11 +9,13 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // from c[0]: TEMPORAL narrows to the top upstream (split, splitD) as Temporal Cloud rises in under it (cloud); the
-  // ROUTING switch docks under the proxy (routing); it flips (flip); the connection tears off the self-hosted service
-  // (tear, tearD) and redraws to Temporal Cloud (redraw, redrawD); WORKERS UNCHANGED (unchanged)
+  // ROUTING switch docks under the proxy (routing); it flips as "Temporal Cloud instead" is read (flip); the
+  // connection tears off the self-hosted service (tear, tearD) and redraws to Temporal Cloud (redraw, redrawD);
+  // WORKERS UNCHANGED once Temporal Cloud has lit up, just after "Workers" is read (unchanged; its position at 16
+  // characters per second plus 0.3 s is 4.24)
   const T0 = {
-    split: 0, splitD: 0.8, cloud: 0.4, routing: 1.0, flip: 3.4, tear: 3.6, tearD: 0.3, redraw: 4.0, redrawD: 0.7,
-    unchanged: 5.2,
+    split: 0, splitD: 0.8, cloud: 0.4, routing: 1.0, flip: 2.6, tear: 2.8, tearD: 0.3, redraw: 3.2, redrawD: 0.7,
+    unchanged: 4.4,
   };
   // the two upstreams, one above the other on TEMPORAL's side: your own Temporal Service (self-hosted) and Temporal
   // Cloud; the zones' rectangles
@@ -80,7 +82,7 @@
     subs: [
       // the switch and its new connection, then a hold on WORKERS UNCHANGED
       {
-        text: "Moving from your own Temporal Service to Temporal Cloud is a proxy setting: Workers don't change.",
+        text: "Point the proxy at Temporal Cloud instead of your own Service: Workers don't change.",
         after: 1.4,
       },
     ],

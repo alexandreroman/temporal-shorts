@@ -123,7 +123,12 @@ recap.
   Services; Workers connect to one local endpoint with a short Namespace
   name, the proxy attaches TLS, credentials (API key or mTLS) and the
   upstream's Namespace name; routing by Namespace, `routing.default`
-  fallback; built-in Codec Server for the Web UI and the CLI.
+  fallback; built-in Codec Server for the Web UI and the CLI. Pointing the
+  proxy at another upstream spares the Worker code change only: running
+  Workflows and their Event Histories stay on the old Service, and moving
+  them is a migration of its own
+  (<https://docs.temporal.io/cloud/migrate/manual>), so chapter 8 says
+  "point the proxy at Temporal Cloud", never that the move is one setting.
 - Proxy encryption:
   <https://docs.temporal.io/production-deployment/temporal-proxy/encrypt-payloads>:
   no Worker or Client code change; short-lived data keys encrypt payloads
@@ -364,8 +369,8 @@ recap.
 
 ## 08 Change Temporal, not your code
 
-- **2:43** Moving from your own Temporal Service to Temporal Cloud is a
-  proxy setting: Workers don't change.
+- **2:43** Point the proxy at Temporal Cloud instead of your own Service:
+  Workers don't change.
   - Visuals: The same wide shot. TEMPORAL narrows into the upper of two
     upstreams, the official logo centered above "Self-hosted" (a server
     icon), the proxy's connection bending up to it; Temporal Cloud rises in

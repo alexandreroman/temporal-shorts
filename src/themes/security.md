@@ -75,8 +75,8 @@ decrypted payloads.
 
 [Watch from 2:43](/themes/security/#t=163)
 
-Moving from your own Temporal Service to Temporal Cloud is a proxy setting:
-Workers don't change.
+Point the proxy at Temporal Cloud instead of your own Service: Workers don't
+change.
 
 ## Chapter 9: Across Namespaces with Nexus
 
@@ -90,7 +90,7 @@ payloads.
 
 ## Chapter 10: Audited and certified
 
-[Watch from 3:17](/themes/security/#t=197)
+[Watch from 3:16](/themes/security/#t=196)
 
 Temporal Cloud is SOC 2 Type 2 certified and compliant with HIPAA, GDPR and
 CCPA. Third parties audit and pen test it every year: audit results are in the
@@ -105,7 +105,7 @@ Workers hold no secrets.
 
 ## Chapter 12: What you can build
 
-[Watch from 3:41](/themes/security/#t=221)
+[Watch from 3:40](/themes/security/#t=220)
 
 A bank transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -113,6 +113,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 3:55](/themes/security/#t=235)
+[Watch from 3:54](/themes/security/#t=234)
 
 With Temporal, your code, your keys and your data stay yours.
