@@ -33,7 +33,7 @@
   // the metric values: forced evictions per second, and the replay latency of an order's short history (five
   // Activities), in ms; after the fix, the latency of the few replays left falls back to `from`
   const EVICTIONS = { from: 6, peak: 46 };
-  const REPLAY_MS = { from: 12, peak: 58 };
+  const REPLAY_MS = { from: 3, peak: 58 };
 
   // Where waiting order `order` is at t, as { x, o }: it arrives at the end of the line, moves up as each eviction
   // frees a cell, slides into the cell its eviction frees, or into a new cell when the strip grows
