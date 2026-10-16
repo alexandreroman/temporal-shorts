@@ -673,15 +673,15 @@ function makeWebUI(root) {
     + '<div class="mono value" style="font-size:13px;line-height:20px;white-space:pre;margin:0 -6px;padding:0 6px;'
     + 'border-radius:4px"></div></div>';
   const win = E(root,
-    `<div style="height:30px;background:#191919;border-bottom:1px solid ${C.line};display:flex;align-items:center;`
-    + `gap:6px;padding-left:12px">${dot}${dot}${dot}<span class="ttl mono" style="margin-left:10px;font-size:11px;`
-    + `letter-spacing:.14em;color:${C.slate}">TEMPORAL WEB UI</span></div>`
+    `<div style="height:30px;background:${WEB_UI.panel};border-bottom:1px solid ${C.line};display:flex;`
+    + `align-items:center;gap:6px;padding-left:12px">${dot}${dot}${dot}<span class="ttl mono" style="margin-left:10px;`
+    + `font-size:11px;letter-spacing:.14em;color:${C.slate}">TEMPORAL WEB UI</span></div>`
     + '<div style="padding:10px 16px 0">'
     + `<div class="line mono" style="font-size:13px;line-height:18px"><span style="color:${C.slate}">2</span>`
     + '&nbsp; Activity completed</div>'
     + WEBUI_FIELDS.map(field).join('') + '</div>',
     '', {
-      width: WEBUI.w + 'px', height: WEBUI.h + 'px', background: '#111111', border: `1.5px solid ${C.line}`,
+      width: WEBUI.w + 'px', height: WEBUI.h + 'px', background: WEB_UI.page, border: `1.5px solid ${C.line}`,
       borderRadius: 'var(--r)', overflow: 'hidden', textAlign: 'left',
     });
   win.caption = win.querySelector('.ttl');

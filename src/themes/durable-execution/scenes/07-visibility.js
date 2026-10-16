@@ -16,7 +16,7 @@
 
   // Colors sampled from the real Web UI (dark mode)
   const UI = {
-    page: '#111111', panel: '#191919', head: '#222222', altRow: '#1D1D1D', hover: '#272727',
+    ...WEB_UI, head: '#222222', altRow: '#1D1D1D', hover: '#272727',
     rule: '#343332', cardEdge: '#2E2D2C', fieldEdge: '#43403F',
     text: '#FBFBFA', dim: '#C3C2BB', link: '#8DA4EF', navActive: '#1C202D',
     primary: '#3A5BC7', outline: '#334CA2', tabLine: '#3952A8',

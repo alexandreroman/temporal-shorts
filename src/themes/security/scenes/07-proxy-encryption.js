@@ -109,7 +109,7 @@
   // connections they read through (in s.links) and their titles and event lines
   const READERS = [
     { slot: FLEET_CLIENTS[0], link: 6, title: 'TEMPORAL CLI', event: 'ActivityTaskCompleted', body: '#0B0B0B' },
-    { slot: FLEET_CLIENTS[1], link: 7, title: 'TEMPORAL WEB UI', event: 'Activity completed', body: '#111111' },
+    { slot: FLEET_CLIENTS[1], link: 7, title: 'TEMPORAL WEB UI', event: 'Activity completed', body: WEB_UI.page },
   ];
   // the IBAN on two lines in a window, and the name
   const IBAN = TRANSFER[0][1];
@@ -237,9 +237,9 @@
       + `${text}</div>`;
     const value = '<div class="mono value" style="font-size:21px;line-height:27px;white-space:pre"></div>';
     const win = E(root,
-      `<div style="height:36px;background:#191919;border-bottom:1px solid ${C.line};display:flex;align-items:center;`
-      + `gap:7px;padding-left:14px">${dot}${dot}${dot}<span class="mono" style="margin-left:10px;font-size:16px;`
-      + `letter-spacing:.12em;color:${C.slate}">${title}</span></div>`
+      `<div style="height:36px;background:${WEB_UI.panel};border-bottom:1px solid ${C.line};display:flex;`
+      + `align-items:center;gap:7px;padding-left:14px">${dot}${dot}${dot}<span class="mono" style="margin-left:10px;`
+      + `font-size:16px;letter-spacing:.12em;color:${C.slate}">${title}</span></div>`
       + '<div style="padding:14px 18px 0">'
       + `<div class="mono" style="font-size:17px;line-height:24px;white-space:nowrap">`
       + `<span style="color:${C.slate}">2</span>`

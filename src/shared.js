@@ -15,6 +15,9 @@ const C = {
   // TEMPORAL's surface: the fill of Temporal's tiles and zones on the stage
   temporalSurface: '#17182A',
 };
+// Temporal Web UI colors, sampled from the real UI in dark mode: the page background, and the panels (sidebar, top
+// bar, cards) and window title bars
+const WEB_UI = { page: '#111111', panel: '#191919' };
 // URL of this script, in src/: asset URLs resolve against it, not against the page, as theme pages live in
 // subfolders. Read while the script loads, the only time document.currentScript is set.
 const SRC_BASE = document.currentScript.src || document.baseURI;
