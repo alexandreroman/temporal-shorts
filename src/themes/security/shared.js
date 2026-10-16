@@ -959,6 +959,10 @@ const TILE_LABEL_LINES = 2;
 // The padlock badge centered on a recap tile's top edge, as on the payload card: its diameter and the padlock's size,
 // px, both even, so they center on whole pixels
 const RECAP_BADGE = { size: 56, lock: 32 };
+// How far the camera of chapters 11 and 12 moves the recap row down from USE_CASE_ROW, px: the badges rise half their
+// size above the tiles, so the row comes down by half that, which centers badges and tiles together on y 515. Chapter
+// 12 keeps it, so its use-case tiles flip in the recap tiles' slots.
+const RECAP_DY = RECAP_BADGE.size / 4;
 // A recap tile of USE_CASE_ROW's size and type scale for one of BENEFITS, with its padlock badge (.badge, .lock),
 // open and unlit until setRecapTile() sets its state. Chapter 11 lands these tiles; chapter 12 opens on them, padlocks
 // shut, and flips them over into the use cases.

@@ -24,8 +24,8 @@
       setRecapTile(tile, { seal: 1 });
       return tile;
     },
-    // no zoom in, for the match cut; the exit zoom plays with the fade-out
-    camera: { enter: 1 },
+    // no zoom in, for the match cut, and chapter 11's row offset (RECAP_DY); the exit zoom plays with the fade-out
+    camera: { enter: 1, dy: RECAP_DY },
     fadeIn: 0,
     subs: [
       {

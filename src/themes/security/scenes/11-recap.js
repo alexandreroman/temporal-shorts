@@ -36,8 +36,9 @@
       s.ripples = BENEFITS.map(() => makeRipples(root, 2, RGB.neon));
     },
     update(t, c, s) {
-      // the camera zoom-through (setCamera) in; no exit zoom, as chapter 12 opens on the last frame
-      setCamera(s.cam, t, this.dur, { exit: 1 });
+      // the camera zoom-through (setCamera) in, the row lowered by RECAP_DY; no exit zoom, as chapter 12 opens on
+      // the last frame
+      setCamera(s.cam, t, this.dur, { dy: RECAP_DY, exit: 1 });
       s.tiles.forEach((tile, i) => {
         const x = useCaseX(i);
         const landAt = c[0] + LAND_AT[i];
