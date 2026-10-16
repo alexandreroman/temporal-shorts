@@ -528,7 +528,8 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 //   ('2 GB') and when it last changed (a swell)
 // - backlog: { n, trend }, the BACKLOG count (default: the lanes' queues added up) and its trend, 'up' (red) or
 //   'down' (neon); wait: { text, trend }, the SCHEDULE-TO-START value ('38 s')
-// - metrics: up to 2 metric lines [{ name, value, at, color }], each rising in at `at` (see placeBottomBand)
+// - metrics: up to 2 metric lines [{ name, value, at, out, color }], each rising in at `at` and, if `out` is set,
+//   sinking out at `out` (see placeBottomBand)
 // - code: { swap, insert, light }: swap { slots: [value, at], cache: [value, at] } replaces a value (10, 500) at
 //   `at`; insert { poller: at } opens the inserted Poller line; light [key, from, to] highlights a line ('slots',
 //   'poller', 'cache')
@@ -827,7 +828,8 @@ function placeBottomBand(dg, t, state, show) {
     }
     setMetricLine(e, m.name, m.value, m.color);
     const top = meter.top.mem + i * (metric.h + GRID.gutter);
-    rise(e, metric.left + metric.w / 2, top + metric.h / 2, P(t, m.at, 0.4), 12);
+    const shown = P(t, m.at, 0.4) * (1 - P(t, m.out ?? Infinity, 0.4));
+    rise(e, metric.left + metric.w / 2, top + metric.h / 2, shown, 12);
   });
   const cpu = state.cpu ?? 0;
   setMeter(dg.cpu, cpu / 100, Math.round(cpu) + '%', cpu >= 90);
@@ -937,10 +939,39 @@ function setPanelHeader(panel, o) {
   panel.st.style.opacity = o;
 }
 
-// ---------- the hard cuts of the intro, chapter 1 and chapter 2: each scene ends on the next one's first frame
-// The tasks waiting in the Activity lane as chapters 1 and 2 start: the scene before each one ends on that count.
-// Half-way between whole counts, so the counts shown on either side of a cut agree.
-const QUEUE_AT_CUT = { ch1: 45.5, ch2: 2800.5 };
+// ---------- the hard cuts: from the intro to the outro, each scene ends on the next one's first frame
+// The values carried across the cuts, as each chapter starts: the scene before it ends on them. act and wf: the tasks
+// waiting in the Activity and Workflow lanes; wait: SCHEDULE-TO-START, in seconds; cpu: in %; mem: the share of memory
+// used. Activity counts sit half-way between whole counts, so the counts shown on either side of a cut agree;
+// Workflow counts are whole, so that no chip is half-way in.
+const AT_CUT = {
+  ch1: { act: 45.5 },
+  ch2: { act: 2800.5 },
+  ch3: { wf: 6, act: 3240.5, wait: 44, cpu: 35, mem: 0.45 },
+  ch4: { wf: 6, act: 2880.5, wait: 28, cpu: 45, mem: 0.6 },
+  ch5: { wf: 6, act: 900.5, wait: 3, cpu: 80, mem: 0.8 },
+  ch6: { wf: 4, act: 990.5, wait: 4, cpu: 88, mem: 0.55 },
+};
+// The task flows of a chapter that ends on a cut are done REST_LEAD s before its end: no task flies, swells or frees
+// its Slot as the cut comes, so the cut and the hold of presenter mode before it fall on a still frame. Each chapter
+// takes a multiple of five tasks from the Activity lane: its queued chips then show at the cut the icons the next
+// chapter starts with (see placeLane).
+const REST_LEAD = 0.4;
+// The parts that only one chapter shows (a metric line, a FIXED tag) leave LEAVE_LEAD s before its end, over 0.4 s;
+// presenter mode holds just before (holdBeforeEnd)
+const LEAVE_LEAD = 1.0;
+
+// The Workflow cache of chapters 5 and 6. Chapter 5's 4 cells hold #1042 to #1045 and the open orders from
+// #1046 on (firstWaiting) wait for a cell: the cache evicts the orders of the cells `evicted`, in turn, each eviction
+// handing its cell to the next waiting order, then it grows to 7 cells, which take the orders after them.
+const CACHE_ORDERS = { firstWaiting: 1046, evicted: [3, 1, 2, 0], from: 4 };
+// The order in cache cell i once chapter 5 has evicted and grown the cache: chapter 6 starts with it
+function finalCacheOrder(i) {
+  const { firstWaiting, evicted, from } = CACHE_ORDERS;
+  const eviction = evicted.indexOf(i);
+  return firstWaiting + (eviction >= 0 ? eviction : evicted.length + i - from);
+}
+
 // The intro's queue strip and mini Worker, which chapter 1 picks up where the intro leaves them: the Worker panel on
 // the frame's right edge (x 1424..1800, y 429..601), the strip a zone gap before it (x 1064..1384), its middle level
 // with that of the panel's 2 rows of Slots (y 539)
@@ -952,3 +983,95 @@ const INTRO_LANE = {
   left: 1800 - INTRO_WORKER_SIZE.w - GRID.zone - INTRO_LANE_W, w: INTRO_LANE_W, cap: 5,
   y: INTRO_WORKER_TOP + MINI.head + MINI.h / 2 + MINI.pitchY / 2,
 };
+
+// ---------- the recap table of chapter 7, and the parts of the diagram that start its rows
+// Chapter 6 ends with its four bottleneck components shrunk into these parts, on the table's rows, where chapter 7
+// starts: the rows then grow from them. Final stage coordinates (no shift), every size even: the column headings (24 px
+// high) a label gap above 4 rows of 104 px, a gutter apart; each row's part partLeft px inside its left edge.
+const RECAP = { left: 120, w: 1680, headTop: 196, rowH: 104, partLeft: 32 };
+RECAP.rowTop = RECAP.headTop + 24 + GRID.label;
+RECAP.pitch = RECAP.rowH + GRID.gutter;
+const recapRowY = i => RECAP.rowTop + RECAP.rowH / 2 + i * RECAP.pitch;
+// The part drawn at the start of each row, w x h px, one per bottleneck, in the order of the rows
+const RECAP_PART = { w: 78, h: 34 };
+const RECAP_PARTS = ['slots', 'poller', 'cache', 'cpu'];
+// Middle of the part of row i
+const recapPartCenter = i => [RECAP.left + RECAP.partLeft + RECAP_PART.w / 2, recapRowY(i)];
+// The small parts, each drawn in its box:
+// - a full Slot grid: 3 x 2 busy Slots, 22 x 14 px, 28 and 20 px apart (see recapSlotCenter)
+const RECAP_SLOT = { w: 22, h: 14, pitchX: 28, pitchY: 20 };
+// Middle of Slot j of the Slot grid part, from the part's top left corner
+const recapSlotCenter = j => [
+  RECAP_SLOT.w / 2 + (j % 3) * RECAP_SLOT.pitchX, RECAP_SLOT.h / 2 + Math.floor(j / 3) * RECAP_SLOT.pitchY,
+];
+function makeSlotsPart(box) {
+  for (let j = 0; j < 6; j++) {
+    const [x, y] = recapSlotCenter(j);
+    const slot = makeSlot(box, RECAP_SLOT.w, RECAP_SLOT.h, {
+      left: x - RECAP_SLOT.w / 2 + 'px', top: y - RECAP_SLOT.h / 2 + 'px', borderRadius: '3px', opacity: 1,
+    });
+    Object.assign(slot.style, SLOT_LOOKS.busy);
+  }
+}
+// - a Poller of the diagram's size, on the right, with its poll line, whose dashes flow from the queue into the Poller
+//   (see showRecapPart)
+const RECAP_POLLER_X = 56 + DIAGRAM.poller.size / 2;
+function makePollerPart(box) {
+  box.insertAdjacentHTML('beforeend',
+    `<svg width="${RECAP_PART.w}" height="${RECAP_PART.h}" style="position:absolute;left:0;top:0">`
+    + `<path d="M 2 17 L 52 17" stroke="${C.violet}" stroke-width="2" stroke-linecap="round"`
+    + ' stroke-dasharray="5,7"/></svg>');
+  box.line = box.querySelector('path');
+  E(box, '', '', {
+    left: RECAP_POLLER_X - DIAGRAM.poller.size / 2 + 'px', top: '6px', width: '22px', height: '22px',
+    borderRadius: '50%', border: '2px solid ' + C.violet, background: 'var(--surface)', opacity: 1,
+  });
+}
+// - a WORKFLOW CACHE cell, of the diagram's size, in the middle, holding the order of the first cell as chapter 6
+//   leaves the cache
+function makeCachePart(box) {
+  const { w, h } = DIAGRAM.cache;
+  const slot = makeSlot(box, w, h, {
+    left: (RECAP_PART.w - w) / 2 + 'px', top: (RECAP_PART.h - h) / 2 + 'px', fontFamily: 'Mono', fontSize: '16px',
+    borderColor: C.uv, background: `rgba(${RGB.uv},.22)`, opacity: 1,
+  });
+  slot.textContent = '#' + finalCacheOrder(0);
+}
+// - a full CPU meter: its value over a red bar
+function makeCpuPart(box) {
+  E(box, '100%', 'mono', {
+    right: '0', left: 'auto', top: '-2px', fontSize: '16px', lineHeight: '18px', color: C.red, opacity: 1,
+  });
+  E(box, '', '', {
+    top: '20px', width: RECAP_PART.w + 'px', height: '14px', borderRadius: '3px', background: C.red, opacity: 1,
+  });
+}
+const RECAP_PART_MAKERS = { slots: makeSlotsPart, poller: makePollerPart, cache: makeCachePart, cpu: makeCpuPart };
+// The part of row i, hidden until showRecapPart shows it
+function makeRecapPart(root, i) {
+  const box = E(root, '', '', { width: RECAP_PART.w + 'px', height: RECAP_PART.h + 'px' });
+  RECAP_PART_MAKERS[RECAP_PARTS[i]](box);
+  return box;
+}
+// Shows the part of row i at its place, moved dx, dy px (whole pixels) and scaled by s, with opacity o
+function showRecapPart(box, i, o, { dx = 0, dy = 0, s = 1 } = {}) {
+  const [x, y] = recapPartCenter(i);
+  showAt(box, x - RECAP_PART.w / 2 + dx, y - RECAP_PART.h / 2 + dy, o);
+  box.style.transform = s === 1 ? '' : `scale(${s})`;
+  // the Poller's poll line flows on the ambient clock, as in the diagram (see draw())
+  if (box.line) box.line.setAttribute('stroke-dashoffset', -G * 40);
+}
+
+// ---------- the outro's mini Worker, above the end card
+// 4 x 2 Slots, busy with the five steps of an order and a few free: a Worker that keeps up. The outro's shift moves it
+// down, with the end card; chapter 7 ends with its Slot grid part grown into it, at the same place.
+const OUTRO_SHIFT = [0, 80];
+const OUTRO_WORKER = { x: 960, y: 238, cols: 4, rows: 2, free: [3, 6] };
+function makeOutroWorker(root) {
+  return makeMiniWorker(root, 'WORKER', OUTRO_WORKER.cols, OUTRO_WORKER.rows);
+}
+// Its status and Slots, on every frame: its gear turns on the ambient clock
+function setOutroWorker(panel) {
+  setAppStatus(panel, '', 'running');
+  panel.cells.forEach((cell, i) => setSlot(cell, OUTRO_WORKER.free.includes(i) ? 'free' : 'busy', activityIcon(i)));
+}

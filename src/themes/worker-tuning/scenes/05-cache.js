@@ -1,11 +1,12 @@
 // ===================== 5. THE CACHE RUNS OUT
-// The Worker diagram as chapter 4 leaves it: 50 Activity Slots, 44 busy, 5 Activity Pollers, the CPU at 80% and the
-// backlog falling. Open orders line up against the full WORKFLOW CACHE and the MEMORY meter nears full. The cache
+// Starts on chapter 4's last frame (a hard cut): 50 Activity Slots, 44 busy, 5 Activity Pollers, the CPU at 80% and
+// the backlog falling. Open orders line up against the full WORKFLOW CACHE and the MEMORY meter nears full. The cache
 // evicts #1045 (EVICTED), the next order takes its cell, and the next Workflow Task of #1045 takes a Workflow Slot
 // that turns dashed, its retry icon spinning: a replay. More evictions follow, both Workflow Slots replay, the cache
 // gets a red outline and a BOTTLENECK tag, the eviction and replay metrics climb, the CPU jumps and the backlog grows
 // again. The memory goes from 2 GB to 4 GB, the maxCachedWorkflows line of the code card lights and goes from 500 to
 // 2000, and the strip widens: the waiting orders move into its new cells, the tag turns FIXED and the replays stop.
+// Last, the tag and the metric lines leave: chapter 6 starts on this chapter's last frame (another hard cut).
 // The block keeps every name declared in this file local to this scene.
 {
   const SLOTS = 50;
@@ -17,15 +18,18 @@
   const pressX = r => PRESS.left + DIAGRAM.cache.w / 2 + r * DIAGRAM.cache.pitch;
   const cellX = i => cacheCellLeft(i) + DIAGRAM.cache.w / 2;
   // the first order waiting: the 4 cells hold #1042 to #1045
-  const FIRST_WAITING = 1046;
+  const FIRST_WAITING = CACHE_ORDERS.firstWaiting;
   // the cells the cache evicts, in turn; eviction j hands its cell to order FIRST_WAITING + j
-  const EVICTED_CELLS = [3, 1, 2, 0];
+  const EVICTED_CELLS = CACHE_ORDERS.evicted;
   // the strip grows from 4 to 7 cells: the 3 new ones take the next orders, the 2 waiting then (the 4 evictions used
   // 4 orders) and one more, set before the scene starts so that no eviction shows
-  const GROWN = { from: 4, to: DIAGRAM.cache.max };
+  const GROWN = { from: CACHE_ORDERS.from, to: DIAGRAM.cache.max };
   const NEW_CELLS = Array.from({ length: GROWN.to - GROWN.from }, (_, j) => ({
-    cell: GROWN.from + j, at: -10, next: FIRST_WAITING + EVICTED_CELLS.length + j,
+    cell: GROWN.from + j, at: -10, next: finalCacheOrder(GROWN.from + j),
   }));
+  // the Activity Tasks that keep coming into the 6 free Slots: 30 of them, a multiple of the five order steps (see
+  // REST_LEAD), each one holding its Slot WORK.hold s
+  const WORK = { from: 0.6, count: 30, hold: 2.6 };
   // the metric values: forced evictions per second, replay latency in ms
   const formatLatency = ms => (ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
 
@@ -56,6 +60,11 @@
   scene({
     chapter: 5, title: 'The cache runs out',
     pre: 1.5, post: 2.0,
+    // hard cuts on both ends: chapter 4 ends on this chapter's first frame, chapter 6 starts on its last one
+    fadeIn: 0, fadeOut: 0,
+    // presenter mode holds with the FIXED tag and the metric lines on screen, then plays their exit and the cut in one
+    // go
+    holdBeforeEnd: LEAVE_LEAD + 0.1,
     subs: [
       { text: "More orders are open at once than the Workflow cache can hold.", after: 1.5 },
       {
@@ -108,18 +117,28 @@
         [2, flowLandAt(hitsBefore, 0)], [0, flowLandAt(hitsBefore, 1)],
         [5, flowLandAt(hitsAfter, 0)], [1, flowLandAt(hitsAfter, 1)], [6, flowLandAt(hitsAfter, 2)],
       ];
-      // the Activity Tasks keep coming into the 6 free Slots
-      const work = { lane: 'act', from: 0.6, every: 1.1, count: 34, hold: 2.6, slots: freeSlots(SLOTS, BUSY) };
+      // the Activity Tasks keep coming into the 6 free Slots, at a pace that has the last one done REST_LEAD s
+      // before the end
+      const work = {
+        lane: 'act', from: WORK.from, count: WORK.count, hold: WORK.hold, slots: freeSlots(SLOTS, BUSY),
+        every: (this.dur - REST_LEAD - FLIGHT.land - WORK.hold - WORK.from) / (WORK.count - 1),
+      };
 
-      // the backlog falls as chapter 4 ends, grows again once the replays start, and falls after the fix
+      // the backlog falls on from where chapter 4 leaves it, grows again once the replays start, and falls after the
+      // fix to where chapter 6 starts; so does the wait
+      const start = AT_CUT.ch5, next = AT_CUT.ch6;
       const clogged = P(t, replayFrom, fixAt - replayFrom, linear);
-      const relief = Math.max(0, t - fixAt);
-      const act = 900 - 8 * Math.min(t, replayFrom) + 640 * clogged - 70 * relief;
-      const wf = 5 + 36 * clogged - 34 * P(t, fixAt, 2.0);
+      const clogging = start.act - 8 * Math.min(t, replayFrom) + 640 * clogged;
+      const act = lerp(clogging, next.act, P(t, fixAt, this.dur - fixAt, linear));
+      const wf = lerp(start.wf + 36 * clogged, next.wf, P(t, fixAt, 2.0));
       const trend = t >= replayFrom && t < fixAt ? 'up' : 'down';
-      const wait = 3 + 6 * P(t, replayFrom, 4.0) - 5 * P(t, fixAt, 2.0);
+      const wait = lerp(start.wait + 6 * P(t, replayFrom, 4.0), next.wait, P(t, fixAt, 2.0));
+      // the memory nears full; twice as much halves the share used, then the larger cache takes a little of it
+      const crowded = start.mem + 0.12 * P(t, c[0] + 1.0, 1.5);
+      const memUse = lerp(lerp(crowded, crowded / 2, P(t, memAt, 0.6)), next.mem, P(t, growAt, 0.6));
       const cells = lerp(GROWN.from, GROWN.to, P(t, growAt, 0.6));
       const fixed = t >= fixAt;
+      const outAt = this.dur - LEAVE_LEAD;
       placeWorkerDiagram(s.dg, t, {
         queue: { wf, act },
         flows: [hitsBefore, work, ...replays, hitsAfter],
@@ -131,21 +150,19 @@
           cells, grow: t >= growAt ? { from: GROWN.from, at: growAt } : undefined, hits,
           evictions: [...NEW_CELLS, ...evictions],
         },
-        cpu: 80 + 16 * P(t, c[2] + 1.4, 0.8) - 8 * P(t, fixAt, 1.0),
-        mem: {
-          use: 0.8 + 0.12 * P(t, c[0] + 1.0, 1.5) - 0.46 * P(t, memAt, 0.6) + 0.09 * P(t, growAt, 0.6),
-          label: t >= memAt ? '4 GB' : '2 GB', swapAt: memAt,
-        },
+        cpu: lerp(start.cpu + 16 * P(t, c[2] + 1.4, 0.8), next.cpu, P(t, fixAt, 1.0)),
+        mem: { use: memUse, label: t >= memAt ? '4 GB' : '2 GB', swapAt: memAt },
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
+        // the metric lines and the cache's tag sink out before the cut, as chapter 6 shows none
         metrics: [
           {
-            name: 'temporal_sticky_cache_total_forced_eviction', at: c[2] + 0.8,
+            name: 'temporal_sticky_cache_total_forced_eviction', at: c[2] + 0.8, out: outAt,
             value: fixed ? '0/s' : Math.round(lerp(6, 48, P(t, c[2] + 0.8, 2.5))) + '/s',
             color: fixed ? C.neon : C.red,
           },
           {
-            name: 'temporal_workflow_task_replay_latency', at: c[2] + 1.2,
+            name: 'temporal_workflow_task_replay_latency', at: c[2] + 1.2, out: outAt,
             value: fixed ? 'no replays' : formatLatency(lerp(40, 1200, P(t, c[2] + 1.2, 2.5))),
             color: fixed ? C.neon : C.red,
           },
@@ -156,7 +173,7 @@
           light: ['cache', lightAt, swapAt + 2.0],
         },
         status: replaying.length > 0 ? ['REPLAYING', 'running'] : ['RUNNING', 'running'],
-        marks: { cache: { at: c[2] + 0.3, fixedAt: fixAt } },
+        marks: { cache: { at: c[2] + 0.3, fixedAt: fixAt, out: outAt } },
       });
       // a replaying Slot's retry icon turns backwards, on the ambient clock
       replaying.forEach(i => {

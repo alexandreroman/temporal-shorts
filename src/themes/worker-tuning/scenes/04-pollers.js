@@ -1,10 +1,12 @@
 // ===================== 4. THE POLLERS CAN'T KEEP UP
-// The Worker diagram as chapter 3 leaves it: 50 Activity Slots, half of them free, the CPU at 45%, the queue growing.
+// Starts on chapter 3's last frame (a hard cut): 50 Activity Slots, half of them free, the CPU at 45%, the queue
+// growing.
 // The two Activity Pollers bring in one task every 1.6 s while their poll lines keep pulsing. A
 // temporal_activity_schedule_to_start_latency metric line climbs in red under the Slots available one, and the Pollers
 // get a red outline and a BOTTLENECK tag. The code card gains activityTaskPollerBehavior: { type: 'autoscaling' }:
 // the column grows to 5 Pollers, tasks stream through them into the free Slots, the tag turns FIXED, the backlog and
-// the wait fall. Last, the Slots fill and the CPU climbs to 80%.
+// the wait fall. Last, the Slots fill and the CPU climbs to 80%, and the two metric lines sink out: chapter 5 starts on
+// this chapter's last frame (another hard cut).
 // The block keeps every name declared in this file local to this scene.
 {
   const SLOTS = 50;
@@ -12,15 +14,21 @@
   const BUSY = 25;
   const STREAM = 19;
   const STREAM_TARGETS = freeSlots(SLOTS, BUSY).slice(0, STREAM);
-  // the trickle before the Pollers scale visits the 6 Slots that the stream leaves free
+  // the trickle before the Pollers scale visits the 6 Slots that the stream leaves free: 11 tasks, so that the chapter
+  // takes 30 tasks from the queue, a multiple of the five order steps (see REST_LEAD)
   const TRICKLE_TARGETS = SLOT_ORDER.slice(BUSY + STREAM);
-  // the CPU and the memory follow the busy Slots: 45% and 60% with 25 busy, 80% and 80% with 44
-  const cpuOf = busy => lerp(45, 80, (busy - BUSY) / STREAM);
-  const memOf = busy => lerp(0.6, 0.8, (busy - BUSY) / STREAM);
+  const TRICKLE_COUNT = 11;
+  // the CPU and the memory follow the busy Slots: chapter 3's values with 25 busy, chapter 5's with 44
+  const cpuOf = busy => lerp(AT_CUT.ch4.cpu, AT_CUT.ch5.cpu, (busy - BUSY) / STREAM);
+  const memOf = busy => lerp(AT_CUT.ch4.mem, AT_CUT.ch5.mem, (busy - BUSY) / STREAM);
 
   scene({
     chapter: 4, title: "The Pollers can't keep up",
     pre: 1.5, post: 2.0,
+    // hard cuts on both ends: chapter 3 ends on this chapter's first frame, chapter 5 starts on its last one
+    fadeIn: 0, fadeOut: 0,
+    // presenter mode holds with the metric lines on screen, then plays their exit and the cut in one go
+    holdBeforeEnd: LEAVE_LEAD + 0.1,
     subs: [
       {
         text: "Now Slots sit free while the queue still grows, and the CPU has room to spare.",
@@ -46,10 +54,7 @@
       const growAt = c[2] + 2.4;
       const streamFrom = growAt + 0.6;
       // until then, a task every 1.6 s, each one done 2.4 s after it lands
-      const trickle = {
-        lane: 'act', from: 0.6, every: 1.6, count: Math.floor((growAt - 0.6) / 1.6), hold: 2.4,
-        slots: TRICKLE_TARGETS,
-      };
+      const trickle = { lane: 'act', from: 0.6, every: 1.6, count: TRICKLE_COUNT, hold: 2.4, slots: TRICKLE_TARGETS };
       const stream = {
         lane: 'act', from: streamFrom, every: 0.45, count: STREAM, slots: STREAM_TARGETS,
         icon: k => steadySlotIcon(STREAM_TARGETS[k]),
@@ -57,13 +62,19 @@
       const streamed = flowHolding(stream, t);
       const available = SLOTS - BUSY - streamed - flowHolding(trickle, t);
 
-      // the queue grows until the stream starts, then falls; the wait climbs to 44 s, then falls to 3 s
-      const act = 2880 + 20 * Math.min(t, streamFrom) - 175 * Math.max(0, t - streamFrom);
+      // the queue grows from the count chapter 3 leaves until the stream starts, then falls to the count chapter 5
+      // starts from; the wait climbs to 44 s, then falls to chapter 5's
+      const start = AT_CUT.ch4, next = AT_CUT.ch5;
+      const peak = start.act + 20 * streamFrom;
+      const fall = P(t, streamFrom, this.dur - streamFrom, linear);
+      const act = t < streamFrom ? start.act + 20 * t : lerp(peak, next.act, fall);
       const climbFrom = 0.3, climbTo = c[1] + 0.8;
-      const wait = lerp(28, 44, P(t, climbFrom, climbTo - climbFrom, linear)) - 41 * P(t, streamFrom, 7.0);
+      const wait = lerp(lerp(start.wait, 44, P(t, climbFrom, climbTo - climbFrom, linear)), next.wait,
+        P(t, streamFrom, 7.0));
       const trend = t < streamFrom ? 'up' : 'down';
+      const outAt = this.dur - LEAVE_LEAD;
       placeWorkerDiagram(s.dg, t, {
-        queue: { wf: 6, act },
+        queue: { wf: start.wf, act },
         flows: [trickle, stream],
         slots: { n: SLOTS, busy: BUSY },
         pollers: { act: 5, grow: { from: 2, at: growAt } },
@@ -72,11 +83,11 @@
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
         metrics: [
-          // already there as chapter 3 ends
-          { name: 'temporal_worker_task_slots_available', value: String(available), at: -1 },
+          // already there as chapter 3 ends; both sink out before the cut, as chapter 5 shows none
+          { name: 'temporal_worker_task_slots_available', value: String(available), at: -1, out: outAt },
           {
             name: 'temporal_activity_schedule_to_start_latency', value: formatWait(wait), color: trendColor(trend),
-            at: c[1] + 0.8,
+            at: c[1] + 0.8, out: outAt,
           },
         ],
         code: {

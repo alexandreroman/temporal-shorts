@@ -109,9 +109,9 @@
       // the queue starts from the intro's count; c[1]: it overflows, thousands of tasks wait; c[2]: it keeps growing,
       // up to the count chapter 2 starts from at the end
       const departed = flowDeparted(flow, t);
-      const settled = QUEUE_AT_CUT.ch1 + RATE * this.dur - flow.count + SURGE;
-      const queue = QUEUE_AT_CUT.ch1 + RATE * t - departed + SURGE * P(t, c[1] + 0.4, 4.0, easeIn)
-        + (QUEUE_AT_CUT.ch2 - settled) * P(t, c[2], this.dur - c[2], linear);
+      const settled = AT_CUT.ch1.act + RATE * this.dur - flow.count + SURGE;
+      const queue = AT_CUT.ch1.act + RATE * t - departed + SURGE * P(t, c[1] + 0.4, 4.0, easeIn)
+        + (AT_CUT.ch2.act - settled) * P(t, c[2], this.dur - c[2], linear);
       const wait = 0.2 + 37.8 * P(t, c[1] + 0.4, 4.0, easeIn) + 6 * P(t, c[2], 6.0, linear);
       const growing = t >= c[1] + 0.4;
 

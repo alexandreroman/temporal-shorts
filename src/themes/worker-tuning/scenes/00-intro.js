@@ -26,7 +26,7 @@
   const ARRIVE = 1.4;
   const arrived = (t, end) => {
     const x = clamp((t - ARRIVE) / (end - ARRIVE));
-    return 2 + (QUEUE_AT_CUT.ch1 + DEPART.slots.length - 2) * (0.35 * x + 0.65 * x * x);
+    return 2 + (AT_CUT.ch1.act + DEPART.slots.length - 2) * (0.35 * x + 0.65 * x * x);
   };
 
   scene({

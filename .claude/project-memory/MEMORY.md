@@ -31,3 +31,4 @@
 - [Themes: shared anatomy and stories](references/project_theme-anatomy.md) — structure, layout, subtitles, vocabulary, docs, per-theme stories
 - [Markdown for coding agents](references/project_agent-markdown.md) — /themes/<theme>.md only, generated text, absolute links, no llms.txt
 - [Search engine optimization](references/project_seo.md) — hidden transcript, title suffix, markdown-title, personal author, git lastmod
+- [Scene transitions without fades](references/feedback_scene-transitions.md) — hard cuts on the last frame, motion for content changes, no scene fades

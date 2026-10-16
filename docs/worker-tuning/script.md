@@ -46,6 +46,11 @@ component), the setting (a line of `Worker.create` changes in the code
 card), the relief (a neon tag, the backlog falls) and the next bottleneck
 already showing, which leads into the next chapter.
 
+Scenes never fade into each other: each one opens on the previous one's
+last frame (a hard cut), and when the content changes, from the diagram
+to the recap table and from the table to the end card, components travel
+into what comes next. Only the video's opening and closing fade.
+
 The running example is the shop of the `durable-execution` video on Black
 Friday: orders arrive ten times faster than usual, and each order is a
 Workflow of five Activities, `chargeCard`, `reserveItem`, `renderInvoice`
@@ -151,9 +156,10 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 
 - **1:17** The Worker is set for normal days: 10 Activity Slots. All 10
   are busy, and the CPU sits at 35%.
-  - Visuals: the code card shows `maxConcurrentActivityTaskExecutions:
-    10` and `maxCachedWorkflows: 500`, the settings for normal days; the
-    10 Activity Slots are violet; CPU 35%.
+  - Visuals: the chapter opens on chapter 2's last frame (a hard cut). The
+    code card shows `maxConcurrentActivityTaskExecutions: 10` and
+    `maxCachedWorkflows: 500`, the settings for normal days; the 10 Activity
+    Slots are violet; CPU 35%.
 - **1:25** Tasks wait for a Slot, not for the machine: the Slots
   available metric stays at zero.
   - Visuals: the Slot grid gets a red outline and a BOTTLENECK tag; the
@@ -172,8 +178,8 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 
 - **1:53** Now Slots sit free while the queue still grows, and the CPU has
   room to spare.
-  - Visuals: half the Slots empty, the poll lines flowing; CPU 45%; the
-    queue grows.
+  - Visuals: the chapter opens on chapter 3's last frame (a hard cut). Half
+    the Slots empty, the poll lines flowing; CPU 45%; the queue grows.
 - **2:01** Tasks wait a long time before they start: the Pollers can't
   fetch them fast enough.
   - Visuals: the Pollers get the red outline and BOTTLENECK tag; a
@@ -185,14 +191,15 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     'autoscaling' }`; the Activity Pollers grow from 2 to 5; tasks stream
     into the free Slots; the tag turns neon.
 - **2:16** Tasks reach the free Slots again, and the CPU starts to climb.
-  - Visuals: the Slots fill to 44; the CPU meter rises to 80%; the
-    backlog and SCHEDULE-TO-START fall (3.0 s).
+  - Visuals: the Slots fill to 44; the CPU meter rises to 80%; the backlog and
+    SCHEDULE-TO-START fall (3.0 s). Before the cut, the metric lines sink out.
 
 ## 05 The cache runs out
 
 - **2:27** More orders are open at once than the Workflow cache can hold.
-  - Visuals: open orders wait as dashed cells (#1046, #1047, ...) beside
-    the full WORKFLOW CACHE strip, with a "+N" count; MEMORY turns red.
+  - Visuals: the chapter opens on chapter 4's last frame (a hard cut). Open
+    orders wait as dashed cells (#1046, #1047, ...) beside the full WORKFLOW
+    CACHE strip, with a "+N" count; MEMORY turns red.
 - **2:33** The cache evicts Workflows. An evicted Workflow replays its
   whole Event History on its next task.
   - Visuals: a cell slides out in red (EVICTED) and hands its place to a
@@ -207,18 +214,19 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     jumps to 96%; the Workflow lane lengthens.
 - **2:49** Give the Worker more memory and a larger cache: open orders
   stay cached, and replays stop.
-  - Visuals: MEMORY 2 GB becomes 4 GB; the code line
-    `maxCachedWorkflows: 500` lights and becomes 2000; the strip widens
-    to 7 cells and the waiting orders move in; the metric lines read 0/s
-    and "no replays" in neon; the tag turns neon; CPU 88%.
+  - Visuals: MEMORY 2 GB becomes 4 GB; the code line `maxCachedWorkflows: 500`
+    lights and becomes 2000; the strip widens to 7 cells and the waiting
+    orders move in; the metric lines read 0/s and "no replays" in neon; the
+    tag turns neon; CPU 88%. Before the cut, the metric lines and the FIXED
+    tag sink out.
 
 ## 06 The CPU is full
 
 - **3:01** Now renderInvoice keeps the CPU at 100%: every task slows down
   and holds its Slot longer.
-  - Visuals: invoice chips fill two Slots in three; the CPU meter pins at
-    100% in red with the BOTTLENECK tag; the busy Slots drop from 44 to 36,
-    the others stay free.
+  - Visuals: the chapter opens on chapter 5's last frame (a hard cut). A wave
+    of invoice chips runs through the queue and fills two Slots in three; the CPU meter pins at 100% in red with the
+    BOTTLENECK tag; the busy Slots drop from 44 to 36, the others stay free.
 - **3:09** More Slots would not help: a Slot adds no CPU. This Worker has
   used all the CPU it has.
   - Visuals: the code card fades; a dashed "+ SLOTS" ghost takes its
@@ -231,32 +239,36 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     travel along it to them; the CPU meters settle at 60, 62 and 58%;
     A's CPU tag turns neon (FIXED).
 - **3:26** The backlog drains, and new orders start right away again.
-  - Visuals: the queues empty; BACKLOG falls to 0 and SCHEDULE-TO-START
-    to 0.3 s, in neon.
+  - Visuals: the queues empty; BACKLOG falls to 0 and SCHEDULE-TO-START to 0.3
+    s, in neon. Then the diagram leaves in turn while the Slot grid, the
+    Pollers, the cache and the CPU meter shrink into the row icons of chapter
+    7's table.
 
 ## 07 Read the signals
 
 - **3:36** A growing backlog has four common causes: full Slots, slow
   Pollers, a small cache or a full CPU.
-  - Visuals: a table of four rows, SYMPTOM / SIGNAL / FIX: Slots full, CPU
-    low / `worker_task_slots_available` at 0 / More Slots
+  - Visuals: each row grows from its icon (the cache icon reads #1049, the
+    order the diagram ends with). A table of four rows, SYMPTOM / SIGNAL /
+    FIX: Slots full, CPU low / `worker_task_slots_available` at 0 / More Slots
     (`maxConcurrentActivityTaskExecutions`); Slots free, long wait /
     `activity_schedule_to_start_latency` high / Poller Autoscaling
     (`activityTaskPollerBehavior`); evictions, replays /
-    `sticky_cache_total_forced_eviction` rising / More memory, larger
-    cache (`maxCachedWorkflows`); CPU at 100% / CPU usage / More Workers;
-    each row starts with a small icon of the diagram (Slots, a Poller, a
-    cache cell, a full CPU bar) and lights as it is named.
+    `sticky_cache_total_forced_eviction` rising / More memory, larger cache
+    (`maxCachedWorkflows`); CPU at 100% / CPU usage / More Workers; each row
+    starts with a small icon of the diagram (Slots, a Poller, a cache cell, a
+    full CPU bar) and lights as it is named.
 - **3:44** Change one setting at a time, watch the signals, then look for
   the next bottleneck.
   - Visuals: under the table, three pills CHANGE ONE SETTING → WATCH THE
     SIGNALS → NEXT BOTTLENECK, each appearing as it is read, then an arrow
-    back to the first closes the loop.
+    back to the first closes the loop. Then the rows and the loop slide out,
+    and the Slot icon grows into the outro's Worker.
 
 ## Outro
 
 - **3:55** Tune one bottleneck at a time, and your Temporal Workers keep
   up when traffic spikes.
-  - Visuals: a small Worker panel with its Slots, title "Tuning Temporal
-    Workers", tagline "WORKERS THAT KEEP UP WITH YOUR TRAFFIC", Temporal
-    logo.
+  - Visuals: the outro opens on that Worker; the end card builds under it. A
+    small Worker panel with its Slots, title "Tuning Temporal Workers",
+    tagline "WORKERS THAT KEEP UP WITH YOUR TRAFFIC", Temporal logo.
