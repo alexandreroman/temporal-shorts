@@ -479,6 +479,7 @@ function placeGhost(ghost, t, p, o, strikeAt, strikeO) {
 // A tag's height: 21 px of line, 8 of padding and 2 of border (1 px a side); odd, so a tag centered on a line has its
 // top rounded to a whole pixel
 const TAG_H = 31;
+const TAG_GAP = 6; // the gap between a tag above an outline and the outline
 // A statusTag TAG_H px high: the bottleneck tags, and chapter 5's EVICTED
 function markTag(root) {
   const tag = statusTag(root);
@@ -494,7 +495,7 @@ function makeMark(root) {
 function tagCorner(box, spot, w, minLeft) {
   if (spot === 'left') return [box.left - 20 - w, Math.round(box.top + box.h / 2 - TAG_H / 2)];
   const left = spot === 'above-right' ? box.left + box.w - w : box.left + box.w / 2 - w / 2;
-  const top = spot === 'astride' ? Math.round(box.top - TAG_H / 2) : box.top - 38;
+  const top = spot === 'astride' ? Math.round(box.top - TAG_H / 2) : box.top - TAG_GAP - TAG_H;
   return [Math.max(minLeft, left), top];
 }
 // box: { left, top, w, h } of the outline; spot: where the tag sits, 'above' (centered over the outline),
