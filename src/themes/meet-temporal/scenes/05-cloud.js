@@ -98,7 +98,7 @@
   CLOUD_TITLE.gap = Math.round(0.2 * CLOUD_TITLE.font);
   // A zone with a label at its top left (yours) or the title Temporal Cloud (Temporal's), and a caption at its
   // bottom
-  function makeZone(root, zone, caption, mine) {
+  const makeZone = (root, zone, caption, mine) => {
     const head = mine
       ? '<div class="lbl" style="position:absolute;left:24px;top:20px;padding-left:0;font-size:18px">'
         + 'Your environment</div>'
@@ -115,9 +115,9 @@
     { width: zone.w + 'px', height: zone.h + 'px', ...look });
     e.cap = e.querySelector('.cap');
     return e;
-  }
+  };
   // A Worker: an app panel with its code in a card, its keywords in violet
-  function makeWorker(root, k, lines) {
+  const makeWorker = (root, k, lines) => {
     const w = makeAppPanel(root, `WORKER ${k + 1}`, WORKER.w, WORKER.h, { font: 19, statusFont: 15, statusTop: 23 });
     const keyword = /^(\s*)(workflow|activity|await|return)/;
     const code = lines.map(line => '<div style="white-space:pre;margin:0 -8px;padding:0 8px;border-radius:4px">'
@@ -129,10 +129,10 @@
     w.code = w.querySelector('.code');
     w.lines = [...w.code.children];
     return w;
-  }
+  };
   // The Data Converter: a lock (its shackle its own path, so it can open and snap shut) and its name on one row,
   // then a key and YOUR KEYS: the encryption keys are yours
-  function makeConverter(root) {
+  const makeConverter = root => {
     const e = E(root,
       '<div style="display:flex;align-items:center">'
       + `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${C.neon}" stroke-width="2"`
@@ -157,7 +157,7 @@
       boxShadow: `0 0 12px 3px rgba(${RGB.neon},.45)`,
     });
     return e;
-  }
+  };
   // A block of Temporal Cloud: its label (an icon and a name) at its top left, top px from its top
   const makeBlock = (root, icon, name, h, top = 20) => E(root,
     panelLabel(icon, name, `left:22px;top:${top}px`), 'tile', {
@@ -167,7 +167,7 @@
   // A history row: its number, its name on the left, then two fixed columns on the right: its state, a quiet slate
   // label right-aligned 20 px left of the payload column, and its payload, encrypted (an empty slot for an event
   // without data)
-  function makeRow(root, i, [name, state, payload]) {
+  const makeRow = (root, i, [name, state, payload]) => {
     const chip = payload === null ? '<span style="flex:none;width:210px"></span>'
       : '<span class="pl" style="flex:none;display:flex;align-items:center;justify-content:center;gap:8px;'
         + 'width:210px;height:40px;'
@@ -187,7 +187,7 @@
       });
     e.pl = e.querySelector('.pl');
     return e;
-  }
+  };
 
   scene({
     chapter: 5, title: 'How Temporal Cloud works',

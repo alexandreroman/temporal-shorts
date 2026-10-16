@@ -60,21 +60,21 @@
 
   // SVG path of the proxy's connection to the point (x1, y): straight when y is on the wire's line, else bending at
   // WIRE.x with rounded corners
-  function wireD(x1, y) {
+  const wireD = (x1, y) => {
     const { x0, x } = WIRE;
     const y0 = PROXY_WIRE.y, dy = y - y0;
     if (Math.abs(dy) < 0.5) return `M ${x0} ${y0} L ${x1} ${y0}`;
     const r = Math.min(WIRE.r, Math.abs(dy) / 2), dir = Math.sign(dy);
     return `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + dir * r} V ${y - dir * r} Q ${x} ${y} ${x + r} ${y}`
       + ` H ${x1}`;
-  }
+  };
   // An upstream's body: its name, centered under its heading's lockup, and its icon in the middle
-  function upstreamBody(name, icon) {
+  const upstreamBody = (name, icon) => {
     return `<div style="position:absolute;left:0;right:0;top:${TITLE.nameTop}px;font-size:${TITLE.name}px;`
       + `line-height:30px;text-align:center;color:#F2F2F2">${name}</div>`
       + '<div style="position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;'
       + `transform:translateY(-50%);margin-top:${UPSTREAM.icon / 2}px">${ICON(icon, 52, C.slate, 1.6)}</div>`;
-  }
+  };
 
   scene({
     chapter: 8, title: 'Change Temporal, not your code',

@@ -34,12 +34,12 @@
     return [hub.x + Math.cos(a) * BUBBLE.r, hub.y + Math.sin(a) * BUBBLE.r];
   };
   // the spoke from the symbol's edge to the hub's edge
-  function spokeD(hub) {
+  const spokeD = hub => {
     const dx = hub.x - CENTER.x, dy = hub.y - CENTER.y, d = Math.hypot(dx, dy);
     const from = SYMBOL_SIZE / 2 + 16, to = d - HUB_SIZE / 2 - 8;
     return `M ${CENTER.x + dx / d * from} ${CENTER.y + dy / d * from} L ${CENTER.x + dx / d * to} `
       + `${CENTER.y + dy / d * to}`;
-  }
+  };
 
   // Round category hub: the category in bold, then WORKFLOWS lighter, on UV
   const makeHub = (root, name) => E(root,
@@ -50,7 +50,7 @@
     });
   // Example bubble: a round tile with a stroke icon, its mono label on its outer side, away from the link to its
   // hub: beside it when the bubble sits mostly left or right of the hub (angle in degrees), else above or under it
-  function makeBubble(root, [icon, label], angle) {
+  const makeBubble = (root, [icon, label], angle) => {
     const a = angle * Math.PI / 180;
     let labelAt;
     if (Math.abs(Math.cos(a)) >= 0.6) {
@@ -66,7 +66,7 @@
       + `<div class="lbl" style="position:absolute;${labelAt};font-size:${BUBBLE.font}px">`
       + `${label}</div>`,
       '', { width: BUBBLE.size + 'px', height: BUBBLE.size + 'px' });
-  }
+  };
 
   scene({
     chapter: 3, title: 'Where Temporal is used',

@@ -101,7 +101,7 @@
   const distance = ([x1, y1], [x2, y2]) => Math.hypot(x2 - x1, y2 - y1);
 
   // The scene time at which the outline's pen, drawing at a steady speed, reaches OUTLINE[index]
-  function penReaches(index) {
+  const penReaches = index => {
     let total = 0, reached = 0;
     OUTLINE.forEach((point, i) => {
       const next = OUTLINE[(i + 1) % OUTLINE.length];
@@ -109,12 +109,12 @@
       total += distance(point, next);
     });
     return OUTLINE_AT + OUTLINE_D * reached / total;
-  }
+  };
 
   // Title block: "Meet" and the lockup on one line, the violet tagline under it. The lockup image rests its
   // wordmark's baseline on the line's baseline (vertical-align lowers the image's bottom under it), where "Meet"
   // sits too.
-  function makeTitleCard(root, tagline) {
+  const makeTitleCard = (root, tagline) => {
     return E(root,
       `<div style="width:${TITLE_WIDTH}px;height:${LOCKUP_HEIGHT}px;margin:0 auto;text-align:left;`
       + 'line-height:0;white-space:nowrap">'
@@ -124,7 +124,7 @@
       + '<div class="mono" style="font-size:24px;line-height:32px;letter-spacing:.14em;padding-left:.14em;'
       + `color:var(--violet);margin-top:${TAGLINE_GAP}px">${tagline}</div>`,
       '', { width: CARD_WIDTH + 'px', height: CARD_HEIGHT + 'px', textAlign: 'center' });
-  }
+  };
 
   scene({
     pre: 0.4, post: 2.6,

@@ -67,7 +67,7 @@
     .join('');
   // An outsider's tile, h px high: an icon and a name, in the identity badge's type, then a second row (HTML) under
   // them, and its verdict tag on the right of its heading (tile.verdict, an alarm tag, hidden)
-  function makeOutsider(root, h, icon, name, color, rowHtml, look) {
+  const makeOutsider = (root, h, icon, name, color, rowHtml, look) => {
     const { w, inset, headTop } = OUTSIDER;
     const tile = E(root,
       `<div style="position:absolute;left:${inset}px;top:${headTop}px;display:flex;gap:8px;align-items:center">`
@@ -81,18 +81,18 @@
     });
     balanceTagLabel(tile.verdict, 'alarm');
     return tile;
-  }
+  };
   // A heading of the private connectivity beat: an icon and a label, in the outsiders' heading type, in color
   const beatHeading = (root, icon, label, color) => E(root,
     `${ICON(icon, 22, color, 1.8)}<span class="lbl" style="font-size:14px;color:${color}">${label}</span>`, '',
     { display: 'flex', gap: '8px', alignItems: 'center' });
   // Pops an outsider's verdict in, with the label of an alarm tag (setAlarmTag), at `at`
-  function popVerdict(tile, t, label, at) {
+  const popVerdict = (tile, t, label, at) => {
     setAlarmTag(tile.verdict, label);
     const pop = popIn(t, at);
     tile.verdict.style.opacity = pop.o;
     tile.verdict.style.transform = `scale(${pop.s})`;
-  }
+  };
 
   scene({
     chapter: 2, title: 'On the wire',

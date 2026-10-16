@@ -44,7 +44,7 @@
 
   // A viewer's tile: a person and a name, and the eye that marks it once it reads the IBAN (tile.eye), on its right;
   // its person in line with the Web UI's text, its eye as far from its right edge
-  function makeViewer(root, name) {
+  const makeViewer = (root, name) => {
     const tile = E(root,
       '<div style="display:flex;align-items:center;gap:12px">'
       + `${ICON('user', 28, C.ink, 1.8)}<span class="lbl" style="font-size:14px;color:var(--ink)">${name}</span></div>`
@@ -56,9 +56,9 @@
       });
     tile.eye = tile.querySelector('.eye');
     return tile;
-  }
+  };
   // The lens: a red ring holding a copy of the IBAN, LENS.zoom times larger, and a scan line through its center
-  function makeLens(root) {
+  const makeLens = root => {
     const lens = E(root,
       `<div class="mono" style="position:absolute;white-space:pre;color:${C.ink};font-size:${IBAN.font * LENS.zoom}px;`
       + `line-height:${IBAN.line * LENS.zoom}px">${TRANSFER[0][1]}</div>`
@@ -70,14 +70,14 @@
       });
     lens.text = lens.firstElementChild;
     return lens;
-  }
+  };
   // The stutter before the rewind, from `at` for d seconds: every 0.05 s the picture jumps sideways (dx, whole px) and
   // splits into red and UV copies `split` px apart; { dx: 0, split: 0 } outside it
-  function stutter(t, at, d) {
+  const stutter = (t, at, d) => {
     if (t < at || t >= at + d) return { dx: 0, split: 0 };
     const step = Math.floor((t - at) / 0.05);
     return { dx: Math.round((hash(step + 70) * 2 - 1) * 16), split: 4 + Math.round(hash(step + 90) * 8) };
-  }
+  };
 
   scene({
     chapter: 3, title: 'In the Event History',

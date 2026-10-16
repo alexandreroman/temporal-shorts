@@ -102,7 +102,7 @@
   // A row of the table, after its part (see makeRecapPart): the symptom, the signal (its metrics in mono, one per line,
   // each followed by its reading in red; plain words as the symptom) and the fix (the Worker option under it, in slate
   // mono)
-  function makeRow(root, row) {
+  const makeRow = (root, row) => {
     const textCss = 'font-size:28px;line-height:36px';
     const metricLine = ([metric, reading]) => '<div style="display:flex;align-items:baseline;gap:12px">'
       + `<span>${metric}</span><span style="color:${C.red}">${reading}</span></div>`;
@@ -115,7 +115,7 @@
     return E(root,
       cell(COL.symptom, row.symptom, textCss) + signal + cell(COL.fix, `<div>${row.fix}${option}</div>`, textCss),
       'tile', { height: RECAP.rowH + 'px', textAlign: 'left' });
-  }
+  };
 
   scene({
     chapter: 7, title: 'Read the signals',

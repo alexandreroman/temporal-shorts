@@ -41,7 +41,7 @@
   const TRAIL = [0.06, 0.12, 0.18]; // how far each ghost of a travelling face lags behind it, in seconds
 
   // Milestone tile: company on top, name in a two-line box (or the official logo), a rule, the detail at the bottom
-  function makeMilestone(root, { company, name, detail }) {
+  const makeMilestone = (root, { company, name, detail }) => {
     const head = `<div class="lbl" style="font-size:17px">${company ?? 'Their own company'}</div>`;
     const body = name
       ? `<div style="font-size:32px;line-height:1.12;letter-spacing:-.5px">${name}</div>`
@@ -54,7 +54,7 @@
       + `<div class="lbl" style="position:absolute;left:0;right:0;top:234px;font-size:15px;color:var(--ink)">`
       + `${detail}</div>`,
       'tile', { width: TILE.w + 'px', height: TILE.h + 'px' });
-  }
+  };
   // Name and role of a founder, aligned toward the face (align: 'right' or 'left')
   const makeNameLabel = (root, founder, align) => E(root,
     `<div class="mono" style="font-size:24px;letter-spacing:.1em;text-transform:uppercase">`

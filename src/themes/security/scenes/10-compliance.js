@@ -61,14 +61,14 @@
   const PILL_Y = (slotY(0) + slotY(1)) / 2;
   TAG.y = PILL_Y - TAG.pillDy;
   // SVG path from the audit tag's inner edge to the card's left edge, level with the results row: a smooth S
-  function linkD() {
+  const linkD = () => {
     const x0 = TAG.xs[0] + TAG.w / 2 + LINK.gap, x1 = CARD.x - CARD.w / 2 - LINK.gap;
     const y0 = PILL_Y, y1 = slotY(RESULTS_ROW), xm = (x0 + x1) / 2;
     return `M ${x0} ${y0} C ${xm} ${y0} ${xm} ${y1} ${x1} ${y1}`;
-  }
+  };
 
   // A seal: its ring, its dashed inner ring, a neon check, its name and status
-  function makeSeal(root, [lines, status]) {
+  const makeSeal = (root, [lines, status]) => {
     const nameBlock = SEAL.nameLine * 2;
     const inner = SEAL.size - 2 * SEAL.ring;
     return E(root,
@@ -85,14 +85,14 @@
         background: '#221A33', display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', textAlign: 'center',
       });
-  }
+  };
   // An empty seal slot: a faint dashed circle where a seal lands
   const makeSlot = root => E(root, '', '', {
     width: SEAL.size + 'px', height: SEAL.size + 'px', borderRadius: '50%',
     border: `2px dashed rgba(${RGB.ink},.22)`,
   });
   // A tag of a third-party check, under its THIRD PARTY caption: one element, centered on its pill and caption
-  function makeAuditTag(root, [icon, label]) {
+  const makeAuditTag = (root, [icon, label]) => {
     return E(root,
       '<div class="lbl" style="font-size:16px;line-height:22px">Third party</div>'
       + `<div class="mono" style="margin-top:16px;width:${TAG.w}px;height:52px;display:flex;align-items:center;`
@@ -100,10 +100,10 @@
       + `color:${C.ink};border:2px solid ${C.violet};border-radius:var(--rs);background:var(--violet-solid)">`
       + `${ICON(icon, 22, C.violet, 2)}${label}</div>`,
       '', { display: 'flex', flexDirection: 'column', alignItems: 'center' });
-  }
+  };
   // The TRUST CENTER card: its heading and address, then one slot per row of CARD_ROWS, dashed while empty
   // (card.slots[i], with .fill, the filled row, hidden until a scene shows it)
-  function makeTrustCard(root) {
+  const makeTrustCard = root => {
     const slots = CARD_ROWS.map((row, i) => {
       const top = CARD.slotTop + i * (CARD.slotH + CARD.slotGap);
       return `<div class="slot" style="position:absolute;left:${CARD.pad}px;right:${CARD.pad}px;top:${top}px;`
@@ -125,7 +125,7 @@
       'tile', { width: CARD.w + 'px', height: CARD.h + 'px', textAlign: 'left', background: C.bg });
     card.slots = [...card.querySelectorAll('.slot')].map(slot => ({ slot, fill: slot.querySelector('.fill') }));
     return card;
-  }
+  };
 
   scene({
     chapter: 10, title: 'Audited and certified',

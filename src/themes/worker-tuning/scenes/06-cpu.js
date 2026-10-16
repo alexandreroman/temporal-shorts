@@ -74,7 +74,7 @@
   ];
   // Worker B or C: an app panel, its Poller, 5 Slots and a CPU gauge. Children are placed from the panel's padding
   // box, inside its border, drawn 1 px wide (see MINI.border): the offsets put them on whole stage pixels.
-  function makeNewWorker(root, name) {
+  const makeNewWorker = (root, name) => {
     const inset = MINI.border;
     const panel = makeAppPanel(root, name, NEW.w, NEW.h, { font: 18 });
     panel.cells = Array.from({ length: INSIDE.slots }, (_, k) => makeSlot(panel, slot.w, slot.h, {
@@ -99,31 +99,31 @@
     panel.cpuFill = panel.querySelector('.fill');
     panel.cpuFill.style.background = `linear-gradient(90deg,${C.uv},${C.violet})`;
     return panel;
-  }
-  function setNewWorkerCpu(panel, cpu) {
+  };
+  const setNewWorkerCpu = (panel, cpu) => {
     panel.cpuValue.textContent = Math.round(cpu) + '%';
     panel.cpuFill.style.width = Math.round(cpu / 100 * GAUGE.w) + 'px';
-  }
+  };
 
   // Fades an element by o, on top of the opacity it was given this frame
-  function fadeBy(e, o) {
+  const fadeBy = (e, o) => {
     const opacity = parseFloat(e.style.opacity) * o;
     e.style.opacity = opacity;
     e.style.visibility = opacity <= 0.001 ? 'hidden' : 'visible';
-  }
+  };
   // Moves an element that the diagram placed this frame with place() dx, dy px further, and fades it by o
-  function slideAway(e, dx, dy, o) {
+  const slideAway = (e, dx, dy, o) => {
     e.style.transform = `translate(${dx}px,${dy}px) ${e.style.transform}`;
     fadeBy(e, o);
-  }
+  };
   // The same for a label that the diagram placed this frame with showAt()
-  function slideLabelAway(e, dx, dy, o) {
+  const slideLabelAway = (e, dx, dy, o) => {
     e.style.left = parseFloat(e.style.left) + dx + 'px';
     e.style.top = parseFloat(e.style.top) + dy + 'px';
     fadeBy(e, o);
-  }
+  };
   // The parts of the diagram in each group that leaves (see LEAVING), placed or labels
-  function leavingGroups(dg) {
+  const leavingGroups = dg => {
     const { lanes } = dg;
     return {
       temporal: {
@@ -133,7 +133,7 @@
       band: { placed: [dg.backlog, dg.wait, ...dg.metrics], labels: [] },
       frame: { placed: [dg.worker, ...dg.wfSlots, ...dg.pollers.wf], labels: Object.values(dg.labels) },
     };
-  }
+  };
   // Slot j of the Slot grid part that Activity Slot i shrinks into: the grid's 10 columns and 5 rows fold into the
   // part's 3 and 2
   const partSlotOf = i => Math.floor((i % DIAGRAM.slot.cols) * 3 / DIAGRAM.slot.cols)
@@ -143,7 +143,7 @@
   // component in the order of the recap's rows. Of the elements that end on the same spot, one stays: the others fade
   // out on the way. The lane's track resizes rather than scales, from the diagram's size to the part's (size: [from,
   // to], each [w, h]): its height shrinks far less than its width.
-  function shrinkingComponents(dg) {
+  const shrinkingComponents = dg => {
     const partCorner = i => [recapPartCenter(i)[0] - RECAP_PART.w / 2, recapPartCenter(i)[1] - RECAP_PART.h / 2];
     const { left, w, h } = DIAGRAM.lane;
     const lane = [[
@@ -172,7 +172,7 @@
     const gaugeTo = [partX, partY + barMiddle(RECAP_PART.h) - barMiddle(CPU_GAUGE.h) * gaugeScale];
     const cpu = [[dg.cpu, [gauge.left + gauge.w / 2, gauge.top + gauge.h / 2], gaugeTo, gaugeScale, true]];
     return [lane, slots, pollers, cache, cpu];
-  }
+  };
 
   scene({
     chapter: 6, title: 'The CPU is full',

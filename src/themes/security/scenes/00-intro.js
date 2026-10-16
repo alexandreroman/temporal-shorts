@@ -22,7 +22,7 @@
   const GHOSTS = [0.07, 0.14, 0.21]; // how far each ghost outline of the flying card lags behind it, in progress
 
   // Seal and scramble of the loop at loop time u (negative before the first pass: open and in clear)
-  function loopState(u) {
+  const loopState = u => {
     if (u < 0) return { seal: 0, scramble: TRANSFER.map(() => 0) };
     const seal = u < LOOP.open ? P(u, LOOP.seal, LOOP.sealD, linear) : 1 - P(u, LOOP.open, LOOP.sealD, linear);
     const scramble = TRANSFER.map((_, i) => {
@@ -33,7 +33,7 @@
       return Math.min(on, 1 - off);
     });
     return { seal, scramble };
-  }
+  };
 
   scene({
     pre: 1.0,

@@ -37,7 +37,7 @@
 
   // Where waiting order `order` is at t, as { x, o }: it arrives at the end of the line, moves up as each eviction
   // frees a cell, slides into the cell its eviction frees, or into a new cell when the strip grows
-  function waitingOrder(order, t, evictions, firstAt, growAt) {
+  const waitingOrder = (order, t, evictions, firstAt, growAt) => {
     const j = order - FIRST_WAITING;
     // the first PRESS.n orders line up at the start; the others arrive as the line moves up
     const arriveAt = j < PRESS.n ? firstAt + j * 0.4 : evictions[j - PRESS.n].at + 0.6;
@@ -57,7 +57,7 @@
     const grow = P(t, growAt - 0.3, 0.4);
     const newCell = GROWN.from + Math.round(rank);
     return { x: lerp(x, cellX(newCell), grow), o: arrive * (1 - P(t, growAt + 0.05 + rank * 0.12, 0.2)) };
-  }
+  };
 
   scene({
     chapter: 5, title: 'The cache runs out',

@@ -50,7 +50,7 @@
   const CREDENTIALS = { x: PROXY.x, y: PROXY.y + PROXY.h / 2 + 38 };
 
   // The point at progress p (0 to 1) along a route of straight legs between points, at constant speed
-  function alongRoute(points, p) {
+  const alongRoute = (points, p) => {
     const legs = points.slice(1).map((b, i) => Math.hypot(b[0] - points[i][0], b[1] - points[i][1]));
     let left = clamp(p) * legs.reduce((a, b) => a + b, 0);
     for (let i = 0; i < legs.length; i++) {
@@ -61,7 +61,7 @@
       left -= legs[i];
     }
     return points[points.length - 1];
-  }
+  };
   // The first round(p * length) characters of text: it types in as p goes from 0 to 1
   const typed = (text, p) => text.slice(0, Math.round(clamp(p) * text.length));
 

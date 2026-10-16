@@ -146,7 +146,7 @@
     + `line-height:${HEAD.line}px;letter-spacing:.1em;color:${C.ink}">${text}</div>`;
   // A Namespace: its border, its NAMESPACE label and name at the top left (headTop px under its top edge, INSET px
   // from its left edge), and its verdict tag on the right of the heading (box.verdict, hidden)
-  function makeNamespaceBox(root, box, name) {
+  const makeNamespaceBox = (root, box, name) => {
     // offsets from inside the 1.5 px border, so its text rests on whole pixels
     const top = box.headTop - 1.5;
     const e = E(root,
@@ -161,9 +161,9 @@
       height: VERDICT.h + 'px', transformOrigin: 'right center',
     });
     return e;
-  }
+  };
   // A tile of the box's size: its heading, then its rows, a key over a value, centered in the room under it
-  function makeInfoTile(root, box, heading, rows) {
+  const makeInfoTile = (root, box, heading, rows) => {
     const rowH = ROW.keyLine + ROW.valueLine;
     const headBottom = TILE.headTop + HEAD.line;
     const block = rows.length * rowH + (rows.length - 1) * ROW.gap;
@@ -176,7 +176,7 @@
     return E(root,
       headHtml(heading, `position:absolute;left:${TILE.inset - 1.5}px;top:${TILE.headTop - 1.5}px;`) + rowsHtml,
       'tile', { width: box.w + 'px', height: box.h + 'px', textAlign: 'left' });
-  }
+  };
   // The fraud Task Queue: its heading on the left, its name on the right, on one line
   const makeQueueTile = root => E(root,
     headHtml('TASK QUEUE') + `<div class="mono" style="font-size:${ROW.value}px">fraud-tq</div>`,
@@ -198,7 +198,7 @@
   const makeEndpointBlock = root => makeGateTile(root, GATE.top.h, 'gateway', 'NEXUS ENDPOINT',
     `<div class="mono" style="font-size:${ROW.value}px;line-height:${ROW.valueLine}px">fraud-screening</div>`);
   // The gate's bottom tile: ALLOWLIST and its one row, payments (block.row, its check block.check)
-  function makeAllowlistBlock(root) {
+  const makeAllowlistBlock = root => {
     const block = makeGateTile(root, GATE.bottom.h, 'shield', 'ALLOWLIST',
       `<div class="row" style="width:${ALLOW_ROW.w}px;height:${ALLOW_ROW.h}px;display:flex;align-items:center;`
       + 'justify-content:center;gap:8px;border:1.5px solid;border-radius:var(--rs);'
@@ -207,7 +207,7 @@
     block.row = block.querySelector('.row');
     block.check = block.querySelector('.check svg');
     return block;
-  }
+  };
   // The veil over fraud's inside, within its border: a frosted, hatched pane, an eye struck through and what is not
   // exposed to callers. update() wipes it in from the gate's side.
   const makeVeil = root => E(root,
@@ -224,7 +224,7 @@
     });
   // The sealed result: a small card in the payload card's look, RESULT and one field in ciphertext, its padlock shut
   // on its top edge
-  function makeSealedResult(root) {
+  const makeSealedResult = root => {
     const { w, h, badge, lock } = RESULT;
     const card = E(root,
       `<div class="mono" style="font-size:14px;line-height:18px;letter-spacing:.14em;color:${C.slate};`
@@ -243,20 +243,20 @@
     });
     setLock(padlock, 1);
     return card;
-  }
+  };
   // Pops a Namespace's verdict in at `at`: its label and kind ('alarm', the theme's red verdict, or 'ok')
-  function popVerdict(box, t, label, kind, at) {
+  const popVerdict = (box, t, label, kind, at) => {
     if (kind === 'alarm') setAlarmTag(box.verdict, label);
     else setStatus(box.verdict, label, kind);
     const pop = popIn(t, at);
     box.verdict.style.opacity = pop.o;
     box.verdict.style.transform = `scale(${pop.s})`;
-  }
+  };
   // The center of a box given by its left, top and size
   const center = box => [box.x + box.w / 2, box.y + box.h / 2];
   // The boundary's dashes (BOUNDARY_DASHES) drawn down to `drawn` px along it, with the Endpoint's opening, open px
   // on each side of the call line, cut out of them
-  function boundaryDashes(drawn, open) {
+  const boundaryDashes = (drawn, open) => {
     const cutFrom = BOUNDARY.mid - open;
     const cutTo = BOUNDARY.mid + open;
     const dashes = [];
@@ -268,10 +268,10 @@
       });
     });
     return dashes;
-  }
+  };
   // Strokes path p as the given dashes, [from, to] along it in order; hides it when there are none. The pattern's
   // last gap runs past the path's end, and the offset starts it the first dash's distance in.
-  function strokeDashes(p, dashes) {
+  const strokeDashes = (p, dashes) => {
     if (dashes.length === 0) {
       p.style.opacity = 0;
       return;
@@ -286,7 +286,7 @@
     p.setAttribute('stroke-dasharray', parts.map(n => +n.toFixed(3)).join(' '));
     p.setAttribute('stroke-dashoffset', -lead);
     p.style.opacity = 1;
-  }
+  };
 
   scene({
     chapter: 9, title: 'Across Namespaces with Nexus',

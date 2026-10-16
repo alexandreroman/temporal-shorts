@@ -158,10 +158,11 @@ workspaces run `make setup` automatically.
     theme page to it (`<link rel="alternate" type="text/markdown"
     href="/themes/<theme>.md">`)
   - `themes/<theme>/scenes/`: one file per scene (subtitles and
-    animations), wrapped in a `{ ... }` block so its helpers stay local;
-    each chapter is one scene, which sets `chapter` and `title`; `shift`
-    (`[dx, dy]` or `(t, c) => [dx, dy]`, see `pan()`) centers the
-    composition at (960, 515)
+    animations), wrapped in a `{ ... }` block so its helpers stay local
+    (declare them with `const`: a function declaration inside the block
+    leaks to the global scope); each chapter is one scene, which sets
+    `chapter` and `title`; `shift` (`[dx, dy]` or `(t, c) => [dx, dy]`,
+    see `pan()`) centers the composition at (960, 515)
 - `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh` and
   any make target when the fonts are missing), frame preview, parallel
   render, timeline, layout check (`layout_check.py`), SRT export, Markdown

@@ -53,23 +53,23 @@
   // 0.4 amp up and down, within 0.35 s
   const jolt = (t, at, amp) => [dampedShake(t, at, amp, 0.35, 5), dampedShake(t, at, amp * 0.4, 0.35, 4)];
   // Sum of the jolts of every hit in `hits`
-  function jolts(t, hits, amp) {
+  const jolts = (t, hits, amp) => {
     let dx = 0, dy = 0;
     for (const at of hits) {
       const [x, y] = jolt(t, at, amp);
       dx += x; dy += y;
     }
     return [dx, dy];
-  }
+  };
   // Red flicker after each of `hits`: on and off every 0.06 s for 0.36 s, fading, as an intensity from 0 to 1
-  function flicker(t, hits) {
+  const flicker = (t, hits) => {
     let k = 0;
     for (const at of hits) {
       const u = t - at;
       if (u >= 0 && u < 0.36 && Math.floor(u / 0.06) % 2 === 0) k = Math.max(k, 1 - u / 0.36);
     }
     return k;
-  }
+  };
   // Red glow around a tile at flicker intensity k; '' leaves the tile's own style
   const redGlow = k => (k > 0
     ? `0 0 0 2px rgba(${RGB.red},${k.toFixed(3)}), 0 0 30px rgba(${RGB.red},${(0.7 * k).toFixed(3)})`

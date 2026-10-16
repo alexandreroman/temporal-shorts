@@ -126,20 +126,20 @@
   const closeRow = i => [LIST_AT.x, LIST_AT.top + i * LIST_AT.pitch];
   const wideRow = i => [WIDE_LIST.x, WIDE_LIST.top + i * WIDE_LIST.pitch];
   // The point at progress p along a path element, from its end back to its start if `back`
-  function alongPath(pathEl, p, back = false) {
+  const alongPath = (pathEl, p, back = false) => {
     const point = pathEl.getPointAtLength(pathEl._L * clamp(back ? 1 - p : p));
     return [point.x, point.y];
-  }
+  };
   // A data key's trip along the KMS link: it leaves the DATA KEY at goAt and takes tripD to reach the KMS, stays
   // there `stay` seconds while the KMS wraps it (wrapped from just after wrapAt), then comes back (from backAt)
-  function kmsTrip(linkEl, t, goAt, { tripD, stay }) {
+  const kmsTrip = (linkEl, t, goAt, { tripD, stay }) => {
     const wrapAt = goAt + tripD, backAt = wrapAt + stay;
     const at = t < backAt ? alongPath(linkEl, P(t, goAt, tripD), true) : alongPath(linkEl, P(t, backAt, tripD));
     return { at, wrapAt, backAt, wrapped: t >= wrapAt + 0.15 };
-  }
+  };
   // A tag of the close shot, sized in screen px (font): its HTML after the leading icon of a statusTag kind (unless
   // `icon` is false), in that kind's look; solid, an opaque fill for a tag over other parts
-  function closeTag(root, html, kind, font, { solid = null, icon: withIcon = true } = {}) {
+  const closeTag = (root, html, kind, font, { solid = null, icon: withIcon = true } = {}) => {
     const { icon, ...look } = STATUS_KINDS[kind];
     const lead = icon && withIcon ? ICON(icon[0], font * U, icon[1], icon[2]) : '';
     // centered, as balanceTagLabel() centers a statusTag: a label alone (icon: false) gets extra left padding for
@@ -151,10 +151,10 @@
     });
     if (solid) e.style.background = solid;
     return e;
-  }
+  };
   // YOUR KMS: its name, the KMS key (e.kmsKey, its icon) and the key servers it can be; NEVER LEAVES beside the key
   // (e.never)
-  function makeKms(root) {
+  const makeKms = root => {
     const e = E(root,
       `<div style="position:absolute;left:${px(22)};top:${px(18)};display:flex;align-items:center;gap:${px(10)}">`
       + `${ICON('kms', 26 * U, C.slate, 1.8)}<span class="lbl" style="font-size:${px(20)};color:var(--ink)">`
@@ -170,10 +170,10 @@
     e.never = closeTag(e, 'NEVER LEAVES', 'ok', 15);
     Object.assign(e.never.style, { left: 'auto', right: px(22), top: px(70) });
     return e;
-  }
+  };
   // The DATA KEY: a key, then its name and number (e.num) over its cipher (e.cipher); under them, its lifetime, a
   // clock and a bar (e.fill) that drains as the key seals payloads (setLife)
-  function makeDataKey(root) {
+  const makeDataKey = root => {
     const e = E(root,
       `<div style="display:flex;align-items:center;gap:${px(12)}">${ICON('key', 26 * U, C.neon, 2)}`
       + '<div style="text-align:left">'
@@ -193,19 +193,19 @@
     e.cipher = e.querySelector('.cipher');
     e.fill = e.querySelector('.fill');
     return e;
-  }
+  };
   // The share of a data key's lifetime left, 0 to 1, as the length of its bar
-  function setLife(e, left) {
+  const setLife = (e, left) => {
     e.fill.style.transform = `scaleX(${clamp(left).toFixed(4)})`;
-  }
+  };
   // The tag of a card's data key, a fixed width so it never moves as its text changes: DATA KEY n on its way to the
   // KMS, then WRAPPED KEY n, behind a lock (setKeyTag)
   const makeKeyTag = root => closeTag(root, '', 'wait', 15, { solid: 'var(--violet-solid)' });
-  function setKeyTag(e, n, wrapped) {
+  const setKeyTag = (e, n, wrapped) => {
     const icon = ICON(wrapped ? 'lock' : 'key', 16 * U, wrapped ? C.violet : C.neon, 2);
     setHtml(e, `${icon}${wrapped ? 'WRAPPED' : 'DATA'} KEY ${n}`);
     Object.assign(e.style, { width: px(200), justifyContent: 'center', borderStyle: wrapped ? 'solid' : 'dashed' });
-  }
+  };
   // The ciphertext of stored payload i, its first n glyphs (the same glyphs in both lists and in the windows)
   const storedCipher = (i, n) => Array.from({ length: n }, (_, col) => cipherGlyph(i + 10, col)).join('');
   // A row of the close shot's list (ROW): ciphertext, then the payload's wrapped data key behind the violet lock of
@@ -231,7 +231,7 @@
   // A window that reads the payload through the proxy, in the dark look of the Temporal Web UI: a title bar, then row
   // 2 of the Event History (its event line) and the payload's IBAN, on two lines, and name, keys above values
   // (win.values, set by setReader)
-  function makeReader(root, { title, event, body }) {
+  const makeReader = (root, { title, event, body }) => {
     const dot = '<i style="display:block;width:9px;height:9px;border-radius:50%;background:#4B5363"></i>';
     const key = text => `<div class="mono" style="margin-top:10px;font-size:16px;line-height:20px;color:${C.slate}">`
       + `${text}</div>`;
@@ -251,11 +251,11 @@
       });
     win.values = [...win.querySelectorAll('.value')];
     return win;
-  }
+  };
   // clear (0 to 1): the window's values turn from ciphertext to clear, left to right
-  function setReader(win, clear) {
+  const setReader = (win, clear) => {
     win.values.forEach((e, i) => setHtml(e, scrambledHtml(READER_SEEDS[i], READER_VALUES[i], 1 - clear, true)));
-  }
+  };
   // A small pill that carries the payload along a connection: its text in ciphertext (violet) or in clear (neon)
   const makePacket = (root, html, color) => E(root, html, 'mono', {
     height: '30px', lineHeight: '27px', padding: '0 12px', fontSize: '16px', whiteSpace: 'pre',

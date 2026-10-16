@@ -31,10 +31,10 @@
     + i * LINE.gap + LINE.h / 2];
   const rowEntry = i => [HIST.x - HIST.w / 2 + 14, HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2];
   // the cable a result runs along: from the end of line i, across the gap between the panels, into row i
-  function cableD(i) {
+  const cableD = i => {
     const [x0, y0] = lineEnd(i), [x1, y1] = rowEntry(i);
     return `M ${x0} ${y0} C ${x0 + 90} ${y0}, ${x1 - 90} ${y1}, ${x1} ${y1}`;
-  }
+  };
   const GLITCH_BARS = 7;
 
   // App instance panel holding a STEPS card: one line per step, with a neon check once done; EMPTY in the middle

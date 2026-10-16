@@ -41,7 +41,7 @@
 
   // The intro's mini Worker at morph progress m: its panel grows from the intro's place into the WORKER A panel, its
   // header fades out early, and its Slots move into the closed Worker's grid, growing to the diagram's Slot size
-  function placeMorphingWorker(mini, m) {
+  const placeMorphingWorker = (mini, m) => {
     const { worker, slot } = DIAGRAM;
     const left = lerp(MINI_FROM.left, worker.left, m), top = lerp(MINI_FROM.top, worker.top, m);
     mini.w = lerp(MINI_FROM.w, worker.w, m);
@@ -55,7 +55,7 @@
       const at = [lerp(fromX, toX - center[0], m), lerp(fromY, toY - center[1], m)];
       placeMiniCell(mini, cell, at, lerp(MINI.w, slot.w, m), lerp(MINI.h, slot.h, m));
     });
-  }
+  };
 
   scene({
     chapter: 1, title: 'The backlog grows',

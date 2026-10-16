@@ -52,7 +52,7 @@
   const TRIP_TEXT = TRANSFER[0][1].slice(0, 14);
 
   // A tile of your keys' holder: an icon over its name, and the violet key with YOUR KEYS (tile.key, see turnKey)
-  function makeKeyTile(root, icon, name, w, h) {
+  const makeKeyTile = (root, icon, name, w, h) => {
     const tile = E(root,
       `<div style="display:flex;align-items:center;justify-content:center;gap:10px">${icon}`
       + `<span class="lbl" style="font-size:15px;color:var(--ink)">${name}</span></div>`
@@ -64,12 +64,12 @@
       });
     tile.key = tile.querySelector('.key');
     return tile;
-  }
+  };
   // The key of a key tile turns once round its shaft as turn goes from 0 to 1 (a 3D spin, which ends where it began)
-  function turnKey(tile, turn) {
+  const turnKey = (tile, turn) => {
     const spinning = turn > 0 && turn < 1;
     tile.key.style.transform = spinning ? `perspective(120px) rotateX(${(360 * turn).toFixed(2)}deg)` : 'none';
-  }
+  };
   // A Search Attribute in clear: its name, an equals sign and its value, in a rounded box
   const attribute = (name, value, css = '') => `<span class="mono" style="display:inline-block;font-size:12px;`
     + `line-height:26px;padding:0 10px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);${css}">`
