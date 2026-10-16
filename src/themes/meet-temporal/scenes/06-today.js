@@ -88,7 +88,7 @@
     AI_Y[Math.floor(j / 3)]]);
   // the tiles of both groups: one style, well rounded
   const TILE = {
-    background: C.temporalSurface, color: C.ink, border: '1.5px solid ' + C.uv, fontSize: '24px', gap: '14px',
+    background: C.temporalSurface, color: C.ink, border: '1px solid ' + C.uv, fontSize: '24px', gap: '14px',
     padding: '0 24px', borderRadius: '22px',
   };
 
@@ -227,7 +227,7 @@
         TILE));
       // and more: the same tile, dashed and a little dimmer
       s.ais.push(makeChip(root, `${ICON('plus', 24, C.violet, 2)}<span style="opacity:.75">and more</span>`,
-        AI_CHIP, { ...TILE, border: '1.5px dashed ' + C.uv }));
+        AI_CHIP, { ...TILE, border: '1px dashed ' + C.uv }));
 
       // beat 3's labels: the rounds, then the valuation
       s.rounds = ROUNDS.slice(0, LAST).map(round => E(root,

@@ -101,7 +101,7 @@
       s.bugs = BUGS.map(b => {
         const badge = E(root, ICON('bug', 30, C.red, 1.8), '', {
           width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: C.bg, border: '1.5px solid ' + C.red, borderRadius: '50%',
+          background: C.bg, border: '1px solid ' + C.red, borderRadius: '50%',
         });
         // only the bug turns, not the round badge around it
         badge.querySelector('svg').style.transform = `rotate(${b.angle}deg)`;

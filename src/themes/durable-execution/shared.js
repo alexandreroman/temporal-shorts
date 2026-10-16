@@ -57,7 +57,7 @@ function makeOrderStatus(p) {
     + '<span class="mono" style="font-size:20px;letter-spacing:.08em">ORDER #1042</span>'
     + `<span style="width:1.5px;height:24px;background:${C.line}"></span>`
     + '<span class="st mono" style="font-size:20px;letter-spacing:.08em"></span></div>',
-    '', { padding: '10px 18px', border: '1.5px solid ' + C.slate, borderRadius: 'var(--rs)', whiteSpace: 'nowrap' });
+    '', { padding: '10px 18px', border: '1px solid ' + C.slate, borderRadius: 'var(--rs)', whiteSpace: 'nowrap' });
   e.st = e.querySelector('.st');
   return e;
 }

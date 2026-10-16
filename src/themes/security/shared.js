@@ -124,7 +124,7 @@ function makePayload(p, { w = 420 } = {}) {
     + `<div class="mono value" style="font-size:${value.font}px;line-height:${value.line}px;white-space:pre"></div>`
     + '</div>').join('');
   const card = E(p,
-    `<div class="alarm" style="position:absolute;inset:-1.5px;border:1.5px solid ${C.red};border-radius:var(--r);`
+    `<div class="alarm" style="position:absolute;inset:-1.5px;border:1px solid ${C.red};border-radius:var(--r);`
     + `background:rgba(${RGB.red},.12);opacity:0"></div>`
     + `<div class="mono" style="font-size:${head.font}px;line-height:${head.line}px;letter-spacing:.14em;`
     + `color:${C.slate};margin-bottom:${head.gap}px">PAYLOAD</div>`
@@ -133,13 +133,14 @@ function makePayload(p, { w = 420 } = {}) {
       width: w + 'px', height: h + 'px', textAlign: 'left',
       padding: `${pad.top}px ${pad.x}px ${pad.bottom}px`,
     });
-  // centered on the card's top edge; offsets from the padding box, inside the card's 1.5 px border
+  // centered on the card's top edge; offsets from the padding box, 1.5 px back: the border (TILE_BORDER) and half a
+  // pixel
   const lockBadge = E(card, '', '', {
     left: (w - badge) / 2 - 1.5 + 'px', top: -badge / 2 - 1.5 + 'px', width: badge + 'px', height: badge + 'px',
-    borderRadius: '50%', background: C.bg, border: `1.5px solid ${C.line}`, opacity: 1,
+    borderRadius: '50%', background: C.bg, border: `1px solid ${C.line}`, opacity: 1,
   });
   const lockSize = 2 * px(12);
-  // centered in the badge, offsets from inside its 1.5 px border
+  // centered in the badge, offsets from its padding box, 1.5 px back: the border (TILE_BORDER) and half a pixel
   card.lock = makeLock(lockBadge, lockSize, 1.9, {
     left: (badge - lockSize) / 2 - 1.5 + 'px', top: (badge - lockSize) / 2 - 1.5 + 'px', opacity: 1,
   });
@@ -303,7 +304,7 @@ function makeLane(root) {
     // a transparent border as thick as TEMPORAL's, so both zones' labels sit as far from their edges
     '', {
       width: env.w + 'px', height: env.h + 'px', background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)',
-      border: '1.5px solid transparent',
+      border: '1px solid transparent',
     });
   lane.temporal = E(root,
     zoneHeading(`<img class="head" src="${LOGO}" style="height:${ZONE_LOGO_H}px;display:block">`)
@@ -343,7 +344,7 @@ function makeLane(root) {
   // on the dashed edge, which it hides
   lane.door = E(root, ICON('door', 32, C.ink, 1.8), '', {
     width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: C.bg, border: `1.5px solid ${C.slate}`, borderRadius: 'var(--rs)',
+    background: C.bg, border: `1px solid ${C.slate}`, borderRadius: 'var(--rs)',
   });
   lane.door.icon = lane.door.querySelector('svg');
   return lane;
@@ -499,14 +500,14 @@ const NS_SWEEP_W = 160;
 // shows them.
 function makeNamespaces(lane) {
   const bands = NAMESPACES.map(ns => {
-    // offsets from inside the band's 1.5 px border, so its label and lock rest on whole pixels
+    // offsets from the band's padding box, 1.5 px back: the border (TILE_BORDER) and half a pixel
     const labelTop = (ns.mine ? 20 : (ns.h - 44) / 2) - 1.5;
     const band = E(lane.temporal.parentNode,
       `<div style="position:absolute;left:18.5px;top:${labelTop}px">`
       + `<div class="mono" style="font-size:13px;line-height:18px;letter-spacing:.14em;color:${C.slate}">`
       + 'NAMESPACE</div>'
       + `<div class="mono" style="font-size:20px;line-height:26px">${ns.name}</div></div>`,
-      '', { width: NS_BAND.w + 'px', height: ns.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)' });
+      '', { width: NS_BAND.w + 'px', height: ns.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)' });
     lane.svg.before(band);
     band.ns = ns;
     if (!ns.mine) {
@@ -682,7 +683,7 @@ function makeWebUI(root) {
     + '&nbsp; Activity completed</div>'
     + WEBUI_FIELDS.map(field).join('') + '</div>',
     '', {
-      width: WEBUI.w + 'px', height: WEBUI.h + 'px', background: WEB_UI.page, border: `1.5px solid ${C.line}`,
+      width: WEBUI.w + 'px', height: WEBUI.h + 'px', background: WEB_UI.page, border: `1px solid ${C.line}`,
       borderRadius: 'var(--r)', overflow: 'hidden', textAlign: 'left',
     });
   win.caption = win.querySelector('.ttl');
@@ -787,11 +788,11 @@ function makeWorkerTile(root, worker) {
     + `<div class="gear">${ICON('gear', 30, C.ink, 1.8)}</div>`
     + '<span class="mono" style="font-size:20px;letter-spacing:.1em">WORKER</span></div>'
     + `<div class="lang" style="position:absolute;left:${inset}px;top:56px;height:32px;display:flex;`
-    + `align-items:center;gap:8px;padding:0 12px;border:1.5px solid ${C.lineLight};border-radius:var(--rs)">`
+    + `align-items:center;gap:8px;padding:0 12px;border:1px solid ${C.lineLight};border-radius:var(--rs)">`
     + `<img src="${logo.url}" alt="" width="${logo.w}" height="${logo.h}" style="display:block;`
     + `filter:url(#${INK_FILTER_ID})">${name}</div>`
     + WORKER_CHIPS.map(([icon, label], i) => `<div class="chip" style="${slot(i, 'display:flex;align-items:center;'
-      + `gap:10px;padding-left:12px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);background:${C.bg};`
+      + `gap:10px;padding-left:12px;border:1px solid ${C.lineLight};border-radius:var(--rs);background:${C.bg};`
       + `opacity:0`)}">${ICON(icon, 20, C.violet, 1.9)}<span class="mono" style="font-size:19px;letter-spacing:.08em">`
       + `${label.toUpperCase()}</span></div>`).join('')
     + [0, 1].map(i => `<div class="code mono" style="${slot(i, `font-size:21px;line-height:${WORKER_TILE.chipH}px;`
@@ -891,13 +892,13 @@ const makeProxyBand = root => E(root,
   + `<div class="mono" style="font-size:12px;line-height:18px;letter-spacing:.14em;color:${C.slate}">NAMESPACE</div>`
   + `<div class="mono" style="font-size:18px;line-height:26px">${FULL_NS}</div></div>`,
   '', {
-    width: PROXY_BAND.w + 'px', height: PROXY_BAND.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)',
+    width: PROXY_BAND.w + 'px', height: PROXY_BAND.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)',
   });
 // A small tag beside the card (PROXY_CARD): a fixed width w, its HTML centered, in the violet look; 15 px (18 px on
 // screen in chapter 6's shot), so the full Namespace name leaves room on both sides in its band
 const proxyCardTag = (root, html, w) => E(root, html, 'mono', {
   width: w + 'px', height: PROXY_CARD.tagH + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  gap: '6px', fontSize: '15px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1.5px solid ${C.violet}`,
+  gap: '6px', fontSize: '15px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1px solid ${C.violet}`,
   borderRadius: 'var(--rs)', background: 'var(--violet-solid)',
 });
 // The Namespace tag's text: the full name's room always laid out (the tag's font is monospace), its first `shown`
@@ -931,12 +932,13 @@ function makeRecapTile(p, [icon, label]) {
   const { size, lock } = RECAP_BADGE;
   const tile = iconTile(p, icon, label, w, h, C.ink, USE_CASE_TYPE);
   padTileLabel(tile, TILE_LABEL_LINES);
-  // offsets from the tile's padding box, inside its 1.5 px border; out of the flex flow, as absolutely positioned
+  // offsets from the tile's padding box, 1.5 px back: the border (TILE_BORDER) and half a pixel; out of the flex
+  // flow, as absolutely positioned
   tile.badge = E(tile, '', '', {
     left: (w - size) / 2 - 1.5 + 'px', top: -size / 2 - 1.5 + 'px', width: size + 'px', height: size + 'px',
-    borderRadius: '50%', background: C.bg, border: `1.5px solid ${C.line}`, opacity: 1,
+    borderRadius: '50%', background: C.bg, border: `1px solid ${C.line}`, opacity: 1,
   });
-  // centered in the badge, offsets from inside its 1.5 px border
+  // centered in the badge, offsets from its padding box, 1.5 px back: the border (TILE_BORDER) and half a pixel
   tile.lock = makeLock(tile.badge, lock, 1.9, {
     left: (size - lock) / 2 - 1.5 + 'px', top: (size - lock) / 2 - 1.5 + 'px', opacity: 1,
   });

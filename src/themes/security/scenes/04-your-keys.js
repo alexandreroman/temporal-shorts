@@ -72,7 +72,7 @@
   };
   // A Search Attribute in clear: its name, an equals sign and its value, in a rounded box
   const attribute = (name, value, css = '') => `<span class="mono" style="display:inline-block;font-size:12px;`
-    + `line-height:26px;padding:0 10px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);${css}">`
+    + `line-height:26px;padding:0 10px;border:1px solid ${C.lineLight};border-radius:var(--rs);${css}">`
     + `${name} <span style="color:${C.slate}">=</span> ${value}</span>`;
 
   scene({
@@ -101,7 +101,7 @@
       s.hist = makeStoredHistory(root);
       // the Web UI's place under the history, a faint dashed outline once the window has moved out
       s.webuiSlot = E(root, '', '', {
-        width: WEBUI.w + 'px', height: WEBUI.h + 'px', border: `1.5px dashed ${C.lineLight}`, borderRadius: 'var(--r)',
+        width: WEBUI.w + 'px', height: WEBUI.h + 'px', border: `1px dashed ${C.lineLight}`, borderRadius: 'var(--r)',
       });
       s.webui = makeWebUI(root);
       // the label, the two attributes on two lines (the IBAN that tries to join them beside the second), then the
@@ -115,7 +115,7 @@
         + '<div style="position:absolute;left:16.5px;top:75.5px;display:flex;gap:6px">'
         + `<span class="attr">${attribute('Region', 'EU')}</span>`
         + `<span class="secret" style="position:relative">${attribute('iban', 'FR76',
-          `border:1.5px dashed ${C.red};color:${C.red}`)}`
+          `border:1px dashed ${C.red};color:${C.red}`)}`
         + `<i class="strike" style="position:absolute;left:6px;right:6px;top:13px;height:2px;background:${C.red};`
         + 'transform-origin:left center"></i></span></div>'
         + `<div class="sweep" style="position:absolute;top:0;bottom:0;width:120px;background:linear-gradient(90deg,`
@@ -130,7 +130,7 @@
       s.codec = makeKeyTile(root, ICON('server', 28, C.ink, 1.8), 'Codec Server', CODEC.w, CODEC.h);
       s.packet = E(root, '', 'mono', {
         width: '190px', height: '34px', lineHeight: '31px', textAlign: 'center', fontSize: '18px', whiteSpace: 'pre',
-        background: C.bg, border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+        background: C.bg, border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
       });
       s.converter = makeKeyTile(root, '', 'Data Converter', CONVERTER.tile.w, CONVERTER.tile.h);
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });

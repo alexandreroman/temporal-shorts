@@ -92,7 +92,7 @@
         width: CHIP.w + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
         padding: '6px 14px 6px 12px', fontSize: '20px', lineHeight: '28px', letterSpacing: '.08em',
         textTransform: 'uppercase', whiteSpace: 'nowrap', color: C.red,
-        border: '1.5px solid ' + C.red, background: 'var(--red-solid)', borderRadius: 'var(--rs)',
+        border: '1px solid ' + C.red, background: 'var(--red-solid)', borderRadius: 'var(--rs)',
       }));
       // tickets as wide as the right column, their content centered: the text changes, the box does not. Built
       // after the panels and the bill: the ticket flies over them to the middle of the stage

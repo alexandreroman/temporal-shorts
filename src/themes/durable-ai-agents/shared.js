@@ -114,7 +114,7 @@ function makeTicket(p) {
   const e = E(p,
     `<div style="display:flex;align-items:center;gap:12px">${ICON('ticket', 34, C.ink, 1.6)}`
     + '<span class="n mono" style="font-size:20px;letter-spacing:.08em">1 BOOKING</span></div>',
-    '', { padding: '10px 16px', border: '1.5px solid ' + C.slate, borderRadius: 'var(--rs)' });
+    '', { padding: '10px 16px', border: '1px solid ' + C.slate, borderRadius: 'var(--rs)' });
   e.n = e.querySelector('.n');
   return e;
 }

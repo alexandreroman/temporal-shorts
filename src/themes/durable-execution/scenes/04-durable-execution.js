@@ -64,7 +64,7 @@
     + `text-transform:uppercase;color:var(--slate)">${name}</span>`,
     '', {
       width: SERVICE.w + 'px', height: SERVICE.h + 'px', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', gap: '12px', border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+      justifyContent: 'center', gap: '12px', border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
     });
   // attempt marker: the attempt number while it runs, then a red x or a neon check
   const makeAttempt = (p, n) => {

@@ -18,8 +18,8 @@
   const LINE = { top: 62, gap: 80, h: 56 };
   // the history rows level with the app's lines, as far apart: row i's middle on line i's, so each saved result
   // runs straight across from its line to its row
-  // (the lines sit inside the STEPS card's border, 1.5 px, which renders as 2)
-  const LINE_MID_Y = APP.y - APP.h / 2 + CARD.top + 2 + LINE.top + LINE.h / 2;
+  // (the lines sit inside two borders, the app panel's and the STEPS card's)
+  const LINE_MID_Y = APP.y - APP.h / 2 + CARD.top + 2 * TILE_BORDER + LINE.top + LINE.h / 2;
   const HROW = { gap: LINE.gap, h: 44 };
   HROW.top = LINE_MID_Y - (HIST.y - HIST.h / 2) - HROW.h / 2;
   // NEW APP INSTANCE in the STEPS card, centered in the space under the last line (stage y)

@@ -61,7 +61,7 @@
     }
     return E(root,
       `<div style="width:${BUBBLE.size}px;height:${BUBBLE.size}px;border-radius:50%;`
-      + `background:var(--surface);border:1.5px solid ${C.line};display:flex;align-items:center;`
+      + `background:var(--surface);border:1px solid ${C.line};display:flex;align-items:center;`
       + `justify-content:center">${ICON(icon, BUBBLE.icon, C.ink, 1.7)}</div>`
       + `<div class="lbl" style="position:absolute;${labelAt};font-size:${BUBBLE.font}px">`
       + `${label}</div>`,

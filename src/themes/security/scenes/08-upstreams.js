@@ -109,7 +109,7 @@
         + `font-size:${LABEL.font}px">`
         + 'Routing</div>'
         + `<div style="position:absolute;left:${TRACK.left}px;top:${TRACK.top}px;width:${TRACK.w}px;`
-        + `height:${TRACK.h}px;border:1.5px solid ${C.violet};border-radius:${TRACK.w / 2}px">`
+        + `height:${TRACK.h}px;border:1px solid ${C.violet};border-radius:${TRACK.w / 2}px">`
         + `<div class="knob" style="position:absolute;left:${KNOB.inset}px;top:${KNOB.inset}px;width:${KNOB.size}px;`
         + `height:${KNOB.size}px;`
         + `border-radius:50%;background:${C.violet};box-shadow:0 0 12px rgba(${RGB.violet},.8)"></div></div>`

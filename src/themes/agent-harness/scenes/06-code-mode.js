@@ -164,7 +164,7 @@
       s.code = E(root,
         '<div class="lbl" style="position:absolute;left:24px;top:20px;font-size:16px;padding-left:0;'
         + `display:flex;align-items:center;gap:10px">${ICON('code', 20, C.slate, 2)}Script written by the model</div>`
-        + `<div style="position:absolute;left:0;right:0;top:56px;border-top:1.5px solid ${C.line}"></div>`,
+        + `<div style="position:absolute;left:0;right:0;top:56px;border-top:1px solid ${C.line}"></div>`,
         'tile', { width: CODE.w + 'px', height: CODE.h + 'px', textAlign: 'left' });
       // the run highlight sits behind the code lines
       s.hl = E(s.code, '', '', {

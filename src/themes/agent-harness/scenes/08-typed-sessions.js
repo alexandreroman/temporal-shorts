@@ -90,7 +90,7 @@
       + `align-items:center;gap:10px">${ICON('code', 20, C.slate, 2)}`
       + `<span class="mono" style="font-size:18px">${fileName}</span>`
       + `<span class="lbl" style="margin-left:auto;font-size:15px;color:${tagColor}">${tag}</span></div>`
-      + `<div style="position:absolute;left:0;right:0;top:${CODE.head}px;border-top:1.5px solid ${C.line}"></div>`,
+      + `<div style="position:absolute;left:0;right:0;top:${CODE.head}px;border-top:1px solid ${C.line}"></div>`,
       'tile', { width: CODE.w + 'px', height: h + 'px', textAlign: 'left' });
     // line highlights sit in a layer under the code lines
     // the layer stays on, each highlight fades on its own
@@ -113,14 +113,14 @@
     + 'font-size:16px;line-height:23px;padding:0 10px;opacity:0">' + field + '</span>';
   // one itinerary row of the trip planner: icon, item and price
   const planRow = (icon, item, price) => '<div class="row" style="display:flex;align-items:center;gap:22px;'
-    + `height:84px;padding:0 26px;border:1.5px solid ${C.line};border-radius:var(--rs);margin-top:16px;opacity:0">`
+    + `height:84px;padding:0 26px;border:1px solid ${C.line};border-radius:var(--rs);margin-top:16px;opacity:0">`
     + `${ICON(icon, 34, C.ink, 1.7)}<span style="flex:1;font-size:30px">${item}</span>`
     + `<span class="mono" style="font-size:28px;color:var(--slate)">${price}</span></div>`;
   // browser window holding a small trip planner (top bar with three dots), with the badges of its bound fields:
   // trip.items at the right end of the label line, over the rows, and trip.total_usd beside the total
   const makePlanner = p => {
     const e = E(p,
-      `<div style="height:48px;border-bottom:1.5px solid ${C.line};display:flex;gap:10px;align-items:center;`
+      `<div style="height:48px;border-bottom:1px solid ${C.line};display:flex;gap:10px;align-items:center;`
       + 'padding-left:20px"><i></i><i></i><i></i></div>'
       + '<div style="padding:30px 44px">'
       + '<div style="font-size:52px;line-height:1.15">Lisbon, 3 nights</div>'

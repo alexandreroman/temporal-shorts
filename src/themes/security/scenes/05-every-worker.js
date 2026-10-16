@@ -87,20 +87,20 @@
         + `letter-spacing:.1em;color:${C.neon}">${ICON('check', 16, C.neon, 2.6)}VERIFIED</span>`,
         '', {
           width: LIST.w + 'px', height: LIST.h + 'px', display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', padding: '0 14px', border: `1.5px solid ${C.lineLight}`,
+          justifyContent: 'space-between', padding: '0 14px', border: `1px solid ${C.lineLight}`,
           borderRadius: 'var(--rs)',
         }));
       s.updates = WORKERS.map(() => E(root, `${ICON('retry', 22, C.neon, 2.2)}UPDATE`, 'mono', {
         width: UPDATE.w + 'px', height: UPDATE.h + 'px', display: 'flex', alignItems: 'center',
         justifyContent: 'center', gap: '12px', fontSize: '22px', letterSpacing: '.12em', color: C.neon,
-        border: `1.5px solid ${C.neon}`, borderRadius: 'var(--rs)', background: 'var(--neon-solid)',
+        border: `1px solid ${C.neon}`, borderRadius: 'var(--rs)', background: 'var(--neon-solid)',
         boxShadow: `0 0 18px rgba(${RGB.neon},.4)`,
       }));
       // the forgetful Worker's empty CODEC slot, outlined in red
       s.missing = E(root, 'NO CODEC', 'mono', {
         width: UPDATE.w + 'px', height: WORKER_TILE.chipH + 'px', lineHeight: (WORKER_TILE.chipH - 3) + 'px',
         textAlign: 'center', fontSize: '19px', letterSpacing: '.1em', paddingLeft: '.1em', color: C.red,
-        border: `1.5px dashed ${C.red}`,
+        border: `1px dashed ${C.red}`,
         borderRadius: 'var(--rs)', background: `rgba(${RGB.red},.1)`,
       });
       s.pill = fixedTag(root, `${ICON('retry', 20, C.violet, 2)}Rotate`, 'violet solid', PILL.w, PILL.h);

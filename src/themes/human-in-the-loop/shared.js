@@ -116,7 +116,7 @@ function makeApprovalCard(p, k) {
     + '<div class="ring" style="position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;'
     + `border-radius:50%;background:rgba(${RGB.ink},.55);opacity:0"></div>`
     + '<span class="apt" style="position:relative;display:inline-flex;align-items:center;gap:8px">Approve</span></div>'
-    + `<div class="rj" style="${button};border:1.5px solid #9AA3B5;color:${C.bg}">Reject</div></div>`,
+    + `<div class="rj" style="${button};border:1px solid #9AA3B5;color:${C.bg}">Reject</div></div>`,
     'paper', {
       width: px(400), padding: `${px(20)} ${px(26)} ${px(26)}`, borderLeft: `${px(6)} solid ${C.violet}`,
     });

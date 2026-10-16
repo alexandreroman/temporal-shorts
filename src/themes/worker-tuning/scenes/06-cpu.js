@@ -73,9 +73,9 @@
     [headX, DIAGRAM.actY], ...busRoute(w).slice(0, -1), [pollerX, portY(w)], [newSlotX(k), portY(w)],
   ];
   // Worker B or C: an app panel, its Poller, 5 Slots and a CPU gauge. Children are placed from the panel's padding
-  // box, inside its border, drawn 1 px wide (see MINI.border): the offsets put them on whole stage pixels.
+  // box, inside its border (TILE_BORDER): the offsets put them on whole stage pixels.
   const makeNewWorker = (root, name) => {
-    const inset = MINI.border;
+    const inset = TILE_BORDER;
     const panel = makeAppPanel(root, name, NEW.w, NEW.h, { font: 18 });
     panel.cells = Array.from({ length: INSIDE.slots }, (_, k) => makeSlot(panel, slot.w, slot.h, {
       left: (INSIDE.slotLeft + k * slot.pitchX - inset) + 'px', top: (INSIDE.row - slot.h / 2 - inset) + 'px',

@@ -107,7 +107,7 @@
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
       // the rewind: a copy of the card leaves the chip, under its verdict, with fading outlines behind it
       s.ghosts = GHOSTS.map(() => E(root, '', '', {
-        width: PAYLOAD_IN_WORKER.w + 'px', height: CHIP_LAYOUT.h + 'px', border: `1.5px solid ${C.violet}`,
+        width: PAYLOAD_IN_WORKER.w + 'px', height: CHIP_LAYOUT.h + 'px', border: `1px solid ${C.violet}`,
         borderRadius: 'var(--r)',
       }));
       s.copy = makePayload(root, { w: PAYLOAD_IN_WORKER.w });

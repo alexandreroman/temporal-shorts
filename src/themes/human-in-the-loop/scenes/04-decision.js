@@ -53,7 +53,7 @@
       s.ticket = E(root,
         `<div style="display:flex;align-items:center;gap:14px">${ICON('laptop', 40, C.ink, 1.6)}`
         + '<span class="mono" style="font-size:24px;letter-spacing:.08em">1 ORDER</span></div>',
-        '', { padding: '12px 20px', border: '1.5px solid ' + C.neon, borderRadius: 'var(--rs)' });
+        '', { padding: '12px 20px', border: '1px solid ' + C.neon, borderRadius: 'var(--rs)' });
       s.temporal = makeWfTemporalPanel(root);
       s.history = makeOrderHistory(root);
       // the Workflow itself, handed to instance B

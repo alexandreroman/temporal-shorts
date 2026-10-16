@@ -131,7 +131,7 @@ function makeTaskChip(root, lane) {
   }
   const size = DIAGRAM.chip.act + 'px';
   return E(root, '', '', {
-    width: size, height: size, background: 'var(--surface)', border: '1.5px solid ' + C.lineLight,
+    width: size, height: size, background: 'var(--surface)', border: '1px solid ' + C.lineLight,
     borderRadius: 'var(--rs)', display: 'flex', alignItems: 'center', justifyContent: 'center',
   });
 }
@@ -146,7 +146,7 @@ function makeQueueLane(root, label, lane, { w = DIAGRAM.lane.w, cap = DIAGRAM.la
     lane, w, cap,
     track: E(root, '', '', {
       width: w + 'px', height: DIAGRAM.lane.h + 'px', background: `rgba(${RGB.ink},.03)`,
-      border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)',
+      border: '1px solid ' + C.line, borderRadius: 'var(--rs)',
     }),
     label: label ? E(root, label, 'lbl', { fontSize: '16px' }) : null,
     more: E(root, '', 'mono', { fontSize: '16px', lineHeight: '20px', color: C.slate, whiteSpace: 'nowrap' }),
@@ -201,7 +201,7 @@ const SLOT_LOOKS = {
 // Slot cell of w x h px (parent: the stage root, or a mini Worker panel)
 function makeSlot(parent, w, h, css = {}) {
   return E(parent, '', '', {
-    width: w + 'px', height: h + 'px', border: '1.5px solid', borderRadius: '5px',
+    width: w + 'px', height: h + 'px', border: '1px solid', borderRadius: '5px',
     display: 'flex', alignItems: 'center', justifyContent: 'center', ...css,
   });
 }
@@ -327,10 +327,10 @@ function makeMeter(p, label, w, h) {
   return e;
 }
 // The CPU meter's outer box at dock: 0, its tile in the bottom band; 1, the compact gauge in the WORKER panel
-// (CPU_GAUGE, plus the tile's border, drawn 1 px wide as MINI.border says); whole pixels in between
+// (CPU_GAUGE, plus the tile's border, TILE_BORDER); whole pixels in between
 function cpuMeterBox(dock) {
   const { meter } = DIAGRAM;
-  const b = MINI.border;
+  const b = TILE_BORDER;
   const at = (from, to) => Math.round(lerp(from, to, dock));
   return {
     left: at(meter.left, CPU_GAUGE.left - b), top: at(meter.top.cpu, CPU_GAUGE.top - b),
@@ -932,10 +932,9 @@ function placeMarks(dg, t, state, layout) {
 }
 
 // ---------- mini Worker (intro, outro): a WORKER panel holding a small grid of Activity Slots
-// Cells GRID.cell apart, GRID.pad from the panel's edges, under a header `head` px high. border: the panel's border
-// as drawn, as its cells are placed from its padding edge: Chromium draws the 1.5 px border of .tile 1 px wide in the
-// 1920 x 1080 frames, so the cells rest on whole pixels
-const MINI = { w: 56, h: 32, pitchX: 56 + GRID.cell, pitchY: 32 + GRID.cell, pad: GRID.pad, head: 72, border: 1 };
+// Cells GRID.cell apart, GRID.pad from the panel's edges, under a header `head` px high; placed from the panel's
+// padding edge, TILE_BORDER inside its outer edge, so they rest on whole pixels
+const MINI = { w: 56, h: 32, pitchX: 56 + GRID.cell, pitchY: 32 + GRID.cell, pad: GRID.pad, head: 72 };
 // Size of a mini Worker panel holding cols x rows Slots
 const miniWorkerSize = (cols, rows) => ({
   w: MINI.pad * 2 + (cols - 1) * MINI.pitchX + MINI.w,
@@ -963,7 +962,7 @@ function makeMiniWorker(root, name, cols, rows) {
 function placeMiniCell(panel, cell, [x, y], cw, ch) {
   Object.assign(cell.style, {
     width: cw + 'px', height: ch + 'px',
-    left: (panel.w / 2 + x - cw / 2 - MINI.border) + 'px', top: (panel.h / 2 + y - ch / 2 - MINI.border) + 'px',
+    left: (panel.w / 2 + x - cw / 2 - TILE_BORDER) + 'px', top: (panel.h / 2 + y - ch / 2 - TILE_BORDER) + 'px',
   });
 }
 // Opacity of an app panel's header: its gear and name, and its status
@@ -1042,13 +1041,13 @@ function makeQueuePart(box) {
   const { h, chip, icon, pitch } = RECAP_QUEUE;
   E(box, '', '', {
     top: (RECAP_PART.h - h) / 2 + 'px', width: RECAP_PART.w + 'px', height: h + 'px',
-    background: `rgba(${RGB.ink},.03)`, border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)', opacity: 1,
+    background: `rgba(${RGB.ink},.03)`, border: '1px solid ' + C.line, borderRadius: 'var(--rs)', opacity: 1,
   });
   const headX = RECAP_PART.w / 2 + pitch;
   for (let k = 0; k < 3; k++) {
     E(box, ICON(activityIcon(k), icon, C.ink, 1.8), '', {
       left: headX - k * pitch - chip / 2 + 'px', top: (RECAP_PART.h - chip) / 2 + 'px', width: chip + 'px',
-      height: chip + 'px', background: 'var(--surface)', border: '1.5px solid ' + C.lineLight, borderRadius: '4px',
+      height: chip + 'px', background: 'var(--surface)', border: '1px solid ' + C.lineLight, borderRadius: '4px',
       display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 1,
     });
   }

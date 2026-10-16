@@ -19,7 +19,7 @@
     + i * (CARD.rowH + CARD.rowGap) + CARD.rowH / 2 - CARD_H / 2;
   const ROW_BG = `rgba(${RGB.ink},.04)`;
   const ROW_CSS = `display:flex;align-items:center;height:${CARD.rowH}px;margin-top:${CARD.rowGap}px;padding:0 16px;`
-    + `border:1.5px solid transparent;border-radius:var(--rs);background:${ROW_BG}`;
+    + `border:1px solid transparent;border-radius:var(--rs);background:${ROW_BG}`;
 
   // Layout grid: the Trip planner's column on the left (x 140-520), TravelAgent on the right (x 960-1780), a
   // 440 px gap between them for the calls. TravelAgent stays in place in both phases; in phase 1 the crossed-out
@@ -88,7 +88,7 @@
       + `<span class="mono" style="flex:1;font-size:22px;white-space:nowrap">${signature}</span>`
       + '<span class="mono" style="width:40px;text-align:center;font-size:22px;color:var(--slate)">→</span>'
       + `<span style="width:${outW}px"><span class="mono" style="font-size:22px;padding:2px 10px;border-radius:4px;`
-      + `border:1.5px solid ${C.uv};background:rgba(${RGB.uv},.18)">${out}</span></span></div>`).join('');
+      + `border:1px solid ${C.uv};background:rgba(${RGB.uv},.18)">${out}</span></span></div>`).join('');
     const cols = `<span style="flex:1">INPUT</span><span style="width:${outW + 40}px;padding-left:40px">OUTPUT</span>`;
     return makeAgentCard(p, 'TravelAgent', 'Operations', cols, rows, TRAVEL.w);
   };
@@ -99,7 +99,7 @@
       + '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px">'
       + '<b class="mono" style="font-size:22px;line-height:26px">travel_plan_trip</b>'
       + '<span class="from mono" style="display:inline-block;font-size:16px;line-height:20px;letter-spacing:.06em;'
-      + `padding:2px 8px;border-radius:4px;border:1.5px solid ${C.uv};background:rgba(${RGB.uv},.16);`
+      + `padding:2px 8px;border-radius:4px;border:1px solid ${C.uv};background:rgba(${RGB.uv},.16);`
       + 'color:var(--slate);transform-origin:left center">'
       + 'FROM <span style="color:var(--ink)">TravelAgent</span></span></div>'
       + `<span class="ok" style="margin-left:auto;display:flex">${ICON('check', 28, C.neon, 2.6)}</span></div>`

@@ -56,7 +56,7 @@
       s.t = makeTitleBlock(root, 'AN EXPLAINER FOR SECURITY TEAMS', 'Who can see your<br>Workflow data?',
         'SECURITY WITH TEMPORAL');
       s.ghosts = GHOSTS.map(() => E(root, '', '', {
-        border: `1.5px solid ${C.violet}`, borderRadius: 'var(--r)',
+        border: `1px solid ${C.violet}`, borderRadius: 'var(--r)',
       }));
       s.card = makePayload(root, { w: CARD.w });
       // the lane-size card that lands in the Worker: it takes over from the large one halfway through the flight

@@ -109,7 +109,7 @@
     w.insertAdjacentHTML('beforeend',
       `<div class="code mono" style="position:absolute;left:${CODE.inset}px;right:${CODE.inset}px;top:${CODE.top}px;`
       + `height:${CODE.h}px;padding:10px ${CODE.inset - 1.5}px;font-size:19px;line-height:${CODE.line}px;`
-      + `background:rgba(${RGB.ink},.03);border:1.5px solid ${C.line};border-radius:var(--rs)">${code}</div>`);
+      + `background:rgba(${RGB.ink},.03);border:1px solid ${C.line};border-radius:var(--rs)">${code}</div>`);
     w.code = w.querySelector('.code');
     w.lines = [...w.code.children];
     return w;
@@ -127,7 +127,7 @@
       'mono', {
         width: CONV.w + 'px', height: CONV.h + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', fontSize: '13px', letterSpacing: '.03em', paddingLeft: '.03em',
-        textTransform: 'uppercase', textAlign: 'center', background: '#1E2418', border: '1.5px solid ' + C.neon,
+        textTransform: 'uppercase', textAlign: 'center', background: '#1E2418', border: '1px solid ' + C.neon,
         borderRadius: 'var(--rs)',
       });
     e.key = e.querySelector('.key');
@@ -164,7 +164,7 @@
       'mono', {
         width: VIEW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center',
         padding: '0 20px 0 20px', fontSize: '22px', whiteSpace: 'nowrap', background: `rgba(${RGB.ink},.03)`,
-        border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)',
+        border: '1px solid ' + C.line, borderRadius: 'var(--rs)',
       });
     e.pl = e.querySelector('.pl');
     return e;
@@ -196,7 +196,7 @@
       s.conv = makeConverter(root);
       s.orch = makeBlock(root, 'clock', 'Orchestration · task queue', ORCH.h, (ORCH.h - 26) / 2);
       s.orch.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:${LANE.left}px;`
-        + `top:${LANE.top}px;width:${LANE.w}px;height:${LANE.h}px;border:1.5px dashed rgba(148,163,184,.5);`
+        + `top:${LANE.top}px;width:${LANE.w}px;height:${LANE.h}px;border:1px dashed rgba(148,163,184,.5);`
         + 'border-radius:var(--rs)"></div>');
       // its payloads show locked; NEVER SEES YOUR PAYLOADS takes the label row's right
       s.pers = makeBlock(root, 'book', 'Persistence', PERS.h);
@@ -228,12 +228,12 @@
       s.tasks = TASKS.map(([name]) => E(root, name, 'mono', {
         width: TASK.w + 'px', height: TASK.h + 'px', lineHeight: (TASK.h - 3) + 'px', textAlign: 'center',
         // opaque, so nothing it passes over shows through its text
-        fontSize: '20px', background: '#2B2F78', border: '1.5px solid ' + C.uv, borderRadius: 'var(--rs)',
+        fontSize: '20px', background: '#2B2F78', border: '1px solid ' + C.uv, borderRadius: 'var(--rs)',
       }));
       // the Workflow's schedule requests: violet, opaque, so nothing shows through their text
       s.schedules = SCHEDULES.map(text => E(root, text, 'mono', {
         fontSize: '17px', padding: '8px 14px', background: '#3A2766', color: C.ink,
-        border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
+        border: '1px solid ' + C.violet, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
       s.polls = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       // on a Worker's wire, a task or a schedule request travels as a violet spark, so no card ever covers the

@@ -123,7 +123,7 @@
       // round the tube
       s.publicNet = E(root, '', '', {
         width: (PUBLIC.x1 - PUBLIC.x0) + 'px', height: (PUBLIC.y1 - PUBLIC.y0) + 'px',
-        background: `rgba(${RGB.red},.06)`, border: `1.5px dashed rgba(${RGB.red},.55)`, borderRadius: 'var(--r)',
+        background: `rgba(${RGB.red},.06)`, border: `1px dashed rgba(${RGB.red},.55)`, borderRadius: 'var(--r)',
       });
       s.publicHead = beatHeading(root, 'globe', 'Public internet', C.red);
       s.corridor = makeCorridor(root);
@@ -150,7 +150,7 @@
         + `<div style="position:absolute;left:14.5px;right:14.5px;top:${BADGE.tabTop}px;display:flex;gap:8px">`
         + ['mTLS CERTIFICATE · YOUR CA', 'API KEY'].map((text, i) => `<div class="mono" style="flex:${i ? 1 : 'none'};`
           + 'height:28px;line-height:25px;padding:0 8px;font-size:12px;letter-spacing:.06em;white-space:nowrap;'
-          + `border:1.5px solid ${C.lineLight};border-radius:var(--rs)">${text}</div>`).join('')
+          + `border:1px solid ${C.lineLight};border-radius:var(--rs)">${text}</div>`).join('')
         + '</div>',
         'tile', { width: BADGE.w + 'px', height: BADGE.h + 'px', textAlign: 'left' });
       s.badge.scan = E(s.badge, '', '', {

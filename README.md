@@ -216,7 +216,7 @@ still scaling counts at its unscaled size), scene `shift` included (and a
 scene camera's zoom, `makeCamera()`, which frames a shot), and prints one
 line per scene: its top, bottom, height, middle and a verdict,
 `ok`, `OUT`, `THIN` or `OFF-CENTER`. `OUT` allows 2 px past the frame, as
-sub-pixel borders and strokes (a 1.5 px border) round past a whole-pixel
+sub-pixel strokes and half-pixel positions round past a whole-pixel
 edge; an `OUT` scene also names the element that leaves the frame and
 when. `OUT` fails the check; `THIN` and `OFF-CENTER` are warnings, as some
 scenes have legitimate exceptions. The check goes on over every theme and

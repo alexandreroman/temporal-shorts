@@ -96,10 +96,10 @@
   const DENY_MID = (DENY_FROM + GATE.left) / 2;
   const DENY_D = `M ${DENY_FROM} ${ANALYTICS_Y} C ${DENY_MID} ${ANALYTICS_Y} ${DENY_MID} ${HIT.y} ${GATE.left} ${HIT.y}`
     + ` H ${HIT.x}`;
-  // Where payments' verdict tag (ALLOWED) ends as it renders, right and bottom: Chromium draws the Namespace's 1.5 px
-  // border 1 px wide, so the tag, set from inside it, ends at x 760.5 and y 309.5 and lights pixel column 760 and row
-  // 309, as a whole-pixel box ending at 761 and 310 does. TAG_EDGE holds those whole-pixel ends; the tube's label and
-  // the cards in payments end on its right one.
+  // Where payments' verdict tag (ALLOWED) ends as it renders, right and bottom: set 1.5 px back from INSET inside
+  // the Namespace's 1 px border (TILE_BORDER), the tag ends at x 760.5 and y 309.5 and lights pixel column 760 and
+  // row 309, as a whole-pixel box ending at 761 and 310 does. TAG_EDGE holds those whole-pixel ends; the tube's label
+  // and the cards in payments end on its right one.
   const TAG_EDGE = {
     right: PAYMENTS.x + PAYMENTS.w - 1 - (INSET - 1.5) + 0.5,
     bottom: PAYMENTS.y + 1 + PAYMENTS.headTop - 1.5 + NS_HEAD.h / 2 + VERDICT.h / 2 + 0.5,
@@ -147,14 +147,14 @@
   // A Namespace: its border, its NAMESPACE label and name at the top left (headTop px under its top edge, INSET px
   // from its left edge), and its verdict tag on the right of the heading (box.verdict, hidden)
   const makeNamespaceBox = (root, box, name) => {
-    // offsets from inside the 1.5 px border, so its text rests on whole pixels
+    // offsets from the padding box, 1.5 px back: the border (TILE_BORDER) and half a pixel
     const top = box.headTop - 1.5;
     const e = E(root,
       `<div style="position:absolute;left:${INSET - 1.5}px;top:${top}px">`
       + `<div class="mono" style="font-size:${NS_HEAD.label}px;line-height:${NS_HEAD.labelLine}px;letter-spacing:.14em;`
       + `color:${C.slate}">NAMESPACE</div>`
       + `<div class="mono" style="font-size:${NS_HEAD.name}px;line-height:${NS_HEAD.nameLine}px">${name}</div></div>`,
-      '', { width: box.w + 'px', height: box.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)' });
+      '', { width: box.w + 'px', height: box.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)' });
     e.verdict = statusTag(e, { font: VERDICT.font, icon: VERDICT.font });
     Object.assign(e.verdict.style, {
       left: 'auto', right: INSET - 1.5 + 'px', top: top + NS_HEAD.h / 2 - VERDICT.h / 2 + 'px',
@@ -201,7 +201,7 @@
   const makeAllowlistBlock = root => {
     const block = makeGateTile(root, GATE.bottom.h, 'shield', 'ALLOWLIST',
       `<div class="row" style="width:${ALLOW_ROW.w}px;height:${ALLOW_ROW.h}px;display:flex;align-items:center;`
-      + 'justify-content:center;gap:8px;border:1.5px solid;border-radius:var(--rs);'
+      + 'justify-content:center;gap:8px;border:1px solid;border-radius:var(--rs);'
       + `background:${C.bg}"><span class="check">${ICON('check', 18, C.slate, 2.6)}</span>`
       + `<span class="mono" style="font-size:${ROW.value}px">payments</span></div>`);
     block.row = block.querySelector('.row');
@@ -233,10 +233,11 @@
       + `<div class="mono" style="font-size:19px;line-height:26px;white-space:pre">`
       + `${scrambledHtml(RESULT.row, RESULT.value, 1)}</div>`,
       'tile', { width: w + 'px', height: h + 'px', textAlign: 'left', padding: '16px 20px' });
-    // centered on the card's top edge, offsets from inside its 1.5 px border
+    // centered on the card's top edge, offsets from the padding box, 1.5 px back: the border (TILE_BORDER) and half
+    // a pixel
     const lockBadge = E(card, '', '', {
       left: (w - badge) / 2 - 1.5 + 'px', top: -badge / 2 - 1.5 + 'px', width: badge + 'px', height: badge + 'px',
-      borderRadius: '50%', background: C.bg, border: `1.5px solid ${C.neon}`, opacity: 1,
+      borderRadius: '50%', background: C.bg, border: `1px solid ${C.neon}`, opacity: 1,
     });
     const padlock = makeLock(lockBadge, lock, 1.9, {
       left: (badge - lock) / 2 - 1.5 + 'px', top: (badge - lock) / 2 - 1.5 + 'px', opacity: 1,

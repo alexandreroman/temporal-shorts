@@ -72,7 +72,7 @@
     const inner = SEAL.size - 2 * SEAL.ring;
     return E(root,
       `<div style="position:absolute;left:${SEAL.ring - 3}px;top:${SEAL.ring - 3}px;width:${inner}px;`
-      + `height:${inner}px;border-radius:50%;border:1.5px dashed rgba(${RGB.violet},.55)"></div>`
+      + `height:${inner}px;border-radius:50%;border:1px dashed rgba(${RGB.violet},.55)"></div>`
       + ICON('check', SEAL.check, C.neon, 2.6)
       + `<div class="mono" style="height:${nameBlock}px;display:flex;flex-direction:column;justify-content:center;`
       + `margin-top:6px;font-size:${SEAL.name}px;line-height:${SEAL.nameLine}px;font-weight:700;color:${C.ink}">`
@@ -106,9 +106,9 @@
     const slots = CARD_ROWS.map((row, i) => {
       const top = CARD.slotTop + i * (CARD.slotH + CARD.slotGap);
       return `<div class="slot" style="position:absolute;left:${CARD.pad}px;right:${CARD.pad}px;top:${top}px;`
-        + `height:${CARD.slotH}px;border:1.5px dashed ${C.line};border-radius:var(--rs)">`
+        + `height:${CARD.slotH}px;border:1px dashed ${C.line};border-radius:var(--rs)">`
         + '<div class="fill" style="position:absolute;inset:-1.5px;display:flex;align-items:center;gap:12px;'
-        + `padding-left:16px;border:1.5px solid rgba(${RGB.violet},.45);border-left:3px solid ${C.violet};`
+        + `padding-left:16px;border:1px solid rgba(${RGB.violet},.45);border-left:3px solid ${C.violet};`
         + 'border-radius:var(--rs);'
         + `background:rgba(${RGB.violet},.12);opacity:0">`
         + `${ICON('book', 24, C.violet, 1.8)}<span class="mono" style="font-size:19px;color:${C.ink}">${row}`
@@ -155,7 +155,7 @@
       s.tags = AUDITS.map(audit => makeAuditTag(root, audit));
       s.results = E(root, ICON('book', REPORT.icon, C.violet, 1.8), '', {
         width: REPORT.w + 'px', height: REPORT.h + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', background: C.bg, border: `1.5px solid ${C.violet}`, borderRadius: 'var(--rs)',
+        justifyContent: 'center', background: C.bg, border: `1px solid ${C.violet}`, borderRadius: 'var(--rs)',
       });
       s.landing = makeRipples(root, 2, RGB.violet);
     },

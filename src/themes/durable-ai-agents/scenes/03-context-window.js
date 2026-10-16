@@ -90,7 +90,7 @@
         return { row, hl: row.querySelector('.hl') };
       });
       s.gauge = E(root, '<div class="f" style="position:absolute;left:0;right:0;bottom:0"></div>', '', {
-        width: '22px', height: '600px', background: `rgba(${RGB.ink},.08)`, border: '1.5px solid ' + C.line,
+        width: '22px', height: '600px', background: `rgba(${RGB.ink},.08)`, border: '1px solid ' + C.line,
         overflow: 'hidden', borderRadius: 'var(--rs)',
       });
       s.gf = s.gauge.querySelector('.f');
@@ -101,7 +101,7 @@
         `<div class="mono" style="font-size:22px">Yesterday's email</div>`
         + '<div class="lbl" style="font-size:15px;margin-top:4px">not in context</div>',
         '', {
-          border: `1.5px dashed ${C.lineLight}`, padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)',
+          border: `1px dashed ${C.lineLight}`, padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)',
         });
       s.bill = E(root,
         '<div style="display:flex;align-items:center;gap:16px">'
@@ -112,7 +112,7 @@
         + '<div class="lbl" style="font-size:16px;margin-top:6px;color:var(--neon)">billed so far</div>'
         + '</div></div>',
         '', {
-          padding: '16px 22px', border: '1.5px solid ' + C.neon, background: `rgba(${RGB.neon},.06)`,
+          padding: '16px 22px', border: '1px solid ' + C.neon, background: `rgba(${RGB.neon},.06)`,
           borderRadius: 'var(--r)',
         });
       s.tok = s.bill.querySelector('.tok');
@@ -122,7 +122,7 @@
       s.spends = PART_PX.map(px => {
         const gain = tokensFor(pagePx + px) - tokensFor(pagePx);
         pagePx += px;
-        // 36 px icon, a 27 px coin, centered on the big coin (1.5 px border + 22 px padding + 23 px)
+        // 36 px icon, a 27 px coin, centered on the big coin (1 px border + 22 px padding + 23 px, and half a pixel)
         const coin = E(s.bill, ICON('coin', 36, C.neon, 1.8), '', { left: '28.5px', top: 'calc(50% - 18px)' });
         coin.querySelector('circle').setAttribute('fill', `rgba(${RGB.neon},.2)`);
         const plus = E(s.bill, '+' + withCommas(gain), 'mono', {

@@ -213,11 +213,11 @@
   const makeListRow = (root, i, key) => E(root,
     `<span class="mono" style="font-size:16px;color:${C.violet}">${storedCipher(i, 5)}</span>`
     + `<span class="key mono" style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:15px;`
-    + `line-height:20px;letter-spacing:.04em;padding:0 5px;border:1.5px solid ${C.violet};border-radius:4px;`
+    + `line-height:20px;letter-spacing:.04em;padding:0 5px;border:1px solid ${C.violet};border-radius:4px;`
     + `color:${C.violet}">${ICON('lock', 13, C.violet, 2.2)}WRAPPED ${key}</span>`,
     '', {
       width: ROW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 8px',
-      background: C.bg, border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+      background: C.bg, border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
     });
   // A row of the wide shot's list: a neon lock and the payload's ciphertext, at camera rest (values 18.5 px on screen)
   const makeWideRow = (root, i) => E(root,
@@ -225,7 +225,7 @@
     + `${storedCipher(i, 8)}</span>`,
     '', {
       width: WIDE_LIST.w + 'px', height: WIDE_LIST.h + 'px', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', gap: '10px', background: C.bg, border: `1.5px solid ${C.lineLight}`,
+      justifyContent: 'center', gap: '10px', background: C.bg, border: `1px solid ${C.lineLight}`,
       borderRadius: 'var(--rs)',
     });
   // A window that reads the payload through the proxy, in the dark look of the Temporal Web UI: a title bar, then row
@@ -246,7 +246,7 @@
       + `&nbsp; ${event}</div>`
       + key('from') + value + value + key('name') + value + '</div>',
       '', {
-        width: FLEET.tile.w + 'px', height: FLEET.tile.h + 'px', background: body, border: `1.5px solid ${C.line}`,
+        width: FLEET.tile.w + 'px', height: FLEET.tile.h + 'px', background: body, border: `1px solid ${C.line}`,
         borderRadius: 'var(--r)', overflow: 'hidden', textAlign: 'left',
       });
     win.values = [...win.querySelectorAll('.value')];
@@ -259,7 +259,7 @@
   // A small pill that carries the payload along a connection: its text in ciphertext (violet) or in clear (neon)
   const makePacket = (root, html, color) => E(root, html, 'mono', {
     height: '30px', lineHeight: '27px', padding: '0 12px', fontSize: '16px', whiteSpace: 'pre',
-    background: C.bg, border: `1.5px solid ${color}`, borderRadius: 'var(--rs)', color,
+    background: C.bg, border: `1px solid ${color}`, borderRadius: 'var(--rs)', color,
     boxShadow: `0 0 16px rgba(${color === C.neon ? RGB.neon : RGB.violet},.45)`,
   });
 
@@ -304,7 +304,7 @@
       // 19 px (16.7 px on screen), so CIPHERTEXT leaves room on both sides at the rows' width
       s.cipherTag = E(root, 'Ciphertext<br>only', 'lbl', {
         width: WIDE_LIST.w + 'px', padding: '8px 0 8px .12em', fontSize: '19px', lineHeight: '26px',
-        textAlign: 'center', color: C.violet, border: `1.5px solid ${C.violet}`, borderRadius: 'var(--rs)',
+        textAlign: 'center', color: C.violet, border: `1px solid ${C.violet}`, borderRadius: 'var(--rs)',
         background: VERDICT_FILL.wait,
       });
       s.kms = makeKms(root);

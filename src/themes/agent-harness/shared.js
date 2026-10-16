@@ -66,6 +66,6 @@ function setWaitRace(card, waits, race) {
 function makePauseBadge(p) {
   return E(p, ICON('pause', 22, C.violet, 1.8), '', {
     width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: 'var(--violet-solid)', border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)',
+    background: 'var(--violet-solid)', border: '1px solid ' + C.violet, borderRadius: 'var(--rs)',
   });
 }

@@ -89,12 +89,10 @@
   const OUT = { lead: 2.2, leave: 0.45, stagger: 0.08, rowDx: 200, loopDy: 40, growAt: 0.35, grow: 1.3 };
   const GROWING = RECAP_PARTS.indexOf('slots');
 
-  // The offset of a row's content from its outer edge: Chromium draws the 1.5 px border of a tile 1 px wide
-  const BORDER = 1;
   // A cell of a row, at x from the row's outer left edge, as high as the row, its content centered vertically on
   // whole pixels; its parts sit on one baseline, 12 px apart
-  const cell = (x, html, css = '', h = RECAP.rowH) => `<div style="position:absolute;left:${x - BORDER}px;`
-    + `top:-${BORDER}px;height:${h}px;display:flex;align-items:center;white-space:nowrap;${css}">`
+  const cell = (x, html, css = '', h = RECAP.rowH) => `<div style="position:absolute;left:${x - TILE_BORDER}px;`
+    + `top:-${TILE_BORDER}px;height:${h}px;display:flex;align-items:center;white-space:nowrap;${css}">`
     + `<div style="display:flex;align-items:baseline;gap:12px">${html}</div></div>`;
   // 24 px lines, so that the symptom's 3 metrics fit its row with room to spare
   const metricCss = 'font-family:Mono;font-size:20px;line-height:24px';

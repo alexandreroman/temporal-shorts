@@ -98,7 +98,7 @@ html,body{margin:0;background:var(--bg)}
    big 40 + 24 + 2 = 66 px, so a pill centered on a whole pixel rests on whole pixels */
 .pill{
   white-space:nowrap;line-height:30px;padding:9px 18px 9px calc(18px + .1em);background:rgba(248,250,252,.04);
-  border:1.5px solid var(--line-light);
+  border:1px solid var(--line-light);
   font-family:'Mono';font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
   border-radius:var(--rs);
 }
@@ -115,7 +115,7 @@ html,body{margin:0;background:var(--bg)}
   white-space:nowrap;font-family:'Mono';font-size:20px;letter-spacing:.12em;padding-left:.12em;text-transform:uppercase;
   color:var(--slate);
 }
-.tile{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);text-align:center}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);text-align:center}
 /* white card on the dark stage (Event History, code, console) */
 .paper{background:var(--ink);color:var(--bg);border-radius:var(--r)}
 /* Live player (page opened without ?t=): fit-to-window stage and playback controls.

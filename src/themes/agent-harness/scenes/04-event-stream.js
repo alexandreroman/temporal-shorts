@@ -50,17 +50,17 @@
 
   const chipCss = type => ({
     ...EVENT_TYPES[type], fontSize: '16px', letterSpacing: '.1em', padding: '4px 10px 4px calc(10px + .1em)',
-    border: '1.5px solid', borderRadius: '4px', whiteSpace: 'nowrap',
+    border: '1px solid', borderRadius: '4px', whiteSpace: 'nowrap',
   });
-  // Console row chip and tag text: a 22 px line makes them 32 px tall with their padding and border (the 1.5 px
-  // border is drawn 1 px wide at this scale), an even height, so they center on whole pixels in their 46 px row
+  // Console row chip and tag text: a 22 px line makes them 32 px tall with their padding and 1 px border, an even
+  // height, so they center on whole pixels in their 46 px row
   const CONSOLE_LINE = 22, CONSOLE_TAG_H = 32;
   // the same chip, as inline HTML for the console rows (fixed width so the row texts line up)
   const chipHtml = type => {
     const css = EVENT_TYPES[type];
     return `<span class="mono" style="display:inline-block;width:132px;text-align:center;font-size:16px;`
       + `line-height:${CONSOLE_LINE}px;`
-      + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1.5px solid ${css.borderColor};border-radius:4px;`
+      + `letter-spacing:.1em;padding:4px 0 4px .1em;border:1px solid ${css.borderColor};border-radius:4px;`
       + `background:${css.background};color:${css.color}">${type}</span>`;
   };
 
@@ -123,7 +123,7 @@
       const badgeCss = color => ({
         left: 'auto', right: '24px', top: '22px', display: 'flex', alignItems: 'center', gap: '8px',
         fontSize: '16px', letterSpacing: '.12em', padding: '4px 10px 4px calc(10px + .12em)', borderRadius: '4px',
-        border: `1.5px solid ${color}`, color, transformOrigin: 'right center',
+        border: `1px solid ${color}`, color, transformOrigin: 'right center',
       });
       s.live = E(s.console,
         `<span class="dot" style="width:10px;height:10px;border-radius:50%;background:${C.red}"></span>LIVE`,

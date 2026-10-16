@@ -50,7 +50,7 @@
       `<div style="position:absolute;left:0;right:0;top:32px">${head}</div>`
       + '<div style="position:absolute;left:16px;right:16px;top:72px;height:96px;display:flex;align-items:center;'
       + `justify-content:center">${body}</div>`
-      + `<div style="position:absolute;left:32px;right:32px;top:204px;border-top:1.5px solid ${C.line}"></div>`
+      + `<div style="position:absolute;left:32px;right:32px;top:204px;border-top:1px solid ${C.line}"></div>`
       + `<div class="lbl" style="position:absolute;left:0;right:0;top:234px;font-size:15px;color:var(--ink)">`
       + `${detail}</div>`,
       'tile', { width: TILE.w + 'px', height: TILE.h + 'px' });

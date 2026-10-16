@@ -18,6 +18,10 @@ const C = {
 // Temporal Web UI colors, sampled from the real UI in dark mode: the page background, and the panels (sidebar, top
 // bar, cards) and window title bars
 const WEB_UI = { page: '#111111', panel: '#191919' };
+// Border width of .tile (styles.css) and of the other bordered boxes, px: whole, as Chromium rounds a border width
+// down to whole device pixels (a 1.5px border lays out and draws 1 px wide in the 1920 x 1080 frames). What a box
+// holds is placed from its padding edge, TILE_BORDER inside its outer edge.
+const TILE_BORDER = 1;
 // URL of this script, in src/: asset URLs resolve against it, not against the page, as theme pages live in
 // subfolders. Read while the script loads, the only time document.currentScript is set.
 const SRC_BASE = document.currentScript.src || document.baseURI;
@@ -687,13 +691,13 @@ const liftShackle = (svg, lift) => svg.querySelector('.shackle').setAttribute('t
 // ---------- status tags
 // Small status label (e.g. on an Event History row); its text and colors are set by setStatus(). font sizes the
 // text; padX and padY: its side and top and bottom padding, px; icon: size of the leading icon of the checked kinds;
-// border: a 1.5 px border, transparent for the filled kinds, so every kind keeps the same size.
+// border: a 1 px border, transparent for the filled kinds, so every kind keeps the same size.
 function statusTag(p, { font = 15, padX = 10, padY = 4, icon = 16, border = true } = {}) {
   const e = E(p, '', 'mono', {
     fontSize: font + 'px', letterSpacing: '.1em', padding: `${padY}px ${padX}px`, borderRadius: '4px',
     whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
   });
-  if (border) e.style.border = '1.5px solid';
+  if (border) e.style.border = '1px solid';
   e.iconSize = icon;
   e.padX = padX;
   return e;
@@ -784,7 +788,7 @@ function makeLinesApp(p, name, w, h, lines, opts) {
   const cardW = w - 48, cardH = h - cardTop - 24;
   app.insertAdjacentHTML('beforeend',
     `<div style="position:absolute;left:24px;top:${cardTop}px;width:${cardW}px;height:${cardH}px;`
-    + `background:rgba(${RGB.ink},.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
+    + `background:rgba(${RGB.ink},.03);border:1px solid ${C.line};border-radius:var(--r)">`
     + panelLabel('code', label, 'left:20px;top:16px;padding-left:0') + emptyNote(emptyTop) + '</div>');
   app.card = app.lastElementChild;
   app.empty = app.card.querySelector('.empty');

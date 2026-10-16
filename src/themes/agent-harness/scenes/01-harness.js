@@ -222,7 +222,7 @@
       s.reply2 = card('Added: Tram 28 tour $25. Total $895.', 'llm', 'AGENT', CARD_H.reply2);
       // the empty slot where the next message lands while the harness waits
       s.slot = E(root, 'Waiting for the next message', 'lbl', {
-        width: CAP.w + 'px', height: CARD_H.msg2 + 'px', fontSize: '16px', border: `1.5px dashed ${C.slate}`,
+        width: CAP.w + 'px', height: CARD_H.msg2 + 'px', fontSize: '16px', border: `1px dashed ${C.slate}`,
         borderRadius: 'var(--r)', display: 'flex', alignItems: 'center', justifyContent: 'center',
       });
       // each arrow runs from a card's inner edge to the frame's edge (or back), its head on the far end; the reply
