@@ -20,10 +20,11 @@ function startPlayer() {
     loopOn: '<path d="M4 12V9a3 3 0 0 1 3-3h13M20 12v3a3 3 0 0 1-3 3H4"/>' + LOOP_ARROWS,
     // Same cycle without the two corners the slash crosses, so the slash stays legible at 20 px.
     loopOff: '<path d="M4 12V9M10 6h10M20 12v3M14 18H4"/><path d="M3 3l18 18"/>' + LOOP_ARROWS,
-    // A board on a stand.
-    presenterOn: '<path d="M2 4h20M4 4v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4"/>' + EASEL_STAND,
-    // Same board, opened where the slash crosses it so the slash stays legible at 20 px.
-    presenterOff: '<path d="M8 4h14M20 4v9a2 2 0 0 1-2 2M12.5 15H6a2 2 0 0 1-2-2V8"/><path d="M3 3l18 18"/>'
+    // A board on a stand, shown while presenter mode is off, to turn it on.
+    enterPresenter: '<path d="M2 4h20M4 4v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4"/>' + EASEL_STAND,
+    // Same board slashed, shown while presenter mode is on, to turn it off; opened where the slash crosses it
+    // so the slash stays legible at 20 px.
+    exitPresenter: '<path d="M8 4h14M20 4v9a2 2 0 0 1-2 2M12.5 15H6a2 2 0 0 1-2-2V8"/><path d="M3 3l18 18"/>'
       + EASEL_STAND,
   };
   // Keyboard shortcuts by control id, as bound by the keydown handler below.
@@ -344,7 +345,8 @@ function startPlayer() {
   }
 
   function updatePresenterButton() {
-    setIcon(presenterButton, presenter ? 'presenterOn' : 'presenterOff', 'Presenter mode');
+    // Unlike subtitles and loop, the icon shows the action, like fullscreen: off by default, it invites turning on.
+    setIcon(presenterButton, presenter ? 'exitPresenter' : 'enterPresenter', 'Presenter mode');
     presenterButton.setAttribute('aria-pressed', String(presenter));
   }
 
