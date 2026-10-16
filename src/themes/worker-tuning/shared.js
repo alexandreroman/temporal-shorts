@@ -315,17 +315,24 @@ const TREND_COLORS = { up: C.red, down: C.neon };
 const trendColor = trend => TREND_COLORS[trend] || C.ink;
 // Insets of a meter tile's label, value and bar, from its padding box
 const METER_INSET = { labelLeft: 22, labelTop: 20, valueRight: 24, valueTop: 16, bar: 24 };
+// The HTML of a meter's label, value (.v) and bar (a .fill in a track barW px wide), shared by the meter tiles and
+// the CPU gauges of Workers B and C; at: { label, value, bar }, the CSS offsets of each, e.g. 'left:22px;top:20px'
+function meterHtml(label, barW, at) {
+  return `<div class="lbl" style="position:absolute;${at.label};font-size:16px">${label}</div>`
+    + `<div class="v mono" style="position:absolute;${at.value};font-size:24px;line-height:30px;`
+    + 'transform-origin:right center"></div>'
+    + `<div style="position:absolute;${at.bar};width:${barW}px;height:${GAUGE.barH}px;border-radius:3px;`
+    + `background:rgba(${RGB.ink},.08);overflow:hidden"><div class="fill" style="height:100%;width:0"></div></div>`;
+}
 // Meter tile, w x h: a label and a value on top, a bar gauge under them (see setMeter)
 function makeMeter(p, label, w, h) {
   const { labelLeft, labelTop, valueRight, valueTop, bar } = METER_INSET;
   const barW = w - 2 * bar;
   const e = E(p,
-    `<div class="lbl" style="position:absolute;left:${labelLeft}px;top:${labelTop}px;font-size:16px">${label}</div>`
-    + `<div class="v mono" style="position:absolute;right:${valueRight}px;top:${valueTop}px;font-size:24px;`
-    + 'line-height:30px;transform-origin:right center"></div>'
-    + `<div style="position:absolute;left:${bar}px;bottom:${bar}px;width:${barW}px;height:${GAUGE.barH}px;`
-    + `border-radius:3px;background:rgba(${RGB.ink},.08);overflow:hidden">`
-    + '<div class="fill" style="height:100%;width:0"></div></div>',
+    meterHtml(label, barW, {
+      label: `left:${labelLeft}px;top:${labelTop}px`, value: `right:${valueRight}px;top:${valueTop}px`,
+      bar: `left:${bar}px;bottom:${bar}px`,
+    }),
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
   e.lbl = e.querySelector('.lbl');
   e.v = e.querySelector('.v');

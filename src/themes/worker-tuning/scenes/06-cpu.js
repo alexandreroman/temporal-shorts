@@ -82,14 +82,12 @@
     makePoller(panel, {
       left: (INSIDE.pollerX - size / 2 - inset) + 'px', top: (INSIDE.row - size / 2 - inset) + 'px', opacity: 1,
     });
-    panel.insertAdjacentHTML('beforeend',
-      `<div class="lbl" style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${GAUGE.labelTop - inset}px;`
-      + 'font-size:16px">CPU</div>'
-      + `<div class="v mono" style="position:absolute;right:${GRID.pad - inset}px;top:${GAUGE.valueTop - inset}px;`
-      + 'font-size:24px;line-height:30px"></div>'
-      + `<div style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${GAUGE.barTop - inset}px;`
-      + `width:${GAUGE.w}px;height:${GAUGE.barH}px;border-radius:3px;background:rgba(${RGB.ink},.08);`
-      + 'overflow:hidden"><div class="fill" style="height:100%;width:0"></div></div>');
+    const cpuLeft = INSIDE.cpuLeft - inset;
+    panel.insertAdjacentHTML('beforeend', meterHtml('CPU', GAUGE.w, {
+      label: `left:${cpuLeft}px;top:${GAUGE.labelTop - inset}px`,
+      value: `right:${GRID.pad - inset}px;top:${GAUGE.valueTop - inset}px`,
+      bar: `left:${cpuLeft}px;top:${GAUGE.barTop - inset}px`,
+    }));
     panel.cpuValue = panel.querySelector('.v');
     panel.cpuFill = panel.querySelector('.fill');
     panel.cpuFill.style.background = `linear-gradient(90deg,${C.uv},${C.violet})`;
