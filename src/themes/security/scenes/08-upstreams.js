@@ -56,9 +56,9 @@
   // grows to it from its 34 px as TEMPORAL splits), then under it the upstream's name in the brand font: Self-hosted
   // and Cloud (logo: the lockup's height, its wordmark about 20 px on screen; name: its top and size, 21 px on screen)
   const TITLE = { logo: 40, laneLogo: ZONE_LOGO_H, nameTop: 72, name: 24 };
-  // Both titles are centered in their box: the lockup's left edge, on a whole pixel (the lockup's viewBox is 1570 x
-  // 410), and the lane heading's resting left edge before the split (zoneHeading())
-  TITLE.logoLeft = Math.round((SELF_ZONE.w - TITLE.logo * 1570 / 410) / 2);
+  // Both titles are centered in their box: the lockup's left edge, on a whole pixel (see LOCKUP), and the lane
+  // heading's resting left edge before the split (zoneHeading())
+  TITLE.logoLeft = Math.round((SELF_ZONE.w - TITLE.logo * LOCKUP.w / LOCKUP.h) / 2);
 
   // SVG path of the proxy's connection to the point (x1, y): straight when y is within half a pixel of the wire's
   // line, else bending at WIRE.x with rounded corners
