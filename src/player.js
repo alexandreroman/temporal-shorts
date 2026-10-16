@@ -13,9 +13,11 @@ function startPlayer() {
     replay: '<path d="M4.6 15a8 8 0 1 0 1.8-8.7L4 8.5"/><path d="M4 3.5v5h5"/>',
     enterFullscreen: '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>',
     exitFullscreen: '<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>',
-    subtitlesOn: '<rect x="2" y="4.5" width="20" height="15" rx="3"/>' + CC_LETTERS,
-    // Same frame, opened where the slash crosses it so the slash stays legible at 20 px.
-    subtitlesOff: '<path d="M8.5 4.5H19a3 3 0 0 1 3 3v8M15.5 19.5H5a3 3 0 0 1-3-3v-9"/><path d="M3 3l18 18"/>'
+    // A CC frame, shown while subtitles are hidden, to turn them on.
+    showSubtitles: '<rect x="2" y="4.5" width="20" height="15" rx="3"/>' + CC_LETTERS,
+    // Same frame slashed, shown while subtitles are shown, to turn them off; opened where the slash crosses it
+    // so the slash stays legible at 20 px.
+    hideSubtitles: '<path d="M8.5 4.5H19a3 3 0 0 1 3 3v8M15.5 19.5H5a3 3 0 0 1-3-3v-9"/><path d="M3 3l18 18"/>'
       + CC_LETTERS,
     loopOn: '<path d="M4 12V9a3 3 0 0 1 3-3h13M20 12v3a3 3 0 0 1-3 3H4"/>' + LOOP_ARROWS,
     // Same cycle without the two corners the slash crosses, so the slash stays legible at 20 px.
@@ -330,7 +332,7 @@ function startPlayer() {
 
   function updateSubtitlesButton() {
     // A toggle button keeps one label; aria-pressed tells assistive technologies whether it is on.
-    setIcon(subtitlesButton, subtitlesShown ? 'subtitlesOn' : 'subtitlesOff', 'Subtitles');
+    setIcon(subtitlesButton, subtitlesShown ? 'hideSubtitles' : 'showSubtitles', 'Subtitles');
     subtitlesButton.setAttribute('aria-pressed', String(subtitlesShown));
   }
 
@@ -345,7 +347,7 @@ function startPlayer() {
   }
 
   function updatePresenterButton() {
-    // Unlike subtitles and loop, the icon shows the action, like fullscreen: off by default, it invites turning on.
+    // Unlike loop, the icon shows the action, like subtitles and fullscreen: off by default, it invites turning on.
     setIcon(presenterButton, presenter ? 'exitPresenter' : 'enterPresenter', 'Presenter mode');
     presenterButton.setAttribute('aria-pressed', String(presenter));
   }
