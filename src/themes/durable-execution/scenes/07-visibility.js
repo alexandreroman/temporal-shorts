@@ -663,6 +663,8 @@
         page.style.transform = `translateY(${Math.round((1 - p) * 12)}px)`;
         page.style.visibility = page.style.opacity > 0.001 ? 'visible' : 'hidden';
       };
+      // c[0] names each status of the list (word position at 16 characters per second, plus 0.3 s)
+      const named = { running: c[0] + 4.35, completed: c[0] + 4.95, failed: c[0] + 5.75 };
       // the four clicks of the chapter: order-1042 on the list (c[0]); Back to Workflows on its page, at the end of
       // c[1], so that the list comes back as c[2] begins; order-1045 on the list, back in full about 1 s before
       // that click; the Timeline tab of order-1045, as its shipPackage completes
@@ -683,9 +685,12 @@
       // out after its last click. A target takes its hover look just after the glide onto it.
       const tip1042 = rowIdTip(ROW_1042), tip1045 = rowIdTip(ROW_1045);
       const lowerRight = ([x, y], dx, dy) => [x + dx, y + dy]; // where the pointer comes in from
-      const to1042At = c[0] + 5.7, toBackAt = backAt - 0.9, to1045At = backAt + 0.8, toTimelineAt = timelineAt - 0.9;
+      // the pointer comes in once the "failed" bump has peaked, and lands after it
+      const pointerInAt = named.failed + 0.15;
+      const to1042At = pointerInAt + 0.1, toBackAt = backAt - 0.9, to1045At = backAt + 0.8;
+      const toTimelineAt = timelineAt - 0.9;
       const pointerVisits = [
-        { inAt: c[0] + 5.6, outAt: clickAt + 0.3,
+        { inAt: pointerInAt, outAt: clickAt + 0.3,
           glides: [{ from: lowerRight(tip1042, 560, 144), to: tip1042, at: to1042At }] },
         { inAt: backAt - 1.0, outAt: open45At + 0.3,
           glides: [{ from: lowerRight(BACK_TIP, 420, 160), to: BACK_TIP, at: toBackAt },
@@ -697,7 +702,6 @@
 
       // ---- c[0]: the rows come in quickly; the count pill and the badges of each status bump as the subtitle
       // names it, then the pointer hovers order-1042 and clicks it (back on the list, it clicks order-1045)
-      const named = { running: c[0] + 4.06, completed: c[0] + 4.63, failed: c[0] + 5.44 };
       COUNTED.forEach(status => {
         s.list.counts[status].style.transform = `scale(${1 + 0.12 * bumpAt(t, named[status])})`;
       });
@@ -735,10 +739,10 @@
       // ---- c[1]: order-1042: the chart sweeps through the run in time order on "every Activity" (each name
       // label shows as its bar ends), then the crash annotation on "the retry after the crash"
       const tl = s.timeline;
-      setTimeline(tl, ORDER_1042.runtime * P(t, c[1] + 1.8, 2.2, linear));
+      setTimeline(tl, ORDER_1042.runtime * P(t, c[1] + 2.6, 2.2, linear));
       s.order1042.end.textContent = dateTime(ORDER_1042.start + ORDER_1042.runtime);
       s.order1042.duration.textContent = duration(ORDER_1042.runtime);
-      showAnnotation(s.crashNote, t, c[1] + 4.9);
+      showAnnotation(s.crashNote, t, c[1] + 5.25);
 
       // ---- c[2], once the pointer has opened it from the list: order-1045 live: shipPackage fails twice, waits 1s
       // then 2s, attempt 3 succeeds and the pointer switches to the Timeline tab, which keeps growing as
