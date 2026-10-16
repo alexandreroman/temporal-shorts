@@ -22,11 +22,11 @@
   const RIDE = { x0: TUBE.x0 + 120, x1: TUBE.x1 - 120 };
   // the outsiders under the wire, between the zones, one after the other, their tops in line (top): the eavesdropper
   // (spyH high), then the unknown client (clientH), which holds one line under its name. Inside a tile, px from its
-  // padding box: its heading's top, with its verdict tag (VERDICT) on the right of the same line, its second row's
-  // top, and the inset of both from its sides.
+  // padding box (TILE_BORDER inside its edges): its heading's top, with its verdict tag (VERDICT) on the right of the
+  // same line, its second row's top, and the inset of both from its sides.
   const OUTSIDER = {
     x: (LANE.wire.x0 + LANE.wire.x1) / 2, top: 672, w: 340, spyH: 120, clientH: 88,
-    headTop: 14.5, rowTop: 50.5, inset: 14.5,
+    headTop: 16 - TILE_BORDER, rowTop: 52 - TILE_BORDER, inset: 16 - TILE_BORDER,
   };
   // a verdict tag: its text size and height, centered on the heading's line (icon 22 px high)
   const VERDICT = { font: 14, h: 28 };
@@ -40,8 +40,12 @@
   const GLYPHS = 8;
   // the identity badge: it leaves the Worker's top right, at the shot's left edge, and slides in over the tube's
   // label to land above the corridor, 16 px clear of its top rail, inside the tube shot, in line with the outsiders'
-  // tiles. Its two tabs share one row (tabTop), under its heading.
-  const BADGE = { x: OUTSIDER.x, w: OUTSIDER.w, h: 84, tabTop: 44.5, route: [[540, 340], [690, 315], [860, 325]] };
+  // tiles. Inside it, px from its padding box, as in the outsiders' tiles: its heading's top, and its two tabs' row
+  // (tabTop), under its heading.
+  const BADGE = {
+    x: OUTSIDER.x, w: OUTSIDER.w, h: 84, headTop: 12 - TILE_BORDER, tabTop: 46 - TILE_BORDER,
+    route: [[540, 340], [690, 315], [860, 325]],
+  };
   BADGE.y = TUBE.y - CORRIDOR.h / 2 - 16 - BADGE.h / 2;
   // the private connectivity beat, at camera rest, in the gap between the zones, where the wire crosses the network:
   // the PUBLIC INTERNET band fills the gap 12 px inside the zones' edges, from 3 px under the tube shot's content
@@ -131,13 +135,15 @@
         + `color:${C.slate}">`
         + 'no credentials</div>', {});
       // sized for the 1.4 tube shot: its tabs render at 17 px, its heading and verdict at 18 px or more. VERIFIED,
-      // of the outsiders' verdicts' size, centers on the heading's line (21.5 px under the padding box's top) and ends
-      // with the tabs, side by side on one row: the certificate's as wide as its text, the API key's the rest.
+      // of the outsiders' verdicts' size, centers on the heading's line (its icon 22 px high) and ends with the tabs,
+      // side by side on one row: the certificate's as wide as its text, the API key's the rest.
+      const { inset } = OUTSIDER;
       s.badge = E(root,
-        '<div style="position:absolute;left:14.5px;top:10.5px;display:flex;gap:8px;align-items:center">'
+        `<div style="position:absolute;left:${inset}px;top:${BADGE.headTop}px;display:flex;gap:8px;`
+        + 'align-items:center">'
         + `${ICON('badge', 22, C.ink, 1.8)}<span class="lbl" style="font-size:14px;color:var(--ink)">Identity</span>`
         + '</div>'
-        + `<div style="position:absolute;left:14.5px;right:14.5px;top:${BADGE.tabTop}px;display:flex;gap:8px">`
+        + `<div style="position:absolute;left:${inset}px;right:${inset}px;top:${BADGE.tabTop}px;display:flex;gap:8px">`
         + ['mTLS CERTIFICATE · YOUR CA', 'API KEY'].map((text, i) => `<div class="mono" style="flex:${i ? 1 : 'none'};`
           + 'height:28px;line-height:25px;padding:0 8px;font-size:12px;letter-spacing:.06em;white-space:nowrap;'
           + `border:1px solid ${C.lineLight};border-radius:var(--rs)">${text}</div>`).join('')
@@ -146,7 +152,7 @@
       s.badge.scan = E(s.badge, '', '', {
         left: '0', width: '100%', height: '2px', background: C.neon, boxShadow: `0 0 10px 2px rgba(${RGB.neon},.5)`,
       });
-      s.verified = makeHeadingVerdict(s.badge, { ...VERDICT, right: 14.5, top: 21.5 - VERDICT.h / 2 });
+      s.verified = makeHeadingVerdict(s.badge, { ...VERDICT, right: inset, top: BADGE.headTop + 11 - VERDICT.h / 2 });
 
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
       // the beam's scan line on the tube, over the card it reads, and the glyphs it pulls down

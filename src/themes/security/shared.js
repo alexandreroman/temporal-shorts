@@ -73,15 +73,14 @@ function setLock(lock, seal) {
 // The round padlock badge centered on the top edge of a box w px wide (the payload card, a recap tile, the sealed
 // result): a badge `badge` px across, in the stage black with a line border, and a makeLock() padlock lockSize px
 // in its middle; pass even sizes, so both center on whole pixels. The scenes set the border color and the lock's state.
-// Offsets from the box's padding box, 1.5 px back: the border (TILE_BORDER) and half a pixel.
+// Both are placed from the padding box of their parent, TILE_BORDER inside its outer edge.
 function makeLockBadge(parent, w, badge, lockSize) {
   const e = E(parent, '', '', {
-    left: (w - badge) / 2 - 1.5 + 'px', top: -badge / 2 - 1.5 + 'px', width: badge + 'px', height: badge + 'px',
-    borderRadius: '50%', background: C.bg, border: `1px solid ${C.line}`, opacity: 1,
+    left: (w - badge) / 2 - TILE_BORDER + 'px', top: -badge / 2 - TILE_BORDER + 'px', width: badge + 'px',
+    height: badge + 'px', borderRadius: '50%', background: C.bg, border: `1px solid ${C.line}`, opacity: 1,
   });
-  const lock = makeLock(e, lockSize, 1.9, {
-    left: (badge - lockSize) / 2 - 1.5 + 'px', top: (badge - lockSize) / 2 - 1.5 + 'px', opacity: 1,
-  });
+  const inset = (badge - lockSize) / 2 - TILE_BORDER;
+  const lock = makeLock(e, lockSize, 1.9, { left: inset + 'px', top: inset + 'px', opacity: 1 });
   return { badge: e, lock };
 }
 
@@ -139,8 +138,8 @@ function makePayload(p, { w = 420 } = {}) {
     + `<div class="mono value" style="font-size:${value.font}px;line-height:${value.line}px;white-space:pre"></div>`
     + '</div>').join('');
   const card = E(p,
-    `<div class="alarm" style="position:absolute;inset:-1.5px;border:1px solid ${C.red};border-radius:var(--r);`
-    + `background:rgba(${RGB.red},.12);opacity:0"></div>`
+    `<div class="alarm" style="position:absolute;inset:-${TILE_BORDER}px;border:1px solid ${C.red};`
+    + `border-radius:var(--r);background:rgba(${RGB.red},.12);opacity:0"></div>`
     + `<div class="mono" style="font-size:${head.font}px;line-height:${head.line}px;letter-spacing:.14em;`
     + `color:${C.slate};margin-bottom:${head.gap}px">PAYLOAD</div>`
     + rowsHtml,
@@ -517,10 +516,10 @@ const NS_SWEEP_W = 160;
 // shows them.
 function makeNamespaces(lane) {
   const bands = NAMESPACES.map(ns => {
-    // offsets from the band's padding box, 1.5 px back: the border (TILE_BORDER) and half a pixel
-    const labelTop = (ns.mine ? 20 : (ns.h - 44) / 2) - 1.5;
+    // offsets from the band's padding box, TILE_BORDER inside its edge
+    const labelTop = (ns.mine ? 20 : (ns.h - 44) / 2) - TILE_BORDER;
     const band = E(lane.temporal.parentNode,
-      `<div style="position:absolute;left:18.5px;top:${labelTop}px">`
+      `<div style="position:absolute;left:${20 - TILE_BORDER}px;top:${labelTop}px">`
       + `<div class="mono" style="font-size:13px;line-height:18px;letter-spacing:.14em;color:${C.slate}">`
       + 'NAMESPACE</div>'
       + `<div class="mono" style="font-size:20px;line-height:26px">${ns.name}</div></div>`,
@@ -528,7 +527,9 @@ function makeNamespaces(lane) {
     lane.svg.before(band);
     band.ns = ns;
     if (!ns.mine) {
-      band.lock = makeLock(band, 30, 1.9, { left: NS_BAND.w - 54 - 1.5 + 'px', top: (ns.h - 30) / 2 - 1.5 + 'px' });
+      band.lock = makeLock(band, 30, 1.9, {
+        left: NS_BAND.w - 54 - TILE_BORDER + 'px', top: (ns.h - 30) / 2 - TILE_BORDER + 'px',
+      });
     }
     return band;
   });
@@ -921,9 +922,10 @@ PROXY_CARD.keyDy = PROXY_CARD.nsDy + PROXY_CARD.tagH + PROXY_CARD.gap;
 // bottom edge as the tags are apart
 const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 280 };
 PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 78 + PROXY_CARD.h / 2 };
-// The payments Namespace band (PROXY_BAND), labelled with its full name at its top left
+// The payments Namespace band (PROXY_BAND), labelled with its full name at its top left, 18 px from its left edge and
+// 14 px under its top edge (offsets from its padding box, TILE_BORDER inside them)
 const makeProxyBand = root => E(root,
-  '<div style="position:absolute;left:16.5px;top:12.5px">'
+  `<div style="position:absolute;left:${18 - TILE_BORDER}px;top:${14 - TILE_BORDER}px">`
   + `<div class="mono" style="font-size:12px;line-height:18px;letter-spacing:.14em;color:${C.slate}">NAMESPACE</div>`
   + `<div class="mono" style="font-size:18px;line-height:26px">${FULL_NS}</div></div>`,
   '', {

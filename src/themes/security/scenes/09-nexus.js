@@ -96,26 +96,26 @@
   const DENY_MID = (DENY_FROM + GATE.left) / 2;
   const DENY_D = `M ${DENY_FROM} ${ANALYTICS_Y} C ${DENY_MID} ${ANALYTICS_Y} ${DENY_MID} ${HIT.y} ${GATE.left} ${HIT.y}`
     + ` H ${HIT.x}`;
-  // Where payments' verdict tag (ALLOWED) ends as it renders, right and bottom: set 1.5 px back from INSET inside
-  // the Namespace's 1 px border (TILE_BORDER), the tag ends at x 760.5 and y 309.5 and lights pixel column 760 and
-  // row 309, as a whole-pixel box ending at 761 and 310 does. TAG_EDGE holds those whole-pixel ends; the tube's label
-  // and the cards in payments end on its right one.
-  const TAG_EDGE = {
-    right: PAYMENTS.x + PAYMENTS.w - 1 - (INSET - 1.5) + 0.5,
-    bottom: PAYMENTS.y + 1 + PAYMENTS.headTop - 1.5 + NS_HEAD.h / 2 + VERDICT.h / 2 + 0.5,
+  // Where payments' heading row ends, right and bottom: its verdict tag (ALLOWED) ends INSET px inside the
+  // Namespace's right edge and centers on the heading; the tube's label and the cards in payments end on its right
+  const PAYMENTS_HEAD = {
+    right: PAYMENTS.x + PAYMENTS.w - INSET, bottom: PAYMENTS.y + PAYMENTS.headTop + NS_HEAD.h / 2 + VERDICT.h / 2,
   };
   // The mTLS tube between the Namespaces, in the theme's TLS tube look (makeTube): from the transfer Workflow's tile,
   // its mouth ring (24 px wide) 16 px clear of it, to 24 px inside fraud, where the veil covers its end. Its label, a
   // big pill (chapter 2's TLS label as it shows on screen), sits above it as in chapter 2: its right edge on
-  // TAG_EDGE.right, in line with ALLOWED, and as far under that tag as above the tube.
+  // PAYMENTS_HEAD.right, in line with ALLOWED, and as far under that tag as above the tube.
   const NEXUS_TUBE = { x0: WORKFLOW.x + WORKFLOW.w + 16 + 12, x1: FRAUD.x + 24, y: CALL_Y, h: TUBE_H };
   const TUBE_LABEL = { w: TUBE_LABEL_W.big, h: 66 };
-  NEXUS_TUBE.label = { x: TAG_EDGE.right - TUBE_LABEL.w / 2, y: (TAG_EDGE.bottom + CALL_Y - TUBE_H / 2) / 2 };
+  NEXUS_TUBE.label = {
+    x: PAYMENTS_HEAD.right - TUBE_LABEL.w / 2, y: (PAYMENTS_HEAD.bottom + CALL_Y - TUBE_H / 2) / 2,
+  };
   // The payload card in the tube: as wide as chapter 2's card in its tube on screen (PAYLOAD_IN_WORKER.w at its scale
   // and zoom), built at that width so it rests on whole pixels. Where it waits in payments, its right edge on
-  // TAG_EDGE.right (17 px clear of the tube's mouth ring), and where it is hidden under the veil, fully inside fraud.
+  // PAYMENTS_HEAD.right (16 px clear of the tube's mouth ring), and where it is hidden under the veil, fully inside
+  // fraud.
   const CARD = { w: 284 };
-  const CARD_AT = { x: TAG_EDGE.right - CARD.w / 2, hiddenX: FRAUD.x + CARD.w / 2 + 20 };
+  const CARD_AT = { x: PAYMENTS_HEAD.right - CARD.w / 2, hiddenX: FRAUD.x + CARD.w / 2 + 20 };
   // The sealed result that comes back: its size (as wide as the tube's label, so it lands right under it, both edges
   // in line), its padlock badge and padlock, its one field (TRANSFER's ciphertext glyphs for row `row`, so its glyphs
   // differ from the payload's), its center x where it lands, under the label, and its center y in the tube
@@ -146,32 +146,36 @@
   const headHtml = (text, css = '') => `<div class="mono" style="${css}font-size:${HEAD.font}px;`
     + `line-height:${HEAD.line}px;letter-spacing:.1em;color:${C.ink}">${text}</div>`;
   // A Namespace: its border, its NAMESPACE label and name at the top left (headTop px under its top edge, INSET px
-  // from its left edge), and its verdict tag on the right of the heading (box.verdict, hidden)
+  // from its left edge), and its verdict tag on the right of the heading, INSET px from its right edge (box.verdict,
+  // hidden)
   const makeNamespaceBox = (root, box, name) => {
-    // offsets from the padding box, 1.5 px back: the border (TILE_BORDER) and half a pixel
-    const top = box.headTop - 1.5;
+    // offsets from the padding box, TILE_BORDER inside the edges
+    const top = box.headTop - TILE_BORDER;
+    const inset = INSET - TILE_BORDER;
     const e = E(root,
-      `<div style="position:absolute;left:${INSET - 1.5}px;top:${top}px">`
+      `<div style="position:absolute;left:${inset}px;top:${top}px">`
       + `<div class="mono" style="font-size:${NS_HEAD.label}px;line-height:${NS_HEAD.labelLine}px;letter-spacing:.14em;`
       + `color:${C.slate}">NAMESPACE</div>`
       + `<div class="mono" style="font-size:${NS_HEAD.name}px;line-height:${NS_HEAD.nameLine}px">${name}</div></div>`,
       '', { width: box.w + 'px', height: box.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)' });
-    e.verdict = makeHeadingVerdict(e, { ...VERDICT, right: INSET - 1.5, top: top + NS_HEAD.h / 2 - VERDICT.h / 2 });
+    e.verdict = makeHeadingVerdict(e, { ...VERDICT, right: inset, top: top + NS_HEAD.h / 2 - VERDICT.h / 2 });
     return e;
   };
-  // A tile of the box's size: its heading, then its rows, a key over a value, centered in the room under it
+  // A tile of the box's size: its heading, then its rows, a key over a value, centered in the room under it (offsets
+  // from its padding box, TILE_BORDER inside its edges)
   const makeInfoTile = (root, box, heading, rows) => {
     const rowH = ROW.keyLine + ROW.valueLine;
     const headBottom = TILE.headTop + HEAD.line;
     const block = rows.length * rowH + (rows.length - 1) * ROW.gap;
     const rowsTop = Math.round(headBottom + (box.h - headBottom - block) / 2);
-    const rowsHtml = rows.map(([key, value], i) => `<div style="position:absolute;left:${TILE.inset - 1.5}px;`
-      + `top:${rowsTop + i * (rowH + ROW.gap) - 1.5}px">`
+    const left = TILE.inset - TILE_BORDER;
+    const rowsHtml = rows.map(([key, value], i) => `<div style="position:absolute;left:${left}px;`
+      + `top:${rowsTop + i * (rowH + ROW.gap) - TILE_BORDER}px">`
       + `<div class="mono" style="font-size:${ROW.key}px;line-height:${ROW.keyLine}px;color:${C.slate}">${key}</div>`
       + `<div class="mono" style="font-size:${ROW.value}px;line-height:${ROW.valueLine}px">${value}</div></div>`)
       .join('');
     return E(root,
-      headHtml(heading, `position:absolute;left:${TILE.inset - 1.5}px;top:${TILE.headTop - 1.5}px;`) + rowsHtml,
+      headHtml(heading, `position:absolute;left:${left}px;top:${TILE.headTop - TILE_BORDER}px;`) + rowsHtml,
       'tile', { width: box.w + 'px', height: box.h + 'px', textAlign: 'left' });
   };
   // The fraud Task Queue: its heading on the left, its name on the right, on one line
@@ -214,8 +218,9 @@
     + `<div style="margin-top:8px;font-size:18px;line-height:26px;color:${C.slate}">`
     + 'Namespace, Task Queue, implementation</div>',
     '', {
-      width: FRAUD.w - 3 + 'px', height: FRAUD.h - 3 + 'px', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', borderRadius: 'calc(var(--r) - 1.5px)',
+      width: FRAUD.w - 2 * TILE_BORDER + 'px', height: FRAUD.h - 2 * TILE_BORDER + 'px', display: 'flex',
+      flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      borderRadius: `calc(var(--r) - ${TILE_BORDER}px)`,
       background: `repeating-linear-gradient(135deg, rgba(${RGB.ink},.05) 0 2px, rgba(${RGB.ink},0) 2px 14px), `
         + '#1A1B2C',
     });

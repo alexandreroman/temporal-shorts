@@ -37,17 +37,18 @@
   const PAD = 14;
   const LABEL = { top: 9, font: 21 };
   // its track, from the panel's top left corner (under the label, as far below its capitals as before), and its
-  // knob's size, inset in the track and travel: the options' spacing
+  // knob's size, its inset in the track (centered across it, inside its border) and its travel: the options' spacing
   const TRACK = { left: PAD, top: 48, w: 30, h: 70 };
-  const KNOB = { size: 24, inset: 1.5 };
-  KNOB.travel = TRACK.h - 3 - KNOB.size - 2 * KNOB.inset;
+  const KNOB = { size: 24 };
+  KNOB.inset = (TRACK.w - 2 * TILE_BORDER - KNOB.size) / 2;
+  KNOB.travel = TRACK.h - 2 * TILE_BORDER - KNOB.size - 2 * KNOB.inset;
   // the panel's center and size, its top 15 px under the proxy box, its height round the track
-  const ROUTING = { x: PROXY.x, w: PROXY.w, h: TRACK.top + TRACK.h + PAD + 3 };
+  const ROUTING = { x: PROXY.x, w: PROXY.w, h: TRACK.top + TRACK.h + PAD + 2 * TILE_BORDER };
   ROUTING.y = PROXY.y + PROXY.h / 2 + 15 + ROUTING.h / 2;
   const STEM = { y0: PROXY.y + PROXY.h / 2, y1: ROUTING.y - ROUTING.h / 2 };
   // the two options: their left edge and line height; each option's line centered on a knob stop (tops)
   const OPTIONS = { left: 56, font: 19, line: 28 };
-  const firstStop = TRACK.top + 1.5 + KNOB.inset + KNOB.size / 2;
+  const firstStop = TRACK.top + TILE_BORDER + KNOB.inset + KNOB.size / 2;
   OPTIONS.tops = [firstStop, firstStop + KNOB.travel].map(y => y - OPTIONS.line / 2);
   // the sparks that fly off the self-hosted service as the connection tears off it: how many, how long each one flies
   const TEAR = { n: 8, life: 0.5 };
@@ -214,7 +215,7 @@
         option.style.color = active ? C.ink : C.slate;
       });
       s.routing.style.borderColor = t >= flipAt && t < flipAt + 0.6 ? C.neon : C.line;
-      const knobY = ROUTING.y - ROUTING.h / 2 + TRACK.top + 1.5 + KNOB.inset + KNOB.size / 2 + KNOB.travel;
+      const knobY = ROUTING.y - ROUTING.h / 2 + TILE_BORDER + firstStop + KNOB.travel;
       placeRipples(s.click, t, flipAt + 0.2, ROUTING.x - ROUTING.w / 2 + TRACK.left + TRACK.w / 2, knobY, 20, 120,
         { d: 0.6, step: 0.14 });
 

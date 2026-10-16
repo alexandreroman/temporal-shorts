@@ -46,8 +46,14 @@
   };
   // KEYS STAY WITH YOU, on the border between the zones, where the wire runs while the Worker is there
   const KEYS_TAG = { x: (LANE.wire.x0 + LANE.wire.x1) / 2, y: LANE.wire.y, w: 340 };
-  // the Search Attributes panel, in the close layout's slot under the Web UI, as large as it
-  const STRIP = { x: CLOSE.column.x, y: CLOSE.slot.y, w: WEBUI.w, h: WEBUI.h };
+  // the Search Attributes panel, in the close layout's slot under the Web UI, as large as it; inside it, px from its
+  // padding box (TILE_BORDER inside its edges): the left edge of its lines, the top of its label, of its two
+  // attributes' rows and of its tag, 34 px apart from the first attribute on, as much room under the tag as above the
+  // label
+  const STRIP = {
+    x: CLOSE.column.x, y: CLOSE.slot.y, w: WEBUI.w, h: WEBUI.h, left: 18 - TILE_BORDER, labelTop: 15 - TILE_BORDER,
+    rowTops: [43 - TILE_BORDER, 77 - TILE_BORDER], tagTop: 111 - TILE_BORDER,
+  };
   // the glyphs that rain off the card as it crosses the gate: how many, and how long each one falls
   const RAIN = { n: 28, life: 0.7 };
   // the first characters of the IBAN, which the trip to the Codec Server carries
@@ -112,11 +118,11 @@
       // INDEXED, NOT ENCRYPTED tag (s.indexed): the attributes and the tag evenly spaced, as much room above the label
       // as under the tag
       s.strip = E(root,
-        '<div class="lbl" style="position:absolute;left:16.5px;top:13.5px;font-size:13px;padding-left:0">'
-        + 'Search Attributes</div>'
-        + `<span class="attr" style="position:absolute;left:16.5px;top:41.5px">`
+        `<div class="lbl" style="position:absolute;left:${STRIP.left}px;top:${STRIP.labelTop}px;font-size:13px;`
+        + 'padding-left:0">Search Attributes</div>'
+        + `<span class="attr" style="position:absolute;left:${STRIP.left}px;top:${STRIP.rowTops[0]}px">`
         + `${attribute('TransferStatus', 'DEBITED')}</span>`
-        + '<div style="position:absolute;left:16.5px;top:75.5px;display:flex;gap:6px">'
+        + `<div style="position:absolute;left:${STRIP.left}px;top:${STRIP.rowTops[1]}px;display:flex;gap:6px">`
         + `<span class="attr">${attribute('WorkflowId', 'tx-8812')}</span>`
         + `<span class="secret" style="position:relative">${attribute('iban', 'FR76',
           `border:1px dashed ${C.red};color:${C.red}`)}`
@@ -130,7 +136,7 @@
       s.strip.strike = s.strip.querySelector('.strike');
       s.strip.sweep = s.strip.querySelector('.sweep');
       s.indexed = statusTag(s.strip, { font: 11, icon: 11 });
-      Object.assign(s.indexed.style, { left: '16.5px', top: '109.5px', height: '24px' });
+      Object.assign(s.indexed.style, { left: STRIP.left + 'px', top: STRIP.tagTop + 'px', height: '24px' });
       s.codec = makeKeyTile(root, ICON('server', 28, C.ink, 1.8), 'Codec Server', CODEC.w, CODEC.h);
       s.packet = E(root, '', 'mono', {
         width: '190px', height: '34px', lineHeight: '31px', textAlign: 'center', fontSize: '18px', whiteSpace: 'pre',
@@ -220,7 +226,7 @@
       let cardY = PAYLOAD_IN_WORKER.y;
       const { layout } = PAYLOAD_IN_WORKER;
       // the share of each value already past the gate, from its right end (Mono advances 0.6 em per character)
-      const textLeft = cardX - PAYLOAD_IN_WORKER.w / 2 + 1.5 + layout.pad.x;
+      const textLeft = cardX - PAYLOAD_IN_WORKER.w / 2 + TILE_BORDER + layout.pad.x;
       const scramble = TRANSFER.map(([, value]) => {
         const textW = value.length * 0.6 * layout.value.font;
         return clamp((textLeft + textW - CONVERTER.x) / textW);

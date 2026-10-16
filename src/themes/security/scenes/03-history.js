@@ -35,8 +35,8 @@
   // close layout moves it (closeDx): its top left corner, its line height and font size, and its width (Mono advances
   // 0.6 em per character)
   const IBAN = {
-    x: HIST_CHIP.x - HIST_CHIP.w / 2 + (1.5 + PAYLOAD_IN_WORKER.layout.pad.x) * HIST_CHIP.k,
-    y: HIST_CHIP.y - HIST_CHIP.h / 2 + (1.5 + PAYLOAD_IN_WORKER.layout.valueTop(0)) * HIST_CHIP.k,
+    x: HIST_CHIP.x - HIST_CHIP.w / 2 + (TILE_BORDER + PAYLOAD_IN_WORKER.layout.pad.x) * HIST_CHIP.k,
+    y: HIST_CHIP.y - HIST_CHIP.h / 2 + (TILE_BORDER + PAYLOAD_IN_WORKER.layout.valueTop(0)) * HIST_CHIP.k,
     line: PAYLOAD_IN_WORKER.layout.value.line * HIST_CHIP.k, font: PAYLOAD_IN_WORKER.layout.value.font * HIST_CHIP.k,
   };
   IBAN.w = TRANSFER[0][1].length * 0.6 * IBAN.font;
@@ -47,7 +47,7 @@
     const tile = E(root,
       '<div style="display:flex;align-items:center;gap:12px">'
       + `${ICON('user', 28, C.ink, 1.8)}<span class="lbl" style="font-size:14px;color:var(--ink)">${name}</span></div>`
-      + `<div class="eye" style="position:absolute;right:16px;top:${(VIEWER.h - 24) / 2 - 1.5}px;opacity:0">`
+      + `<div class="eye" style="position:absolute;right:16px;top:${(VIEWER.h - 24) / 2 - TILE_BORDER}px;opacity:0">`
       + `${ICON('eye', 24, C.red, 2)}</div>`,
       'tile', {
         width: VIEWER.w + 'px', height: VIEWER.h + 'px', display: 'flex', alignItems: 'center',

@@ -107,7 +107,7 @@
       const top = CARD.slotTop + i * (CARD.slotH + CARD.slotGap);
       return `<div class="slot" style="position:absolute;left:${CARD.pad}px;right:${CARD.pad}px;top:${top}px;`
         + `height:${CARD.slotH}px;border:1px dashed ${C.line};border-radius:var(--rs)">`
-        + '<div class="fill" style="position:absolute;inset:-1.5px;display:flex;align-items:center;gap:12px;'
+        + `<div class="fill" style="position:absolute;inset:-${TILE_BORDER}px;display:flex;align-items:center;gap:12px;`
         + `padding-left:16px;border:1px solid rgba(${RGB.violet},.45);border-left:3px solid ${C.violet};`
         + 'border-radius:var(--rs);'
         + `background:rgba(${RGB.violet},.12);opacity:0">`
