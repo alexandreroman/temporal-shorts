@@ -431,6 +431,35 @@ function makeWorkerCode(root) {
   return card;
 }
 
+// ---------- the "+ WORKER" (chapter 1) and "+ SLOTS" (chapter 6) ghosts: the reflex fix, struck through
+// A dashed panel in the place of the code card (with its tab), the whole band high, its label in 30 px mono; it also
+// keeps the composition centered on y 515, which the hard cuts leave no shift to do
+const GHOST = { left: DIAGRAM.code.left, top: DIAGRAM.band.top, w: DIAGRAM.code.w, h: DIAGRAM.band.h, label: 30 };
+GHOST.x = GHOST.left + GHOST.w / 2;
+GHOST.y = GHOST.top + GHOST.h / 2;
+// The ghost and its red strike, strikeHalfW px on either side of its middle (in a layer of its own, over the ghost)
+function makeGhost(root, label, strikeHalfW) {
+  const ghost = E(root,
+    `<div class="mono" style="font-size:${GHOST.label}px;letter-spacing:.1em;padding-left:.1em;color:var(--slate)">`
+    + label + '</div>',
+    '', {
+      width: GHOST.w + 'px', height: GHOST.h + 'px', border: '2px dashed ' + C.lineLight, borderRadius: 'var(--r)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    });
+  const svg = svgLayer(root);
+  const { x, y } = GHOST;
+  ghost.strike = path(svg, `M ${x - strikeHalfW} ${y} L ${x + strikeHalfW} ${y}`, C.red, 4, false);
+  return ghost;
+}
+// Places a ghost: risen by p (see rise()), with opacity o; from strikeAt on, its border turns red and the strike draws
+// across it, with opacity strikeO
+function placeGhost(ghost, t, p, o, strikeAt, strikeO) {
+  rise(ghost, GHOST.x, GHOST.y, p);
+  ghost.style.opacity = o;
+  ghost.style.borderColor = t >= strikeAt ? C.red : C.lineLight;
+  draw(ghost.strike, P(t, strikeAt, 0.35, easeOut), strikeO);
+}
+
 // ---------- bottleneck markers: a red outline round a part and a BOTTLENECK tag, which turn neon (FIXED)
 // A tag's height: 21 px of line, 8 of padding and 3 of border, so a tag centered on a whole pixel rests on whole pixels
 const TAG_H = 32;

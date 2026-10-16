@@ -17,10 +17,7 @@
   const SLOTS = 50;
   // Worker A's steadily busy Slots: 44 as chapter 5 ends, 36 once the CPU is full and tasks come in slowly
   const BUSY = 44, BUSY_SLOW = 36;
-  const { band, code, slot } = DIAGRAM;
-  // the "+ SLOTS" ghost fills the code card's place, as the "+ WORKER" ghost of chapter 1 does
-  const GHOST = { left: code.left, top: band.top, w: code.w, h: band.h, label: 30 };
-  const GHOST_X = GHOST.left + GHOST.w / 2, GHOST_Y = GHOST.top + GHOST.h / 2;
+  const { band, slot } = DIAGRAM;
   // Workers B and C: two panels stacked a zone apart in the bottom band (y 632..736 and 776..880), under WORKER A and
   // as wide (x 860..1800), once the CPU and MEMORY meters have left it. Inside, on a row `row` px below the panel's
   // top, under the header's gear (y 20..50): a Poller in the column of Worker A's (x 936), 5 Slots on Worker A's Slot
@@ -200,15 +197,8 @@
     ],
     build(root, s) {
       s.dg = makeWorkerDiagram(root);
-      s.ghost = E(root,
-        `<div class="mono" style="font-size:${GHOST.label}px;letter-spacing:.1em;padding-left:.1em;color:var(--slate)">`
-        + '+ SLOTS</div>',
-        '', {
-          width: GHOST.w + 'px', height: GHOST.h + 'px', border: '2px dashed ' + C.lineLight, borderRadius: 'var(--r)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        });
-      s.svg = svgLayer(root);
-      s.strike = path(s.svg, `M ${GHOST_X - 95} ${GHOST_Y} L ${GHOST_X + 95} ${GHOST_Y}`, C.red, 4, false);
+      // the "+ SLOTS" ghost fills the code card's place, as the "+ WORKER" ghost of chapter 1 does
+      s.ghost = makeGhost(root, '+ SLOTS', 95);
       // in the poll lines' layer of the diagram, where they share Worker A's segments seamlessly
       s.bus = NEW.names.map((_, w) => path(s.dg.svg, roundedPath(busRoute(w), GRID.corner), C.violet, 2, false, '5,7'));
       s.workers = NEW.names.map(name => makeNewWorker(root, name));
@@ -298,10 +288,9 @@
       s.dg.worker.st.style.opacity = 1 - P(t, dockAt, 0.3);
 
       // "+ SLOTS" rises where the code card was, is struck through, and gives way to Workers B and C
-      const ghostO = P(t, c[1] + 0.6, 0.5) * (1 - P(t, c[2] + 0.2, 0.4));
-      rise(s.ghost, GHOST_X, GHOST_Y, ghostO);
-      s.ghost.style.borderColor = t >= strikeAt ? C.red : C.lineLight;
-      draw(s.strike, P(t, strikeAt, 0.35, easeOut), 1 - P(t, c[2] + 0.2, 0.4));
+      const ghostOut = 1 - P(t, c[2] + 0.2, 0.4);
+      const ghostO = P(t, c[1] + 0.6, 0.5) * ghostOut;
+      placeGhost(s.ghost, t, ghostO, ghostO, strikeAt, ghostOut);
 
       // B and C slide in from the right and glow a moment; their poll lines join them to the lanes. They slide out to
       // the right with the move.
