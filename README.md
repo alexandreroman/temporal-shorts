@@ -19,7 +19,7 @@ Each video is a theme:
   [Workflows](https://docs.temporal.io/workflows),
   [Activities](https://docs.temporal.io/activities), retries, the
   [Event History](https://docs.temporal.io/encyclopedia/event-history),
-  replay and the Temporal web UI.
+  replay and the Temporal Web UI.
 - **Human-in-the-Loop** (`human-in-the-loop`): how a Temporal
   Workflow waits durably for a person's decision, such as an approval, for
   minutes or days, then resumes where it left off.
