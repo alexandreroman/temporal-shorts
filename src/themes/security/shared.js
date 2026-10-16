@@ -950,7 +950,7 @@ function namespaceHtml(shown, caret) {
 // The benefits of the recap, [icon, label], one tile each in the use cases' row (USE_CASE_ROW); a <br> splits a label
 // that would crowd its tile
 const BENEFITS = [
-  ['door', 'No inbound ports'], ['badge', 'Verified<br>connections'], ['key', 'Your keys only'],
+  ['door', 'No inbound ports'], ['badge', 'Verified<br>clients'], ['key', 'Your keys only'],
   ['keyOff', 'No secrets<br>in Workers'],
 ];
 // The label height of the recap and use-case tiles, in lines (padTileLabel): one label in a row may take two lines,

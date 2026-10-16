@@ -100,8 +100,8 @@ Temporal Trust Center.
 
 [Watch from 3:32](/themes/security/#t=212)
 
-Your code stays home, every connection is verified, payloads stay encrypted,
-Workers hold no secrets.
+Your code stays home, Temporal verifies every client, your keys encrypt, Workers
+need no secrets.
 
 ## Chapter 12: What you can build
 

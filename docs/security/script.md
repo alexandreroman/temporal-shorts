@@ -129,6 +129,11 @@ recap.
   them is a migration of its own
   (<https://docs.temporal.io/cloud/migrate/manual>), so chapter 8 says
   "point the proxy at Temporal Cloud", never that the move is one setting.
+  Inbound authentication on the proxy is off by default
+  (<https://docs.temporal.io/production-deployment/temporal-proxy/configure>):
+  the hop from a Worker to the proxy is not verified unless you configure
+  it, so the recap says "Temporal verifies every client", never that every
+  connection is verified.
 - Proxy encryption:
   <https://docs.temporal.io/production-deployment/temporal-proxy/encrypt-payloads>:
   no Worker or Client code change; short-lived data keys encrypt payloads
@@ -459,12 +464,12 @@ recap.
 
 ## 11 What you get
 
-- **3:33** Your code stays home, every connection is verified, payloads
-  stay encrypted, Workers hold no secrets.
+- **3:33** Your code stays home, Temporal verifies every client, your keys
+  encrypt, Workers need no secrets.
   - Visuals: 4 tall benefit tiles drop in one at a time across the frame
     as the subtitle names them, each lighting up as it lands while the
     padlock badge on its top edge snaps shut with neon ripples: NO INBOUND
-    PORTS (closed door) / VERIFIED CONNECTIONS (badge) / YOUR KEYS ONLY
+    PORTS (closed door) / VERIFIED CLIENTS (badge) / YOUR KEYS ONLY
     (key) / NO SECRETS IN WORKERS (a key struck through).
 
 ## 12 What you can build
