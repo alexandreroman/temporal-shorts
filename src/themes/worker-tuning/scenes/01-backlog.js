@@ -15,15 +15,22 @@
   // where the intro leaves its mini Worker
   const { w: MINI_W, h: MINI_H } = miniWorkerSize(INTRO_WORKER.cols, INTRO_WORKER.rows);
   const MINI_FROM = { left: INTRO_WORKER.x - MINI_W / 2, top: INTRO_WORKER.y - MINI_H / 2, w: MINI_W, h: MINI_H };
-  // ORDERS / MIN: a readout like BACKLOG, under the Worker; its x10 tag astride its top right corner
-  const ORDERS = { left: DIAGRAM.worker.left, top: DIAGRAM.readout.top, w: DIAGRAM.readout.w, h: DIAGRAM.readout.h };
-  // the "+ WORKER" ghost: a dashed panel right of ORDERS / MIN, 40 px away, its label struck through
-  const GHOST = { left: 1180, top: DIAGRAM.readout.top, w: 620, h: 264, label: 30 };
+  // ORDERS / MIN: a readout like BACKLOG, in the meter column under the Worker; its x10 tag (72 x 40) astride its
+  // top right corner, centered between the end of its label (x 1023) and the "+ WORKER" ghost (x 1120), about 12 px
+  // from each, and 20 px under the WORKER panel
+  const { meter, code } = DIAGRAM;
+  const ORDERS = { left: meter.left, top: meter.top.cpu, w: meter.w, h: meter.h };
+  const TIMES10 = { x: 1072, y: ORDERS.top, w: 72 };
+  // the "+ WORKER" ghost: a dashed panel in the place of the code card (with its tab) of the later chapters, the whole
+  // band high, its label struck through; it also keeps the composition centered on y 515, which the hard cuts leave
+  // no shift to do
+  const { band } = DIAGRAM;
+  const GHOST = { left: code.left, top: band.top, w: code.w, h: band.h, label: 30 };
   const GHOST_X = GHOST.left + GHOST.w / 2, GHOST_Y = GHOST.top + GHOST.h / 2;
   // WHAT IS FULL? (66 px high): the Slots move down DROP px to make room for it, 20 px above their label, so the tag,
-  // the label and the grid (y 267..460) stay centered as a group in the Worker panel
+  // the label and the grid (y 274..469) stay centered as a group in the Worker panel
   const DROP = 43;
-  const WHAT_X = DIAGRAM.worker.left + DIAGRAM.worker.w / 2, WHAT_Y = 300;
+  const WHAT_X = DIAGRAM.worker.left + DIAGRAM.worker.w / 2, WHAT_Y = 307;
   // the extras (ORDERS / MIN, the ghost, WHAT IS FULL?) fade out OUT_LEAD s before the end, so the scene ends on the
   // frame chapter 2 starts from
   const OUT_LEAD = 1.6;
@@ -72,7 +79,9 @@
       s.lane = makeLane(root, null, 'act');
       s.mini = makeMiniWorker(root, 'WORKER', INTRO_WORKER.cols, INTRO_WORKER.rows);
       s.orders = makeReadout(root, 'Orders / min', ORDERS.w, ORDERS.h);
-      s.times10 = fixedTag(root, '&times;10', 'violet solid', 84);
+      s.times10 = fixedTag(root, '&times;10', 'violet solid', TIMES10.w);
+      // 29 + 2 x 4 + 3 = 40 px high, with less padding than a pill: it stands on the readout's edge
+      Object.assign(s.times10.style, { lineHeight: '29px', padding: '4px 12px 4px calc(12px + .1em)' });
       s.ghost = E(root,
         `<div class="mono" style="font-size:${GHOST.label}px;letter-spacing:.1em;padding-left:.1em;color:var(--slate)">`
         + '+ WORKER</div>',
@@ -142,7 +151,7 @@
       setReadout(s.orders, withCommas(orders), C.ink, swell(t, rush + 3.0, 0.08));
       place(s.orders, ORDERS.left + ORDERS.w / 2, ORDERS.top + ORDERS.h / 2, 1, P(t, c[0] + 0.3, 0.5) * extras);
       const x10 = popIn(t, rush + 3.0);
-      place(s.times10, ORDERS.left + ORDERS.w - 52, ORDERS.top, x10.s, x10.o * extras);
+      place(s.times10, TIMES10.x, TIMES10.y, x10.s, x10.o * extras);
 
       // c[2]: "+ WORKER" rises, is struck through once "add more Workers" is read, then WHAT IS FULL? lands as the
       // Slots make room for it

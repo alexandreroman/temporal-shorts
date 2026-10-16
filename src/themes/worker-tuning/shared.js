@@ -37,48 +37,108 @@ function showAt(e, left, top, o) {
 
 // ---------- the Worker diagram: the shared stage of chapters 1 to 6
 // Final stage coordinates (the chapters have no shift), every size even, so resting parts sit on whole pixels.
+// One grid spaces every part of the theme (GRID):
+// - pad: the inner padding of every panel (left, right and bottom; their headers sit 24 px in too) and of the text
+//   of the tiles and metric lines
+// - gutter: between the components of one zone: tiles side by side or stacked, metric lines, Worker panels
+// - zone: between zones: the TEMPORAL and WORKER panels, the top and bottom bands (the poll lines run in this gap)
+// - cell: between cells: Activity Slots, Workflow Slots, cache cells, Pollers, the mini Worker's Slots
+// - label: from a label (labelH px high) to the component it names
+// - corner: the radius of the poll lines' rounded corners
+const GRID = { pad: 24, gutter: 20, zone: 40, cell: 12, label: 12, labelH: 21, corner: 8 };
+// The layout, inside the content frame x 120..1800, y 150..880:
+// - Top band, y 150..592: the TEMPORAL panel (x 120..820) holds the "orders" Task Queue as two lanes, Workflow
+//   Tasks (middle y 285) and Activity Tasks (y 464); the WORKER panel (x 860..1800) takes them: a Poller column
+//   centered on x 936, level with each lane, then the Workflow Slots and the WORKFLOW CACHE on the Workflow row, the
+//   Activity Slot grid (10 per row, up to 5 rows centered on y 464) on the Activity row. Every cell sits on the
+//   grid's 10 columns (x 1028..1776, on the panel's right padding line): the Workflow Slots on columns 0 and 1, the
+//   cache on columns 3 to 9. The labels of the Workflow row sit on y 224 in both panels, 12 px above the row's
+//   tallest part (its 2 Pollers); ACTIVITY SLOTS sits 12 px above the grid's top row.
 // - Chapters 1 and 2 open on a closed Worker: one "orders" lane, and the 10 Activity Slots in 2 rows of 5, the grid
 //   and its ACTIVITY SLOTS label centered as a group in the WORKER panel (see `closed` in the slots state).
-// - Top band, y 150..576: the TEMPORAL panel (x 120..700) holds the "orders" Task Queue as two lanes, Workflow
-//   Tasks (middle y 280) and Activity Tasks (y 452); the WORKER panel (x 860..1800) takes them: Pollers at x 954,
-//   level with each lane, then the Workflow Slots and the WORKFLOW CACHE on the Workflow row, the Activity Slot grid
-//   (10 per row, up to 5 rows centered on y 452) on the Activity row. The labels of the Workflow row sit on y 224 in
-//   both panels; ACTIVITY SLOTS sits above the grid's top row (y 320 for 5 rows).
-// - Bottom band, y 616..880, two columns under the panels: BACKLOG and SCHEDULE-TO-START readouts, then up to two
-//   metric lines, under TEMPORAL (x 120..700); CPU and MEMORY meters (x 860..1100) and the Worker.create() code card
-//   (x 1140..1800) under the WORKER.
+// - Bottom band, y 632..880, its columns on the panels' edges, in two rows a gutter apart, those of the CPU and
+//   MEMORY meters (x 860..1100, y 632..746 and 766..880): under TEMPORAL (x 120..820), the BACKLOG and
+//   SCHEDULE-TO-START readouts on the first row, up to two metric lines on the second; right of the meters, the
+//   Worker.create() code card with its tab (x 1120..1800), as high as the band at its tallest, 6 lines.
+// - The poll lines join each lane's right end to its Pollers with right angles: out of the lane, along the line,
+//   down or up a trunk in the middle of the gap between the panels (x 840), then into each Poller.
 const DIAGRAM = {
-  temporal: { left: 120, top: 150, w: 580, h: 426 },
-  worker: { left: 860, top: 150, w: 940, h: 426 },
+  temporal: { left: 120, top: 150, w: 700, h: 442 },
+  worker: { left: 860, top: 150, w: 940, h: 442 },
   // middles of the Workflow and Activity lanes and of the Worker rows they feed; midY: the single lane of chapter 1,
-  // before the Task Queue splits into two
-  wfY: 280, actY: 452, midY: 366,
-  // top of the labels on the Workflow row (both panels); ACTIVITY SLOTS sits labelGap px above the Slot grid
-  labelTop: 224, labelGap: 31,
-  // lane track: x 144..676, 52 px high; queued chips every `pitch` px from the head (28 px inside its right end),
-  // at most `cap` of them, then a "+N" count at its left end
-  lane: { left: 144, w: 532, h: 52, pitch: 48, cap: 9, headInset: 28 },
+  // before the Task Queue splits into two, in the middle of the panel
+  wfY: 285, actY: 464, midY: 371,
+  // top of the labels on the Workflow row (both panels), 20 px under the panel headers
+  labelTop: 224,
+  // lane track: x 144..796, 52 px high; queued chips every `pitch` px from the head (28 px inside its right end),
+  // at most `cap` of them, then a "+N" count at its left end; its label sits labelTop px above its middle
+  lane: { left: 144, w: 652, h: 52, pitch: 48, cap: 11, headInset: 28, labelTop: 61 },
   chip: { act: 40, wf: 28 },
-  // Pollers: 22 px circles at x 954, `pitch` px apart, centered on their lane; the room on either side of the column
-  // holds its BOTTLENECK tag clear of the panel edge and of ACTIVITY SLOTS
-  poller: { x: 954, size: 22, pitch: 36, max: { wf: 2, act: 5 } },
-  // Slots: w x h cells; Activity Slots in rows of `cols` from x 1036 (x 1036..1762 for 10), up to `max`
-  slot: { left: 1036, w: 60, h: 34, pitchX: 74, pitchY: 42, cols: 10, max: 50 },
-  // the closed Worker's grid: 2 rows of `cols` Slots, x 1152..1508, y 341..417, its label on y 310..331, so the
-  // label and the grid, 107 px high together, sit centered in the WORKER panel (y 150..576)
-  closed: { left: 1152, top: 341, cols: 5 },
+  // Pollers: 22 px circles, `pitch` px apart, centered on their lane, in a column centered on x 936, between the
+  // panel's padding line (x 884) and a gutter of 40 px before the Slots; its BOTTLENECK tag (x 872..1000) stays
+  // clear of the panel edge and of ACTIVITY SLOTS
+  poller: { x: 936, size: 22, pitch: 34, max: { wf: 2, act: 5 } },
+  // the poll lines' trunk, in the middle of the gap between the panels
+  trunkX: 840,
+  // Slots: w x h cells; Activity Slots in rows of `cols` from x 1028 (x 1028..1776 for 10), up to `max`
+  slot: { left: 1028, w: 64, h: 32, pitchX: 76, pitchY: 44, cols: 10, max: 50 },
+  // the closed Worker's grid: 2 rows of `cols` Slots, x 1146..1514, y 350..426, its label on y 317..338, so the
+  // label and the grid, 109 px high together, sit centered in the WORKER panel (y 150..592)
+  closed: { left: 1146, top: 350, cols: 5 },
   wfSlots: 2,
-  // WORKFLOW CACHE: a strip of order cells from x 1226, up to `max` (x 1226..1762)
-  cache: { left: 1226, w: 60, h: 34, pitch: 68, max: 8 },
-  // the readouts as high as the meters beside them; the two metric lines on the MEMORY meter's top and bottom lines
-  readout: { top: 616, w: 280, h: 124, left: { backlog: 120, wait: 420 } },
-  metric: { left: 120, w: 580, h: 42, tops: [756, 838] },
-  meter: { left: 860, w: 240, h: 124, top: { cpu: 616, mem: 756 } },
-  // code card x 1140..1800, under its WORKER tab (y 616..650); 18 px code, so the longest line (54 characters) fits
-  code: { left: 1140, top: 650, w: 660, font: 18, lineH: 30, padY: 16, padX: 16, gutter: 34 },
+  // WORKFLOW CACHE: a strip of order cells on the Slot columns 3 to 9 (x 1256..1776), up to `max`
+  cache: { left: 1256, w: 64, h: 32, pitch: 76, max: 7 },
+  // the bottom band, as high as the code card and its tab, and as two meters a gutter apart
+  band: { top: 632, h: 248 },
+  // the readouts on the meters' first row, as high as them
+  readout: { w: 340, left: { backlog: 120, wait: 480 } },
+  // the metric lines on the meters' second row: two lines a gutter apart, the first on its top line, the second on
+  // its bottom line
+  metric: { left: 120, w: 700, h: 47 },
+  meter: { left: 860, w: 240, h: 114, top: { cpu: 632, mem: 766 } },
+  // code card x 1120..1800, y 666..880, under its WORKER tab (y 632..666), 6 lines high whatever it shows; 18 px
+  // code, so the longest line (54 characters) fits
+  code: { left: 1120, top: 666, w: 680, font: 18, lineH: 30, padY: 17, padX: 24, gutter: 34 },
 };
-// Right end of the lanes, where the poll lines reach them
+// Right end of the lanes, where the poll lines leave them
 const LANE_EXIT_X = DIAGRAM.lane.left + DIAGRAM.lane.w;
+// Middle of a lane ('wf' or 'act') at split (see the split state): both lanes sit on midY before the split
+const laneMidY = (lane, split) => Math.round(lerp(DIAGRAM.midY, lane === 'wf' ? DIAGRAM.wfY : DIAGRAM.actY, split));
+
+// ---------- right-angle connectors
+// An SVG path through the points of an orthogonal line, its corners rounded with GRID.corner (less where a segment
+// is too short); repeated points are skipped
+function roundedPath(points) {
+  const pts = points.filter((p, i) => i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [px, py] = pts[i - 1], [x, y] = pts[i], [nx, ny] = pts[i + 1];
+    const inLen = Math.hypot(x - px, y - py), outLen = Math.hypot(nx - x, ny - y);
+    const r = Math.min(GRID.corner, inLen / 2, outLen / 2);
+    const from = [x - (x - px) / inLen * r, y - (y - py) / inLen * r];
+    const to = [x + (nx - x) / outLen * r, y + (ny - y) / outLen * r];
+    d += ` L ${from[0]} ${from[1]} Q ${x} ${y} ${to[0]} ${to[1]}`;
+  }
+  const last = pts[pts.length - 1];
+  return d + ` L ${last[0]} ${last[1]}`;
+}
+// The points of the poll line from the end of a lane whose middle is laneY to a Poller at (x, y): along the lane's
+// line to the trunk, along the trunk, then into the Poller. Every line starts at the lane's end, so the lines of one
+// lane share their first segments and their dashes, which flow from the lane to the Pollers (see draw()).
+const pollRoute = (laneY, x, y) => [[LANE_EXIT_X + 3, laneY], [DIAGRAM.trunkX, laneY], [DIAGRAM.trunkX, y], [x, y]];
+// The point at fraction u of a line through points (straight segments): a chip moving along a connector
+function pointAlong(points, u) {
+  const lengths = points.slice(1).map((p, i) => Math.hypot(p[0] - points[i][0], p[1] - points[i][1]));
+  let rest = clamp(u) * lengths.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < lengths.length; i++) {
+    if (rest <= lengths[i] || i === lengths.length - 1) {
+      const p = lengths[i] > 0 ? rest / lengths[i] : 1;
+      return [lerp(points[i][0], points[i + 1][0], p), lerp(points[i][1], points[i + 1][1], p)];
+    }
+    rest -= lengths[i];
+  }
+  return points[points.length - 1];
+}
 
 // ---------- task chips and lanes
 // Task chip: an Activity Task is a small tile carrying its step's icon (see setChipIcon), a Workflow Task a small UV
@@ -130,9 +190,9 @@ const laneHeadX = (lane, x) => x + lane.w - DIAGRAM.lane.headInset;
 // - shift: 0 to 1, how far the queue has moved up since the last departure (1 at rest); past the cap, the tail
 //   chip fades in at its place as the queue moves, coming from the overflow
 function placeLane(lane, x, y, o, { queue = 0, departed = 0, shift = 1, iconOf = activityIcon, labelO = 1 } = {}) {
-  const { pitch, h } = DIAGRAM.lane;
+  const { pitch } = DIAGRAM.lane;
   place(lane.track, x + lane.w / 2, y, 1, o);
-  if (lane.label) showAt(lane.label, x, y - h / 2 - 30, o * labelO);
+  if (lane.label) showAt(lane.label, x, y - DIAGRAM.lane.labelTop, o * labelO);
   const shown = Math.min(queue, lane.cap);
   const overflow = queue > lane.cap;
   const headX = laneHeadX(lane, x);
@@ -237,12 +297,11 @@ function freeingSlots(flows, t) {
   }
   return slots;
 }
-// Where a chip is u seconds after leaving the head: on its way to the Poller, then to the Slot (each leg eased)
-function flightPoint(u, head, poller, slot) {
-  if (u < FLIGHT.leg) {
-    const p = ease(u / FLIGHT.leg);
-    return [lerp(head[0], poller[0], p), lerp(head[1], poller[1], p)];
-  }
+// Where a chip is u seconds after leaving the head: along its lane and the poll line to the Poller (route: the
+// points from the head to the Poller), then to the Slot (each leg eased)
+function flightPoint(u, route, slot) {
+  if (u < FLIGHT.leg) return pointAlong(route, ease(u / FLIGHT.leg));
+  const poller = route[route.length - 1];
   const p = ease((u - FLIGHT.leg) / (FLIGHT.land - FLIGHT.leg));
   return [lerp(poller[0], slot[0], p), lerp(poller[1], slot[1], p)];
 }
@@ -252,7 +311,7 @@ function flightPoint(u, head, poller, slot) {
 function makeReadout(p, label, w, h) {
   const e = E(p,
     `<div class="lbl" style="position:absolute;left:22px;top:20px;font-size:16px">${label}</div>`
-    + '<div class="v" style="position:absolute;left:24px;bottom:20px;font-size:60px;line-height:60px;'
+    + '<div class="v" style="position:absolute;left:24px;bottom:12px;font-size:60px;line-height:60px;'
     + 'letter-spacing:-1px;white-space:nowrap;transform-origin:left center"></div>',
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
   e.v = e.querySelector('.v');
@@ -297,7 +356,7 @@ function makeMetricLine(p, w, h) {
     '<span class="n"></span><span class="v"></span>',
     'tile mono', {
       width: w + 'px', height: h + 'px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '0 18px', fontSize: '17px', whiteSpace: 'nowrap',
+      padding: `0 ${GRID.pad}px`, fontSize: '17px', whiteSpace: 'nowrap',
     });
   e.n = e.querySelector('.n');
   e.v = e.querySelector('.v');
@@ -415,8 +474,10 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
     Object.assign(cell.ghost.style, { borderColor: C.red, color: C.red, background: `rgba(${RGB.red},.12)` });
     return cell;
   });
-  // the poll lines run above the panels, from each Poller to the end of its lane; their `d` is set on each frame
+  // the poll lines run above the panels, from the end of each lane to its Pollers; their `d` is set on each frame.
+  // The layer, not each line, is translucent, so the segments that lines share look like those of a single line.
   dg.svg = svgLayer(root);
+  dg.svg.style.opacity = 0.85;
   const pollLine = () => path(dg.svg, 'M 0 0 L 1 0', C.violet, 2, false, '5,7');
   const { max } = DIAGRAM.poller;
   dg.pollLines = { wf: Array.from({ length: max.wf }, pollLine), act: Array.from({ length: max.act }, pollLine) };
@@ -430,9 +491,9 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
     wf: Array.from({ length: 6 }, () => makeTaskChip(root, 'wf')),
     act: Array.from({ length: 14 }, () => makeTaskChip(root, 'act')),
   };
-  dg.backlog = makeReadout(root, 'Backlog', readout.w, readout.h);
-  dg.wait = makeReadout(root, 'Schedule-to-start', readout.w, readout.h);
-  dg.metrics = metric.tops.map(() => makeMetricLine(root, metric.w, metric.h));
+  dg.backlog = makeReadout(root, 'Backlog', readout.w, meter.h);
+  dg.wait = makeReadout(root, 'Schedule-to-start', readout.w, meter.h);
+  dg.metrics = [makeMetricLine(root, metric.w, metric.h), makeMetricLine(root, metric.w, metric.h)];
   dg.cpu = makeMeter(root, 'CPU', meter.w, meter.h);
   dg.mem = makeMeter(root, 'Memory', meter.w, meter.h);
   dg.code = makeWorkerCode(root);
@@ -457,7 +518,7 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 //   the closed grid moves down, making room for a tag above it (default 0)
 // - wfSlots: { busy, replay }, the Workflow Slots (busy: how many, from the first)
 // - pollers: { wf, act, grow, polling }: Pollers per lane (default 2 each, up to DIAGRAM.poller.max); grow { from,
-//   at }: Activity Pollers from `from` on pop in at `at`; polling { wf, act }: whether a lane's poll lines pulse
+//   at }: Activity Pollers from `from` on pop in at `at`; polling { wf, act }: whether a lane's poll lines flow
 //   (default: while the lane has a free Slot)
 // - cache: { cells, grow, filledAt, hits, evictions }: cells (default 4, up to DIAGRAM.cache.max) holding orders
 //   #1042, #1043...; grow { from, at }: the strip widens; filledAt [at, every]: cell i fills at at + i * every
@@ -467,7 +528,7 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 //   ('2 GB') and when it last changed (a swell)
 // - backlog: { n, trend }, the BACKLOG count (default: the lanes' queues added up) and its trend, 'up' (red) or
 //   'down' (neon); wait: { text, trend }, the SCHEDULE-TO-START value ('38 s')
-// - metrics: up to 2 metric lines [{ name, value, at, color }], each rising in at `at`
+// - metrics: up to 2 metric lines [{ name, value, at, color }], each rising in at `at` (see placeBottomBand)
 // - code: { swap, insert, light }: swap { slots: [value, at], cache: [value, at] } replaces a value (10, 500) at
 //   `at`; insert { poller: at } opens the inserted Poller line; light [key, from, to] highlights a line ('slots',
 //   'poller', 'cache')
@@ -557,10 +618,8 @@ function placeLanes(dg, t, state, o) {
     const { departed, lastLeave, every } = laneDepartures(state, lane, t);
     // the queue moves up after each departure, quicker than the departures come
     const shift = P(t, lastLeave, Math.min(0.3, every * 0.9));
-    const laneY = lane === 'wf' ? DIAGRAM.wfY : DIAGRAM.actY;
-    const y = Math.round(lerp(DIAGRAM.midY, laneY, split));
     const laneO = lane === 'wf' ? o * split : o;
-    placeLane(dg.lanes[lane], DIAGRAM.lane.left, y, laneO, {
+    placeLane(dg.lanes[lane], DIAGRAM.lane.left, laneMidY(lane, split), laneO, {
       queue: state.queue?.[lane] ?? 0, departed, shift, iconOf, labelO: split,
     });
   }
@@ -601,10 +660,10 @@ function placeSlots(dg, t, state, layout, flights, slotsO, wfO, labelO) {
     const [x, y] = wfSlotCenter(i);
     place(cell, x, y, wfLooks[i].s, wfO);
   });
-  const { labelTop, labelGap, slot } = DIAGRAM;
+  const { labelTop, slot } = DIAGRAM;
   showAt(dg.labels.wfSlots, slot.left, labelTop, wfO);
   const [firstX, firstY] = slotPoint(layout, 0);
-  showAt(dg.labels.slots, firstX - slot.w / 2, firstY - slot.h / 2 - labelGap, labelO);
+  showAt(dg.labels.slots, firstX - slot.w / 2, firstY - slot.h / 2 - GRID.label - GRID.labelH, labelO);
   dg.labels.slots.style.color = light > 0.5 ? C.violet : '';
   dg.labels.slots.style.textShadow = glowShadow(RGB.violet, light, { blur: 14, alpha: 0.8 });
 }
@@ -623,17 +682,19 @@ function activityPollers(pollers, t) {
     shown: i => (i < grow.from ? { s: 1, o: 1 } : backPop(t, grow.at + 0.3 + (i - grow.from) * 0.12, 0.35)),
   };
 }
-// Pollers and their poll lines: a line pulses toward the lane (dashes flowing on the ambient clock G, see draw())
-// while its lane is polling; a Poller glows as a chip passes it
+// Pollers and their poll lines: a line pulses from the lane to its Poller (dashes flowing on the ambient clock G,
+// see draw()) while its lane is polling; a Poller glows as a chip passes it
 function placePollers(dg, t, state, layout, flights, o) {
   const pollers = state.pollers ?? {};
   const act = activityPollers(pollers, t);
   const nWf = pollers.wf ?? 2;
+  const split = state.split ?? 1;
   const columns = {
     wf: {
-      n: nWf, working: nWf, laneY: DIAGRAM.wfY, y: i => pollerY(DIAGRAM.wfY, i, nWf), shown: () => ({ s: 1, o: 1 }),
+      n: nWf, working: nWf, laneY: laneMidY('wf', split), y: i => pollerY(DIAGRAM.wfY, i, nWf),
+      shown: () => ({ s: 1, o: 1 }),
     },
-    act: { n: act.n, working: act.working, laneY: DIAGRAM.actY, y: act.y, shown: act.shown },
+    act: { n: act.n, working: act.working, laneY: laneMidY('act', split), y: act.y, shown: act.shown },
   };
   // a lane polls while it has a free Slot, unless the state says otherwise
   const nSlots = layout.n;
@@ -663,15 +724,15 @@ function placePollers(dg, t, state, layout, flights, o) {
       e.style.background = glow > 0.5 ? C.violet : 'var(--surface)';
       place(e, x, y, shown.s, shown.o * o);
       const line = dg.pollLines[lane][i];
-      line.setAttribute('d', `M ${x - size / 2 - 3} ${y} L ${LANE_EXIT_X + 3} ${col.laneY}`);
-      draw(line, 1, polling[lane] && i < col.n ? 0.85 * shown.o * o : 0);
+      line.setAttribute('d', roundedPath(pollRoute(col.laneY, x - size / 2 - 3, y)));
+      draw(line, 1, polling[lane] && i < col.n ? shown.o * o : 0);
     });
   }
   showAt(dg.labels.pollers, x - 48, DIAGRAM.labelTop, o);
 }
-// Chips in flight: from the head of their lane, through a Poller, into their Slot, shrinking a little on the way.
-// slotsO: { wf, act }, the opacity of each lane's Slots: past the Poller, a chip fades to it, so it vanishes into a
-// Worker whose Slots are hidden
+// Chips in flight: from the head of their lane, along the poll line to a Poller, into their Slot, shrinking a little
+// on the way. slotsO: { wf, act }, the opacity of each lane's Slots: past the Poller, a chip fades to it, so it
+// vanishes into a Worker whose Slots are hidden
 function placeFlights(dg, t, state, layout, flights, o, slotsO) {
   const used = { wf: 0, act: 0 };
   const iconOf = state.taskIcon ?? activityIcon;
@@ -683,16 +744,16 @@ function placeFlights(dg, t, state, layout, flights, o, slotsO) {
     const lane = f.flow.lane;
     const chip = dg.flying[lane][used[lane]++ % dg.flying[lane].length];
     if (lane === 'act') setChipIcon(chip, f.flow.icon?.(f.k) ?? iconOf(f.index));
-    const laneY = lane === 'wf' ? DIAGRAM.wfY : DIAGRAM.actY;
-    const head = [laneHeadX(dg.lanes[lane], DIAGRAM.lane.left), lerp(DIAGRAM.midY, laneY, split)];
+    const laneY = laneMidY(lane, split);
+    const headX = laneHeadX(dg.lanes[lane], DIAGRAM.lane.left);
     // the Poller it passes: (k mod the working Pollers), as placePollers lights it; a closed Worker shows no
     // Pollers, and its chips pass their column level with the lane, straight into the Slots
-    const pollerAt = lane === 'wf' ? pollerY(laneY, f.k % nWf, nWf) : act.y(f.k % act.working);
-    const poller = [DIAGRAM.poller.x, lerp(pollerAt, head[1], layout.closed)];
+    const pollerAt = lane === 'wf' ? pollerY(DIAGRAM.wfY, f.k % nWf, nWf) : act.y(f.k % act.working);
+    const route = [[headX, laneY], ...pollRoute(laneY, DIAGRAM.poller.x, lerp(pollerAt, laneY, layout.closed))];
     const slotIndex = f.flow.slots[f.k % f.flow.slots.length];
     const slot = lane === 'wf' ? wfSlotCenter(slotIndex) : slotPoint(layout, slotIndex);
     const u = t - f.leave;
-    const [x, y] = flightPoint(u, head, poller, slot);
+    const [x, y] = flightPoint(u, route, slot);
     const inWorker = P(u, FLIGHT.leg, FLIGHT.land - FLIGHT.leg);
     place(chip, x, y, 1 - 0.2 * inWorker, o * lerp(1, slotsO[lane], P(u, FLIGHT.leg, 0.15)));
   }
@@ -752,11 +813,12 @@ function placeBottomBand(dg, t, state, show) {
   const queue = state.queue ?? {};
   const backlog = state.backlog ?? {};
   const backlogN = backlog.n ?? (queue.wf ?? 0) + (queue.act ?? 0);
+  const readoutY = meter.top.cpu + meter.h / 2;
   setReadout(dg.backlog, withCommas(Math.floor(backlogN)), trendColor(backlog.trend));
-  place(dg.backlog, readout.left.backlog + readout.w / 2, readout.top + readout.h / 2, 1, show('backlog'));
+  place(dg.backlog, readout.left.backlog + readout.w / 2, readoutY, 1, show('backlog'));
   const wait = state.wait ?? { text: '0.2 s' };
   setReadout(dg.wait, wait.text, trendColor(wait.trend));
-  place(dg.wait, readout.left.wait + readout.w / 2, readout.top + readout.h / 2, 1, show('wait'));
+  place(dg.wait, readout.left.wait + readout.w / 2, readoutY, 1, show('wait'));
   dg.metrics.forEach((e, i) => {
     const m = state.metrics?.[i];
     if (!m) {
@@ -764,7 +826,8 @@ function placeBottomBand(dg, t, state, show) {
       return;
     }
     setMetricLine(e, m.name, m.value, m.color);
-    rise(e, metric.left + metric.w / 2, metric.tops[i] + metric.h / 2, P(t, m.at, 0.4), 12);
+    const top = meter.top.mem + i * (metric.h + GRID.gutter);
+    rise(e, metric.left + metric.w / 2, top + metric.h / 2, P(t, m.at, 0.4), 12);
   });
   const cpu = state.cpu ?? 0;
   setMeter(dg.cpu, cpu / 100, Math.round(cpu) + '%', cpu >= 90);
@@ -774,8 +837,8 @@ function placeBottomBand(dg, t, state, show) {
   setMeter(dg.mem, use, mem.label ?? '2 GB', use >= 0.9, mem.swapAt === undefined ? 1 : swell(t, mem.swapAt, 0.25));
   place(dg.mem, meter.left + meter.w / 2, meter.top.mem + meter.h / 2, 1, show('mem'));
 }
-// The code card at t: inserted lines open (the lines under them slide down and the card grows), values swap with a
-// swell, and one line may be highlighted
+// The code card at t: inserted lines open (the lines under them slide down; the card keeps the height of all its
+// lines), values swap with a swell, and one line may be highlighted
 function placeCode(card, t, code, o) {
   const { left, top, w, padY, lineH } = DIAGRAM.code;
   const rowOf = {};
@@ -797,11 +860,9 @@ function placeCode(card, t, code, o) {
     span.textContent = swapped ? swap[0] : WORKER_CODE.find(spec => spec.key === key).value;
     span.style.transform = swap ? `scale(${swell(t, swap[1], 0.3)})` : '';
   }
-  const h = padY * 2 + row * lineH;
-  card.style.height = h + 'px';
   const light = code.light;
   setCodeLine(card, light ? rowOf[light[0]] : 0, light ? win(t, light[1], light[2], 0.25) : 0);
-  place(card, left + w / 2, top + h / 2, 1, o);
+  place(card, left + w / 2, top + card.h / 2, 1, o);
 }
 // The bottleneck markers, round the part each one names (the Activity Slots: on the diagram's grid, not a closed one)
 function placeMarks(dg, t, state, layout) {
@@ -830,16 +891,16 @@ function placeMarks(dg, t, state, layout) {
     left: cache.left - pad, top: DIAGRAM.wfY - cache.h / 2 - pad,
     w: (cells - 1) * cache.pitch + cache.w + 2 * pad, h: cache.h + 2 * pad,
   }, 'above-right', marks.cache, cache.left + dg.labels.cache.offsetWidth + 20);
-  // the CPU meter
-  placeMark(dg.marks.cpu, t, {
-    left: meter.left - pad, top: meter.top.cpu - pad, w: meter.w + 2 * pad, h: meter.h + 2 * pad,
-  }, 'astride', marks.cpu);
+  // the CPU meter, the outline on its own border: a tile needs no room round it, and the gutter beside it stays clear
+  // for the poll line of Workers B and C (chapter 6)
+  placeMark(dg.marks.cpu, t, { left: meter.left, top: meter.top.cpu, w: meter.w, h: meter.h }, 'astride', marks.cpu);
 }
 
 // ---------- mini Worker (intro, outro): a WORKER panel holding a small grid of Activity Slots
-// border: the panel's border as drawn, as its cells are placed from its padding edge: Chromium draws the 1.5 px border
-// of .tile 1 px wide in the 1920 x 1080 frames, so the cells rest on whole pixels
-const MINI = { w: 56, h: 32, pitchX: 70, pitchY: 42, pad: 24, head: 72, border: 1 };
+// Cells GRID.cell apart, GRID.pad from the panel's edges, under a header `head` px high. border: the panel's border
+// as drawn, as its cells are placed from its padding edge: Chromium draws the 1.5 px border of .tile 1 px wide in the
+// 1920 x 1080 frames, so the cells rest on whole pixels
+const MINI = { w: 56, h: 32, pitchX: 56 + GRID.cell, pitchY: 32 + GRID.cell, pad: GRID.pad, head: 72, border: 1 };
 // Size of a mini Worker panel holding cols x rows Slots
 const miniWorkerSize = (cols, rows) => ({
   w: MINI.pad * 2 + (cols - 1) * MINI.pitchX + MINI.w,
@@ -880,8 +941,14 @@ function setPanelHeader(panel, o) {
 // The tasks waiting in the Activity lane as chapters 1 and 2 start: the scene before each one ends on that count.
 // Half-way between whole counts, so the counts shown on either side of a cut agree.
 const QUEUE_AT_CUT = { ch1: 45.5, ch2: 2800.5 };
-// The intro's queue strip and mini Worker, which chapter 1 picks up where the intro leaves them: the strip ends 40 px
-// before the Worker panel (x 1416..1800), its middle level with that of the panel's 2 rows of Slots (y 539)
-const INTRO_WORKER = { x: 1608, y: 515, cols: 5, rows: 2 };
-const INTRO_WORKER_TOP = INTRO_WORKER.y - miniWorkerSize(INTRO_WORKER.cols, INTRO_WORKER.rows).h / 2;
-const INTRO_LANE = { left: 1056, w: 320, cap: 5, y: INTRO_WORKER_TOP + MINI.head + MINI.h / 2 + MINI.pitchY / 2 };
+// The intro's queue strip and mini Worker, which chapter 1 picks up where the intro leaves them: the Worker panel on
+// the frame's right edge (x 1424..1800, y 429..601), the strip a zone gap before it (x 1064..1384), its middle level
+// with that of the panel's 2 rows of Slots (y 539)
+const INTRO_WORKER_SIZE = miniWorkerSize(5, 2);
+const INTRO_WORKER = { x: 1800 - INTRO_WORKER_SIZE.w / 2, y: 515, cols: 5, rows: 2 };
+const INTRO_WORKER_TOP = INTRO_WORKER.y - INTRO_WORKER_SIZE.h / 2;
+const INTRO_LANE_W = 320;
+const INTRO_LANE = {
+  left: 1800 - INTRO_WORKER_SIZE.w - GRID.zone - INTRO_LANE_W, w: INTRO_LANE_W, cap: 5,
+  y: INTRO_WORKER_TOP + MINI.head + MINI.h / 2 + MINI.pitchY / 2,
+};

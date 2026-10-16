@@ -43,17 +43,21 @@
   // Seconds after its subtitle starts when it reads `name`: 16 characters per second, plus 0.3 s, as useCaseScene
   const namedAt = (text, name) => text.indexOf(name) / 16 + 0.3;
 
-  // Final stage coordinates (no shift), every size even. The composition spans y 190..840, centered on y 515: the
-  // column headings (24 px high, 16 px above the rows), 4 rows of 104 px 16 px apart (y 230..694), then the loop 60 px
-  // under them: its pills (y 754..804) and the arrow back, which runs 36 px under them.
-  const TABLE = { left: 120, w: 1680, headTop: 190, rowTop: 230, rowH: 104, pitch: 120 };
+  // Final stage coordinates (no shift), every size even, on the theme's grid (GRID). The composition spans
+  // y 196..836, centered on y 515: the column headings (24 px high, a label gap above the rows), 4 rows of 104 px a
+  // gutter apart (y 232..708), then the loop a zone gap under them: its pills (y 748..798) and the arrow back, which
+  // runs 36 px under them.
+  const TABLE = { left: 120, w: 1680, headTop: 196, rowH: 104 };
+  TABLE.rowTop = TABLE.headTop + 24 + GRID.label;
+  TABLE.pitch = TABLE.rowH + GRID.gutter;
   // Column lefts, from the rows' outer left edge: 32 px of padding on either side of the rows, the symptoms 40 px
   // right of the parts, then equal gaps (100 px) after the widest symptom (248 px) and the widest signal (492 px),
   // measured; the widest fix ends 32 px inside the rows' right edge
   const COL = { part: 32, symptom: 150, signal: 498, fix: 1090 };
   // The part drawn at the start of each row: 78 x 34 px
   const PART = { w: 78, h: 34 };
-  const LOOP = { top: 754, w: 360, h: 50, xs: [460, 960, 1460], backY: 840 };
+  const LOOP = { top: TABLE.rowTop + 3 * TABLE.pitch + TABLE.rowH + GRID.zone, w: 360, h: 50, xs: [460, 960, 1460] };
+  LOOP.backY = LOOP.top + LOOP.h + 36;
   const rowY = i => TABLE.rowTop + TABLE.rowH / 2 + i * TABLE.pitch;
 
   // The offset of a row's content from its outer edge: Chromium draws the 1.5 px border of a tile 1 px wide
@@ -74,11 +78,11 @@
       Object.assign(slot.style, SLOT_LOOKS.busy);
     }
   }
-  // - a Poller with its poll line, whose dashes flow toward the queue (see update)
+  // - a Poller with its poll line, whose dashes flow from the queue into the Poller (see update)
   function makePollerPart(box) {
     box.insertAdjacentHTML('beforeend',
       `<svg width="${PART.w}" height="${PART.h}" style="position:absolute;left:0;top:0">`
-      + `<path d="M 52 17 L 2 17" stroke="${C.violet}" stroke-width="2" stroke-linecap="round"`
+      + `<path d="M 2 17 L 52 17" stroke="${C.violet}" stroke-width="2" stroke-linecap="round"`
       + ' stroke-dasharray="5,7"/></svg>');
     box.line = box.querySelector('path');
     E(box, '', '', {
@@ -86,11 +90,12 @@
       border: '2px solid ' + C.violet, background: 'var(--surface)', opacity: 1,
     });
   }
-  // - a WORKFLOW CACHE cell holding an order
+  // - a WORKFLOW CACHE cell holding an order, of the diagram's size
   function makeCachePart(box) {
-    const slot = makeSlot(box, 60, PART.h, {
-      left: '9px', top: '0', fontFamily: 'Mono', fontSize: '16px', borderColor: C.uv,
-      background: `rgba(${RGB.uv},.22)`, opacity: 1,
+    const { w, h } = DIAGRAM.cache;
+    const slot = makeSlot(box, w, h, {
+      left: (PART.w - w) / 2 + 'px', top: (PART.h - h) / 2 + 'px', fontFamily: 'Mono', fontSize: '16px',
+      borderColor: C.uv, background: `rgba(${RGB.uv},.22)`, opacity: 1,
     });
     slot.textContent = '#1042';
   }

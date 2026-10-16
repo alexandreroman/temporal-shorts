@@ -1,71 +1,66 @@
 // ===================== 6. THE CPU IS FULL
-// The Worker diagram as chapter 5 leaves it, the cache grown to 8 cells. renderInvoice tasks fill the Slots, the CPU
+// The Worker diagram as chapter 5 leaves it, the cache grown to 7 cells. renderInvoice tasks fill the Slots, the CPU
 // pins at 100% in red and gets a BOTTLENECK tag; tasks come in slowly and a few Slots stay free. The code card fades
 // out: a dashed "+ SLOTS" ghost rises in its place and is struck through. Then WORKER B and WORKER C slide in, each
-// with its own Slots and CPU meter, their Pollers joined to the same two lanes by one dashed poll line; tasks fly to
-// them along it, the three CPU meters settle around 60%, the tag turns FIXED, and the backlog drains to 0.
+// with its own Poller, Slots and CPU meter, their Pollers joined to the Activity lane by a poll line that branches off
+// the trunk of Worker A's; tasks fly to them along it, the three CPU meters settle around 60%, the tag turns FIXED,
+// and the backlog drains to 0.
 // The block keeps every name declared in this file local to this scene.
 {
   const SLOTS = 50;
   // Worker A's steadily busy Slots: 44 as chapter 5 ends, 36 once the CPU is full and tasks come in slowly
   const BUSY = 44, BUSY_SLOW = 36;
-  // the "+ SLOTS" ghost fills the code card's place, as the "+ WORKER" ghost of chapter 1 does under the Worker
-  const GHOST = { left: 1140, top: DIAGRAM.readout.top, w: 660, h: 264, label: 30 };
+  const { band, meter, code, slot } = DIAGRAM;
+  // the "+ SLOTS" ghost fills the code card's place, as the "+ WORKER" ghost of chapter 1 does
+  const GHOST = { left: code.left, top: band.top, w: code.w, h: band.h, label: 30 };
   const GHOST_X = GHOST.left + GHOST.w / 2, GHOST_Y = GHOST.top + GHOST.h / 2;
-  // Workers B and C: panels in the code card's place, as high as the meters beside them (B level with the CPU
-  // meter, C with the MEMORY one); inside, 5 Slots and a CPU gauge on a row `row` px below the panel's top
-  const NEW = { left: 1200, w: 600, h: 124, tops: [616, 756], names: ['WORKER B', 'WORKER C'] };
-  const INSIDE = { row: 84, slotLeft: 48, slots: 5, cpuLeft: 424, cpuW: 152 };
-  const newSlotX = k => NEW.left + INSIDE.slotLeft + MINI.w / 2 + k * MINI.pitchX;
+  // Workers B and C: panels in the code card's column, as high as the meters beside them (B level with the CPU
+  // meter, C with the MEMORY one). Inside, on a row `row` px below the panel's top, 20 px above its bottom: a Poller
+  // under the gear, 5 Slots of the diagram's size from under the name (x 1186..1554), and a CPU gauge on the panel's
+  // right padding line (x 1594..1776, the right edge of Worker A's Slots)
+  const NEW = {
+    left: code.left, w: code.w, h: meter.h, tops: [meter.top.cpu, meter.top.mem], names: ['WORKER B', 'WORKER C'],
+  };
+  const INSIDE = { row: 78, pollerX: GRID.pad + 11, slotLeft: 66, slots: 5, cpuLeft: 474, cpuW: 182 };
+  const newSlotX = k => NEW.left + INSIDE.slotLeft + slot.w / 2 + k * slot.pitchX;
   const portY = w => NEW.tops[w] + INSIDE.row;
-  // the poll line of B and C: from each Poller (on its panel's left edge) to a collector at x 1150, between the CPU
-  // meter and the panels, along C's row to a trunk in the gap between the two big panels (x 760), then up the trunk
-  // to the Activity lane (where it crosses the poll line of A's middle Poller) and on to the Workflow lane
-  const BUS = { collector: 1150, trunk: 760, portX: NEW.left - 13 };
+  // the poll line of B and C: from the Activity lane down the trunk of Worker A's poll lines (x 840), on down to C's
+  // row, along it under the CPU meter (where the MEMORY meter was) to a collector in the gutter before the panels
+  // (x 1110), then on into C's Poller, or up the collector into B's
+  const BUS = { collector: NEW.left - GRID.gutter / 2, pollerX: NEW.left + INSIDE.pollerX };
   // a task flies to B or C in FLY s, along the poll line; the first one leaves TASKS.first s after the line shows
   const FLY = 1.4;
   const TASKS = { first: 0.4, every: 1.0, count: 16, hold: 3.2 };
-  // the orders in the 8 cache cells as chapter 5 ends, set before the scene starts so that no eviction shows
-  const CACHED = [1049, 1047, 1048, 1046, 1050, 1051, 1052, 1053].map((next, cell) => ({ cell, at: -10, next }));
+  // the orders in the 7 cache cells as chapter 5 ends, set before the scene starts so that no eviction shows
+  const CACHED = [1049, 1047, 1048, 1046, 1050, 1051, 1052].map((next, cell) => ({ cell, at: -10, next }));
 
-  // The middle of a Slot of Worker w, k-th from the left
-  const newSlotPoint = (w, k) => [newSlotX(k), portY(w)];
-  // The path of a task from the head of the Activity lane to Slot k of Worker w, as points
-  function taskPath(headX, w, k) {
-    const { collector, trunk } = BUS;
-    const viaCollector = w === 0 ? [[collector, portY(1)], [collector, portY(0)]] : [];
-    return [
-      [headX, DIAGRAM.actY], [trunk, DIAGRAM.actY], [trunk, portY(1)], ...viaCollector, [NEW.left, portY(w)],
-      newSlotPoint(w, k),
-    ];
+  // The points of the poll line from the Activity lane's end to the Poller of Worker w: A's route to the trunk, down
+  // to C's row, then into C's Poller, or along C's row to the collector and up into B's
+  function busRoute(w) {
+    const route = pollRoute(DIAGRAM.actY, BUS.pollerX - DIAGRAM.poller.size / 2 - 3, portY(1));
+    if (w === 1) return route;
+    const toCollector = route.slice(0, 3).concat([[BUS.collector, portY(1)], [BUS.collector, portY(w)]]);
+    return toCollector.concat([[route[3][0], portY(w)]]);
   }
-  // The point at fraction u of a path's length
-  function pointAlong(points, u) {
-    const lengths = points.slice(1).map((p, i) => Math.hypot(p[0] - points[i][0], p[1] - points[i][1]));
-    let rest = clamp(u) * lengths.reduce((a, b) => a + b, 0);
-    for (let i = 0; i < lengths.length; i++) {
-      if (rest <= lengths[i] || i === lengths.length - 1) {
-        const p = lengths[i] > 0 ? rest / lengths[i] : 1;
-        return [lerp(points[i][0], points[i + 1][0], p), lerp(points[i][1], points[i + 1][1], p)];
-      }
-      rest -= lengths[i];
-    }
-    return points[points.length - 1];
-  }
-  // Worker B or C: an app panel, its Poller astride its left edge, 5 Slots and a CPU gauge. Children are placed from
-  // the panel's padding box, inside its 1.5 px border: the offsets put them on whole stage pixels.
+  // The path of a task from the head of the Activity lane to Slot k of Worker w, as points: along the poll line, then
+  // on along the Slot row
+  const taskPath = (headX, w, k) => [
+    [headX, DIAGRAM.actY], ...busRoute(w).slice(0, -1), [BUS.pollerX, portY(w)], [newSlotX(k), portY(w)],
+  ];
+  // Worker B or C: an app panel, its Poller, 5 Slots and a CPU gauge. Children are placed from the panel's padding
+  // box, inside its border, drawn 1 px wide (see MINI.border): the offsets put them on whole stage pixels.
   function makeNewWorker(root, name) {
-    const inset = 1.5;
+    const inset = MINI.border;
     const panel = makeAppPanel(root, name, NEW.w, NEW.h, { font: 18 });
-    panel.cells = Array.from({ length: INSIDE.slots }, (_, k) => makeSlot(panel, MINI.w, MINI.h, {
-      left: (INSIDE.slotLeft + k * MINI.pitchX - inset) + 'px', top: (INSIDE.row - MINI.h / 2 - inset) + 'px',
+    panel.cells = Array.from({ length: INSIDE.slots }, (_, k) => makeSlot(panel, slot.w, slot.h, {
+      left: (INSIDE.slotLeft + k * slot.pitchX - inset) + 'px', top: (INSIDE.row - slot.h / 2 - inset) + 'px',
       opacity: 1,
     }));
     const size = DIAGRAM.poller.size;
     E(panel, '', '', {
-      left: (-size / 2 - inset + 1) + 'px', top: (INSIDE.row - size / 2 - inset) + 'px', width: size + 'px',
-      height: size + 'px', borderRadius: '50%', border: '2px solid ' + C.violet, background: 'var(--surface)',
-      opacity: 1,
+      left: (INSIDE.pollerX - size / 2 - inset) + 'px', top: (INSIDE.row - size / 2 - inset) + 'px',
+      width: size + 'px', height: size + 'px', borderRadius: '50%', border: '2px solid ' + C.violet,
+      background: 'var(--surface)', opacity: 1,
     });
     panel.insertAdjacentHTML('beforeend',
       `<div class="lbl" style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${20 - inset}px;`
@@ -114,13 +109,8 @@
         });
       s.svg = svgLayer(root);
       s.strike = path(s.svg, `M ${GHOST_X - 95} ${GHOST_Y} L ${GHOST_X + 95} ${GHOST_Y}`, C.red, 4, false);
-      const { collector, trunk, portX } = BUS;
-      const exitX = LANE_EXIT_X + 3;
-      s.bus = [
-        `M ${portX} ${portY(0)} H ${collector} V ${portY(1)}`,
-        `M ${portX} ${portY(1)} H ${trunk}`,
-        `M ${trunk} ${portY(1)} V ${DIAGRAM.wfY} H ${exitX}`,
-      ].map(d => path(s.svg, d, C.violet, 2, false, '5,7'));
+      // in the poll lines' layer of the diagram, where they share Worker A's segments seamlessly
+      s.bus = NEW.names.map((_, w) => path(s.dg.svg, roundedPath(busRoute(w)), C.violet, 2, false, '5,7'));
       s.workers = NEW.names.map(name => makeNewWorker(root, name));
       s.chips = Array.from({ length: 6 }, () => makeTaskChip(root, 'act'));
     },
@@ -162,7 +152,7 @@
         flows: [slow, shared],
         slots: { n: SLOTS, busy: BUSY - freed, icon },
         pollers: { act: 5 },
-        cache: { cells: 8, evictions: CACHED },
+        cache: { cells: DIAGRAM.cache.max, evictions: CACHED },
         cpu: 88 + 12 * P(t, pinAt, 1.2) - 40 * P(t, drainFrom, 1.8),
         mem: { use: 0.55, label: '4 GB' },
         backlog: { trend },
@@ -185,7 +175,7 @@
         setArrivalGlow(panel, t, arriveAt[w], arriveAt[w] + 2.6);
         setNewWorkerCpu(panel, (w === 0 ? 62 : 58) * P(t, busAt + 1.0, 1.8));
       });
-      s.bus.forEach(line => draw(line, 1, 0.85 * P(t, busAt, 0.4)));
+      s.bus.forEach(line => draw(line, 1, P(t, busAt, 0.4)));
 
       // tasks fly to B and C in turn along the poll line, each holding a Slot TASKS.hold s
       const headX = laneHeadX(s.dg.lanes.act, DIAGRAM.lane.left);
@@ -195,14 +185,14 @@
         for (let w = 0; w < NEW.names.length; w++) {
           const leave = busAt + TASKS.first + w * 0.5 + k * TASKS.every;
           const land = leave + FLY;
-          const slot = (k + 2 * w) % INSIDE.slots;
+          const cell = (k + 2 * w) % INSIDE.slots;
           const taskIconName = taskIcon(k * 2 + w);
-          if (t >= land && t < land + TASKS.hold) busy[w][slot] = { icon: taskIconName, s: swell(t, land, 0.12) };
+          if (t >= land && t < land + TASKS.hold) busy[w][cell] = { icon: taskIconName, s: swell(t, land, 0.12) };
           if (t >= leave && t < land && flying < s.chips.length) {
             const chip = s.chips[flying++];
             setChipIcon(chip, taskIconName);
             const u = ease((t - leave) / FLY);
-            const [x, y] = pointAlong(taskPath(headX, w, slot), u);
+            const [x, y] = pointAlong(taskPath(headX, w, cell), u);
             place(chip, x, y, 1 - 0.2 * P(u, 0.85, 0.15, linear), 1);
           }
         }

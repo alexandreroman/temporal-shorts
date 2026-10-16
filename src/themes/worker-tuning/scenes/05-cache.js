@@ -10,18 +10,19 @@
 {
   const SLOTS = 50;
   const BUSY = 44;
-  // the open orders waiting for a cache cell: dashed cells right of the strip, 24 px from its outline, then a "+N"
-  // count of the others
-  const PRESS = { left: 1522, n: 3, countLeft: 1732 };
+  // the open orders waiting for a cache cell: n dashed cells right of the 4-cell strip, 24 px from its outline (x
+  // 1580..1720), then, a cell gap after them, a "+N" count of the others, which ends inside the panel's padding line
+  const PRESS = { left: 1580, n: 2 };
+  PRESS.countLeft = PRESS.left + PRESS.n * DIAGRAM.cache.pitch;
   const pressX = r => PRESS.left + DIAGRAM.cache.w / 2 + r * DIAGRAM.cache.pitch;
   const cellX = i => cacheCellLeft(i) + DIAGRAM.cache.w / 2;
   // the first order waiting: the 4 cells hold #1042 to #1045
   const FIRST_WAITING = 1046;
   // the cells the cache evicts, in turn; eviction j hands its cell to order FIRST_WAITING + j
   const EVICTED_CELLS = [3, 1, 2, 0];
-  // the strip grows from 4 to 8 cells: the 4 new ones take the orders waiting then (the 4 evictions used 4 orders),
-  // set before the scene starts so that no eviction shows
-  const GROWN = { from: 4, to: 8 };
+  // the strip grows from 4 to 7 cells: the 3 new ones take the next orders, the 2 waiting then (the 4 evictions used
+  // 4 orders) and one more, set before the scene starts so that no eviction shows
+  const GROWN = { from: 4, to: DIAGRAM.cache.max };
   const NEW_CELLS = Array.from({ length: GROWN.to - GROWN.from }, (_, j) => ({
     cell: GROWN.from + j, at: -10, next: FIRST_WAITING + EVICTED_CELLS.length + j,
   }));
@@ -43,9 +44,10 @@
       const p = P(t, ev.at, 0.5);
       return { x: lerp(pressX(0), cellX(ev.cell), p), o: 1 - P(t, ev.at + 0.4, 0.2) };
     }
-    // a growing strip takes the line: each order slides 24 px left into its new cell and fades as that cell pops in
-    // to show it (placeCache pops the new cells 0.12 s apart)
-    const x = pressX(rank) + (1 - arrive) * 40;
+    // an arriving order fades in at its place, clear of the "+N" count right of the line; a growing strip takes the
+    // line: each order slides 20 px left into its new cell and fades as that cell pops in to show it (placeCache pops
+    // the new cells 0.12 s apart)
+    const x = pressX(rank);
     const grow = P(t, growAt - 0.3, 0.4);
     const newCell = GROWN.from + Math.round(rank);
     return { x: lerp(x, cellX(newCell), grow), o: arrive * (1 - P(t, growAt + 0.05 + rank * 0.12, 0.2)) };
@@ -168,7 +170,8 @@
       });
       const others = 140 + 30 * Math.max(0, t - c[0]);
       s.more.textContent = '+' + withCommas(others);
-      showAt(s.more, PRESS.countLeft, DIAGRAM.wfY - 10, P(t, c[0] + 1.8, 0.4) * (1 - P(t, growAt, 0.3)));
+      // the count fades out before the strip grows: its last new cell pops in where the count was
+      showAt(s.more, PRESS.countLeft, DIAGRAM.wfY - 10, P(t, c[0] + 1.8, 0.4) * (1 - P(t, growAt - 0.3, 0.3)));
 
       // EVICTED over the first evicted cell until the replay has started, 20 px clear of the WORKFLOW CACHE label at
       // least, as the bottleneck tag

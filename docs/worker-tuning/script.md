@@ -134,9 +134,10 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     with step icons).
 - **0:49** A Poller in the Worker asks a queue for a task, but only
   while a Slot is free.
-  - Visuals: the WORKER A panel fills in; Pollers sit at the end of each
-    lane, a dashed poll line pulsing toward the queue; a task jumps from
-    the queue through a Poller into a free Slot.
+  - Visuals: the WORKER A panel fills in; Pollers hang off each lane on
+    right-angle connectors whose dashes flow from the queue to the
+    Pollers; a task travels along the connector, through a Poller, into a
+    free Slot.
 - **0:56** A Slot is the permission to run one task. The task itself uses
   the Worker's CPU and memory.
   - Visuals: the Slot grid lights; CPU and MEMORY meters under the Worker
@@ -171,7 +172,7 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 
 - **1:53** Now Slots sit free while the queue still grows, and the CPU has
   room to spare.
-  - Visuals: half the Slots empty, the poll lines pulsing; CPU 45%; the
+  - Visuals: half the Slots empty, the poll lines flowing; CPU 45%; the
     queue grows.
 - **2:01** Tasks wait a long time before they start: the Pollers can't
   fetch them fast enough.
@@ -208,7 +209,7 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   stay cached, and replays stop.
   - Visuals: MEMORY 2 GB becomes 4 GB; the code line
     `maxCachedWorkflows: 500` lights and becomes 2000; the strip widens
-    to 8 cells and the waiting orders move in; the metric lines read 0/s
+    to 7 cells and the waiting orders move in; the metric lines read 0/s
     and "no replays" in neon; the tag turns neon; CPU 88%.
 
 ## 06 The CPU is full
@@ -226,8 +227,9 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   Queue and share the load.
   - Visuals: MEMORY fades; WORKER B and WORKER C slide in from the right
     under WORKER A, compact panels with 5 Slots and a CPU gauge each;
-    their poll line joins the same lanes and tasks fly to them; the CPU
-    meters settle at 60, 62 and 58%; A's CPU tag turns neon (FIXED).
+    their poll line branches off the Activity lane's connector and tasks
+    travel along it to them; the CPU meters settle at 60, 62 and 58%;
+    A's CPU tag turns neon (FIXED).
 - **3:26** The backlog drains, and new orders start right away again.
   - Visuals: the queues empty; BACKLOG falls to 0 and SCHEDULE-TO-START
     to 0.3 s, in neon.

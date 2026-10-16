@@ -402,6 +402,13 @@ below and the card order in [Home page design](feedback_home-page.md).
   code card; a bottleneck gets a red outline and BOTTLENECK tag, then a
   neon FIXED tag. Each bottleneck chapter: symptom, what is full, the
   setting, relief, the next bottleneck showing.
+- Connectors between TEMPORAL and the Workers are right-angle elbows
+  (horizontal, vertical run in the gap, horizontal), and their dashed flow
+  and the task chips move left to right, from the Task Queue to the
+  Pollers: a Poller takes work from Temporal.
+- The intro's queue strip and mini Worker (10 Slots, 2 x 5) carry into
+  ch1 on a hard cut and grow into the diagram; ch1 to ch2 is a hard cut
+  too, where the centered 2 x 5 grid opens into the diagram row.
 - Slower pacing, as agent-harness: `pre: 1.5, post: 2.0` on chapters,
   intro `pre: 1.5`, outro `pre: 1.0, post: 3.0`.
 

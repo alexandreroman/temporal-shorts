@@ -72,7 +72,8 @@
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
         metrics: [
-          { name: 'temporal_worker_task_slots_available', value: String(available), at: 0 },
+          // already there as chapter 3 ends
+          { name: 'temporal_worker_task_slots_available', value: String(available), at: -1 },
           {
             name: 'temporal_activity_schedule_to_start_latency', value: formatWait(wait), color: trendColor(trend),
             at: c[1] + 0.8,
