@@ -6,6 +6,7 @@ function startPlayer() {
   const CC_LETTERS = '<path d="M10.5 10a2.5 2.5 0 1 0 0 4M17 10a2.5 2.5 0 1 0 0 4"/>';
   const LOOP_ARROWS = '<path d="M17 3l3 3-3 3M7 21l-3-3 3-3"/>';
   const EASEL_STAND = '<path d="M12 15v2M8 21l4-4 4 4"/>';
+  // Toggle icons show the action, as the fullscreen ones do: what a press does, not the current state.
   const ICON_PATHS = {
     home: '<path d="M3 11l9-7.5 9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>',
     play: '<path d="M7 4.5v15l12-7.5z"/>',
@@ -19,9 +20,11 @@ function startPlayer() {
     // so the slash stays legible at 20 px.
     hideSubtitles: '<path d="M8.5 4.5H19a3 3 0 0 1 3 3v8M15.5 19.5H5a3 3 0 0 1-3-3v-9"/><path d="M3 3l18 18"/>'
       + CC_LETTERS,
-    loopOn: '<path d="M4 12V9a3 3 0 0 1 3-3h13M20 12v3a3 3 0 0 1-3 3H4"/>' + LOOP_ARROWS,
-    // Same cycle without the two corners the slash crosses, so the slash stays legible at 20 px.
-    loopOff: '<path d="M4 12V9M10 6h10M20 12v3M14 18H4"/><path d="M3 3l18 18"/>' + LOOP_ARROWS,
+    // A cycle, shown while looping is off, to turn it on.
+    enableLoop: '<path d="M4 12V9a3 3 0 0 1 3-3h13M20 12v3a3 3 0 0 1-3 3H4"/>' + LOOP_ARROWS,
+    // Same cycle slashed, shown while looping is on, to turn it off; without the two corners the slash crosses,
+    // so the slash stays legible at 20 px.
+    disableLoop: '<path d="M4 12V9M10 6h10M20 12v3M14 18H4"/><path d="M3 3l18 18"/>' + LOOP_ARROWS,
     // A board on a stand, shown while presenter mode is off, to turn it on.
     enterPresenter: '<path d="M2 4h20M4 4v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4"/>' + EASEL_STAND,
     // Same board slashed, shown while presenter mode is on, to turn it off; opened where the slash crosses it
@@ -315,7 +318,7 @@ function startPlayer() {
   }
 
   function updateLoopButton() {
-    setIcon(loopButton, looping ? 'loopOn' : 'loopOff', 'Loop');
+    setIcon(loopButton, looping ? 'disableLoop' : 'enableLoop', 'Loop');
     loopButton.setAttribute('aria-pressed', String(looping));
   }
 
@@ -347,7 +350,6 @@ function startPlayer() {
   }
 
   function updatePresenterButton() {
-    // Unlike loop, the icon shows the action, like subtitles and fullscreen: off by default, it invites turning on.
     setIcon(presenterButton, presenter ? 'exitPresenter' : 'enterPresenter', 'Presenter mode');
     presenterButton.setAttribute('aria-pressed', String(presenter));
   }
