@@ -37,7 +37,7 @@ The video teaches, in order:
    too slowly; turn on Poller Autoscaling;
 5. a cache too small: evictions force replays of the Event History, which
    burn CPU and hold Slots; give the Worker more memory and a larger cache;
-6. a full CPU: more Slots add no CPU; only then add Workers;
+6. a full CPU: more Slots add no CPU; only then add Workers on more hosts;
 7. change one setting at a time, then look for the next bottleneck: fixing
    one limit moves the constraint somewhere else.
 
@@ -250,8 +250,8 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   used all the CPU it has.
   - Visuals: the code card fades; a dashed "+ SLOTS" ghost takes its
     place, crossed out.
-- **3:18** This is the moment to add Workers: B and C poll the same Task
-  Queue and share the load.
+- **3:18** Now add Workers on more hosts: B and C poll the same Task Queue
+  and share the load.
   - Visuals: MEMORY and the "+ SLOTS" ghost fade; A's CPU meter shrinks
     into a compact gauge at the top right of WORKER A, its BOTTLENECK tag beside
     it; WORKER B and WORKER C, as wide as A, slide in under it, each with a
@@ -270,24 +270,24 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 
 - **3:37** A growing backlog often comes from one of four Worker limits:
   Slots, Pollers, cache or CPU.
-  - Visuals: each row grows from its icon (the cache icon reads #1049, the
-    order the diagram ends with). The table's first row is the symptom, set
-    slightly apart, with a 2 px violet-to-UV gradient border, an even violet
-    glow and a violet WATCH FIRST badge astride its top border on the right: a
-    queue-strip icon (chapter 6's Activity lane shrinks into it), "Backlog
-    grows, tasks wait", the three signals stacked, `approximate_backlog_count`
-    rising, `approximate_backlog_age` older,
-    `activity_schedule_to_start_latency` high, and "Find the full limit
-    below"; its glow swells as "A growing backlog" is read. Then four rows, under the SYMPTOM / SIGNAL / FIX headings, each
-    option name on a smaller line under its fix: Slots full, CPU low /
+  - Visuals: each row grows from its icon (the cache icon reads #1049, the order
+    the diagram ends with). The table's first row is the symptom, set slightly
+    apart, with a 2 px violet-to-UV gradient border, an even violet glow and a
+    violet WATCH FIRST badge astride its top border on the right: a queue-strip
+    icon (chapter 6's Activity lane shrinks into it), "Backlog grows, tasks
+    wait", the three signals stacked, `approximate_backlog_count` rising,
+    `approximate_backlog_age` older, `activity_schedule_to_start_latency` high,
+    and "Find the full limit below"; its glow swells as "A growing backlog" is
+    read. Then four rows, under the SYMPTOM / SIGNAL / FIX headings, each option
+    name on a smaller line under its fix: Slots full, CPU low /
     `worker_task_slots_available` at 0 / More Slots, if downstream keeps up
     (`maxConcurrentActivityTaskExecutions`); Slots free, long wait /
     `activity_schedule_to_start_latency` high / Poller Autoscaling
     (`activityTaskPollerBehavior`); evictions, replays /
     `sticky_cache_total_forced_eviction` high rate / More memory, larger cache
-    (`maxCachedWorkflows`); CPU at 100% / CPU usage / More Workers; each row
-    starts with a small icon of the diagram (Slots, a Poller, a cache cell, a
-    full CPU bar) and lights as it is named.
+    (`maxCachedWorkflows`); CPU at 100% / CPU usage / More Workers on more
+    hosts; each row starts with a small icon of the diagram (Slots, a Poller, a
+    cache cell, a full CPU bar) and lights as it is named.
 - **3:45** Change one setting at a time, watch the signals, then look for
   the next bottleneck.
   - Visuals: under the table, three pills CHANGE ONE SETTING → WATCH THE

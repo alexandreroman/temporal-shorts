@@ -43,7 +43,7 @@
     {
       name: 'CPU', symptom: 'CPU at 100%',
       signalText: 'CPU usage',
-      fix: 'More Workers', option: '',
+      fix: 'More Workers on more hosts', option: '',
     },
   ];
   // The loop, in the order the second subtitle reads it (name: its words in the subtitle)
