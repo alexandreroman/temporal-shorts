@@ -465,8 +465,9 @@ const NAMESPACES = [
   { name: 'payments', y: 515, h: 300, mine: true },
   { name: 'analytics', y: 720, h: 86 },
 ];
-// The bands span TEMPORAL 24 px inside its sides: their center x and width
-const NS_BAND = { x: LANE.temporal.x + LANE.temporal.w / 2, w: LANE.temporal.w - 48 };
+// The bands span TEMPORAL 10 px inside its sides: their center x and width. Wide enough for the Event History, which
+// sits right of TEMPORAL's center (LANE.history), to keep 20 px clear of payments' right edge as of its top and bottom.
+const NS_BAND = { x: LANE.temporal.x + LANE.temporal.w / 2, w: LANE.temporal.w - 20 };
 // The light that sweeps across TEMPORAL as it splits into Namespaces, px wide
 const NS_SWEEP_W = 160;
 // The Namespace bands, under the lane's SVG layer and the Event History, each labelled at its top left, a padlock on
