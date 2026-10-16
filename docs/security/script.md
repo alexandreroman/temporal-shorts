@@ -149,15 +149,15 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     the gap round the tube, two violet rails from the environment's edge
     to TEMPORAL's, labelled PRIVATE LINK on the TLS label's line, and
     hides the band round the tube; the band dims away, and the
-    eavesdropper, left on the public side, reads NO TRAFFIC. A neon
-    PRIVATE-ONLY RULE tag snaps on under the corridor as its rails flare.
-    All of it clears for the identity badge.
+    eavesdropper, left on the public side, reads NO TRAFFIC. The band and
+    the eavesdropper then leave and the label makes room for the identity
+    badge; the corridor stays round the tube to the end of the chapter.
 - **0:39** The Worker proves who it is: a certificate from your own CA, or
   an API key.
-  - Visuals: In the held tube shot, an IDENTITY badge (two tabs: mTLS
-    CERTIFICATE · YOUR CA, and API KEY) leaves the Worker, grows on its
-    way and lands above the tube's end; a neon scan line checks it and it
-    turns VERIFIED. Dramatic beat: an UNKNOWN CLIENT (no credentials)
+  - Visuals: In the held tube shot, an IDENTITY badge (two tabs side by
+    side: mTLS CERTIFICATE · YOUR CA, and API KEY) leaves the Worker,
+    grows on its way and lands above the corridor; a neon scan line checks
+    it and it turns VERIFIED. Dramatic beat: an UNKNOWN CLIENT (no credentials)
     rises under the tube; its request hits a red barrier at TEMPORAL's
     edge with a red flash and a shake, and a solid red REJECTED tag pops
     beside the client's name.
@@ -180,16 +180,16 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     scheduled: creditAccount"; each row gets a SAVED tag.
 - **0:59** TLS only protects the trip: once stored, the IBAN is readable by
   anyone who can read the history.
-  - Visuals: The tube fades and, with no camera move, the content comes to
-    the camera: the history slides left and a column comes in on the
-    right, a TEMPORAL WEB UI window showing row 2 with the IBAN and the
-    name in clear, over two viewers, OPERATOR and WEB UI USER. Dramatic
-    beat: a solid red READABLE tag slams onto the chip (red rings, a flash, a
-    shake), the Web UI's IBAN turns red, eyes open on both viewers, and a
-    red lens sweeps the chip's IBAN, its digits magnified. At the end the
-    frame stutters (jitter, a red and violet split), then a copy of the
-    card streaks back along the wire into the Worker, ghost outlines
-    trailing, as the camera whips left: a rewind.
+  - Visuals: The tube and its corridor fade and, with no camera move, the
+    content comes to the camera: the history slides left and a column comes in
+    on the right, a TEMPORAL WEB UI window showing row 2 with the IBAN and the
+    name in clear, over two viewers, OPERATOR and WEB UI USER. Dramatic beat: a
+    solid red READABLE tag slams onto the chip (red rings, a flash, a shake),
+    the Web UI's IBAN turns red, eyes open on both viewers, and a red lens
+    sweeps the chip's IBAN, its digits magnified. At the end the frame stutters
+    (jitter, a red and violet split), then a copy of the card streaks back along
+    the wire into the Worker, ghost outlines trailing, as the camera whips left:
+    a rewind.
 
 ## 04 Encrypted with your keys
 

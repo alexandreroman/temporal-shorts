@@ -2,11 +2,11 @@
 // Opens on the push-in that ended chapter 1 (WIRE_SHOT). A neon TLS tube draws along the wire and the payload card
 // rides it toward Temporal while an eavesdropper's beam scans it and reads only ciphertext. The gap between the zones
 // turns out to be the PUBLIC INTERNET; a private corridor (PRIVATE LINK) seals the tube off from it, the eavesdropper
-// loses sight of the wire and a PRIVATE-ONLY RULE tag snaps on. The Worker's identity badge slides into the shot and
-// turns VERIFIED; an unknown client comes in under the wire and is REJECTED. TEMPORAL splits into three Namespaces
-// under a sweep of light, the card enters payments only, and the camera starts its whip right (TUBE_HANDOFF) into
-// chapter 3. The camera only moves forward: right along the lane, its scale never shrinking (1.35, 1.4, then the
-// whip's 1.6); what the story needs from the Worker comes to it.
+// loses sight of the wire; the corridor stays to the end. The Worker's identity badge slides into the shot and turns
+// VERIFIED; an unknown client comes in under the wire and is REJECTED. TEMPORAL splits into three Namespaces under a
+// sweep of light, the card enters payments only, and the camera starts its whip right (TUBE_HANDOFF) into chapter 3.
+// The camera only moves forward: right along the lane, its scale never shrinking (1.35, 1.4, then the whip's 1.6);
+// what the story needs from the Worker comes to it.
 // The block keeps every name declared in this file local to this scene.
 {
   // camera framings, [x, y, scale] for shot(): along the tube as the card rides it (from, then to, held while the
@@ -38,20 +38,17 @@
   const NOISE_COLS = 30;
   const GLYPHS = 8;
   // the identity badge: it leaves the Worker's top right, at the shot's left edge, and slides in over the tube's
-  // label to land above the tube's end, by TEMPORAL's edge, inside the tube shot, in line with the outsiders' tiles
-  const BADGE = { x: OUTSIDER.x, y: 350, w: OUTSIDER.w, h: 120, route: [[540, 340], [690, 315], [860, 325]] };
+  // label to land above the corridor, 16 px clear of its top rail, inside the tube shot, in line with the outsiders'
+  // tiles. Its two tabs share one row (tabTop), under its heading.
+  const BADGE = { x: OUTSIDER.x, w: OUTSIDER.w, h: 84, tabTop: 44.5, route: [[540, 340], [690, 315], [860, 325]] };
+  BADGE.y = TUBE.y - CORRIDOR.h / 2 - 16 - BADGE.h / 2;
   // the private connectivity beat, at camera rest, in the gap between the zones, where the wire crosses the network:
   // the PUBLIC INTERNET band fills the gap 12 px inside the zones' edges, from 3 px under the tube shot's content
-  // band's top to 3 px over its bottom, its heading (headTop px under its top) centered; the corridor spans the gap
-  // from edge to edge, its rails (rail px thick) gap px outside the tube's walls, its PRIVATE LINK label above it on
-  // the TLS label's line; the PRIVATE-ONLY RULE tag sits halfway between the corridor and the outsiders' tiles
-  const GAP = { x0: LANE.env.x + LANE.env.w, x1: LANE.temporal.x };
+  // band's top to 3 px over its bottom, its heading (headTop px under its top) centered; the corridor (CORRIDOR)
+  // spans the gap, its PRIVATE LINK label above it on the TLS label's line, until the identity badge takes its place
   const TUBE_BAND = contentBand(shot(0, TUBE_TO, []));
-  const PUBLIC = { x0: GAP.x0 + 12, x1: GAP.x1 - 12, y0: Math.ceil(TUBE_BAND.top) + 3,
+  const PUBLIC = { x0: CORRIDOR.x0 + 12, x1: CORRIDOR.x1 - 12, y0: Math.ceil(TUBE_BAND.top) + 3,
     y1: Math.floor(TUBE_BAND.bottom) - 3, headTop: 14 };
-  const CORRIDOR = { gap: 8, rail: 3 };
-  CORRIDOR.h = TUBE.h + 2 * (CORRIDOR.gap + CORRIDOR.rail);
-  const RULE_Y = (TUBE.y + CORRIDOR.h / 2 + OUTSIDER.top) / 2;
   // the unknown client's request, up to TEMPORAL's edge under the tube, where a red barrier stops it
   const BARRIER = { x: LANE.temporal.x, y: 660, h: 100 };
   const REQUEST_PATH = `M 1070 ${OUTSIDER.top + 3} Q 1120 630 ${BARRIER.x - 6} ${BARRIER.y}`;
@@ -59,8 +56,7 @@
   // identities, c[3] the split
   const T0 = { door: 0, tube: 0.1, tubeD: 0.8, label: 0.7, lift: 0.6, liftD: 0.7, ride: 1.4, rideD: 3.0,
     spy: 1.0, beam: 1.4, lock: 2.6, unlock: 3.8 };
-  const T1 = { band: 0.1, bandD: 0.5, corridor: 0.9, corridorD: 0.9, label: 1.5, dim: 1.4, dimD: 0.8, blind: 1.8,
-    rule: 2.8 };
+  const T1 = { band: 0.1, bandD: 0.5, corridor: 0.9, corridorD: 0.9, label: 1.5, dim: 1.4, dimD: 0.8, blind: 1.8 };
   const T2 = { spyOut: 0.1, badge: 0.6, badgeD: 1.2, scan: 2.0, scanD: 0.6, verified: 2.6, client: 3.4,
     request: 3.9, requestD: 0.4 };
   const T3 = { out: 0.1, cam: 0.2, sweep: 1.1, sweepD: 0.9, lit: 2.0, locks: [2.4, 2.6], enter: 3.2, enterD: 0.6 };
@@ -125,17 +121,13 @@
       s.lane.svg.appendChild(s.beam);
       s.request = path(s.lane.svg, REQUEST_PATH, C.slate, 2.5, false);
       // the PUBLIC INTERNET band and the private corridor, under the tube: the corridor's opaque fill hides the band
-      // round the tube, and its rails end on the zones' edges
+      // round the tube
       s.publicNet = E(root, '', '', {
         width: (PUBLIC.x1 - PUBLIC.x0) + 'px', height: (PUBLIC.y1 - PUBLIC.y0) + 'px',
         background: `rgba(${RGB.red},.06)`, border: `1.5px dashed rgba(${RGB.red},.55)`, borderRadius: 'var(--r)',
       });
       s.publicHead = beatHeading(root, 'globe', 'Public internet', C.red);
-      s.corridor = E(root, '', '', {
-        width: (GAP.x1 - GAP.x0) + 'px', height: CORRIDOR.h + 'px',
-        borderTop: `${CORRIDOR.rail}px solid ${C.violet}`, borderBottom: `${CORRIDOR.rail}px solid ${C.violet}`,
-        background: `linear-gradient(rgba(${RGB.violet},.07), rgba(${RGB.violet},.07)), ${C.bg}`,
-      });
+      s.corridor = makeCorridor(root);
       s.tube = makeTube(root, TUBE);
 
       s.spy = makeOutsider(root, OUTSIDER.spyH, 'eye', 'Eavesdropper', C.red,
@@ -151,15 +143,16 @@
         + 'no credentials</div>', {});
       // sized for the 1.4 tube shot: its tabs render at 17 px, its heading and verdict at 18 px or more. VERIFIED,
       // of the outsiders' verdicts' size, centers on the heading's line (21.5 px under the padding box's top) and ends
-      // with the tabs.
+      // with the tabs, side by side on one row: the certificate's as wide as its text, the API key's the rest.
       s.badge = E(root,
         '<div style="position:absolute;left:14.5px;top:10.5px;display:flex;gap:8px;align-items:center">'
         + `${ICON('badge', 22, C.ink, 1.8)}<span class="lbl" style="font-size:14px;color:var(--ink)">Identity</span>`
         + '</div>'
-        + ['mTLS CERTIFICATE · YOUR CA', 'API KEY'].map((text, i) => '<div class="mono" style="position:absolute;'
-          + `left:14.5px;right:14.5px;top:${44.5 + i * 36}px;height:28px;line-height:25px;padding-left:10px;`
-          + `font-size:12px;letter-spacing:.06em;border:1.5px solid ${C.lineLight};border-radius:var(--rs)">`
-          + `${text}</div>`).join(''),
+        + `<div style="position:absolute;left:14.5px;right:14.5px;top:${BADGE.tabTop}px;display:flex;gap:8px">`
+        + ['mTLS CERTIFICATE · YOUR CA', 'API KEY'].map((text, i) => `<div class="mono" style="flex:${i ? 1 : 'none'};`
+          + 'height:28px;line-height:25px;padding:0 8px;font-size:12px;letter-spacing:.06em;white-space:nowrap;'
+          + `border:1.5px solid ${C.lineLight};border-radius:var(--rs)">${text}</div>`).join('')
+        + '</div>',
         'tile', { width: BADGE.w + 'px', height: BADGE.h + 'px', textAlign: 'left' });
       s.badge.scan = E(s.badge, '', '', {
         left: '0', width: '100%', height: '2px', background: C.neon, boxShadow: `0 0 10px 2px rgba(${RGB.neon},.5)`,
@@ -179,9 +172,6 @@
       });
       s.glyphs = Array.from({ length: GLYPHS }, () => E(root, '', 'mono', { fontSize: '17px', color: C.red }));
       s.privateLabel = beatHeading(root, 'shield', 'Private link', C.violet);
-      s.rule = statusTag(root, { font: VERDICT.font, icon: VERDICT.font });
-      s.rule.style.height = VERDICT.h + 'px';
-      balanceTagLabel(s.rule, 'ok');
       s.requestHead = makeSpark(root, 12, RGB.ink);
       s.barrier = E(root, '', '', {
         width: '6px', height: BARRIER.h + 'px', background: C.red, borderRadius: '3px',
@@ -268,24 +258,15 @@
 
       // the gap between the zones lights up as the PUBLIC INTERNET, round the eavesdropper; a private corridor draws
       // across it round the tube, toward TEMPORAL, and the band dims away behind it: the eavesdropper is left on the
-      // public side, with no traffic to see. The PRIVATE-ONLY RULE snaps on, the rails flaring; all of it clears for
-      // the identities.
+      // public side, with no traffic to see. The band and its heading leave with the eavesdropper, the label with
+      // the identity badge's arrival; the corridor stays to the end and on into chapter 3 (TUBE_HANDOFF).
       const beatOut = 1 - P(t, c[2] + T2.spyOut, 0.3);
       const bandO = P(t, c[1] + T1.band, T1.bandD) * lerp(1, OFF_SHOT, P(t, c[1] + T1.dim, T1.dimD)) * beatOut;
       place(s.publicNet, (PUBLIC.x0 + PUBLIC.x1) / 2, (PUBLIC.y0 + PUBLIC.y1) / 2, 1, bandO);
       place(s.publicHead, OUTSIDER.x, PUBLIC.y0 + PUBLIC.headTop + 11, 1, bandO);
-      const corridor = P(t, c[1] + T1.corridor, T1.corridorD);
-      place(s.corridor, (GAP.x0 + GAP.x1) / 2, TUBE.y, 1, corridor > 0 ? beatOut : 0);
-      // the clip cuts the glow at the zones' edges, where the rails end, and on the right while the corridor draws
-      s.corridor.style.clipPath = `inset(-40px ${((1 - corridor) * 100).toFixed(3)}% -40px 0)`;
-      const ruleAt = c[1] + T1.rule;
-      const flare = t >= ruleAt ? 1 - P(t, ruleAt, 0.8) : 0;
-      s.corridor.style.boxShadow = glowShadow(RGB.violet, 0.5 + 0.5 * flare, { blur: 24 + 16 * flare, alpha: 0.5 });
+      placeCorridor(s.corridor, { drawn: P(t, c[1] + T1.corridor, T1.corridorD) });
       const label = popIn(t, c[1] + T1.label);
       place(s.privateLabel, OUTSIDER.x, TUBE.label.y, label.s, label.o * beatOut);
-      setStatus(s.rule, 'PRIVATE-ONLY RULE', 'ok');
-      const rule = popIn(t, ruleAt);
-      place(s.rule, OUTSIDER.x, RULE_Y, rule.s, rule.o * beatOut);
 
       // the identity badge slides out of the Worker, along an arc over the tube, to TEMPORAL's edge; a scan line
       // checks it, and it turns VERIFIED

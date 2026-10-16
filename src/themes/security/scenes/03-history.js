@@ -1,10 +1,10 @@
 // ===================== 3. IN THE EVENT HISTORY
 // Opens in the whip that ended chapter 2 (TUBE_HANDOFF): the camera lands close on the Event History (HIST_SHOT) with
 // the payload card, which docks as the payload chip of row 2 while the history grows into its three rows. The TLS
-// tube fades; the camera holds while TEMPORAL widens into its close layout (CLOSE): the history slides left and the
-// Web UI comes in on its right, showing the same IBAN in clear to two viewers. READABLE slams onto the chip, a lens
-// scans the IBAN and the viewers' eyes turn to it. Then the picture stutters and rewinds: a copy of the card streaks
-// back to the Worker as the camera whips left and TEMPORAL narrows back (REWIND_HANDOFF).
+// tube and its private corridor fade; the camera holds while TEMPORAL widens into its close layout (CLOSE): the
+// history slides left and the Web UI comes in on its right, showing the same IBAN in clear to two viewers. READABLE
+// slams onto the chip, a lens scans the IBAN and the viewers' eyes turn to it. Then the picture stutters and rewinds:
+// a copy of the card streaks back to the Worker as the camera whips left and TEMPORAL narrows back (REWIND_HANDOFF).
 // The block keeps every name declared in this file local to this scene.
 {
   // the docking, in seconds from c[0], in the close shot the whip lands on (HIST_SHOT): the history grows from the
@@ -94,10 +94,11 @@
       },
     ],
     build(stage, s) {
-      // built in chapter 2's order (lane, Namespaces, tube, card last), so the cut shows the same stack
+      // built in chapter 2's order (lane, Namespaces, corridor, tube, card last), so the cut shows the same stack
       const root = s.cam = makeCamera(stage);
       s.lane = makeLane(root);
       s.ns = makeNamespaces(s.lane);
+      s.corridor = makeCorridor(root);
       s.tube = makeTube(root, TUBE);
       s.hist = makeStoredHistory(root);
       s.webui = makeWebUI(root);
@@ -165,7 +166,10 @@
       });
       // after placeLane(), whose zones it clips
       frameLaneEdges(s.lane, cam);
-      placeTube(s.tube, TUBE, { o: lerp(1, OFF_SHOT, settled) * (1 - tubeOut) });
+      // the corridor round the tube goes with it
+      const tubeO = lerp(1, OFF_SHOT, settled) * (1 - tubeOut);
+      placeCorridor(s.corridor, { o: tubeO });
+      placeTube(s.tube, TUBE, { o: tubeO });
       // the Namespaces have made their point: they fade as the history grows over them
       placeNamespaces(s.ns, 1, 1, [1, 1], 1 - P(t, c[0] + T0.ns, 0.4));
 

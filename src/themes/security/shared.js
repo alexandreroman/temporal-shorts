@@ -457,6 +457,28 @@ function placeTube(tube, geom, { drawn = 1, o = 1, label = o, labelS = 1 } = {})
   place(tube.label, geom.label.x, geom.label.y, labelS, label);
 }
 
+// ---------- the private corridor (chapters 2 and 3)
+// The private link round the TLS tube where it crosses the network, at camera rest: it spans the gap between the
+// zones from edge to edge (x0 to x1), its two rails rail px thick, gap px outside the tube's walls, h px high in all
+const CORRIDOR = { x0: LANE.env.x + LANE.env.w, x1: LANE.temporal.x, gap: 8, rail: 3 };
+CORRIDOR.h = TUBE.h + 2 * (CORRIDOR.gap + CORRIDOR.rail);
+// The corridor (CORRIDOR): two violet rails and an opaque fill between them, which hides what lies behind the tube
+// there. Build it under the tube; placeCorridor() shows it.
+function makeCorridor(root) {
+  return E(root, '', '', {
+    width: (CORRIDOR.x1 - CORRIDOR.x0) + 'px', height: CORRIDOR.h + 'px',
+    borderTop: `${CORRIDOR.rail}px solid ${C.violet}`, borderBottom: `${CORRIDOR.rail}px solid ${C.violet}`,
+    background: `linear-gradient(rgba(${RGB.violet},.07), rgba(${RGB.violet},.07)), ${C.bg}`,
+    boxShadow: glowShadow(RGB.violet, 0.5, { blur: 24, alpha: 0.5 }),
+  });
+}
+// The corridor drawn from its left end up to drawn (0 to 1), toward TEMPORAL, with opacity o. The clip cuts its glow
+// at the zones' edges, where the rails end, and on the right while it draws.
+function placeCorridor(corridor, { drawn = 1, o = 1 } = {}) {
+  place(corridor, (CORRIDOR.x0 + CORRIDOR.x1) / 2, TUBE.y, 1, drawn > 0 ? o : 0);
+  corridor.style.clipPath = `inset(-40px ${((1 - drawn) * 100).toFixed(3)}% -40px 0)`;
+}
+
 // ---------- the Namespaces (chapters 2 and 3)
 // The Namespaces inside TEMPORAL, top to bottom: each one's name, the middle y and height of its band. The Worker's
 // own, payments, surrounds the Event History, level with the wire and the tube.
@@ -952,8 +974,8 @@ const WIRE_LANE = { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, heads: 0 };
 // of the stored history (to: HIST_SHOT, where chapter 3 holds as the history grows) and the card to the lane's
 // history (cardTo) over d seconds. Chapter 2 plays its first `cut` seconds and ends there (fadeOut:
 // 0); chapter 3 opens there (fadeIn: 0) and plays the rest: read both sides from tubeWhip(). At the cut: placeLane()
-// with `lane` (the environment and the Worker, cropped at the left edge, dimmed), placeTube(tube, TUBE),
-// placeNamespaces(ns, 1, 1, [1, 1]).
+// with `lane` (the environment and the Worker, cropped at the left edge, dimmed), placeCorridor(corridor),
+// placeTube(tube, TUBE), placeNamespaces(ns, 1, 1, [1, 1]).
 const TUBE_HANDOFF = {
   from: [1153, 515, 1.4], to: HIST_SHOT,
   card: [TUBE.x1 - 62, TUBE.y], cardTo: [LANE.history.x, LANE.history.y],
