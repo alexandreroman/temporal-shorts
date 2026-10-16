@@ -236,22 +236,6 @@ const spinnerRing = (size, alpha = 0.3, css = '') => `<div class="spin" style="$
   + `height:${size}px;border:3px solid rgba(${RGB.violet},${alpha});border-top-color:${C.violet};border-radius:50%">`
   + '</div>';
 
-// ---------- DOM writes that skip unchanged values: update() runs every frame, and rewriting the same HTML or text
-// costs a relayout for nothing
-// Sets an element's HTML, rewritten only when it changes
-function setHtml(e, html) {
-  if (e._html !== html) {
-    e.innerHTML = html;
-    e._html = html;
-  }
-}
-// Sets an element's text, rewritten only when it changes
-function setText(e, text) {
-  if (e._text !== text) {
-    e.textContent = text;
-    e._text = text;
-  }
-}
 // A count with thousands separators, the same whatever the locale: 2400 -> '2,400'
 const withCommas = n => Math.round(n).toLocaleString('en-US');
 
@@ -1106,37 +1090,6 @@ function sparkOnPath(spark, pathEl, prog, o) {
   // with a factor, the opacity is rounded to 3 decimals, which keeps the security scenes' flowing sparks on the same
   // color levels
   place(spark, point.x, point.y, 1, o === undefined ? opacity : +(opacity * o).toFixed(3));
-}
-
-// SVG path through the points of an orthogonal line, its corners rounded with radius r (less where a segment is too
-// short); repeated points are skipped
-function roundedPath(points, r) {
-  const pts = points.filter((p, i) => i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
-  let d = `M ${pts[0][0]} ${pts[0][1]}`;
-  for (let i = 1; i < pts.length - 1; i++) {
-    const [px, py] = pts[i - 1], [x, y] = pts[i], [nx, ny] = pts[i + 1];
-    const inLen = Math.hypot(x - px, y - py), outLen = Math.hypot(nx - x, ny - y);
-    const corner = Math.min(r, inLen / 2, outLen / 2);
-    const from = [x - (x - px) / inLen * corner, y - (y - py) / inLen * corner];
-    const to = [x + (nx - x) / outLen * corner, y + (ny - y) / outLen * corner];
-    d += ` L ${from[0]} ${from[1]} Q ${x} ${y} ${to[0]} ${to[1]}`;
-  }
-  const last = pts[pts.length - 1];
-  return d + ` L ${last[0]} ${last[1]}`;
-}
-// The point at fraction u (0 to 1) of a line through points (straight segments), at constant speed: a chip or a
-// card moving along a connector
-function pointAlong(points, u) {
-  const lengths = points.slice(1).map((p, i) => Math.hypot(p[0] - points[i][0], p[1] - points[i][1]));
-  let rest = clamp(u) * lengths.reduce((a, b) => a + b, 0);
-  for (let i = 0; i < lengths.length; i++) {
-    if (rest <= lengths[i] || i === lengths.length - 1) {
-      const p = lengths[i] > 0 ? clamp(rest / lengths[i]) : 1;
-      return [lerp(points[i][0], points[i + 1][0], p), lerp(points[i][1], points[i + 1][1], p)];
-    }
-    rest -= lengths[i];
-  }
-  return points[points.length - 1];
 }
 
 // Ripple rings: n circles of a color growing from size0 to size1 px and fading, one after the other, from `at`

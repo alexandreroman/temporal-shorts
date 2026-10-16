@@ -107,9 +107,11 @@ workspaces run `make setup` automatically.
     are copies, see the comment above the chain
   - `styles.css`: brand styles and live-player CSS
   - `engine.js`: timeline, easing and layout helpers, SVG path helpers
-    (`setD()`, `sCurveD()`), icons, components, star field and `boot()`,
-    called last by every theme page (builds the scenes, then freezes on
-    `?t=` or starts the player); chapter titles come from the scenes
+    (`setD()`, `sCurveD()`, `roundedPath()`, `pointAlong()`), DOM writes
+    that skip unchanged values (`setHtml()`, `setText()`), icons,
+    components, star field and `boot()`, called last by every theme page
+    (builds the scenes, then freezes on `?t=` or starts the player);
+    chapter titles come from the scenes
   - `shared.js`: brand constants and components used by two or more
     themes (`C`, `RGB` and `WEB_UI` colors, `TILE_BORDER`, `assetUrl()`
     and `LOGO`, the lockup and Temporal Cloud zone, tiles, tags, glows,
@@ -119,13 +121,12 @@ workspaces run `make setup` automatically.
     panel of numbered step lines (`makeLinesApp()`), the Event History
     card, the code card of TypeScript lines (`makeCodeCard()`,
     `highlightJs()`, `setCodeLine()`), status tags, counters, crash and
-    takeover effects, the recap row of benefit tiles, DOM writes that skip
-    unchanged values (`setHtml()`, `setText()`), small animation and path
-    helpers such as `popScale()`, `backPop()` and `roundedPath()`, camera
-    and motion helpers (`makeCamera`, `setCamera`, `hash`, ripples, sparks
-    on paths), title and end cards) and the whole "What you can build"
-    chapter, `useCaseScene()`; icons used by two or more themes are in
-    `ICONS` in `engine.js`, the others in their theme's `shared.js`
+    takeover effects, the recap row of benefit tiles, small animation
+    helpers such as `popScale()` and `backPop()`, camera and motion
+    helpers (`makeCamera`, `setCamera`, `hash`, ripples, sparks on paths),
+    title and end cards) and the whole "What you can build" chapter,
+    `useCaseScene()`; icons used by two or more themes are in `ICONS` in
+    `engine.js`, the others in their theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page; opens paused at a `#t=<time>` URL fragment
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
