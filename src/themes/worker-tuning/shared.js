@@ -243,6 +243,14 @@ function closedSlotCenter(i, drop) {
 const wfSlotCenter = i => [DIAGRAM.slot.left + DIAGRAM.slot.w / 2 + i * DIAGRAM.slot.pitchX, DIAGRAM.wfY];
 // Middle of Poller i of n on a lane whose middle is laneY
 const pollerY = (laneY, i, n) => laneY + (i - (n - 1) / 2) * DIAGRAM.poller.pitch;
+// Poller: a violet ring DIAGRAM.poller.size px wide (css: its place in a Worker panel or a recap part, if any)
+function makePoller(parent, css = {}) {
+  const size = DIAGRAM.poller.size + 'px';
+  return E(parent, '', '', {
+    width: size, height: size, borderRadius: '50%', border: '2px solid ' + C.violet, background: 'var(--surface)',
+    ...css,
+  });
+}
 
 // ---------- task flows: chips from a lane through a Poller into a Slot
 // A flow is a stream of tasks, a pure function of time: { lane, from, every, count, hold, slots, icon, freeAhead }.
@@ -536,10 +544,7 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
   const pollLine = () => path(dg.svg, 'M 0 0 L 1 0', C.violet, 2, false, '5,7');
   const { max } = DIAGRAM.poller;
   dg.pollLines = { wf: Array.from({ length: max.wf }, pollLine), act: Array.from({ length: max.act }, pollLine) };
-  const poller = () => E(root, '', '', {
-    width: DIAGRAM.poller.size + 'px', height: DIAGRAM.poller.size + 'px', borderRadius: '50%',
-    border: '2px solid ' + C.violet, background: 'var(--surface)',
-  });
+  const poller = () => makePoller(root);
   dg.pollers = { wf: Array.from({ length: max.wf }, poller), act: Array.from({ length: max.act }, poller) };
   // chips in flight, reused in turn
   dg.flying = {
@@ -1105,10 +1110,7 @@ function makePollerPart(box) {
     + `<path d="M 2 17 L 52 17" stroke="${C.violet}" stroke-width="2" stroke-linecap="round"`
     + ' stroke-dasharray="5,7"/></svg>');
   box.line = box.querySelector('path');
-  E(box, '', '', {
-    left: RECAP_POLLER_X - DIAGRAM.poller.size / 2 + 'px', top: '6px', width: '22px', height: '22px',
-    borderRadius: '50%', border: '2px solid ' + C.violet, background: 'var(--surface)', opacity: 1,
-  });
+  makePoller(box, { left: RECAP_POLLER_X - DIAGRAM.poller.size / 2 + 'px', top: '6px', opacity: 1 });
 }
 // - a WORKFLOW CACHE cell, of the diagram's size, in the middle, holding the order of the first cell as chapter 6
 //   leaves the cache

@@ -79,10 +79,8 @@
       opacity: 1,
     }));
     const size = DIAGRAM.poller.size;
-    E(panel, '', '', {
-      left: (INSIDE.pollerX - size / 2 - inset) + 'px', top: (INSIDE.row - size / 2 - inset) + 'px',
-      width: size + 'px', height: size + 'px', borderRadius: '50%', border: '2px solid ' + C.violet,
-      background: 'var(--surface)', opacity: 1,
+    makePoller(panel, {
+      left: (INSIDE.pollerX - size / 2 - inset) + 'px', top: (INSIDE.row - size / 2 - inset) + 'px', opacity: 1,
     });
     panel.insertAdjacentHTML('beforeend',
       `<div class="lbl" style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${GAUGE.labelTop - inset}px;`
