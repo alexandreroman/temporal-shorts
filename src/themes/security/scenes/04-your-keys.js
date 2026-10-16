@@ -20,10 +20,12 @@
   // over; the Web UI comes back, in ciphertext, in the middle of the history's right
   const T1 = { fly: 0.2, flyD: 1.2, flip: 0.15, webui: 2.0 };
   // from c[2]: the Search Attributes strip rises in under the Web UI, which moves up to make room (strip, stripD),
-  // its two attributes pop in, a light sweeps across them, their tag pops in; then an IBAN tries to join them and is
-  // struck out (secret, strike, secretOut)
+  // its two attributes pop in, the Workflow ID as "Workflow IDs" is read (attrs), a light sweeps across them, their tag
+  // pops in just after "in clear"; then an IBAN tries to join them and is struck out (secret, strike, secretOut), out
+  // by "keep secrets"; each word at its position at 16 characters per second plus 0.3 s
   const T2 = {
-    strip: 0.2, stripD: 0.5, attrs: 0.6, sweep: 1.3, sweepD: 0.8, tag: 1.9, secret: 2.8, strike: 3.4, secretOut: 4.6,
+    strip: 0.2, stripD: 0.5, attrs: [0.6, 1.7], sweep: 2.4, sweepD: 0.8, tag: 3.0, secret: 3.9, strike: 4.5,
+    secretOut: 5.7,
   };
   // from c[3]: the camera pulls back to the whole lane as the Worker steps aside and the Web UI moves into your
   // environment as a browser (move, moveD); the Codec Server pops in; the payload goes down to it in ciphertext and
@@ -84,7 +86,9 @@
     subs: [
       { text: "A <b>Data Converter</b> encrypts the payload inside the Worker, with your keys, before it leaves." },
       { text: "Temporal stores and passes on only ciphertext: it never sees the IBAN." },
-      { text: "<b>Search Attributes</b> stay in clear, so Temporal can index them: keep secrets out of them." },
+      {
+        text: "<b>Search Attributes</b> and Workflow IDs stay in clear, so Temporal can index them: keep secrets out.",
+      },
       // the round trip, then a hold to read it before the pull-back
       {
         text: "To read payloads in the Web UI, a <b>Codec Server</b> you run decrypts them for your browser.",
@@ -113,7 +117,7 @@
         + `<span class="attr" style="position:absolute;left:16.5px;top:41.5px">`
         + `${attribute('TransferStatus', 'DEBITED')}</span>`
         + '<div style="position:absolute;left:16.5px;top:75.5px;display:flex;gap:6px">'
-        + `<span class="attr">${attribute('Region', 'EU')}</span>`
+        + `<span class="attr">${attribute('WorkflowId', 'tx-8812')}</span>`
         + `<span class="secret" style="position:relative">${attribute('iban', 'FR76',
           `border:1px dashed ${C.red};color:${C.red}`)}`
         + `<i class="strike" style="position:absolute;left:6px;right:6px;top:13px;height:2px;background:${C.red};`
@@ -279,7 +283,7 @@
       // it leaves with the close layout, as TEMPORAL narrows back
       rise(s.strip, STRIP.x, STRIP.y, stripIn * (1 - wide) * done);
       s.strip.attrs.forEach((e, i) => {
-        const pop = backPop(t, c[2] + T2.attrs + i * 0.2, 0.4);
+        const pop = backPop(t, c[2] + T2.attrs[i], 0.4);
         popScale(e, pop);
       });
       const sweep = P(t, c[2] + T2.sweep, T2.sweepD, linear);

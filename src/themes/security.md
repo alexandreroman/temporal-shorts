@@ -40,9 +40,9 @@ anyone who can read the history.
 
 A Data Converter encrypts the payload inside the Worker, with your keys, before
 it leaves. Temporal stores and passes on only ciphertext: it never sees the
-IBAN. Search Attributes stay in clear, so Temporal can index them: keep secrets
-out of them. To read payloads in the Web UI, a Codec Server you run decrypts
-them for your browser.
+IBAN. Search Attributes and Workflow IDs stay in clear, so Temporal can index
+them: keep secrets out. To read payloads in the Web UI, a Codec Server you run
+decrypts them for your browser.
 
 ## Chapter 5: The same work in every Worker
 
@@ -63,7 +63,7 @@ the full Namespace name.
 
 ## Chapter 7: Encryption without code changes
 
-[Watch from 2:14](/themes/security/#t=134)
+[Watch from 2:15](/themes/security/#t=135)
 
 The proxy can also encrypt every payload on its way out, with no change to
 Worker code. Payloads are sealed with short-lived data keys, wrapped by a key
@@ -73,7 +73,7 @@ decrypted payloads.
 
 ## Chapter 8: Change Temporal, not your code
 
-[Watch from 2:43](/themes/security/#t=163)
+[Watch from 2:44](/themes/security/#t=164)
 
 Point the proxy at Temporal Cloud instead of your own Service: Workers don't
 change.
@@ -89,7 +89,7 @@ travel over mTLS, and your Data Converter still encrypts the payloads.
 
 ## Chapter 10: Audited and certified
 
-[Watch from 3:15](/themes/security/#t=195)
+[Watch from 3:16](/themes/security/#t=196)
 
 Temporal Cloud is SOC 2 Type 2 certified and compliant with HIPAA, GDPR and
 CCPA. Third parties audit and pen test it every year: audit results are in the
@@ -104,7 +104,7 @@ need no secrets.
 
 ## Chapter 12: What you can build
 
-[Watch from 3:39](/themes/security/#t=219)
+[Watch from 3:40](/themes/security/#t=220)
 
 A bank transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -112,6 +112,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 3:53](/themes/security/#t=233)
+[Watch from 3:54](/themes/security/#t=234)
 
 With Temporal, your code, your keys and your data stay yours.

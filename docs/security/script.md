@@ -119,6 +119,13 @@ recap.
   ("No inbound connectivity, ever").
 - Search Attributes are not encrypted, so the service can index them:
   <https://docs.temporal.io/production-deployment/temporal-proxy/encrypt-payloads>.
+  Workflow IDs too: "Workflow Ids are stored in plain text, are not
+  processed by a custom Payload Codec"
+  (<https://docs.temporal.io/workflow-execution/workflowid-runid>). Failure
+  messages and call stacks are another caveat the video leaves out:
+  "Failure messages and call stacks are not encoded as codec-capable
+  Payloads by default"
+  (<https://docs.temporal.io/production-deployment/data-encryption>).
 - Temporal Proxy: <https://docs.temporal.io/production-deployment/temporal-proxy>
   and <https://github.com/temporalio/temporal-proxy>: a gRPC proxy between
   Workers, SDK clients, the Web UI and one or more upstream Temporal
@@ -264,12 +271,13 @@ recap.
     in ciphertext; READABLE flips over into a violet NEVER SEES YOUR
     PAYLOADS, and the Web UI comes back in the middle of the right column
     showing the same ciphertext.
-- **1:19** Search Attributes stay in clear, so Temporal can index them:
-  keep secrets out of them.
+- **1:19** Search Attributes and Workflow IDs stay in clear, so Temporal
+  can index them: keep secrets out.
   - Visuals: The Web UI moves up as a SEARCH ATTRIBUTES panel in clear
-    rises in under it: `TransferStatus = DEBITED` and `Region = EU`, a
-    light sweep across them, then a slate INDEXED, NOT ENCRYPTED tag; a
-    red dashed `iban = FR76` slides in beside them and is struck out.
+    rises in under it: `TransferStatus = DEBITED`, then `WorkflowId =
+    tx-8812` as Workflow IDs are named, a light sweep across them, then a
+    slate INDEXED, NOT ENCRYPTED tag; a red dashed `iban = FR76` slides in
+    beside them and is struck out.
 - **1:26** To read payloads in the Web UI, a Codec Server you run decrypts
   them for your browser.
   - Visuals: The camera pulls back to the whole lane; the Worker, the wire
@@ -293,7 +301,7 @@ recap.
     CERTIFICATE, API KEY, CODEC. Each Worker draws its own connection
     through the channel between the rows to TEMPORAL, where a CONNECTIONS
     list adds one VERIFIED row per Worker (worker-1 · Go, and so on).
-- **1:40** Rotate a certificate or a key, and every Worker must pick it up.
+- **1:41** Rotate a certificate or a key, and every Worker must pick it up.
   - Visuals: A ROTATE pill sweeps across the fleet; each Worker flashes
     neon as it passes, an UPDATE panel flipping over its CERTIFICATE and
     API KEY chips.
