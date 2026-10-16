@@ -524,7 +524,8 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 //   #1042, #1043...; grow { from, at }: the strip widens; filledAt [at, every]: cell i fills at at + i * every
 //   (default: filled); hits [[cell, at]]: the cell flashes; evictions [{ cell, at, next }]: its order slides out in
 //   red and order `next` takes its place
-// - cpu: 0 to 100 (red from 90); mem: { use, gb, swapAt }, the share used (red from 0.9), the size shown in GB
+// - cpu: 0 to 100 (red from 90); cpuTop: the CPU meter's top (default DIAGRAM.meter.top.cpu; chapter 6 moves it
+//   down to the MEMORY meter's place); mem: { use, gb, swapAt }, the share used (red from 0.9), the size shown in GB
 //   (1 shows '1 GB') and when it last changed (a swell)
 // - backlog: { n, trend }, the BACKLOG count (default: the Activity lane's queue, as the backlog metrics count each
 //   task type on its own) and its trend, 'up' (red) or 'down' (neon); wait: { text, trend }, the SCHEDULE-TO-START
@@ -834,7 +835,8 @@ function placeBottomBand(dg, t, state, show) {
   });
   const cpu = state.cpu ?? 0;
   setMeter(dg.cpu, cpu / 100, Math.round(cpu) + '%', cpu >= 90);
-  place(dg.cpu, meter.left + meter.w / 2, meter.top.cpu + meter.h / 2, 1, show('cpu'));
+  const cpuTop = state.cpuTop ?? meter.top.cpu;
+  place(dg.cpu, meter.left + meter.w / 2, cpuTop + meter.h / 2, 1, show('cpu'));
   const mem = state.mem ?? {};
   const use = mem.use ?? 0.3;
   const size = mem.gb === undefined ? '' : mem.gb + ' GB';
@@ -895,9 +897,9 @@ function placeMarks(dg, t, state, layout) {
     left: cache.left - pad, top: DIAGRAM.wfY - cache.h / 2 - pad,
     w: (cells - 1) * cache.pitch + cache.w + 2 * pad, h: cache.h + 2 * pad,
   }, 'above-right', marks.cache, cache.left + dg.labels.cache.offsetWidth + 20);
-  // the CPU meter, the outline on its own border: a tile needs no room round it, and the gutter beside it stays clear
-  // for the poll line of Workers B and C (chapter 6)
-  placeMark(dg.marks.cpu, t, { left: meter.left, top: meter.top.cpu, w: meter.w, h: meter.h }, 'astride', marks.cpu);
+  // the CPU meter, the outline on its own border: a tile needs no room round it
+  const cpuTop = state.cpuTop ?? meter.top.cpu;
+  placeMark(dg.marks.cpu, t, { left: meter.left, top: cpuTop, w: meter.w, h: meter.h }, 'astride', marks.cpu);
 }
 
 // ---------- mini Worker (intro, outro): a WORKER panel holding a small grid of Activity Slots

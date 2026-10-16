@@ -2,9 +2,11 @@
 // Starts on chapter 5's last frame (a hard cut), the cache grown to 7 cells. renderInvoice tasks fill the queue and
 // the Slots in a wave, the CPU pins at 100% in red and gets a BOTTLENECK tag; tasks come in slowly and a few Slots stay
 // free, and a temporal_activity_execution_latency metric line climbs in red under the readouts. The code card fades
-// out: a dashed "+ SLOTS" ghost rises in its place and is struck through. Then WORKER B and WORKER C slide in, each
-// with its own Poller, Slots and CPU meter, their Pollers joined to the Activity lane by a poll line that branches off
-// the trunk of Worker A's; tasks fly to them along it, the three CPU meters settle around 60%, the execution latency
+// out: a dashed "+ SLOTS" ghost rises in its place and is struck through. Then the MEMORY meter leaves, the CPU meter
+// moves down into its place, and WORKER B and WORKER C slide in, each with its own Poller, Slots and CPU meter, their
+// Pollers joined to the Activity lane by a poll line that carries on down the trunk of Worker A's, runs under Worker
+// A's panel and drops down a corridor between the CPU meter and their panels; tasks fly to them along it, small
+// enough to keep clear of the parts beside it, the three CPU meters settle around 60%, the execution latency
 // falls back in neon, the tag turns FIXED, and the backlog drains to 0. Last, the move into the recap: the four
 // bottleneck components (the Activity Slot grid, the Activity Pollers, the Workflow cache, the CPU meter) shrink into
 // the small parts that start the rows of chapter 7's table, at their places, while the rest of the diagram, the
@@ -18,22 +20,35 @@
   // the "+ SLOTS" ghost fills the code card's place, as the "+ WORKER" ghost of chapter 1 does
   const GHOST = { left: code.left, top: band.top, w: code.w, h: band.h, label: 30 };
   const GHOST_X = GHOST.left + GHOST.w / 2, GHOST_Y = GHOST.top + GHOST.h / 2;
-  // Workers B and C: panels in the code card's column, as high as the meters beside them (B level with the CPU
-  // meter, C with the MEMORY one). Inside, on a row `row` px below the panel's top, 20 px above its bottom: a Poller
-  // under the gear, 5 Slots of the diagram's size from under the name (x 1186..1554), and a CPU gauge on the panel's
-  // right padding line (x 1594..1776, the right edge of Worker A's Slots)
+  // Workers B and C: two panels stacked a zone apart in the bottom band (y 632..736 and 776..880), from x 1190 to
+  // the right edge, so that their Slots sit on Worker A's Slot columns 3 to 7 (x 1256..1624) and a corridor of 90 px
+  // separates them from the CPU meter. Inside, on a row `row` px below the panel's top, a cell under the header's
+  // gear (y 20..50): a Poller on the padding line, 5 Slots of the diagram's size a gutter after it, and a CPU gauge a
+  // zone after them, up to the panel's right padding line (x 1664..1776, the right edge of Worker A's Slots)
+  const NEW_H = (band.h - GRID.zone) / 2;
   const NEW = {
-    left: code.left, w: code.w, h: meter.h, tops: [meter.top.cpu, meter.top.mem], names: ['WORKER B', 'WORKER C'],
+    left: 1190, w: 610, h: NEW_H, tops: [band.top, band.top + NEW_H + GRID.zone], names: ['WORKER B', 'WORKER C'],
   };
-  const INSIDE = { row: 78, pollerX: GRID.pad + 11, slotLeft: 66, slots: 5, cpuLeft: 474, cpuW: 182 };
+  const INSIDE = { row: 78, pollerX: GRID.pad + 11, slotLeft: 66, slots: 5, cpuLeft: 474, cpuW: 112 };
+  // the CPU meter moves down to the MEMORY meter's place once that one has left, making room for the poll line of B
+  // and C
+  const CPU_TOP = { from: meter.top.cpu, to: meter.top.mem };
   const newSlotX = k => NEW.left + INSIDE.slotLeft + slot.w / 2 + k * slot.pitchX;
   const portY = w => NEW.tops[w] + INSIDE.row;
-  // the poll line of B and C: from the Activity lane down the trunk of Worker A's poll lines (x 840), on down to C's
-  // row, along it under the CPU meter (where the MEMORY meter was) to a collector in the gutter before the panels
-  // (x 1110), then on into C's Poller, or up the collector into B's
-  const BUS = { collector: NEW.left - GRID.gutter / 2, pollerX: NEW.left + INSIDE.pollerX };
-  // a task flies to B or C in FLY s, along the poll line; the first one leaves TASKS.first s after the line shows
+  // the poll line of B and C keeps CLEAR px from every part it does not join: from the Activity lane down the trunk
+  // of Worker A's poll lines (x 840) to y 616, CLEAR px under Worker A's panel, along it to a collector in the middle
+  // of the corridor between the CPU meter and the panels (x 1145), down the collector, then into B's or C's Poller
+  const CLEAR = 24;
+  const BUS = {
+    runY: DIAGRAM.worker.top + DIAGRAM.worker.h + CLEAR,
+    collector: (meter.left + meter.w + NEW.left) / 2,
+    pollerX: NEW.left + INSIDE.pollerX,
+  };
+  // a task flies to B or C in FLY s, along the poll line, shrinking to CHIP_SCALE as it leaves the lane: 28 px, it
+  // passes the 40 px gap between the TEMPORAL and WORKER panels with room on both sides; the first one leaves
+  // TASKS.first s after the line shows
   const FLY = 1.4;
+  const CHIP_SCALE = 0.7;
   const TASKS = { first: 0.4, every: 1.0, hold: 3.2 };
   // the orders in the 7 cache cells as chapter 5 ends, set before the scene starts so that no eviction shows
   const CACHED = Array.from({ length: DIAGRAM.cache.max }, (_, cell) => ({
@@ -52,13 +67,12 @@
   };
   const LINES_OUT = 0.3;
 
-  // The points of the poll line from the Activity lane's end to the Poller of Worker w: A's route to the trunk, down
-  // to C's row, then into C's Poller, or along C's row to the collector and up into B's
+  // The points of the poll line from the Activity lane's end to the Poller of Worker w: A's route to the trunk and
+  // down it to the run under Worker A's panel, along the run to the collector, down to w's row and into its Poller
   function busRoute(w) {
-    const route = pollRoute(DIAGRAM.actY, BUS.pollerX - DIAGRAM.poller.size / 2 - 3, portY(1));
-    if (w === 1) return route;
-    const toCollector = route.slice(0, 3).concat([[BUS.collector, portY(1)], [BUS.collector, portY(w)]]);
-    return toCollector.concat([[route[3][0], portY(w)]]);
+    const trunk = pollRoute(DIAGRAM.actY, DIAGRAM.trunkX, BUS.runY).slice(0, 3);
+    const pollerLeft = BUS.pollerX - DIAGRAM.poller.size / 2 - 3;
+    return [...trunk, [BUS.collector, BUS.runY], [BUS.collector, portY(w)], [pollerLeft, portY(w)]];
   }
   // The path of a task from the head of the Activity lane to Slot k of Worker w, as points: along the poll line, then
   // on along the Slot row
@@ -150,7 +164,7 @@
     const cache = dg.cache.map((cell, i) => [
       cell, [cacheCellLeft(i) + DIAGRAM.cache.w / 2, DIAGRAM.wfY], recapPartCenter(2), 1, i === 0,
     ]);
-    const meterAt = [meter.left + meter.w / 2, meter.top.cpu + meter.h / 2];
+    const meterAt = [meter.left + meter.w / 2, CPU_TOP.to + meter.h / 2];
     const cpu = [[dg.cpu, meterAt, recapPartCenter(3), RECAP_PART.w / meter.w, true]];
     return [slots, pollers, cache, cpu];
   }
@@ -204,6 +218,8 @@
       // queue empties; last, the move into the recap
       const pinAt = c[0] + 0.8;
       const strikeAt = c[1] + 1.6;
+      // the MEMORY meter is gone at c[2] + 0.6, as the CPU meter moves down into its place
+      const cpuMoveAt = c[2] + 0.6;
       const arriveAt = [c[2] + 0.8, c[2] + 1.2];
       const busAt = c[2] + 1.6;
       const drainFrom = c[2] + 2.4, drainEnd = c[3] + 3.0;
@@ -252,6 +268,7 @@
         pollers: { act: 5 },
         cache: { cells: DIAGRAM.cache.max, evictions: CACHED },
         cpu: start.cpu + 12 * P(t, pinAt, 1.2) - 40 * P(t, drainFrom, 1.8),
+        cpuTop: Math.round(lerp(CPU_TOP.from, CPU_TOP.to, P(t, cpuMoveAt, 0.6))),
         mem: { use: start.mem, gb: start.gb },
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
@@ -306,7 +323,9 @@
             setChipIcon(chip, taskIconName);
             const u = ease((t - leaveAt) / FLY);
             const [x, y] = pointAlong(taskPath(headX, w, cell), u);
-            place(chip, x, y, 1 - 0.2 * P(u, 0.85, 0.15, linear), 1);
+            // the chip shrinks from the head of the lane to the trunk, past which its route only goes right or down
+            const scale = lerp(1, CHIP_SCALE, P(x, headX, DIAGRAM.trunkX - headX, linear));
+            place(chip, x, y, scale, 1);
           }
         }
       }
