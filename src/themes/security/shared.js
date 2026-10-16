@@ -531,10 +531,14 @@ function placeNamespaces(ns, split, lit = 0, seals = [0, 0], o = 1) {
   });
 }
 
-// Centers the label of a statusTag (src/shared.js): its letter spacing also trails its last letter, so its left
-// padding gets as much
-function balanceTagLabel(e) {
-  e.style.paddingLeft = 'calc(10px + .1em)';
+// Centers the label of a statusTag (src/shared.js) of kind `kind` in its box, this theme's tags only (pad: the tag's
+// side padding). The letter spacing also trails the last letter: a label alone gets as much extra left padding, while
+// the margin round a leading icon's stroke inside its viewBox already offsets it. The 1-2 px that setStatus() adds to
+// round the width up to an even number go to both sides, not only to the right. Call it before setStatus(), which
+// measures the width.
+function balanceTagLabel(e, kind, pad = '10px') {
+  e.style.paddingLeft = STATUS_KINDS[kind].icon ? pad : `calc(${pad} + .1em)`;
+  e.style.justifyContent = 'center';
 }
 // The red alarm look of this theme's verdicts (UNREADABLE, REJECTED, READABLE; IN CLEAR in its pill): a solid red
 // fill under dark bold text, which reads at a glance. A statusTag kind of this theme only, so other themes keep theirs.
@@ -590,7 +594,10 @@ function makeStoredHistory(root) {
     w: HIST.w, h: HIST.h, font: HIST_ROW.font, rowH: HIST_ROW.h, rowTop: i => HIST_ROW.tops[i],
     tagTop: i => HIST_ROW.tops[i] + (HIST_ROW.h - 24) / 2, tagRight: 20, tag: { font: 12, icon: 12 },
   });
-  card.tags.forEach(tag => { tag.style.height = '24px'; });
+  card.tags.forEach(tag => {
+    tag.style.height = '24px';
+    balanceTagLabel(tag, 'saved');
+  });
   card.insertAdjacentHTML('beforeend', historyEmptyNote());
   card.empty = card.querySelector('.empty');
   card.chip = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
@@ -615,11 +622,10 @@ function placeStoredHistory(card, { grow = 1, o = 1, rows = [1, 1, 1], saved = [
   place(card.chip, HIST_CHIP.x + dx, HIST_CHIP.y, HIST_CHIP.k, chip);
 }
 // The verdict tag on the payload chip (statusTag, 30 px high, so it centers on whole pixels; 13 px, so its longest
-// label leaves the chip's corners clear); setChipVerdict() sets it
+// label leaves the chip's corners clear); setChipVerdict() sets and centers it
 function makeChipVerdict(root) {
   const e = statusTag(root, { font: 13, icon: 13 });
   e.style.height = '30px';
-  balanceTagLabel(e);
   return e;
 }
 // The opaque fill of each verdict kind: the tag straddles the chip's edge, which must not show through it
@@ -628,6 +634,7 @@ const VERDICT_FILL = { alarm: C.red, wait: 'var(--violet-solid)' };
 // scale and opacity, flip, its height as it flips over (1 flat on the chip, 0 edge on), and close, the chip's slide
 // (closeDx)
 function setChipVerdict(e, label, kind, { s = 1, o = 1, flip = 1, close = 0 } = {}) {
+  balanceTagLabel(e, kind);
   if (kind === 'alarm') {
     setAlarmTag(e, label);
   } else {
@@ -682,29 +689,31 @@ function setWebUI(win, { scramble = 0, red = 0 } = {}) {
 
 // ---------- the Data Converter (chapter 4)
 // The Data Converter in your environment, between the Worker panel and the environment's right edge, at camera rest:
-// its tile (the key and its labels) above the gate that the payload card passes through, level with the card in the
-// Worker; the tile's top and the gate's bottom in line with the Worker panel's. x: their center; tile and gate: each
-// one's center y and size.
+// its tile (the key and its labels) and, hanging from the tile's bottom edge down to the Worker panel's bottom edge,
+// the gate that the payload card passes through; the tile's top in line with the Worker panel's. x: their center
+// line; tile: its center y and size; gate: its top and bottom y and its width.
 const CONVERTER = {
   x: (LANE.worker.x + LANE.worker.w / 2 + LANE.env.x + LANE.env.w) / 2,
   tile: { y: LANE.worker.y - LANE.worker.h / 2 + 45, w: 200, h: 90 },
-  gate: { y: PAYLOAD_IN_WORKER.y, h: 2 * (LANE.worker.y + LANE.worker.h / 2 - PAYLOAD_IN_WORKER.y) },
 };
+CONVERTER.gate = { top: CONVERTER.tile.y + CONVERTER.tile.h / 2, bottom: LANE.worker.y + LANE.worker.h / 2, w: 2 };
 
 // ---------- the fleet of Workers (chapters 5 to 8)
 // The fleet layout, in stage px, sized for chapter 4's wide shot (WIDE_SHOT, 0.88), which frames stage x 5-1915 and
 // y 100-930 as the content frame x 120-1800, y 150-880: the zones grow to y 150-880 (y, h; on screen y 193-836).
 // env and temporal: the zones' left edge and width in chapter 5, YOUR ENVIRONMENT holding the Workers and TEMPORAL
 // wide enough for a card; proxyEnv and proxyTemporal: from chapter 6, the environment wider, its right edge on the
-// proxy box (PROXY), and TEMPORAL narrower, at the right end. The tiles (tile: their size, the lane's Worker panel at
-// 0.75) sit in a grid of two rows (rows: their center y) and up to four columns (cols: their center x): the Workers
-// in the first three, the SDK client and the Web UI in the fourth (chapter 6 on). Between the rows runs the channel,
-// on the wire's line, where each tile's connection has a track of its own, `track` px from the next (fleetLinkD).
+// proxy box (PROXY), and TEMPORAL narrower, at the right end. The tiles (tile: their size, about the lane's Worker
+// panel at 0.75) sit in a grid of two rows (rows: their center y) and up to four columns (cols: their center x):
+// the Workers in the first three, the SDK client and the Web UI in the fourth (chapter 6 on). Between the rows runs
+// the channel, on the wire's line, where each tile's connection has a track of its own, `track` px from the next
+// (fleetLinkD). The environment's left edge leaves the Workers as much room on their left as chapter 5's right edge
+// on their right; the zones' widths are even (lerpZone).
 const FLEET = {
   y: 150, h: 730,
-  env: { x: 20, w: 990 }, temporal: { x: 1240, w: 660 },
-  proxyEnv: { x: 20, w: 1410 }, proxyTemporal: { x: 1680, w: 220 },
-  tile: { w: 296, h: 276 },
+  env: { x: 17, w: 990 }, temporal: { x: 1240, w: 660 },
+  proxyEnv: { x: 17, w: 1414 }, proxyTemporal: { x: 1680, w: 220 },
+  tile: { w: 296, h: 262 },
   rows: [353, 677],
   cols: [192, 512, 832, 1152],
   track: 6,
@@ -756,9 +765,9 @@ function addLogoInkFilter() {
 // The four chips a Worker carries in chapter 5, top to bottom: icon and label
 const WORKER_CHIPS = [['globe', 'Address'], ['badge', 'Certificate'], ['key', 'API key'], ['lock', 'Codec']];
 // Inside a Worker tile, px from its top: the chips' slots (chipTop, chipH apart by chipGap), inset px from its sides;
-// the two lines of chapter 6 take the first two slots. At 0.88, the chips' labels render at 16.7 px, the lines at
-// 18.5 px.
-const WORKER_TILE = { chipTop: 100, chipH: 34, chipGap: 6, inset: 20 };
+// the two lines of chapter 6 take the first two slots. The last chip ends about as far above the tile's bottom as
+// the gear sits under its top. At 0.88, the chips' labels render at 16.7 px, the lines at 18.5 px.
+const WORKER_TILE = { chipTop: 96, chipH: 34, chipGap: 5, inset: 20 };
 const workerSlotTop = i => WORKER_TILE.chipTop + i * (WORKER_TILE.chipH + WORKER_TILE.chipGap);
 // A Worker tile of the fleet (FLEET.tile) for worker (WORKERS): the gear and WORKER, the language tag with its logo
 // (tile.langTag), then its four chips (tile.chips, hidden) and two code lines in the first two slots (tile.lines,
@@ -843,9 +852,10 @@ const WORKER_LINES = ['proxy:7233', 'payments'];
 const FULL_NS = 'payments.a1b2c';
 // How long the light takes to run along a connection to or from the proxy, seconds
 const PROXY_FLOW_PERIOD = 2.0;
-// Where a tag about the Workers sits in the fleet layout, centered under them (NO SECRETS, WORKERS UNCHANGED)
+// Where a tag about the Workers sits in the fleet layout, centered under them, between their bottom row and your
+// environment's bottom edge (NO SECRETS, WORKERS UNCHANGED): its center and height
 const UNDER_WORKERS = {
-  x: (WORKERS[0].x + WORKERS[2].x) / 2, y: (FLEET.rows[1] + FLEET.tile.h / 2 + FLEET.y + FLEET.h) / 2,
+  x: (WORKERS[0].x + WORKERS[2].x) / 2, y: (FLEET.rows[1] + FLEET.tile.h / 2 + FLEET.y + FLEET.h) / 2, h: 32,
 };
 // The TLS tube that the proxy adds on the way out (chapters 6 and 7): from the box's right edge to 12 px inside
 // TEMPORAL, on the wire's line, high enough to hold the card and its tags; its label above it
@@ -854,13 +864,13 @@ PROXY_TUBE.label = { x: (PROXY_TUBE.x0 + PROXY_TUBE.x1) / 2, y: PROXY_TUBE.y - P
 // The card that goes through the proxy in chapter 6, a lane-size card at scale k, with its Namespace tag straddling
 // its bottom edge and the API KEY under it (tagH: their height; nsW and keyW: their widths; tagGap: the gap between
 // them); h: its height on the stage; keyDy: from its center to the API KEY's
-const PROXY_CARD = { w: PAYLOAD_IN_WORKER.w, k: 0.45, tagH: 28, nsW: 172, keyW: 124, tagGap: 6 };
+const PROXY_CARD = { w: PAYLOAD_IN_WORKER.w, k: 0.45, tagH: 28, nsW: 156, keyW: 124, tagGap: 6 };
 PROXY_CARD.h = payloadLayout(PROXY_CARD.w).h * PROXY_CARD.k;
 PROXY_CARD.keyDy = PROXY_CARD.h / 2 + PROXY_CARD.tagH / 2 + PROXY_CARD.tagGap + PROXY_CARD.tagH;
 // The payments Namespace inside TEMPORAL that the card goes into in chapter 6: its center and size; card: where the
-// card rests in it, under its name
-const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 250 };
-PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 64 + PROXY_CARD.h / 2 };
+// card rests in it, under its name, its padlock clear of the name
+const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 266 };
+PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 80 + PROXY_CARD.h / 2 };
 // The payments Namespace band (PROXY_BAND), labelled with its full name at its top left
 const makeProxyBand = root => E(root,
   '<div style="position:absolute;left:16.5px;top:12.5px">'
@@ -869,10 +879,11 @@ const makeProxyBand = root => E(root,
   '', {
     width: PROXY_BAND.w + 'px', height: PROXY_BAND.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)',
   });
-// A small tag beside the card (PROXY_CARD): a fixed width w, its HTML centered, in the violet look
+// A small tag beside the card (PROXY_CARD): a fixed width w, its HTML centered, in the violet look; 15 px (18 px on
+// screen in chapter 6's shot), so the full Namespace name leaves room on both sides in its band
 const proxyCardTag = (root, html, w) => E(root, html, 'mono', {
   width: w + 'px', height: PROXY_CARD.tagH + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  gap: '6px', fontSize: '16px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1.5px solid ${C.violet}`,
+  gap: '6px', fontSize: '15px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1.5px solid ${C.violet}`,
   borderRadius: 'var(--rs)', background: 'var(--violet-solid)',
 });
 // The Namespace tag's text: the full name's room always laid out (the tag's font is monospace), its first `shown`
@@ -964,10 +975,10 @@ function tubeWhip(u) {
 // Converter (CONVERTER). lane: the lane's opacities (placeLane; the others are 1): the zones, pushed off the frame,
 // dimmed, their headings and the lane's history hidden, the wire back where the TLS tube was. stored: the opacity of
 // the stored Event History (placeStoredHistory, every row and SAVED tag shown, card and chip alike) and of the
-// chip's READABLE verdict; the chip is in clear and red (setPayload red: 1); all are cropped at the frame's right
-// edge. The Web UI and the viewers are gone.
+// chip's READABLE verdict; the chip is in clear and red (setPayload red: 1); all rest just past the frame's right
+// edge, so no sliver of them shows. The Web UI and the viewers are gone.
 const REWIND_HANDOFF = {
-  shot: [575, 506, 1.5],
+  shot: [555, 506, 1.5],
   lane: { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, door: 0, heads: 0 },
   stored: OFF_SHOT,
 };

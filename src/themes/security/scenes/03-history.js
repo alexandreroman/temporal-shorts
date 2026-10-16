@@ -171,7 +171,7 @@
 
       // the history takes over from the lane's (identical at that instant) and grows into its rows; the card grows
       // from its tube scale into the chip's place, where the chip takes over
-      // The close layout slides them left; the rewind dims them, cropped at the frame's edge.
+      // The close layout slides them left; the rewind dims them as it pushes them off the frame.
       const dock = P(t, dockAt, T0.d);
       const storedO = (t >= dockAt ? 1 : 0) * lerp(1, REWIND_HANDOFF.stored, away);
       const dx = closeDx(close);

@@ -127,24 +127,20 @@
       s.strip.sweep = s.strip.querySelector('.sweep');
       s.indexed = statusTag(s.strip, { font: 11, icon: 11 });
       Object.assign(s.indexed.style, { left: '16.5px', top: '109.5px', height: '24px' });
+      balanceTagLabel(s.indexed, 'closed');
       s.codec = makeKeyTile(root, ICON('server', 28, C.ink, 1.8), 'Codec Server', CODEC.w, CODEC.h);
       s.packet = E(root, '', 'mono', {
         width: '190px', height: '34px', lineHeight: '31px', textAlign: 'center', fontSize: '18px', whiteSpace: 'pre',
         background: C.bg, border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
       });
       s.converter = makeKeyTile(root, '', 'Data Converter', CONVERTER.tile.w, CONVERTER.tile.h);
-      // the gate hangs under the tile on a violet stem
-      const gateTop = CONVERTER.gate.y - CONVERTER.gate.h / 2;
-      const tileBottom = CONVERTER.tile.y + CONVERTER.tile.h / 2;
-      s.stem = path(s.lane.svg, `M ${CONVERTER.x} ${tileBottom} L ${CONVERTER.x} ${gateTop}`, C.violet, 2, false);
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
-      // a light curtain the card passes through, over it
-      s.gate = E(root,
-        `<i style="position:absolute;left:10px;top:0;bottom:0;width:4px;border-radius:2px;background:${C.violet}"></i>`,
-        '', {
-          width: '24px', height: CONVERTER.gate.h + 'px', borderRadius: '12px', transformOrigin: 'center top',
-          background: `linear-gradient(90deg,rgba(${RGB.violet},0),rgba(${RGB.violet},.3),rgba(${RGB.violet},0))`,
-        });
+      // the gate the card passes through, over it: one violet line, as thick as the lane's connections, from the
+      // tile's bottom edge to the Worker panel's
+      s.gate = E(root, '', '', {
+        width: CONVERTER.gate.w + 'px', height: CONVERTER.gate.bottom - CONVERTER.gate.top + 'px',
+        background: C.violet, transformOrigin: 'center top',
+      });
       s.rain = Array.from({ length: RAIN.n }, () => E(root, '', 'mono', { fontSize: '18px', color: C.violet }));
       s.sealRipples = makeRipples(root, 3, RGB.violet);
       s.landRipples = makeRipples(root, 2, RGB.violet);
@@ -205,12 +201,13 @@
       place(s.converter, CONVERTER.x, CONVERTER.tile.y, tilePop.s, tilePop.o * converterO);
       turnKey(s.converter, P(t, c[0] + T0.key, T0.keyD));
       s.converter.style.borderColor = t >= c[0] + T0.key ? C.violet : C.line;
+      // the gate draws down from the tile; it glows softly while the key is armed
       const gate = P(t, c[0] + T0.gate, T0.gateD);
-      draw(s.stem, P(t, c[0] + T0.gate - 0.15, 0.2), converterO);
-      place(s.gate, CONVERTER.x, CONVERTER.gate.y, 1, (gate > 0 ? 1 : 0) * converterO);
+      const { top: gateTop, bottom: gateBottom } = CONVERTER.gate;
+      place(s.gate, CONVERTER.x, (gateTop + gateBottom) / 2, 1, (gate > 0 ? 1 : 0) * converterO);
       s.gate.style.transform += ` scaleY(${gate.toFixed(3)})`;
       const armed = P(t, c[0] + T0.key, 0.3) * (1 - P(t, sealAt + 0.6, 0.6));
-      s.gate.style.boxShadow = glowShadow(RGB.violet, 0.4 + 0.6 * armed, { blur: 30, alpha: 0.7 });
+      s.gate.style.boxShadow = glowShadow(RGB.violet, armed, { blur: 12, alpha: 0.8 });
 
       // the card passes through the gate: each value turns into ciphertext as it crosses, glyphs raining off it,
       // then the lock snaps shut with violet rings; it then flies to the chip and lands on it, where the chip takes

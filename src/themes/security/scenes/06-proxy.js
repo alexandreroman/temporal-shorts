@@ -87,10 +87,13 @@
       s.landing = makeRipples(root, 2, RGB.violet);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
       s.outSparks = [0, 1].map(() => makeSpark(root, 12, RGB.violet));
-      s.noSecrets = statusTag(root, { font: 17, icon: 17 });
-      s.noSecrets.style.height = '34px';
+      // 19 px (16.7 px on screen), as WORKERS UNCHANGED in chapter 8, in the same place
+      s.noSecrets = statusTag(root, { font: 19, icon: 19 });
+      s.noSecrets.style.height = UNDER_WORKERS.h + 'px';
+      balanceTagLabel(s.noSecrets, 'ok');
       s.credentials = statusTag(root, { font: 15, icon: 15 });
       s.credentials.style.height = '30px';
+      balanceTagLabel(s.credentials, 'wait');
       // the card and its tags, over the proxy and the tube
       s.card = makePayload(root, { w: CARD.w });
       s.ns = proxyCardTag(root, '', CARD.nsW);

@@ -177,11 +177,12 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 - **1:00** A Data Converter encrypts the payload inside the Worker, with
   your keys, before it leaves.
   - Visuals: A close shot of the Worker, the card back in it in clear. A
-    DATA CONVERTER tile (a key, YOUR KEYS) pops in beside it and lowers a
-    violet light gate on a stem. Dramatic beat: the key spins once, the
-    card passes through the gate and each value turns into ciphertext as
-    it crosses, violet glyphs raining off the gate; the lock snaps shut
-    with violet rings, and the ciphertext stays fixed.
+    DATA CONVERTER tile (a key, YOUR KEYS) pops in beside it and draws its
+    gate down, one violet line from the tile's bottom edge to the Worker's,
+    which glows softly while the key is armed. Dramatic beat: the key spins
+    once, the card passes through the gate and each value turns into
+    ciphertext as it crosses, violet glyphs raining off the gate; the lock
+    snaps shut with violet rings, and the ciphertext stays fixed.
 - **1:07** Temporal stores and passes on only ciphertext: it never sees the
   IBAN.
   - Visuals: The camera tracks the sealed card along the wire back to the
@@ -292,7 +293,8 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     sparks, a red cross, a shake) and the data key dims; a red
     hazard-striped gate drops across the tube's mouth. The next card, in
     clear, slams into the gate (a red flash, a shake) and turns red: CALL
-    FAILED; the tube goes dark and FAIL CLOSED stamps across it.
+    FAILED, in solid red; the tube goes dark and FAIL CLOSED, a solid red
+    stamp, lands across it above the wire.
 - **2:34** Its built-in Codec Server lets the Web UI and the CLI show the
   decrypted payloads.
   - Visuals: The link heals, the gate lifts and the failed card goes back

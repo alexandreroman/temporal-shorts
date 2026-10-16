@@ -65,7 +65,7 @@
       left: 'auto', right: inset + 'px', top: VERDICT.top + 'px', height: VERDICT.h + 'px',
       transformOrigin: 'right center', opacity: 0,
     });
-    balanceTagLabel(tile.verdict);
+    balanceTagLabel(tile.verdict, 'alarm');
     return tile;
   }
   // Pops an outsider's verdict in, with the label of an alarm tag (setAlarmTag), at `at`
@@ -132,7 +132,7 @@
         left: 'auto', right: '14.5px', top: 21.5 - VERDICT.h / 2 + 'px', height: VERDICT.h + 'px',
         transformOrigin: 'right center',
       });
-      balanceTagLabel(s.verified);
+      balanceTagLabel(s.verified, 'ok');
 
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
       // the beam's scan line on the tube, over the card it reads, and the glyphs it pulls down

@@ -28,16 +28,17 @@
   // inside each upstream: its icon, in the middle
   const UPSTREAM = { icon: 52 };
   // the ROUTING switch, the proxy's setting: a panel docked under the proxy box, on a short stem, where your
-  // environment is empty (on the environment's edge, as the box is): center and size; its text is 21 px (18.5 on
-  // screen)
-  const ROUTING = { x: PROXY.x, y: 765, w: 220, h: 170 };
+  // environment is empty (on the environment's edge, as the box is), as wide as the box: center and size; its label
+  // is 21 px (18.5 on screen), its options 19 px (16.7 on screen), so the longer one fits the box's width
+  const ROUTING = { x: PROXY.x, y: 765, w: PROXY.w, h: 170 };
   const STEM = { y0: PROXY.y + PROXY.h / 2, y1: ROUTING.y - ROUTING.h / 2 };
   // its track, from the panel's top left corner, and its knob's size, inset in the track and travel; its two options'
   // left edge and tops
-  const TRACK = { left: 16, top: 54, w: 30, h: 100 };
+  const TRACK = { left: 14, top: 54, w: 30, h: 100 };
   const KNOB = { size: 24, inset: 1.5 };
   KNOB.travel = TRACK.h - 3 - KNOB.size - 2 * KNOB.inset;
-  const OPTIONS = { left: 60, tops: [58, 122] };
+  // each option's line centered on a knob position
+  const OPTIONS = { left: 56, tops: [55, 125], font: 19 };
   // the sparks that fly off the self-hosted service as the connection tears off it: how many, how long each one flies
   const TEAR = { n: 8, life: 0.5 };
   // The two upstreams' titles, a pair: the official lockup at the zone's heading place (the lane's TEMPORAL heading
@@ -97,15 +98,16 @@
       // the ROUTING switch on its stem: its label, its track and knob, and its two options
       s.stem = path(s.lane.svg, `M ${PROXY.x} ${STEM.y0} V ${STEM.y1}`, C.violet, 2.5, false);
       s.routing = E(root,
-        '<div class="lbl" style="position:absolute;left:16px;top:14px;padding-left:0;font-size:21px">Routing</div>'
+        `<div class="lbl" style="position:absolute;left:${TRACK.left}px;top:14px;padding-left:0;font-size:21px">`
+        + 'Routing</div>'
         + `<div style="position:absolute;left:${TRACK.left}px;top:${TRACK.top}px;width:${TRACK.w}px;`
         + `height:${TRACK.h}px;border:1.5px solid ${C.violet};border-radius:${TRACK.w / 2}px">`
         + `<div class="knob" style="position:absolute;left:${KNOB.inset}px;top:${KNOB.inset}px;width:${KNOB.size}px;`
         + `height:${KNOB.size}px;`
         + `border-radius:50%;background:${C.violet};box-shadow:0 0 12px rgba(${RGB.violet},.8)"></div></div>`
         + ['SELF-HOSTED', 'CLOUD'].map((name, i) => `<div class="option mono" style="position:absolute;`
-          + `left:${OPTIONS.left}px;top:${OPTIONS.tops[i]}px;font-size:21px;line-height:28px;letter-spacing:.02em">`
-          + `${name}</div>`).join(''),
+          + `left:${OPTIONS.left}px;top:${OPTIONS.tops[i]}px;font-size:${OPTIONS.font}px;line-height:28px;`
+          + `letter-spacing:.02em">${name}</div>`).join(''),
         'tile', { width: ROUTING.w + 'px', height: ROUTING.h + 'px', textAlign: 'left', background: C.bg });
       s.knob = s.routing.querySelector('.knob');
       s.options = [...s.routing.querySelectorAll('.option')];
@@ -113,8 +115,10 @@
       s.headSpark = makeSpark(root, 14, RGB.violet);
       s.tearSparks = Array.from({ length: TEAR.n }, () => makeSpark(root, 6, RGB.violet));
       s.landing = makeRipples(root, 2, RGB.violet);
-      s.unchanged = statusTag(root, { font: 21, icon: 21 });
-      s.unchanged.style.height = '40px';
+      // 19 px (16.7 px on screen), as NO SECRETS in chapter 6, in the same place: clearly narrower than the tile above
+      s.unchanged = statusTag(root, { font: 19, icon: 19 });
+      s.unchanged.style.height = UNDER_WORKERS.h + 'px';
+      balanceTagLabel(s.unchanged, 'ok');
     },
     update(t, c, s) {
       const flipAt = c[0] + T0.flip, tearAt = c[0] + T0.tear, redrawAt = c[0] + T0.redraw;

@@ -8,7 +8,7 @@
 // dimmed, the next one pops in, ROTATED, makes a quick trip to the KMS to be wrapped and its bar refills. Every payload
 // that leaves is sealed with the key of the moment (1, 1, 2, 3), while the stored ones keep theirs; NEVER LEAVES on
 // the KMS key. Then the dramatic beat: the link to the KMS snaps with red sparks, a gate drops
-// at the proxy's exit, the next card slams into it in clear, CALL FAILED, and FAIL CLOSED stamps onto the empty wire.
+// at the proxy's exit, the next card slams into it in clear, CALL FAILED, and FAIL CLOSED stamps onto the empty tube.
 // The link heals, and the camera pulls back once, out of the proxy to the whole fleet (FULL_LANE_SHOT): the proxy's
 // built-in Codec Server decrypts row 2 for a CLI and the Web UI window, while TEMPORAL keeps only ciphertext. The
 // chapter clears onto chapter 8's first frame. The camera holds, then pulls back out and left, one way.
@@ -90,8 +90,10 @@
   const LINK = {
     x0: KMS.x + KMS.w / 2, y0: KMS.y + 14, x: 1304, x1: DATA_KEY.x - DATA_KEY.w / 2, y1: DATA_KEY.y, breakY: 460,
   };
-  // NO CODE CHANGE, in your environment under the connections (on screen, about 400, 720)
-  const NO_CODE = { x: 1197, y: 600 };
+  // FAIL CLOSED's center, this far above the wire's line
+  const FAIL_CLOSED_RISE = 32;
+  // NO CODE CHANGE, in your environment under the connections, centered under YOUR KMS (on screen, about 370, 720)
+  const NO_CODE = { x: KMS.x, y: 600 };
   // TEMPORAL in the close layout: its left edge and width (on screen x 1373-1790); the TLS tube shortens with it
   const CLOSE_ZONE = { x: 1602, y: FLEET.y, w: 174, h: FLEET.h };
   // TEMPORAL's list of stored payloads in the close shot, one row per card that went through, each with its wrapped
@@ -102,15 +104,21 @@
   const CLOSE_ROW = { left: CLOSE_ZONE.x + 32, right: CLOSE_ZONE.x + CLOSE_ZONE.w - 8 };
   ROW.closeK = (CLOSE_ROW.right - CLOSE_ROW.left) / ROW.w;
   const LIST_AT = { x: (CLOSE_ROW.left + CLOSE_ROW.right) / 2, label: 456, top: 482, pitch: 27 };
+  // How far the TLS tube runs into TEMPORAL: 12 px in the close shot, as in chapter 6 (PROXY_TUBE), 4 px at camera
+  // rest, where the wide list needs the room
+  const TUBE_IN = { close: PROXY_TUBE.x1 - PROXY_WIRE.x1, wide: 4 };
   // The same list at camera rest, where the message is that TEMPORAL keeps ciphertext only: larger rows of ciphertext
-  // alone (no key), spread down TEMPORAL's column under its logo, clear of the tube's mouth (x: their center; w and h:
-  // a row's size; label, top, pitch as above), and CIPHERTEXT ONLY under them (cipherY)
+  // alone (no key), spread down TEMPORAL's column under its logo, 20 px clear of the tube's mouth ring (12 px past
+  // the tube's end, see makeTube) and of the zone's right edge (x: their center; w and h: a row's size; label, top,
+  // pitch as above), and CIPHERTEXT ONLY under them (cipherY)
+  const WIDE_MOUTH = FLEET.proxyTemporal.x + TUBE_IN.wide + 12;
+  const WIDE_RIGHT = FLEET.proxyTemporal.x + FLEET.proxyTemporal.w;
   const WIDE_LIST = {
-    x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w - 12 - 88, w: 176, h: 46, label: 266, top: 344, pitch: 76,
+    x: (WIDE_MOUTH + WIDE_RIGHT) / 2, w: WIDE_RIGHT - WIDE_MOUTH - 40, h: 46, label: 266, top: 344, pitch: 76,
     cipherY: 690,
   };
   // the Codec Server, in the proxy box under its name, at camera rest: center and size
-  const CODEC = { x: PROXY.x, y: 558, w: 172, h: 136 };
+  const CODEC = { x: PROXY.x, y: 558, w: 172, h: 160 };
   // the CLI and the Web UI windows, which open over the SDK client's and the Web UI's tiles: their slots, the
   // connections they read through (in s.links) and their titles and event lines
   const READERS = [
@@ -157,10 +165,12 @@
   function closeTag(root, html, kind, font, { solid = null, icon: withIcon = true } = {}) {
     const { icon, ...look } = STATUS_KINDS[kind];
     const lead = icon && withIcon ? ICON(icon[0], font * U, icon[1], icon[2]) : '';
+    // centered, as balanceTagLabel() centers a statusTag: a label alone (icon: false) gets extra left padding for
+    // the letter spacing that trails its last letter, which the margin round a leading icon's stroke already offsets
     const e = E(root, lead + html, 'mono', {
       fontSize: px(font), lineHeight: px(font * 1.4), letterSpacing: '.1em', padding: `${px(6)} ${px(14)}`,
-      borderRadius: px(6), whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: px(8),
-      border: `${px(2)} solid`, ...look,
+      paddingLeft: withIcon ? px(14) : `calc(${px(14)} + .1em)`, borderRadius: px(6), whiteSpace: 'nowrap',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: px(8), border: `${px(2)} solid`, ...look,
     });
     if (solid) e.style.background = solid;
     return e;
@@ -316,9 +326,11 @@
         fontSize: '21px', lineHeight: '28px', width: WIDE_LIST.w + 'px', paddingLeft: '0',
       });
       s.wideRows = s.rows.map((_, i) => makeWideRow(root, i));
+      // 19 px (16.7 px on screen), so CIPHERTEXT leaves room on both sides at the rows' width
       s.cipherTag = E(root, 'Ciphertext<br>only', 'lbl', {
-        width: WIDE_LIST.w + 'px', padding: '8px 0', fontSize: '21px', lineHeight: '28px', textAlign: 'center',
-        color: C.violet, border: `1.5px solid ${C.violet}`, borderRadius: 'var(--rs)', background: VERDICT_FILL.wait,
+        width: WIDE_LIST.w + 'px', padding: '8px 0 8px .12em', fontSize: '19px', lineHeight: '26px',
+        textAlign: 'center', color: C.violet, border: `1.5px solid ${C.violet}`, borderRadius: 'var(--rs)',
+        background: VERDICT_FILL.wait,
       });
       s.kms = makeKms(root);
       s.top = svgLayer(root);
@@ -363,11 +375,17 @@
       s.fetch = makePacket(root, scrambledHtml(READER_SEEDS[0], IBAN.slice(0, 9), 1), C.violet);
       s.deliver = READERS.map(() => makePacket(root, IBAN.slice(0, 9), C.neon));
       s.noCode = closeTag(root, 'NO CODE CHANGE', 'ok', 20, { solid: 'var(--neon-solid)' });
-      s.callFailed = closeTag(root, 'CALL FAILED', 'denied', 18, { solid: 'var(--red-solid)' });
+      // at this size and place, its capitals render 2 px above the box's middle; text sits on whole stage px, so one
+      // stage px of padding moves from its bottom to its top (2.4 px on screen), which leaves them 1 px low at most
+      Object.assign(s.noCode.style, { paddingTop: `calc(${px(6)} + 1px)`, paddingBottom: `calc(${px(6)} - 1px)` });
+      // in the theme's alarm look (STATUS_KINDS.alarm), like the other red verdicts
+      s.callFailed = closeTag(root, 'CALL FAILED', 'alarm', 18);
+      s.callFailed.style.fontWeight = '700';
+      // the stamp, in the same alarm look: dark bold text on solid red
       s.failClosed = E(root, 'FAIL CLOSED', 'mono', {
-        fontSize: px(30), lineHeight: px(40), letterSpacing: '.12em', padding: `${px(10)} ${px(22)}`,
-        paddingLeft: `calc(${px(22)} + .12em)`, border: `${px(3)} solid ${C.red}`, borderRadius: px(8),
-        color: C.red, background: 'var(--red-solid)', whiteSpace: 'nowrap', fontWeight: 700,
+        fontSize: px(26), lineHeight: px(36), letterSpacing: '.12em', padding: `${px(8)} ${px(16)}`,
+        paddingLeft: `calc(${px(16)} + .12em)`, border: `${px(3)} solid ${C.red}`, borderRadius: px(8),
+        color: C.bg, background: C.red, whiteSpace: 'nowrap', fontWeight: 700,
         boxShadow: `0 0 ${px(30)} rgba(${RGB.red},.5)`,
       });
       s.sealRipples = RUNS.map(() => makeRipples(root, 2, RGB.violet));
@@ -439,7 +457,7 @@
       });
 
       // the TLS tube, as long as the way to TEMPORAL, dimmed while the call fails; its label smaller in the close shot
-      const tubeX1 = temporalZone.x + 12;
+      const tubeX1 = temporalZone.x + lerp(TUBE_IN.close, TUBE_IN.wide, wide);
       const tubeMid = (PROXY_TUBE.x0 + tubeX1) / 2;
       const tubeGeom = { ...PROXY_TUBE, x1: tubeX1, label: { x: tubeMid, y: PROXY_TUBE.label.y } };
       placeTube(s.tube, tubeGeom, {
@@ -658,13 +676,14 @@
       const gate = P(t, c[3] + T3.gate, 0.25, backOut) * (1 - P(t, healAt + 0.05, 0.25));
       place(s.gate, GATE.x, PROXY_TUBE.y, 1, gate > 0.001 ? closeOnly : 0);
       s.gate.style.transform += ` scaleY(${clamp(gate, 0, 1.2).toFixed(3)})`;
-      // CALL FAILED slams onto the failed card's bottom edge; FAIL CLOSED stamps onto the empty wire
+      // CALL FAILED slams onto the failed card's bottom edge; FAIL CLOSED stamps onto the empty tube, above the
+      // wire, its tilted ends clear of the failed card and of TEMPORAL's list
       const healed = 1 - P(t, healAt, 0.3);
       const callSlam = P(t, c[3] + T3.callFailed, T3.slamD, easeIn);
       place(s.callFailed, STOP.x, STOP.y + CARD.h / 2 + 1, lerp(1.7, 1, callSlam),
         P(t, c[3] + T3.callFailed, 0.08, linear) * healed);
       const stamp = P(t, c[3] + T3.failClosed, T3.slamD, easeIn);
-      place(s.failClosed, tubeMid, PROXY_TUBE.y, lerp(2.2, 1, stamp),
+      place(s.failClosed, tubeMid, PROXY_TUBE.y - FAIL_CLOSED_RISE, lerp(2.2, 1, stamp),
         P(t, c[3] + T3.failClosed, 0.08, linear) * healed, -8);
 
       // after the pull-back: the proxy's built-in Codec Server, and the CLI and the Web UI, which open over their

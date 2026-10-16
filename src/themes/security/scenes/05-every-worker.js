@@ -32,15 +32,16 @@
   const CODEC = 3;
   // the lane's Worker panel shrinks into the first slot at this scale (FLEET.tile is about its size there)
   const MORPH_K = 0.75;
-  // the ROTATE pill's path between the rows: from x0 to x1, on the channel's line
-  const PILL = { x0: WORKERS[0].x - 100, x1: WORKERS[2].x + 100, w: 200 };
+  // the ROTATE pill's path between the rows: from x0 to x1, on the channel's line; its size, low enough to leave
+  // the channel's edges clear (h: 36 px in a 62 px channel)
+  const PILL = { x0: WORKERS[0].x - 100, x1: WORKERS[2].x + 100, w: 200, h: 36 };
   // TEMPORAL's list of the six connections, under its logo: its label's top, the rows' top, pitch, height and width
   const LIST = { x: FLEET.temporal.x + FLEET.temporal.w / 2, label: 226, top: 256, pitch: 36, h: 32, w: 560 };
   // the payload card that goes out in clear: a larger card (its values render at 19 px at 0.88), where it lands, in
-  // TEMPORAL under the list, and the scale it leaves the Worker at
+  // TEMPORAL under the list, its padlock about 20 px clear of the last row, and the scale it leaves the Worker at
   const CARD = { w: 480, x: LIST.x, k0: 0.25 };
   CARD.h = payloadLayout(CARD.w).h;
-  CARD.y = LIST.top + WORKERS.length * LIST.pitch + 26 + CARD.h / 2;
+  CARD.y = LIST.top + WORKERS.length * LIST.pitch + 38 + CARD.h / 2;
   // the UPDATE panel, which flips over a Worker's two credential chips (CERTIFICATE and API KEY), as wide and as high
   // as both: its size and its offset from the tile's center
   const UPDATE = {
@@ -98,11 +99,15 @@
       // the forgetful Worker's empty CODEC slot, outlined in red
       s.missing = E(root, 'NO CODEC', 'mono', {
         width: UPDATE.w + 'px', height: WORKER_TILE.chipH + 'px', lineHeight: (WORKER_TILE.chipH - 3) + 'px',
-        textAlign: 'center', fontSize: '19px', letterSpacing: '.1em', color: C.red, border: `1.5px dashed ${C.red}`,
+        textAlign: 'center', fontSize: '19px', letterSpacing: '.1em', paddingLeft: '.1em', color: C.red,
+        border: `1.5px dashed ${C.red}`,
         borderRadius: 'var(--rs)', background: `rgba(${RGB.red},.1)`,
       });
-      s.pill = fixedTag(root, `${ICON('retry', 22, C.violet, 2)}Rotate`, 'violet solid', PILL.w);
-      Object.assign(s.pill.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' });
+      s.pill = fixedTag(root, `${ICON('retry', 20, C.violet, 2)}Rotate`, 'violet solid', PILL.w, PILL.h);
+      Object.assign(s.pill.style, {
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '20px',
+        lineHeight: '24px', paddingTop: '0', paddingBottom: '0',
+      });
       s.sparks = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       s.card = makePayload(root, { w: CARD.w });
       s.alarm = makeRipples(root, 2, RGB.red);
