@@ -5,8 +5,6 @@ Object.assign(ICONS, {
   db: '<ellipse cx="12" cy="5.5" rx="7.5" ry="2.5"/><path d="M4.5 5.5v13c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-13'
     + 'M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/>',
   flag: '<path d="M5 21V3M5 4h13l-3 4.5 3 4.5H5"/>',
-  // a screen over a flat base line (agent-harness's `laptop` has a keyboard)
-  laptopFlat: '<rect x="5" y="5" width="14" height="10"/><path d="M2.5 19h19"/>',
   clipboard: '<rect x="5" y="4.5" width="14" height="16.5"/><path d="M9 3h6v3H9zM8.5 13.5l2.5 2.5 4.5-5"/>',
   up: '<path d="M12 20V5M6 11l6-6 6 6"/>',
 });
