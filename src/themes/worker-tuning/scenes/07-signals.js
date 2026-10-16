@@ -67,14 +67,18 @@
   const COL = { symptom: 150, signal: 570, fix: 1194 };
   const LOOP = { top: recapRowY(ROWS.length - 1) + RECAP.rowH / 2 + GRID.zone, w: 360, h: 50, xs: [460, 960, 1460] };
   LOOP.backY = LOOP.top + LOOP.h + 36;
-  // The symptom row stands apart: a violet border at rest (the others: the line color), a glow and a WATCH FIRST
+  // The symptom row stands apart: a gradient border, a glow (FRAME), a light violet tint and a WATCH FIRST
   // badge, a violet pill as chapter 1's x10 tag in 16 px type, w x h px, astride its top border, its right edge on the
   // row's inner padding line (GRID.pad), whole pixels; small enough to end 20 px clear of the fix under it (measured)
   const BADGE = { text: 'Watch first', w: 148, h: 32 };
   BADGE.x = RECAP.left + RECAP.w - GRID.pad - BADGE.w / 2;
-  // Its glow: a soft violet halo blur px wide at opacity alpha, which fades in over `in` s once the row has its full
-  // width, then stays the same, the light included (a UV halo would show much darker), until it leaves with the row
-  const GLOW = { blur: 20, alpha: 0.3, in: 0.5 };
+  // Its frame: a border `border` px wide in the brand gradient, violet to UV from left to right, over the row's own
+  // border, and under the row a soft violet glow, blur px wide and spread px out, at alpha; both show over `in` s once
+  // the row has its full width. When the subtitle names the row, the glow swells to swellAlpha over swellUp s and eases
+  // back over swellDown s, in place of the UV border of the other rows.
+  const FRAME = { border: 2, blur: 28, spread: 2, alpha: 0.35, swellAlpha: 0.6, in: 0.4, swellUp: 0.3, swellDown: 0.8 };
+  // The symptom row's background: the tile's surface under a light violet tint
+  const SYMPTOM_BACKGROUND = `linear-gradient(rgba(${RGB.violet},.06), rgba(${RGB.violet},.06)), var(--surface)`;
   const rowTop = i => recapRowY(i) - RECAP.rowH / 2;
   // Each row grows from its part, from GROW.at + i * GROW.stagger over GROW.d s: a tile around the part (partLeft px
   // on either side) that widens to the row's full width
@@ -135,12 +139,16 @@
       });
       s.headings = [heading('Symptom', COL.symptom), heading('Signal', COL.signal), heading('Fix', COL.fix)];
       // the symptom row's glow, under the rows: an empty box of the row's full size whose outer shadow shows round
-      // the row, so it follows neither the row's width while it grows nor its fade-in; its opacity sets its strength
-      s.glow = E(root, '', '', {
-        width: RECAP.w + 'px', height: RECAP.rowH + 'px', borderRadius: 'var(--r)',
-        boxShadow: `0 0 ${GLOW.blur}px ${C.violet}`,
-      });
+      // the row, so it follows neither the row's width while it grows nor its fade-in
+      const rowBox = { width: RECAP.w + 'px', height: RECAP.rowH + 'px', borderRadius: 'var(--r)' };
+      s.glow = E(root, '', '', rowBox);
       s.rows = ROWS.map(row => makeRow(root, row));
+      s.rows[0].style.background = SYMPTOM_BACKGROUND;
+      // ... and its gradient border, over the row: a gradient box masked down to its padding ring
+      s.border = E(root, '', '', {
+        ...rowBox, padding: FRAME.border + 'px', background: `linear-gradient(90deg, ${C.violet}, ${C.uv})`,
+        mask: 'linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)',
+      });
       s.badge = fixedTag(root, BADGE.text, 'violet solid', BADGE.w, BADGE.h);
       // smaller than a pill, with less padding: it stands on the row's border, as the x10 tag
       Object.assign(s.badge.style, { fontSize: '16px', lineHeight: '22px', padding: '4px 10px 4px calc(10px + .1em)' });
@@ -183,15 +191,22 @@
         e.style.overflow = grow < 1 ? 'hidden' : '';
         showAt(e, RECAP.left + dx, rowTop(i), P(t, growAt, 0.25, linear) * (1 - out));
         const litUntil = i + 1 < litAt.length ? litAt[i + 1] : litAt[i] + 1.2;
-        const restColor = i === 0 ? C.violet : C.line;
-        e.style.borderColor = t >= litAt[i] && t < litUntil ? C.uv : restColor;
+        // the symptom row's glow swells instead (below)
+        const lit = i > 0 && t >= litAt[i] && t < litUntil;
+        e.style.borderColor = lit ? C.uv : C.line;
         // the Slot grid part grows into the outro's Worker (below); the others leave with their rows
         if (i !== GROWING) showRecapPart(s.parts[i], i, 1 - out, { dx });
       });
-      // the symptom row's glow fades in once the row has its full width and slides out with the row
-      const glowOut = rowOut(0);
-      const glowO = GLOW.alpha * P(t, GROW.at + GROW.d, GLOW.in) * (1 - glowOut);
-      showAt(s.glow, RECAP.left + Math.round(OUT.rowDx * glowOut), rowTop(0), glowO);
+      // the symptom row's frame shows once the row has its full width, its glow swells as the row is named, and both
+      // slide out with the row, on the same pixels
+      const frameOut = rowOut(0);
+      const frameO = P(t, GROW.at + GROW.d, FRAME.in) * (1 - frameOut);
+      const frameX = RECAP.left + Math.round(OUT.rowDx * frameOut);
+      const swell = P(t, litAt[0], FRAME.swellUp) * (1 - P(t, litAt[0] + FRAME.swellUp, FRAME.swellDown));
+      const alpha = lerp(FRAME.alpha, FRAME.swellAlpha, swell);
+      s.glow.style.boxShadow = `0 0 ${FRAME.blur}px ${FRAME.spread}px rgba(${RGB.violet},${alpha.toFixed(3)})`;
+      showAt(s.glow, frameX, rowTop(0), frameO);
+      showAt(s.border, frameX, rowTop(0), frameO);
       // the badge pops in as the symptom row reaches its full width, and slides out with it
       const badgeIn = popIn(t, GROW.at + GROW.d - 0.2);
       const badgeOut = rowOut(0);

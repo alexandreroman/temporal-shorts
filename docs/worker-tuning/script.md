@@ -272,14 +272,14 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   Slots, Pollers, cache or CPU.
   - Visuals: each row grows from its icon (the cache icon reads #1049, the
     order the diagram ends with). The table's first row is the symptom, set
-    slightly apart, with a violet border, a soft violet glow and a violet
-    WATCH FIRST badge astride its top border on the right: a queue-strip icon
-    (chapter 6's Activity lane shrinks into it), "Backlog grows, tasks wait",
-    the three signals stacked, `approximate_backlog_count` rising,
-    `approximate_backlog_age` older, `schedule_to_start_latency` high, and
-    "Find the full limit below"; it lights as "A growing backlog" is read.
-    Then four rows, under the SYMPTOM / SIGNAL / FIX headings, each option
-    name on a smaller line under its fix: Slots full, CPU low /
+    slightly apart, with a 2 px violet-to-UV gradient border, an even violet
+    glow and a violet WATCH FIRST badge astride its top border on the right: a
+    queue-strip icon (chapter 6's Activity lane shrinks into it), "Backlog
+    grows, tasks wait", the three signals stacked, `approximate_backlog_count`
+    rising, `approximate_backlog_age` older, `schedule_to_start_latency` high,
+    and "Find the full limit below"; its glow swells as "A growing backlog" is
+    read. Then four rows, under the SYMPTOM / SIGNAL / FIX headings, each
+    option name on a smaller line under its fix: Slots full, CPU low /
     `worker_task_slots_available` at 0 / More Slots, if downstream keeps up
     (`maxConcurrentActivityTaskExecutions`); Slots free, long wait /
     `activity_schedule_to_start_latency` high / Poller Autoscaling
