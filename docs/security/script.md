@@ -171,8 +171,8 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 - **0:25** On its way out, the payload travels over TLS, so nobody on the
   network can read it.
   - Visuals: The same close framing, the door gone. A neon glass tube
-    labelled TLS draws from the Worker into TEMPORAL around the wire,
-    light flowing toward Temporal. The tube has an opaque body and
+    labelled TLS draws from the Worker to TEMPORAL's edge around the
+    wire, light flowing toward Temporal. The tube has an opaque body and
     mouths, here and in chapters 3, 6 and 7: the dashed edge, the zone
     and Namespace borders it crosses stop at its walls, and the Worker's
     edge stops at its mouth's ring, so it reads as one channel leaving
@@ -208,8 +208,9 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
   - Visuals: The camera moves right onto TEMPORAL; a light sweep splits it
     into three Namespace bands, support, payments (around the Event
     History, level with the tube) and analytics; payments lights violet,
-    the other two dim and a padlock snaps shut on each; the card enters
-    payments. At the end the camera whips right toward the Event History.
+    the other two dim and a padlock snaps shut on each; the card leaves
+    the tube and enters payments. At the end the camera whips right toward
+    the Event History.
 
 ## 03 In the Event History
 

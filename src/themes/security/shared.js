@@ -427,11 +427,13 @@ function placeLane(lane, o = {}) {
 }
 
 // ---------- the TLS tube (chapters 2 and 3)
-// The TLS tube along the wire, at camera rest: from the Worker panel's right edge (x0) to 24 px inside TEMPORAL (x1),
-// where the payments Namespace begins, on the wire's line y, h px high. The payload card rides it at scale k; its TLS
+// The TLS tube along the wire, at camera rest: from the Worker panel's right edge (x0) to TEMPORAL's left edge (x1),
+// each mouth centered on its edge, on the wire's line y, h px high. The payload card rides it at scale k; its TLS
 // label sits above it, centered on label.
-const TUBE = { x0: LANE.worker.x + LANE.worker.w / 2, x1: LANE.temporal.x + 24, y: LANE.wire.y, h: 184, k: 0.6 };
+const TUBE = { x0: LANE.worker.x + LANE.worker.w / 2, x1: LANE.temporal.x, y: LANE.wire.y, h: 184, k: 0.6 };
 TUBE.label = { x: TUBE.x0 + 120, y: TUBE.y - TUBE.h / 2 - 42 };
+// How far the ring of a tube's mouth reaches past the tube's end, px: half the mouth's width
+const TUBE_MOUTH = 12;
 // A TLS tube along a connection, for its geometry geom (TUBE, or PROXY_TUBE from chapter 6: x0 and x1, its ends; y,
 // its line; h, its height; label, its label's center): a glass pipe with neon walls, a neon ring at each mouth and a
 // flow of light inside it (tube.flow) running toward Temporal; then its TLS label (tube.label). placeTube() shows them.
@@ -445,10 +447,11 @@ function makeTube(root, { x0, x1, h }, body = C.bg) {
   const glass = `linear-gradient(to bottom, rgba(${RGB.neon},.16), rgba(${RGB.neon},.03) 45%, rgba(${RGB.neon},.08))`;
   // the mouth spans the tube's border box (top -2px, under its top wall), so its face's gradient, set on its padding
   // box, lines up with the body's
-  const mouth = side => `<div style="position:absolute;${side}:-12px;top:-2px;width:24px;height:${h}px;`
+  const mouth = side => `<div style="position:absolute;${side}:-${TUBE_MOUTH}px;top:-2px;`
+    + `width:${2 * TUBE_MOUTH}px;height:${h}px;`
     + `border:2px solid ${C.neon};border-radius:50%;background:${glass};background-color:${body}"></div>`;
-  const backingMouth = side => `<div style="position:absolute;${side}:-12px;top:0;width:24px;height:${h}px;`
-    + `border-radius:50%;background:${body}"></div>`;
+  const backingMouth = side => `<div style="position:absolute;${side}:-${TUBE_MOUTH}px;top:0;`
+    + `width:${2 * TUBE_MOUTH}px;height:${h}px;border-radius:50%;background:${body}"></div>`;
   const backing = E(root, backingMouth('left') + backingMouth('right'), '',
     { width: (x1 - x0) + 'px', height: h + 'px', background: body });
   const tube = E(root,
@@ -517,9 +520,13 @@ const NAMESPACES = [
   { name: 'payments', y: 515, h: 300, mine: true },
   { name: 'analytics', y: 720, h: 86 },
 ];
-// The bands span TEMPORAL 10 px inside its sides: their center x and width. Wide enough for the Event History, which
-// sits right of TEMPORAL's center (LANE.history), to keep 20 px clear of payments' right edge as of its top and bottom.
-const NS_BAND = { x: LANE.temporal.x + LANE.temporal.w / 2, w: LANE.temporal.w - 20 };
+// The bands span TEMPORAL from 20 px clear of the TLS tube's mouth, on its left edge, to 10 px inside its right side:
+// their center x and width. Wide enough for the Event History, which sits right of TEMPORAL's center (LANE.history),
+// to keep 20 px clear of payments' right edge as of its top and bottom.
+const NS_BAND_EDGES = { left: TUBE.x1 + TUBE_MOUTH + 20, right: LANE.temporal.x + LANE.temporal.w - 10 };
+const NS_BAND = {
+  x: (NS_BAND_EDGES.left + NS_BAND_EDGES.right) / 2, w: NS_BAND_EDGES.right - NS_BAND_EDGES.left,
+};
 // The light that sweeps across TEMPORAL as it splits into Namespaces, px wide
 const NS_SWEEP_W = 160;
 // The Namespace bands, under the lane's SVG layer and the Event History, each labelled at its top left, a padlock on
@@ -605,7 +612,7 @@ function setAlarmTag(e, label) {
 // ---------- the Event History that stores the payload, and the Web UI (chapters 3 and 4)
 // Inside TEMPORAL, at camera rest: the stored Event History, with the Web UI's place (LANE.ui) under it; in the close
 // layout (CLOSE), the history on the left and a column on its right, the Web UI over the viewers (chapter 3) or the
-// Search Attributes (chapter 4). The Event History grows from the lane's (LANE.history) to HIST, 24 px clear of the
+// Search Attributes (chapter 4). The Event History grows from the lane's (LANE.history) to HIST, 28 px clear of the
 // TLS tube's mouth on its left.
 const HIST = { x: 1480, y: 460, w: 560, h: 398 };
 // Its rows; row 2 holds the payload. HIST_ROW: each row's top in the card, the row height and the text size.
@@ -1038,7 +1045,7 @@ const WIRE_LANE = { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, heads: 0 };
 // placeTube(tube, TUBE), placeNamespaces(ns, 1, 1, [1, 1]).
 const TUBE_HANDOFF = {
   from: [1153, 515, 1.4], to: HIST_SHOT,
-  card: [TUBE.x1 - 62, TUBE.y], cardTo: [LANE.history.x, LANE.history.y],
+  card: [TUBE.x1 - 38, TUBE.y], cardTo: [LANE.history.x, LANE.history.y],
   d: 0.7, cut: 0.25,
   lane: { env: OFF_SHOT, worker: OFF_SHOT, temporal: OFF_SHOT, wire: 0, door: 0 },
 };

@@ -10,10 +10,11 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // camera framings, [x, y, scale] for shot(): along the tube as the card rides it (from, then to, held while the
-  // identities come to the camera: it centers the tube), then on TEMPORAL's Namespaces, from the tube's mouth to the
-  // bands' right edge (TUBE_HANDOFF.from)
+  // identities come to the camera: it centers the tube, from the Worker's edge to its mouth on TEMPORAL's, 12 px to
+  // the right, toward the beats between the zones), then on TEMPORAL's Namespaces, from the tube's mouth to the bands'
+  // right edge (TUBE_HANDOFF.from)
   const TUBE_FROM = [760, 548, 1.4];
-  const TUBE_TO = [(TUBE.x0 + TUBE.x1) / 2, 548, 1.4];
+  const TUBE_TO = [(TUBE.x0 + TUBE.x1) / 2 + 12, 548, 1.4];
   // the move into the tube shot, from c[0]: start and duration
   const TUBE_AT = 0.6, TUBE_D = 1.0;
   const NS_SHOT = TUBE_HANDOFF.from;
