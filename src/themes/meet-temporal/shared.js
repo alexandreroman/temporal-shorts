@@ -18,7 +18,7 @@ Object.assign(ICONS, {
 // Official Temporal symbol alone (white)
 const SYMBOL = assetUrl('assets/temporal-symbol-light-cropped.svg');
 // Official photo of the two founders (https://temporal.io/about), 900x929 px
-const PHOTO = { url: assetUrl('assets/temporal-founders.jpg'), w: 900, h: 929 };
+const PHOTO = { url: assetUrl('assets/temporal-founders.jpg'), w: 900 };
 
 // The languages of Temporal's SDKs, in the order chapter 6 reads them, each with its official logo (their sources
 // and licenses are in the README of their folder)
