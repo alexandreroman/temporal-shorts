@@ -420,7 +420,8 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
   - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
     (the official lockup followed by "Cloud") holding four empty dashed
     seal slots. Dramatic beat: as the subtitle names them, four round
-    violet seals stamp onto the slots one at a time, each falling from
+    violet seals stamp onto the slots one at a time at a steady rhythm
+    (0.6 s apart, the first at "SOC 2 Type 2"), each falling from
     twice its size, tilted, and landing flat with a press, a violet glow,
     neon ripples and a jolt of the frame: SOC 2 TYPE 2 (CERTIFIED), then
     HIPAA, GDPR and CCPA (COMPLIANT), each with a neon check.

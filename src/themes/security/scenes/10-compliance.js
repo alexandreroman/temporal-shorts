@@ -9,9 +9,9 @@
 // scene in and plays into the recap.
 // The block keeps every name declared in this file local to this scene.
 {
-  // seconds after c[0] when each seal lands: as the subtitle names it, at its position at 16 characters per second
-  // plus 0.3 s
-  const STAMP_AT = [1.43, 4.05, 4.49, 5.05];
+  // seconds after c[0] when each seal lands: SOC 2 Type 2 as the subtitle names it, at its position at 16
+  // characters per second plus 0.3 s, then the others at the same steady 0.6 s rhythm
+  const STAMP_AT = [1.43, 2.03, 2.63, 3.23];
   // the stamp: the seal falls from STAMP.from times its size, tilted STAMP.tilt degrees, over STAMP.d seconds and
   // lands flat; the press squashes it to 1 - STAMP.press, back to its size in STAMP.pressD seconds; the frame jolts
   const STAMP = { from: 2.0, tilt: -10, d: 0.18, press: 0.06, pressD: 0.22, shake: 4, shakeD: 0.25 };
@@ -132,7 +132,7 @@
     subs: [
       {
         text: 'Temporal Cloud is <b>SOC 2 Type 2</b> certified and compliant with HIPAA, GDPR and CCPA.',
-        // the last stamp's ripples end at c[0] + 5.8: the four seals then hold about 1.1 s
+        // the last stamp's ripples end at c[0] + 3.98: the four seals then hold about 2.9 s
         after: 1.0,
       },
       {
