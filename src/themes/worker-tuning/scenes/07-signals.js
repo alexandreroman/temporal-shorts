@@ -14,10 +14,10 @@
   // each row starting with its part (RECAP_PARTS, in the same order). The signal: SDK metrics (named without the
   // temporal_ prefix, as in the docs headings), one per line, each with its reading, or plain words (signalText) in
   // the text font; the fix: what to change, and the Worker option that does it, on a second line. The symptom's
-  // metrics are those to watch first, as the label under it says (note): the backlog of the Task Queue, then the wait.
+  // metrics are those to watch first, as the badge on its row says: the backlog of the Task Queue, then the wait.
   const ROWS = [
     {
-      name: 'A growing backlog', symptom: 'Backlog grows, tasks wait', note: 'Watch first',
+      name: 'A growing backlog', symptom: 'Backlog grows, tasks wait',
       metrics: [
         ['approximate_backlog_count', 'rising'], ['approximate_backlog_age', 'older'],
         ['schedule_to_start_latency', 'high'],
@@ -59,14 +59,19 @@
   const namedAt = (text, name) => text.indexOf(name) / 16 + 0.3;
 
   // Final stage coordinates (no shift), every size even, on the theme's grid (GRID). The composition spans
-  // y 158..872, centered on y 515: the column headings and the 5 rows (y 158..722, see RECAP), then the loop a zone gap
-  // under them: its pills (y 762..812) and the arrow back, which runs 36 px under them.
+  // y 150..880, the whole content frame: the column headings and the 5 rows (y 150..754, see RECAP), then the loop a
+  // zone gap under them: its pills (y 794..844) and the arrow back, which runs 36 px under them (y 880).
   // Column lefts, from the rows' outer left edge: 32 px of padding on either side of the rows (RECAP.partLeft), the
   // symptoms 40 px right of the parts, then equal gaps (96 px) after the widest symptom (324 px) and the widest
   // signal (528 px), measured; the widest fix (453 px) ends 32 px inside the rows' right edge
   const COL = { symptom: 150, signal: 570, fix: 1194 };
   const LOOP = { top: recapRowY(ROWS.length - 1) + RECAP.rowH / 2 + GRID.zone, w: 360, h: 50, xs: [460, 960, 1460] };
   LOOP.backY = LOOP.top + LOOP.h + 36;
+  // The symptom row stands apart: a violet border at rest (the others: the line color) and a WATCH FIRST badge, a
+  // violet pill as chapter 1's x10 tag in 16 px type, w x h px, astride its top border, its right edge on the row's
+  // inner padding line (GRID.pad), whole pixels; small enough to end 20 px clear of the fix under it (measured)
+  const BADGE = { text: 'Watch first', w: 148, h: 32 };
+  BADGE.x = RECAP.left + RECAP.w - GRID.pad - BADGE.w / 2;
   const rowTop = i => recapRowY(i) - RECAP.rowH / 2;
   // Each row grows from its part, from GROW.at + i * GROW.stagger over GROW.d s: a tile around the part (partLeft px
   // on either side) that widens to the row's full width
@@ -87,9 +92,9 @@
   // 24 px lines, so that the symptom's 3 metrics fit its row with room to spare
   const metricCss = 'font-family:Mono;font-size:20px;line-height:24px';
 
-  // A row of the table, after its part (see makeRecapPart): the symptom (an optional label under it), the signal (its
-  // metrics in mono, one per line, each followed by its reading in red; plain words as the symptom) and the fix (the
-  // Worker option under it); the lines under the symptom and the fix share one slate mono style
+  // A row of the table, after its part (see makeRecapPart): the symptom, the signal (its metrics in mono, one per line,
+  // each followed by its reading in red; plain words as the symptom) and the fix (the Worker option under it, in slate
+  // mono)
   function makeRow(root, row) {
     const textCss = 'font-size:28px;line-height:36px';
     const metricLine = ([metric, reading]) => '<div style="display:flex;align-items:baseline;gap:12px">'
@@ -97,17 +102,14 @@
     const signal = row.metrics
       ? cell(COL.signal, `<div>${row.metrics.map(metricLine).join('')}</div>`, metricCss)
       : cell(COL.signal, row.signalText, textCss);
-    const subLine = (text, css = '') => (text
-      ? `<div class="mono" style="font-size:18px;line-height:28px;color:${C.slate};${css}">${text}</div>`
-      : '');
-    // the label is uppercase and letter-spaced, as the other labels (.lbl)
-    const note = subLine(row.note, 'letter-spacing:.12em;text-transform:uppercase');
-    const option = subLine(row.option);
+    const option = row.option
+      ? `<div class="mono" style="font-size:18px;line-height:28px;color:${C.slate}">${row.option}</div>`
+      : '';
     return E(root,
-      cell(COL.symptom, `<div>${row.symptom}${note}</div>`, textCss) + signal
-        + cell(COL.fix, `<div>${row.fix}${option}</div>`, textCss),
+      cell(COL.symptom, row.symptom, textCss) + signal + cell(COL.fix, `<div>${row.fix}${option}</div>`, textCss),
       'tile', { height: RECAP.rowH + 'px', textAlign: 'left' });
   }
+
   scene({
     chapter: 7, title: 'Read the signals',
     pre: 1.5, post: 2.0,
@@ -130,6 +132,9 @@
       });
       s.headings = [heading('Symptom', COL.symptom), heading('Signal', COL.signal), heading('Fix', COL.fix)];
       s.rows = ROWS.map(row => makeRow(root, row));
+      s.badge = fixedTag(root, BADGE.text, 'violet solid', BADGE.w, BADGE.h);
+      // smaller than a pill, with less padding: it stands on the row's border, as the x10 tag
+      Object.assign(s.badge.style, { fontSize: '16px', lineHeight: '22px', padding: '4px 10px 4px calc(10px + .1em)' });
       // the parts above their rows, which grow from them; the parts are there from the start, as chapter 6 leaves them
       s.parts = ROWS.map((row, i) => makeRecapPart(root, i));
       s.svg = svgLayer(root);
@@ -169,10 +174,15 @@
         e.style.overflow = grow < 1 ? 'hidden' : '';
         showAt(e, RECAP.left + dx, rowTop(i), P(t, growAt, 0.25, linear) * (1 - out));
         const litUntil = i + 1 < litAt.length ? litAt[i + 1] : litAt[i] + 1.2;
-        e.style.borderColor = t >= litAt[i] && t < litUntil ? C.uv : C.line;
+        const restColor = i === 0 ? C.violet : C.line;
+        e.style.borderColor = t >= litAt[i] && t < litUntil ? C.uv : restColor;
         // the Slot grid part grows into the outro's Worker (below); the others leave with their rows
         if (i !== GROWING) showRecapPart(s.parts[i], i, 1 - out, { dx });
       });
+      // the badge pops in as the symptom row reaches its full width, and slides out with it
+      const badgeIn = popIn(t, GROW.at + GROW.d - 0.2);
+      const badgeOut = rowOut(0);
+      place(s.badge, BADGE.x + Math.round(OUT.rowDx * badgeOut), rowTop(0), badgeIn.s, badgeIn.o * (1 - badgeOut));
 
       // the loop: each pill pops in, lit, as the second subtitle reads it, the arrow to it drawing just before; the
       // arrow back follows the last pill, and the first pill lights up again as it arrives. The pills slide down and

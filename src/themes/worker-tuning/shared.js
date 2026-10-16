@@ -1054,10 +1054,10 @@ const INTRO_LANE = {
 // ---------- the recap table of chapter 7, and the parts of the diagram that start its rows
 // Chapter 6 ends with the Activity lane and its four bottleneck components shrunk into these parts, on the table's
 // rows, where chapter 7 starts: the rows then grow from them. Final stage coordinates (no shift), every size even: the
-// column headings (24 px high) a label gap above 5 rows of 92 px, a gutter apart, except after the first one, the
-// symptom: a gutter and a cell (split), which sets it apart from the four limits under it; each row's part partLeft px
-// inside its left edge.
-const RECAP = { left: 120, w: 1680, headTop: 158, rowH: 92, split: GRID.gutter + GRID.cell, partLeft: 32 };
+// column headings (24 px high) a label gap above 5 rows of 96 px, a gutter apart, except after the first one, the
+// symptom: `split` px, which sets it apart from the four limits under it; each row's part partLeft px inside its left
+// edge. With chapter 7's loop under them, the table fills the content frame from its top (y 150).
+const RECAP = { left: 120, w: 1680, headTop: 150, rowH: 96, split: 28, partLeft: 32 };
 RECAP.rowTop = RECAP.headTop + 24 + GRID.label;
 RECAP.pitch = RECAP.rowH + GRID.gutter;
 // Middle of row i: 0 is the symptom, 1 to 4 the limits

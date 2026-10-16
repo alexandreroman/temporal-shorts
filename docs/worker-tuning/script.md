@@ -272,8 +272,9 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   Slots, Pollers, cache or CPU.
   - Visuals: each row grows from its icon (the cache icon reads #1049, the
     order the diagram ends with). The table's first row is the symptom, set
-    slightly apart: a queue-strip icon (chapter 6's Activity lane shrinks into
-    it), "Backlog grows, tasks wait" over a small WATCH FIRST label, the three
+    slightly apart, with a violet border and a violet WATCH FIRST badge
+    astride its top border on the right: a queue-strip icon (chapter 6's
+    Activity lane shrinks into it), "Backlog grows, tasks wait", the three
     signals stacked, `approximate_backlog_count` rising,
     `approximate_backlog_age` older, `schedule_to_start_latency` high, and
     "Find the full limit below"; it lights as "A growing backlog" is read.
