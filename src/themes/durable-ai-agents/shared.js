@@ -39,17 +39,24 @@ function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts,
   });
 }
 
-// The app of chapters 1, 2 and 4: a window with a gear that gearSpin() turns while the app works.
-// Its .app* styles are in this theme's index.html; its APP label is an .under-label (src/styles.css).
+// The app of chapters 1, 2 and 4: a 300x220 window (a title bar with three dots, three text lines) with a gear that
+// gearSpin() turns while the app works; its APP label is an .under-label (src/styles.css).
 function makeApp(parent) {
+  const dot = `<i style="width:9px;height:9px;background:${C.slate};opacity:.6;border-radius:2px"></i>`;
+  const line = width => `<b style="display:block;width:${width}%;height:10px;background:rgba(${RGB.ink},.18);`
+    + 'border-radius:3px"></b>';
   const root = E(parent, `
-   <div class="app-win">
-     <div class="app-bar"><i></i><i></i><i></i></div>
-     <div class="app-lines"><b style="width:70%"></b><b style="width:45%"></b><b style="width:60%"></b></div>
-     <div class="app-gear">${ICON('gear', 46, C.ink)}</div>
+   <div style="position:absolute;inset:0;background:var(--surface);border:1px solid ${C.lineLight};
+     border-radius:var(--r);overflow:hidden">
+     <div style="height:32px;border-bottom:1px solid ${C.lineLight};display:flex;gap:8px;align-items:center;
+       padding-left:14px">${dot.repeat(3)}</div>
+     <div style="padding:24px 22px;display:flex;flex-direction:column;gap:16px">
+       ${line(70)}${line(45)}${line(60)}
+     </div>
+     <div class="gear" style="position:absolute;right:18px;bottom:14px;opacity:.35">${ICON('gear', 46, C.ink)}</div>
    </div>
-   <div class="under-label">APP</div>`, 'app');
-  root.gear = root.querySelector('.app-gear');
+   <div class="under-label">APP</div>`, '', { width: '300px', height: '220px' });
+  root.gear = root.querySelector('.gear');
   return root;
 }
 
