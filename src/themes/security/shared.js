@@ -220,9 +220,12 @@ const LANE = {
 // there and shrinks to this width; chapter 1 opens on it. In the Worker panel, under its heading and code line.
 const PAYLOAD_IN_WORKER = { x: LANE.worker.x, y: LANE.worker.y + 55, w: 340 };
 
+// The environment's dashed edge, the theme's boundary look: a slate stroke `width` px wide, dashes of `dash` px, `gap`
+// px apart (chapter 9's Nexus gate draws its boundary in it too)
+const ENV_EDGE = { width: 2, dash: 10, gap: 8 };
 // Draws path p as a dashed line up to prog (0 to 1) of its length, with opacity o: dashes of `dash` px, `gap` px
 // apart, which stay in place as it draws (draw() makes its dashes flow)
-function drawDashed(p, prog, o = 1, dash = 10, gap = 8) {
+function drawDashed(p, prog, o = 1, dash = ENV_EDGE.dash, gap = ENV_EDGE.gap) {
   const drawn = p._L * clamp(prog);
   const period = dash + gap;
   const full = Math.floor(drawn / period);
@@ -347,7 +350,7 @@ function makeLane(root) {
 
   lane.svg = svgLayer(root);
   // the environment's dashed edge (placeLane() redraws it when the zone moves)
-  lane.envEdges = envEdgeDs(env).map(d => path(lane.svg, d, C.slate, 2, false));
+  lane.envEdges = envEdgeDs(env).map(d => path(lane.svg, d, C.slate, ENV_EDGE.width, false));
   lane.envKey = zoneKey(env);
   // the dashed edge shows only inside the content frame, so a close shot never runs it under the chapter header or
   // the subtitles (see frameLaneEdges)

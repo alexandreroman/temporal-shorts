@@ -384,28 +384,32 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     `ScreenWorkflow`, activity `scoreRisk`) with a TASK QUEUE `fraud-tq`
     across the bottom of fraud. The Endpoint rises between them: a NEXUS
     ENDPOINT tile (`fraud-screening`) over an ALLOWLIST tile (`payments`),
-    and a thin violet line draws down their center axis, closing the
-    opening between them; the Namespaces glow at "across Namespaces", and
-    the transfer Workflow's call line draws from the middle of its tile up
-    to the line.
+    and a boundary draws down their center axis between them, in the
+    dashed slate look of YOUR ENVIRONMENT's edge (2 px, 10 px dashes 8 px
+    apart): nothing crosses it but through the Endpoint. The Namespaces
+    glow at "across Namespaces", and the transfer Workflow's call line
+    draws from the middle of its tile up to the boundary.
 - **3:01** The Endpoint lets in only the Namespaces on its allowlist, and
   callers never need to know what is behind it.
   - Visuals: Dramatic beat: a call from analytics races up to the gate and
-    slams into the line, which flashes red, with a red flash, a shake and red
-    rings; the allowlist flashes red and a solid red NOT ON ALLOWLIST tag
-    pops in analytics' heading row. Then the payments call runs to the line:
-    its row on the allowlist lights up neon with a check, a neon ALLOWED tag
-    pops in payments' heading row, the line lifts and the call goes on to the
-    handler. A hatched veil wipes over the fraud Namespace from the gate's
-    side: an eye struck through, NOT EXPOSED TO CALLERS, "Namespace, Task
-    Queue, implementation".
+    slams into the boundary, which flashes red, with a red flash, a shake and
+    red rings, then turns back to its slate dashes; the allowlist flashes red
+    and a solid red NOT ON ALLOWLIST tag pops in analytics' heading row. Then
+    the payments call runs to the boundary: its row on the allowlist lights
+    up neon with a check, a neon ALLOWED tag pops in payments' heading row,
+    the Endpoint opens a gap in the boundary at the call's height, as tall
+    as chapter 1's door (the three dashes round the call give way), and the
+    call goes through it on to the handler. A hatched veil wipes over the
+    fraud Namespace from the gate's side: an eye struck through, NOT EXPOSED
+    TO CALLERS, "Namespace, Task Queue, implementation".
 - **3:08** Calls between Namespaces travel over mTLS, and your Data
   Converter still encrypts the payloads.
   - Visuals: The call line turns into a neon tube from the transfer
-    Workflow through the gate's opening into the veiled Namespace, as high
-    as the Workflow tile, labelled mTLS above it as in chapter 2. The tube
-    has an opaque body: the Namespace borders it crosses stop at its walls,
-    so it reads as one channel. The label, the payload card at rest and the
+    Workflow through the Endpoint's opening in the boundary into the veiled
+    Namespace, as high as the Workflow tile, labelled mTLS above it as in
+    chapter 2. The tube has an opaque body: the Namespace borders and the
+    boundary's dashes it crosses stop at its walls, so it reads as one
+    channel. The label, the payload card at rest and the
     RESULT card end on the right edge of the ALLOWED tag, and the label sits
     as far under that tag as above the tube. The payload card, at the size
     it rides chapter 2's tube, comes out of the Workflow already sealed by

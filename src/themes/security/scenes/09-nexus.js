@@ -2,12 +2,13 @@
 // Temporal Nexus, on Temporal Cloud's side: a wide Temporal Cloud zone (the official lockup followed by "Cloud")
 // holds the payments Namespace on the left, where Nora's transfer Workflow runs, the fraud team's Namespace on the
 // right, where the screenTransfer handler and its Task Queue live, and between them the Nexus Endpoint
-// fraud-screening, a gate: its tile over its ALLOWLIST's, a violet line on their center axis closing the opening
-// between them. The transfer Workflow's call runs up to that line. The dramatic beat: a call from the analytics
-// Namespace slams into the gate (a red flash, a shake): NOT ON ALLOWLIST; then the call from payments is checked
-// against the allowlist, ALLOWED, the gate opens and the call reaches the handler. A veil drops
-// over the fraud Namespace: its Namespace, Task Queue and implementation are not exposed to callers. Then an mTLS
-// tube replaces the call line, the payload card, already sealed by the caller's Worker, rides it behind the veil, and
+// fraud-screening, a gate: its tile over its ALLOWLIST's, and between them, on their center axis, a boundary in the
+// theme's boundary look, YOUR ENVIRONMENT's dashed edge. The transfer Workflow's call runs up to that boundary. The
+// dramatic beat: a call from the analytics Namespace slams into it (a red flash, a shake): NOT ON ALLOWLIST; then the
+// call from payments is checked against the allowlist, ALLOWED, the Endpoint opens a gap in the boundary at the call's
+// height, as a door in it, and the call goes through to the handler. A veil drops over the fraud Namespace: its
+// Namespace, Task Queue and implementation are not exposed to callers. Then an mTLS tube replaces the call line,
+// through the same opening, the payload card, already sealed by the caller's Worker, rides it behind the veil, and
 // the result comes back sealed too, by the handler. The camera holds; the engine's zoom-through brings the scene in
 // and plays into the next one.
 // The block keeps every name declared in this file local to this scene.
@@ -54,13 +55,27 @@
   ];
   // The Endpoint, a gate on x 960 between the Namespaces, as wide as the gaps on its sides allow: its two tiles, top
   // (the Endpoint's name) and bottom (its allowlist), 20 px clear of the tube, as tall as each other, the top one's top
-  // and the bottom one's bottom in line with the Namespaces'; and, on the gate's center axis, its line (bar: its
-  // width, as chapter 4's Data Converter gate), which closes the opening between them
-  const GATE = { x: 960, w: 220, bar: 2 };
+  // and the bottom one's bottom in line with the Namespaces'; and, on the gate's center axis, the boundary between
+  // them (open: its top and bottom)
+  const GATE = { x: 960, w: 220 };
   GATE.open = { top: CALL_Y - TUBE_H / 2 - 20, bottom: CALL_Y + TUBE_H / 2 + 20 };
   GATE.top = { y: FRAUD.y, h: GATE.open.top - FRAUD.y };
   GATE.bottom = { y: GATE.open.bottom, h: FRAUD.y + FRAUD.h - GATE.open.bottom };
   GATE.left = GATE.x - GATE.w / 2;
+  // The boundary, a path down the gate's axis from the Endpoint's tile to the allowlist's (length: its length; mid:
+  // where it crosses the call line, along it): YOUR ENVIRONMENT's dashed edge (ENV_EDGE), whole dashes only, one
+  // centered on the call line, so both ends stand a gap's length clear of the tiles. BOUNDARY_DASHES: those dashes,
+  // [from, to] along the path. The Endpoint's opening, as tall as chapter 1's door, takes out the three dashes round
+  // the call line: OPEN_HALF px on each side of it, its edges on the ends of the dashes it keeps.
+  const DASH_PERIOD = ENV_EDGE.dash + ENV_EDGE.gap;
+  const BOUNDARY = { length: GATE.open.bottom - GATE.open.top, mid: CALL_Y - GATE.open.top };
+  const OPEN_HALF = ENV_EDGE.dash / 2 + DASH_PERIOD + ENV_EDGE.gap;
+  const BOUNDARY_DASHES = [];
+  const dashSteps = Math.ceil(BOUNDARY.mid / DASH_PERIOD);
+  for (let k = -dashSteps; k <= dashSteps; k++) {
+    const from = BOUNDARY.mid - ENV_EDGE.dash / 2 + k * DASH_PERIOD;
+    if (from >= 0 && from + ENV_EDGE.dash <= BOUNDARY.length) BOUNDARY_DASHES.push([from, from + ENV_EDGE.dash]);
+  }
   // A gate tile's stack, centered in it, px: its icon, the gap under it, its heading line, the gap under that; then
   // the Endpoint's name (a value line) or the allowlist's one row (its size)
   const STACK = { icon: 28, iconGap: 10, gap: 14 };
@@ -69,13 +84,13 @@
   const ALLOW_ROW_Y = GATE.bottom.y + GATE.bottom.h / 2
     + (STACK.icon + STACK.iconGap + HEAD.line + STACK.gap + ALLOW_ROW.h) / 2 - ALLOW_ROW.h / 2;
   // The calls, as SVG paths: the transfer Workflow's, from its tile's right edge along the call line to the handler's
-  // tile, its first part (CALL_TO_GATE of its length) up to the gate's line; the analytics call, from its Namespace's
-  // right edge, up through the gap beside the gate and into the opening, to the gate's line (HIT: where it hits). The
-  // round caps end under the tiles and the line.
-  const BAR_LEFT = GATE.x - GATE.bar / 2;
+  // tile, its first part (CALL_TO_GATE of its length) up to the boundary; the analytics call, from its Namespace's
+  // right edge, up through the gap beside the gate and into the opening, to the boundary (HIT: where it hits, the
+  // middle of the third dash under the call line). The round caps end under the tiles and the boundary's dashes.
+  const BOUNDARY_LEFT = GATE.x - ENV_EDGE.width / 2;
   const CALL_D = `M ${WORKFLOW.x + WORKFLOW.w} ${CALL_Y} H ${HANDLER.x}`;
-  const CALL_TO_GATE = (BAR_LEFT - WORKFLOW.x - WORKFLOW.w) / (HANDLER.x - WORKFLOW.x - WORKFLOW.w);
-  const HIT = { x: BAR_LEFT, y: CALL_Y + 60 };
+  const CALL_TO_GATE = (BOUNDARY_LEFT - WORKFLOW.x - WORKFLOW.w) / (HANDLER.x - WORKFLOW.x - WORKFLOW.w);
+  const HIT = { x: BOUNDARY_LEFT, y: CALL_Y + 3 * DASH_PERIOD };
   const ANALYTICS_Y = ANALYTICS.y + ANALYTICS.h / 2;
   const DENY_FROM = ANALYTICS.x + ANALYTICS.w;
   const DENY_MID = (DENY_FROM + GATE.left) / 2;
@@ -110,16 +125,18 @@
   };
 
   // the beats, in seconds from their cue. c[0]: the transfer Workflow (workflow) and the handler (handler) come in,
-  // the Namespaces light up (across), the gate rises (gate), its line draws down (bar, barD) and the call line draws
-  // to it (call, callD). c[1]: the analytics call (deny, denyD) hits the gate; the payments call (allow, allowD)
-  // reaches it, the allowlist row lights, ALLOWED (allowed), the gate opens (open) and the call goes on to the handler
-  // (pass, passD); the veil wipes over fraud (veil, veilD), its caption (caption). c[2]: the tube draws (tube,
-  // tubeD), its label (label); the payload card, sealed by the caller's Worker, comes out (card) and rides behind the
-  // veil (ride, rideD); the result comes back (back, backD)
-  const T0 = { workflow: 1.3, handler: 2.6, gate: 3.9, bar: 4.3, barD: 0.4, across: 4.4, call: 5.4, callD: 0.6 };
+  // the Namespaces light up (across), the gate rises (gate), its boundary draws down (boundary, boundaryD) and the
+  // call line draws to it (call, callD). c[1]: the analytics call (deny, denyD) hits the boundary; the payments call
+  // (allow, allowD) reaches it, the allowlist row lights, ALLOWED (allowed), the Endpoint opens the boundary (open,
+  // openD) and the call goes on to the handler (pass, passD); the veil wipes over fraud (veil, veilD), its caption
+  // (caption). c[2]: the tube draws (tube, tubeD), its label (label); the payload card, sealed by the caller's Worker,
+  // comes out (card) and rides behind the veil (ride, rideD); the result comes back (back, backD)
+  const T0 = {
+    workflow: 1.3, handler: 2.6, gate: 3.9, boundary: 4.3, boundaryD: 0.4, across: 4.4, call: 5.4, callD: 0.6,
+  };
   const T1 = {
-    deny: 1.0, denyD: 0.45, allow: 2.5, allowD: 0.5, allowed: 3.2, open: 3.3, pass: 3.5, passD: 0.5, veil: 4.2,
-    veilD: 0.7, caption: 4.8,
+    deny: 1.0, denyD: 0.45, allow: 2.5, allowD: 0.5, allowed: 3.2, open: 3.3, openD: 0.3, pass: 3.5, passD: 0.5,
+    veil: 4.2, veilD: 0.7, caption: 4.8,
   };
   const T2 = { tube: 0.3, tubeD: 0.9, label: 2.4, card: 3.3, ride: 3.8, rideD: 1.1, back: 5.0, backD: 1.2 };
 
@@ -237,6 +254,39 @@
   }
   // The center of a box given by its left, top and size
   const center = box => [box.x + box.w / 2, box.y + box.h / 2];
+  // The boundary's dashes (BOUNDARY_DASHES) drawn down to `drawn` px along it, with the Endpoint's opening, open px
+  // on each side of the call line, cut out of them
+  function boundaryDashes(drawn, open) {
+    const cutFrom = BOUNDARY.mid - open;
+    const cutTo = BOUNDARY.mid + open;
+    const dashes = [];
+    BOUNDARY_DASHES.forEach(([from, to]) => {
+      const end = Math.min(to, drawn);
+      const pieces = open > 0 ? [[from, Math.min(end, cutFrom)], [Math.max(from, cutTo), end]] : [[from, end]];
+      pieces.forEach(([a, b]) => {
+        if (b > a) dashes.push([a, b]);
+      });
+    });
+    return dashes;
+  }
+  // Strokes path p as the given dashes, [from, to] along it in order; hides it when there are none. The pattern's
+  // last gap runs past the path's end, and the offset starts it the first dash's distance in.
+  function strokeDashes(p, dashes) {
+    if (dashes.length === 0) {
+      p.style.opacity = 0;
+      return;
+    }
+    const parts = [];
+    dashes.forEach(([from, to], i) => {
+      if (i > 0) parts.push(from - dashes[i - 1][1]);
+      parts.push(to - from);
+    });
+    const lead = dashes[0][0];
+    parts.push(p._L + lead);
+    p.setAttribute('stroke-dasharray', parts.map(n => +n.toFixed(3)).join(' '));
+    p.setAttribute('stroke-dashoffset', -lead);
+    p.style.opacity = 1;
+  }
 
   scene({
     chapter: 9, title: 'Across Namespaces with Nexus',
@@ -275,6 +325,8 @@
       s.svg = svgLayer(root);
       s.call = path(s.svg, CALL_D, C.slate, 2.5, false);
       s.deny = path(s.svg, DENY_D, C.slate, 2.5, false);
+      // the boundary, over the calls' ends, under the tube, whose opaque body hides its dashes where it crosses
+      s.boundary = path(s.svg, `M ${GATE.x} ${GATE.open.top} V ${GATE.open.bottom}`, C.slate, ENV_EDGE.width, false);
       s.workflow = makeInfoTile(root, WORKFLOW, 'WORKFLOW', WORKFLOW_ROWS);
       s.handler = makeInfoTile(root, HANDLER, 'HANDLER', HANDLER_ROWS);
       s.queue = makeQueueTile(root);
@@ -293,11 +345,6 @@
       // over the tube's end and the cards, which go behind it
       s.veil = makeVeil(root);
 
-      // the gate's line, over the calls' ends: drawn down from the Endpoint's tile to the allowlist's, as chapter 4's
-      // Data Converter gate, and lifted back up to open the gate
-      s.bar = E(root, '', '', {
-        width: GATE.bar + 'px', height: GATE.open.bottom - GATE.open.top + 'px', transformOrigin: 'center top',
-      });
       s.denySpark = makeSpark(root, 12, RGB.ink);
       s.callSpark = makeSpark(root, 12, RGB.ink);
       s.redRipples = makeRipples(root, 2, RGB.red);
@@ -334,7 +381,7 @@
       const queuePop = backPop(t, c[0] + T0.handler + 0.12);
       place(s.queue, ...center(QUEUE), queuePop.s, queuePop.o);
 
-      // the Endpoint rises between the Namespaces, its line draws down to close the opening, and the call line draws
+      // the Endpoint rises between the Namespaces, its boundary draws down between its tiles, and the call line draws
       // to it
       const gate = P(t, c[0] + T0.gate, 0.5);
       rise(s.endpoint, GATE.x, GATE.top.y + GATE.top.h / 2, gate);
@@ -344,8 +391,8 @@
       const tubeAt = c[2] + T2.tube;
       draw(s.call, lerp(toGate * CALL_TO_GATE, 1, pass), 1 - P(t, tubeAt, T2.tubeD));
 
-      // The dramatic beat: the analytics call races to the gate and slams into its line, which flashes red (a flash, a
-      // shake, red rings): NOT ON ALLOWLIST
+      // The dramatic beat: the analytics call races to the gate and slams into its boundary, which flashes red (a
+      // flash, a shake, red rings) and turns back to its slate dashes: NOT ON ALLOWLIST
       const deny = P(t, c[1] + T1.deny, T1.denyD, easeIn);
       draw(s.deny, deny, 0.8 * (1 - P(t, hitAt, 0.3)));
       sparkOnPath(s.denySpark, s.deny, deny);
@@ -354,8 +401,8 @@
       const red = t >= hitAt && t < hitAt + 0.7;
       s.allowlist.style.borderColor = red ? C.red : C.violet;
 
-      // the payments call reaches the gate: its row on the allowlist lights up, ALLOWED, the line lifts and the call
-      // goes on to the handler
+      // the payments call reaches the boundary: its row on the allowlist lights up, ALLOWED, the Endpoint opens a gap
+      // in the boundary at the call's height and the call goes through it to the handler
       const allow = P(t, c[1] + T1.allow, T1.allowD, linear);
       sparkOnPath(s.callSpark, s.call, t < allowAt ? CALL_TO_GATE * allow : lerp(CALL_TO_GATE, 1, pass));
       const listed = t >= allowAt;
@@ -365,12 +412,11 @@
       placeRipples(s.allowRipples, t, allowAt, GATE.x, ALLOW_ROW_Y, 60, 240,
         { d: 0.6, step: 0.14 });
       popVerdict(s.payments, t, 'ALLOWED', 'ok', c[1] + T1.allowed);
-      const opened = P(t, c[1] + T1.open, 0.3);
-      const barShown = P(t, c[0] + T0.bar, T0.barD) * (1 - opened);
-      place(s.bar, GATE.x, (GATE.open.top + GATE.open.bottom) / 2, 1, barShown > 0 ? 1 : 0);
-      s.bar.style.transform += ` scaleY(${barShown.toFixed(3)})`;
-      s.bar.style.background = red ? C.red : C.violet;
-      s.bar.style.boxShadow = glowShadow(RGB.red, red ? 1 : 0, { blur: 18, alpha: 0.8 });
+      const drawn = P(t, c[0] + T0.boundary, T0.boundaryD) * BOUNDARY.length;
+      const open = P(t, c[1] + T1.open, T1.openD) * OPEN_HALF;
+      strokeDashes(s.boundary, boundaryDashes(drawn, open));
+      s.boundary.setAttribute('stroke', red ? C.red : C.slate);
+      s.boundary.style.filter = red ? `drop-shadow(0 0 6px rgba(${RGB.red},.8))` : 'none';
 
       // what is behind the Endpoint is not exposed to callers: a veil wipes over fraud from the gate's side
       const veil = P(t, c[1] + T1.veil, T1.veilD);
