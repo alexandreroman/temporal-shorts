@@ -106,19 +106,22 @@ workspaces run `make setup` automatically.
     background; captured by `make social` only, not a site page; its icons
     are copies, see the comment above the chain
   - `styles.css`: brand styles and live-player CSS
-  - `engine.js`: timeline, easing and layout helpers, icons, components,
-    star field and `boot()`, called last by every theme page (builds the
-    scenes, then freezes on `?t=` or starts the player); chapter titles come
-    from the scenes
+  - `engine.js`: timeline, easing and layout helpers, SVG path helpers
+    (`setD()`, `sCurveD()`), icons, components, star field and `boot()`,
+    called last by every theme page (builds the scenes, then freezes on
+    `?t=` or starts the player); chapter titles come from the scenes
   - `shared.js`: brand constants and components used by two or more
-    themes (`C` and `RGB` colors, `assetUrl()` and `LOGO`, tiles, tags,
-    glows, step rows, the agentic loop (`makeAgentLoop()`), the lunch
-    example (`LUNCH_STEPS`, `LUNCH_HISTORY`) with its CONTEXT panel and
-    blocks (`makeMemory()`, `makeMemBlocks()`), app and TEMPORAL panels,
-    the app panel of numbered step lines (`makeLinesApp()`), the Event
-    History card, the code card of TypeScript lines (`makeCodeCard()`,
+    themes (`C`, `RGB` and `WEB_UI` colors, `TILE_BORDER`, `assetUrl()`
+    and `LOGO`, the lockup and Temporal Cloud zone, tiles, tags, glows,
+    step rows, the agentic loop (`makeAgentLoop()`), the lunch example
+    (`LUNCH_STEPS`, `LUNCH_HISTORY`) with its CONTEXT panel and blocks
+    (`makeMemory()`, `makeMemBlocks()`), app and TEMPORAL panels, the app
+    panel of numbered step lines (`makeLinesApp()`), the Event History
+    card, the code card of TypeScript lines (`makeCodeCard()`,
     `highlightJs()`, `setCodeLine()`), status tags, counters, crash and
-    takeover effects, small animation helpers such as `backPop()`, camera
+    takeover effects, the recap row of benefit tiles, DOM writes that skip
+    unchanged values (`setHtml()`, `setText()`), small animation and path
+    helpers such as `popScale()`, `backPop()` and `roundedPath()`, camera
     and motion helpers (`makeCamera`, `setCamera`, `hash`, ripples, sparks
     on paths), title and end cards) and the whole "What you can build"
     chapter, `useCaseScene()`; icons used by two or more themes are in
@@ -134,9 +137,9 @@ workspaces run `make setup` automatically.
     `<meta name="markdown-title">` (the name of the video, heading of its
     Markdown version)
   - `themes/<theme>/`: the theme's own scripts, e.g.
-    `themes/durable-ai-agents/shared.js` (extra icons, the step list,
-    `makeApp`, the context block size `MEM_BLOCK`, the bill, the takeover
-    of chapters 6 and 7, the booking ticket) or
+    `themes/durable-ai-agents/shared.js` (extra icons, `makeApp`, the
+    context block size `MEM_BLOCK`, the bill, the takeover of chapters 6
+    and 7, the booking ticket) or
     `themes/worker-tuning/shared.js` (the Worker diagram shared by its
     chapters, `makeWorkerDiagram()` and `placeWorkerDiagram()`: Task Queue
     lanes, Pollers, Slots, Workflow cache, readouts, meters, the

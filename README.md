@@ -74,10 +74,11 @@ HTML pages.
 ```text
 src/index.html         home page: one card per theme (styles in home.css)
 src/styles.css         Temporal brand styles and the live player's CSS
-src/engine.js          timeline, easing, placement, SVG icons, components,
-                       page start (boot)
-src/shared.js          brand helpers shared by the themes (colors, tiles,
-                       title and end cards, step rows, the agentic loop,
+src/engine.js          timeline, easing, placement, SVG paths and icons,
+                       components, page start (boot)
+src/shared.js          brand helpers shared by the themes (colors, the
+                       lockup and Temporal Cloud zone, tiles, title and
+                       end cards, recap row, step rows, the agentic loop,
                        the lunch example with its context panel and
                        blocks, crash and takeover effects, status tags,
                        app and Temporal panels, the app panel of numbered
