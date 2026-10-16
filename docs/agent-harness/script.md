@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=agent-harness` for the live values; the start
-times below are a snapshot from 2026-10-09.
+times below are a snapshot from 2026-10-16.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
