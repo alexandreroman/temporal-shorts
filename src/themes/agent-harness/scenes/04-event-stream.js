@@ -39,7 +39,7 @@
     ['APPROVAL', 'book_flight: needs approval'],
     ['APPROVAL', 'approved by a human'],
     ['TOOL', 'tool book_flight · done'],
-    ['TURN', 'turn total · 2,140 tokens'],
+    ['TOKENS', 'turn total · 2,140 tokens'],
   ];
   const HUMAN_ROW = 4, TOTAL_ROW = 6;
   // status tags of the HUMAN_ROW and TOTAL_ROW marks, as [label, statusTag kind]
