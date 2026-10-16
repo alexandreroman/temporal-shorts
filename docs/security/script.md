@@ -131,7 +131,8 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     Dramatic beat: an EAVESDROPPER tile rises under the wire, LISTENING;
     its red beam searches the tube and locks on the card: a red scan line,
     ciphertext glyphs pouring down the beam into its readout, which fills
-    with base64 noise; the beam lets go and UNREADABLE pops.
+    with base64 noise; the beam lets go and a solid red UNREADABLE tag
+    pops beside the tile's name.
 - **0:32** The Worker proves who it is: a certificate from your own CA, or
   an API key.
   - Visuals: In the held tube shot, an IDENTITY badge (two tabs: mTLS
@@ -139,7 +140,8 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     way and lands above the tube's end; a neon scan line checks it and it
     turns VERIFIED. Dramatic beat: an UNKNOWN CLIENT (no credentials)
     rises under the tube; its request hits a red barrier at TEMPORAL's
-    edge with a red flash and a shake: REJECTED.
+    edge with a red flash and a shake, and a solid red REJECTED tag pops
+    beside the client's name.
 - **0:38** Each Namespace is isolated: the Worker reaches only the
   Namespace its credentials allow.
   - Visuals: The camera moves right onto TEMPORAL; a light sweep splits it
@@ -163,7 +165,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     the camera: the history slides left and a column comes in on the
     right, a TEMPORAL WEB UI window showing row 2 with the IBAN and the
     name in clear, over two viewers, OPERATOR and WEB UI USER. Dramatic
-    beat: a red READABLE tag slams onto the chip (red rings, a flash, a
+    beat: a solid red READABLE tag slams onto the chip (red rings, a flash, a
     shake), the Web UI's IBAN turns red, eyes open on both viewers, and a
     red lens sweeps the chip's IBAN, its digits magnified. At the end the
     frame stutters (jitter, a red and violet split), then a copy of the
@@ -185,25 +187,25 @@ rewind whip carries it from ch3 back to the Worker for ch4.
   - Visuals: The camera tracks the sealed card along the wire back to the
     close layout of the Event History, where it lands as row 2's chip, now
     in ciphertext; READABLE flips over into a violet NEVER SEES YOUR
-    PAYLOADS, and the Web UI comes back in the right column showing the
-    same ciphertext.
+    PAYLOADS, and the Web UI comes back in the middle of the right column
+    showing the same ciphertext.
 - **1:12** Search Attributes stay in clear, so Temporal can index them:
   keep secrets out of them.
-  - Visuals: Under the Web UI, a SEARCH ATTRIBUTES panel in clear:
-    `TransferStatus = DEBITED` and `Region = EU`, a light sweep across
-    them, then a slate INDEXED, NOT ENCRYPTED tag; a red dashed
-    `iban = FR76` slides in beside them and is struck out.
+  - Visuals: The Web UI moves up as a SEARCH ATTRIBUTES panel in clear
+    rises in under it: `TransferStatus = DEBITED` and `Region = EU`, a
+    light sweep across them, then a slate INDEXED, NOT ENCRYPTED tag; a
+    red dashed `iban = FR76` slides in beside them and is struck out.
 - **1:18** To read payloads in the Web UI, a Codec Server you run decrypts
   them for your browser.
   - Visuals: The camera pulls back to the whole lane; the Worker, the wire
     and the converter step aside, and the Web UI window flies into YOUR
-    ENVIRONMENT, growing into YOUR BROWSER · WEB UI. A CODEC SERVER (the
-    same key, YOUR KEYS) appears under it: the IBAN goes down to it in
-    ciphertext and comes back up in clear, and the browser shows the IBAN
-    and the name, its border flashing neon. KEYS NEVER SHARED sits between
-    the zones; TEMPORAL's side, dimmed, stays sealed. At the end the
-    chapter clears to the bare lane, the Worker back, and the camera pulls
-    back a little further.
+    ENVIRONMENT, growing into YOUR BROWSER · WEB UI, centered in it. A
+    CODEC SERVER (the same key, YOUR KEYS) appears under it: the IBAN goes
+    down to it in ciphertext and comes back up in clear, and the browser
+    shows the IBAN and the name, its border flashing neon. KEYS NEVER
+    SHARED sits between the zones; TEMPORAL's side, dimmed, stays sealed.
+    At the end the chapter clears to the bare lane, the Worker back, and
+    the camera pulls back a little further.
 
 ## 05 The same work in every Worker
 
@@ -225,9 +227,9 @@ rewind whip carries it from ch3 back to the Worker for ch4.
   - Visuals: The sixth Worker's CODEC slot blinks into a red dashed NO
     CODEC outline; its border and connection turn red, and a payload card
     leaves it in clear and grows on its way into TEMPORAL, where its row
-    turns red. Dramatic beat: a red IN CLEAR tag slams onto the card, with
-    a red flash, a shake and red rings. At the end every chip falls off
-    every Worker.
+    turns red. Dramatic beat: a solid red IN CLEAR tag slams onto the
+    card, with a red flash, a shake and red rings. At the end every chip
+    falls off every Worker.
 
 ## 06 Meet Temporal Proxy
 

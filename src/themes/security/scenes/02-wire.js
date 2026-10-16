@@ -8,31 +8,39 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // camera framings, [x, y, scale] for shot(): along the tube as the card rides it (from, then to, held while the
-  // identities come to the camera: it centers the tube and TEMPORAL's edge), then on TEMPORAL's Namespaces, from the
-  // tube's mouth to the bands' right edge (TUBE_HANDOFF.from)
+  // identities come to the camera: it centers the tube), then on TEMPORAL's Namespaces, from the tube's mouth to the
+  // bands' right edge (TUBE_HANDOFF.from)
   const TUBE_FROM = [760, 548, 1.4];
-  const TUBE_TO = [900, 548, 1.4];
+  const TUBE_TO = [(TUBE.x0 + TUBE.x1) / 2, 548, 1.4];
   // the move into the tube shot, from c[0]: start and duration
   const TUBE_AT = 0.6, TUBE_D = 1.0;
   const NS_SHOT = TUBE_HANDOFF.from;
   // the card's stops in the tube, at TUBE.k: by the Worker, then by TEMPORAL's edge
   const RIDE = { x0: TUBE.x0 + 120, x1: TUBE.x1 - 120 };
-  // the outsiders under the wire, between the zones, one after the other: the eavesdropper, then the unknown client;
-  // their verdict tags straddle their bottom edge
-  const OUTSIDER = { x: (LANE.wire.x0 + LANE.wire.x1) / 2, y: 725, w: 320, h: 132 };
-  const VERDICT_Y = OUTSIDER.y + OUTSIDER.h / 2;
+  // the outsiders under the wire, between the zones, one after the other, their tops in line (top): the eavesdropper
+  // (spyH high), then the unknown client (clientH), which holds one line under its name. Inside a tile, px from its
+  // padding box: its heading's top, with its verdict tag (VERDICT) on the right of the same line, its second row's
+  // top, and the inset of both from its sides.
+  const OUTSIDER = {
+    x: (LANE.wire.x0 + LANE.wire.x1) / 2, top: 672, w: 336, spyH: 120, clientH: 88,
+    headTop: 14.5, rowTop: 50.5, inset: 14.5,
+  };
+  // a verdict tag: its text size and height, centered on the heading's line (icon 22 px high)
+  const VERDICT = { font: 14, h: 28 };
+  VERDICT.top = OUTSIDER.headTop + 11 - VERDICT.h / 2;
   // the beam rises from the eavesdropper's top to the tube's bottom wall, spread over BEAM_W there
-  const BEAM_FROM = OUTSIDER.y - OUTSIDER.h / 2;
+  const BEAM_FROM = OUTSIDER.top;
   const BEAM_W = 120;
-  // ciphertext glyphs on the eavesdropper's readout: two lines of NOISE_COLS; GLYPHS of them pour down the beam
-  const NOISE_COLS = 24;
+  // ciphertext glyphs on the eavesdropper's readout: two lines of NOISE_COLS, which fill it; GLYPHS of them pour down
+  // the beam
+  const NOISE_COLS = 30;
   const GLYPHS = 8;
   // the identity badge: it leaves the Worker's top right, at the shot's left edge, and slides in over the tube's
-  // label to land above the tube's end, by TEMPORAL's edge, inside the tube shot
-  const BADGE = { x: 990, y: 350, w: 280, h: 120, route: [[540, 340], [690, 315], [860, 325]] };
+  // label to land above the tube's end, by TEMPORAL's edge, inside the tube shot, in line with the outsiders' tiles
+  const BADGE = { x: OUTSIDER.x, y: 350, w: OUTSIDER.w, h: 120, route: [[540, 340], [690, 315], [860, 325]] };
   // the unknown client's request, up to TEMPORAL's edge under the tube, where a red barrier stops it
-  const BARRIER = { x: LANE.temporal.x, y: 655, h: 100 };
-  const REQUEST_PATH = `M 1070 ${OUTSIDER.y - OUTSIDER.h / 2 + 3} Q 1120 630 ${BARRIER.x - 6} ${BARRIER.y}`;
+  const BARRIER = { x: LANE.temporal.x, y: 660, h: 100 };
+  const REQUEST_PATH = `M 1070 ${OUTSIDER.top + 3} Q 1120 630 ${BARRIER.x - 6} ${BARRIER.y}`;
   // the beats, in seconds from their cue: c[0] the tube and the eavesdropper, c[1] the identities, c[2] the split
   const T0 = { door: 0, tube: 0.1, tubeD: 0.8, label: 0.7, lift: 0.6, liftD: 0.7, ride: 1.4, rideD: 3.0,
     spy: 1.0, beam: 1.4, lock: 2.6, unlock: 3.8 };
@@ -43,19 +51,29 @@
   // A line of ciphertext glyphs for the readout: `salt` picks another draw of them
   const noiseLine = (row, salt) => Array.from({ length: NOISE_COLS }, (_, col) => cipherGlyph(row + 7, col, salt))
     .join('');
-  // An outsider's tile: an icon and a name, then a second row (HTML) under them
-  function makeOutsider(root, icon, name, color, rowHtml, look) {
-    return E(root,
-      '<div style="position:absolute;left:18.5px;top:14.5px;display:flex;gap:10px;align-items:center">'
-      + `${ICON(icon, 26, color, 1.8)}<span class="lbl" style="font-size:16px;color:${color}">${name}</span></div>`
+  // An outsider's tile, h px high: an icon and a name, in the identity badge's type, then a second row (HTML) under
+  // them, and its verdict tag on the right of its heading (tile.verdict, an alarm tag, hidden)
+  function makeOutsider(root, h, icon, name, color, rowHtml, look) {
+    const { w, inset, headTop } = OUTSIDER;
+    const tile = E(root,
+      `<div style="position:absolute;left:${inset}px;top:${headTop}px;display:flex;gap:8px;align-items:center">`
+      + `${ICON(icon, 22, color, 1.8)}<span class="lbl" style="font-size:14px;color:${color}">${name}</span></div>`
       + rowHtml,
-      'tile', { width: OUTSIDER.w + 'px', height: OUTSIDER.h + 'px', textAlign: 'left', ...look });
+      'tile', { width: w + 'px', height: h + 'px', textAlign: 'left', ...look });
+    tile.verdict = statusTag(tile, { font: VERDICT.font, icon: VERDICT.font });
+    Object.assign(tile.verdict.style, {
+      left: 'auto', right: inset + 'px', top: VERDICT.top + 'px', height: VERDICT.h + 'px',
+      transformOrigin: 'right center', opacity: 0,
+    });
+    balanceTagLabel(tile.verdict);
+    return tile;
   }
-  // A verdict tag (statusTag), 30 px high so it centers on whole pixels
-  function makeVerdict(root) {
-    const e = statusTag(root, { font: 15, icon: 15 });
-    Object.assign(e.style, { height: '30px', background: C.bg });
-    return e;
+  // Pops an outsider's verdict in, with the label of an alarm tag (setAlarmTag), at `at`
+  function popVerdict(tile, t, label, at) {
+    setAlarmTag(tile.verdict, label);
+    const pop = popIn(t, at);
+    tile.verdict.style.opacity = pop.o;
+    tile.verdict.style.transform = `scale(${pop.s})`;
   }
 
   scene({
@@ -83,16 +101,20 @@
       s.request = path(s.lane.svg, REQUEST_PATH, C.slate, 2.5, false);
       s.tube = makeTube(root, TUBE);
 
-      s.spy = makeOutsider(root, 'eye', 'Eavesdropper', C.red,
-        '<div class="readout mono" style="position:absolute;left:18.5px;right:18.5px;top:52.5px;height:52px;'
-        + `padding:4px 12px;font-size:15px;line-height:22px;white-space:pre;color:${C.slate};`
+      s.spy = makeOutsider(root, OUTSIDER.spyH, 'eye', 'Eavesdropper', C.red,
+        `<div class="readout mono" style="position:absolute;left:${OUTSIDER.inset}px;right:${OUTSIDER.inset}px;`
+        + `top:${OUTSIDER.rowTop}px;height:52px;`
+        + `padding:4px 12px;font-size:15px;line-height:22px;white-space:pre;text-align:center;color:${C.slate};`
         + `background:rgba(0,0,0,.3);border:1px solid ${C.line};border-radius:var(--rs)"></div>`,
         { borderColor: `rgba(${RGB.red},.7)`, background: '#211617' });
       s.spy.readout = s.spy.querySelector('.readout');
-      s.client = makeOutsider(root, 'server', 'Unknown client', C.ink,
-        `<div class="mono" style="position:absolute;left:18.5px;top:62.5px;font-size:15px;color:${C.slate}">`
+      s.client = makeOutsider(root, OUTSIDER.clientH, 'server', 'Unknown client', C.ink,
+        `<div class="mono" style="position:absolute;left:${OUTSIDER.inset}px;top:${OUTSIDER.rowTop}px;font-size:15px;`
+        + `color:${C.slate}">`
         + 'no credentials</div>', {});
-      // sized for the 1.4 tube shot: its tabs render at 17 px, its heading and verdict at 18 px or more
+      // sized for the 1.4 tube shot: its tabs render at 17 px, its heading and verdict at 18 px or more. VERIFIED,
+      // of the outsiders' verdicts' size, centers on the heading's line (21.5 px under the padding box's top) and ends
+      // with the tabs.
       s.badge = E(root,
         '<div style="position:absolute;left:14.5px;top:10.5px;display:flex;gap:8px;align-items:center">'
         + `${ICON('badge', 22, C.ink, 1.8)}<span class="lbl" style="font-size:14px;color:var(--ink)">Identity</span>`
@@ -105,10 +127,12 @@
       s.badge.scan = E(s.badge, '', '', {
         left: '0', width: '100%', height: '2px', background: C.neon, boxShadow: `0 0 10px 2px rgba(${RGB.neon},.5)`,
       });
-      s.verified = statusTag(s.badge, { font: 13, icon: 13 });
+      s.verified = statusTag(s.badge, { font: VERDICT.font, icon: VERDICT.font });
       Object.assign(s.verified.style, {
-        left: 'auto', right: '12.5px', top: '9.5px', transformOrigin: 'right center',
+        left: 'auto', right: '14.5px', top: 21.5 - VERDICT.h / 2 + 'px', height: VERDICT.h + 'px',
+        transformOrigin: 'right center',
       });
+      balanceTagLabel(s.verified);
 
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
       // the beam's scan line on the tube, over the card it reads, and the glyphs it pulls down
@@ -124,8 +148,6 @@
       });
       s.redRipples = makeRipples(root, 2, RGB.red);
       s.lockRipples = [0, 1].map(() => makeRipples(root, 2, RGB.neon));
-      s.unreadable = makeVerdict(root);
-      s.rejected = makeVerdict(root);
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);
     },
@@ -174,7 +196,8 @@
 
       // the eavesdropper rises under the wire; its beam searches the tube from TEMPORAL's side, locks on the card
       // and follows it, its readout flickering with ciphertext, then lets go: UNREADABLE
-      rise(s.spy, OUTSIDER.x, OUTSIDER.y, P(t, c[0] + T0.spy, 0.5) * (1 - P(t, c[1] + T1.spyOut, 0.3)));
+      rise(s.spy, OUTSIDER.x, OUTSIDER.top + OUTSIDER.spyH / 2, P(t, c[0] + T0.spy, 0.5)
+        * (1 - P(t, c[1] + T1.spyOut, 0.3)));
       const lockAt = c[0] + T0.lock, unlockAt = c[0] + T0.unlock;
       const beamOn = P(t, c[0] + T0.beam, 0.3) * (1 - P(t, unlockAt, 0.3));
       const locked = t >= lockAt && t < unlockAt;
@@ -196,9 +219,7 @@
         e.textContent = cipherGlyph(i, Math.floor(t * 15), 500);
         place(e, gx, lerp(tubeBottom - 10, BEAM_FROM + 20, f), 1, locked ? Math.sin(Math.PI * f) : 0);
       });
-      const unreadable = popIn(t, unlockAt + 0.1);
-      setStatus(s.unreadable, 'UNREADABLE', 'denied');
-      place(s.unreadable, OUTSIDER.x, VERDICT_Y, unreadable.s, unreadable.o * (1 - P(t, c[1] + T1.spyOut, 0.3)));
+      popVerdict(s.spy, t, 'UNREADABLE', unlockAt + 0.1);
 
       // the identity badge slides out of the Worker, along an arc over the tube, to TEMPORAL's edge; a scan line
       // checks it, and it turns VERIFIED
@@ -217,7 +238,7 @@
 
       // an unknown client tries to connect: its request hits a red barrier at TEMPORAL's edge (flash, shake) and
       // bounces off; REJECTED
-      rise(s.client, OUTSIDER.x, OUTSIDER.y, P(t, c[1] + T1.client, 0.5) * out2);
+      rise(s.client, OUTSIDER.x, OUTSIDER.top + OUTSIDER.clientH / 2, P(t, c[1] + T1.client, 0.5) * out2);
       s.client.style.borderColor = t >= rejectAt ? C.red : C.line;
       const request = P(t, c[1] + T1.request, T1.requestD, easeIn);
       draw(s.request, request, 0.8 * (1 - P(t, rejectAt, 0.3)));
@@ -225,9 +246,7 @@
       const barrier = t >= rejectAt ? 1 - P(t, rejectAt + 0.2, 0.6) : 0;
       place(s.barrier, BARRIER.x, BARRIER.y, 1, barrier);
       placeRipples(s.redRipples, t, rejectAt, BARRIER.x, BARRIER.y, 40, 200, { d: 0.8, step: 0.15 });
-      const rejected = popIn(t, rejectAt + 0.1);
-      setStatus(s.rejected, 'REJECTED', 'denied');
-      place(s.rejected, OUTSIDER.x, VERDICT_Y, rejected.s, rejected.o * out2);
+      popVerdict(s.client, t, 'REJECTED', rejectAt + 0.1);
 
       // TEMPORAL splits into Namespaces under a sweep of light: payments lights up, the other two dim and lock
       const lockSeal = T2.locks.map(at => P(t, c[2] + at, 0.5, linear));

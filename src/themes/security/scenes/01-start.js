@@ -31,7 +31,7 @@
   // the annotations: OUTBOUND ONLY above the wire, NO INBOUND PORTS beside the door, both centered between the zones
   const TAG_X = (LANE.wire.x0 + LANE.wire.x1) / 2;
   const OUTBOUND = { y: LANE.wire.y - 46, w: 240 };
-  const NO_INBOUND = { y: LANE.door.y, w: 282 };
+  const NO_INBOUND = { y: LANE.door.y, w: 290 };
 
   scene({
     chapter: 1, title: 'Where the data starts',

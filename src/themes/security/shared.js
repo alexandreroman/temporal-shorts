@@ -207,7 +207,7 @@ const LANE = {
   wire: { x0: 760, x1: 1160, y: 515 },
   temporal: { x: 1160, y: 190, w: 640, h: 650 },
   history: { x: 1560, y: 515, w: 392, h: 260 },
-  ui: { x: 1350, y: 741, w: 300, h: 150 },
+  ui: { x: 1350, y: 750, w: 300, h: 150 },
   door: { x: 760, y: 720 },
 };
 // Hand-off from the intro to chapter 1: the payload card in the Worker, its center and width. The intro's card flies
@@ -233,6 +233,8 @@ const roundRectD = (x, y, w, h, r) => `M ${x + w / 2} ${y} H ${x + w - r} A ${r}
   + ` V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
 // How far a zone's labels sit inside it: its heading under its top edge, its caption above its bottom edge, in px
 const ZONE_LABEL_INSET = { head: 20, cap: 24 };
+// The height of TEMPORAL's heading, the official lockup, px; YOUR ENVIRONMENT's line is as high
+const ZONE_LOGO_H = 34;
 // A zone's heading (zone.head), 24 px from its left edge, inside a frame of its own (zone.headFrame): placeLane() sets
 // the heading's opacity, frameLaneEdges() the frame's
 const zoneHeading = html => '<div class="head-frame" style="position:absolute;left:24px;'
@@ -243,8 +245,9 @@ const zoneCaption = text => '<div class="cap-frame" style="position:absolute;lef
   + `bottom:${ZONE_LABEL_INSET.cap}px"><div class="cap lbl" style="text-align:center;font-size:18px;`
   + `color:var(--ink);opacity:0">${text}</div></div>`;
 
-// The slate EMPTY note of the lane's Event History, centered across the card, 150 px under its top
-const historyEmptyNote = () => '<div class="empty mono" style="position:absolute;left:0;right:0;top:150px;'
+// The slate EMPTY note of the lane's Event History, centered across the card, 140 px under its top: in the middle of
+// the room under the heading
+const historyEmptyNote = () => '<div class="empty mono" style="position:absolute;left:0;right:0;top:140px;'
   + `text-align:center;font-size:18px;letter-spacing:.14em;padding-left:.14em;color:${C.slateDark}">EMPTY</div>`;
 
 // Number of lanes built so far: it makes the id of each lane's clip path unique in the document
@@ -316,13 +319,18 @@ function makeLane(root) {
   const { env, temporal, worker, history, wire } = LANE;
   const lane = {};
   lane.env = E(root,
-    zoneHeading('<div class="head lbl" style="padding-left:0;font-size:18px">Your environment</div>')
+    // its line as high as TEMPORAL's logo, so both headings share a center line
+    zoneHeading(`<div class="head lbl" style="padding-left:0;font-size:18px;line-height:${ZONE_LOGO_H}px">`
+      + 'Your environment</div>')
     + zoneCaption('Your code runs here'),
+    // a transparent border as thick as TEMPORAL's, so both zones' labels sit as far from their edges
     '', {
       width: env.w + 'px', height: env.h + 'px', background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)',
+      border: '1.5px solid transparent',
     });
   lane.temporal = E(root,
-    zoneHeading(`<img class="head" src="${LOGO}" style="height:34px;display:block">`) + zoneCaption('Your code never runs here'),
+    zoneHeading(`<img class="head" src="${LOGO}" style="height:${ZONE_LOGO_H}px;display:block">`)
+    + zoneCaption('Your code never runs here'),
     'tile', { width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: '#17182A' });
   [lane.env, lane.temporal].forEach(zone => {
     zone.head = zone.querySelector('.head');
@@ -413,7 +421,7 @@ function placeLane(lane, o = {}) {
 // The TLS tube along the wire, at camera rest: from the Worker panel's right edge (x0) to 24 px inside TEMPORAL (x1),
 // where the payments Namespace begins, on the wire's line y, h px high. The payload card rides it at scale k; its TLS
 // label sits above it, centered on label.
-const TUBE = { x0: LANE.worker.x + LANE.worker.w / 2, x1: LANE.temporal.x + 24, y: LANE.wire.y, h: 176, k: 0.6 };
+const TUBE = { x0: LANE.worker.x + LANE.worker.w / 2, x1: LANE.temporal.x + 24, y: LANE.wire.y, h: 184, k: 0.6 };
 TUBE.label = { x: TUBE.x0 + 120, y: TUBE.y - TUBE.h / 2 - 42 };
 // A TLS tube along a connection, for its geometry geom (TUBE, or PROXY_TUBE from chapter 6: x0 and x1, its ends; y,
 // its line; h, its height; label, its label's center): a glass pipe with neon walls, a neon ring at each mouth and a
@@ -523,26 +531,41 @@ function placeNamespaces(ns, split, lit = 0, seals = [0, 0], o = 1) {
   });
 }
 
+// Centers the label of a statusTag (src/shared.js): its letter spacing also trails its last letter, so its left
+// padding gets as much
+function balanceTagLabel(e) {
+  e.style.paddingLeft = 'calc(10px + .1em)';
+}
+// The red alarm look of this theme's verdicts (UNREADABLE, REJECTED, READABLE; IN CLEAR in its pill): a solid red
+// fill under dark bold text, which reads at a glance. A statusTag kind of this theme only, so other themes keep theirs.
+STATUS_KINDS.alarm = { background: C.red, color: C.bg, borderColor: C.red, icon: ['x', C.bg, 2.8] };
+// Sets statusTag e to the alarm look with that label, in bold
+function setAlarmTag(e, label) {
+  e.style.fontWeight = '700';
+  setStatus(e, label, 'alarm');
+}
+
 // ---------- the Event History that stores the payload, and the Web UI (chapters 3 and 4)
 // Inside TEMPORAL, at camera rest: the stored Event History, with the Web UI's place (LANE.ui) under it; in the close
 // layout (CLOSE), the history on the left and a column on its right, the Web UI over the viewers (chapter 3) or the
 // Search Attributes (chapter 4). The Event History grows from the lane's (LANE.history) to HIST, 24 px clear of the
 // TLS tube's mouth on its left.
-const HIST = { x: 1480, y: 454, w: 560, h: 392 };
+const HIST = { x: 1480, y: 460, w: 560, h: 398 };
 // Its rows; row 2 holds the payload. HIST_ROW: each row's top in the card, the row height and the text size.
 const HIST_ROWS = [
   'Workflow started: transfer', 'Activity completed: debitAccount', 'Activity scheduled: creditAccount',
 ];
-const HIST_ROW = { tops: [56, 92, 346], h: 32, font: 18 };
+const HIST_ROW = { tops: [56, 92, 352], h: 32, font: 18 };
 // The payload chip of row 2: the payload card itself, a lane-size card (PAYLOAD_IN_WORKER.w) shown at scale k,
-// left-aligned with the rows' text and 138 px under the card's top. Its center (x, y), its size on the stage (w, h)
+// left-aligned with the rows' text and 143 px under the card's top, its padlock and verdict tag as far from rows 2
+// and 3. Its center (x, y), its size on the stage (w, h)
 // and tagY, the center of its verdict tag (READABLE, then NEVER SEES YOUR PAYLOADS), which straddles its bottom edge,
 // 3 px low, clear of its last value.
 const HIST_CHIP = { k: 0.8 };
 HIST_CHIP.w = PAYLOAD_IN_WORKER.w * HIST_CHIP.k;
 HIST_CHIP.h = payloadLayout(PAYLOAD_IN_WORKER.w).h * HIST_CHIP.k;
 HIST_CHIP.x = HIST.x - HIST.w / 2 + 70 + HIST_CHIP.w / 2;
-HIST_CHIP.y = HIST.y - HIST.h / 2 + 138 + HIST_CHIP.h / 2;
+HIST_CHIP.y = HIST.y - HIST.h / 2 + 143 + HIST_CHIP.h / 2;
 HIST_CHIP.tagY = HIST_CHIP.y + HIST_CHIP.h / 2 + 3;
 // The close shot that reads the small text of TEMPORAL, [x, y, scale] for shot(): the stored history, centered; at 1.6
 // the chip's values render at 19.7 px and its labels at 14.5 px. TEMPORAL's zone, cut by the frame there, dims.
@@ -552,7 +575,11 @@ const HIST_SHOT = [HIST.x, HIST.y, 1.6];
 // before any wider shot), the history slides left (hist: its center x) and a column comes in on its right, the Web
 // UI (ui: its center y, LANE.ui's size) over a slot of the same size (slot: its center y; the viewers in chapter 3,
 // the Search Attributes in chapter 4). On screen it spans x 160-1760 and y 201-829.
-const CLOSE = { zone: { x: 956, w: 1048 }, hist: { x: 1260 }, column: { x: 1830 }, ui: { y: 367 }, slot: { y: 541 } };
+const CLOSE = {
+  zone: { x: 956, w: 1048 }, hist: { x: 1260 }, column: { x: 1830 },
+  // the Web UI and the slot, 24 px apart, centered on the history
+  ui: { y: HIST.y - (LANE.ui.h + 24) / 2 }, slot: { y: HIST.y + (LANE.ui.h + 24) / 2 },
+};
 // How far the history and its chip move left in the close layout, at progress `close` (0 to 1)
 const closeDx = close => Math.round(lerp(0, CLOSE.hist.x - HIST.x, close));
 // The stored Event History: the white card (HIST) with its rows, a SAVED tag per row and the lane history's EMPTY
@@ -587,18 +614,26 @@ function placeStoredHistory(card, { grow = 1, o = 1, rows = [1, 1, 1], saved = [
   });
   place(card.chip, HIST_CHIP.x + dx, HIST_CHIP.y, HIST_CHIP.k, chip);
 }
-// The verdict tag on the payload chip (statusTag, 30 px high, so it centers on whole pixels); setChipVerdict() sets it
+// The verdict tag on the payload chip (statusTag, 30 px high, so it centers on whole pixels; 13 px, so its longest
+// label leaves the chip's corners clear); setChipVerdict() sets it
 function makeChipVerdict(root) {
-  const e = statusTag(root, { font: 14, icon: 14 });
+  const e = statusTag(root, { font: 13, icon: 13 });
   e.style.height = '30px';
+  balanceTagLabel(e);
   return e;
 }
 // The opaque fill of each verdict kind: the tag straddles the chip's edge, which must not show through it
-const VERDICT_FILL = { denied: 'var(--red-solid)', wait: 'var(--violet-solid)' };
-// The verdict tag at HIST_CHIP.tagY: its label and kind (setStatus; 'denied' or 'wait'), its scale and opacity, flip,
-// its height as it flips over (1 flat on the chip, 0 edge on), and close, the chip's slide (closeDx)
+const VERDICT_FILL = { alarm: C.red, wait: 'var(--violet-solid)' };
+// The verdict tag at HIST_CHIP.tagY: its label and kind ('alarm', see setAlarmTag, or 'wait', see setStatus), its
+// scale and opacity, flip, its height as it flips over (1 flat on the chip, 0 edge on), and close, the chip's slide
+// (closeDx)
 function setChipVerdict(e, label, kind, { s = 1, o = 1, flip = 1, close = 0 } = {}) {
-  setStatus(e, label, kind);
+  if (kind === 'alarm') {
+    setAlarmTag(e, label);
+  } else {
+    e.style.fontWeight = '';
+    setStatus(e, label, kind);
+  }
   e.style.background = VERDICT_FILL[kind];
   place(e, HIST_CHIP.x + closeDx(close), HIST_CHIP.tagY, s, o);
   if (flip < 1) e.style.transform += ` scaleY(${flip.toFixed(3)})`;
@@ -648,11 +683,12 @@ function setWebUI(win, { scramble = 0, red = 0 } = {}) {
 // ---------- the Data Converter (chapter 4)
 // The Data Converter in your environment, between the Worker panel and the environment's right edge, at camera rest:
 // its tile (the key and its labels) above the gate that the payload card passes through, level with the card in the
-// Worker. x: their center; tile and gate: each one's center y and size.
+// Worker; the tile's top and the gate's bottom in line with the Worker panel's. x: their center; tile and gate: each
+// one's center y and size.
 const CONVERTER = {
   x: (LANE.worker.x + LANE.worker.w / 2 + LANE.env.x + LANE.env.w) / 2,
-  tile: { y: 330, w: 200, h: 110 },
-  gate: { y: PAYLOAD_IN_WORKER.y, h: 300 },
+  tile: { y: LANE.worker.y - LANE.worker.h / 2 + 45, w: 200, h: 90 },
+  gate: { y: PAYLOAD_IN_WORKER.y, h: 2 * (LANE.worker.y + LANE.worker.h / 2 - PAYLOAD_IN_WORKER.y) },
 };
 
 // ---------- the fleet of Workers (chapters 5 to 8)

@@ -106,8 +106,12 @@
       s.sparks = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       s.card = makePayload(root, { w: CARD.w });
       s.alarm = makeRipples(root, 2, RGB.red);
-      s.inClear = fixedTag(root, `${ICON('eye', 20, C.red, 2)}In clear`, 'red solid', 200);
-      Object.assign(s.inClear.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' });
+      // in the theme's alarm look (STATUS_KINDS.alarm), like the other red verdicts
+      s.inClear = fixedTag(root, `${ICON('eye', 20, C.bg, 2.4)}In clear`, 'red', 200);
+      Object.assign(s.inClear.style, {
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: C.red, color: C.bg,
+        borderColor: C.red, fontWeight: '700',
+      });
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);
     },

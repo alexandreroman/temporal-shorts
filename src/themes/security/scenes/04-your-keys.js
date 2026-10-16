@@ -17,11 +17,14 @@
   // passes through the gate (cross, crossD), then its lock snaps shut (seal)
   const T0 = { tile: 0.2, gate: 0.5, gateD: 0.5, key: 1.1, keyD: 0.35, cross: 1.6, crossD: 1.4, seal: 3.05 };
   // from c[1]: the card flies to the chip (fly, flyD) and the camera tracks it there (HIST_SHOT); the verdict flips
-  // over; the Web UI comes back, in ciphertext
+  // over; the Web UI comes back, in ciphertext, in the middle of the history's right
   const T1 = { fly: 0.2, flyD: 1.2, flip: 0.15, webui: 2.0 };
-  // from c[2]: the Search Attributes strip rises in, its two attributes pop in, a light sweeps across them, their tag
-  // pops in; then an IBAN tries to join them and is struck out (secret, strike, secretOut)
-  const T2 = { strip: 0.2, attrs: 0.6, sweep: 1.3, sweepD: 0.8, tag: 1.9, secret: 2.8, strike: 3.4, secretOut: 4.6 };
+  // from c[2]: the Search Attributes strip rises in under the Web UI, which moves up to make room (strip, stripD),
+  // its two attributes pop in, a light sweeps across them, their tag pops in; then an IBAN tries to join them and is
+  // struck out (secret, strike, secretOut)
+  const T2 = {
+    strip: 0.2, stripD: 0.5, attrs: 0.6, sweep: 1.3, sweepD: 0.8, tag: 1.9, secret: 2.8, strike: 3.4, secretOut: 4.6,
+  };
   // from c[3]: the camera pulls back to the whole lane as the Worker steps aside and the Web UI moves into your
   // environment as a browser (move, moveD); the Codec Server pops in; the payload goes down to it in ciphertext and
   // comes back in clear (down, up, each tripD long); the browser shows it in clear (clear); KEYS NEVER SHARED
@@ -31,9 +34,9 @@
   const END = { before: 1.4, clearD: 0.5, d: 1.25 };
 
   // the browser, the Web UI grown k times as it moves into your environment (its values render at 18 px in the
-  // whole lane's shot), in the Worker's place, and the Codec Server under it; the payload's way down to the Codec
-  // Server and back up, beside each other
-  const BROWSER = { x: LANE.worker.x + 10, y: 360, k: 1.4 };
+  // whole lane's shot), in the Worker's place, centered in the environment, and the Codec Server under it; the
+  // payload's way down to the Codec Server and back up, beside each other
+  const BROWSER = { x: LANE.env.x + LANE.env.w / 2, y: 360, k: 1.4 };
   const CODEC = { x: BROWSER.x, y: 700, w: 360, h: 120 };
   const TRIP = {
     down: BROWSER.x - 60, up: BROWSER.x + 60, y0: BROWSER.y + BROWSER.k * WEBUI.h / 2 + 10,
@@ -102,13 +105,14 @@
       });
       s.webui = makeWebUI(root);
       // the label, the two attributes on two lines (the IBAN that tries to join them beside the second), then the
-      // INDEXED, NOT ENCRYPTED tag (s.indexed)
+      // INDEXED, NOT ENCRYPTED tag (s.indexed): the attributes and the tag evenly spaced, as much room above the label
+      // as under the tag
       s.strip = E(root,
-        '<div class="lbl" style="position:absolute;left:16.5px;top:12.5px;font-size:13px;padding-left:0">'
+        '<div class="lbl" style="position:absolute;left:16.5px;top:13.5px;font-size:13px;padding-left:0">'
         + 'Search Attributes</div>'
-        + `<span class="attr" style="position:absolute;left:16.5px;top:40.5px">`
+        + `<span class="attr" style="position:absolute;left:16.5px;top:41.5px">`
         + `${attribute('TransferStatus', 'DEBITED')}</span>`
-        + '<div style="position:absolute;left:16.5px;top:74.5px;display:flex;gap:6px">'
+        + '<div style="position:absolute;left:16.5px;top:75.5px;display:flex;gap:6px">'
         + `<span class="attr">${attribute('Region', 'EU')}</span>`
         + `<span class="secret" style="position:relative">${attribute('iban', 'FR76',
           `border:1.5px dashed ${C.red};color:${C.red}`)}`
@@ -122,7 +126,7 @@
       s.strip.strike = s.strip.querySelector('.strike');
       s.strip.sweep = s.strip.querySelector('.sweep');
       s.indexed = statusTag(s.strip, { font: 11, icon: 11 });
-      Object.assign(s.indexed.style, { left: '16.5px', top: '110.5px', height: '24px' });
+      Object.assign(s.indexed.style, { left: '16.5px', top: '109.5px', height: '24px' });
       s.codec = makeKeyTile(root, ICON('server', 28, C.ink, 1.8), 'Codec Server', CODEC.w, CODEC.h);
       s.packet = E(root, '', 'mono', {
         width: '190px', height: '34px', lineHeight: '31px', textAlign: 'center', fontSize: '18px', whiteSpace: 'pre',
@@ -251,17 +255,18 @@
       const flipAt = landAt + T1.flip;
       const flipped = t >= flipAt;
       const flip = flipped ? P(t, flipAt, 0.15, easeOut) : 1 - P(t, flipAt - 0.15, 0.15, easeIn);
-      setChipVerdict(s.verdict, flipped ? 'NEVER SEES YOUR PAYLOADS' : 'READABLE', flipped ? 'wait' : 'denied', {
+      setChipVerdict(s.verdict, flipped ? 'NEVER SEES YOUR PAYLOADS' : 'READABLE', flipped ? 'wait' : 'alarm', {
         o: storedO, flip, s: flipped ? swell(t, flipAt + 0.1, 0.1) : 1, close,
       });
 
-      // the Web UI comes back on the history's right, showing the same ciphertext; it then leaves Temporal's side for
-      // your environment, growing into a browser, which shows the payload in clear once the Codec Server has
-      // decrypted it. Once the pull-back has narrowed TEMPORAL back, a faint dashed outline marks the Web UI's place
-      // under the history (LANE.ui).
+      // the Web UI comes back on the history's right, showing the same ciphertext, and moves up as the Search
+      // Attributes rise in under it; it then leaves Temporal's side for your environment, growing into a browser,
+      // which shows the payload in clear once the Codec Server has decrypted it. Once the pull-back has narrowed
+      // TEMPORAL back, a faint dashed outline marks the Web UI's place under the history (LANE.ui).
       const webuiPop = backPop(t, c[1] + T1.webui);
       const move = P(t, c[3] + T3.move, T3.moveD);
-      const column = [CLOSE.column.x, CLOSE.ui.y];
+      const stripIn = P(t, c[2] + T2.strip, T2.stripD);
+      const column = [CLOSE.column.x, Math.round(lerp(HIST.y, CLOSE.ui.y, stripIn))];
       const [winX, winY] = bezier([column, [column[0] - 400, column[1] - 120],
         [BROWSER.x + 400, BROWSER.y - 60], [BROWSER.x, BROWSER.y]], move);
       place(s.webui, winX, winY, webuiPop.s * lerp(1, BROWSER.k, move), webuiPop.o * done);
@@ -276,7 +281,7 @@
       // the Search Attributes strip: two attributes in clear, a light sweeping across them, INDEXED, NOT ENCRYPTED;
       // an IBAN tries to join them and is struck out
       // it leaves with the close layout, as TEMPORAL narrows back
-      rise(s.strip, STRIP.x, STRIP.y, P(t, c[2] + T2.strip, 0.5) * (1 - wide) * done);
+      rise(s.strip, STRIP.x, STRIP.y, stripIn * (1 - wide) * done);
       s.strip.attrs.forEach((e, i) => {
         const pop = backPop(t, c[2] + T2.attrs + i * 0.2, 0.4);
         e.style.opacity = pop.o;

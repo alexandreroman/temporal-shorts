@@ -21,9 +21,11 @@
   // whip left (d long), which land 0.15 s before the cut
   const REWIND = { stutter: 1.35, stutterD: 0.35, d: 0.85 };
   // the two viewers under the Web UI, one above the other in the close layout's slot (CLOSE.slot), as wide as the
-  // Web UI: their size and centers
+  // Web UI, as far from each other as from it: their size and centers
   const VIEWER = { w: WEBUI.w, h: 66 };
-  VIEWER.ys = [CLOSE.slot.y - WEBUI.h / 2 + VIEWER.h / 2, CLOSE.slot.y + WEBUI.h / 2 - VIEWER.h / 2];
+  const viewersTop = CLOSE.ui.y + WEBUI.h / 2, viewersBottom = CLOSE.slot.y + WEBUI.h / 2;
+  const viewerGap = (viewersBottom - viewersTop - 2 * VIEWER.h) / 2;
+  VIEWER.ys = [viewersTop + viewerGap + VIEWER.h / 2, viewersBottom - VIEWER.h / 2];
   // the lens over the chip's IBAN: its diameter, its zoom and its margin from the ends of the IBAN as it sweeps
   const LENS = { d: 160, zoom: 2.0, margin: 32 };
   // how far each ghost outline of the streaking card lags behind it, in progress
@@ -40,7 +42,8 @@
   };
   IBAN.w = TRANSFER[0][1].length * 0.6 * IBAN.font;
 
-  // A viewer's tile: a person and a name, and the eye that marks it once it reads the IBAN (tile.eye), on its right
+  // A viewer's tile: a person and a name, and the eye that marks it once it reads the IBAN (tile.eye), on its right;
+  // its person in line with the Web UI's text, its eye as far from its right edge
   function makeViewer(root, name) {
     const tile = E(root,
       '<div style="display:flex;align-items:center;gap:12px">'
@@ -49,7 +52,7 @@
       + `${ICON('eye', 24, C.red, 2)}</div>`,
       'tile', {
         width: VIEWER.w + 'px', height: VIEWER.h + 'px', display: 'flex', alignItems: 'center',
-        paddingLeft: '18.5px',
+        paddingLeft: '16px',
       });
     tile.eye = tile.querySelector('.eye');
     return tile;
@@ -204,7 +207,7 @@
       // the dramatic beat: READABLE slams onto the chip from above its size, red rings, a red flash and a shake;
       // then a lens sweeps along the clear IBAN, a red scan line through it
       const slam = P(t, slamAt, T1.slamD, easeIn);
-      setChipVerdict(s.verdict, 'READABLE', 'denied', {
+      setChipVerdict(s.verdict, 'READABLE', 'alarm', {
         s: lerp(1.7, 1, slam), o: P(t, slamAt, 0.08, linear) * storedO, close,
       });
       placeRipples(s.alarm, t, hitAt, HIST_CHIP.x + dx, HIST_CHIP.tagY, 60, 320, { d: 0.8, step: 0.16 });

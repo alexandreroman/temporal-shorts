@@ -43,7 +43,7 @@
   // The two upstreams' titles, a pair: the official lockup at the zone's heading place (the lane's TEMPORAL heading
   // grows to it from its 34 px as TEMPORAL splits), then under it the upstream's name in the brand font: Self-hosted
   // and Cloud (logo: the lockup's height, its wordmark about 20 px on screen; name: its top and size, 21 px on screen)
-  const TITLE = { logo: 40, laneLogo: 34, nameTop: 72, name: 24 };
+  const TITLE = { logo: 40, laneLogo: ZONE_LOGO_H, nameTop: 72, name: 24 };
   // Both titles are centered in their box: the lockup's left edge, on a whole pixel (the lockup's viewBox is 1570 x
   // 410), and the lane heading's resting left edge before the split (zoneHeading())
   TITLE.logoLeft = Math.round((SELF_ZONE.w - TITLE.logo * 1570 / 410) / 2);
@@ -128,7 +128,10 @@
       const split = P(t, c[0] + T0.split, T0.splitD);
       const selfDim = P(t, tearAt, 0.3);
       const selfZone = lerpZone(PROXY_ZONES.temporal, SELF_ZONE, split);
-      s.lane.temporal.head.style.height = Math.round(lerp(TITLE.laneLogo, TITLE.logo, split)) + 'px';
+      // YOUR ENVIRONMENT's line grows with it, so both headings keep one center line
+      const headH = Math.round(lerp(TITLE.laneLogo, TITLE.logo, split)) + 'px';
+      s.lane.temporal.head.style.height = headH;
+      s.lane.env.head.style.lineHeight = headH;
       // the heading glides to the centered place as it grows
       s.lane.temporal.headFrame.style.left = Math.round(lerp(LANE_HEAD_LEFT, TITLE.logoLeft, split)) + 'px';
       placeLane(s.lane, {
