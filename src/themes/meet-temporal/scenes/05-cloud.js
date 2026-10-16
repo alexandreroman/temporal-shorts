@@ -25,6 +25,8 @@
   // comes back: 24 px from the zone's right border, so its name fits on one line; tall enough for a third line, IN
   // EACH WORKER, as data conversion runs on the Workers, not in a gateway between them and Temporal Cloud
   const CONV = { x: 754, y: workerY(1), w: 164, h: 120 };
+  // the width of the scan line that sweeps across the Data Converter
+  const SCAN_W = 3;
   // the connection: from the Data Converter out to a connector dot on Temporal Cloud's edge
   const DOT = { x: CLOUD.x - CLOUD.w / 2, y: CONV.y, size: 18 };
   // the connection's labels, centered between your zone's edge and Temporal Cloud's
@@ -52,8 +54,10 @@
   const VISIBLE = 5;
   // the middle of row i in the viewport, unscrolled
   const rowInView = i => VIEW.first + ROW.h / 2 + i * PITCH;
-  // the middle of a row's payload chip (210 px wide), 20 px inside the row's right border
-  const PAYLOAD_X = BLOCK.x + BLOCK.w / 2 - 24 - 1.5 - 20 - 105;
+  // the middle of a row's payload chip (210 px wide), 20 px inside the row's right border: the viewport, and so the
+  // row, ends VIEW.left px from the block's padding edge, TILE_BORDER inside its outer edge
+  const ROW_RIGHT = BLOCK.x - BLOCK.w / 2 + TILE_BORDER + VIEW.left + VIEW.w;
+  const PAYLOAD_X = ROW_RIGHT - TILE_BORDER - 20 - 105;
   // The tasks, in the order Temporal queues them, and the Worker each goes to: the Workflow task starts the
   // Workflow, which runs until it awaits chargeCard; the chargeCard task runs; a new Workflow task resumes the
   // Workflow until it awaits shipPackage; the shipPackage task runs; a last Workflow task resumes it to its end
@@ -109,7 +113,7 @@
       + `${line.replace(keyword, `$1<span style="color:${C.violet}">$2</span>`)}</div>`).join('');
     w.insertAdjacentHTML('beforeend',
       `<div class="code mono" style="position:absolute;left:${CODE.inset}px;right:${CODE.inset}px;top:${CODE.top}px;`
-      + `height:${CODE.h}px;padding:10px ${CODE.inset - 1.5}px;font-size:19px;line-height:${CODE.line}px;`
+      + `height:${CODE.h}px;padding:10px ${CODE.inset - TILE_BORDER}px;font-size:19px;line-height:${CODE.line}px;`
       + `background:rgba(${RGB.ink},.03);border:1px solid ${C.line};border-radius:var(--rs)">${code}</div>`);
     w.code = w.querySelector('.code');
     w.lines = [...w.code.children];
@@ -135,9 +139,10 @@
       });
     e.key = e.querySelector('.key');
     e.lock = e.querySelector('svg');
-    // the scan line that sweeps across the tile as data goes through it, behind the tile's text
+    // the scan line that sweeps across the tile as data goes through it, behind the tile's text, as tall as the
+    // tile inside its border
     e.scan = E(e, '', '', {
-      width: '3px', height: (CONV.h - 3) + 'px', zIndex: -1, background: C.neon,
+      width: SCAN_W + 'px', height: (CONV.h - 2 * TILE_BORDER) + 'px', zIndex: -1, background: C.neon,
       boxShadow: `0 0 12px 3px rgba(${RGB.neon},.45)`,
     });
     return e;
@@ -232,7 +237,7 @@
         fontSize: '14px', textAlign: 'center', lineHeight: '22px',
       });
       s.tasks = TASKS.map(([name]) => E(root, name, 'mono', {
-        width: TASK.w + 'px', height: TASK.h + 'px', lineHeight: (TASK.h - 3) + 'px', textAlign: 'center',
+        width: TASK.w + 'px', height: TASK.h + 'px', lineHeight: (TASK.h - 2 * TILE_BORDER) + 'px', textAlign: 'center',
         // opaque, so nothing it passes over shows through its text
         fontSize: '20px', background: '#2B2F78', border: '1px solid ' + C.uv, borderRadius: 'var(--rs)',
       }));
@@ -466,8 +471,10 @@
       const active = passes.find(pass => Math.abs(t - pass.mid) < 0.22);
       const pulse = active ? win(t, active.mid - 0.22, active.mid + 0.22, 0.12) : 0;
       const sweep = active ? P(t, active.mid - 0.22, 0.44, linear) : 0;
-      place(s.conv.scan, (active && active.out ? sweep : 1 - sweep) * (CONV.w - 6) + 1.5, (CONV.h - 3) / 2, 1,
-        active ? pulse * 0.8 : 0);
+      // the scan line runs inside the tile's border, from its left edge to its right one
+      const scanRun = CONV.w - 2 * TILE_BORDER - SCAN_W;
+      place(s.conv.scan, (active && active.out ? sweep : 1 - sweep) * scanRun + SCAN_W / 2,
+        (CONV.h - 2 * TILE_BORDER) / 2, 1, active ? pulse * 0.8 : 0);
       const decrypt = active && !active.out ? win(t, active.mid - 0.2, active.mid + 0.15, 0.1) : 0;
       const click = active && active.out ? swell(t, active.mid - 0.1, 0.25) : 1;
       s.conv.lock.style.transform = `scale(${click})`;
