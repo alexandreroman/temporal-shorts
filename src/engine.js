@@ -149,6 +149,8 @@ function draw(p, prog, o = 1) {
 }
 
 // ---------- icons (stroke, 24 grid)
+// The outline of the `shield` icon, without its check: an SVG path on the 24 grid
+const SHIELD_OUTLINE = 'M12 3l8 3v6c0 4.5-3.4 7.7-8 9-4.6-1.3-8-4.5-8-9V6z';
 const ICONS = {
   cal: '<rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   mail: '<rect x="3" y="6" width="18" height="13"/><path d="M3 7l9 6 9-6"/>',
@@ -183,7 +185,7 @@ const ICONS = {
     + '<circle cx="17" cy="18" r="2"/>',
   lock: '<rect x="5" y="11" width="14" height="10"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/>',
   // a shield with a check
-  shield: '<path d="M12 3l8 3v6c0 4.5-3.4 7.7-8 9-4.6-1.3-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  shield: `<path d="${SHIELD_OUTLINE}"/><path d="M8.5 12l2.5 2.5 4.5-5"/>`,
   // a key: its bow and its bit
   key: '<circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21M17.5 12v3.5M20.5 12v2.5"/>',
   // a cloud on a flat base: a hosted service
