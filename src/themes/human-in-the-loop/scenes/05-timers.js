@@ -13,7 +13,7 @@
     'Timer fired: reminder due', 'Timer fired: escalation due',
   ];
   // the Event History card is exactly as wide as the timeline (DAY 0 to DAY 5), 30 px under its day labels
-  const CARD = { w: 5 * LINE.dayW, h: rowTop(TIMER_ROWS.length) - HROW.gap + HROW.h + 24 };
+  const CARD = { w: 5 * LINE.dayW, h: rowTop(TIMER_ROWS.length - 1) + HROW.h + 24 };
   CARD.y = LINE.y + 90 + CARD.h / 2;
   scene({
     chapter: 5, title: 'Deadlines and reminders',

@@ -135,8 +135,8 @@
       // tag, which still pops when the row is read.
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, 1);
       place(s.history, ORDER_HIST.x, ORDER_HIST.y, 1, 1);
-      s.history.rows.forEach((_, i) => {
-        showRow(s.history.rows[i], i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
+      s.history.rows.forEach((row, i) => {
+        showRow(row, i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
         const isRead = i < 4 && t >= replay[i];
         const isReplayed = isRead && i < 3;
         const at = isRead ? replay[i] : saved[i];
