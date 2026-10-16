@@ -80,26 +80,28 @@
   const NO_CODE = { x: KMS.x, y: 622 };
   // TEMPORAL in the close layout: its left edge and width (on screen x 1373-1790); the TLS tube shortens with it
   const CLOSE_ZONE = { x: 1602, y: FLEET.y, w: 174, h: FLEET.h };
+  // How far the TLS tube runs into TEMPORAL: 12 px in the close shot, as in chapter 6 (PROXY_TUBE); none at camera
+  // rest, its mouth centered on the zone's edge, where the wide list needs the room
+  const TUBE_IN = { close: PROXY_TUBE.x1 - PROXY_WIRE.x1, wide: 0 };
   // TEMPORAL's list of stored payloads in the close shot, one row per card that went through, each with its wrapped
-  // data key: a row's size, drawn smaller (closeK) between the tube's mouth (24 px into the zone) and the zone's right
-  // edge, 8 px clear of each, and centered on the tube; label: the list's label, top: the first row, pitch: from one
-  // row to the next (all center y)
+  // data key: a row's size, drawn smaller (closeK) between the tube's mouth ring (TUBE_MOUTH past its end) and the
+  // zone's right edge, 12 px (29 px on screen) clear of the ring and 8 px clear of the edge, and centered on the tube;
+  // label: the list's label, top: the first row, pitch: from one row to the next (all center y)
   const ROW = { w: 196, h: 32 };
-  const CLOSE_ROW = { left: CLOSE_ZONE.x + 32, right: CLOSE_ZONE.x + CLOSE_ZONE.w - 8 };
+  const CLOSE_ROW = {
+    left: CLOSE_ZONE.x + TUBE_IN.close + TUBE_MOUTH + 12, right: CLOSE_ZONE.x + CLOSE_ZONE.w - 8,
+  };
   ROW.closeK = (CLOSE_ROW.right - CLOSE_ROW.left) / ROW.w;
   const LIST_AT = { x: (CLOSE_ROW.left + CLOSE_ROW.right) / 2, label: 456, top: 482, pitch: 27 };
-  // How far the TLS tube runs into TEMPORAL: 12 px in the close shot, as in chapter 6 (PROXY_TUBE), 4 px at camera
-  // rest, where the wide list needs the room
-  const TUBE_IN = { close: PROXY_TUBE.x1 - PROXY_WIRE.x1, wide: 4 };
   // The same list at camera rest, where the message is that TEMPORAL keeps ciphertext only: larger rows of ciphertext
-  // alone (no key), spread down TEMPORAL's column under its logo, 20 px clear of the tube's mouth ring (12 px past
-  // the tube's end, see makeTube) and of the zone's right edge (x: their center; w and h: a row's size; label, top,
-  // pitch as above), and CIPHERTEXT ONLY under them (cipherY)
-  const WIDE_MOUTH = FLEET.proxyTemporal.x + TUBE_IN.wide + 12;
+  // alone (no key), spread down TEMPORAL's column under its logo, 24 px (21 px on screen) clear of the tube's mouth
+  // ring and 20 px clear of the zone's right edge (x: their center; w and h: a row's size; label, top, pitch as
+  // above), and CIPHERTEXT ONLY under them (cipherY)
+  const WIDE_MOUTH = FLEET.proxyTemporal.x + TUBE_IN.wide + TUBE_MOUTH;
   const WIDE_RIGHT = FLEET.proxyTemporal.x + FLEET.proxyTemporal.w;
   const WIDE_LIST = {
-    x: (WIDE_MOUTH + WIDE_RIGHT) / 2, w: WIDE_RIGHT - WIDE_MOUTH - 40, h: 46, label: 266, top: 344, pitch: 76,
-    cipherY: 690,
+    x: (WIDE_MOUTH + 24 + WIDE_RIGHT - 20) / 2, w: WIDE_RIGHT - WIDE_MOUTH - 44, h: 46, label: 266, top: 344,
+    pitch: 76, cipherY: 690,
   };
   // the Codec Server, in the proxy box under its name, at camera rest: center and size
   const CODEC = { x: PROXY.x, y: 558, w: 172, h: 160 };
