@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=security` for the live values; the start
-times below are a snapshot from 2026-10-15.
+times below are a snapshot from 2026-10-16.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -267,24 +267,31 @@ rewind whip carries it from ch3 back to the Worker for ch4.
   you own in your KMS.
   - Visuals: YOUR KMS pops in beside the proxy (a KMS KEY; AWS KMS · AZURE
     KEY VAULT / GCP KMS · YOUR KEY SERVER), linked to a DATA KEY 1 under
-    the proxy's name. The data key seals the next card (AES-256-GCM); a
-    DATA KEY 1 tag travels along the link to the KMS, comes back as
-    WRAPPED KEY 1 and docks on the card, which goes out with it to row 2.
-    The KMS key never moves.
-- **2:20** Data keys rotate on their own, and the proxy never holds your KMS
+    the proxy's name, with a clock and a lifetime bar that drains steadily.
+    While the bar runs, key 1 seals the next card (AES-256-GCM): row 1 was
+    already sealed with it. A DATA KEY 1 tag travels along the link to the
+    KMS, comes back as WRAPPED KEY 1 and docks on the card, which goes out
+    with it to row 2. The KMS key never moves. The bar runs out: key 1
+    turns grey and drops away, DATA KEY 2 pops in with ROTATED beside it,
+    its DATA KEY 2 tag makes the same trip to the KMS and comes back
+    WRAPPED KEY 2, and its bar refills.
+- **2:19** Data keys rotate on their own, and the proxy never holds your KMS
   key.
-  - Visuals: The data key flips over to DATA KEY 2, then 3, sealing cards
-    from other Workers into rows 3 and 4 (WRAPPED 2, WRAPPED 3); NEVER
-    LEAVES appears beside the KMS key, and the two rows sealed with key 1
-    glow: old payloads keep their own.
-- **2:26** If the KMS can't be reached, the call fails: nothing leaves in
+  - Visuals: Key 2's bar drains while it seals a card from another Worker
+    into row 3 (WRAPPED 2); NEVER LEAVES appears beside the KMS key. The
+    bar runs out and the rotation repeats: key 2 drops away, DATA KEY 3
+    and ROTATED pop in, its tag is wrapped at the KMS, the bar refills, and
+    key 3 seals the next card into row 4 (WRAPPED 3). The list reads 1, 1,
+    2, 3, and the two rows sealed with key 1 glow: old payloads keep their
+    own.
+- **2:27** If the KMS can't be reached, the call fails: nothing leaves in
   clear.
   - Visuals: Dramatic beat: the link to YOUR KMS snaps (red halves,
     sparks, a red cross, a shake) and the data key dims; a red
     hazard-striped gate drops across the tube's mouth. The next card, in
     clear, slams into the gate (a red flash, a shake) and turns red: CALL
     FAILED; the tube goes dark and FAIL CLOSED stamps across it.
-- **2:33** Its built-in Codec Server lets the Web UI and the CLI show the
+- **2:34** Its built-in Codec Server lets the Web UI and the CLI show the
   decrypted payloads.
   - Visuals: The link heals, the gate lifts and the failed card goes back
     to its Worker. The camera pulls back in one steady move, out of the
@@ -297,7 +304,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 08 Change Temporal, not your code
 
-- **2:42** Moving from your own Temporal Service to Temporal Cloud is a
+- **2:43** Moving from your own Temporal Service to Temporal Cloud is a
   proxy setting: Workers don't change.
   - Visuals: The same wide shot. TEMPORAL narrows into the upper of two
     upstreams, the official logo centered above "Self-hosted" (a server
@@ -311,7 +318,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 09 What you get
 
-- **2:51** Your code stays home, every connection is verified, payloads
+- **2:52** Your code stays home, every connection is verified, payloads
   stay encrypted, Workers hold no secrets.
   - Visuals: 4 tall benefit tiles drop in one at a time across the frame
     as the subtitle names them, each lighting up as it lands while the
@@ -321,7 +328,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 10 What you can build
 
-- **3:00** Nora's transfer is one example: any Workflow that handles
+- **3:01** Nora's transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use
@@ -330,14 +337,14 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     "passport scans, encrypted" / PAYROLL RUNS (calendar) "salaries never
     in clear" / AI AGENTS ON CUSTOMER DATA (robot) "prompts and replies
     sealed".
-- **3:05** Health claims, KYC onboarding, payroll runs, AI agents on
+- **3:06** Health claims, KYC onboarding, payroll runs, AI agents on
   customer data: the data stays yours.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **3:13** With Temporal, your code, your keys and your data stay yours.
+- **3:14** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.

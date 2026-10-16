@@ -73,21 +73,21 @@ payloads.
 
 ## Chapter 8: Change Temporal, not your code
 
-[Watch from 2:41](/themes/security/#t=161)
+[Watch from 2:42](/themes/security/#t=162)
 
 Moving from your own Temporal Service to Temporal Cloud is a proxy setting:
 Workers don't change.
 
 ## Chapter 9: What you get
 
-[Watch from 2:51](/themes/security/#t=171)
+[Watch from 2:52](/themes/security/#t=172)
 
 Your code stays home, every connection is verified, payloads stay encrypted,
 Workers hold no secrets.
 
 ## Chapter 10: What you can build
 
-[Watch from 2:59](/themes/security/#t=179)
+[Watch from 3:00](/themes/security/#t=180)
 
 Nora's transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -95,6 +95,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 3:13](/themes/security/#t=193)
+[Watch from 3:14](/themes/security/#t=194)
 
 With Temporal, your code, your keys and your data stay yours.

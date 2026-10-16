@@ -2,10 +2,12 @@
 // Opens inside the TEMPORAL PROXY box, on the push that ended chapter 6 (PROXY_SHOT), and holds that shot while the
 // content comes to it: TEMPORAL slides closer and narrows into a close layout, where it lists the payloads it stores.
 // A payload card rides in from a Worker, in clear, and is sealed inside the proxy (lock and scramble): NO CODE CHANGE.
-// YOUR KMS comes in beside the proxy and a DATA KEY appears in it: the data key seals the next card (AES-256-GCM) and
-// makes a trip to the KMS, which wraps it with the KMS key; the wrapped key leaves with the payload, the KMS key stays
-// put. The data key rotates twice, 1 to 2 to 3, each new payload sealed with the current one while the stored ones keep
-// theirs; NEVER LEAVES on the KMS key. Then the dramatic beat: the link to the KMS snaps with red sparks, a gate drops
+// YOUR KMS comes in beside the proxy and a DATA KEY appears in it, with a bar that drains over its lifetime: the data
+// key seals the next card (AES-256-GCM) and makes a trip to the KMS, which wraps it with the KMS key; the wrapped key
+// leaves with the payload, the KMS key stays put. Each time the bar runs out, the key rotates: the old key drops away,
+// dimmed, the next one pops in, ROTATED, makes a quick trip to the KMS to be wrapped and its bar refills. Every payload
+// that leaves is sealed with the key of the moment (1, 1, 2, 3), while the stored ones keep theirs; NEVER LEAVES on
+// the KMS key. Then the dramatic beat: the link to the KMS snaps with red sparks, a gate drops
 // at the proxy's exit, the next card slams into it in clear, CALL FAILED, and FAIL CLOSED stamps onto the empty wire.
 // The link heals, and the camera pulls back once, out of the proxy to the whole fleet (FULL_LANE_SHOT): the proxy's
 // built-in Codec Server decrypts row 2 for a CLI and the Web UI window, while TEMPORAL keeps only ciphertext. The
@@ -18,11 +20,22 @@
 
   // from c[0]: TEMPORAL slides into its close layout as chapter 6's Namespace fades (close, closeD); NO CODE CHANGE
   const T0 = { close: -0.3, closeD: 0.8, noCode: 2.3 };
-  // from c[1]: YOUR KMS pops in and its link to the proxy draws (kms, link, linkD); the DATA KEY pops in (key)
-  const T1 = { kms: 0.2, link: 0.6, linkD: 0.6, key: 1.0 };
-  // from c[2]: the data key rotates twice (flips); the KMS key NEVER LEAVES (never); the stored payloads that keep
-  // the first data key light up (keep)
-  const T2 = { flips: [0.2, 2.6], never: 2.2, keep: 5.1 };
+  // from c[1]: YOUR KMS pops in and its link to the proxy draws (kms, link, linkD); the DATA KEY pops in (key); its
+  // lifetime runs out and it rotates (rotate)
+  const T1 = { kms: 0.2, link: 0.6, linkD: 0.6, key: 0.8, rotate: 4.2 };
+  // from c[2]: the second data key starts its lifetime, and rotates once it runs out (ROTATE.life); the KMS key NEVER
+  // LEAVES (never); the stored payloads that keep the first data key light up (keep)
+  const T2 = { never: 2.4, keep: 6.7 };
+  // A data key's lifetime and its rotation, in seconds: life, how long its bar takes to drain. At a rotation, the old
+  // key turns grey and drops away (dropD); once it is clear, the new one pops in (pop) and ROTATED shows beside it
+  // (tag, for tagD). The new key's tag leaves for the KMS (go), takes tripD each way and stays there a moment (stay),
+  // where the KMS wraps it (wrapAt); its bar refills as the wrapped key docks back into it (fillD), and it seals
+  // payloads from `ready` on
+  const ROTATE = { life: 3.6, dropD: 0.45, pop: 0.35, tag: 0.4, tagD: 1.25, go: 0.5, tripD: 0.35, stay: 0.2,
+    fillD: 0.25 };
+  ROTATE.wrapAt = ROTATE.go + ROTATE.tripD;
+  ROTATE.docked = ROTATE.wrapAt + ROTATE.stay + ROTATE.tripD;
+  ROTATE.ready = ROTATE.docked + 0.1;
   // from c[3]: the link snaps (snap); the gate drops at the proxy's exit (gate); CALL FAILED and FAIL CLOSED slam in
   // (callFailed, failClosed, slamD)
   const T3 = { snap: 0.3, gate: 0.55, callFailed: 1.7, failClosed: 2.3, slamD: 0.17 };
@@ -42,17 +55,18 @@
   // after it leaves; out and outD, when it leaves the proxy for Temporal and how long it takes; key, the number of the
   // data key that seals it; wrap, the one whose data key makes the trip to the KMS (the others get theirs at once);
   // fails, the card that the closed gate stops (sealed by nothing, it stays in clear). The first card is sealed before
-  // the data key shows, so its key shows only in TEMPORAL's list.
+  // the data key shows, so its key shows only in TEMPORAL's list. Each card is sealed while its key's bar runs, and
+  // has left the proxy before that key rotates.
   const RUNS = [
     { from: 2, cue: 0, at: 0.3, ride: 1.2, seal: 1.6, out: 3.1, outD: 0.9, key: 1, noKey: true },
-    { from: 4, cue: 1, at: 0.5, ride: 1.1, seal: 1.5, out: 4.3, outD: 0.9, key: 1, wrap: true },
-    { from: 0, cue: 2, at: 0.5, ride: 0.8, seal: 1.05, out: 1.8, outD: 0.7, key: 2 },
-    { from: 3, cue: 2, at: 2.4, ride: 0.8, seal: 1.05, out: 1.8, outD: 0.7, key: 3 },
+    { from: 4, cue: 1, at: 0.3, ride: 1.1, seal: 1.3, out: 3.5, outD: 0.9, key: 1, wrap: true },
+    { from: 0, cue: 2, at: 0.1, ride: 0.8, seal: 1.05, out: 1.8, outD: 0.7, key: 2 },
+    { from: 3, cue: 2, at: 4.35, ride: 0.8, seal: 1.05, out: 1.8, outD: 0.7, key: 3 },
     { from: 1, cue: 3, at: 0.8, ride: 0.75, fails: true },
   ];
   // the data key's trip to the KMS and back, seconds after its card is sealed: it leaves (go), takes tripD each way,
   // is wrapped at the KMS (stay seconds there), then docks on its card's bottom edge (dockD)
-  const WRAP = { go: 0.7, tripD: 0.6, stay: 0.3, dockD: 0.35 };
+  const WRAP = { go: 0.4, tripD: 0.5, stay: 0.3, dockD: 0.3 };
 
   // The cards of this chapter, drawn at the close shot's size, so the layout check measures them as the shot frames
   // them (168 px: 403 px on screen, values 18.2 px)
@@ -60,18 +74,21 @@
   CARD.h = payloadLayout(CARD.w).h;
   // inside the proxy: where a card is sealed, in the room under the proxy's name; where the failed card stops, its
   // right edge on the gate
-  const SEAL = { x: PROXY.x, y: 567 };
+  const SEAL = { x: PROXY.x, y: 571 };
   const GATE = { x: PROXY.x + PROXY.w / 2, w: 8 };
   const STOP = { x: GATE.x - GATE.w / 2 - CARD.w / 2 - 1, y: SEAL.y };
-  // the DATA KEY in the proxy, between its name and the card: center and size
-  const DATA_KEY = { x: PROXY.x, y: 474, w: 84, h: 26 };
+  // the DATA KEY in the proxy, between its name and the card: center and size; where its key icon sits (icon, from
+  // the center), the start of the key that flies onto a card
+  const DATA_KEY = { x: PROXY.x, y: 477, w: 84, h: 32, icon: [-28, -4] };
+  // ROTATED, beside the DATA KEY, halfway between its right edge and the proxy's
+  const ROTATED_AT = { x: PROXY.x + (DATA_KEY.w + PROXY.w) / 4, y: DATA_KEY.y };
   // YOUR KMS, in your environment beside the proxy, above the connections (on screen x 149-590, y 199-420): center
   // and size
   const KMS = { x: 1184, y: 430, w: 184, h: 92 };
-  // the KMS link: from the KMS's right edge to the data key's left edge, a corner on the way down at x; it breaks at
-  // breakY
+  // the KMS link: from the KMS's right edge, under NEVER LEAVES so that a key tag at the KMS clears it, to the data
+  // key's left edge, a corner on the way down at x; it breaks at breakY
   const LINK = {
-    x0: KMS.x + KMS.w / 2, y0: KMS.y, x: 1304, x1: DATA_KEY.x - DATA_KEY.w / 2, y1: DATA_KEY.y, breakY: 452,
+    x0: KMS.x + KMS.w / 2, y0: KMS.y + 14, x: 1304, x1: DATA_KEY.x - DATA_KEY.w / 2, y1: DATA_KEY.y, breakY: 460,
   };
   // NO CODE CHANGE, in your environment under the connections (on screen, about 400, 720)
   const NO_CODE = { x: 1197, y: 600 };
@@ -121,6 +138,13 @@
     const point = pathEl.getPointAtLength(pathEl._L * clamp(back ? 1 - p : p));
     return [point.x, point.y];
   }
+  // A data key's trip along the KMS link: it leaves the DATA KEY at goAt and takes tripD to reach the KMS, stays
+  // there `stay` seconds while the KMS wraps it (wrapped from just after wrapAt), then comes back (from backAt)
+  function kmsTrip(linkEl, t, goAt, { tripD, stay }) {
+    const wrapAt = goAt + tripD, backAt = wrapAt + stay;
+    const at = t < backAt ? alongPath(linkEl, P(t, goAt, tripD), true) : alongPath(linkEl, P(t, backAt, tripD));
+    return { at, wrapAt, backAt, wrapped: t >= wrapAt + 0.15 };
+  }
   // Shows only the last q (0 to 1) of a path's length, with opacity o: a line that shrinks toward its end
   function drawTail(pathEl, q, o = 1) {
     const L = pathEl._L;
@@ -128,11 +152,11 @@
     pathEl.setAttribute('stroke-dashoffset', -L * (1 - clamp(q)));
     pathEl.style.opacity = q > 0.001 ? o : 0;
   }
-  // A tag of the close shot, sized in screen px (font): its HTML after the leading icon of a statusTag kind, in that
-  // kind's look; solid, an opaque fill for a tag over other parts
-  function closeTag(root, html, kind, font, solid = null) {
+  // A tag of the close shot, sized in screen px (font): its HTML after the leading icon of a statusTag kind (unless
+  // `icon` is false), in that kind's look; solid, an opaque fill for a tag over other parts
+  function closeTag(root, html, kind, font, { solid = null, icon: withIcon = true } = {}) {
     const { icon, ...look } = STATUS_KINDS[kind];
-    const lead = icon ? ICON(icon[0], font * U, icon[1], icon[2]) : '';
+    const lead = icon && withIcon ? ICON(icon[0], font * U, icon[1], icon[2]) : '';
     const e = E(root, lead + html, 'mono', {
       fontSize: px(font), lineHeight: px(font * 1.4), letterSpacing: '.1em', padding: `${px(6)} ${px(14)}`,
       borderRadius: px(6), whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: px(8),
@@ -160,26 +184,36 @@
     Object.assign(e.never.style, { left: 'auto', right: px(22), top: px(70) });
     return e;
   }
-  // The DATA KEY: a key, then its name and number (e.num, which flips over as it rotates) over its cipher (e.cipher)
+  // The DATA KEY: a key, then its name and number (e.num) over its cipher (e.cipher); under them, its lifetime, a
+  // clock and a bar (e.fill) that drains as the key seals payloads (setLife)
   function makeDataKey(root) {
     const e = E(root,
-      `${ICON('key', 26 * U, C.neon, 2)}<div style="text-align:left">`
+      `<div style="display:flex;align-items:center;gap:${px(12)}">${ICON('key', 26 * U, C.neon, 2)}`
+      + '<div style="text-align:left">'
       + `<div class="mono" style="font-size:${px(18)};line-height:${px(24)};letter-spacing:.08em">DATA KEY `
-      + '<span class="num" style="display:inline-block">1</span></div>'
+      + '<span class="num">1</span></div>'
       + `<div class="cipher mono" style="font-size:${px(14)};line-height:${px(18)};letter-spacing:.08em;`
-      + `color:${C.slate}">AES-256-GCM</div></div>`,
+      + `color:${C.slate}">AES-256-GCM</div></div></div>`
+      + `<div style="display:flex;align-items:center;gap:${px(8)}">${ICON('clock', 16 * U, C.neon, 2.2)}`
+      + `<div style="flex:1;height:${px(8)};border-radius:${px(4)};background:rgba(${RGB.neon},.2);overflow:hidden">`
+      + `<div class="fill" style="height:100%;background:${C.neon};transform-origin:left center"></div></div></div>`,
       '', {
-        width: DATA_KEY.w + 'px', height: DATA_KEY.h + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', gap: px(12), background: C.bg, border: `${px(2)} solid ${C.neon}`,
-        borderRadius: px(8),
+        width: DATA_KEY.w + 'px', height: DATA_KEY.h + 'px', display: 'flex', flexDirection: 'column',
+        justifyContent: 'center', gap: px(6), padding: `0 ${px(18)}`, background: C.bg,
+        border: `${px(2)} solid ${C.neon}`, borderRadius: px(8),
       });
     e.num = e.querySelector('.num');
     e.cipher = e.querySelector('.cipher');
+    e.fill = e.querySelector('.fill');
     return e;
+  }
+  // The share of a data key's lifetime left, 0 to 1, as the length of its bar
+  function setLife(e, left) {
+    e.fill.style.transform = `scaleX(${clamp(left).toFixed(4)})`;
   }
   // The tag of a card's data key, a fixed width so it never moves as its text changes: DATA KEY n on its way to the
   // KMS, then WRAPPED KEY n, behind a lock (setKeyTag)
-  const makeKeyTag = root => closeTag(root, '', 'wait', 15, 'var(--violet-solid)');
+  const makeKeyTag = root => closeTag(root, '', 'wait', 15, { solid: 'var(--violet-solid)' });
   function setKeyTag(e, n, wrapped) {
     const icon = ICON(wrapped ? 'lock' : 'key', 16 * U, wrapped ? C.violet : C.neon, 2);
     setHtml(e, `${icon}${wrapped ? 'WRAPPED' : 'DATA'} KEY ${n}`);
@@ -250,13 +284,13 @@
     holdBeforeEnd: END.clear + 0.1,
     subs: [
       { text: "The proxy can also encrypt every payload on its way out, with no change to Worker code." },
-      // the data key's trip to the KMS and the card's way out
+      // a short gap: the first rotation plays under this subtitle
       {
         text: "Payloads are sealed with short-lived data keys, wrapped by a key you own in your <b>KMS</b>.",
-        after: 0.6,
+        after: 0.2,
       },
-      // the second rotation and its card
-      { text: "Data keys rotate on their own, and the proxy never holds your KMS key.", after: 1.0 },
+      // the second rotation, its card, and the stored payloads that keep the first key
+      { text: "Data keys rotate on their own, and the proxy never holds your KMS key.", after: 2.4 },
       // a hold on the alarm
       { text: "If the KMS can't be reached, the call fails: nothing leaves in clear.", after: 1.6 },
       // the pull-back and the round trip, then a hold to read the windows
@@ -295,7 +329,13 @@
       s.linkA = path(s.top, `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + r} V ${breakY}`, C.violet, 2, false);
       s.linkB = path(s.top, `M ${x} ${breakY} V ${y1 - r} Q ${x} ${y1} ${x + r} ${y1} H ${x1}`, C.violet, 2, false);
       s.breakMark = E(root, ICON('x', 22 * U, C.red, 2.6));
+      // the key whose lifetime ran out, under the DATA KEY that replaces it; ROTATED beside them; the new key's tag,
+      // which makes the trip to the KMS, with the KMS's ripples for each rotation
+      s.oldKey = makeDataKey(root);
       s.dataKey = makeDataKey(root);
+      s.rotated = closeTag(root, 'ROTATED', 'ok', 14, { solid: 'var(--neon-solid)', icon: false });
+      s.rotateTag = makeKeyTag(root);
+      s.rotateRipples = [0, 1].map(() => makeRipples(root, 2, RGB.violet));
       s.gate = E(root, '', '', {
         width: GATE.w + 'px', height: PROXY_TUBE.h + 'px', borderRadius: px(4), transformOrigin: 'center top',
         background: `repeating-linear-gradient(-45deg, ${C.red} 0 ${px(10)}, var(--red-solid) ${px(10)} ${px(20)})`,
@@ -322,8 +362,8 @@
       });
       s.fetch = makePacket(root, scrambledHtml(READER_SEEDS[0], IBAN.slice(0, 9), 1), C.violet);
       s.deliver = READERS.map(() => makePacket(root, IBAN.slice(0, 9), C.neon));
-      s.noCode = closeTag(root, 'NO CODE CHANGE', 'ok', 20, 'var(--neon-solid)');
-      s.callFailed = closeTag(root, 'CALL FAILED', 'denied', 18, 'var(--red-solid)');
+      s.noCode = closeTag(root, 'NO CODE CHANGE', 'ok', 20, { solid: 'var(--neon-solid)' });
+      s.callFailed = closeTag(root, 'CALL FAILED', 'denied', 18, { solid: 'var(--red-solid)' });
       s.failClosed = E(root, 'FAIL CLOSED', 'mono', {
         fontSize: px(30), lineHeight: px(40), letterSpacing: '.12em', padding: `${px(10)} ${px(22)}`,
         paddingLeft: `calc(${px(22)} + .12em)`, border: `${px(3)} solid ${C.red}`, borderRadius: px(8),
@@ -465,25 +505,60 @@
       sparkOnPath(s.healSpark, s.linkPath, P(t, healAt + 0.35, 0.5, linear));
       s.healSpark.style.opacity = (+s.healSpark.style.opacity * closeOnly).toFixed(3);
 
-      // the DATA KEY, which shows its cipher once it first seals a card; it rotates twice, its number flipping over,
-      // and dims while the KMS can't be reached
-      const keyPop = backPop(t, c[1] + T1.key);
+      // The data keys: each seals payloads until its lifetime runs out, then the proxy rotates to the next one, at
+      // `rotations`. A key's bar drains over ROTATE.life from drainAt: key 1 has sealed payloads since before it shows;
+      // key 2's bar holds full until c[2], and key 3's stops draining just before c[3], so the presenter stops there
+      // are at rest
+      const rotations = [c[1] + T1.rotate, c[2] + ROTATE.life];
+      const keys = [
+        { ready: -Infinity, drainAt: rotations[0] - ROTATE.life },
+        { ready: rotations[0] + ROTATE.ready, drainAt: c[2] },
+        { ready: rotations[1] + ROTATE.ready, drainAt: rotations[1] + ROTATE.ready, stopAt: c[3] - 0.2 },
+      ];
+      // the share of its lifetime a key has left at t; before it is ready, its bar refills
+      const lifeLeft = key => (t < key.ready ? P(t, key.ready - ROTATE.fillD, ROTATE.fillD)
+        : 1 - (Math.min(t, key.stopAt ?? t) - key.drainAt) / ROTATE.life);
+      const keyI = rotations.filter(at => t >= at).length;
+      const rotatedAt = keyI > 0 ? rotations[keyI - 1] : null;
+
+      // the DATA KEY, which shows its cipher once it first seals a card, pops in again at each rotation and swells as
+      // its bar refills; it dims while the KMS can't be reached
+      const keyPop = backPop(t, rotatedAt === null ? c[1] + T1.key : rotatedAt + ROTATE.pop);
       const keyDown = P(t, snapAt + 0.1, 0.25) * (1 - P(t, healAt, 0.3));
       place(s.dataKey, DATA_KEY.x, DATA_KEY.y, keyPop.s, keyPop.o * (1 - 0.55 * keyDown) * closeOnly);
       s.dataKey.style.borderColor = keyDown > 0.5 ? C.red : C.neon;
       s.dataKey.style.borderStyle = keyDown > 0.5 ? 'dashed' : 'solid';
-      const flipsDone = T2.flips.filter(at => t >= c[2] + at).length;
-      const flipAt = c[2] + T2.flips[Math.max(0, flipsDone - 1)];
-      // the old number turns away in the 0.15 s before each flip, the new one turns in after it
-      const nextAt = c[2] + T2.flips[Math.min(flipsDone, T2.flips.length - 1)];
-      const turnAway = flipsDone < T2.flips.length ? P(t, nextAt - 0.15, 0.15, easeIn) : 0;
-      const turnIn = flipsDone > 0 ? 1 - P(t, flipAt, 0.15, easeOut) : 0;
-      setText(s.dataKey.num, String(1 + flipsDone));
-      const angle = 90 * Math.max(turnAway, turnIn);
-      s.dataKey.num.style.transform = angle > 0 ? `perspective(${px(60)}) rotateX(${angle.toFixed(2)}deg)` : 'none';
-      s.dataKey.style.transform += ` scale(${swell(t, flipAt, flipsDone ? 0.12 : 0).toFixed(4)})`;
+      setText(s.dataKey.num, String(keyI + 1));
+      setLife(s.dataKey, lifeLeft(keys[keyI]));
+      s.dataKey.style.transform += ` scale(${swell(t, keys[keyI].ready - 0.1, 0.08).toFixed(4)})`;
       const firstKeySeal = runAt(RUNS[1]) + RUNS[1].seal;
       s.dataKey.cipher.style.opacity = P(t, firstKeySeal, 0.3);
+
+      // the key whose lifetime ran out turns grey and drops away, its bar empty, before the new one pops in
+      const dim = rotatedAt === null ? 0 : P(t, rotatedAt, 0.15);
+      const drop = rotatedAt === null ? 1 : P(t, rotatedAt, ROTATE.dropD);
+      setText(s.oldKey.num, String(keyI));
+      setLife(s.oldKey, 0);
+      s.oldKey.style.filter = `grayscale(${dim.toFixed(3)})`;
+      place(s.oldKey, DATA_KEY.x, DATA_KEY.y + 48 * drop, 1 - 0.15 * drop,
+        lerp(1, 0.5, dim) * (1 - drop) * closeOnly);
+      if (rotatedAt === null) {
+        place(s.rotated, 0, 0, 1, 0);
+        place(s.rotateTag, 0, 0, 1, 0);
+      } else {
+        // ROTATED shows beside the new key
+        const rotatedTag = popIn(t, rotatedAt + ROTATE.tag);
+        const rotatedO = rotatedTag.o * (1 - P(t, rotatedAt + ROTATE.tag + ROTATE.tagD, 0.2));
+        place(s.rotated, ROTATED_AT.x, ROTATED_AT.y, rotatedTag.s, rotatedO * closeOnly);
+        // the new key's tag goes to the KMS, which wraps it, and docks back into the DATA KEY as its bar refills
+        const goAt = rotatedAt + ROTATE.go;
+        const trip = kmsTrip(s.linkPath, t, goAt, ROTATE);
+        const docking = P(t, rotatedAt + ROTATE.docked, 0.15);
+        setKeyTag(s.rotateTag, keyI + 1, trip.wrapped);
+        const tagPop = popIn(t, goAt);
+        const tagS = tagPop.s * swell(t, trip.wrapAt + 0.05, 0.25) * (1 - 0.6 * docking);
+        place(s.rotateTag, trip.at[0], trip.at[1], tagS, tagPop.o * (1 - docking) * closeOnly);
+      }
 
       // the cards: each rides in from its Worker, in clear, and is sealed in the proxy (the data key flies onto its
       // lock); the first one with the data key sends that key to the KMS, which wraps it; each goes out with its
@@ -522,7 +597,8 @@
         // the data key flies from the DATA KEY onto the card's lock as it seals it
         const flyP = P(t, sealAt - 0.3, 0.3);
         const flyOn = !run.noKey && !run.fails && flyP > 0 && t < sealAt + 0.1;
-        place(fly, lerp(DATA_KEY.x - DATA_KEY.w / 2 + 14, x, flyP), lerp(DATA_KEY.y, y - CARD.h / 2, flyP), 1,
+        const [iconDx, iconDy] = DATA_KEY.icon;
+        place(fly, lerp(DATA_KEY.x + iconDx, x, flyP), lerp(DATA_KEY.y + iconDy, y - CARD.h / 2, flyP), 1,
           flyOn ? 1 : 0);
 
         // its data key's tag: it docks on the card's bottom edge, at once or after the trip to the KMS
@@ -530,19 +606,15 @@
         if (run.noKey || run.fails) {
           place(keyTag, 0, 0, 1, 0);
         } else if (run.wrap) {
-          const goAt = sealAt + WRAP.go, wrapAt = goAt + WRAP.tripD, backAt = wrapAt + WRAP.stay;
-          const dockAt = backAt + WRAP.tripD;
-          let tagAt = alongPath(s.linkPath, P(t, goAt, WRAP.tripD), true);
-          if (t >= backAt) tagAt = alongPath(s.linkPath, P(t, backAt, WRAP.tripD));
-          const docking = P(t, dockAt, WRAP.dockD);
+          const goAt = sealAt + WRAP.go;
+          const trip = kmsTrip(s.linkPath, t, goAt, WRAP);
+          let tagAt = trip.at;
+          const docking = P(t, trip.backAt + WRAP.tripD, WRAP.dockD);
           if (docking > 0) tagAt = [lerp(LINK.x1, dock[0], docking), lerp(LINK.y1, dock[1], docking)];
-          setKeyTag(keyTag, run.key, t >= wrapAt + 0.15);
+          setKeyTag(keyTag, run.key, trip.wrapped);
           const tagPop = popIn(t, goAt);
-          place(keyTag, tagAt[0], tagAt[1], k * tagPop.s * swell(t, wrapAt + 0.05, 0.25), tagPop.o * o);
-          placeRipples(s.wrapRipples, t, wrapAt + 0.05, LINK.x0, LINK.y0, 20, 120, { d: 0.7, step: 0.15 });
-          s.kms.kmsKey.style.transform = `scale(${swell(t, wrapAt, 0.3).toFixed(4)})`;
-          s.kms.kmsKey.style.filter = `drop-shadow(0 0 ${px(14 * win(t, wrapAt - 0.1, wrapAt + 0.4, 0.15))} `
-            + `rgba(${RGB.violet},.9))`;
+          place(keyTag, tagAt[0], tagAt[1], k * tagPop.s * swell(t, trip.wrapAt + 0.05, 0.25), tagPop.o * o);
+          placeRipples(s.wrapRipples, t, trip.wrapAt + 0.05, LINK.x0, LINK.y0, 20, 120, { d: 0.7, step: 0.15 });
         } else {
           setKeyTag(keyTag, run.key, true);
           const tagPop = popIn(t, sealAt + 0.35);
@@ -563,6 +635,16 @@
         rowE.querySelector('.key').style.boxShadow = glowShadow(RGB.neon, keep, { blur: 12, alpha: 0.8 });
         rowE.style.borderColor = keep > 0.5 ? C.neon : C.lineLight;
       });
+      // the KMS key swells and glows as it wraps a data key: the first card's, then each rotation's
+      const wrapRun = RUNS.find(run => run.wrap);
+      const wraps = [runAt(wrapRun) + wrapRun.seal + WRAP.go + WRAP.tripD, ...rotations.map(at => at + ROTATE.wrapAt)];
+      const kmsSwell = wraps.reduce((k, at) => k * swell(t, at, 0.3), 1);
+      const kmsGlow = Math.max(...wraps.map(at => win(t, at - 0.1, at + 0.4, 0.15)));
+      s.kms.kmsKey.style.transform = `scale(${kmsSwell.toFixed(4)})`;
+      s.kms.kmsKey.style.filter = `drop-shadow(0 0 ${px(14 * kmsGlow)} rgba(${RGB.violet},.9))`;
+      rotations.forEach((at, i) => placeRipples(s.rotateRipples[i], t, at + ROTATE.wrapAt + 0.05, LINK.x0, LINK.y0,
+        20, 120, { d: 0.7, step: 0.15 }));
+
       const firstLanded = P(t, runAt(RUNS[0]) + RUNS[0].out + RUNS[0].outD - 0.15, 0.3);
       place(s.listLabel, lerp(LIST_AT.x, WIDE_LIST.x, wide), lerp(LIST_AT.label, WIDE_LIST.label, wide),
         lerp(ROW.closeK, 1, wide), firstLanded * closeOnly);
