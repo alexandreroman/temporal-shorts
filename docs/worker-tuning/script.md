@@ -276,9 +276,9 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     glow and a violet WATCH FIRST badge astride its top border on the right: a
     queue-strip icon (chapter 6's Activity lane shrinks into it), "Backlog
     grows, tasks wait", the three signals stacked, `approximate_backlog_count`
-    rising, `approximate_backlog_age` older, `schedule_to_start_latency` high,
-    and "Find the full limit below"; its glow swells as "A growing backlog" is
-    read. Then four rows, under the SYMPTOM / SIGNAL / FIX headings, each
+    rising, `approximate_backlog_age` older,
+    `activity_schedule_to_start_latency` high, and "Find the full limit
+    below"; its glow swells as "A growing backlog" is read. Then four rows, under the SYMPTOM / SIGNAL / FIX headings, each
     option name on a smaller line under its fix: Slots full, CPU low /
     `worker_task_slots_available` at 0 / More Slots, if downstream keeps up
     (`maxConcurrentActivityTaskExecutions`); Slots free, long wait /

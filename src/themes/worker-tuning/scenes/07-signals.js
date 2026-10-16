@@ -21,7 +21,7 @@
       name: 'A growing backlog', symptom: 'Backlog grows, tasks wait',
       metrics: [
         ['approximate_backlog_count', 'rising'], ['approximate_backlog_age', 'older'],
-        ['schedule_to_start_latency', 'high'],
+        ['activity_schedule_to_start_latency', 'high'],
       ],
       fix: 'Find the full limit below', option: '',
     },
