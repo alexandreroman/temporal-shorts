@@ -24,30 +24,38 @@ const ROW = { w: 344, h: 140 };
 ROW.x0 = FRAME.x0 + ROW.w / 2; // center of the first tile
 ROW.gap = (FRAME.x1 - FRAME.x0 - ROW.w) / 3; // from one tile center to the next
 
-// The steps as a makeStepRow on the line y; each tile also carries an hourglass for the waiting state (place the
-// row with setStep, see placeLaptopRow)
-function makeLaptopRow(root, svg, y) {
-  const row = makeStepRow(root, svg, STEPS, ROW.x0, ROW.gap, y, ROW.w, ROW.h);
-  row.tiles.forEach(e => {
-    e.insertAdjacentHTML('beforeend',
-      '<div class="hg" style="position:absolute;right:10px;top:10px;opacity:0">'
-      + `${ICON('hourglass', 30, C.violet, 2)}</div>`);
-    e.hg = e.querySelector('.hg');
-  });
-  return row;
+// Violet waiting hourglass of size px as markup, hidden, in the top right corner of its parent: right and top are its
+// insets in px (see setHourglass)
+function hourglassMark(size, right, top) {
+  return `<div class="hg" style="position:absolute;right:${right}px;top:${top}px;opacity:0">`
+    + `${ICON('hourglass', size, C.violet, 2)}</div>`;
 }
 // Hourglass turn in degrees: it rests, then flips over every 2.4 s (idle motion, driven by G)
 function hourglassTurn() {
   const flips = Math.floor(G / 2.4), flip = P(G - flips * 2.4, 2.0, 0.4);
   return ((flips + flip) * 180) % 360;
 }
+// An hourglass at opacity o, at its current turn
+function setHourglass(hg, o) {
+  hg.style.opacity = o;
+  hg.style.transform = `rotate(${hourglassTurn()}deg)`;
+}
+// The steps as a makeStepRow on the line y; each tile also carries an hourglass for the waiting state (place the
+// row with setStep, see placeLaptopRow)
+function makeLaptopRow(root, svg, y) {
+  const row = makeStepRow(root, svg, STEPS, ROW.x0, ROW.gap, y, ROW.w, ROW.h);
+  row.tiles.forEach(e => {
+    e.insertAdjacentHTML('beforeend', hourglassMark(30, 10, 10));
+    e.hg = e.querySelector('.hg');
+  });
+  return row;
+}
 // 0 pending, 1 running, 2 done, 3 failed, 4 waiting for a person (violet border, hourglass instead of the spinner)
 function setStep(e, st) {
   const waiting = st === 4;
   stepState(e, waiting ? 1 : st);
   if (waiting) e.spin.style.opacity = 0;
-  e.hg.style.opacity = waiting ? 1 : 0;
-  e.hg.style.transform = `rotate(${hourglassTurn()}deg)`;
+  setHourglass(e.hg, waiting ? 1 : 0);
 }
 // states: one setStep value per tile (see placeStepRow)
 function placeLaptopRow(row, t, a, states, dx = 0, dy = 0) {
@@ -208,8 +216,7 @@ function makeWorkflowApp(p, name) {
     + `background:rgba(${RGB.violet},.2);border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`);
   app.cur = app.card.querySelector('.cur');
   app.lines.forEach(line => {
-    line.insertAdjacentHTML('beforeend',
-      `<div class="hg" style="position:absolute;right:16px;top:6px">${ICON('hourglass', 28, C.violet, 2)}</div>`);
+    line.insertAdjacentHTML('beforeend', hourglassMark(28, 16, 6));
     line.hg = line.querySelector('.hg');
   });
   return app;
@@ -218,9 +225,7 @@ function makeWorkflowApp(p, name) {
 // bright, no mark yet). fall (0 to 1) drops the line out of the card when the app crashes.
 function setWfLine(app, i, state, fall = 0) {
   setCardLine(app, i, state, fall);
-  const hourglass = app.lines[i].hg;
-  hourglass.style.opacity = state === 'waiting' ? 1 : 0;
-  hourglass.style.transform = `rotate(${hourglassTurn()}deg)`;
+  setHourglass(app.lines[i].hg, state === 'waiting' ? 1 : 0);
 }
 // Cursor bar on line pos (fractional while it moves from one line to the next), with opacity o
 function setWfCursor(app, pos, o) {
@@ -279,6 +284,6 @@ function setRowTag(history, i, t, label, at, o) {
 // The "waiting for a Signal" line pulses while shown
 function setWaitLine(history, o) {
   history.wait.style.opacity = o * (0.8 + 0.2 * Math.sin(G * 4)); // never below 0.6, so it stays readable
-  history.wait.hg.style.transform = `rotate(${hourglassTurn()}deg)`;
+  setHourglass(history.wait.hg, 1);
 }
 
