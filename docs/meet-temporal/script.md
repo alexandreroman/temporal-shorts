@@ -50,6 +50,12 @@ its visuals.
   `src/assets/languages/README.md`
 - https://docs.temporal.io/cloud/security (the Temporal Cloud claims of
   chapter 05)
+- https://docs.temporal.io/cloud/connectivity ("Namespace access is always
+  securely authenticated via API keys or mTLS, regardless of how you
+  choose to connect": how chapter 05's connection is authenticated and
+  where it runs)
+- https://temporal.io/blog/10-reasons-your-ciso-will-love-temporal-cloud
+  ("No inbound connectivity, ever": chapter 05's OUTBOUND ONLY)
 - https://temporal.io/blog/samars-journey (Cadence became the standard way
   to build reliable stateful apps inside Uber)
 - https://github.com/temporalio/temporal (README: "Temporal is a mature
