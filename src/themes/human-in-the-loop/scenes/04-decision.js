@@ -13,14 +13,14 @@
   const MARIA = { x: (APP.x - APP.w / 2 + CARD.x - APPROVAL_CARD.w / 2) / 2, y: APP.y - AVATAR.dy };
   const TICKET_X = STRIP.x + 265; // 30 px from the strip's right edge, like the clock from its left edge
   // the Signal lands on the left part of the row it becomes, in the slot of the waiting line
-  const SIGNAL_LANDING = { x: HIST.x - 180, y: historyRowY(3) };
+  const SIGNAL_LANDING = { x: ORDER_HIST.x - 180, y: historyRowY(3) };
   // NEW INSTANCE: on the top edge of instance B's panel, centered in the free space between its name (right edge
   // near x 362) and its longest status, TAKING OVER (left edge near x 720), about 60 px clear of both; 16 px low, so
   // it keeps 20 px of clear space under the step row. Fixed even width, so it rests on whole pixels (solid: the
   // panel border does not show through)
   const NEW_TAG = { x: 540, y: APP.y - APP.h / 2 + 16, w: 240 };
   // the order chip flies from the "Workflow started" history row to instance B's status, at the panel's top right
-  const CHIP_FROM = { x: HIST.x - 180, y: historyRowY(0) };
+  const CHIP_FROM = { x: ORDER_HIST.x - 180, y: historyRowY(0) };
   const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 36 };
   scene({
     chapter: 4, title: 'The decision arrives',
@@ -134,7 +134,7 @@
       // Rows 1 to 3 are replayed; the Signal arrived after them, so it is new to the Workflow: it keeps its SAVED
       // tag, which still pops when the row is read.
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, 1);
-      place(s.history, HIST.x, HIST.y, 1, 1);
+      place(s.history, ORDER_HIST.x, ORDER_HIST.y, 1, 1);
       s.history.rows.forEach((_, i) => {
         showRow(s.history.rows[i], i < 3 ? 1 : P(t, saved[i] - 0.1, 0.3));
         const isRead = i < 4 && t >= replay[i];

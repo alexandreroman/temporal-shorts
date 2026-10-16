@@ -262,7 +262,7 @@
       const webuiPop = backPop(t, c[1] + T1.webui);
       const move = P(t, c[3] + T3.move, T3.moveD);
       const stripIn = P(t, c[2] + T2.strip, T2.stripD);
-      const column = [CLOSE.column.x, Math.round(lerp(HIST.y, CLOSE.ui.y, stripIn))];
+      const column = [CLOSE.column.x, Math.round(lerp(STORED_HIST.y, CLOSE.ui.y, stripIn))];
       const [winX, winY] = bezier([column, [column[0] - 400, column[1] - 120],
         [BROWSER.x + 400, BROWSER.y - 60], [BROWSER.x, BROWSER.y]], move);
       place(s.webui, winX, winY, webuiPop.s * lerp(1, BROWSER.k, move), webuiPop.o * done);

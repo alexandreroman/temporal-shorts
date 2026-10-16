@@ -8,8 +8,8 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // the docking, in seconds from c[0], in the close shot the whip lands on (HIST_SHOT): the history grows from the
-  // lane's to HIST while the card grows from its tube scale into the chip's place (at, d), and what that shot crops
-  // dims (dim, dimD); the rows slide in, then their SAVED tags, one after the other (rows, saved, step)
+  // lane's to STORED_HIST while the card grows from its tube scale into the chip's place (at, d), and what that shot
+  // crops dims (dim, dimD); the rows slide in, then their SAVED tags, one after the other (rows, saved, step)
   const T0 = { at: -0.1, d: 0.9, dim: -0.1, dimD: 0.6, ns: -0.1, rows: 0.6, saved: 1.3, step: 0.15 };
   // from c[1]: the tube fades; TEMPORAL widens into its close layout (close, closeD); the Web UI and the viewers
   // come in; READABLE slams onto the chip; the lens scans the IBAN; the viewers' eyes turn to it

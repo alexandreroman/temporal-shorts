@@ -42,7 +42,7 @@
         tag: tag(root, label, 'violet'),
         stem: E(root, '', '', { width: '2px', height: '30px' }),
       }));
-      s.history = makeHistory(root, TIMER_ROWS, CARD.w, CARD.h);
+      s.history = makeSignalHistory(root, TIMER_ROWS, CARD.w, CARD.h);
       s.durable = tag(root, 'Timers are durable too', 'uv big');
     },
     update(t, c, s) {

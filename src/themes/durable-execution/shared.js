@@ -71,9 +71,9 @@ function setOrderStatus(e, text, color = C.slate) {
 const TEMPORAL_HEADER = { ...TEMPORAL_HEADER_LARGE, note: 'Outside the Workers' };
 
 // ---------- Event History card
-// Row i spans HIST.row0 + i * HIST.rowGap (from the card top) over HIST.rowGap px; the rows below a crash line
-// sit lower, see makeHistory.
-const HIST = { row0: 76, rowGap: 56 };
+// Row i spans STEP_HIST.row0 + i * STEP_HIST.rowGap (from the card top) over STEP_HIST.rowGap px; the rows below a
+// crash line sit lower, see makeStepHistory.
+const STEP_HIST = { row0: 76, rowGap: 56 };
 const uvName = fn => `<span style="color:${C.uv}">${fn}</span>`;
 const HISTORY_ROWS = [
   'Workflow started: order #1042',
@@ -84,22 +84,22 @@ const HISTORY_ROWS = [
 // from crashRow on sit crashGap px lower, leaving room for the "WORKER CRASHED HERE" line (see markCrash); without
 // one, the card has no crash marks. Returns the makeHistoryCard card: its tags are centered on their rows (see
 // setHistoryTag); card.rowTop(i) is the top of row i.
-function makeHistory(p, rows, w, h, crashRow = null, crashGap = 0) {
+function makeStepHistory(p, rows, w, h, crashRow = null, crashGap = 0) {
   const crashed = crashRow !== null;
-  const rowTop = i => HIST.row0 + i * HIST.rowGap + (crashed && i >= crashRow ? crashGap : 0);
+  const rowTop = i => STEP_HIST.row0 + i * STEP_HIST.rowGap + (crashed && i >= crashRow ? crashGap : 0);
   let crash = null;
   if (crashed) {
     crash = {
-      keptTop: HIST.row0 - 2, keptH: crashRow * HIST.rowGap + 4,
-      cutTop: HIST.row0 + crashRow * HIST.rowGap + crashGap / 2 - 1,
+      keptTop: STEP_HIST.row0 - 2, keptH: crashRow * STEP_HIST.rowGap + 4,
+      cutTop: STEP_HIST.row0 + crashRow * STEP_HIST.rowGap + crashGap / 2 - 1,
       label: 'WORKER CRASHED HERE', labelX: '58%', labelFont: 14,
     };
   }
   // tags 24 px from the card's right edge, 10 px inside the tinted kept block: REUSED, NOT RE-RUN keeps about
   // 20 px from the longest row text it sits on (shipPackage: tracking 1Z-48)
   return makeHistoryCard(p, rows, {
-    w, h, rowTop, rowH: HIST.rowGap, padY: 0, tagTop: i => rowTop(i) + HIST.rowGap / 2, tagRight: 24,
-    tag: { border: false }, crash, scanH: HIST.rowGap,
+    w, h, rowTop, rowH: STEP_HIST.rowGap, padY: 0, tagTop: i => rowTop(i) + STEP_HIST.rowGap / 2, tagRight: 24,
+    tag: { border: false }, crash, scanH: STEP_HIST.rowGap,
   });
 }
 // Row i slides in from the right with progress p, on whole pixels
@@ -154,7 +154,7 @@ const EH = {
 // Stage y of code line i and of history row i (rows below the crash line sit EH.crashGap lower)
 const ehLineY = i => EH.worker.y + EH.code.dy - (EH.code.padY * 2 + WORKFLOW_CODE.length * EH.code.lineH) / 2
   + EH.code.padY + (i + 0.5) * EH.code.lineH;
-const ehRowY = i => EH.hist.top + HIST.row0 + (i + 0.5) * HIST.rowGap + (i >= EH.crashRow ? EH.crashGap : 0);
+const ehRowY = i => EH.hist.top + STEP_HIST.row0 + (i + 0.5) * STEP_HIST.rowGap + (i >= EH.crashRow ? EH.crashGap : 0);
 // Code line and history row of step i (ORDER_STEPS[i]): its await line, and the row after "Workflow started"
 const ehStepLine = i => awaitLine(WORKFLOW_CODE, i);
 const ehStepRow = i => i + 1;
@@ -179,7 +179,7 @@ function makeEventHistoryShot(root, workerNames) {
   shot.order = makeOrderStatus(root);
   shot.order.style.width = EH.order.w + 'px';
   shot.temporal = makeTemporalPanel(root, EH.temporal.w, EH.temporal.h, TEMPORAL_HEADER);
-  shot.hist = makeHistory(root, HISTORY_ROWS, EH.hist.w, EH.hist.h, EH.crashRow, EH.crashGap);
+  shot.hist = makeStepHistory(root, HISTORY_ROWS, EH.hist.w, EH.hist.h, EH.crashRow, EH.crashGap);
   return shot;
 }
 // Places everything but the Worker panels (o: opacity of each part; [sx, sy]: shake of the Worker side)

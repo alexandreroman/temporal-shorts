@@ -567,9 +567,9 @@ function setAlarmTag(e, label) {
 // ---------- the Event History that stores the payload, and the Web UI (chapters 3 and 4)
 // Inside TEMPORAL, at camera rest: the stored Event History, with the Web UI's place (LANE.ui) under it; in the close
 // layout (CLOSE), the history on the left and a column on its right, the Web UI over the viewers (chapter 3) or the
-// Search Attributes (chapter 4). The Event History grows from the lane's (LANE.history) to HIST, 28 px clear of the
-// TLS tube's mouth on its left.
-const HIST = { x: 1480, y: 460, w: 560, h: 398 };
+// Search Attributes (chapter 4). The Event History grows from the lane's (LANE.history) to STORED_HIST, 28 px clear of
+// the TLS tube's mouth on its left.
+const STORED_HIST = { x: 1480, y: 460, w: 560, h: 398 };
 // Its rows; row 2 holds the payload. HIST_ROW: each row's top in the card, the row height and the text size.
 const HIST_ROWS = [
   'Workflow started: transfer', 'Activity completed: debitAccount', 'Activity scheduled: creditAccount',
@@ -583,12 +583,12 @@ const HIST_ROW = { tops: [56, 92, 352], h: 32, font: 18 };
 const HIST_CHIP = { k: 0.8 };
 HIST_CHIP.w = PAYLOAD_IN_WORKER.w * HIST_CHIP.k;
 HIST_CHIP.h = payloadLayout(PAYLOAD_IN_WORKER.w).h * HIST_CHIP.k;
-HIST_CHIP.x = HIST.x - HIST.w / 2 + 70 + HIST_CHIP.w / 2;
-HIST_CHIP.y = HIST.y - HIST.h / 2 + 143 + HIST_CHIP.h / 2;
+HIST_CHIP.x = STORED_HIST.x - STORED_HIST.w / 2 + 70 + HIST_CHIP.w / 2;
+HIST_CHIP.y = STORED_HIST.y - STORED_HIST.h / 2 + 143 + HIST_CHIP.h / 2;
 HIST_CHIP.tagY = HIST_CHIP.y + HIST_CHIP.h / 2 + 3;
 // The close shot that reads the small text of TEMPORAL, [x, y, scale] for shot(): the stored history, centered; at 1.6
 // the chip's values render at 19.7 px and its labels at 14.5 px. TEMPORAL's zone, cut by the frame there, dims.
-const HIST_SHOT = [HIST.x, HIST.y, 1.6];
+const HIST_SHOT = [STORED_HIST.x, STORED_HIST.y, 1.6];
 // The close layout of TEMPORAL in HIST_SHOT, when the message needs more than the history: rather than the camera
 // moving, the content comes to it. The zone widens on both sides (zone: its left edge x and width; it narrows back
 // before any wider shot), the history slides left (hist: its center x) and a column comes in on its right, the Web
@@ -597,16 +597,16 @@ const HIST_SHOT = [HIST.x, HIST.y, 1.6];
 const CLOSE = {
   zone: { x: 956, w: 1048 }, hist: { x: 1260 }, column: { x: 1830 },
   // the Web UI and the slot, 24 px apart, centered on the history
-  ui: { y: HIST.y - (LANE.ui.h + 24) / 2 }, slot: { y: HIST.y + (LANE.ui.h + 24) / 2 },
+  ui: { y: STORED_HIST.y - (LANE.ui.h + 24) / 2 }, slot: { y: STORED_HIST.y + (LANE.ui.h + 24) / 2 },
 };
 // How far the history and its chip move left in the close layout, at progress `close` (0 to 1)
-const closeDx = close => Math.round(lerp(0, CLOSE.hist.x - HIST.x, close));
-// The stored Event History: the white card (HIST) with its rows, a SAVED tag per row and the lane history's EMPTY
-// note, then its payload chip (card.chip, a makePayload). placeStoredHistory() shows them; the chip's state
+const closeDx = close => Math.round(lerp(0, CLOSE.hist.x - STORED_HIST.x, close));
+// The stored Event History: the white card (STORED_HIST) with its rows, a SAVED tag per row and the lane history's
+// EMPTY note, then its payload chip (card.chip, a makePayload). placeStoredHistory() shows them; the chip's state
 // (setPayload) stays with the scenes.
 function makeStoredHistory(root) {
   const card = makeHistoryCard(root, HIST_ROWS, {
-    w: HIST.w, h: HIST.h, font: HIST_ROW.font, rowH: HIST_ROW.h, rowTop: i => HIST_ROW.tops[i],
+    w: STORED_HIST.w, h: STORED_HIST.h, font: HIST_ROW.font, rowH: HIST_ROW.h, rowTop: i => HIST_ROW.tops[i],
     tagTop: i => HIST_ROW.tops[i] + (HIST_ROW.h - 24) / 2, tagRight: 20, tag: { font: 12, icon: 12 },
   });
   card.tags.forEach(tag => {
@@ -617,16 +617,17 @@ function makeStoredHistory(root) {
   card.chip = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
   return card;
 }
-// grow (0 to 1): the card grows from the lane's history, EMPTY, to HIST, as EMPTY fades; o: the opacity of the card;
-// rows: the progress of each row as it slides in (showRow); saved: the opacity of each row's SAVED tag; chip: the
+// grow (0 to 1): the card grows from the lane's history, EMPTY, to STORED_HIST, as EMPTY fades; o: the opacity of the
+// card; rows: the progress of each row as it slides in (showRow); saved: the opacity of each row's SAVED tag; chip: the
 // opacity of the chip, which rests at HIST_CHIP; close: the slide of both into the close layout (closeDx).
 function placeStoredHistory(card, { grow = 1, o = 1, rows = [1, 1, 1], saved = [1, 1, 1], chip = 1, close = 0 } = {}) {
   const { history } = LANE;
   // even sizes, so the card rests on whole pixels
-  card.style.width = 2 * Math.round(lerp(history.w, HIST.w, grow) / 2) + 'px';
-  card.style.height = 2 * Math.round(lerp(history.h, HIST.h, grow) / 2) + 'px';
+  card.style.width = 2 * Math.round(lerp(history.w, STORED_HIST.w, grow) / 2) + 'px';
+  card.style.height = 2 * Math.round(lerp(history.h, STORED_HIST.h, grow) / 2) + 'px';
   const dx = closeDx(close);
-  place(card, Math.round(lerp(history.x, HIST.x, grow)) + dx, Math.round(lerp(history.y, HIST.y, grow)), 1, o);
+  const x = Math.round(lerp(history.x, STORED_HIST.x, grow)) + dx;
+  place(card, x, Math.round(lerp(history.y, STORED_HIST.y, grow)), 1, o);
   card.empty.style.opacity = 1 - clamp(grow * 3);
   card.rows.forEach((row, i) => showRow(row, rows[i], 26, true));
   card.tags.forEach((tag, i) => {

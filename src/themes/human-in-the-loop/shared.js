@@ -241,15 +241,15 @@ const HISTORY = [
 const HROW = { top: 74, gap: 52, h: 40 }; // rows inside an Event History card: first row top, spacing, height
 const rowTop = i => HROW.top + i * HROW.gap;
 // the chapter 3 and 4 Event History card, in the Temporal panel
-const HIST = historyInset(WF_LAYOUT.temporal);
+const ORDER_HIST = historyInset(WF_LAYOUT.temporal);
 // stage y of the middle of row i in that card, where things flying into the history land
-const historyRowY = i => HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2;
+const historyRowY = i => ORDER_HIST.y - ORDER_HIST.h / 2 + rowTop(i) + HROW.h / 2;
 // Kinds of the row tags (see setRowTag): SAVED (neon on black), REPLAYED (white on UV, the look of reused rows),
 // STILL WAITING (white on violet)
 const ROW_TAG_KINDS = { 'SAVED': 'saved', 'REPLAYED': 'reused', 'STILL WAITING': 'waiting' };
 // makeHistoryCard with this theme's sizes: numbered rows (Signal rows in UV) and one status tag per row;
 // scanH: height of the row highlight, null for none
-function makeHistory(p, rows, w, h, scanH = null) {
+function makeSignalHistory(p, rows, w, h, scanH = null) {
   return makeHistoryCard(p, rows, {
     uvRow: i => rows[i].startsWith('Signal'), w, h, headerFont: 20, rowTop, font: 23, rowH: HROW.h,
     tagTop: i => rowTop(i) + 4, tag: { font: 18, padX: 12, icon: 18, border: false }, scanH,
@@ -258,7 +258,7 @@ function makeHistory(p, rows, w, h, scanH = null) {
 // The laptop order history of chapters 3 and 4, with a scan highlight for the replay, the pulsing line shown in
 // the slot of row 4 while the Workflow waits for the Signal, and WORKFLOW COMPLETE 26 px under the rows
 function makeOrderHistory(p) {
-  const history = makeHistory(p, HISTORY, HIST.w, HIST.h, HROW.h + 6);
+  const history = makeSignalHistory(p, HISTORY, ORDER_HIST.w, ORDER_HIST.h, HROW.h + 6);
   // UV, as light violet is too faint on white
   history.wait = E(history,
     `<span class="hg" style="display:inline-block">${ICON('hourglass', 22, C.uv, 2.2)}</span>`

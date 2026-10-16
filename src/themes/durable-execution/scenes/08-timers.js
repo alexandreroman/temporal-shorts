@@ -39,7 +39,7 @@
   const WAKE_X = 740;
   const lineY = i => CODE_CARD_STYLE.y - (CODE_CARD_STYLE.padY * 2 + WAIT_CODE.length * CODE_CARD_STYLE.lineH) / 2
     + CODE_CARD_STYLE.padY + (i + 0.5) * CODE_CARD_STYLE.lineH;
-  const rowY = i => HIST_CARD.y - HIST_CARD.h / 2 + HIST.row0 + (i + 0.5) * HIST.rowGap;
+  const rowY = i => HIST_CARD.y - HIST_CARD.h / 2 + STEP_HIST.row0 + (i + 0.5) * STEP_HIST.rowGap;
 
   // Worker status shown in the block: label, icon (spin: a running spinner) and colors
   const STATUS = {
@@ -137,7 +137,7 @@
       s.spin = makeLineBadge(s.code, 0, spinnerRing(26), 'none');
       s.status = makeStatusBlock(root);
       s.temporal = makeTemporalPanel(root, EH.temporal.w, EH.temporal.h, TEMPORAL_HEADER);
-      s.hist = makeHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h);
+      s.hist = makeStepHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h);
       s.timer = makeTimerBlock(root);
       s.chips = {
         ship: makeResultCard(root), start: makeResultCard(root, true, 'START TIMER'),
