@@ -172,7 +172,7 @@
           const d = Math.hypot(x - hub.x, y - hub.y);
           const ux = (x - hub.x) / d, uy = (y - hub.y) / d;
           const link = s.links[i][k];
-          link.setAttribute('d', `M ${hub.x + ux * (HUB_SIZE / 2 + 6)} ${hub.y + uy * (HUB_SIZE / 2 + 6)} `
+          setD(link, `M ${hub.x + ux * (HUB_SIZE / 2 + 6)} ${hub.y + uy * (HUB_SIZE / 2 + 6)} `
             + `L ${x - ux * (BUBBLE.size / 2 + 6)} ${y - uy * (BUBBLE.size / 2 + 6)}`);
           link.style.opacity = bp.o * rest;
         });

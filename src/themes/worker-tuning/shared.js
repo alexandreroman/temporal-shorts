@@ -753,7 +753,7 @@ function placePollers(dg, t, state, layout, flights, o) {
       e.style.background = glow > 0.5 ? C.violet : 'var(--surface)';
       place(e, x, y, shown.s, shown.o * o);
       const line = dg.pollLines[lane][i];
-      line.setAttribute('d', roundedPath(pollRoute(col.laneY, x - size / 2 - 3, y), GRID.corner));
+      setD(line, roundedPath(pollRoute(col.laneY, x - size / 2 - 3, y), GRID.corner));
       draw(line, 1, polling[lane] && i < col.n ? shown.o * o : 0);
     });
   }
