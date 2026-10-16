@@ -61,8 +61,9 @@ something from elsewhere, the content comes to the camera. From the intro
 to ch8, and from ch11 to ch12, each chapter ends on the next one's first
 frame (a match cut): a whip carries the card from ch2 into ch3, and a
 rewind whip carries it from ch3 back to the Worker for ch4. Ch9 and ch10
-leave the lane for Temporal Cloud's side alone: the engine's zoom-through
-brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
+leave the lane for Temporal Cloud's side alone: the camera zoom-through
+(setCamera) brings ch9 in from ch8, carries it into ch10, and ch10 into the
+recap.
 
 ### Sources
 
@@ -86,16 +87,15 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
   own security: the chapter shows Temporal Cloud only, and claims its mTLS
   for Cloud alone.
 - Compliance: <https://trust.temporal.io/> (Temporal Trust Center, updated
-  May 29, 2026): SOC 2 Type II, GDPR, HIPAA and CCPA (CCPA comes from the badge here: the
-  docs security page lists SOC 2 Type 2, GDPR and HIPAA only); "Temporal Cloud —
-  Certifications: SOC 2 Type 2, HIPAA"; "One or more annual third-party
-  audit(s)" and "Annual third-party penetration testing"; the Trust Center
-  "is regularly updated to reflect the latest audit results" and lists a
-  SOC 2 Type 2 report among its documents (no pen test report is said to
-  be published). The security model page states
-  "Temporal Technologies is SOC 2 Type 2 certified and compliant with GDPR
-  and HIPAA regulations". No other framework, no customer or third-party
-  logo.
+  May 29, 2026): SOC 2 Type II, GDPR, HIPAA and CCPA (CCPA comes from the
+  badge here: the docs security page lists SOC 2 Type 2, GDPR and HIPAA only);
+  "Temporal Cloud — Certifications: SOC 2 Type 2, HIPAA"; "One or more annual
+  third-party audit(s)" and "Annual third-party penetration testing"; the Trust
+  Center "is regularly updated to reflect the latest audit results" and lists a
+  SOC 2 Type 2 report among its documents (no pen test report is said to be
+  published). The security model page states "Temporal Technologies is SOC 2
+  Type 2 certified and compliant with GDPR and HIPAA regulations". No other
+  framework, no customer or third-party logo.
 - Temporal Cloud security model:
   <https://docs.temporal.io/evaluate/cloud/security>: Temporal "does not
   run or manage your applications or Workers"; the Data Converter encrypts
@@ -380,21 +380,21 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 - **2:53** With Temporal Nexus, your Workflow can call another team's
   service, across Namespaces, through an Endpoint.
-  - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
-    (the official lockup followed by "Cloud") holding three Namespaces: the
+  - Visuals: The camera zoom-through (setCamera) brings in a wide Temporal Cloud
+    zone (the official lockup followed by "Cloud") holding three Namespaces: the
     payments Namespace on the left, lit violet, with the analytics Namespace
-    under it, and the fraud team's Namespace on the right. As the subtitle
-    names them, a WORKFLOW tile pops into payments (type `TransferWorkflow`,
-    endpoint `fraud-screening`, operation `screenTransfer`), then a HANDLER
-    tile into fraud (operation `screenTransfer`, starts workflow
-    `ScreenWorkflow`, activity `scoreRisk`) with a TASK QUEUE `fraud-tq`
-    across the bottom of fraud. The Endpoint rises between them: a NEXUS
-    ENDPOINT tile (`fraud-screening`) over an ALLOWLIST tile (`payments`),
-    and a boundary draws down their center axis between them, in the
-    dashed slate look of YOUR ENVIRONMENT's edge (2 px, 10 px dashes 8 px
-    apart): nothing crosses it but through the Endpoint. The Namespaces
-    glow at "across Namespaces", and the transfer Workflow's call line
-    draws from the middle of its tile up to the boundary.
+    under it, and the fraud team's Namespace on the right. As the subtitle names
+    them, a WORKFLOW tile pops into payments (type `TransferWorkflow`, endpoint
+    `fraud-screening`, operation `screenTransfer`), then a HANDLER tile into
+    fraud (operation `screenTransfer`, starts workflow `ScreenWorkflow`,
+    activity `scoreRisk`) with a TASK QUEUE `fraud-tq` across the bottom of
+    fraud. The Endpoint rises between them: a NEXUS ENDPOINT tile
+    (`fraud-screening`) over an ALLOWLIST tile (`payments`), and a boundary
+    draws down their center axis between them, in the dashed slate look of YOUR
+    ENVIRONMENT's edge (2 px, 10 px dashes 8 px apart): nothing crosses it but
+    through the Endpoint. The Namespaces glow at "across Namespaces", and the
+    transfer Workflow's call line draws from the middle of its tile up to the
+    boundary.
 - **3:01** The Endpoint lets in only the Namespaces on its allowlist, and
   callers never need to know what is behind it.
   - Visuals: Dramatic beat: a call from analytics races up to the gate and
@@ -431,14 +431,14 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 - **3:17** Temporal Cloud is SOC 2 Type 2 certified and compliant
   with HIPAA, GDPR and CCPA.
-  - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
-    (the official lockup followed by "Cloud") holding four empty dashed
-    seal slots. Dramatic beat: as the subtitle names them, four round
-    violet seals stamp onto the slots one at a time at a steady rhythm
-    (0.6 s apart, the first at "SOC 2 Type 2"), each falling from
-    twice its size, tilted, and landing flat with a press, a violet glow,
-    neon ripples and a jolt of the frame: SOC 2 TYPE 2 (CERTIFIED), then
-    HIPAA, GDPR and CCPA (COMPLIANT), each with a neon check.
+  - Visuals: The camera zoom-through (setCamera) brings in a wide Temporal Cloud
+    zone (the official lockup followed by "Cloud") holding four empty dashed
+    seal slots. Dramatic beat: as the subtitle names them, four round violet
+    seals stamp onto the slots one at a time at a steady rhythm (0.6 s apart,
+    the first at "SOC 2 Type 2"), each falling from twice its size, tilted, and
+    landing flat with a press, a violet glow, neon ripples and a jolt of the
+    frame: SOC 2 TYPE 2 (CERTIFIED), then HIPAA, GDPR and CCPA (COMPLIANT), each
+    with a neon check.
 - **3:24** Third parties audit and pen test it every year: audit results
   are in the Temporal Trust Center.
   - Visuals: The zone moves up with its seals and a TRUST CENTER card

@@ -1,12 +1,12 @@
 // ===================== 10. AUDITED AND CERTIFIED
-// Temporal Cloud's compliance, on TEMPORAL's side: a wide Temporal Cloud zone (the official lockup followed by
-// "Cloud") holds four empty seal slots. The dramatic beat: as the first subtitle names them, four seals stamp onto
-// their slots one at a time, SOC 2 TYPE 2 (certified), then HIPAA, GDPR and CCPA (compliant), each slamming down
-// with a press, neon ripples and a jolt. For the second subtitle the zone moves up and a TRUST CENTER card rises in
-// under it, listing the SOC 2 Type 2 report over an empty slot; an ANNUAL AUDIT and an ANNUAL PEN TEST tag pop in
-// on its sides, each under a THIRD PARTY caption. The audit tag sends its results along a dashed line into the empty
-// slot, and the card lights up as the Trust Center is named. The camera holds; the engine's zoom-through brings the
-// scene in and plays into the recap.
+// Temporal Cloud's compliance, on TEMPORAL's side: a wide Temporal Cloud zone (the official lockup followed by "Cloud")
+// holds four empty seal slots. The dramatic beat: as the first subtitle names them, four seals stamp onto their slots
+// one at a time, SOC 2 TYPE 2 (certified), then HIPAA, GDPR and CCPA (compliant), each slamming down with a press, neon
+// ripples and a jolt. For the second subtitle the zone moves up and a TRUST CENTER card rises in under it, listing the
+// SOC 2 Type 2 report over an empty slot; an ANNUAL AUDIT and an ANNUAL PEN TEST tag pop in on its sides, each under a
+// THIRD PARTY caption. The audit tag sends its results along a dashed line into the empty slot, and the card lights up
+// as the Trust Center is named. The camera zoom-through (setCamera) brings the scene in and plays into the recap; in
+// between, the camera holds.
 // The block keeps every name declared in this file local to this scene.
 {
   // seconds after c[0] when each seal lands: SOC 2 Type 2 as the subtitle names it, at its position at 16
@@ -162,7 +162,7 @@
     update(t, c, s) {
       const hits = STAMP_AT.map(at => c[0] + at);
 
-      // the camera holds; each stamp jolts the frame. The engine's zoom-through in and out.
+      // the camera holds; each stamp jolts the frame. The camera zoom-through (setCamera) in and out.
       const jolt = hits.map(hit => shake(t, hit, STAMP.shake, STAMP.shakeD));
       const dx = jolt.reduce((sum, [x]) => sum + x, 0), dy = jolt.reduce((sum, [, y]) => sum + y, 0);
       setCamera(s.cam, t, this.dur, { dx, dy });

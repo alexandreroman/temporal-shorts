@@ -1,8 +1,8 @@
 // ===================== 12. WHAT YOU CAN BUILD
 // What else the same protection fits: one tile per kind of sensitive data, each with an example, lit as the subtitle
 // names it. Opens on chapter 11's last frame, the recap tiles at rest with their padlocks shut (a match cut), and flips
-// them over in 3D, one at a time and in the same slots, into the use cases. The default fade-out plays the engine's
-// zoom-through into the outro.
+// them over in 3D, one at a time and in the same slots, into the use cases. The default fade-out plays the camera
+// zoom-through (setCamera) into the outro.
 // The block keeps every name declared in this file local to this scene.
 {
   useCaseScene({
