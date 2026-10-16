@@ -69,22 +69,17 @@
   };
 
   // Simple syntax colors, as in chapter 6: keywords and decorators violet, types light UV, the rest ink or slate
-  const KEYWORDS = new Set(['class', 'async', 'def', 'export', 'interface']);
-  const TYPES = new Set(['Trip', 'HarnessState', 'Item', 'TravelAgent', 'PlanTrip', 'Itinerary', 'int', 'number',
-    'list']);
-  const tokenColor = token => {
-    if (token.startsWith('@') || KEYWORDS.has(token)) return C.violet;
-    if (TYPES.has(token)) return '#A5ABFF';
-    if (/^\w/.test(token)) return C.ink;
-    return C.slate;
-  };
+  const KEYWORDS = ['class', 'async', 'def', 'export', 'interface'];
+  const TYPES = ['Trip', 'HarnessState', 'Item', 'TravelAgent', 'PlanTrip', 'Itinerary', 'int', 'number', 'list'];
+  // the generated TypeScript may hold generics (Array<Item>), so the code is escaped
   const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const codeHtml = line => line.replace(/@[\w.]+|\w+|[^\w\s]+/g,
-    token => `<span style="color:${tokenColor(token)}">${escapeHtml(token)}</span>`);
+  const codeHtml = line => codeTokens(line, KEYWORDS, TYPES)
+    .map(([text, color]) => `<span style="color:${color}">${escapeHtml(text)}</span>`)
+    .join('');
 
-  // code card: a header with the file name and a tag on the right, a rule, then the code lines. e.highlight(range,
-  // tint, color) adds a line highlight behind the code, hidden until update() shows it.
-  const makeCodeCard = (p, fileName, tag, tagColor, lines, h) => {
+  // source card: a header with the file name and a tag on the right, a rule, then the code lines.
+  // e.highlight(range, tint, color) adds a line highlight behind the code, hidden until update() shows it.
+  const makeSourceCard = (p, fileName, tag, tagColor, lines, h) => {
     const e = E(p,
       `<div style="position:absolute;left:24px;right:24px;top:0;height:${CODE.head}px;display:flex;`
       + `align-items:center;gap:10px">${ICON('code', 20, C.slate, 2)}`
@@ -172,10 +167,10 @@
 
       // left: the agent's Python class, the generated types arrow, the generated TypeScript
       s.lblL = E(root, 'Your agent', 'lbl');
-      s.python = makeCodeCard(root, 'travel_agent.py', 'Python', C.slate, PYTHON, PY.h);
+      s.python = makeSourceCard(root, 'travel_agent.py', 'Python', C.slate, PYTHON, PY.h);
       s.gen = path(s.svg, `M ${CODE.x} ${GEN.top} L ${CODE.x} ${GEN.bottom}`, C.violet, 3, true);
       s.genL = E(root, 'Generated types', 'lbl', { fontSize: '16px', color: C.ink });
-      s.ts = makeCodeCard(root, 'client_sdk/TravelAgent.ts', 'Generated', C.violet, TYPESCRIPT, TS.h);
+      s.ts = makeSourceCard(root, 'client_sdk/TravelAgent.ts', 'Generated', C.violet, TYPESCRIPT, TS.h);
       // the highlights of each mirrored pair, one in each card, and the UV highlights of the bound Trip fields
       s.pairs = PAIRS.map(pair => [
         s.python.highlight(pair.py, PAIR_TINT, C.violet),

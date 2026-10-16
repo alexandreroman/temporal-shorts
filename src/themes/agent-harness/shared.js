@@ -23,6 +23,20 @@ function callCard(p, name, arg = '', cls = '') {
   });
 }
 
+// Light UV of the names a code card singles out (tool names, types)
+const CODE_LIGHT = '#A5ABFF';
+// A line of code as [text, color] tokens, with simple syntax colors (chapters 6 and 8): decorators and `keywords`
+// violet, `light` names CODE_LIGHT, other names, numbers and "strings" ink, punctuation and spaces slate
+function codeTokens(line, keywords, light) {
+  const tokens = line.match(/"[^"]*"|@[\w.]+|\w+|\s+|[^\w\s"]+/g) || [];
+  return tokens.map(token => {
+    if (token.startsWith('@') || keywords.includes(token)) return [token, C.violet];
+    if (light.includes(token)) return [token, CODE_LIGHT];
+    if (/^["\w]/.test(token)) return [token, C.ink];
+    return [token, C.slate];
+  });
+}
+
 // place() anchored on the element's left edge, so a label or a pill keeps its gap to what it follows
 function placeLeft(e, x, y, o, s = 1) {
   e.style.transform = `translate(${x}px,${y}px) translateY(-50%) scale(${s})`;
