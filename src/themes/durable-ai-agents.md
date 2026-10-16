@@ -21,8 +21,8 @@ Nothing more.
 [Watch from 0:28](/themes/durable-ai-agents/#t=28)
 
 Surprise: the model has no memory. Tell it your name. Then ask again in the next
-call: it has already forgotten. That's by design: LLMs are stateless. So the app
-resends the whole conversation with every call.
+call: it has already forgotten. That's by design: LLMs are stateless. So the
+whole conversation is sent again with every call.
 
 ## Chapter 3: The context window
 
@@ -34,7 +34,7 @@ a size limit, and every word on it is billed, at every call.
 
 ## Chapter 4: Tools
 
-[Watch from 1:05](/themes/durable-ai-agents/#t=65)
+[Watch from 1:04](/themes/durable-ai-agents/#t=64)
 
 The model can't check the weather or send an email. So we give it tools. When it
 needs one, the model writes a request: "use the Weather tool, for Paris". The
