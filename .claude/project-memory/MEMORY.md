@@ -32,3 +32,5 @@
 - [Markdown for coding agents](references/project_agent-markdown.md) — /themes/<theme>.md only, generated text, absolute links, no llms.txt
 - [Search engine optimization](references/project_seo.md) — hidden transcript, title suffix, markdown-title, personal author, git lastmod
 - [Scene transitions without fades](references/feedback_scene-transitions.md) — hard cuts on the last frame, motion for content changes, no scene fades
+- [Live follow-up of a theme in progress](references/feedback_live-follow-up.md) — HTML player served and rebuilt while a theme is built
+- [Camera moves within a scene](references/feedback_camera-moves.md) — one direction per scene, no ping-pong; content comes to the camera

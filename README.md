@@ -33,12 +33,20 @@ Each video is a theme:
 - **Tuning Temporal Workers** (`worker-tuning`): for developers and SREs,
   how a Worker takes work, and how to find and fix the bottleneck behind a
   growing Task Queue backlog: Slots, Pollers, the Workflow cache, CPU.
+- **Security** (`security`): for security teams, one payload on its way
+  from the Worker to the Event History: where the code runs, TLS, private
+  connectivity and identity, what Temporal stores, encryption with your
+  keys, then [Temporal Proxy][temporal-proxy], which keeps credentials and
+  encryption out of the Workers, calls across Namespaces with Temporal
+  Nexus, and Temporal Cloud's compliance: certifications, yearly
+  third-party audits, the Trust Center.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal hands back the saved results from the Event
 History](preview.png)
 
 [agent-harness]: https://github.com/temporal-community/temporal-agent-harness
+[temporal-proxy]: https://docs.temporal.io/production-deployment/temporal-proxy
 
 ## Getting started
 
@@ -74,8 +82,9 @@ src/shared.js          brand helpers shared by the themes (colors, tiles,
                        blocks, crash and takeover effects, status tags,
                        app and Temporal panels, the app panel of numbered
                        step lines, Event History card, code card,
-                       counters, small animation helpers) and the "What
-                       you can build" chapter (useCaseScene)
+                       counters, small animation helpers, camera and
+                       motion helpers) and the "What you can build"
+                       chapter (useCaseScene)
 src/player.js          live player: controls, fit-to-window, shortcuts
 src/themes/<theme>/    one folder per theme: index.html, the 1920x1080
                        theme page (background, subtitles, header, script
@@ -203,8 +212,9 @@ coins, may leave it. A scene shorter than the frame is centered on y 515
 within 25 px, and every scene spans at least 440 px, 60 % of the frame. The
 check renders each scene inside each subtitle and just before its end,
 measures the visible content at its resting size (an element a pop is
-still scaling counts at its unscaled size), scene `shift` included, and
-prints one line per scene: its top, bottom, height, middle and a verdict,
+still scaling counts at its unscaled size), scene `shift` included (and a
+scene camera's zoom, `makeCamera()`, which frames a shot), and prints one
+line per scene: its top, bottom, height, middle and a verdict,
 `ok`, `OUT`, `THIN` or `OFF-CENTER`. `OUT` allows 2 px past the frame, as
 sub-pixel borders and strokes (a 1.5 px border) round past a whole-pixel
 edge; an `OUT` scene also names the element that leaves the frame and

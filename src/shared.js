@@ -52,10 +52,24 @@ function iconTile(p, icon, label, w, h, col = C.ink, opts = {}) {
 const USE_CASE_ROW = { y: 515, w: 384, h: 460, pitch: 432 };
 // Type scale of the tiles of that row, as iconTile options: icon size and stroke, label font and gap above it
 const USE_CASE_TYPE = { size: 96, stroke: 1.6, font: 26, gap: 30 };
+// Line height of a tile label padded by padTileLabel(), in units of its font size
+const TILE_LABEL_LINE = 1.3;
+// Pads the label of an iconTile to the height of `lines` lines, its own lines (split by <br>) centered in that
+// height, so that the tiles of one row keep their icons and example lines aligned when only some labels take two
+// lines. Whole pixels, so the tile's content keeps the same pixel grid.
+function padTileLabel(tile, lines) {
+  const label = tile.children[1];
+  const lineHeight = Math.round(parseFloat(label.style.fontSize) * TILE_LABEL_LINE);
+  const pad = (lines - label.innerHTML.split('<br>').length) * lineHeight / 2;
+  Object.assign(label.style, { lineHeight: lineHeight + 'px', paddingTop: pad + 'px', paddingBottom: pad + 'px' });
+}
 // Use-case tile ("What you can build"): an iconTile with one short example line under its label, in smaller
-// lowercase slate mono ("charge, refund, transfer"), which sets it apart from the recap's benefit tiles.
-function useCaseTile(p, icon, label, example, w, h) {
+// lowercase slate mono ("charge, refund, transfer"), which sets it apart from the recap's benefit tiles. labelLines:
+// the label height in lines (padTileLabel), for a row where a label takes two lines (a <br> in it); 1 leaves the
+// label as iconTile sets it.
+function useCaseTile(p, icon, label, example, w, h, labelLines = 1) {
   const tile = iconTile(p, icon, label, w, h, C.ink, USE_CASE_TYPE);
+  if (labelLines > 1) padTileLabel(tile, labelLines);
   tile.insertAdjacentHTML('beforeend',
     '<div class="mono" style="font-size:20px;color:var(--slate);white-space:nowrap;margin-top:16px">'
     + `${example}</div>`);
@@ -63,22 +77,56 @@ function useCaseTile(p, icon, label, example, w, h) {
 }
 // x of the center of tile i (0 to 3) of a row of 4 tiles spaced like USE_CASE_ROW, centered on x 960
 const useCaseX = i => 960 + (i - 1.5) * USE_CASE_ROW.pitch;
+// Perspective (px) and duration (s) of the 3D flip of useCaseScene's `front` option
+const USE_CASE_FLIP = { perspective: 1600, d: 0.7 };
+// 3D flip (rotateY) of a tile in its slot (x, y), from its front face to its back face (two elements of one size), as
+// turn goes from 0 to 1: the tile lifts a little as it turns, and each face shows for its own half turn. At rest (turn
+// 0 or 1), the face shown has place()'s transform alone, so it rests on the same pixels as a tile that never flips.
+function flipTile(frontFace, backFace, x, y, turn) {
+  const turning = turn > 0 && turn < 1;
+  const lift = turning ? 1 + 0.06 * Math.sin(Math.PI * turn) : 1;
+  const backShown = turn >= 0.5;
+  place(frontFace, x, y, lift, backShown ? 0 : 1);
+  place(backFace, x, y, lift, backShown ? 1 : 0);
+  if (turning) {
+    const rotateY = deg => ` perspective(${USE_CASE_FLIP.perspective}px) rotateY(${deg.toFixed(2)}deg)`;
+    frontFace.style.transform += rotateY(180 * turn);
+    backFace.style.transform += rotateY(180 * turn - 180);
+  }
+}
 // The "What you can build" chapter of an explainer, its scene before the outro: chapter, its number; uses, the
 // [icon, label, example] of each of the 4 useCaseTiles of USE_CASE_ROW; subs, its 2 subtitles. The tiles pop in
 // one at a time, 0.8 s apart from c[0] + firstAt, while subtitle 1 reads; subtitle 2 names them in order, and each
 // lights up (UV border) as it is named, namedAt[i] seconds after c[1], until the next one is named (the last one
-// stays lit for lastLit seconds).
-function useCaseScene({ chapter, uses, namedAt, subs, firstAt = 1.6, lastLit = 1.2 }) {
+// stays lit for lastLit seconds). Options, which leave the scene as above when unset:
+// - labelLines: the label height of every tile, in lines (see useCaseTile);
+// - front: (root, i) => the element that tile i shows first, in its slot at rest (the recap tile that the previous
+//   scene ends on, for a match cut): instead of popping in, each tile flips over in 3D (rotateY) from that face to
+//   its use-case tile, at the same times;
+// - camera: setCamera() options; the tiles then live in a camera layer (makeCamera) that zooms through as the scene
+//   fades in and out;
+// - fadeIn: the scene's fade-in (0 for a match cut).
+function useCaseScene({
+  chapter, uses, namedAt, subs, firstAt = 1.6, lastLit = 1.2, labelLines = 1, front = null, camera = null, fadeIn,
+}) {
   scene({
-    chapter, title: 'What you can build', subs,
+    chapter, title: 'What you can build', subs, fadeIn,
     build(root, s) {
       const { w, h } = USE_CASE_ROW;
-      s.uses = uses.map(([icon, label, example]) => useCaseTile(root, icon, label, example, w, h));
+      if (camera) root = s.cam = makeCamera(root);
+      s.uses = uses.map(([icon, label, example]) => useCaseTile(root, icon, label, example, w, h, labelLines));
+      if (front) s.fronts = uses.map((_, i) => front(root, i));
     },
     update(t, c, s) {
+      if (camera) setCamera(s.cam, t, this.dur, camera);
       s.uses.forEach((e, i) => {
-        const p = backPop(t, c[0] + firstAt + i * 0.8);
-        place(e, useCaseX(i), USE_CASE_ROW.y, p.s, p.o);
+        const at = c[0] + firstAt + i * 0.8;
+        if (front) {
+          flipTile(s.fronts[i], e, useCaseX(i), USE_CASE_ROW.y, P(t, at, USE_CASE_FLIP.d));
+        } else {
+          const p = backPop(t, at);
+          place(e, useCaseX(i), USE_CASE_ROW.y, p.s, p.o);
+        }
         const litFrom = c[1] + namedAt[i];
         const litUntil = i + 1 < namedAt.length ? c[1] + namedAt[i + 1] : litFrom + lastLit;
         e.style.borderColor = t >= litFrom && t < litUntil ? C.uv : C.line;
@@ -854,4 +902,52 @@ function makeCounter(p, label, w, { icon = null, noteBelow = false, h = null, ce
 function setCounter(e, n, note = '', { noteColor = C.neon, numColor = C.ink } = {}) {
   e.n.textContent = n; e.n.style.color = numColor;
   e.note.textContent = note; e.note.style.color = noteColor;
+}
+
+// ===================== camera and motion helpers (camera moves, trails, sparks, ripples)
+// Deterministic pseudo-random number in [0, 1) for an integer n: the same n gives the same value on every page and
+// render worker, so scattered particles and glitches render identically in parallel
+function hash(n) {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+// Camera of a scene: a full-stage layer that holds the scene's elements, so the whole composition can be scaled and
+// moved around the stage center. Build the scene's elements in it.
+function makeCamera(root) {
+  return E(root, '', 'cam', { width: '1920px', height: '1080px', transformOrigin: '960px 540px', opacity: 1 });
+}
+// Zoom-through between scenes: the composition grows from `enter` (0.94; 1 for none) to 1 over enterD seconds as
+// the scene fades in, and on to 1.06 as it fades out (dur: the scene duration). scale, dx, dy: an extra camera move
+// of the scene, at rest 1, 0, 0 so that a resting frame sits on whole pixels.
+// The exit zoom runs over the scene's default fade-out (SCENE_FADE): the presenter's end-of-scene stop, at the start
+// of that fade, falls just before it, and the zoom plays with the fade into the next scene.
+function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enterD = 0.6, exit = 1.06 } = {}) {
+  const zoom = lerp(enter, 1, P(t, 0, enterD)) * lerp(1, exit, P(t, dur - SCENE_FADE, SCENE_FADE, easeIn));
+  cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
+}
+
+// Puts a spark on the head of a path drawn to prog (0 to 1): it shows only while the path draws
+function sparkOnPath(spark, pathEl, prog, dx = 0, dy = 0) {
+  if (prog <= 0 || prog >= 1) {
+    place(spark, 0, 0, 1, 0);
+    return;
+  }
+  const point = pathEl.getPointAtLength(pathEl._L * prog);
+  place(spark, point.x + dx, point.y + dy, 1, Math.min(1, prog * 6, (1 - prog) * 6));
+}
+
+// Ripple rings: n circles of a color growing from size0 to size1 px and fading, one after the other, from `at`
+function makeRipples(p, n, rgb) {
+  return Array.from({ length: n }, () => E(p, '', '', { borderRadius: '50%', border: `3px solid rgb(${rgb})` }));
+}
+// Each ring grows over d seconds, step seconds after the one before it
+function placeRipples(rings, t, at, x, y, size0, size1, { d = 1.2, step = 0.25 } = {}) {
+  rings.forEach((e, i) => {
+    const p = P(t, at + i * step, d, x => 1 - Math.pow(1 - x, 2));
+    // sized, not scaled, so the ring keeps its 3 px line
+    const size = Math.round(lerp(size0, size1, p) / 2) * 2;
+    e.style.width = e.style.height = size + 'px';
+    place(e, x, y, 1, p > 0 && p < 1 ? (1 - p) * 0.9 : 0);
+  });
 }

@@ -159,10 +159,19 @@ const ICONS = {
     + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
   cart: '<path d="M2 4h3l2.5 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
   card: '<rect x="2.5" y="5" width="19" height="14"/><path d="M2.5 9.5h19M6 15h5"/>',
+  // an ID card: a portrait (head and shoulders) on the left, two text lines on the right
+  idCard: '<rect x="2.5" y="5" width="19" height="14"/><circle cx="8" cy="10.5" r="2"/>'
+    + '<path d="M4.5 16.5c0-2 1.6-3 3.5-3s3.5 1 3.5 3M14 10.5h4.5M14 14h4.5"/>',
   box: '<path d="M12 3l8.5 4.5v9L12 21l-8.5-4.5v-9z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9M7.8 5.3l8.5 4.5"/>',
   truck: '<path d="M14 18V5H2v13h3M9 18h6M19 18h3v-5l-4-5h-4"/><circle cx="7" cy="18" r="2"/>'
     + '<circle cx="17" cy="18" r="2"/>',
   lock: '<rect x="5" y="11" width="14" height="10"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/>',
+  // a shield with a check
+  shield: '<path d="M12 3l8 3v6c0 4.5-3.4 7.7-8 9-4.6-1.3-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  // a key: its bow and its bit
+  key: '<circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21M17.5 12v3.5M20.5 12v2.5"/>',
+  // a cloud on a flat base: a hosted service
+  cloud: '<path d="M7 19h10.5a4.5 4.5 0 0 0 .4-9A6 6 0 0 0 6.3 11.6 3.8 3.8 0 0 0 7 19z"/>',
   food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
   hourglass: '<path d="M6 3h12M6 21h12"/><path d="M8 3v3.5l4 5.5-4 5.5V21M16 3v3.5L12 12l4 5.5V21"/>'
     + '<path d="M10 18.5h4"/>',

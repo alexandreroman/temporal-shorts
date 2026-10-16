@@ -77,6 +77,8 @@
 /* Worker tuning: the slider knobs slide up or down, a little past their place on the way back, then settle. */
 .home .theme:is(:hover,:focus-visible) .knob-up{animation:icon-knob-up .5s ease-in-out var(--d,0s)}
 .home .theme:is(:hover,:focus-visible) .knob-down{animation:icon-knob-down .5s ease-in-out var(--d,0s)}
+/* Security: the padlock's shackle lifts open, then snaps shut, dipping into the body before it settles. */
+.home .theme:is(:hover,:focus-visible) .shackle{animation:icon-snap .6s ease-in-out}
 /* pathLength="1" on the path: a dash as long as the path, slid from fully hidden to fully shown. */
 @keyframes icon-draw{from{stroke-dasharray:1 2;stroke-dashoffset:1}to{stroke-dasharray:1 2;stroke-dashoffset:0}}
 @keyframes icon-hidden{from,to{opacity:0}}
@@ -91,6 +93,7 @@
 @keyframes icon-plug{from{opacity:0;transform:translateY(-4px)}40%{opacity:1}70%{transform:translateY(.6px)}}
 @keyframes icon-knob-up{40%{transform:translateY(-5px)}75%{transform:translateY(.8px)}}
 @keyframes icon-knob-down{40%{transform:translateY(5px)}75%{transform:translateY(-.8px)}}
+@keyframes icon-snap{25%,50%{transform:translateY(-2px)}75%{transform:translateY(.5px)}}
 .home .theme-title{font-size:24px;line-height:1.2;letter-spacing:-.2px}
 .home .theme-text{font-size:16px;line-height:1.5;color:var(--slate)}
 @media (max-width:600px){

@@ -10,7 +10,7 @@ Object.assign(ICONS, {
   queue: '<rect x="2.5" y="5" width="5" height="9"/><rect x="9.5" y="5" width="5" height="9"/>'
     + '<rect x="16.5" y="5" width="5" height="9"/><path d="M3 18.5h17M17.5 16l2.5 2.5-2.5 2.5"/>',
   trash: '<path d="M4 6h16M9 6V3.5h6V6M6 6l1 15h10l1-15M10 10v7M14 10v7"/>',
-  // a shield with a check, its point lower than agent-harness's `shield`
+  // a shield with a check, its point lower than the engine's `shield`
   shieldTall: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9.5C7.5 20 4 17 4 12V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
   // Worker status icons of chapter 8: free (pauseLines, two lines where agent-harness's `pause` has two bars) and
   // restarting (power); deploying a new version uses the engine's `upload`

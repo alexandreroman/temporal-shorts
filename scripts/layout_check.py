@@ -17,7 +17,8 @@ descendants count through it. Its limits:
   - overflow:hidden is ignored: a clipped element counts with its whole box;
   - content that shows only between the sample times is not seen;
   - an element resting at a scale other than 1 counts at scale 1, a scaled SVG element with its rendered box, and
-    the descendants of a scaled element that overflow it are not seen.
+    the descendants of a scaled element that overflow it are not seen. A scene camera (makeCamera(), class `cam`)
+    is the exception: its zoom is a shot, not a pop, so its descendants count as the shot frames them.
 
   python scripts/layout_check.py --theme <theme>
 """
@@ -72,10 +73,23 @@ MEASURE = r"""({index, t}) => {
     return Math.abs(scaleX - 1) > 1e-3 || Math.abs(scaleY - 1) > 1e-3;
   };
 
-  // True when an ancestor below the scene root is scaled: the element is counted through that ancestor's resting box.
+  // A scene camera (makeCamera()): its zoom frames a shot, so what it holds counts as the shot shows it.
+  const isCamera = (element) => element.classList.contains('cam');
+
+  // The scale of the cameras round the element: its resting size on the stage.
+  const cameraScale = (element) => {
+    let scale = 1;
+    for (let node = element.parentElement; node !== root; node = node.parentElement) {
+      if (isCamera(node)) scale *= new DOMMatrixReadOnly(getComputedStyle(node).transform).a;
+    }
+    return scale;
+  };
+
+  // True when an ancestor below the scene root, a camera aside, is scaled: the element is counted through that
+  // ancestor's resting box.
   const hasScaledAncestor = (element) => {
     for (let node = element.parentElement; node !== root; node = node.parentElement) {
-      if (isScaled(node)) return true;
+      if (isScaled(node) && !isCamera(node)) return true;
     }
     return false;
   };
@@ -87,7 +101,8 @@ MEASURE = r"""({index, t}) => {
     const box = element.getBoundingClientRect();
     if (!isScaled(element) || !(element instanceof HTMLElement)) return box;
     const centerY = (box.top + box.bottom) / 2;
-    const width = element.offsetWidth, height = element.offsetHeight;
+    const scale = cameraScale(element);
+    const width = element.offsetWidth * scale, height = element.offsetHeight * scale;
     return {top: centerY - height / 2, bottom: centerY + height / 2, width, height};
   };
 

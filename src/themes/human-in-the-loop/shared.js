@@ -9,9 +9,6 @@ Object.assign(ICONS, {
   laptopFlat: '<rect x="5" y="5" width="14" height="10"/><path d="M2.5 19h19"/>',
   clipboard: '<rect x="5" y="4.5" width="14" height="16.5"/><path d="M9 3h6v3H9zM8.5 13.5l2.5 2.5 4.5-5"/>',
   up: '<path d="M12 20V5M6 11l6-6 6 6"/>',
-  // an ID card: a portrait (head and shoulders) on the left, two text lines on the right
-  idCard: '<rect x="2.5" y="5" width="19" height="14"/><circle cx="8" cy="10.5" r="2"/>'
-    + '<path d="M4.5 16.5c0-2 1.6-3 3.5-3s3.5 1 3.5 3M14 10.5h4.5M14 14h4.5"/>',
 });
 
 // Horizontal extent of this theme's scenes, x 80 to 1840 inside the 80 px header margins, and the 40 px between

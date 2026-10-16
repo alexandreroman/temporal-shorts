@@ -26,6 +26,13 @@ from a deterministic HTML animation. Each video is a theme:
   SREs: how a Worker takes work, and how to find and fix the bottleneck
   behind a growing Task Queue backlog: Slots, Pollers, the Workflow
   cache, CPU
+- `security`: Security with Temporal, a video for security teams that
+  follows a payload from the Worker to the Event History: where the code
+  runs, TLS, private connectivity and identity, what Temporal stores,
+  encryption with your keys, then Temporal Proxy, which keeps credentials
+  and encryption out of the Workers, calls across Namespaces with Temporal
+  Nexus, and Temporal Cloud's compliance: certifications, yearly
+  third-party audits, the Trust Center
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page
@@ -111,11 +118,11 @@ workspaces run `make setup` automatically.
     the app panel of numbered step lines (`makeLinesApp()`), the Event
     History card, the code card of TypeScript lines (`makeCodeCard()`,
     `highlightJs()`, `setCodeLine()`), status tags, counters, crash and
-    takeover effects, small animation helpers such as `backPop()`, title
-    and end cards) and the
-    whole "What you can build" chapter, `useCaseScene()`; icons used by
-    two or more themes are in `ICONS` in `engine.js`, the others in their
-    theme's `shared.js`
+    takeover effects, small animation helpers such as `backPop()`, camera
+    and motion helpers (`makeCamera`, `setCamera`, `hash`, ripples, sparks
+    on paths), title and end cards) and the whole "What you can build"
+    chapter, `useCaseScene()`; icons used by two or more themes are in
+    `ICONS` in `engine.js`, the others in their theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page; opens paused at a `#t=<time>` URL fragment
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
