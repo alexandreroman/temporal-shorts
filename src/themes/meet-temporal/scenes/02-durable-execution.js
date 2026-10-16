@@ -78,10 +78,8 @@
       // width, so it rests on whole pixels centered
       const DONE_H = 46;
       const doneTop = rowTop(HISTORY.length - 1) + HROW.h + (HIST.h - rowTop(HISTORY.length - 1) - HROW.h - DONE_H) / 2;
-      s.history.done = E(s.history, `${ICON('check', 24, C.neon, 2.6)} ORDER COMPLETE`, 'mono', {
-        left: '50%', top: doneTop + 'px', width: '270px', height: DONE_H + 'px', fontSize: '20px',
-        letterSpacing: '.12em', color: C.neon, background: C.bg, padding: '0 18px 0 16px',
-        borderRadius: 'var(--rs)', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center',
+      addHistoryDone(s.history, 'ORDER COMPLETE', doneTop, {
+        width: '270px', height: DONE_H + 'px', padding: '0 18px 0 16px', justifyContent: 'center',
       });
       // each result runs as a neon pulse along a cable into the history; replayed results run back in violet
       s.cableSvg = svgLayer(root);
@@ -193,9 +191,7 @@
       markCrash(s.history, t, crashAt);
       const scanning = replay.findIndex(q => t >= q - 0.2 && t < q + 0.7);
       scanRow(s.history, scanning);
-      const dp = backPop(t, complete);
-      s.history.done.style.opacity = dp.o;
-      s.history.done.style.transform = `translateX(-50%) scale(${dp.s})`;
+      placeHistoryDone(s.history, t, complete);
       placeFlash(s.flash, t, crashAt);
 
       // the crash glitch: color fringes on the whole composition, torn bars and scanlines, re-drawn 24 times a

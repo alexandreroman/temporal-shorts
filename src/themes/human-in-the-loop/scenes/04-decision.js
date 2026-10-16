@@ -145,9 +145,7 @@
       setWaitLine(s.history, 1 - P(t, signalIn - 0.2, 0.3));
       const scanning = replay.findIndex(q => t >= q && t < q + 0.5);
       scanRow(s.history, scanning);
-      const dp = backPop(t, complete);
-      s.history.done.style.opacity = dp.o;
-      s.history.done.style.transform = `translateX(-50%) scale(${dp.s})`;
+      placeHistoryDone(s.history, t, complete);
     }
   });
 }

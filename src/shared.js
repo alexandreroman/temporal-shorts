@@ -902,6 +902,22 @@ function markCrash(card, t, crashAt) {
   card.kept.style.opacity = P(t, crashAt + 0.7, 0.4);
   card.cut.style.opacity = P(t, crashAt + 0.3, 0.3);
 }
+// Neon chip with a check, e.g. WORKFLOW COMPLETE, centered in an Event History card with its top at `top` px; css adds
+// to or overrides its style (a fixed size, the padding). Returns the chip, also kept as card.done.
+function addHistoryDone(card, label, top, css = {}) {
+  card.done = E(card, `${ICON('check', 24, C.neon, 2.6)} ${label}`, 'mono', {
+    left: '50%', top: top + 'px', fontSize: '20px', letterSpacing: '.12em', color: C.neon, background: C.bg,
+    padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)', display: 'flex', gap: '10px', alignItems: 'center',
+    ...css,
+  });
+  return card.done;
+}
+// Pops the chip of addHistoryDone() in at `at`
+function placeHistoryDone(card, t, at) {
+  const pop = backPop(t, at);
+  card.done.style.opacity = pop.o;
+  card.done.style.transform = `translateX(-50%) scale(${pop.s})`;
+}
 // Small card carrying one step result between the app and Temporal: UV for a model call or an Activity, green
 // for a tool result; label: the card text, e.g. the kind of call the result comes from
 function makeResultCard(p, uv = true, label = 'RESULT') {

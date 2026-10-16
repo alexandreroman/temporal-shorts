@@ -271,11 +271,7 @@ function makeOrderHistory(p) {
       letterSpacing: '.12em', color: C.uv, padding: '0 10px', display: 'flex', gap: '12px', alignItems: 'center',
     });
   history.wait.hg = history.wait.querySelector('.hg');
-  history.done = E(history, `${ICON('check', 24, C.neon, 2.6)} WORKFLOW COMPLETE`, 'mono', {
-    left: '50%', top: (rowTop(HISTORY.length - 1) + HROW.h + 26) + 'px', fontSize: '20px', letterSpacing: '.12em',
-    color: C.neon, background: C.bg, padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)',
-    display: 'flex', gap: '10px', alignItems: 'center',
-  });
+  addHistoryDone(history, 'WORKFLOW COMPLETE', rowTop(HISTORY.length - 1) + HROW.h + 26);
   return history;
 }
 // Status tag of row i, a key of ROW_TAG_KINDS; it pops when its label changes at `at`
