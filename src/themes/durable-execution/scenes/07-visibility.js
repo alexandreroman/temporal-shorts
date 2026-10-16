@@ -102,7 +102,7 @@
   // interval, then emailReceipt runs. Seconds from the Workflow start; the Activities in step order (chargeCard
   // first).
   const ORDER_1042 = {
-    ...workflow('order-1042'), runtime: 16.112, historySize: '3.01 KB', transitions: 17,
+    ...workflow('order-1042'), runtime: 16.112,
     activities: [
       { from: 0.2, to: 1.4 },
       { from: 1.5, to: 2.3 },
@@ -120,7 +120,7 @@
     return { from: attempts[0].from, retryAt: last.from, to: last.to, attempts: attempts.length };
   };
   const ORDER_1045 = {
-    ...workflow('order-1045'), runtime: 10.04, historySize: '1.79 KB', transitions: 19,
+    ...workflow('order-1045'), runtime: 10.04,
     attempts: ATTEMPTS_1045,
     activities: [
       { from: 0.2, to: 1.3 },
@@ -321,8 +321,7 @@
       + field(0, 2, 'Duration', '', 'duration mono')
       + field(1, 0, 'Run ID', mono(order.run)) + field(1, 1, 'Workflow Type', link('placeOrder'))
       + field(1, 2, 'Task Queue', link('orders'))
-      + field(2, 0, 'History Size', mono(order.historySize)) + field(2, 1, 'State Transitions', mono(order.transitions))
-      + field(2, 2, 'Workflow SDK', 'TypeScript')
+      + field(2, 0, 'Workflow SDK', 'TypeScript')
       + `<div style="${at(PAGE.pad, DETAILS.tabsTop)}width:${CONTENT_W}px;height:46px;display:flex;gap:34px;`
       + `font-size:20px;box-shadow:inset 0 -1px 0 ${UI.cardEdge}">${tabs}</div>`;
     page.badge = makeBadge(page.querySelector('.title'), order.status, TITLE_BADGE_W, { order: '-1' });
