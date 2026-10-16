@@ -524,10 +524,11 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 //   #1042, #1043...; grow { from, at }: the strip widens; filledAt [at, every]: cell i fills at at + i * every
 //   (default: filled); hits [[cell, at]]: the cell flashes; evictions [{ cell, at, next }]: its order slides out in
 //   red and order `next` takes its place
-// - cpu: 0 to 100 (red from 90); mem: { use, label, swapAt }, the share used (red from 0.9), the size shown
-//   ('2 GB') and when it last changed (a swell)
-// - backlog: { n, trend }, the BACKLOG count (default: the lanes' queues added up) and its trend, 'up' (red) or
-//   'down' (neon); wait: { text, trend }, the SCHEDULE-TO-START value ('38 s')
+// - cpu: 0 to 100 (red from 90); mem: { use, gb, swapAt }, the share used (red from 0.9), the size shown in GB
+//   (1 shows '1 GB') and when it last changed (a swell)
+// - backlog: { n, trend }, the BACKLOG count (default: the Activity lane's queue, as the backlog metrics count each
+//   task type on its own) and its trend, 'up' (red) or 'down' (neon); wait: { text, trend }, the SCHEDULE-TO-START
+//   value ('38 s')
 // - metrics: up to 2 metric lines [{ name, value, at, out, color }], each rising in at `at` and, if `out` is set,
 //   sinking out at `out` (see placeBottomBand)
 // - code: { swap, insert, light }: swap { slots: [value, at], cache: [value, at] } replaces a value (10, 500) at
@@ -813,7 +814,7 @@ function placeBottomBand(dg, t, state, show) {
   const { readout, metric, meter } = DIAGRAM;
   const queue = state.queue ?? {};
   const backlog = state.backlog ?? {};
-  const backlogN = backlog.n ?? (queue.wf ?? 0) + (queue.act ?? 0);
+  const backlogN = backlog.n ?? queue.act ?? 0;
   const readoutY = meter.top.cpu + meter.h / 2;
   setReadout(dg.backlog, withCommas(Math.floor(backlogN)), trendColor(backlog.trend));
   place(dg.backlog, readout.left.backlog + readout.w / 2, readoutY, 1, show('backlog'));
@@ -836,7 +837,8 @@ function placeBottomBand(dg, t, state, show) {
   place(dg.cpu, meter.left + meter.w / 2, meter.top.cpu + meter.h / 2, 1, show('cpu'));
   const mem = state.mem ?? {};
   const use = mem.use ?? 0.3;
-  setMeter(dg.mem, use, mem.label ?? '2 GB', use >= 0.9, mem.swapAt === undefined ? 1 : swell(t, mem.swapAt, 0.25));
+  const size = mem.gb === undefined ? '' : mem.gb + ' GB';
+  setMeter(dg.mem, use, size, use >= 0.9, mem.swapAt === undefined ? 1 : swell(t, mem.swapAt, 0.25));
   place(dg.mem, meter.left + meter.w / 2, meter.top.mem + meter.h / 2, 1, show('mem'));
 }
 // The code card at t: inserted lines open (the lines under them slide down; the card keeps the height of all its
@@ -942,15 +944,16 @@ function setPanelHeader(panel, o) {
 // ---------- the hard cuts: from the intro to the outro, each scene ends on the next one's first frame
 // The values carried across the cuts, as each chapter starts: the scene before it ends on them. act and wf: the tasks
 // waiting in the Activity and Workflow lanes; wait: SCHEDULE-TO-START, in seconds; cpu: in %; mem: the share of memory
-// used. Activity counts sit half-way between whole counts, so the counts shown on either side of a cut agree;
-// Workflow counts are whole, so that no chip is half-way in.
+// used; gb: the Worker's memory, in GB (raised by chapter 5: at about 600 cached Workflows per GB of heap in the
+// TypeScript SDK, a cache of 500 nearly fills 1 GB). Activity counts sit half-way between whole counts, so the counts
+// shown on either side of a cut agree; Workflow counts are whole, so that no chip is half-way in.
 const AT_CUT = {
   ch1: { act: 45.5 },
   ch2: { act: 2800.5 },
-  ch3: { wf: 6, act: 3240.5, wait: 44, cpu: 35, mem: 0.45 },
-  ch4: { wf: 6, act: 2880.5, wait: 28, cpu: 45, mem: 0.6 },
-  ch5: { wf: 6, act: 900.5, wait: 3, cpu: 80, mem: 0.8 },
-  ch6: { wf: 4, act: 990.5, wait: 4, cpu: 88, mem: 0.55 },
+  ch3: { wf: 6, act: 3240.5, wait: 44, cpu: 35, mem: 0.45, gb: 1 },
+  ch4: { wf: 6, act: 2880.5, wait: 28, cpu: 45, mem: 0.6, gb: 1 },
+  ch5: { wf: 6, act: 900.5, wait: 0.8, cpu: 80, mem: 0.8, gb: 1 },
+  ch6: { wf: 4, act: 990.5, wait: 1.2, cpu: 88, mem: 0.4, gb: 4 },
 };
 // The task flows of a chapter that ends on a cut are done REST_LEAD s before its end: no task flies, swells or frees
 // its Slot as the cut comes, so the cut and the hold of presenter mode before it fall on a still frame. Each chapter
@@ -986,9 +989,11 @@ const INTRO_LANE = {
 
 // ---------- the recap table of chapter 7, and the parts of the diagram that start its rows
 // Chapter 6 ends with its four bottleneck components shrunk into these parts, on the table's rows, where chapter 7
-// starts: the rows then grow from them. Final stage coordinates (no shift), every size even: the column headings (24 px
-// high) a label gap above 4 rows of 104 px, a gutter apart; each row's part partLeft px inside its left edge.
-const RECAP = { left: 120, w: 1680, headTop: 196, rowH: 104, partLeft: 32 };
+// starts: the rows then grow from them. Final stage coordinates (no shift), every size even: the WATCH FIRST strip
+// (stripH px high), a gutter above the column headings (24 px high), which sit a label gap above 4 rows of 104 px, a
+// gutter apart; each row's part partLeft px inside its left edge.
+const RECAP = { left: 120, w: 1680, stripTop: 158, stripH: 56, rowH: 104, partLeft: 32 };
+RECAP.headTop = RECAP.stripTop + RECAP.stripH + GRID.gutter;
 RECAP.rowTop = RECAP.headTop + 24 + GRID.label;
 RECAP.pitch = RECAP.rowH + GRID.gutter;
 const recapRowY = i => RECAP.rowTop + RECAP.rowH / 2 + i * RECAP.pitch;

@@ -372,7 +372,8 @@ below and the card order in [Home page design](feedback_home-page.md).
   Friday night where each fix moves the bottleneck: Slots (ch3), Pollers
   (ch4), the Workflow cache (ch5), the CPU (ch6). Ch1's first reflex,
   "add more Workers?", gets its answer only in ch6, once the CPU is full;
-  "a growing backlog has four common causes", never "four causes". Ch7, "Read
+  the recap says a growing backlog "often comes from one of four Worker
+  limits", never that it has only four causes. Ch7, "Read
   the signals", is the recap (symptom / signal / fix table and the loop
   change one setting, watch, next bottleneck); no "What you can build"
   chapter, as for agent-harness.
@@ -385,7 +386,13 @@ below and the card order in [Home page design](feedback_home-page.md).
   Slots, so the story's Worker is set to 10 "for normal days"; the Poller
   fix is Poller Autoscaling (`activityTaskPollerBehavior: { type:
   'autoscaling' }`), never a manual poller count, as the docs recommend;
-  more Workers only when the hosts are fully used. Poller and Workflow
+  more Workers only when the hosts are fully used. Figures stay
+  realistic: replay latency in milliseconds, a fixed schedule-to-start
+  below 1 s, the cache sized from memory (~600 Workflows per GB in TS),
+  BACKLOG as the Activity Task queue's count (ApproximateBacklogCount is
+  per task type). Key metrics appear where the story needs them: backlog
+  count and schedule-to-start in ch1, execution latency in ch6, a WATCH
+  FIRST strip in ch7. Poller and Workflow
   Slot counts in the diagram are schematic (2 Pollers growing to 5, 2
   Workflow Slots), stated as such in `script.md`. Resource-based tuners,
   rate limits and partitions stay out.
@@ -393,7 +400,7 @@ below and the card order in [Home page design](feedback_home-page.md).
   Activities, `chargeCard`, `reserveItem`, `renderInvoice` (CPU-heavy
   PDF, `invoice` icon), `shipPackage`, `emailReceipt`. One set of figures:
   10 Activity Slots raised to 50; cache 500 raised to 2000 with memory
-  2 GB to 4 GB; Workers A, then B and C. The code card shows both
+  1 GB to 4 GB; Workers A, then B and C. The code card shows both
   "normal days" settings (10 Slots, cache 500) from ch3 on.
 - One stage for ch1-6, the Worker diagram (`makeWorkerDiagram`,
   `placeWorkerDiagram` in its `shared.js`): TEMPORAL panel with the

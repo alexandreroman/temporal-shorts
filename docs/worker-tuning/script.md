@@ -13,7 +13,8 @@ animation shows.
 The video is a guide for developers and SREs who already run Temporal
 Workers: they know what a Workflow and an Activity are, and they watch a
 Task Queue back up under load. It teaches how a Worker takes work and how
-to tell apart the four common causes of one symptom, a growing backlog.
+to tell apart the four Worker limits behind one symptom, a growing
+backlog.
 
 It is inspired by the Temporal Worker Tuning Simulator
 (https://github.com/cvilenio/temporal-worker-tuning-simulator), a teaching
@@ -56,7 +57,7 @@ Friday: orders arrive ten times faster than usual, and each order is a
 Workflow of five Activities, `chargeCard`, `reserveItem`, `renderInvoice`
 (a CPU-heavy PDF), `shipPackage` and `emailReceipt`. One set of figures
 runs through the video: 10 Activity Slots, raised to 50; a Workflow cache
-of 500 raised to 2000 with the memory going from 2 GB to 4 GB; Worker A,
+of 500 raised to 2000 with the memory going from 1 GB to 4 GB; Worker A,
 then Workers B and C.
 
 ### Sources
@@ -82,9 +83,18 @@ and the TypeScript SDK (v1.24.0):
   `temporal_worker_task_slots_available`,
   `temporal_activity_schedule_to_start_latency`,
   `temporal_sticky_cache_total_forced_eviction`,
-  `temporal_workflow_task_replay_latency`.
+  `temporal_workflow_task_replay_latency`,
+  `temporal_activity_execution_latency`.
 - https://docs.temporal.io/cli/command-reference/task-queue#describe:
-  `ApproximateBacklogCount`.
+  `ApproximateBacklogCount` and `ApproximateBacklogAge`, per task type;
+  Temporal Cloud metrics `temporal_cloud_v1_approximate_backlog_count`
+  and `temporal_cloud_v1_approximate_backlog_age`
+  (Temporal Cloud metrics reference); self-hosted matching metrics
+  `approximate_backlog_count` and `approximate_backlog_age_seconds`.
+- https://docs.temporal.io/troubleshooting/performance-bottlenecks: a
+  schedule-to-start p95 above 1 s is high; replay latency is high above a
+  few milliseconds. The TypeScript cache default holds about 600
+  Workflows per GB of heap.
 
 Poller and Workflow Slot counts are schematic: the diagram draws 2
 Workflow Pollers, 2 Workflow Slots, and 2 Activity Pollers growing to 5
@@ -119,9 +129,14 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     then lands in it.
 - **0:20** Tasks pile up in the Task Queue: the backlog
   grows, and each order waits longer to start.
-  - Visuals: the queue lengthens; the BACKLOG counter
-    (`ApproximateBacklogCount`) climbs in red; a SCHEDULE-TO-START readout
-    rises.
+  - Visuals: the queue lengthens; the BACKLOG counter, the Activity Task
+    queue's count, climbs in red, and a SCHEDULE-TO-START readout rises;
+    under them, two metric lines name them,
+    `temporal_cloud_v1_approximate_backlog_count` and
+    `temporal_activity_schedule_to_start_latency`, in red; they fade out
+    with the extras before the cut. From chapter 2 on, BACKLOG counts the
+    Activity Tasks lane only (`ApproximateBacklogCount` is per task
+    type).
 - **0:29** The first reflex is to add more Workers. Before that, find out
   what is actually full.
   - Visuals: a dashed "+ WORKER" ghost appears, crossed out; a magnifier
@@ -192,7 +207,7 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     into the free Slots; the tag turns neon.
 - **2:16** Tasks reach the free Slots again, and the CPU starts to climb.
   - Visuals: the Slots fill to 44; the CPU meter rises to 80%; the backlog and
-    SCHEDULE-TO-START fall (3.0 s). Before the cut, the metric lines sink out.
+    SCHEDULE-TO-START fall (0.8 s). Before the cut, the metric lines sink out.
 
 ## 05 The cache runs out
 
@@ -206,60 +221,68 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     waiting order; the evicted order's next Workflow Task takes a Workflow
     Slot, which turns dashed with a turning retry icon; the status reads
     REPLAYING; four evictions in all.
-- **2:42** Replays burn CPU and hold Slots without moving any order
-  forward.
+- **2:42** Replays burn CPU and hold Workflow Slots before the order can
+  move forward.
   - Visuals: the cache gets the red outline and BOTTLENECK tag; the
-    metric lines `temporal_sticky_cache_total_forced_eviction` (46/s) and
-    `temporal_workflow_task_replay_latency` (892 ms) climb; the CPU meter
-    jumps to 96%; the Workflow lane lengthens.
+    metric lines `temporal_sticky_cache_total_forced_eviction` (up to
+    46/s) and `temporal_workflow_task_replay_latency` (12 to 58 ms) climb;
+    SCHEDULE-TO-START rises from 0.8 s to 6.8 s; the CPU meter jumps to
+    96%; the Workflow lane lengthens.
 - **2:49** Give the Worker more memory and a larger cache: open orders
-  stay cached, and replays stop.
-  - Visuals: MEMORY 2 GB becomes 4 GB; the code line `maxCachedWorkflows: 500`
+  stay cached, and replays become rare.
+  - Visuals: MEMORY 1 GB becomes 4 GB; the code line `maxCachedWorkflows: 500`
     lights and becomes 2000; the strip widens to 7 cells and the waiting
-    orders move in; the metric lines read 0/s and "no replays" in neon; the
+    orders move in; the metric lines read 0/s and "rare" in neon; the
     tag turns neon; CPU 88%. Before the cut, the metric lines and the FIXED
     tag sink out.
 
 ## 06 The CPU is full
 
-- **3:01** Now renderInvoice keeps the CPU at 100%: every task slows down
+- **3:02** Now renderInvoice keeps the CPU at 100%: every task slows down
   and holds its Slot longer.
   - Visuals: the chapter opens on chapter 5's last frame (a hard cut). A wave
     of invoice chips runs through the queue and fills two Slots in three;
     the CPU meter pins at 100% in red with the BOTTLENECK tag; the busy
-    Slots drop from 44 to 36, the others stay free.
-- **3:09** More Slots would not help: a Slot adds no CPU. This Worker has
+    Slots drop from 44 to 36, the others stay free; the metric line
+    `temporal_activity_execution_latency` climbs from 2.0 s to 3.4 s in red
+    and SCHEDULE-TO-START to 11 s.
+- **3:10** More Slots would not help: a Slot adds no CPU. This Worker has
   used all the CPU it has.
   - Visuals: the code card fades; a dashed "+ SLOTS" ghost takes its
     place, crossed out.
-- **3:17** This is the moment to add Workers: B and C poll the same Task
+- **3:18** This is the moment to add Workers: B and C poll the same Task
   Queue and share the load.
   - Visuals: MEMORY fades; WORKER B and WORKER C slide in from the right
     under WORKER A, compact panels with 5 Slots and a CPU gauge each;
     their poll line branches off the Activity lane's connector and tasks
     travel along it to them; the CPU meters settle at 60, 62 and 58%;
     A's CPU tag turns neon (FIXED).
-- **3:26** The backlog drains, and new orders start right away again.
-  - Visuals: the queues empty; BACKLOG falls to 0 and SCHEDULE-TO-START to 0.3
+- **3:27** The backlog drains, and new orders start right away again.
+  - Visuals: `temporal_activity_execution_latency` falls back to 2.0 s in
+    neon; the queues empty; BACKLOG falls to 0 and SCHEDULE-TO-START to 0.3
     s, in neon. Then the diagram leaves in turn while the Slot grid, the
     Pollers, the cache and the CPU meter shrink into the row icons of chapter
     7's table.
 
 ## 07 Read the signals
 
-- **3:36** A growing backlog has four common causes: full Slots, slow
-  Pollers, a small cache or a full CPU.
+- **3:37** A growing backlog often comes from one of four Worker limits:
+  Slots, Pollers, cache or CPU.
   - Visuals: each row grows from its icon (the cache icon reads #1049, the
-    order the diagram ends with). A table of four rows, SYMPTOM / SIGNAL /
-    FIX: Slots full, CPU low / `worker_task_slots_available` at 0 / More Slots
+    order the diagram ends with). Above the table, a WATCH FIRST strip
+    names the symptom's signals: `approximate_backlog_count`,
+    `approximate_backlog_age`, `schedule_to_start_latency`. A table of four
+    rows, SYMPTOM / SIGNAL / FIX, each option name on a smaller line under
+    its fix: Slots full, CPU low / `worker_task_slots_available` at 0 /
+    More Slots, if downstream keeps up
     (`maxConcurrentActivityTaskExecutions`); Slots free, long wait /
     `activity_schedule_to_start_latency` high / Poller Autoscaling
     (`activityTaskPollerBehavior`); evictions, replays /
-    `sticky_cache_total_forced_eviction` rising / More memory, larger cache
+    `sticky_cache_total_forced_eviction` high rate / More memory, larger cache
     (`maxCachedWorkflows`); CPU at 100% / CPU usage / More Workers; each row
     starts with a small icon of the diagram (Slots, a Poller, a cache cell, a
     full CPU bar) and lights as it is named.
-- **3:44** Change one setting at a time, watch the signals, then look for
+- **3:45** Change one setting at a time, watch the signals, then look for
   the next bottleneck.
   - Visuals: under the table, three pills CHANGE ONE SETTING → WATCH THE
     SIGNALS → NEXT BOTTLENECK, each appearing as it is read, then an arrow
@@ -268,7 +291,7 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 
 ## Outro
 
-- **3:55** Tune one bottleneck at a time, and your Temporal Workers keep
+- **3:56** Tune one bottleneck at a time, and your Temporal Workers keep
   up when traffic spikes.
   - Visuals: the outro opens on that Worker; the end card builds under it. A
     small Worker panel with its Slots, title "Tuning Temporal Workers",

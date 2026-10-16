@@ -79,7 +79,7 @@
         slots: { n: SLOTS, busy: BUSY },
         pollers: { act: 5, grow: { from: 2, at: growAt } },
         cpu: cpuOf(BUSY + streamed),
-        mem: { use: memOf(BUSY + streamed) },
+        mem: { use: memOf(BUSY + streamed), gb: start.gb },
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
         metrics: [

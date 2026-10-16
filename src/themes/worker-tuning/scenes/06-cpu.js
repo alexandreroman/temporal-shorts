@@ -1,13 +1,14 @@
 // ===================== 6. THE CPU IS FULL
 // Starts on chapter 5's last frame (a hard cut), the cache grown to 7 cells. renderInvoice tasks fill the queue and
 // the Slots in a wave, the CPU pins at 100% in red and gets a BOTTLENECK tag; tasks come in slowly and a few Slots stay
-// free. The code card fades out: a dashed "+ SLOTS" ghost rises in its place and is struck through. Then WORKER B and
-// WORKER C slide in, each with its own Poller, Slots and CPU meter, their Pollers joined to the Activity lane by a poll
-// line that branches off the trunk of Worker A's; tasks fly to them along it, the three CPU meters settle around 60%,
-// the tag turns FIXED, and the backlog drains to 0. Last, the move into the recap: the four bottleneck components (the
-// Activity Slot grid, the Activity Pollers, the Workflow cache, the CPU meter) shrink into the small parts that start
-// the rows of chapter 7's table, at their places, while the rest of the diagram leaves in turn; chapter 7 starts on
-// this chapter's last frame (another hard cut).
+// free, and a temporal_activity_execution_latency metric line climbs in red under the readouts. The code card fades
+// out: a dashed "+ SLOTS" ghost rises in its place and is struck through. Then WORKER B and WORKER C slide in, each
+// with its own Poller, Slots and CPU meter, their Pollers joined to the Activity lane by a poll line that branches off
+// the trunk of Worker A's; tasks fly to them along it, the three CPU meters settle around 60%, the execution latency
+// falls back in neon, the tag turns FIXED, and the backlog drains to 0. Last, the move into the recap: the four
+// bottleneck components (the Activity Slot grid, the Activity Pollers, the Workflow cache, the CPU meter) shrink into
+// the small parts that start the rows of chapter 7's table, at their places, while the rest of the diagram, the
+// metric line included, leaves in turn; chapter 7 starts on this chapter's last frame (another hard cut).
 // The block keeps every name declared in this file local to this scene.
 {
   const SLOTS = 50;
@@ -43,8 +44,8 @@
   // shrink into their parts on the recap's rows (RECAP_PARTS), MOVE.stagger s apart, each over MOVE.travel s, then fade
   // into them over MOVE.handOver s. The chapter's tasks are all done by then (see REST_LEAD).
   const MOVE = { lead: 2.4, leave: 0.5, travelAt: 0.2, stagger: 0.1, travel: 1.2, handOver: 0.3 };
-  // the groups that leave: the TEMPORAL panel and its lanes to the left, the readouts down, Worker A's panel with its
-  // labels, Workflow Slots and Workflow Pollers up, B and C to the right; the poll lines fade first
+  // the groups that leave: the TEMPORAL panel and its lanes to the left, the readouts and the metric line down, Worker
+  // A's panel with its labels, Workflow Slots and Workflow Pollers up, B and C to the right; the poll lines fade first
   const LEAVING = {
     temporal: { at: 0, dx: -160, dy: 0 }, band: { at: 0.1, dx: 0, dy: 80 }, frame: { at: 0.2, dx: 0, dy: -60 },
     helpers: { at: 0.3, dx: 200, dy: 0 },
@@ -122,7 +123,7 @@
         placed: [dg.temporal, lanes.wf.track, lanes.act.track, ...lanes.wf.chips, ...lanes.act.chips],
         labels: [lanes.wf.label, lanes.act.label, lanes.wf.more, lanes.act.more],
       },
-      band: { placed: [dg.backlog, dg.wait], labels: [] },
+      band: { placed: [dg.backlog, dg.wait, ...dg.metrics], labels: [] },
       frame: { placed: [dg.worker, ...dg.wfSlots, ...dg.pollers.wf], labels: Object.values(dg.labels) },
     };
   }
@@ -239,6 +240,9 @@
       const wf = start.wf * (1 - drain);
       const trend = t >= pinAt && t < drainFrom ? 'up' : 'down';
       const wait = lerp(start.wait + 10 * P(t, pinAt, 5.0), 0.3, drain);
+      // a task takes longer on a full CPU, and its usual time again once B and C share the load
+      const latency = lerp(lerp(2.0, 3.4, P(t, pinAt, 3.0)), 2.0, P(t, drainFrom, 1.8));
+      const latencyTrend = t >= drainFrom ? 'down' : 'up';
       placeWorkerDiagram(s.dg, t, {
         show: { code: 1 - P(t, c[1] + 0.2, 0.5), mem: 1 - P(t, c[2] + 0.2, 0.4) },
         queue: { wf, act },
@@ -248,9 +252,16 @@
         pollers: { act: 5 },
         cache: { cells: DIAGRAM.cache.max, evictions: CACHED },
         cpu: start.cpu + 12 * P(t, pinAt, 1.2) - 40 * P(t, drainFrom, 1.8),
-        mem: { use: start.mem, label: '4 GB' },
+        mem: { use: start.mem, gb: start.gb },
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
+        // it leaves with the readouts, in the move into the recap
+        metrics: [
+          {
+            name: 'temporal_activity_execution_latency', value: latency.toFixed(1) + ' s',
+            color: trendColor(latencyTrend), at: c[0] + 1.0,
+          },
+        ],
         code: { swap: { slots: ['50', -10], cache: ['2000', -10] }, insert: { poller: -10 } },
         // the tag leaves as the CPU meter starts its move
         marks: { cpu: { at: c[0] + 1.6, fixedAt: fixAt, out: moveAt } },

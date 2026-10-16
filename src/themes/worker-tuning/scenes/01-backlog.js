@@ -3,9 +3,11 @@
 // TEMPORAL panel fades in around it, and its small WORKER glides and grows into the WORKER A panel, its 10 busy Slots
 // becoming the closed Worker's grid, centered in the panel under its ACTIVITY SLOTS label. Black Friday: the ORDERS /
 // MIN readout climbs tenfold and task chips stream into the queue faster than the Worker takes them: each one lands
-// in a Slot as it frees up. The queue overflows, BACKLOG and SCHEDULE-TO-START climb in red. A dashed "+ WORKER"
-// ghost is crossed out, and a WHAT IS FULL? tag lands on the Worker, above its Slots. Last, ORDERS / MIN, the ghost
-// and the tag fade out: chapter 2 starts on this scene's last frame (another hard cut).
+// in a Slot as it frees up. The queue overflows, BACKLOG and SCHEDULE-TO-START climb in red, and two metric lines
+// under them read the same values: temporal_cloud_v1_approximate_backlog_count and
+// temporal_activity_schedule_to_start_latency. A dashed "+ WORKER" ghost is crossed out, and a WHAT IS FULL? tag lands
+// on the Worker, above its Slots. Last, ORDERS / MIN, the metric lines, the ghost and the tag fade out: chapter 2
+// starts on this scene's last frame (another hard cut).
 // The block keeps every name declared in this file local to this scene.
 {
   // the intro's strip and mini Worker glide into the diagram from MORPH.at, over MORPH.d s; then the diagram's own
@@ -31,8 +33,8 @@
   // the label and the grid (y 274..469) stay centered as a group in the Worker panel
   const DROP = 43;
   const WHAT_X = DIAGRAM.worker.left + DIAGRAM.worker.w / 2, WHAT_Y = 307;
-  // the extras (ORDERS / MIN, the ghost, WHAT IS FULL?) fade out OUT_LEAD s before the end, so the scene ends on the
-  // frame chapter 2 starts from
+  // the extras (ORDERS / MIN, the metric lines, the ghost, WHAT IS FULL?) fade out OUT_LEAD s before the end, so the
+  // scene ends on the frame chapter 2 starts from
   const OUT_LEAD = 1.6;
   // the arrivals: RATE tasks a second from the cut on, a SURGE once the queue overflows (c[1])
   const RATE = 8, SURGE = 2300;
@@ -114,6 +116,7 @@
         + (AT_CUT.ch2.act - settled) * P(t, c[2], this.dur - c[2], linear);
       const wait = 0.2 + 37.8 * P(t, c[1] + 0.4, 4.0, easeIn) + 6 * P(t, c[2], 6.0, linear);
       const growing = t >= c[1] + 0.4;
+      const trend = growing ? 'up' : null;
 
       // the morph: the intro's strip and mini Worker glide into place, then the diagram's own parts take over
       const m = P(t, MORPH.at, MORPH.d);
@@ -140,8 +143,19 @@
         queue: { act: Math.max(0, queue) },
         flows: [flow],
         slots: { busy: 10, closed: 1, drop: Math.round(DROP * whatIn) },
-        backlog: { trend: growing ? 'up' : null },
-        wait: { text: formatWait(wait), trend: growing ? 'up' : null },
+        backlog: { trend },
+        wait: { text: formatWait(wait), trend },
+        // c[1]: the metrics behind the two readouts, as the backlog starts to grow; chapter 2 shows none
+        metrics: [
+          {
+            name: 'temporal_cloud_v1_approximate_backlog_count', value: withCommas(Math.floor(Math.max(0, queue))),
+            color: trendColor(trend), at: c[1] + 0.6, out: outAt,
+          },
+          {
+            name: 'temporal_activity_schedule_to_start_latency', value: formatWait(wait),
+            color: trendColor(trend), at: c[1] + 1.0, out: outAt,
+          },
+        ],
         status: ['BUSY', 'running'],
       });
       setPanelHeader(s.dg.worker, P(t, HANDOFF, 0.4));

@@ -80,7 +80,7 @@
         flows: draining ? [trickle] : [fill],
         slots: { n: slotCount, grow: { from: 10, at: growAt }, busy: steady },
         cpu: cpuOf(busy),
-        mem: { use: memOf(busy) },
+        mem: { use: memOf(busy), gb: start.gb },
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
         metrics: [

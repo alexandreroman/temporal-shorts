@@ -53,13 +53,13 @@ climb.
 
 More orders are open at once than the Workflow cache can hold. The cache evicts
 Workflows. An evicted Workflow replays its whole Event History on its next task.
-Replays burn CPU and hold Slots without moving any order forward. Give the
-Worker more memory and a larger cache: open orders stay cached, and replays
-stop.
+Replays burn CPU and hold Workflow Slots before the order can move forward. Give
+the Worker more memory and a larger cache: open orders stay cached, and replays
+become rare.
 
 ## Chapter 6: The CPU is full
 
-[Watch from 3:00](/themes/worker-tuning/#t=180)
+[Watch from 3:01](/themes/worker-tuning/#t=181)
 
 Now renderInvoice keeps the CPU at 100%: every task slows down and holds its
 Slot longer. More Slots would not help: a Slot adds no CPU. This Worker has used
@@ -69,15 +69,15 @@ away again.
 
 ## Chapter 7: Read the signals
 
-[Watch from 3:35](/themes/worker-tuning/#t=215)
+[Watch from 3:36](/themes/worker-tuning/#t=216)
 
-A growing backlog has four common causes: full Slots, slow Pollers, a small
-cache or a full CPU. Change one setting at a time, watch the signals, then look
-for the next bottleneck.
+A growing backlog often comes from one of four Worker limits: Slots, Pollers,
+cache or CPU. Change one setting at a time, watch the signals, then look for the
+next bottleneck.
 
 ## Outro
 
-[Watch from 3:54](/themes/worker-tuning/#t=234)
+[Watch from 3:55](/themes/worker-tuning/#t=235)
 
 Tune one bottleneck at a time, and your Temporal Workers keep up when traffic
 spikes.

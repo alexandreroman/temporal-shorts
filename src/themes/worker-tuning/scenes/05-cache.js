@@ -4,7 +4,7 @@
 // evicts #1045 (EVICTED), the next order takes its cell, and the next Workflow Task of #1045 takes a Workflow Slot
 // that turns dashed, its retry icon spinning: a replay. More evictions follow, both Workflow Slots replay, the cache
 // gets a red outline and a BOTTLENECK tag, the eviction and replay metrics climb, the CPU jumps and the backlog grows
-// again. The memory goes from 2 GB to 4 GB, the maxCachedWorkflows line of the code card lights and goes from 500 to
+// again. The memory goes from 1 GB to 4 GB, the maxCachedWorkflows line of the code card lights and goes from 500 to
 // 2000, and the strip widens: the waiting orders move into its new cells, the tag turns FIXED and the replays stop.
 // Last, the tag and the metric lines leave: chapter 6 starts on this chapter's last frame (another hard cut).
 // The block keeps every name declared in this file local to this scene.
@@ -30,8 +30,10 @@
   // the Activity Tasks that keep coming into the 6 free Slots: 30 of them, a multiple of the five order steps (see
   // REST_LEAD), each one holding its Slot WORK.hold s
   const WORK = { from: 0.6, count: 30, hold: 2.6 };
-  // the metric values: forced evictions per second, replay latency in ms
-  const formatLatency = ms => (ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
+  // the metric values: forced evictions per second, and the replay latency of an order's short history (five
+  // Activities), in ms
+  const EVICTIONS = { from: 6, peak: 46 };
+  const REPLAY_MS = { from: 12, peak: 58 };
 
   // Where waiting order `order` is at t, as { x, o }: it arrives at the end of the line, moves up as each eviction
   // frees a cell, slides into the cell its eviction frees, or into a new cell when the strip grows
@@ -72,9 +74,9 @@
           + "An evicted Workflow replays its whole Event History on its next task.",
         after: 2.0,
       },
-      { text: "Replays burn CPU and hold Slots without moving any order forward.", after: 2.0 },
+      { text: "Replays burn CPU and hold Workflow Slots before the order can move forward.", after: 2.0 },
       {
-        text: "Give the Worker more memory and a larger cache: open orders stay cached, and replays stop.",
+        text: "Give the Worker more memory and a larger cache: open orders stay cached, and replays become rare.",
         after: 2.0,
       },
     ],
@@ -133,9 +135,10 @@
       const wf = lerp(start.wf + 36 * clogged, next.wf, P(t, fixAt, 2.0));
       const trend = t >= replayFrom && t < fixAt ? 'up' : 'down';
       const wait = lerp(start.wait + 6 * P(t, replayFrom, 4.0), next.wait, P(t, fixAt, 2.0));
-      // the memory nears full; twice as much halves the share used, then the larger cache takes a little of it
+      // the memory nears full; more of it shrinks the share used, then the larger cache takes some of it
       const crowded = start.mem + 0.12 * P(t, c[0] + 1.0, 1.5);
-      const memUse = lerp(lerp(crowded, crowded / 2, P(t, memAt, 0.6)), next.mem, P(t, growAt, 0.6));
+      const raised = crowded * start.gb / next.gb;
+      const memUse = lerp(lerp(crowded, raised, P(t, memAt, 0.6)), next.mem, P(t, growAt, 0.6));
       const cells = lerp(GROWN.from, GROWN.to, P(t, growAt, 0.6));
       const fixed = t >= fixAt;
       const outAt = this.dur - LEAVE_LEAD;
@@ -151,19 +154,19 @@
           evictions: [...NEW_CELLS, ...evictions],
         },
         cpu: lerp(start.cpu + 16 * P(t, c[2] + 1.4, 0.8), next.cpu, P(t, fixAt, 1.0)),
-        mem: { use: memUse, label: t >= memAt ? '4 GB' : '2 GB', swapAt: memAt },
+        mem: { use: memUse, gb: t >= memAt ? next.gb : start.gb, swapAt: memAt },
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
         // the metric lines and the cache's tag sink out before the cut, as chapter 6 shows none
         metrics: [
           {
             name: 'temporal_sticky_cache_total_forced_eviction', at: c[2] + 0.8, out: outAt,
-            value: fixed ? '0/s' : Math.round(lerp(6, 48, P(t, c[2] + 0.8, 2.5))) + '/s',
+            value: fixed ? '0/s' : Math.round(lerp(EVICTIONS.from, EVICTIONS.peak, P(t, c[2] + 0.8, 2.5))) + '/s',
             color: fixed ? C.neon : C.red,
           },
           {
             name: 'temporal_workflow_task_replay_latency', at: c[2] + 1.2, out: outAt,
-            value: fixed ? 'no replays' : formatLatency(lerp(40, 1200, P(t, c[2] + 1.2, 2.5))),
+            value: fixed ? 'rare' : Math.round(lerp(REPLAY_MS.from, REPLAY_MS.peak, P(t, c[2] + 1.2, 2.5))) + ' ms',
             color: fixed ? C.neon : C.red,
           },
         ],

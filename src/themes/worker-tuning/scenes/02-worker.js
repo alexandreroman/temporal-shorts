@@ -69,7 +69,7 @@
         slots: { busy: 10, glow: c[1] + 0.8, closed: 1 - open },
         cache: { cells: 4, filledAt: [cacheFillAt, 0.3], hits },
         cpu: lerp(2, next.cpu, busy / 10),
-        mem: { use: next.mem - 0.025 * (10 - busy) - 0.08 * (1 - cached) },
+        mem: { use: next.mem - 0.025 * (10 - busy) - 0.08 * (1 - cached), gb: next.gb },
         backlog: { trend: 'up' },
         // as chapter 1 leaves it
         wait: { text: formatWait(next.wait), trend: 'up' },
