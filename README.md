@@ -42,7 +42,7 @@ Each video is a theme:
   third-party audits, the Trust Center.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
-app instance and Temporal hands back the saved results from the Event
+app instance and Temporal returns the saved results from the Event
 History](preview.png)
 
 [agent-harness]: https://github.com/temporal-community/temporal-agent-harness
@@ -174,9 +174,9 @@ are out of date: each `output/<theme>.mp4`, `-nosubs.mp4`, `.srt` or
 (`src/themes/<theme>/`: its page and its scripts), the shared sources
 (`src/*.js`, `src/*.css`, assets, fonts, `scripts/common.py`) and the render
 or export script. Editing a scene rebuilds its theme only; editing the home
-page (`src/index.html`, `src/home.css`) or the live player (`src/player.js`)
-rebuilds no video. `make html` rebuilds when any source of any page, a
-`social.png` image, a site icon, a Markdown version or
+page (`src/index.html`, `src/home.css`, `src/home.js`) or the live player
+(`src/player.js`) rebuilds no video. `make html` rebuilds when any source of
+any page, a `social.png` image, a site icon, a Markdown version or
 `scripts/build_html.py` changes.
 Use `make -B render` to force a full render.
 
@@ -489,12 +489,14 @@ editing different scenes never touch the same file.
   shows neither.
 - New scene: create a file in `src/themes/<theme>/scenes/` that calls
   `scene({...})` inside a `{ ... }` block, so its helpers stay local to the
-  file. Then add one `<script src="scenes/...">` line to
-  `src/themes/<theme>/index.html`, in playing order. Scripts are classic
-  `<script src>` tags, not ES modules: Chromium blocks modules on
-  `file://`, which the renderer uses.
-- Helpers: brand helpers for every theme go in `src/shared.js`; helpers used
-  by one theme only go in `src/themes/<theme>/` (for example
+  file; declare them with `const`, as a function declaration inside the
+  block leaks to the global scope. Then add one
+  `<script src="scenes/...">` line to `src/themes/<theme>/index.html`, in
+  playing order. Scripts are classic `<script src>` tags, not ES modules:
+  Chromium blocks modules on `file://`, which the renderer uses.
+- Helpers: helpers used by two or more themes go in `src/shared.js`
+  (engine-level ones, such as geometry and paths, in `src/engine.js`);
+  helpers used by one theme only go in `src/themes/<theme>/` (for example
   `src/themes/durable-ai-agents/shared.js`), loaded right after
   `../../shared.js`. Icons follow the same rule: `ICONS` in
   `src/engine.js` holds those of two or more themes, and a theme's
