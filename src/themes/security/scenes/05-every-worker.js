@@ -103,20 +103,16 @@
         border: `1px dashed ${C.red}`,
         borderRadius: 'var(--rs)', background: `rgba(${RGB.red},.1)`,
       });
-      s.pill = fixedTag(root, `${ICON('retry', 20, C.violet, 2)}Rotate`, 'violet solid', PILL.w, PILL.h);
-      Object.assign(s.pill.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '20px',
-        lineHeight: '24px', paddingTop: '0', paddingBottom: '0',
+      s.pill = fixedTag(root, `${ICON('retry', 20, C.violet, 2)}Rotate`, 'violet solid', PILL.w, {
+        h: PILL.h, gap: 10,
       });
+      Object.assign(s.pill.style, { fontSize: '20px', lineHeight: '24px', paddingTop: '0', paddingBottom: '0' });
       s.sparks = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       s.card = makePayload(root, { w: CARD.w });
       s.alarm = makeRipples(root, 2, RGB.red);
       // in the theme's alarm look (STATUS_KINDS.alarm), like the other red verdicts
-      s.inClear = fixedTag(root, `${ICON('eye', 20, C.bg, 2.4)}In clear`, 'red', 200);
-      Object.assign(s.inClear.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: C.red, color: C.bg,
-        borderColor: C.red, fontWeight: '700',
-      });
+      s.inClear = fixedTag(root, `${ICON('eye', 20, C.bg, 2.4)}In clear`, 'red', 200, { gap: 10 });
+      Object.assign(s.inClear.style, { background: C.red, color: C.bg, borderColor: C.red, fontWeight: '700' });
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);
     },

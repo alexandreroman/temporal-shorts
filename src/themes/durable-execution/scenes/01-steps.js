@@ -61,11 +61,7 @@
       s.dots = s.steps.xs.map(() => makeGlowDot(root, 14, RGB.uv));
       s.services = ORDER_STEPS.map(step => makeService(root, step.service));
       s.code = makeCodeCard(root, { lines: ORDER_CODE, w: ABOVE_W });
-      s.done = tag(root, `${ICON('check', 28, C.neon, 2.6)}Order complete`, 'neon');
-      // whole-pixel width (content: 295.8 px; the pill is 50 px high), so the centered tag lands on whole pixels
-      Object.assign(s.done.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', width: '296px',
-      });
+      s.done = fixedTag(root, `${ICON('check', 28, C.neon, 2.6)}Order complete`, 'neon', null, { gap: 12 });
     },
     update(t, c, s) {
       // order card: pops in, its BUY button is pressed at `press`
@@ -109,6 +105,7 @@
       for (let i = 1; i < 4; i++) line += P(t, c[2] + LINE0 + i * LINE_GAP, 0.2);
       setCodeLine(s.code, line, P(t, c[2] + LINE0 - 0.2, 0.3) * (1 - P(t, c[2] + LINE0 + 4 * LINE_GAP, 0.3)));
       const dp = popIn(t, c[2] + LINE0 + 4 * LINE_GAP + 0.2, 0.08);
+      fitTag(s.done);
       place(s.done, 960, DONE_Y, dp.s, dp.o);
     }
   });

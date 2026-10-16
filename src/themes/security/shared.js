@@ -431,8 +431,7 @@ function makeTube(root, { x0, x1, h }, body = C.bg) {
     });
   tube.backing = backing;
   tube.flow = tube.querySelector('.flow');
-  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
-  Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
+  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112, { gap: 8 });
   return tube;
 }
 // The tube from x0 to x1 of geom (see makeTube; a scene may pass a shorter x1, the tube's width follows), drawn from

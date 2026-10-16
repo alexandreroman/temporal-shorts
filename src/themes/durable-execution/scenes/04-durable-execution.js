@@ -115,11 +115,7 @@
       s.card = makeCodeCard(root, {
         lines: WORKFLOWS_TS, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY, padX, gutter,
       });
-      s.badge = tag(root, `${ICON('check', 22, C.neon, 2.6)}Runs to completion`, 'neon');
-      // whole-pixel size (content: 349.4 x 50), so the badge centered under the card rests on whole pixels
-      Object.assign(s.badge.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '350px',
-      });
+      s.badge = fixedTag(root, `${ICON('check', 22, C.neon, 2.6)}Runs to completion`, 'neon', null, { gap: 10 });
       // a neon ring around the card each time a bolt bounces off it
       s.ring = E(root, '', '', {
         width: (s.card.w + 20) + 'px', height: (s.card.h + 20) + 'px', border: '2px solid ' + C.neon,
@@ -162,6 +158,7 @@
       s.logo.style.transform = `translateY(${(1 - lp) * 16}px)`;
       s.card.hdr.style.opacity = P(t, c[1] + 1.4, 0.4);
       const bp = popIn(t, c[0] + 2.9, 0.08);
+      fitTag(s.badge);
       place(s.badge, cardX, BADGE_Y, bp.s, bp.o);
 
       // each bolt accelerates in, hits the card's edge with a red spark and bounces off, spinning and fading; the

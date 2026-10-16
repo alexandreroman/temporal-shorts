@@ -5,8 +5,8 @@
 // hands them to chapter 1, where they become its Task Queue lane and its WORKER A panel.
 // The block keeps every name declared in this file local to this scene.
 {
-  // the title block's measured size (888.9 x 442.7), rounded up to even numbers so its centered box rests on whole
-  // pixels; type and gaps a little larger than the default title block, so the composition spans the 440 px minimum
+  // the title block's left edge and box (see makeTitleBlock); type and gaps a little larger than the default title
+  // block, so the composition spans the 440 px minimum
   const TITLE = {
     left: 120, w: 890, h: 444,
     sizes: {
@@ -44,8 +44,7 @@
     ],
     build(root, s) {
       s.t = makeTitleBlock(root, 'A GUIDE FOR DEVELOPERS AND SRES', 'Why is my Task Queue<br>backing up?',
-        'TUNE TEMPORAL WORKERS, ONE BOTTLENECK AT A TIME', TITLE.sizes);
-      Object.assign(s.t.style, { width: TITLE.w + 'px', height: TITLE.h + 'px' });
+        'TUNE TEMPORAL WORKERS, ONE BOTTLENECK AT A TIME', { ...TITLE.sizes, box: [TITLE.w, TITLE.h] });
       s.lane = makeQueueLane(root, null, 'act', { w: INTRO_LANE.w, cap: INTRO_LANE.cap });
       s.worker = makeMiniWorker(root, 'WORKER', INTRO_WORKER.cols, INTRO_WORKER.rows);
       s.fly = makeTaskChip(root, 'act');

@@ -147,7 +147,7 @@
         ...rowBox, padding: FRAME.border + 'px', background: `linear-gradient(90deg, ${C.violet}, ${C.uv})`,
         mask: 'linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)',
       });
-      s.badge = fixedTag(root, BADGE.text, 'violet solid', BADGE.w, BADGE.h);
+      s.badge = fixedTag(root, BADGE.text, 'violet solid', BADGE.w, { h: BADGE.h });
       // smaller than a pill, with less padding: it stands on the row's border, as the x10 tag
       Object.assign(s.badge.style, { fontSize: '16px', lineHeight: '22px', padding: '4px 10px 4px calc(10px + .1em)' });
       // the parts above their rows, which grow from them; the parts are there from the start, as chapter 6 leaves them

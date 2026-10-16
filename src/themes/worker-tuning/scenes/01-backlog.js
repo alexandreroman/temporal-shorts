@@ -93,11 +93,7 @@
         });
       s.svg = svgLayer(root);
       s.strike = path(s.svg, `M ${GHOST_X - 110} ${GHOST_Y} L ${GHOST_X + 110} ${GHOST_Y}`, C.red, 4, false);
-      s.what = tag(root, `${ICON('search', 26, C.violet, 2)}What is full?`, 'violet solid big');
-      // whole-pixel width (measured: 370 px), so the centered tag rests on whole pixels
-      Object.assign(s.what.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', width: '370px',
-      });
+      s.what = fixedTag(root, `${ICON('search', 26, C.violet, 2)}What is full?`, 'violet solid big', null, { gap: 14 });
     },
     update(t, c, s) {
       const outAt = this.dur - OUT_LEAD;
@@ -175,6 +171,7 @@
       s.ghost.style.borderColor = t >= strikeAt ? C.red : C.lineLight;
       draw(s.strike, P(t, strikeAt, 0.35, easeOut), extras);
       const what = backPop(t, c[2] + 3.4);
+      fitTag(s.what);
       place(s.what, WHAT_X, WHAT_Y, what.s, what.o * extras);
     },
   });

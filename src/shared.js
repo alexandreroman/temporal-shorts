@@ -81,12 +81,34 @@ function addInkFilter() {
 }
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
 // A tag of a fixed even width w (and height h if given), its label centered in it. The .1em letter spacing gives
-// fractional natural widths: with an even size, a tag centered on a whole pixel rests on whole pixels.
-function fixedTag(p, html, cls, w, h = null) {
+// fractional natural widths: with an even size, a tag centered on a whole pixel rests on whole pixels. gap: an icon
+// and a label side by side, gap px apart, centered in the tag. w null: the tag's natural width rounded up to an even
+// number of pixels, set by fitTag(), which update() calls.
+function fixedTag(p, html, cls, w, { h = null, gap = null } = {}) {
   const e = tag(p, html, cls);
-  Object.assign(e.style, { width: w + 'px', textAlign: 'center' });
+  e.style.textAlign = 'center';
+  if (w) e.style.width = w + 'px';
   if (h) e.style.height = h + 'px';
+  if (gap !== null) {
+    Object.assign(e.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: gap + 'px' });
+  }
   return e;
+}
+// Rounds the width of e, an element of fractional natural width, up to an even number of pixels, so that its edges
+// land on whole pixels whether it is centered or anchored by an edge. Returns false while e is not laid out (its
+// scene hidden): call it again later.
+function roundUpWidth(e) {
+  e.style.width = '';
+  const width = parseFloat(getComputedStyle(e).width);
+  if (Number.isNaN(width)) return false;
+  e.style.width = 2 * Math.ceil(width / 2) + 'px';
+  return true;
+}
+// Sizes a fixedTag() built with no width (see roundUpWidth) on the first frame it is laid out; in the live player, a
+// width measured before the fonts load is measured again on the next call
+function fitTag(e) {
+  if (e._fitted) return;
+  if (roundUpWidth(e) && document.fonts.status === 'loaded') e._fitted = true;
 }
 // icon + label centred in the tile (label null for an icon alone); padding-left offsets the trailing
 // letter-spacing. Options: size and stroke of the icon, font of the label and gap above it; a tile over 130 px
@@ -237,19 +259,23 @@ const withCommas = n => Math.round(n).toLocaleString('en-US');
 
 // ---------- title and end cards
 // Intro title block: the official logo, a slate kicker, the big title (HTML) and a violet tagline, left-aligned.
-// sizes: logo height, font sizes and gaps in px, defaulting to the intro of most themes.
+// sizes: logo height, font sizes and gaps in px, defaulting to the intro of most themes; box: [w, h], a fixed size
+// in even numbers round the block's fractional natural size, so that the block centered on a whole pixel rests on
+// whole pixels (null: its natural size).
 function makeTitleBlock(root, kicker, titleHtml, tagline, sizes = {}) {
   const {
     logoH = 58, logoGap = 46, kickerFont = 22, titleFont = 116, titleLineHeight = 1.02, titleGap = 22,
-    taglineFont = 24, taglineGap = 34,
+    taglineFont = 24, taglineGap = 34, box = null,
   } = sizes;
-  return E(root,
+  const block = E(root,
     `<img src="${LOGO}" style="height:${logoH}px;display:block;margin-bottom:${logoGap}px">`
     + `<div class="mono" style="font-size:${kickerFont}px;letter-spacing:.14em;color:var(--slate)">${kicker}</div>`
     + `<div style="font-size:${titleFont}px;line-height:${titleLineHeight};letter-spacing:-3px;`
     + `margin-top:${titleGap}px">${titleHtml}</div>`
     + `<div class="mono" style="font-size:${taglineFont}px;letter-spacing:.12em;color:var(--violet);`
     + `margin-top:${taglineGap}px">${tagline}</div>`);
+  if (box) Object.assign(block.style, { width: box[0] + 'px', height: box[1] + 'px' });
+  return block;
 }
 // Where icon i of n orbiting an intro's theme visual is: evenly spaced on an ellipse, they turn on the ambient clock
 // G. orbit: { x, y, rx, ry, speed }, the ellipse's center and radii, and the angular speed in radians per second;
@@ -587,7 +613,7 @@ function glitchPanel(panel, glitch) {
 function makeCrashMarks(root, label, bolt, crashTag) {
   return {
     bolt: E(root, ICON('bolt', bolt.size, C.red, 1.6)),
-    tag: fixedTag(root, label, 'red big solid', crashTag.w, crashTag.h),
+    tag: fixedTag(root, label, 'red big solid', crashTag.w, { h: crashTag.h }),
     boltSpot: bolt, tagSpot: crashTag,
   };
 }
@@ -655,7 +681,7 @@ function setArrivalGlow(panel, t, at, out) {
 }
 // "New Worker" or "New instance" fixedTag on the new instance, violet and solid (the panel border does not show
 // through)
-const makeNewTag = (root, label, w, h = null) => fixedTag(root, label, 'violet solid', w, h);
+const makeNewTag = (root, label, w, h = null) => fixedTag(root, label, 'violet solid', w, { h });
 // The tag pops in at `at` and fades out from `out` within 0.3 s, at (x, y): add the arriving panel's dx to x so it
 // slides in with it
 function placeNewTag(e, t, at, out, x, y) {
@@ -729,13 +755,9 @@ function setStatus(e, label, kind) {
   e.innerHTML = icon ? ICON(icon[0], e.iconSize, icon[1], icon[2]) + label : label;
   Object.assign(e.style, colors);
   e.style.paddingLeft = icon ? e.padX + 'px' : `calc(${e.padX}px + .1em)`;
-  e.style.width = '';
-  const width = parseFloat(getComputedStyle(e).width);
-  // no width while the scene is hidden: measured again on the next call
-  if (Number.isNaN(width)) return;
-  e.style.width = 2 * Math.ceil(width / 2) + 'px';
-  // in the live player, a width measured before the fonts load is measured again on the next call
-  if (document.fonts.status === 'loaded') e._l = key;
+  // in the live player, a width measured before the fonts load, or while the scene is hidden, is measured again on
+  // the next call
+  if (roundUpWidth(e) && document.fonts.status === 'loaded') e._l = key;
 }
 // A status tag at time t: its label and kind (see setStatus) and its opacity o; it swells briefly when its label
 // changes at `at`

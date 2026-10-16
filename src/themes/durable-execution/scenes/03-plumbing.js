@@ -24,10 +24,12 @@
   const tileX = p => (p.side < 0 ? TILE.leftX : TILE.rightX);
   const tileY = p => Y0 + (p.row - 1) * TILE.pitch;
   const wireY = p => CARD.y + (p.row - 1) * 80; // where the wire meets the card edge
-  // LINES OF CODE bar: business logic stays thin, plumbing grows to fill the rest (whole pixels at rest)
-  const BAR = { w: CODE_CARD.w, h: 44, biz: 96, gap: 4 };
+  // LINES OF CODE bar: business logic stays thin, plumbing grows to fill the rest (whole pixels at rest). The block:
+  // its label's line, the bar, the legend's line, gap px apart; blockH, odd, centers it on a half pixel, so that its
+  // edges land on whole pixels
+  const BAR = { w: CODE_CARD.w, h: 44, biz: 96, gap: 4, labelLine: 23, legendLine: 22, blockGap: 12 };
+  BAR.blockH = BAR.labelLine + BAR.blockGap + BAR.h + BAR.blockGap + BAR.legendLine;
   const plumbingWidth = BAR.w - BAR.biz - BAR.gap;
-  const BAR_HALF_H = 56.5; // half the measured height (113 px) of the bar block: its edges land on whole pixels
   // Bug badges in landing order; at: when the badge lands (s after c[1]). The first four land one by one, then the
   // pace quickens until every tile is buggy and four of them carry a second badge, all before the subtitle ends.
   // dx, dy: where the 50 px badge lands, from the tile center in whole px, fully inside the tile (10 px from its
@@ -108,16 +110,17 @@
         return badge;
       });
       s.bar = E(root,
-        '<div class="lbl" style="font-size:18px;text-align:center">Lines of code</div>'
-        + `<div style="position:relative;height:${BAR.h}px;margin-top:12px;background:rgba(${RGB.ink},.06);`
-        + 'border-radius:var(--rs);overflow:hidden">'
+        `<div class="lbl" style="font-size:18px;line-height:${BAR.labelLine}px;text-align:center">Lines of code</div>`
+        + `<div style="position:relative;height:${BAR.h}px;margin-top:${BAR.blockGap}px;`
+        + `background:rgba(${RGB.ink},.06);border-radius:var(--rs);overflow:hidden">`
         + `<div class="biz" style="position:absolute;left:0;top:0;bottom:0;background:${C.neon}"></div>`
         + `<div class="plumb" style="position:absolute;left:${BAR.biz + BAR.gap}px;top:0;bottom:0;`
         + `background:${C.red}"></div></div>`
-        + '<div style="display:flex;justify-content:space-between;margin-top:12px">'
+        + `<div style="display:flex;justify-content:space-between;margin-top:${BAR.blockGap}px;`
+        + `line-height:${BAR.legendLine}px">`
         + '<span class="lbl bizL" style="font-size:17px;color:var(--neon)">Business logic</span>'
         + '<span class="lbl plumbL" style="font-size:17px;color:var(--red)">Plumbing</span></div>',
-        '', { width: BAR.w + 'px' });
+        '', { width: BAR.w + 'px', height: BAR.blockH + 'px' });
       s.biz = s.bar.querySelector('.biz'); s.plumb = s.bar.querySelector('.plumb');
       s.bizL = s.bar.querySelector('.bizL'); s.plumbL = s.bar.querySelector('.plumbL');
     },
@@ -147,7 +150,7 @@
       // LINES OF CODE bar under the card: the business logic stays thin, the plumbing grows, and pulses brighter as
       // each bug lands
       const barBottom = Y0 + TILE.pitch + TILE.h / 2; // level with the bottom of the bottom tiles
-      place(s.bar, CARD.x, barBottom - BAR_HALF_H, 1, P(t, c[1] + 0.2, 0.4));
+      place(s.bar, CARD.x, barBottom - BAR.blockH / 2, 1, P(t, c[1] + 0.2, 0.4));
       s.biz.style.width = Math.round(BAR.biz * P(t, c[1] + 0.5, 0.5)) + 'px';
       s.bizL.style.opacity = P(t, c[1] + 0.7, 0.4);
       const grow = P(t, c[1] + 1.2, 2.2);
