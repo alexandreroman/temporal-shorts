@@ -31,7 +31,7 @@
   // REST_LEAD), each one holding its Slot WORK.hold s
   const WORK = { from: 0.6, count: 30, hold: 2.6 };
   // the metric values: forced evictions per second, and the replay latency of an order's short history (five
-  // Activities), in ms
+  // Activities), in ms; after the fix, the latency of the few replays left falls back to `from`
   const EVICTIONS = { from: 6, peak: 46 };
   const REPLAY_MS = { from: 12, peak: 58 };
 
@@ -142,6 +142,7 @@
       const cells = lerp(GROWN.from, GROWN.to, P(t, growAt, 0.6));
       const fixed = t >= fixAt;
       const outAt = this.dur - LEAVE_LEAD;
+      const replayMs = fixed ? REPLAY_MS.from : Math.round(lerp(REPLAY_MS.from, REPLAY_MS.peak, P(t, c[2] + 1.2, 2.5)));
       placeWorkerDiagram(s.dg, t, {
         queue: { wf, act },
         flows: [hitsBefore, work, ...replays, hitsAfter],
@@ -166,7 +167,7 @@
           },
           {
             name: 'temporal_workflow_task_replay_latency', at: c[2] + 1.2, out: outAt,
-            value: fixed ? 'rare' : Math.round(lerp(REPLAY_MS.from, REPLAY_MS.peak, P(t, c[2] + 1.2, 2.5))) + ' ms',
+            value: replayMs + ' ms',
             color: fixed ? C.neon : C.red,
           },
         ],

@@ -232,7 +232,7 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   stay cached, and replays become rare.
   - Visuals: MEMORY 1 GB becomes 4 GB; the code line `maxCachedWorkflows: 500`
     lights and becomes 2000; the strip widens to 7 cells and the waiting
-    orders move in; the metric lines read 0/s and "rare" in neon; the
+    orders move in; the metric lines read 0/s and 12 ms in neon; the
     tag turns neon; CPU 88%. Before the cut, the metric lines and the FIXED
     tag sink out.
 
