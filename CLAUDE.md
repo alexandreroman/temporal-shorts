@@ -30,8 +30,9 @@ from a deterministic HTML animation. Each video is a theme:
   follows a payload from the Worker to the Event History: where the code
   runs, TLS, private connectivity and identity, what Temporal stores,
   encryption with your keys, then Temporal Proxy, which keeps credentials
-  and encryption out of the Workers, and Temporal Cloud's compliance:
-  certifications, yearly third-party audits, the Trust Center
+  and encryption out of the Workers, calls across Namespaces with Temporal
+  Nexus, and Temporal Cloud's compliance: certifications, yearly
+  third-party audits, the Trust Center
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page

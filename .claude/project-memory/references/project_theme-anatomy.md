@@ -440,13 +440,21 @@ below and the card order in [Home page design](feedback_home-page.md).
   (ch5), then Temporal Proxy: a gateway holding the address, credentials
   and Namespace (ch6), encryption with the customer's KMS, fail closed,
   built-in Codec Server (ch7), switching upstreams with no Worker change
-  (ch8), Temporal Cloud's compliance (ch9: SOC 2 Type 2 certified, HIPAA,
-  GDPR and CCPA compliant, yearly third-party audits and pen tests, reports
-  in the Temporal Trust Center; no other framework, no logos), recap
-  (ch10), use cases (ch11: health claims, KYC onboarding, payroll runs, AI
-  agents on customer data). Every Proxy claim follows docs.temporal.io and
-  the temporal-proxy repository, every compliance claim trust.temporal.io
-  and the Temporal Cloud security model (`### Sources` in `script.md`).
+  (ch8), calls across Namespaces with Temporal Nexus (ch9: the transfer
+  Workflow in `payments` calls the fraud team's Endpoint `fraud-screening`,
+  operation `screenTransfer`, handled in `fraud`; the Endpoint's allowlist
+  refuses `analytics` and lets `payments` in, a veil hides fraud's
+  Namespace, Task Queue and implementation from callers, the payload rides
+  an mTLS tube sealed by the caller and the result comes back sealed by the
+  handler; Temporal Cloud only, mTLS never claimed for self-hosted),
+  Temporal Cloud's compliance (ch10: SOC 2 Type 2 certified, HIPAA, GDPR
+  and CCPA compliant, yearly third-party audits and pen tests, reports in
+  the Temporal Trust Center; no other framework, no logos), recap (ch11),
+  use cases (ch12: health claims, KYC onboarding, payroll runs, AI agents
+  on customer data). Every Proxy claim follows docs.temporal.io and the
+  temporal-proxy repository, every Nexus claim the Nexus docs and their
+  security page, every compliance claim trust.temporal.io and the Temporal
+  Cloud security model (`### Sources` in `script.md`).
 - Out of scope: SSO, roles, audit logs, and the pre-release status of
   Temporal Proxy, which the video never mentions.
 - Nothing on screen implies Temporal stores credentials or keys: TEMPORAL
@@ -462,14 +470,15 @@ below and the card order in [Home page design](feedback_home-page.md).
   headings fade instead of being cut; held shots whose message is small
   text render values at 18 px and labels at 14 px or more.
 - Red verdict tags (UNREADABLE, REJECTED, READABLE, IN CLEAR, CALL FAILED,
-  FAIL CLOSED) share a theme-only style: bold near-black text on solid red,
-  about 19-20 px on screen, in their tile's heading row, never straddling a
-  border; text-only tags offset their trailing letter-spacing so the ink
-  sits centered.
-- 08 → 09, 09 → 10 and 11 → outro use the engine zoom-through; ch9 holds
-  TEMPORAL's side alone (a Temporal Cloud zone, the lockup followed by
-  "Cloud"). 10's recap tiles flip in 3D into 11's use-case tiles in the
-  same slots.
+  FAIL CLOSED, NOT ON ALLOWLIST) share a theme-only style: bold near-black
+  text on solid red, about 19-20 px on screen, in their tile's heading row,
+  never straddling a border; text-only tags offset their trailing
+  letter-spacing so the ink sits centered.
+- 08 → 09, 09 → 10, 10 → 11 and 12 → outro use the engine zoom-through;
+  ch9 and ch10 hold Temporal Cloud's side alone, each in a Temporal Cloud
+  zone titled with the lockup followed by "Cloud" (`makeCloudZone()` in the
+  theme's `shared.js`). 11's recap tiles flip in 3D into 12's use-case
+  tiles in the same slots.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title

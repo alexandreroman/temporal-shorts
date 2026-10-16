@@ -23,6 +23,10 @@ Object.assign(ICONS, {
   medical: '<path d="M9 3.5h6V9h5.5v6H15v5.5H9V15H3.5V9H9z"/>',
   // a crosshair: a penetration test
   target: '<circle cx="12" cy="12" r="7.5"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>',
+  // a gateway: an arch on two posts, an arrow passing through it: a Nexus Endpoint
+  gateway: '<path d="M4 21V9a8 6 0 0 1 16 0v12"/><path d="M8 15h8M13 12l3 3-3 3"/>',
+  // an eye struck through: hidden from view
+  eyeOff: '<path d="M2 12c3-6 17-6 20 0-3 6-17 6-20 0z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/>',
 });
 
 // ---------- DOM writes that skip unchanged values: update() runs every frame, and rewriting the same HTML, text or
@@ -921,7 +925,29 @@ function namespaceHtml(shown, caret) {
     + `<span style="opacity:0">${FULL_NS.slice(shown)}</span>${cursor}</span>`;
 }
 
-// ---------- the recap tiles (chapters 10 and 11)
+// ---------- the Temporal Cloud zone (chapters 9 and 10)
+// The title of Temporal Cloud: the official lockup, ZONE_LOGO_H high, then "Cloud" in the brand font and the
+// wordmark's color, its capitals as tall as the wordmark's and on its baseline. The lockup's viewBox is 1570 x 410
+// units, from y 395: the wordmark's capitals run from y 519 to its baseline at y 684.7, 805 being the image's bottom;
+// Instrument Sans capitals are 0.72 em tall. rise: how far the word's baseline sits above the image's bottom; font:
+// its size; gap: a word space (0.2 em of that font) after the wordmark's last letter.
+const CLOUD_TITLE = (() => {
+  const unit = ZONE_LOGO_H / 410;
+  const font = +((684.7 - 519) * unit / 0.72).toFixed(2);
+  return { rise: Math.round((805 - 684.7) * unit), font, gap: Math.round(0.2 * font) };
+})();
+// A Temporal Cloud zone: a tile in TEMPORAL's look, titled with CLOUD_TITLE at the zone's heading place (24 px from
+// its left edge, ZONE_LABEL_INSET.head under its top). The scene sizes and places it.
+function makeCloudZone(root) {
+  return E(root,
+    `<div style="position:absolute;left:24px;top:${ZONE_LABEL_INSET.head}px;height:${ZONE_LOGO_H}px;line-height:0;`
+    + `white-space:nowrap"><img src="${LOGO}" style="height:${ZONE_LOGO_H}px;vertical-align:-${CLOUD_TITLE.rise}px">`
+    + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`
+    + '</div>',
+    'tile', { borderColor: C.uv, background: '#17182A' });
+}
+
+// ---------- the recap tiles (chapters 11 and 12)
 // The benefits of the recap, [icon, label], one tile each in the use cases' row (USE_CASE_ROW); a <br> splits a label
 // that would crowd its tile
 const RECAP = [
@@ -935,7 +961,7 @@ const TILE_LABEL_LINES = 2;
 // px, both even, so they center on whole pixels
 const RECAP_BADGE = { size: 56, lock: 32 };
 // A recap tile of USE_CASE_ROW's size and type scale for a benefit of RECAP, with its padlock badge (.badge, .lock),
-// open and unlit until setRecapTile() sets its state. Chapter 10 lands these tiles; chapter 11 opens on them, padlocks
+// open and unlit until setRecapTile() sets its state. Chapter 11 lands these tiles; chapter 12 opens on them, padlocks
 // shut, and flips them over into the use cases.
 function makeRecapTile(p, [icon, label]) {
   const { w, h } = USE_CASE_ROW;

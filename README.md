@@ -37,8 +37,9 @@ Each video is a theme:
   from the Worker to the Event History: where the code runs, TLS, private
   connectivity and identity, what Temporal stores, encryption with your
   keys, then [Temporal Proxy][temporal-proxy], which keeps credentials and
-  encryption out of the Workers, and Temporal Cloud's compliance:
-  certifications, yearly third-party audits, the Trust Center.
+  encryption out of the Workers, calls across Namespaces with Temporal
+  Nexus, and Temporal Cloud's compliance: certifications, yearly
+  third-party audits, the Trust Center.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal hands back the saved results from the Event

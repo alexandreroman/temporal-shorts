@@ -1,4 +1,4 @@
-// ===================== 9. AUDITED AND CERTIFIED
+// ===================== 10. AUDITED AND CERTIFIED
 // Temporal Cloud's compliance, on TEMPORAL's side: a wide Temporal Cloud zone (the official lockup followed by
 // "Cloud") holds four empty seal slots. The dramatic beat: as the first subtitle names them, four seals stamp onto
 // their slots one at a time, SOC 2 TYPE 2 (certified), then HIPAA, GDPR and CCPA (compliant), each slamming down
@@ -29,15 +29,6 @@
   // the room the heading takes at the zone's top: its inset and the lockup's height; the seals center in the rest
   const HEAD = { inset: ZONE_LABEL_INSET.head, logo: ZONE_LOGO_H };
   const sealY = zone => zone.y + HEAD.inset + HEAD.logo + (zone.h - HEAD.inset - HEAD.logo) / 2;
-  // The title of Temporal Cloud: the official lockup, then "Cloud" in the brand font and the wordmark's color, its
-  // capitals as tall as the wordmark's and on its baseline. The lockup's viewBox is 1570 x 410 units, from y 395: the
-  // wordmark's capitals run from y 519 to its baseline at y 684.7, 805 being the image's bottom; Instrument Sans
-  // capitals are 0.72 em tall. gap: a word space (0.2 em of that font) after the wordmark's last letter.
-  const CLOUD_UNIT = HEAD.logo / 410;
-  const CLOUD_TITLE = {
-    rise: Math.round((805 - 684.7) * CLOUD_UNIT), font: +((684.7 - 519) * CLOUD_UNIT / 0.72).toFixed(2),
-  };
-  CLOUD_TITLE.gap = Math.round(0.2 * CLOUD_TITLE.font);
 
   // The seals, one per column of the use cases' row (useCaseX): [name lines, status]. Each is a round badge of
   // SEAL.size px, a dashed inner ring SEAL.ring px inside its edge, a neon check, its name in two lines' room (so the
@@ -137,7 +128,7 @@
   }
 
   scene({
-    chapter: 9, title: 'Audited and certified',
+    chapter: 10, title: 'Audited and certified',
     subs: [
       {
         text: 'Temporal Cloud is <b>SOC 2 Type 2</b> certified and compliant with HIPAA, GDPR and CCPA.',
@@ -152,12 +143,7 @@
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-      s.zone = E(root,
-        `<div style="position:absolute;left:24px;top:${HEAD.inset}px;height:${HEAD.logo}px;line-height:0;`
-        + `white-space:nowrap"><img src="${LOGO}" style="height:${HEAD.logo}px;vertical-align:-${CLOUD_TITLE.rise}px">`
-        + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`
-        + '</div>',
-        'tile', { borderColor: C.uv, background: '#17182A' });
+      s.zone = makeCloudZone(root);
       s.slots = SEALS.map(() => makeSlot(root));
       s.seals = SEALS.map(seal => makeSeal(root, seal));
       s.ripples = SEALS.map(() => makeRipples(root, 2, RGB.neon));

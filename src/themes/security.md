@@ -79,24 +79,33 @@ payloads.
 Moving from your own Temporal Service to Temporal Cloud is a proxy setting:
 Workers don't change.
 
-## Chapter 9: Audited and certified
+## Chapter 9: Across Namespaces with Nexus
 
 [Watch from 2:59](/themes/security/#t=179)
+
+With Temporal Nexus, your Workflow can call another team's, across Namespaces,
+through an Endpoint. The Endpoint lets in only the Namespaces on its allowlist,
+and callers never see what is behind it. Calls between Namespaces travel over
+mTLS, and your Data Converter still encrypts the payloads.
+
+## Chapter 10: Audited and certified
+
+[Watch from 3:23](/themes/security/#t=203)
 
 Temporal Cloud is SOC 2 Type 2 certified and compliant with HIPAA, GDPR and
 CCPA. Third parties audit and pen test it every year: audit results are in the
 Temporal Trust Center.
 
-## Chapter 10: What you get
+## Chapter 11: What you get
 
-[Watch from 3:15](/themes/security/#t=195)
+[Watch from 3:39](/themes/security/#t=219)
 
 Your code stays home, every connection is verified, payloads stay encrypted,
 Workers hold no secrets.
 
-## Chapter 11: What you can build
+## Chapter 12: What you can build
 
-[Watch from 3:24](/themes/security/#t=204)
+[Watch from 3:47](/themes/security/#t=227)
 
 Nora's transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -104,6 +113,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 3:38](/themes/security/#t=218)
+[Watch from 4:01](/themes/security/#t=241)
 
 With Temporal, your code, your keys and your data stay yours.
