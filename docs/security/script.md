@@ -311,7 +311,7 @@ recap.
   - Visuals: A ROTATE pill sweeps across the fleet; each Worker flashes
     neon as it passes, an UPDATE panel flipping over its CERTIFICATE and
     API KEY chips.
-- **1:45** Forget the codec in one Worker, and its payloads go out in
+- **1:46** Forget the codec in one Worker, and its payloads go out in
   clear.
   - Visuals: The sixth Worker's CODEC slot blinks into a red dashed NO
     CODEC outline; its border and connection turn red, and a payload card
@@ -355,7 +355,7 @@ recap.
     rings; NO CODE CHANGE. The sealed card goes out through the tube and
     becomes the first row of STORED PAYLOADS in TEMPORAL: ciphertext and
     WRAPPED 1 behind a lock.
-- **2:20** Payloads are sealed with short-lived data keys, wrapped by a key
+- **2:21** Payloads are sealed with short-lived data keys, wrapped by a key
   you own in your KMS.
   - Visuals: YOUR KMS pops in beside the proxy (a KMS KEY; AWS KMS · AZURE
     KEY VAULT / GCP KMS · YOUR KEY SERVER), linked to a DATA KEY 1 under
@@ -376,7 +376,7 @@ recap.
     key 3 seals the next card into row 4 (WRAPPED 3). The list reads 1, 1,
     2, 3, and the two rows sealed with key 1 glow: old payloads keep their
     own.
-- **2:34** Its built-in Codec Server lets the Web UI and the CLI show the
+- **2:35** Its built-in Codec Server lets the Web UI and the CLI show the
   decrypted payloads.
   - Visuals: Key 3's bar stops just before the subtitle. The camera pulls
     back in one steady move, out of the proxy to the whole fleet, YOUR KMS,
@@ -434,7 +434,7 @@ recap.
     call goes through it on to the handler. A hatched veil wipes over the
     fraud Namespace from the gate's side: an eye struck through, NOT EXPOSED
     TO CALLERS, "Namespace, Task Queue, implementation".
-- **3:06** Calls between Namespaces travel over mTLS, and your Data
+- **3:07** Calls between Namespaces travel over mTLS, and your Data
   Converter still encrypts the payloads.
   - Visuals: The call line turns into a neon tube from the transfer
     Workflow through the Endpoint's opening in the boundary into the veiled
@@ -490,7 +490,7 @@ recap.
 
 ## 12 What you can build
 
-- **3:39** A bank transfer is one example: any Workflow that handles
+- **3:40** A bank transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use
@@ -506,7 +506,7 @@ recap.
 
 ## Outro
 
-- **3:53** With Temporal, your code, your keys and your data stay yours.
+- **3:54** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.
