@@ -92,12 +92,12 @@ travel over mTLS, and your Data Converter still encrypts the payloads.
 [Watch from 3:16](/themes/security/#t=196)
 
 Temporal Cloud is SOC 2 Type 2 certified and compliant with HIPAA, GDPR and
-CCPA. Third parties audit and pen test it every year: audit results are in the
-Temporal Trust Center.
+CCPA. Third parties audit and pen test it every year: ask the Temporal Trust
+Center for the reports.
 
 ## Chapter 11: What you get
 
-[Watch from 3:31](/themes/security/#t=211)
+[Watch from 3:32](/themes/security/#t=212)
 
 Your code stays home, Temporal verifies every client, your keys encrypt, Workers
 need no secrets.

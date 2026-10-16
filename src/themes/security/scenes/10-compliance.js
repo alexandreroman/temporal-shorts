@@ -4,9 +4,9 @@
 // one at a time, SOC 2 TYPE 2 (certified), then HIPAA, GDPR and CCPA (compliant), each slamming down with a press, neon
 // ripples and a jolt. For the second subtitle the zone moves up and a TRUST CENTER card rises in under it, listing the
 // SOC 2 Type 2 report over an empty slot; an ANNUAL AUDIT and an ANNUAL PEN TEST tag pop in on its sides, each under a
-// THIRD PARTY caption. The audit tag sends its results along a dashed line into the empty slot, and the card lights up
-// as the Trust Center is named. The camera zoom-through (setCamera) brings the scene in and plays into the recap; in
-// between, the camera holds.
+// THIRD PARTY caption. The card lights up as the Trust Center is named, and the audit tag sends its results along a
+// dashed line into the empty slot as the reports are named. The camera zoom-through (setCamera) brings the scene in and
+// plays into the recap; in between, the camera holds.
 // The block keeps every name declared in this file local to this scene.
 {
   // seconds after c[0] when each seal lands: SOC 2 Type 2 as the subtitle names it, at its position at 16
@@ -16,10 +16,10 @@
   // lands flat; the press squashes it to 1 - STAMP.press, back to its size in STAMP.pressD seconds; the frame jolts
   const STAMP = { from: 2.0, tilt: -10, d: 0.18, press: 0.06, pressD: 0.22, shake: 4, shakeD: 0.25 };
   // from c[1]: the zone moves up (rise, riseD) as the TRUST CENTER card comes in (card); the tags pop in as the
-  // subtitle names them (audit, penTest); both swell at "every year" (yearly); the audit results leave for the card
-  // as "audit results" is read (results, resultsD); the card lights up at "Temporal Trust Center" (lit)
+  // subtitle names them (audit, penTest); both swell at "every year" (yearly); the card lights up at "Temporal Trust
+  // Center" (lit); the audit results leave for the card as "reports" is read (results, resultsD)
   const T1 = {
-    rise: 0, riseD: 0.8, card: 0.4, audit: 1.18, penTest: 1.8, yearly: 2.55, results: 3.3, resultsD: 0.5, lit: 4.86,
+    rise: 0, riseD: 0.8, card: 0.4, audit: 1.18, penTest: 1.8, yearly: 2.55, lit: 3.8, results: 5.68, resultsD: 0.5,
   };
 
   // The Temporal Cloud zone, left and top, size: held through the stamps, then moved up for the Trust Center row
@@ -135,9 +135,9 @@
         after: 1.0,
       },
       {
-        text: 'Third parties audit and pen test it every year: audit results are in the <b>Temporal Trust Center</b>.',
-        // the card lights up at c[1] + 4.86: the full composition then holds about 2.7 s before the fade
-        after: 1.0,
+        text: 'Third parties audit and pen test it every year: ask the <b>Temporal Trust Center</b> for the reports.',
+        // the results land at c[1] + 6.18: the full composition then holds about 1.7 s before the fade
+        after: 1.4,
       },
     ],
     build(stage, s) {

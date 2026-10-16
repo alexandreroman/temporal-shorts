@@ -95,9 +95,11 @@ recap.
   third-party audit(s)" and "Annual third-party penetration testing"; the Trust
   Center "is regularly updated to reflect the latest audit results" and lists a
   SOC 2 Type 2 report among its documents (no pen test report is said to be
-  published). The security model page states "Temporal Technologies is SOC 2
-  Type 2 certified and compliant with GDPR and HIPAA regulations". No other
-  framework, no customer or third-party logo.
+  published). Its reports are not public: the Trust Center gates them behind
+  "Get Access", so chapter 10 says to ask it for the reports. The security model
+  page states "Temporal Technologies is SOC 2 Type 2 certified and compliant
+  with GDPR and HIPAA regulations". No other framework, no customer or
+  third-party logo.
 - Temporal Cloud security model:
   <https://docs.temporal.io/evaluate/cloud/security>: Temporal "does not
   run or manage your applications or Workers"; the Data Converter encrypts
@@ -463,18 +465,18 @@ recap.
     landing flat with a press, a violet glow, neon ripples and a jolt of the
     frame: SOC 2 TYPE 2 (CERTIFIED), then HIPAA, GDPR and CCPA (COMPLIANT), each
     with a neon check.
-- **3:22** Third parties audit and pen test it every year: audit results
-  are in the Temporal Trust Center.
+- **3:22** Third parties audit and pen test it every year: ask the Temporal
+  Trust Center for the reports.
   - Visuals: The zone moves up with its seals and a TRUST CENTER card
     rises in under it (a shield, `trust.temporal.io`), listing the SOC 2
     Type 2 report over an empty slot. An ANNUAL AUDIT tag (a magnifier) and
     an ANNUAL PEN TEST tag (a crosshair), each under a THIRD PARTY caption,
     pop in under the first and last seals as the subtitle names them, and
-    swell at "every year". As "audit results" is read, the audit tag sends
-    a document along a dashed line into the empty slot, which fills: Audit
-    results; the pen test tag stays a fact on its own. The card lights up
-    violet as the Trust Center is named. The default fade-out zooms through
-    to the recap.
+    swell at "every year". The card lights up violet as the Trust Center
+    is named; as "reports" is read, the audit tag sends a document along a
+    dashed line into the empty slot, which fills: Audit results; the pen
+    test tag stays a fact on its own. The default fade-out zooms through to
+    the recap.
 
 ## 11 What you get
 
