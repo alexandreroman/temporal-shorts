@@ -13,9 +13,9 @@ from?
 [Watch from 0:09](/themes/meet-temporal/#t=9)
 
 Meet Maxim Fateev and Samar Abbas, the creators of Temporal. Temporal's ideas
-come from projects they built at Amazon, Microsoft and Uber. 2015: at Uber, they
-create Cadence. It becomes the standard for Uber's critical processes. 2019:
-they found Temporal, a fork of Cadence, to bring it to every company.
+come from projects they built at Amazon, Microsoft and Uber. 2015: they join
+Uber, where they create Cadence, the standard for Uber's critical processes.
+2019: they found Temporal, a fork of Cadence, to bring it to every company.
 
 ## Chapter 2: What Temporal does
 

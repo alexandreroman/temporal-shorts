@@ -78,7 +78,7 @@
         text: "Temporal's ideas come from projects they built at Amazon, Microsoft and Uber.",
         after: 3.8,
       },
-      { text: "2015: at Uber, they create Cadence. It becomes the standard for Uber's critical processes." },
+      { text: "2015: they join Uber, where they create Cadence, the standard for Uber's critical processes." },
       {
         // a FORK link draws from Cadence's tile to Temporal's before it lights
         text: "2019: they found Temporal, a fork of Cadence, to bring it to every company.",

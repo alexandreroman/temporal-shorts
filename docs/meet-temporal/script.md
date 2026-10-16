@@ -124,8 +124,8 @@ its visuals.
     and Samar flies onto 2009: AMAZON / "Simple Workflow Service" / AWS
     WORKFLOW SERVICE; Samar travels on to 2014: MICROSOFT / "Durable Task
     Framework" / AZURE DURABLE FUNCTIONS.
-- **0:24** 2015: at Uber, they create Cadence. It becomes the standard for
-  Uber's critical processes.
+- **0:24** 2015: they join Uber, where they create Cadence, the standard
+  for Uber's critical processes.
   - Visuals: Both faces reach 2015: UBER / "Cadence" / UBER'S WORKFLOW
     ENGINE.
 - **0:30** 2019: they found Temporal, a fork of Cadence, to bring it to
