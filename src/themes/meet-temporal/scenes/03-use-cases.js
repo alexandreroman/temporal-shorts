@@ -89,13 +89,12 @@
       const root = s.cam = makeCamera(stage);
       s.glow = E(root, '', '', {
         width: '620px', height: '620px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.violet},.35) 0%, `
-          + `rgba(${RGB.uv},.12) 45%, rgba(${RGB.uv},0) 70%)`,
+        background: haloBackground(0.35, 0.12, 45, 70),
       });
       // the AI hub's halo, which travels with it at the end
       s.halo = E(root, '', '', {
         width: HANDOFF_HALO.size + 'px', height: HANDOFF_HALO.size + 'px', borderRadius: '50%',
-        background: HALO_BACKGROUND,
+        background: HANDOFF_HALO.background,
       });
       s.svg = svgLayer(root);
       s.spokes = HUBS.map(hub => path(s.svg, spokeD(hub), C.violet, 2.5, false));

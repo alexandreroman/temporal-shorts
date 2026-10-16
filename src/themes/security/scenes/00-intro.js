@@ -51,8 +51,7 @@
       // a soft glow behind the card, sized to stay inside the content frame (y 190-870): the layout check counts it
       s.glow = E(root, '', '', {
         width: '680px', height: '680px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.violet},.22) 0%, `
-          + `rgba(${RGB.uv},.10) 40%, rgba(${RGB.uv},0) 68%)`,
+        background: haloBackground(0.22, 0.1, 40, 68),
       });
       s.t = makeTitleBlock(root, 'AN EXPLAINER FOR SECURITY TEAMS', 'Who can see your<br>Workflow data?',
         'SECURITY WITH TEMPORAL');

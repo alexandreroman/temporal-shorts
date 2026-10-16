@@ -77,7 +77,7 @@
       // the halo the LLM node arrives with from the previous chapter, which settles into the LLM's own glow
       s.carry = E(root, '', '', {
         width: HANDOFF_HALO.size + 'px', height: HANDOFF_HALO.size + 'px', borderRadius: '50%',
-        background: HALO_BACKGROUND,
+        background: HANDOFF_HALO.background,
       });
       // the app instances that run the loop: built first, so the loop and its arcs sit on top of them
       s.appA = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h, APP_TEXT_LARGE);

@@ -220,8 +220,7 @@
       addInkFilter();
       s.symbolGlow = E(root, '', '', {
         width: '460px', height: '460px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.violet},.35) 0, `
-          + `rgba(${RGB.uv},.12) 45%, rgba(${RGB.uv},0) 70%)`,
+        background: haloBackground(0.35, 0.12, 45, 70),
       });
       s.symbol = E(root, `<img src="${SYMBOL}" style="width:${SYMBOL_SIZE}px;height:${SYMBOL_SIZE}px;display:block">`);
       // the logo alone, the subtitle names the language; whole-pixel sizes keep its edges crisp

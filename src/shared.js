@@ -276,6 +276,10 @@ function makeGlowDot(p, size, rgb, { radius = '50%', blur = size, spread = 0, al
 function makeSpark(p, size, rgb) {
   return makeGlowDot(p, size, rgb, { spread: Math.round(size / 2), alpha: 0.55 });
 }
+// CSS background of a round halo: violet at its core (opacity core), UV at midAt % of its radius (opacity mid),
+// faded out at end %
+const haloBackground = (core, mid, midAt, end) => `radial-gradient(circle, rgba(${RGB.violet},${core}) 0%, `
+  + `rgba(${RGB.uv},${mid}) ${midAt}%, rgba(${RGB.uv},0) ${end}%)`;
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
 function rise(e, x, y, p, d = 24) {
   place(e, x, y, 1, p);

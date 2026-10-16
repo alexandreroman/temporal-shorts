@@ -90,8 +90,7 @@
       // Temporal's arrival: a bloom of light behind its tile (under everything else)
       s.bloom = E(root, '', '', {
         width: '700px', height: '700px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.violet},.45) 0%, `
-          + `rgba(${RGB.uv},.18) 40%, rgba(${RGB.uv},0) 70%)`,
+        background: haloBackground(0.45, 0.18, 40, 70),
       });
       // "20 years" is put forward while the heading is large: a light runs through its letters (a copy of the words
       // filled with a moving gradient), a glow blooms around them, they pop, and sparkles burst out
