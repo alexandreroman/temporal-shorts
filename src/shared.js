@@ -619,6 +619,24 @@ function makeHandOffCard(root, label) {
   return e;
 }
 
+// ---------- padlock
+// How far the shackle of an open padlock rises above the body, in units of its 24 grid
+const LOCK_LIFT = 4;
+// Stroke padlock in a size px box (24 grid, like ICON('lock')), its shackle a path of its own (.shackle) that
+// liftShackle() raises. stroke: the stroke width; color: the stroke color (none: set later on the <svg>); fill: the
+// body's fill. A filled body is drawn over the shackle, so it hides the shackle's legs as it snaps shut; a hollow
+// body under it.
+function lockSvg(size, { stroke = 1.8, color = '', fill = 'none' } = {}) {
+  const shackle = '<path class="shackle" d="M8 11V7a4 4 0 0 1 8 0v4"/>';
+  const body = `<rect x="5" y="11" width="14" height="10" fill="${fill}"/><path d="M12 15v2"/>`;
+  const parts = fill === 'none' ? body + shackle : shackle + body;
+  const strokeColor = color ? ` stroke="${color}"` : '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none"${strokeColor} stroke-width="${stroke}"`
+    + ` stroke-linecap="square" stroke-linejoin="miter" style="display:block;overflow:visible">${parts}</svg>`;
+}
+// Raises the shackle of a lockSvg() (svg: its <svg> element) lift units of its 24 grid above the body
+const liftShackle = (svg, lift) => svg.querySelector('.shackle').setAttribute('transform', `translate(0 ${-lift})`);
+
 // ---------- status tags
 // Small status label (e.g. on an Event History row); its text and colors are set by setStatus(). font sizes the
 // text; padX and padY: its side and top and bottom padding, px; icon: size of the leading icon of the checked kinds;

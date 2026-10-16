@@ -69,22 +69,14 @@ const cipherGlyph = (row, col, salt = 0) =>
   CIPHER_GLYPHS[Math.floor(hash(row * 97 + col + salt) * CIPHER_GLYPHS.length)];
 
 // ---------- padlock
-// How far the shackle of an open padlock rises above the body, in units of its 24 grid
-const LOCK_LIFT = 4;
 // Seal progress at which the shackle of setLock() lands in the body (backOut first reaches 1 there)
 const LOCK_SHUT = 0.37;
-// Stroke padlock in a size px box (24 grid, like ICON('lock')), open or shut by setLock(). Its body is filled with
-// the stage black, so the shackle's legs hide inside it as the lock snaps shut. css: extra styles of its box.
+// A lockSvg() padlock in a size px box, open or shut by setLock(). Its body is filled with the stage black, so the
+// shackle's legs hide inside it as the lock snaps shut. css: extra styles of its box.
 function makeLock(p, size, stroke = 1.8, css = {}) {
-  const e = E(p,
-    `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke-width="${stroke}"`
-    + ' stroke-linecap="square" stroke-linejoin="miter" style="display:block;overflow:visible">'
-    + '<path class="shackle" d="M8 11V7a4 4 0 0 1 8 0v4"/>'
-    + `<rect x="5" y="11" width="14" height="10" fill="${C.bg}"/><path d="M12 15v2"/></svg>`,
-    '', { width: size + 'px', height: size + 'px', ...css });
+  const e = E(p, lockSvg(size, { stroke, fill: C.bg }), '', { width: size + 'px', height: size + 'px', ...css });
   e.size = size;
   e.svg = e.querySelector('svg');
-  e.shackle = e.querySelector('.shackle');
   return e;
 }
 // seal: 0 open (the shackle lifted out of the body) to 1 shut. Pass a linear progress: the shackle snaps down with a
@@ -92,7 +84,7 @@ function makeLock(p, size, stroke = 1.8, css = {}) {
 function setLock(lock, seal) {
   const s = clamp(seal);
   const lift = (1 - backOut(s)) * LOCK_LIFT;
-  lock.shackle.setAttribute('transform', `translate(0 ${-lift})`);
+  liftShackle(lock.svg, lift);
   const shut = s >= LOCK_SHUT;
   lock.svg.setAttribute('stroke', shut ? C.neon : C.ink);
   // a steady glow once shut, brighter for an instant as the shackle lands

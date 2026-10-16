@@ -114,14 +114,12 @@
     w.lines = [...w.code.children];
     return w;
   };
-  // The Data Converter: a lock (its shackle its own path, so it can open and snap shut) and its name on one row,
-  // then a key and YOUR KEYS: the encryption keys are yours
+  // The Data Converter: a lock (a lockSvg(), so it can open and snap shut) and its name on one row, then a key and
+  // YOUR KEYS: the encryption keys are yours
   const makeConverter = root => {
     const e = E(root,
       '<div style="display:flex;align-items:center">'
-      + `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${C.neon}" stroke-width="2"`
-      + ' stroke-linecap="square" style="display:block;overflow:visible"><rect x="5" y="11" width="14" height="10"/>'
-      + '<path d="M12 15v2"/><path class="shackle" d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
+      + lockSvg(22, { stroke: 2, color: C.neon })
       + '<div style="margin-left:6px;line-height:18px">Data converter</div></div>'
       + '<div style="display:flex;align-items:center;margin-top:12px;font-size:12px;line-height:16px;'
       + `color:${C.neon}"><div class="key" style="flex:none">${ICON('key', 18, C.neon, 1.8)}</div>`
@@ -132,7 +130,6 @@
         textTransform: 'uppercase', textAlign: 'center', background: '#1E2418', border: '1.5px solid ' + C.neon,
         borderRadius: 'var(--rs)',
       });
-    e.shackle = e.querySelector('.shackle');
     e.key = e.querySelector('.key');
     e.lock = e.querySelector('svg');
     // the scan line that sweeps across the tile as data goes through it, behind the tile's text
@@ -468,7 +465,7 @@
       const click = active && active.out ? swell(t, active.mid - 0.1, 0.25) : 1;
       s.conv.lock.style.transform = `scale(${click})`;
       const open = Math.max(P(t, openAt, 0.25) * (1 - P(t, snap, 0.15, easeIn)), decrypt);
-      s.conv.shackle.setAttribute('transform', `translate(0 ${(-4 * open).toFixed(2)})`);
+      liftShackle(s.conv.lock, +(LOCK_LIFT * open).toFixed(2));
       s.conv.key.style.transform = `scale(${swell(t, snap - 0.25, 0.5)})`;
       const glow = Math.max(pulse * 0.7, win(t, snap - 0.1, snap + 0.5, 0.15));
       s.conv.style.boxShadow = glowShadow(RGB.neon, glow, { blur: 24, alpha: 0.45 });
