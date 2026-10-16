@@ -11,10 +11,11 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // The symptom, then the four causes, in the order the first subtitle names them (name: its words in the subtitle),
-  // each row starting with its part (RECAP_PARTS, in the same order). The signal: SDK metrics (named without the
-  // temporal_ prefix, as in the docs headings), one per line, each with its reading, or plain words (signalText) in
-  // the text font; the fix: what to change, and the Worker option that does it, on a second line. The symptom's
-  // metrics are those to watch first, as the badge on its row says: the backlog of the Task Queue, then the wait.
+  // each row starting with its part (RECAP_PARTS, in the same order). The signal: metrics (named without their
+  // temporal_ or temporal_cloud_v1_ prefix, as in the docs headings), one per line, each with its reading, or plain
+  // words (signalText) in the text font; the fix: what to change, and the Worker option that does it, on a second line.
+  // The symptom's metrics are those to watch first, as the badge on its row says: the backlog of the Task Queue (server
+  // or Temporal Cloud metrics), then the wait (an SDK metric); the limits' metrics are SDK metrics.
   const ROWS = [
     {
       name: 'A growing backlog', symptom: 'Backlog grows, tasks wait',

@@ -1021,9 +1021,10 @@ function setPanelHeader(panel, o) {
 // ---------- the hard cuts: from the intro to the outro, each scene ends on the next one's first frame
 // The values carried across the cuts, as each chapter starts: the scene before it ends on them. act and wf: the tasks
 // waiting in the Activity and Workflow lanes; wait: SCHEDULE-TO-START, in seconds; cpu: in %; mem: the share of memory
-// used; gb: the Worker's memory, in GB (raised by chapter 5: at about 600 cached Workflows per GB of heap in the
-// TypeScript SDK, a cache of 500 nearly fills 1 GB). Activity counts sit half-way between whole counts, so the counts
-// shown on either side of a cut agree; Workflow counts are whole, so that no chip is half-way in.
+// used; gb: the Worker's memory, in GB (raised by chapter 5: the TypeScript SDK sizes its default cache at about 600
+// Workflows per GB of heap, after a 200 MB reserve, so a cache of 500 fills 1 GB). Activity counts sit half-way between
+// whole counts, so the counts shown on either side of a cut agree; Workflow counts are whole, so that no chip is
+// half-way in.
 const AT_CUT = {
   ch1: { act: 45.5 },
   ch2: { act: 2800.5 },
