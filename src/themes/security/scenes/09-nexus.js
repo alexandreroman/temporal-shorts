@@ -1,16 +1,16 @@
 // ===================== 9. ACROSS NAMESPACES WITH NEXUS
-// Temporal Nexus, on Temporal Cloud's side: a wide Temporal Cloud zone (the official lockup followed by "Cloud")
-// holds the payments Namespace on the left, where Nora's transfer Workflow runs, the fraud team's Namespace on the
-// right, where the screenTransfer handler and its Task Queue live, and between them the Nexus Endpoint
-// fraud-screening, a gate: its tile over its ALLOWLIST's, and between them, on their center axis, a boundary in the
-// theme's boundary look, YOUR ENVIRONMENT's dashed edge. The transfer Workflow's call runs up to that boundary. The
-// dramatic beat: a call from the analytics Namespace slams into it (a red flash, a shake): NOT ON ALLOWLIST; then the
-// call from payments is checked against the allowlist, ALLOWED, the Endpoint opens a gap in the boundary at the call's
-// height, as a door in it, and the call goes through to the handler. A veil drops over the fraud Namespace: its
-// Namespace, Task Queue and implementation are not exposed to callers. Then an mTLS tube replaces the call line,
-// through the same opening, the payload card, already sealed by the caller's Worker, rides it behind the veil, and
-// the result comes back sealed too, by the handler. The camera holds; the engine's zoom-through brings the scene in
-// and plays into the next one.
+// Temporal Nexus, on Temporal Cloud's side: a wide Temporal Cloud zone (the official lockup followed by "Cloud") holds
+// the payments Namespace on the left, where Nora's transfer Workflow runs, the fraud team's Namespace on the right,
+// where the screenTransfer handler and its Task Queue live, and between them the Nexus Endpoint fraud-screening, a
+// gate: its tile over its ALLOWLIST's, and between them, on their center axis, a boundary in the theme's boundary look,
+// YOUR ENVIRONMENT's dashed edge. The transfer Workflow's call runs up to that boundary. The dramatic beat: a call from
+// the analytics Namespace slams into it (a red flash, a shake): NOT ON ALLOWLIST; then the call from payments is
+// checked against the allowlist, ALLOWED, the Endpoint opens a gap in the boundary at the call's height, as a door in
+// it, and the call goes through to the handler. A veil drops over the fraud Namespace: its Namespace, Task Queue and
+// implementation are not exposed to callers. Then an mTLS tube replaces the call line, through the same opening, the
+// payload card, already sealed by the caller's Worker, rides it behind the veil, and the result comes back sealed too,
+// by the handler. The camera zoom-through (setCamera) brings the scene in and plays into the next one; in between, the
+// camera holds.
 // The block keeps every name declared in this file local to this scene.
 {
   // The Temporal Cloud zone, the scene's whole space: left, top and size, centered on (960, 515)
@@ -109,7 +109,7 @@
   // big pill (chapter 2's TLS label as it shows on screen), sits above it as in chapter 2: its right edge on
   // TAG_EDGE.right, in line with ALLOWED, and as far under that tag as above the tube.
   const NEXUS_TUBE = { x0: WORKFLOW.x + WORKFLOW.w + 16 + 12, x1: FRAUD.x + 24, y: CALL_Y, h: TUBE_H };
-  const TUBE_LABEL = { w: 180, h: 66 };
+  const TUBE_LABEL = { w: TUBE_LABEL_W.big, h: 66 };
   NEXUS_TUBE.label = { x: TAG_EDGE.right - TUBE_LABEL.w / 2, y: (TAG_EDGE.bottom + CALL_Y - TUBE_H / 2) / 2 };
   // The payload card in the tube: as wide as chapter 2's card in its tube on screen (PAYLOAD_IN_WORKER.w at its scale
   // and zoom), built at that width so it rests on whole pixels. Where it waits in payments, its right edge on
@@ -155,11 +155,7 @@
       + `color:${C.slate}">NAMESPACE</div>`
       + `<div class="mono" style="font-size:${NS_HEAD.name}px;line-height:${NS_HEAD.nameLine}px">${name}</div></div>`,
       '', { width: box.w + 'px', height: box.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)' });
-    e.verdict = statusTag(e, { font: VERDICT.font, icon: VERDICT.font });
-    Object.assign(e.verdict.style, {
-      left: 'auto', right: INSET - 1.5 + 'px', top: top + NS_HEAD.h / 2 - VERDICT.h / 2 + 'px',
-      height: VERDICT.h + 'px', transformOrigin: 'right center',
-    });
+    e.verdict = makeHeadingVerdict(e, { ...VERDICT, right: INSET - 1.5, top: top + NS_HEAD.h / 2 - VERDICT.h / 2 });
     return e;
   };
   // A tile of the box's size: its heading, then its rows, a key over a value, centered in the room under it
@@ -233,24 +229,10 @@
       + `<div class="mono" style="font-size:19px;line-height:26px;white-space:pre">`
       + `${scrambledHtml(RESULT.row, RESULT.value, 1)}</div>`,
       'tile', { width: w + 'px', height: h + 'px', textAlign: 'left', padding: '16px 20px' });
-    // centered on the card's top edge, offsets from the padding box, 1.5 px back: the border (TILE_BORDER) and half
-    // a pixel
-    const lockBadge = E(card, '', '', {
-      left: (w - badge) / 2 - 1.5 + 'px', top: -badge / 2 - 1.5 + 'px', width: badge + 'px', height: badge + 'px',
-      borderRadius: '50%', background: C.bg, border: `1px solid ${C.neon}`, opacity: 1,
-    });
-    const padlock = makeLock(lockBadge, lock, 1.9, {
-      left: (badge - lock) / 2 - 1.5 + 'px', top: (badge - lock) / 2 - 1.5 + 'px', opacity: 1,
-    });
+    const { badge: lockBadge, lock: padlock } = makeLockBadge(card, w, badge, lock);
+    lockBadge.style.borderColor = C.neon;
     setLock(padlock, 1);
     return card;
-  };
-  // Pops a Namespace's verdict in at `at`: its label and kind ('alarm', the theme's red verdict, or 'ok')
-  const popVerdict = (box, t, label, kind, at) => {
-    if (kind === 'alarm') setAlarmTag(box.verdict, label);
-    else setStatus(box.verdict, label, kind);
-    const pop = popIn(t, at);
-    popScale(box.verdict, pop);
   };
   // The center of a box given by its left, top and size
   const center = box => [box.x + box.w / 2, box.y + box.h / 2];
@@ -330,13 +312,9 @@
       s.queue = makeQueueTile(root);
 
       // its opaque body in the zone's own fill, over the Namespaces: the borders it crosses (payments', fraud's) stop
-      // at its walls, so it reads as one channel, not as cut by the Namespaces' edges
-      s.tube = makeTube(root, NEXUS_TUBE, s.zone.style.backgroundColor);
-      // its label names mTLS, cased as written (a pill sets its text in capitals), in a big pill: chapter 2's TLS
-      // label at its zoom
-      s.tube.label.classList.add('big');
-      s.tube.label.innerHTML = `${ICON('lock', 24, C.neon, 2)}mTLS`;
-      Object.assign(s.tube.label.style, { width: TUBE_LABEL.w + 'px', textTransform: 'none' });
+      // at its walls, so it reads as one channel, not as cut by the Namespaces' edges; its label names mTLS in a big
+      // pill: chapter 2's TLS label at its zoom
+      s.tube = makeTube(root, NEXUS_TUBE, { body: s.zone.style.backgroundColor, label: 'mTLS', big: true });
       s.card = makePayload(root, { w: CARD.w });
       s.result = makeSealedResult(root);
       // over the tube's end and the cards, which go behind it
@@ -354,7 +332,7 @@
       const hitAt = c[1] + T1.deny + T1.denyD;
       const allowAt = c[1] + T1.allow + T1.allowD;
 
-      // the camera holds; the analytics call's hit shakes it. The engine's zoom-through in and out.
+      // the camera holds; the analytics call's hit shakes it. The camera zoom-through (setCamera) in and out.
       const [shakeX, shakeY] = shake(t, hitAt, 10, 0.4);
       setCamera(s.cam, t, this.dur, { dx: shakeX, dy: shakeY });
       placeFlash(s.flash, t, hitAt, 0.3);
@@ -394,7 +372,7 @@
       draw(s.deny, deny, 0.8 * (1 - P(t, hitAt, 0.3)));
       sparkOnPath(s.denySpark, s.deny, deny);
       placeRipples(s.redRipples, t, hitAt, HIT.x, HIT.y, 40, 200, { d: 0.8, step: 0.15 });
-      popVerdict(s.analytics, t, 'NOT ON ALLOWLIST', 'alarm', hitAt + 0.1);
+      popVerdict(s.analytics.verdict, t, 'NOT ON ALLOWLIST', 'alarm', hitAt + 0.1);
       const red = t >= hitAt && t < hitAt + 0.7;
       s.allowlist.style.borderColor = red ? C.red : C.violet;
 
@@ -408,7 +386,7 @@
       s.allowlist.row.style.boxShadow = glowShadow(RGB.neon, listed ? 0.5 : 0, { blur: 16, alpha: 0.5 });
       placeRipples(s.allowRipples, t, allowAt, GATE.x, ALLOW_ROW_Y, 60, 240,
         { d: 0.6, step: 0.14 });
-      popVerdict(s.payments, t, 'ALLOWED', 'ok', c[1] + T1.allowed);
+      popVerdict(s.payments.verdict, t, 'ALLOWED', 'ok', c[1] + T1.allowed);
       const drawn = P(t, c[0] + T0.boundary, T0.boundaryD) * BOUNDARY.length;
       const open = P(t, c[1] + T1.open, T1.openD) * OPEN_HALF;
       strokeDashes(s.boundary, boundaryDashes(drawn, open));

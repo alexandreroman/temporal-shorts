@@ -110,9 +110,10 @@
       s.sparks = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       s.card = makePayload(root, { w: CARD.w });
       s.alarm = makeRipples(root, 2, RGB.red);
-      // in the theme's alarm look (STATUS_KINDS.alarm), like the other red verdicts
+      // in the theme's alarm look (STATUS_KINDS.alarm, with its own icon), in bold like the other red verdicts
       s.inClear = fixedTag(root, `${ICON('eye', 20, C.bg, 2.4)}In clear`, 'red', 200, { gap: 10 });
-      Object.assign(s.inClear.style, { background: C.red, color: C.bg, borderColor: C.red, fontWeight: '700' });
+      const { icon, ...alarmLook } = STATUS_KINDS.alarm;
+      Object.assign(s.inClear.style, { ...alarmLook, fontWeight: '700' });
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);
     },
@@ -136,7 +137,7 @@
       });
 
       // the camera holds chapter 4's wide shot, which the fleet layout fills; the alarm shakes it
-      const cam = shot(t, BARE_WORKERS_HANDOFF.shot, []);
+      const cam = shot(t, WIDE_SHOT, []);
       const [shakeX, shakeY] = shake(t, hitAt, 10, 0.4);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
       frameLaneEdges(s.lane, cam);

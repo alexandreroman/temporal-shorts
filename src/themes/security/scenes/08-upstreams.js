@@ -1,11 +1,11 @@
 // ===================== 8. CHANGE TEMPORAL, NOT YOUR CODE
-// Opens on the whole fleet that chapter 7 pulled back to (FULL_LANE_SHOT) and holds it. TEMPORAL splits into two
+// Opens on the whole fleet that chapter 7 pulled back to (WIDE_SHOT) and holds it. TEMPORAL splits into two
 // upstreams: your own Temporal Service on top, Self-hosted and lit, the proxy's connection bending up to it, and
 // Temporal Cloud under it (the official lockup above "Cloud"), dim. A ROUTING switch docks under the proxy. Then
 // the dramatic beat: the switch flips from SELF-HOSTED to CLOUD, the connection tears off the self-hosted service and
 // redraws down to Temporal Cloud with a spark running along it, and Temporal Cloud lights up, while the Workers and
-// their two lines stay perfectly still: WORKERS UNCHANGED. The camera holds; the default fade-out plays the engine's
-// zoom-through into the next scene.
+// their two lines stay perfectly still: WORKERS UNCHANGED. The camera holds; the default fade-out plays the camera
+// zoom-through (setCamera) into the next scene.
 // The block keeps every name declared in this file local to this scene.
 {
   // from c[0]: TEMPORAL narrows to the top upstream (split, splitD) as Temporal Cloud rises in under it (cloud); the
@@ -56,7 +56,6 @@
   // Both titles are centered in their box: the lockup's left edge, on a whole pixel (the lockup's viewBox is 1570 x
   // 410), and the lane heading's resting left edge before the split (zoneHeading())
   TITLE.logoLeft = Math.round((SELF_ZONE.w - TITLE.logo * 1570 / 410) / 2);
-  const LANE_HEAD_LEFT = 24;
 
   // SVG path of the proxy's connection to the point (x1, y): straight when y is within half a pixel of the wire's
   // line, else bending at WIRE.x with rounded corners
@@ -70,7 +69,8 @@
     return `<div style="position:absolute;left:0;right:0;top:${TITLE.nameTop}px;font-size:${TITLE.name}px;`
       + `line-height:30px;text-align:center;color:#F2F2F2">${name}</div>`
       + '<div style="position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;'
-      + `transform:translateY(-50%);margin-top:${UPSTREAM.icon / 2}px">${ICON(icon, 52, C.slate, 1.6)}</div>`;
+      + `transform:translateY(-50%);margin-top:${UPSTREAM.icon / 2}px">`
+      + `${ICON(icon, UPSTREAM.icon, C.slate, 1.6)}</div>`;
   };
 
   scene({
@@ -93,8 +93,8 @@
         width: SELF_ZONE.w + 'px', height: SELF_ZONE.h + 'px',
       });
       s.cloud = E(root,
-        `<img src="${LOGO}" style="position:absolute;left:${TITLE.logoLeft}px;top:${ZONE_LABEL_INSET.head}px;height:${TITLE.logo}px;`
-        + `display:block">${upstreamBody('Cloud', 'cloud')}`,
+        `<img src="${LOGO}" style="position:absolute;left:${TITLE.logoLeft}px;top:${ZONE_LABEL_INSET.head}px;`
+        + `height:${TITLE.logo}px;display:block">${upstreamBody('Cloud', 'cloud')}`,
         'tile', {
           width: CLOUD_ZONE.w + 'px', height: CLOUD_ZONE.h + 'px', borderColor: C.uv, background: C.temporalSurface,
         });
@@ -133,7 +133,7 @@
       const landAt = redrawAt + T0.redrawD;
 
       // the camera holds the whole fleet; the default fade-out zooms through to the next scene
-      const cam = shot(t, FULL_LANE_SHOT, []);
+      const cam = shot(t, WIDE_SHOT, []);
       setCamera(s.cam, t, this.dur, { ...cam, enter: 1 });
 
       // the lane: TEMPORAL narrows to the self-hosted service on top, which dims once the connection leaves it
@@ -145,7 +145,7 @@
       s.lane.temporal.head.style.height = headH;
       s.lane.env.head.style.lineHeight = headH;
       // the heading glides to the centered place as it grows
-      s.lane.temporal.headFrame.style.left = Math.round(lerp(LANE_HEAD_LEFT, TITLE.logoLeft, split)) + 'px';
+      s.lane.temporal.headFrame.style.left = Math.round(lerp(ZONE_LABEL_INSET.left, TITLE.logoLeft, split)) + 'px';
       placeLane(s.lane, {
         ...BARE_WORKERS_HANDOFF.lane, envZone: PROXY_ZONES.env, temporalZone: selfZone,
         temporal: lerp(1, SELF_DIM, selfDim),

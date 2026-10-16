@@ -7,7 +7,7 @@
 // leaves with the payload, the KMS key stays put. Each time the bar runs out, the key rotates: the old key drops away,
 // dimmed, the next one pops in, ROTATED, makes a quick trip to the KMS to be wrapped and its bar refills. Every payload
 // that leaves is sealed with the key of the moment (1, 1, 2, 3), while the stored ones keep theirs; NEVER LEAVES on
-// the KMS key. Then the camera pulls back once, out of the proxy to the whole fleet (FULL_LANE_SHOT): the proxy's
+// the KMS key. Then the camera pulls back once, out of the proxy to the whole fleet (WIDE_SHOT): the proxy's
 // built-in Codec Server decrypts row 2 for a CLI and the Web UI window, while TEMPORAL keeps only ciphertext. The
 // chapter clears onto chapter 8's first frame. The camera holds, then pulls back out and left, one way.
 // The block keeps every name declared in this file local to this scene.
@@ -34,7 +34,7 @@
   ROTATE.wrapAt = ROTATE.go + ROTATE.tripD;
   ROTATE.docked = ROTATE.wrapAt + ROTATE.stay + ROTATE.tripD;
   ROTATE.ready = ROTATE.docked + 0.1;
-  // from c[3]: the camera pulls back to FULL_LANE_SHOT (pull, pullD); the Codec Server pops into the proxy (codec);
+  // from c[3]: the camera pulls back to WIDE_SHOT (pull, pullD); the Codec Server pops into the proxy (codec);
   // the CLI and the Web UI open (windows, 0.15 s apart); row 2 goes to the proxy in ciphertext (fetch) and out to
   // both windows (deliver), each tripD long; TEMPORAL keeps ciphertext (ciphertext)
   const T3 = {
@@ -105,12 +105,12 @@
   };
   // the Codec Server, in the proxy box under its name, at camera rest: center and size
   const CODEC = { x: PROXY.x, y: 558, w: 172, h: 160 };
-  // the CLI and the Web UI windows, which open over the SDK client's and the Web UI's tiles: their slots, the
-  // connections they read through (in s.links) and their titles and event lines
+  // the CLI and the Web UI windows, which open over the SDK client's and the Web UI's tiles: their titles and event
+  // lines, their slots and the connections they read through (in s.links, after the Workers')
   const READERS = [
-    { slot: FLEET_CLIENTS[0], link: 6, title: 'TEMPORAL CLI', event: 'ActivityTaskCompleted', body: '#0B0B0B' },
-    { slot: FLEET_CLIENTS[1], link: 7, title: 'TEMPORAL WEB UI', event: 'Activity completed', body: WEB_UI.page },
-  ];
+    { title: 'TEMPORAL CLI', event: 'ActivityTaskCompleted', body: '#0B0B0B' },
+    { title: 'TEMPORAL WEB UI', event: 'Activity completed', body: WEB_UI.page },
+  ].map((reader, i) => ({ ...reader, slot: FLEET_CLIENTS[i], link: WORKERS.length + i }));
   // the IBAN on two lines in a window, and the name
   const IBAN = TRANSFER[0][1];
   const READER_VALUES = [IBAN.slice(0, 19), IBAN.slice(20), TRANSFER[2][1]];
@@ -209,16 +209,20 @@
   // The ciphertext of stored payload i, its first n glyphs (the same glyphs in both lists and in the windows)
   const storedCipher = (i, n) => Array.from({ length: n }, (_, col) => cipherGlyph(i + 10, col)).join('');
   // A row of the close shot's list (ROW): ciphertext, then the payload's wrapped data key behind the violet lock of
-  // the cards' WRAPPED KEY tag; a wrapped key is ciphertext too, which only your KMS can unwrap
-  const makeListRow = (root, i, key) => E(root,
-    `<span class="mono" style="font-size:16px;color:${C.violet}">${storedCipher(i, 5)}</span>`
-    + `<span class="key mono" style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:15px;`
-    + `line-height:20px;letter-spacing:.04em;padding:0 5px;border:1px solid ${C.violet};border-radius:4px;`
-    + `color:${C.violet}">${ICON('lock', 13, C.violet, 2.2)}WRAPPED ${key}</span>`,
-    '', {
-      width: ROW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 8px',
-      background: C.bg, border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
-    });
+  // the cards' WRAPPED KEY tag (row.key); a wrapped key is ciphertext too, which only your KMS can unwrap
+  const makeListRow = (root, i, key) => {
+    const row = E(root,
+      `<span class="mono" style="font-size:16px;color:${C.violet}">${storedCipher(i, 5)}</span>`
+      + `<span class="key mono" style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:15px;`
+      + `line-height:20px;letter-spacing:.04em;padding:0 5px;border:1px solid ${C.violet};border-radius:4px;`
+      + `color:${C.violet}">${ICON('lock', 13, C.violet, 2.2)}WRAPPED ${key}</span>`,
+      '', {
+        width: ROW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center', gap: '8px',
+        padding: '0 8px', background: C.bg, border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+      });
+    row.key = row.querySelector('.key');
+    return row;
+  };
   // A row of the wide shot's list: a neon lock and the payload's ciphertext, at camera rest (values 18.5 px on screen)
   const makeWideRow = (root, i) => E(root,
     `${ICON('lock', 18, C.neon, 2.2)}<span class="mono" style="font-size:21px;color:${C.violet}">`
@@ -265,7 +269,7 @@
 
   scene({
     chapter: 7, title: 'Encryption without code changes',
-    // hard cuts: chapter 6 ends on this chapter's first frame, this chapter on the next one's (FULL_LANE_SHOT)
+    // hard cuts: chapter 6 ends on this chapter's first frame, this chapter on the next one's (WIDE_SHOT)
     fadeIn: 0, fadeOut: 0,
     // presenter mode holds on the decrypted windows, then plays the clear-up and the cut in one go
     holdBeforeEnd: END.clear + 0.1,
@@ -353,7 +357,7 @@
       const clear = P(t, clearAt, END.clearD);
 
       // the camera: chapter 6's push into the proxy, held; then one pull-back, out of the proxy to the whole fleet
-      const cam = shot(t, PROXY_SHOT, [[pullAt, ...FULL_LANE_SHOT, T3.pullD]]);
+      const cam = shot(t, PROXY_SHOT, [[pullAt, ...WIDE_SHOT, T3.pullD]]);
       setCamera(s.cam, t, this.dur, { ...cam, enter: 1, exit: 1 });
       // what the close shot crops at the frame's edge stays dimmed until the pull-back frames it whole, in the last
       // part of the move
@@ -446,10 +450,10 @@
       // the DATA KEY, which shows its cipher once it first seals a card, pops in again at each rotation and swells as
       // its bar refills
       const keyPop = backPop(t, rotatedAt === null ? c[1] + T1.key : rotatedAt + ROTATE.pop);
-      place(s.dataKey, DATA_KEY.x, DATA_KEY.y, keyPop.s, keyPop.o * closeOnly);
+      const keySwell = swell(t, keys[keyI].ready - 0.1, 0.08);
+      place(s.dataKey, DATA_KEY.x, DATA_KEY.y, keyPop.s * keySwell, keyPop.o * closeOnly);
       setText(s.dataKey.num, String(keyI + 1));
       setLife(s.dataKey, lifeLeft(keys[keyI]));
-      s.dataKey.style.transform += ` scale(${swell(t, keys[keyI].ready - 0.1, 0.08).toFixed(4)})`;
       const firstKeySeal = runAt(RUNS[1]) + RUNS[1].seal;
       s.dataKey.cipher.style.opacity = P(t, firstKeySeal, 0.3);
 
@@ -536,7 +540,7 @@
         place(s.wideRows[i], wideX, wideY, 1, landed * reveal * (1 - clear));
         // the payloads that keep the first data key light up once the key has rotated
         const keep = run.key === 1 ? win(t, c[2] + T2.keep, c[2] + T2.keep + 0.6, 0.2) : 0;
-        rowE.querySelector('.key').style.boxShadow = glowShadow(RGB.neon, keep, { blur: 12, alpha: 0.8 });
+        rowE.key.style.boxShadow = glowShadow(RGB.neon, keep, { blur: 12, alpha: 0.8 });
         rowE.style.borderColor = keep > 0.5 ? C.neon : C.lineLight;
       });
       // the KMS key swells and glows as it wraps a data key: the first card's, then each rotation's

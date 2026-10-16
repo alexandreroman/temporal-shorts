@@ -214,7 +214,7 @@
       const cross = P(t, crossAt, T0.crossD);
       let cardX = lerp(PAYLOAD_IN_WORKER.x, SEALED_X, cross);
       let cardY = PAYLOAD_IN_WORKER.y;
-      const layout = payloadLayout(PAYLOAD_IN_WORKER.w);
+      const { layout } = PAYLOAD_IN_WORKER;
       // the share of each value already past the gate, from its right end (Mono advances 0.6 em per character)
       const textLeft = cardX - PAYLOAD_IN_WORKER.w / 2 + 1.5 + layout.pad.x;
       const scramble = TRANSFER.map(([, value]) => {
@@ -242,7 +242,7 @@
         }
         const x = CONVERTER.x + 14 + (40 + 140 * hash(i + 400)) * age;
         const y = cardTop + 40 + hash(i + 300) * (layout.h - 60) + (-90 + 60 * hash(i + 500)) * age + 280 * age * age;
-        glyph.textContent = cipherGlyph(i, Math.floor(t * 12), 700);
+        setText(glyph, cipherGlyph(i, Math.floor(t * 12), 700));
         place(glyph, x, y, 1, Math.sin(Math.PI * age / RAIN.life));
       });
 
@@ -266,7 +266,7 @@
       const [winX, winY] = bezier([column, [column[0] - 400, column[1] - 120],
         [BROWSER.x + 400, BROWSER.y - 60], [BROWSER.x, BROWSER.y]], move);
       place(s.webui, winX, winY, webuiPop.s * lerp(1, BROWSER.k, move), webuiPop.o * done);
-      s.webui.caption.textContent = move >= 0.5 ? 'YOUR BROWSER · WEB UI' : 'TEMPORAL WEB UI';
+      setText(s.webui.caption, move >= 0.5 ? 'YOUR BROWSER · WEB UI' : 'TEMPORAL WEB UI');
       place(s.webuiSlot, WEBUI.x, WEBUI.y, 1, 0.6 * P(t, c[3] + T3.move + T3.moveD, 0.4) * done);
       const clearAt = c[3] + T3.clear;
       setWebUI(s.webui, { scramble: 1 - P(t, clearAt, 0.5, linear) });

@@ -1,14 +1,14 @@
 // ===================== 6. MEET TEMPORAL PROXY
 // Opens on the bare Workers that chapter 5 ended on (BARE_WORKERS_HANDOFF), in chapter 4's wide shot. Your environment
 // widens as TEMPORAL narrows to the right, an SDK client and the Web UI join the Workers, and the TEMPORAL PROXY box
-// slides into the environment's right edge with a violet glow. Every app's
-// connection converges on it, and one connection leaves it for Temporal. Each Worker learns two lines only, the
-// proxy's local address and a short Namespace name: NO SECRETS. Then the camera pushes in toward the proxy as a
-// payload card leaves a Worker in a plain connection: at the proxy it gains, one at a time, the TLS tube, the API KEY
-// and the full Namespace name (payments typed over into payments.a1b2c), each with a click, and goes out to Temporal:
-// CREDENTIALS IN ONE PLACE. The chapter ends pushing into the proxy box (PROXY_SHOT), where the box fills the content
-// frame's height: only the box, the TLS tube and its label stay bright; everything else is dimmed (OFF_SHOT), faded
-// out (the SDK client and the Web UI, which it crops into the header and subtitle bands) or out of the frame. The camera travels one way: right and in.
+// slides into the environment's right edge with a violet glow. Every app's connection converges on it, and one
+// connection leaves it for Temporal. Each Worker learns two lines only, the proxy's local address and a short Namespace
+// name: NO SECRETS. Then the camera pushes in toward the proxy as a payload card leaves a Worker in a plain connection:
+// at the proxy it gains, one at a time, the TLS tube, the API KEY and the full Namespace name (payments typed over into
+// payments.a1b2c), each with a click, and goes out to Temporal: CREDENTIALS IN ONE PLACE. The chapter ends pushing into
+// the proxy box (PROXY_SHOT), where the box fills the content frame's height: only the box, the TLS tube and its label
+// stay bright; everything else is dimmed (OFF_SHOT), faded out (the SDK client and the Web UI, which it crops into the
+// header and subtitle bands) or out of the frame. The camera travels one way: right and in.
 // The block keeps every name declared in this file local to this scene.
 {
   // camera framings, [x, y, scale] for shot(): from c[2], on the proxy's side of the fleet, the two right columns, the
@@ -93,7 +93,7 @@
 
       // the camera: chapter 4's wide shot on the fleet, then right and in toward the proxy with the card, then into
       // the proxy box
-      const cam = shot(t, BARE_WORKERS_HANDOFF.shot, [
+      const cam = shot(t, WIDE_SHOT, [
         [c[2] + T2.cam, ...SEND_SHOT, T2.camD], [pushAt, ...PROXY_SHOT, PUSH_D],
       ]);
       setCamera(s.cam, t, this.dur, { ...cam, enter: 1, exit: 1 });

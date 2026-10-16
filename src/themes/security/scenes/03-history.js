@@ -34,11 +34,10 @@
   // The IBAN line of the chip (a lane-size card shown at HIST_CHIP.k), in stage coordinates at camera rest, before the
   // close layout moves it (closeDx): its top left corner, its line height and font size, and its width (Mono advances
   // 0.6 em per character)
-  const CHIP_LAYOUT = payloadLayout(PAYLOAD_IN_WORKER.w);
   const IBAN = {
-    x: HIST_CHIP.x - HIST_CHIP.w / 2 + (1.5 + CHIP_LAYOUT.pad.x) * HIST_CHIP.k,
-    y: HIST_CHIP.y - HIST_CHIP.h / 2 + (1.5 + CHIP_LAYOUT.valueTop(0)) * HIST_CHIP.k,
-    line: CHIP_LAYOUT.value.line * HIST_CHIP.k, font: CHIP_LAYOUT.value.font * HIST_CHIP.k,
+    x: HIST_CHIP.x - HIST_CHIP.w / 2 + (1.5 + PAYLOAD_IN_WORKER.layout.pad.x) * HIST_CHIP.k,
+    y: HIST_CHIP.y - HIST_CHIP.h / 2 + (1.5 + PAYLOAD_IN_WORKER.layout.valueTop(0)) * HIST_CHIP.k,
+    line: PAYLOAD_IN_WORKER.layout.value.line * HIST_CHIP.k, font: PAYLOAD_IN_WORKER.layout.value.font * HIST_CHIP.k,
   };
   IBAN.w = TRANSFER[0][1].length * 0.6 * IBAN.font;
 
@@ -107,7 +106,7 @@
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
       // the rewind: a copy of the card leaves the chip, under its verdict, with fading outlines behind it
       s.ghosts = GHOSTS.map(() => E(root, '', '', {
-        width: PAYLOAD_IN_WORKER.w + 'px', height: CHIP_LAYOUT.h + 'px', border: `1px solid ${C.violet}`,
+        width: PAYLOAD_IN_WORKER.w + 'px', height: PAYLOAD_IN_WORKER.layout.h + 'px', border: `1px solid ${C.violet}`,
         borderRadius: 'var(--r)',
       }));
       s.copy = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
@@ -147,10 +146,10 @@
       const settled = P(t, c[0] + T0.dim, T0.dimD);
       const away = P(t, streakAt, 0.45);
       const close = P(t, c[1] + T1.close, T1.closeD) * (1 - P(t, streakAt, REWIND.d * 0.8));
-      // every part starts as chapter 2 left it (TUBE_HANDOFF.lane, 1 where it says nothing) and ends as chapter 4
-      // opens (REWIND_HANDOFF.lane, 1 where it says nothing)
-      const open = { env: 1, worker: 1, temporal: 1, history: 1, wire: 1, door: 1, heads: 1, ...TUBE_HANDOFF.lane };
-      const rewind = { env: 1, worker: 1, temporal: 1, history: 1, wire: 1, door: 1, heads: 1, ...REWIND_HANDOFF.lane };
+      // every part starts as chapter 2 left it (TUBE_HANDOFF.lane, shown where it says nothing) and ends as chapter 4
+      // opens (REWIND_HANDOFF.lane, likewise)
+      const open = { ...LANE_SHOWN, ...TUBE_HANDOFF.lane };
+      const rewind = { ...LANE_SHOWN, ...REWIND_HANDOFF.lane };
       const tubeOut = P(t, c[1] + T1.tube, T1.tubeD);
       const headsOut = P(t, 0, whipEnd);
       placeLane(s.lane, {

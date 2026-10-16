@@ -74,23 +74,13 @@
       + `${ICON(icon, 22, color, 1.8)}<span class="lbl" style="font-size:14px;color:${color}">${name}</span></div>`
       + rowHtml,
       'tile', { width: w + 'px', height: h + 'px', textAlign: 'left', ...look });
-    tile.verdict = statusTag(tile, { font: VERDICT.font, icon: VERDICT.font });
-    Object.assign(tile.verdict.style, {
-      left: 'auto', right: inset + 'px', top: VERDICT.top + 'px', height: VERDICT.h + 'px',
-      transformOrigin: 'right center', opacity: 0,
-    });
+    tile.verdict = makeHeadingVerdict(tile, { ...VERDICT, right: inset });
     return tile;
   };
   // A heading of the private connectivity beat: an icon and a label, in the outsiders' heading type, in color
   const beatHeading = (root, icon, label, color) => E(root,
     `${ICON(icon, 22, color, 1.8)}<span class="lbl" style="font-size:14px;color:${color}">${label}</span>`, '',
     { display: 'flex', gap: '8px', alignItems: 'center' });
-  // Pops an outsider's verdict in, with the label of an alarm tag (setAlarmTag), at `at`
-  const popVerdict = (tile, t, label, at) => {
-    setAlarmTag(tile.verdict, label);
-    const pop = popIn(t, at);
-    popScale(tile.verdict, pop);
-  };
 
   scene({
     chapter: 2, title: 'On the wire',
@@ -156,11 +146,7 @@
       s.badge.scan = E(s.badge, '', '', {
         left: '0', width: '100%', height: '2px', background: C.neon, boxShadow: `0 0 10px 2px rgba(${RGB.neon},.5)`,
       });
-      s.verified = statusTag(s.badge, { font: VERDICT.font, icon: VERDICT.font });
-      Object.assign(s.verified.style, {
-        left: 'auto', right: '14.5px', top: 21.5 - VERDICT.h / 2 + 'px', height: VERDICT.h + 'px',
-        transformOrigin: 'right center',
-      });
+      s.verified = makeHeadingVerdict(s.badge, { ...VERDICT, right: 14.5, top: 21.5 - VERDICT.h / 2 });
 
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
       // the beam's scan line on the tube, over the card it reads, and the glyphs it pulls down
@@ -200,7 +186,7 @@
       // the history and the bands whole; TEMPORAL's zone, cropped there too, stays dimmed behind its bands.
       const onTube = P(t, c[0] + TUBE_AT, TUBE_D);
       const onNs = P(t, c[3] + T3.cam, 1.0);
-      const end = { temporal: 1, history: 1, heads: 1, ...TUBE_HANDOFF.lane };
+      const end = { ...LANE_SHOWN, ...TUBE_HANDOFF.lane };
       placeLane(s.lane, {
         env: lerp(WIRE_LANE.env, end.env, onNs), worker: lerp(1, end.worker, onTube),
         temporal: lerp(WIRE_LANE.temporal, end.temporal, onNs), history: lerp(WIRE_LANE.history, end.history, onNs),
@@ -209,8 +195,8 @@
       });
       // after placeLane(), whose zones it clips
       frameLaneEdges(s.lane, cam);
-      placeTube(s.tube, TUBE, { drawn: P(t, c[0] + T0.tube, T0.tubeD, linear), label: popIn(t, c[0] + T0.label).o });
-      s.tube.label.style.transform += ` scale(${popIn(t, c[0] + T0.label).s})`;
+      const labelPop = popIn(t, c[0] + T0.label);
+      placeTube(s.tube, TUBE, { drawn: P(t, c[0] + T0.tube, T0.tubeD, linear), label: labelPop.o, labelS: labelPop.s });
 
       // the card: out of the Worker into the tube, along it to TEMPORAL's edge, into payments, then the whip
       const lift = P(t, c[0] + T0.lift, T0.liftD);
@@ -249,10 +235,10 @@
       s.glyphs.forEach((e, i) => {
         const f = ((t - lockAt) * 1.6 + i / GLYPHS) % 1;
         const gx = lerp(beamX + (hash(i + 40) - 0.5) * 80, OUTSIDER.x, f);
-        e.textContent = cipherGlyph(i, Math.floor(t * 15), 500);
+        setText(e, cipherGlyph(i, Math.floor(t * 15), 500));
         place(e, gx, lerp(tubeBottom - 10, BEAM_FROM + 20, f), 1, locked ? Math.sin(Math.PI * f) : 0);
       });
-      popVerdict(s.spy, t, 'UNREADABLE', unlockAt + 0.1);
+      popVerdict(s.spy.verdict, t, 'UNREADABLE', 'alarm', unlockAt + 0.1);
 
       // the gap between the zones lights up as the PUBLIC INTERNET, round the eavesdropper; a private corridor draws
       // across it round the tube, toward TEMPORAL, and the band dims away behind it: the eavesdropper is left on the
@@ -293,7 +279,7 @@
       const barrier = t >= rejectAt ? 1 - P(t, rejectAt + 0.2, 0.6) : 0;
       place(s.barrier, BARRIER.x, BARRIER.y, 1, barrier);
       placeRipples(s.redRipples, t, rejectAt, BARRIER.x, BARRIER.y, 40, 200, { d: 0.8, step: 0.15 });
-      popVerdict(s.client, t, 'REJECTED', rejectAt + 0.1);
+      popVerdict(s.client.verdict, t, 'REJECTED', 'alarm', rejectAt + 0.1);
 
       // TEMPORAL splits into Namespaces under a sweep of light: payments lights up, the other two dim and lock
       const lockSeal = T3.locks.map(at => P(t, c[3] + at, 0.5, linear));
