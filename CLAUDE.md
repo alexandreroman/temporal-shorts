@@ -163,39 +163,23 @@ workspaces run `make setup` automatically.
     leaks to the global scope); each chapter is one scene, which sets
     `chapter` and `title`; `shift` (`[dx, dy]` or `(t, c) => [dx, dy]`,
     see `pan()`) centers the composition at (960, 515)
-- `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh` and
-  any make target when the fonts are missing), frame preview, parallel
-  render, timeline, layout check (`layout_check.py`), SRT export, Markdown
-  export (`export_markdown.py`), social preview images
-  (`social_images.py`, which also writes the touch icon), standalone HTML
-  build and server (which also serves `/themes/<theme>.md` as
-  `text/markdown`, the site icons, and `/sitemap.xml` and `/robots.txt`
-  when built); the per-theme scripts require `--theme` (no default). The
-  HTML build links every page to the site icons and gives each theme page
-  a visually hidden transcript of its Markdown version (after the stage,
-  for screen readers and search engines; `src/` pages never hold it, so
-  frames are unaffected) and the ` | Temporal Shorts` suffix to its
-  `<title>`. It adds the Open Graph and X card tags, a canonical link and
-  JSON-LD structured data (author and publisher Alexandre Roman, a person:
-  the site is no official Temporal site; topics in `THEME_TOPICS`), and
-  writes `output/sitemap.xml` (home page and listed themes, each with the
-  git date of the last commit that changed its own content as `<lastmod>`:
-  `src/index.html`, or the theme folder and its Markdown version; none in
-  a shallow clone or without git) and
-  `output/robots.txt`, only when the `SITE_URL` environment variable (or
-  make variable) holds the site's root URL: local builds have none, and
-  delete those of an earlier build
-- `.github/workflows/pages.yml`: on push to `main`, checks out the full
-  history (blobless, for the sitemap dates), runs `make html`
-  (which downloads the fonts) with `SITE_URL` set to the Pages URL given by
-  `actions/configure-pages` (no domain in the build or the workflow) and
-  deploys `output/` to GitHub Pages (pages, images, the Markdown
-  versions of the themes, the site icons, `sitemap.xml` and `robots.txt`;
-  no video, no SRT); served at a domain root, as the player's home button
-  links to `/`. Pull requests to `main` run the build only, without the
-  Pages step, so with no social tags, structured data, sitemap or
-  `robots.txt`, and no deploy: the pages are attached to the run as an
-  artifact
+- `scripts/`: setup, fonts (`fonts.sh`, run by `setup.sh` and any make
+  target when the fonts are missing), preview, parallel render, timeline,
+  layout check (`layout_check.py`), SRT and Markdown export
+  (`export_markdown.py`), social images and touch icon
+  (`social_images.py`), HTML build and server (which also serves the
+  Markdown versions, site icons, sitemap and robots); the per-theme
+  scripts require `--theme` (no default). The HTML build adds the hidden
+  transcript (built pages only, so frames are unaffected), the
+  ` | Temporal Shorts` title suffix and the site icons, and, only with
+  `SITE_URL`, link preview tags, JSON-LD (personal author: no official
+  Temporal site; topics in `THEME_TOPICS`), `sitemap.xml` (git lastmod)
+  and `robots.txt` (README.md, Search engines)
+- `.github/workflows/pages.yml`: on push to `main`, full blobless history
+  (sitemap dates), `make html` with `SITE_URL` from
+  `actions/configure-pages`, deploy `output/` to GitHub Pages (no video,
+  no SRT), served at a domain root; pull requests build only and attach
+  the pages as an artifact (README.md, Deployment)
 - `docs/<theme>/script.md`: full script of a theme: subtitles, timings,
   visuals
 - `output/`: generated `<theme>.srt`, `<theme>.mp4`, and the HTML pages

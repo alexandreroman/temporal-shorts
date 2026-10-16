@@ -340,10 +340,12 @@ and the build stops if `og:image` comes after the first inline style or
 script.
 
 These tags need the absolute root URL of the site, which `make html` reads
-from the `SITE_URL` variable. The Pages workflow sets it to the URL given
-by GitHub Pages (see [Deployment](#deployment)). Local builds leave it
-empty and print that they skipped the tags. To check them locally, set it
-and force the rebuild, as an up-to-date build ignores a new value:
+from the `SITE_URL` variable (a make or environment variable; the script,
+`scripts/build_html.py`, reads the environment). The Pages workflow sets it
+to the URL given by GitHub Pages (see [Deployment](#deployment)). Local
+builds leave it empty and print that they skipped the tags. To check them
+locally, set it and force the rebuild, as an up-to-date build ignores a new
+value:
 
 ```bash
 make -B html SITE_URL=https://example.com
