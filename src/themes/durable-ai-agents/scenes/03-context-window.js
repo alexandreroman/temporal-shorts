@@ -125,7 +125,7 @@
         // 36 px icon, a 27 px coin, centered on the big coin (1.5 px border + 22 px padding + 23 px)
         const coin = E(s.bill, ICON('coin', 36, C.neon, 1.8), '', { left: '28.5px', top: 'calc(50% - 18px)' });
         coin.querySelector('circle').setAttribute('fill', `rgba(${RGB.neon},.2)`);
-        const plus = E(s.bill, '+' + gain.toLocaleString('en-US'), 'mono', {
+        const plus = E(s.bill, '+' + withCommas(gain), 'mono', {
           left: 'calc(100% + 20px)', top: '14px', fontSize: '22px', color: C.neon, whiteSpace: 'nowrap',
         });
         return { coin, plus };
@@ -178,7 +178,7 @@
       const bp = backPop(t, c[0] + 1.6, 0.5);
       // the 105 px box ends on the sheet's bottom edge (480 + 300)
       place(s.bill, 1560, 727.5, bp.s, bp.o);
-      s.tok.textContent = tokensFor(used).toLocaleString('en-US') + ' tokens';
+      s.tok.textContent = withCommas(tokensFor(used)) + ' tokens';
       // money spent at each part, mid-slide: the big coin swells, a small coin flies off, "+N" rises and fades
       const spendAt = partAt.map(at => at + 0.1);
       s.coin.style.transform = `scale(${Math.max(...spendAt.map(at => swell(t, at, 0.25)))})`;

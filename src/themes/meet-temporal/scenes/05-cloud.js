@@ -441,7 +441,7 @@
       let text = SECRET;
       if (encrypted >= 1) text = CIPHER;
       else if (encrypted > 0) text = scrambleHex(SECRET, Math.round(encrypted * SECRET.length), frame);
-      if (s.secret.textContent !== text) s.secret.textContent = text;
+      setText(s.secret, text);
       s.secret.style.background = encrypted > 0.5 ? C.violetTint : C.uvTint;
       const k3 = 1.1 * pop.s * (1 - 0.2 * drop);
       place(s.secret, Math.round(sx), Math.round(sy), k3, pop.o * (1 - P(t, landed - 0.15, 0.2)));

@@ -211,11 +211,7 @@
       s.langLinks = LANGUAGES.map((_, k) => path(s.links, linkD(edgePoint(ringAt(k), LANG_CHIP, SYMBOL_SIZE / 2 + 12)),
         C.uv, 2, false));
       // a link follows its tile as the ring turns: its line redrawn, its length measured again
-      s.setLink = (k, at) => {
-        const link = s.langLinks[k];
-        link.setAttribute('d', linkD(edgePoint(at, LANG_CHIP, SYMBOL_SIZE / 2 + 12)));
-        link._L = link.getTotalLength();
-      };
+      s.setLink = (k, at) => setD(s.langLinks[k], linkD(edgePoint(at, LANG_CHIP, SYMBOL_SIZE / 2 + 12)));
       // each logo, a monochrome mark, in ink
       addInkFilter();
       s.symbolGlow = E(root, '', '', {
@@ -324,8 +320,7 @@
       const count = Math.min(CUSTOMERS, ignitedBy(t - waves));
       const rate = count - Math.min(CUSTOMERS, ignitedBy(t - waves - 0.1));
       const done = t >= full;
-      const custText = count.toLocaleString('en-US') + (done ? '+' : '');
-      if (s.custNum.textContent !== custText) s.custNum.textContent = custText;
+      setText(s.custNum, withCommas(count) + (done ? '+' : ''));
       s.custNum.style.filter = !done && rate > 0 ? `blur(${Math.min(3, rate / 60).toFixed(2)}px)` : '';
       // to the left column as the team comes in
       const toLeft = ease(P(t, teamIn - 0.6, 0.8));
@@ -336,8 +331,7 @@
         P(t, waves + 0.6, 0.4) * out1);
       place(s.burst, 960, 460, lerp(0.4, 1.4, P(t, full, 0.7)), win(t, full, full + 0.7, 0.2) * 0.9);
       // the team's count, 285 then up to 570 with the splits, then the stamp
-      const teamText = String(285 + split);
-      if (s.teamNum.textContent !== teamText) s.teamNum.textContent = teamText;
+      setText(s.teamNum, String(285 + split));
       place(s.teamNum, TEAM.x, NUMBER_Y, swell(t, stampAt - 0.2, 0.1), P(t, teamIn, 0.4) * out1);
       place(s.teamLabel, TEAM.x, LABEL_Y, 1, P(t, teamIn + 0.3, 0.4) * out1);
       const st = P(t, stampAt, 0.35, easeIn);
@@ -504,8 +498,7 @@
       });
       // the value: racing with the head, blurred while it surges, then to the middle, big, with its label. Below a
       // billion it counts in millions with the tilde of the Series A estimate it starts from
-      const valueText = value < 1 ? '~$' + Math.round(value * 1000) + 'M' : '$' + value.toFixed(2) + 'B';
-      if (s.value.textContent !== valueText) s.value.textContent = valueText;
+      setText(s.value, value < 1 ? '~$' + Math.round(value * 1000) + 'M' : '$' + value.toFixed(2) + 'B');
       const speed = seg === segs.length - 1 && t < arrive ? P(t, lastSeg[0], lastSeg[1], easeIn) : 0;
       s.value.style.filter = speed > 0.05 ? `blur(${(2.5 * speed).toFixed(2)}px)` : '';
       place(s.value, Math.round(lerp(700, REST.valueX, settle) + kx), Math.round(lerp(300, 480, settle) + ky),

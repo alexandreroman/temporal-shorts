@@ -133,11 +133,7 @@ function tapApprove(card, t, at) {
   card.ring.style.opacity = t >= at ? 1 - ripple : 0;
   card.ring.style.transform = `scale(${0.2 + 1.6 * ripple})`;
   const approved = t >= at + 0.15;
-  const label = approved ? 'approved' : 'approve';
-  if (card._l !== label) {
-    card._l = label;
-    card.apt.innerHTML = approved ? ICON('check', 24, C.bg, 2.6) + 'Approved' : 'Approve';
-  }
+  setHtml(card.apt, approved ? ICON('check', 24, C.bg, 2.6) + 'Approved' : 'Approve');
   card.ap.style.background = approved ? C.neon : C.uv;
   card.ap.style.color = approved ? C.bg : '#FFFFFF';
   // pressed in, then a small bounce as it turns approved

@@ -29,30 +29,6 @@ Object.assign(ICONS, {
   eyeOff: '<path d="M2 12c3-6 17-6 20 0-3 6-17 6-20 0z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/>',
 });
 
-// ---------- DOM writes that skip unchanged values: update() runs every frame, and rewriting the same HTML, text or
-// path costs a relayout for nothing
-// Sets an element's HTML, rewritten only when it changes
-function setHtml(e, html) {
-  if (e._html !== html) {
-    e.innerHTML = html;
-    e._html = html;
-  }
-}
-// Sets an element's text, rewritten only when it changes
-function setText(e, text) {
-  if (e._text !== text) {
-    e.textContent = text;
-    e._text = text;
-  }
-}
-// Sets a path's d, and its length (for draw()), only when it changes
-function setD(pathEl, d) {
-  if (pathEl._d === d) return;
-  pathEl.setAttribute('d', d);
-  pathEl._L = pathEl.getTotalLength();
-  pathEl._d = d;
-}
-
 // ---------- the running example: Nora sends €25,000 to Leo, one payload carried through every chapter
 // The payload's fields, [key, value], in the order the card lists them
 const TRANSFER = [
@@ -387,11 +363,7 @@ function placeLane(lane, o = {}) {
   if (lane.envKey !== zoneKey(envZone)) {
     lane.env.style.width = envZone.w + 'px';
     lane.env.style.height = envZone.h + 'px';
-    envEdgeDs(envZone).forEach((d, i) => {
-      const edge = lane.envEdges[i];
-      edge.setAttribute('d', d);
-      edge._L = edge.getTotalLength();
-    });
+    envEdgeDs(envZone).forEach((d, i) => setD(lane.envEdges[i], d));
     lane.envKey = zoneKey(envZone);
   }
   place(lane.env, ...center(envZone), 1, env);

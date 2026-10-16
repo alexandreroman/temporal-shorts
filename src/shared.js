@@ -209,6 +209,25 @@ const spinnerRing = (size, alpha = 0.3, css = '') => `<div class="spin" style="$
   + `height:${size}px;border:3px solid rgba(${RGB.violet},${alpha});border-top-color:${C.violet};border-radius:50%">`
   + '</div>';
 
+// ---------- DOM writes that skip unchanged values: update() runs every frame, and rewriting the same HTML or text
+// costs a relayout for nothing
+// Sets an element's HTML, rewritten only when it changes
+function setHtml(e, html) {
+  if (e._html !== html) {
+    e.innerHTML = html;
+    e._html = html;
+  }
+}
+// Sets an element's text, rewritten only when it changes
+function setText(e, text) {
+  if (e._text !== text) {
+    e.textContent = text;
+    e._text = text;
+  }
+}
+// A count with thousands separators, the same whatever the locale: 2400 -> '2,400'
+const withCommas = n => Math.round(n).toLocaleString('en-US');
+
 // ---------- title and end cards
 // Intro title block: the official logo, a slate kicker, the big title (HTML) and a violet tagline, left-aligned.
 // sizes: logo height, font sizes and gaps in px, defaulting to the intro of most themes.

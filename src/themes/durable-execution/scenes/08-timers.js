@@ -78,11 +78,8 @@
   };
   const setStatusBlock = (block, key) => {
     const st = STATUS[key];
-    if (block._key !== key) {
-      block._key = key;
-      block.tx.textContent = st.text;
-      block.tx.style.color = st.color;
-    }
+    setText(block.tx, st.text);
+    block.tx.style.color = st.color;
     block.icons.forEach(e => { e.style.opacity = e.dataset.icon === st.icon ? 1 : 0; });
     block.ring.style.transform = `rotate(${G * 400}deg)`;
   };

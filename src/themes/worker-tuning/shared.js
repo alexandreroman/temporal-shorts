@@ -23,8 +23,6 @@ const ORDER_ACTIVITIES = [
 ];
 // Icon of Activity Task k of a lane: the five steps of an order, in turn
 const activityIcon = k => ORDER_ACTIVITIES[k % ORDER_ACTIVITIES.length].icon;
-// A count with thousands separators, the same whatever the locale: 2400 -> '2,400'
-const withCommas = n => Math.round(n).toLocaleString('en-US');
 // A SCHEDULE-TO-START value in seconds: one decimal below 10 s ('9.4 s', '44 s')
 const formatWait = v => (v < 10 ? v.toFixed(1) : String(Math.round(v))) + ' s';
 // Shows a label positioned by its top left corner (whole pixels, so its text always rasters the same way)
@@ -168,9 +166,7 @@ function makeTaskChip(root, lane) {
 }
 // The icon of an Activity Task chip; the DOM is only rewritten when it changes
 function setChipIcon(chip, icon) {
-  if (chip._icon === icon) return;
-  chip.innerHTML = ICON(icon, 22, C.ink, 1.8);
-  chip._icon = icon;
+  setHtml(chip, ICON(icon, 22, C.ink, 1.8));
 }
 // Lane of a Task Queue: a track, an optional label above it, up to `cap` queued chips and a "+N" count of the tasks
 // beyond them. lane: 'wf' or 'act', the kind of chips; w: the track width.

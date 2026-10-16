@@ -126,6 +126,13 @@ function path(svg, d, color, w, arrow = true, dash = null) {
   p.style.opacity = 0;
   return p;
 }
+// Sets a path's d, and its length (for draw()), only when it changes: update() runs every frame
+function setD(pathEl, d) {
+  if (pathEl._d === d) return;
+  pathEl.setAttribute('d', d);
+  pathEl._L = pathEl.getTotalLength();
+  pathEl._d = d;
+}
 // draw: progress p of stroke drawing, o opacity
 function draw(p, prog, o = 1) {
   if (p._dash) {
