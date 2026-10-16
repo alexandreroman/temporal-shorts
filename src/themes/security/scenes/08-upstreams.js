@@ -27,18 +27,26 @@
   const SELF_DIM = 0.6;
   // inside each upstream: its icon, in the middle
   const UPSTREAM = { icon: 52 };
-  // the ROUTING switch, the proxy's setting: a panel docked under the proxy box, on a short stem, where your
-  // environment is empty (on the environment's edge, as the box is), as wide as the box: center and size; its label
-  // is 21 px (18.5 on screen), its options 19 px (16.7 on screen), so the longer one fits the box's width
-  const ROUTING = { x: PROXY.x, y: 765, w: PROXY.w, h: 170 };
-  const STEM = { y0: PROXY.y + PROXY.h / 2, y1: ROUTING.y - ROUTING.h / 2 };
-  // its track, from the panel's top left corner, and its knob's size, inset in the track and travel; its two options'
-  // left edge and tops
-  const TRACK = { left: 14, top: 54, w: 30, h: 100 };
+  // the ROUTING switch, the proxy's setting: a panel docked under the proxy box, on a 15 px stem, where your
+  // environment is empty (on the environment's edge, as the box is), as wide as the box; its label is 21 px (18.5 on
+  // screen), its options 19 px (16.7 on screen), so the longer one fits the box's width. Its content sits PAD px
+  // inside its border all round: the label's capitals (LABEL.top: its line's top, the capitals starting about 5 px
+  // under it) and the track's bottom, as far as the track's left edge.
+  const PAD = 14;
+  const LABEL = { top: 9, font: 21 };
+  // its track, from the panel's top left corner (under the label, as far below its capitals as before), and its
+  // knob's size, inset in the track and travel: the options' spacing
+  const TRACK = { left: PAD, top: 48, w: 30, h: 70 };
   const KNOB = { size: 24, inset: 1.5 };
   KNOB.travel = TRACK.h - 3 - KNOB.size - 2 * KNOB.inset;
-  // each option's line centered on a knob position
-  const OPTIONS = { left: 56, tops: [55, 125], font: 19 };
+  // the panel's center and size, its top 15 px under the proxy box, its height round the track
+  const ROUTING = { x: PROXY.x, w: PROXY.w, h: TRACK.top + TRACK.h + PAD + 3 };
+  ROUTING.y = PROXY.y + PROXY.h / 2 + 15 + ROUTING.h / 2;
+  const STEM = { y0: PROXY.y + PROXY.h / 2, y1: ROUTING.y - ROUTING.h / 2 };
+  // the two options: their left edge and line height; each option's line centered on a knob stop (tops)
+  const OPTIONS = { left: 56, font: 19, line: 28 };
+  const firstStop = TRACK.top + 1.5 + KNOB.inset + KNOB.size / 2;
+  OPTIONS.tops = [firstStop, firstStop + KNOB.travel].map(y => y - OPTIONS.line / 2);
   // the sparks that fly off the self-hosted service as the connection tears off it: how many, how long each one flies
   const TEAR = { n: 8, life: 0.5 };
   // The two upstreams' titles, a pair: the official lockup at the zone's heading place (the lane's TEMPORAL heading
@@ -98,7 +106,8 @@
       // the ROUTING switch on its stem: its label, its track and knob, and its two options
       s.stem = path(s.lane.svg, `M ${PROXY.x} ${STEM.y0} V ${STEM.y1}`, C.violet, 2.5, false);
       s.routing = E(root,
-        `<div class="lbl" style="position:absolute;left:${TRACK.left}px;top:14px;padding-left:0;font-size:21px">`
+        `<div class="lbl" style="position:absolute;left:${TRACK.left}px;top:${LABEL.top}px;padding-left:0;`
+        + `font-size:${LABEL.font}px">`
         + 'Routing</div>'
         + `<div style="position:absolute;left:${TRACK.left}px;top:${TRACK.top}px;width:${TRACK.w}px;`
         + `height:${TRACK.h}px;border:1.5px solid ${C.violet};border-radius:${TRACK.w / 2}px">`
@@ -106,7 +115,7 @@
         + `height:${KNOB.size}px;`
         + `border-radius:50%;background:${C.violet};box-shadow:0 0 12px rgba(${RGB.violet},.8)"></div></div>`
         + ['SELF-HOSTED', 'CLOUD'].map((name, i) => `<div class="option mono" style="position:absolute;`
-          + `left:${OPTIONS.left}px;top:${OPTIONS.tops[i]}px;font-size:${OPTIONS.font}px;line-height:28px;`
+          + `left:${OPTIONS.left}px;top:${OPTIONS.tops[i]}px;font-size:${OPTIONS.font}px;line-height:${OPTIONS.line}px;`
           + `letter-spacing:.02em">${name}</div>`).join(''),
         'tile', { width: ROUTING.w + 'px', height: ROUTING.h + 'px', textAlign: 'left', background: C.bg });
       s.knob = s.routing.querySelector('.knob');
