@@ -225,8 +225,9 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 - **3:01** Now renderInvoice keeps the CPU at 100%: every task slows down
   and holds its Slot longer.
   - Visuals: the chapter opens on chapter 5's last frame (a hard cut). A wave
-    of invoice chips runs through the queue and fills two Slots in three; the CPU meter pins at 100% in red with the
-    BOTTLENECK tag; the busy Slots drop from 44 to 36, the others stay free.
+    of invoice chips runs through the queue and fills two Slots in three;
+    the CPU meter pins at 100% in red with the BOTTLENECK tag; the busy
+    Slots drop from 44 to 36, the others stay free.
 - **3:09** More Slots would not help: a Slot adds no CPU. This Worker has
   used all the CPU it has.
   - Visuals: the code card fades; a dashed "+ SLOTS" ghost takes its
