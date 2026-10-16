@@ -21,13 +21,14 @@ with no inbound port open.
 [Watch from 0:25](/themes/security/#t=25)
 
 On its way out, the payload travels over TLS, so nobody on the network can read
-it. The Worker proves who it is: a certificate from your own CA, or an API key.
-Each Namespace is isolated: the Worker reaches only the Namespace its
-credentials allow.
+it. With Temporal Cloud, AWS PrivateLink or Google Private Service Connect keep
+it off the public internet. The Worker proves who it is: a certificate from your
+own CA, or an API key. Each Namespace is isolated: the Worker reaches only the
+Namespace its credentials allow.
 
 ## Chapter 3: In the Event History
 
-[Watch from 0:45](/themes/security/#t=45)
+[Watch from 0:52](/themes/security/#t=52)
 
 Temporal saves the payload in the Event History: that's how a Workflow resumes
 after a crash. TLS only protects the trip: once stored, the IBAN is readable by
@@ -35,7 +36,7 @@ anyone who can read the history.
 
 ## Chapter 4: Encrypted with your keys
 
-[Watch from 1:00](/themes/security/#t=60)
+[Watch from 1:08](/themes/security/#t=68)
 
 A Data Converter encrypts the payload inside the Worker, with your keys, before
 it leaves. Temporal stores and passes on only ciphertext: it never sees the
@@ -45,7 +46,7 @@ them for your browser.
 
 ## Chapter 5: The same work in every Worker
 
-[Watch from 1:26](/themes/security/#t=86)
+[Watch from 1:34](/themes/security/#t=94)
 
 Now repeat that in every Worker, in every language: address, credentials,
 encryption code. Rotate a certificate or a key, and every Worker must pick it
@@ -53,7 +54,7 @@ up. Forget the codec in one Worker, and its payloads go out in clear.
 
 ## Chapter 6: Meet Temporal Proxy
 
-[Watch from 1:45](/themes/security/#t=105)
+[Watch from 1:53](/themes/security/#t=113)
 
 Meet Temporal Proxy: one gateway in your network, between your apps and
 Temporal. Workers only know a local address and a short Namespace name: no
@@ -62,7 +63,7 @@ the full Namespace name.
 
 ## Chapter 7: Encryption without code changes
 
-[Watch from 2:06](/themes/security/#t=126)
+[Watch from 2:14](/themes/security/#t=134)
 
 The proxy can also encrypt every payload on its way out, with no change to
 Worker code. Payloads are sealed with short-lived data keys, wrapped by a key
@@ -73,21 +74,21 @@ payloads.
 
 ## Chapter 8: Change Temporal, not your code
 
-[Watch from 2:42](/themes/security/#t=162)
+[Watch from 2:50](/themes/security/#t=170)
 
 Moving from your own Temporal Service to Temporal Cloud is a proxy setting:
 Workers don't change.
 
 ## Chapter 9: What you get
 
-[Watch from 2:52](/themes/security/#t=172)
+[Watch from 2:59](/themes/security/#t=179)
 
 Your code stays home, every connection is verified, payloads stay encrypted,
 Workers hold no secrets.
 
 ## Chapter 10: What you can build
 
-[Watch from 3:00](/themes/security/#t=180)
+[Watch from 3:08](/themes/security/#t=188)
 
 Nora's transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -95,6 +96,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 3:14](/themes/security/#t=194)
+[Watch from 3:22](/themes/security/#t=202)
 
 With Temporal, your code, your keys and your data stay yours.

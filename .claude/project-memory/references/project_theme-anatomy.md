@@ -432,8 +432,10 @@ below and the card order in [Home page design](feedback_home-page.md).
   in every chapter; the euro goes with the IBANs.
 - The story follows that payload along one journey lane (YOUR
   ENVIRONMENT, the wire, TEMPORAL): where the code runs and outbound-only
-  polling (ch1), TLS, identity and Namespace isolation (ch2), the Event
-  History storing it readable (ch3), the Data Converter, Search Attributes
+  polling (ch1), TLS, private connectivity (AWS PrivateLink or Google
+  Private Service Connect, a private-only rule; never the Web UI, never
+  Azure), identity and Namespace isolation (ch2), the Event History
+  storing it readable (ch3), the Data Converter, Search Attributes
   in clear and the Codec Server (ch4), the same work in every Worker
   (ch5), then Temporal Proxy: a gateway holding the address, credentials
   and Namespace (ch6), encryption with the customer's KMS, fail closed,

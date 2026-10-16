@@ -28,14 +28,13 @@ everywhere, the same in every chapter: `from: FR76 3000 6000 0112 3456
 7890 189`, `to: DE89 3704 0044 0532 0130 00`, `name: Leo Martin`,
 `amount: €25,000`. The euro sign goes with the IBANs.
 
-Topics, in order: the Worker runs in your environment and calls out to
-Temporal (ch1); TLS, identity, Namespace isolation (ch2); the Event History
-stores payloads, readable without more (ch3); the Data Converter encrypts
-with your keys, Search Attributes stay in clear, a Codec Server decrypts
-for the Web UI (ch4); the same work in every Worker (ch5); Temporal Proxy,
-a gateway that holds the connection settings and credentials (ch6);
-encryption by the proxy (ch7); switching upstreams with no code change
-(ch8).
+Topics, in order: the Worker runs in your environment and calls out to Temporal
+(ch1); TLS, private connectivity, identity, Namespace isolation (ch2); the Event
+History stores payloads, readable without more (ch3); the Data Converter
+encrypts with your keys, Search Attributes stay in clear, a Codec Server
+decrypts for the Web UI (ch4); the same work in every Worker (ch5); Temporal
+Proxy, a gateway that holds the connection settings and credentials (ch6);
+encryption by the proxy (ch7); switching upstreams with no code change (ch8).
 
 Out of scope: SSO, roles, audit logs and certifications (they govern
 people's access, not the payload's way), and the pre-release status of
@@ -65,6 +64,15 @@ rewind whip carries it from ch3 back to the Worker for ch4.
   a Codec Server lets the Web UI decrypt without sharing keys; TLS 1.3 on
   every connection; mTLS certificates from your CA or API keys; the
   Namespace is the unit of isolation.
+- Private connectivity: <https://docs.temporal.io/cloud/connectivity>:
+  Temporal Cloud Namespaces can be reached over AWS PrivateLink or Google
+  Cloud Private Service Connect, so Worker and client traffic does not
+  cross the public internet; Connectivity Rules can enforce private-only
+  access ("Temporal Cloud immediately blocks any traffic that does not
+  match a rule on that Namespace"); access to a Namespace is always
+  authenticated (API keys or mTLS), whatever the path. The Web UI and the
+  control plane stay public, and Azure is not listed: the video shows
+  neither.
 - Workers poll Temporal over outbound connections, no inbound port:
   <https://temporal.io/blog/10-reasons-your-ciso-will-love-temporal-cloud>
   ("No inbound connectivity, ever").
@@ -133,7 +141,18 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     ciphertext glyphs pouring down the beam into its readout, which fills
     with base64 noise; the beam lets go and a solid red UNREADABLE tag
     pops beside the tile's name.
-- **0:32** The Worker proves who it is: a certificate from your own CA, or
+- **0:32** With Temporal Cloud, AWS PrivateLink or Google Private Service
+  Connect keep it off the public internet.
+  - Visuals: In the held tube shot, the gap between the two zones lights
+    up as a PUBLIC INTERNET band (red tint, dashed red edge, a globe
+    heading), the eavesdropper inside it. A private corridor draws across
+    the gap round the tube, two violet rails from the environment's edge
+    to TEMPORAL's, labelled PRIVATE LINK on the TLS label's line, and
+    hides the band round the tube; the band dims away, and the
+    eavesdropper, left on the public side, reads NO TRAFFIC. A neon
+    PRIVATE-ONLY RULE tag snaps on under the corridor as its rails flare.
+    All of it clears for the identity badge.
+- **0:39** The Worker proves who it is: a certificate from your own CA, or
   an API key.
   - Visuals: In the held tube shot, an IDENTITY badge (two tabs: mTLS
     CERTIFICATE · YOUR CA, and API KEY) leaves the Worker, grows on its
@@ -142,7 +161,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     rises under the tube; its request hits a red barrier at TEMPORAL's
     edge with a red flash and a shake, and a solid red REJECTED tag pops
     beside the client's name.
-- **0:38** Each Namespace is isolated: the Worker reaches only the
+- **0:45** Each Namespace is isolated: the Worker reaches only the
   Namespace its credentials allow.
   - Visuals: The camera moves right onto TEMPORAL; a light sweep splits it
     into three Namespace bands, support, payments (around the Event
@@ -152,14 +171,14 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 03 In the Event History
 
-- **0:45** Temporal saves the payload in the Event History: that's how a
+- **0:52** Temporal saves the payload in the Event History: that's how a
   Workflow resumes after a crash.
   - Visuals: The whip lands close on the EVENT HISTORY with a violet
     ripple, and the Namespace bands fade. The card docks as the payload
     chip under row 2 "Activity completed: debitAccount", its fields shown
     in full, between rows 1 "Workflow started: transfer" and 3 "Activity
     scheduled: creditAccount"; each row gets a SAVED tag.
-- **0:52** TLS only protects the trip: once stored, the IBAN is readable by
+- **0:59** TLS only protects the trip: once stored, the IBAN is readable by
   anyone who can read the history.
   - Visuals: The tube fades and, with no camera move, the content comes to
     the camera: the history slides left and a column comes in on the
@@ -174,7 +193,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 04 Encrypted with your keys
 
-- **1:00** A Data Converter encrypts the payload inside the Worker, with
+- **1:08** A Data Converter encrypts the payload inside the Worker, with
   your keys, before it leaves.
   - Visuals: A close shot of the Worker, the card back in it in clear. A
     DATA CONVERTER tile (a key, YOUR KEYS) pops in beside it and draws its
@@ -183,20 +202,20 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     once, the card passes through the gate and each value turns into
     ciphertext as it crosses, violet glyphs raining off the gate; the lock
     snaps shut with violet rings, and the ciphertext stays fixed.
-- **1:07** Temporal stores and passes on only ciphertext: it never sees the
+- **1:14** Temporal stores and passes on only ciphertext: it never sees the
   IBAN.
   - Visuals: The camera tracks the sealed card along the wire back to the
     close layout of the Event History, where it lands as row 2's chip, now
     in ciphertext; READABLE flips over into a violet NEVER SEES YOUR
     PAYLOADS, and the Web UI comes back in the middle of the right column
     showing the same ciphertext.
-- **1:12** Search Attributes stay in clear, so Temporal can index them:
+- **1:19** Search Attributes stay in clear, so Temporal can index them:
   keep secrets out of them.
   - Visuals: The Web UI moves up as a SEARCH ATTRIBUTES panel in clear
     rises in under it: `TransferStatus = DEBITED` and `Region = EU`, a
     light sweep across them, then a slate INDEXED, NOT ENCRYPTED tag; a
     red dashed `iban = FR76` slides in beside them and is struck out.
-- **1:18** To read payloads in the Web UI, a Codec Server you run decrypts
+- **1:26** To read payloads in the Web UI, a Codec Server you run decrypts
   them for your browser.
   - Visuals: The camera pulls back to the whole lane; the Worker, the wire
     and the converter step aside, and the Web UI window flies into YOUR
@@ -210,7 +229,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 05 The same work in every Worker
 
-- **1:26** Now repeat that in every Worker, in every language: address,
+- **1:34** Now repeat that in every Worker, in every language: address,
   credentials, encryption code.
   - Visuals: The lane opens into a fleet: YOUR ENVIRONMENT widens and five
     copies peel off the Worker, six Worker tiles in three columns and two
@@ -219,11 +238,11 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     CERTIFICATE, API KEY, CODEC. Each Worker draws its own connection
     through the channel between the rows to TEMPORAL, where a CONNECTIONS
     list adds one VERIFIED row per Worker (worker-1 · Go, and so on).
-- **1:33** Rotate a certificate or a key, and every Worker must pick it up.
+- **1:40** Rotate a certificate or a key, and every Worker must pick it up.
   - Visuals: A ROTATE pill sweeps across the fleet; each Worker flashes
     neon as it passes, an UPDATE panel flipping over its CERTIFICATE and
     API KEY chips.
-- **1:38** Forget the codec in one Worker, and its payloads go out in
+- **1:45** Forget the codec in one Worker, and its payloads go out in
   clear.
   - Visuals: The sixth Worker's CODEC slot blinks into a red dashed NO
     CODEC outline; its border and connection turn red, and a payload card
@@ -234,7 +253,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 06 Meet Temporal Proxy
 
-- **1:45** Meet Temporal Proxy: one gateway in your network, between your
+- **1:53** Meet Temporal Proxy: one gateway in your network, between your
   apps and Temporal.
   - Visuals: YOUR ENVIRONMENT widens and an SDK CLIENT and a WEB UI tile
     join the fleet in a fourth column; a TEMPORAL PROXY box slides in onto
@@ -242,11 +261,11 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     The eight connections draw one after the other, converging into the
     proxy, and one violet connection leaves it for TEMPORAL, light
     flowing through.
-- **1:51** Workers only know a local address and a short Namespace name: no
+- **1:59** Workers only know a local address and a short Namespace name: no
   certificate, no API key.
   - Visuals: Each Worker types two lines only, `proxy:7233` and
     `payments`; a NO SECRETS tag appears under the Workers.
-- **1:58** On the way out, the proxy adds TLS, the credentials and the full
+- **2:05** On the way out, the proxy adds TLS, the credentials and the full
   Namespace name.
   - Visuals: A payload card, its `payments` tag on its edge, rides from a
     Worker into the proxy as the camera pushes right and in. Dramatic
@@ -258,7 +277,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 07 Encryption without code changes
 
-- **2:07** The proxy can also encrypt every payload on its way out, with no
+- **2:14** The proxy can also encrypt every payload on its way out, with no
   change to Worker code.
   - Visuals: Close on the proxy box, TEMPORAL sliding into the shot beyond
     the TLS tube. A card rides in from a Worker in clear and is sealed
@@ -266,7 +285,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     rings; NO CODE CHANGE. The sealed card goes out through the tube and
     becomes the first row of STORED PAYLOADS in TEMPORAL: ciphertext and
     WRAPPED 1 behind a lock.
-- **2:13** Payloads are sealed with short-lived data keys, wrapped by a key
+- **2:20** Payloads are sealed with short-lived data keys, wrapped by a key
   you own in your KMS.
   - Visuals: YOUR KMS pops in beside the proxy (a KMS KEY; AWS KMS · AZURE
     KEY VAULT / GCP KMS · YOUR KEY SERVER), linked to a DATA KEY 1 under
@@ -278,7 +297,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     turns grey and drops away, DATA KEY 2 pops in with ROTATED beside it,
     its DATA KEY 2 tag makes the same trip to the KMS and comes back
     WRAPPED KEY 2, and its bar refills.
-- **2:19** Data keys rotate on their own, and the proxy never holds your KMS
+- **2:27** Data keys rotate on their own, and the proxy never holds your KMS
   key.
   - Visuals: Key 2's bar drains while it seals a card from another Worker
     into row 3 (WRAPPED 2); NEVER LEAVES appears beside the KMS key. The
@@ -287,7 +306,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     key 3 seals the next card into row 4 (WRAPPED 3). The list reads 1, 1,
     2, 3, and the two rows sealed with key 1 glow: old payloads keep their
     own.
-- **2:27** If the KMS can't be reached, the call fails: nothing leaves in
+- **2:34** If the KMS can't be reached, the call fails: nothing leaves in
   clear.
   - Visuals: Dramatic beat: the link to YOUR KMS snaps (red halves,
     sparks, a red cross, a shake) and the data key dims; a red
@@ -295,7 +314,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     clear, slams into the gate (a red flash, a shake) and turns red: CALL
     FAILED, in solid red; the tube goes dark and FAIL CLOSED, a solid red
     stamp, lands across it above the wire.
-- **2:34** Its built-in Codec Server lets the Web UI and the CLI show the
+- **2:41** Its built-in Codec Server lets the Web UI and the CLI show the
   decrypted payloads.
   - Visuals: The link heals, the gate lifts and the failed card goes back
     to its Worker. The camera pulls back in one steady move, out of the
@@ -308,7 +327,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 08 Change Temporal, not your code
 
-- **2:43** Moving from your own Temporal Service to Temporal Cloud is a
+- **2:50** Moving from your own Temporal Service to Temporal Cloud is a
   proxy setting: Workers don't change.
   - Visuals: The same wide shot. TEMPORAL narrows into the upper of two
     upstreams, the official logo centered above "Self-hosted" (a server
@@ -322,7 +341,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 09 What you get
 
-- **2:52** Your code stays home, every connection is verified, payloads
+- **2:59** Your code stays home, every connection is verified, payloads
   stay encrypted, Workers hold no secrets.
   - Visuals: 4 tall benefit tiles drop in one at a time across the frame
     as the subtitle names them, each lighting up as it lands while the
@@ -332,7 +351,7 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 
 ## 10 What you can build
 
-- **3:01** Nora's transfer is one example: any Workflow that handles
+- **3:08** Nora's transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use
@@ -341,14 +360,14 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     "passport scans, encrypted" / PAYROLL RUNS (calendar) "salaries never
     in clear" / AI AGENTS ON CUSTOMER DATA (robot) "prompts and replies
     sealed".
-- **3:06** Health claims, KYC onboarding, payroll runs, AI agents on
+- **3:14** Health claims, KYC onboarding, payroll runs, AI agents on
   customer data: the data stays yours.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **3:14** With Temporal, your code, your keys and your data stay yours.
+- **3:22** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.
