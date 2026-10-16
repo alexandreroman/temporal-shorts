@@ -51,7 +51,8 @@ the visuals belong to each theme (last section).
   chapter, so every chapter title stays true to its content.
 - Use cases: every explainer has a **What you can build** chapter after
   the recap, right before the outro (`NN-use-cases.js`); a product
-  presentation (agent-harness) ends on its recap. Topic lists in
+  presentation (agent-harness) and a guide (worker-tuning) end on their
+  recap. Topic lists in
   `script.md` leave out both chapters.
   - The scene is one `useCaseScene({ chapter, uses, namedAt, subs })`
     call (`src/shared.js`). 4 `useCaseTile`s (icon, uppercase label,
@@ -363,6 +364,60 @@ below and the card order in [Home page design](feedback_home-page.md).
   between zones; chapters place elements at final positions, with no fixed
   `shift`; ch2 is the model. Pans: ch1 (SDK tags fade), ch4 (console slides in),
   ch8 (code column centered alone, then the UI window enters).
+
+### worker-tuning
+
+- A guide for developers and SREs who already run Workers: one symptom, a
+  growing Task Queue backlog, and its four causes, told as one Black
+  Friday night where each fix moves the bottleneck: Slots (ch3), Pollers
+  (ch4), the Workflow cache (ch5), the CPU (ch6). Ch1's first reflex,
+  "add more Workers?", gets its answer only in ch6, once the CPU is full;
+  the recap says a growing backlog "often comes from one of four Worker
+  limits", never that it has only four causes. Ch7, "Read
+  the signals", is the recap (symptom / signal / fix table and the loop
+  change one setting, watch, next bottleneck); no "What you can build"
+  chapter, as for agent-harness.
+- Inspired by the Temporal Worker Tuning Simulator
+  (https://github.com/cvilenio/temporal-worker-tuning-simulator), concepts
+  only: the repository has no license, so no code, image or color comes
+  from it.
+- Every setting, default and metric matches the Temporal docs and the
+  TypeScript SDK (`### Sources` in `script.md`): defaults are 100 Activity
+  Slots, so the story's Worker is set to 10 "for normal days"; the Poller
+  fix is Poller Autoscaling (`activityTaskPollerBehavior: { type:
+  'autoscaling' }`), never a manual poller count, as the docs recommend;
+  more Workers only when the hosts are fully used. Figures stay
+  realistic: replay latency in milliseconds, a fixed schedule-to-start
+  below 1 s, the cache sized from memory (~600 Workflows per GB in TS),
+  BACKLOG as the Activity Task queue's count (ApproximateBacklogCount is
+  per task type). Key metrics appear where the story needs them: backlog
+  count and schedule-to-start in ch1, execution latency in ch6, a WATCH
+  FIRST strip in ch7. Poller and Workflow
+  Slot counts in the diagram are schematic (2 Pollers growing to 5, 2
+  Workflow Slots), stated as such in `script.md`. Resource-based tuners,
+  rate limits and partitions stay out.
+- Running example: the durable-execution shop, orders x10; five
+  Activities, `chargeCard`, `reserveItem`, `renderInvoice` (CPU-heavy
+  PDF, `invoice` icon), `shipPackage`, `emailReceipt`. One set of figures:
+  10 Activity Slots raised to 50; cache 500 raised to 2000 with memory
+  1 GB to 4 GB; Workers A, then B and C. The code card shows both
+  "normal days" settings (10 Slots, cache 500) from ch3 on.
+- One stage for ch1-6, the Worker diagram (`makeWorkerDiagram`,
+  `placeWorkerDiagram` in its `shared.js`): TEMPORAL panel with the
+  Workflow and Activity lanes, WORKER panel with Pollers, Slots and the
+  WORKFLOW CACHE, readouts, CPU and MEMORY meters, the `Worker.create()`
+  code card; a bottleneck gets a red outline and BOTTLENECK tag, then a
+  neon FIXED tag. Each bottleneck chapter: symptom, what is full, the
+  setting, relief, the next bottleneck showing.
+- Connectors between TEMPORAL and the Workers are right-angle elbows
+  (horizontal, vertical run in the gap, horizontal), and their dashed flow
+  and the task chips move left to right, from the Task Queue to the
+  Pollers: a Poller takes work from Temporal.
+- The intro's queue strip and mini Worker (10 Slots, 2 x 5) carry into
+  ch1 on a hard cut and grow into the diagram; ch1 to ch2 is a hard cut
+  too, where the centered 2 x 5 grid opens into the diagram row.
+- Slower pacing, as agent-harness: `pre: 1.5, post: 2.0` on chapters,
+  intro `pre: 1.5`, outro `pre: 1.0, post: 3.0`.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title

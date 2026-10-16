@@ -22,6 +22,10 @@ from a deterministic HTML animation. Each video is a theme:
   experimental project of the same name for developers: durable agents
   built with the AI SDKs they already use, turns, human approvals, one
   event stream, typed subagents and Code Mode
+- `worker-tuning`: Tuning Temporal Workers, a guide for developers and
+  SREs: how a Worker takes work, and how to find and fix the bottleneck
+  behind a growing Task Queue backlog: Slots, Pollers, the Workflow
+  cache, CPU
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page
@@ -105,8 +109,10 @@ workspaces run `make setup` automatically.
     example (`LUNCH_STEPS`, `LUNCH_HISTORY`) with its CONTEXT panel and
     blocks (`makeMemory()`, `makeMemBlocks()`), app and TEMPORAL panels,
     the app panel of numbered step lines (`makeLinesApp()`), the Event
-    History card, status tags, counters, crash and takeover effects, small
-    animation helpers such as `backPop()`, title and end cards) and the
+    History card, the code card of TypeScript lines (`makeCodeCard()`,
+    `highlightJs()`, `setCodeLine()`), status tags, counters, crash and
+    takeover effects, small animation helpers such as `backPop()`, title
+    and end cards) and the
     whole "What you can build" chapter, `useCaseScene()`; icons used by
     two or more themes are in `ICONS` in `engine.js`, the others in their
     theme's `shared.js`
@@ -123,7 +129,12 @@ workspaces run `make setup` automatically.
   - `themes/<theme>/`: the theme's own scripts, e.g.
     `themes/durable-ai-agents/shared.js` (extra icons, the step list,
     `makeApp`, the context block size `MEM_BLOCK`, the bill, the takeover
-    of chapters 6 and 7, the booking ticket)
+    of chapters 6 and 7, the booking ticket) or
+    `themes/worker-tuning/shared.js` (the Worker diagram shared by its
+    chapters, `makeWorkerDiagram()` and `placeWorkerDiagram()`: Task Queue
+    lanes, Pollers, Slots, Workflow cache, readouts, meters, the
+    `Worker.create()` code card and the bottleneck markers, driven by one
+    state object per frame; the mini Worker of its intro and outro)
   - `social.png`, `themes/<theme>/social.png`: 1200x630 link preview
     image of each page (`social.html`, or the intro title card), written by
     `make social` and committed

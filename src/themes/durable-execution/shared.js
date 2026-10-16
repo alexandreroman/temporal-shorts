@@ -2,8 +2,6 @@
 
 // ---------- extra icons (stroke, 24 grid, same style as ICONS in engine.js)
 Object.assign(ICONS, {
-  truck: '<path d="M14 18V5H2v13h3M9 18h6M19 18h3v-5l-4-5h-4"/><circle cx="7" cy="18" r="2"/>'
-    + '<circle cx="17" cy="18" r="2"/>',
   bag: '<path d="M4.5 8h15l-1 13h-13z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/>',
   bug: '<path d="M8 10h8v5a4 4 0 0 1-8 0z"/><path d="M9.5 10V9a2.5 2.5 0 0 1 5 0v1M12 13v6"/>'
     + '<path d="M3 14h5M16 14h5M4 9l4 2M20 9l-4 2M4.5 20l3.8-2.2M19.5 20l-3.8-2.2"/>',
@@ -28,9 +26,7 @@ const ORDER_STEPS = [
   { icon: 'mail', label: 'Email receipt', fn: 'emailReceipt', service: 'Email', result: 'receipt sent' },
 ];
 
-// ---------- code card: white card showing a few lines of TypeScript, one div per line
-// Card height = 2 * padY + lines * lineH (256 px for the 6 lines of the order code).
-const CODE = { w: 680, font: 24, lineH: 36, padY: 20, padX: 20, gutter: 40, tabH: 34 };
+// ---------- the code of the order, for the code card (makeCodeCard in src/shared.js)
 const ORDER_AWAITS = ORDER_STEPS.map(step => `  await ${step.fn}(order);`);
 // Chapters 1 to 3: the order code before Temporal, an ordinary function
 const ORDER_CODE = ['async function placeOrder(order: Order) {', ...ORDER_AWAITS, '}'];
@@ -47,68 +43,6 @@ const WORKFLOWS_TS = [
 ];
 // Index of the `await` line of step i (ORDER_STEPS[i]) in a list of code lines
 const awaitLine = (lines, i) => lines.findIndex(line => line.includes(`await ${ORDER_STEPS[i].fn}(`));
-// Light syntax coloring of one plain TypeScript line (no HTML): keywords UV, strings violet, called function names
-// bold, comments and punctuation slate (angle brackets escaped), everything else (names, types) default ink
-function highlightJs(line) {
-  const token =
-    /('[^']*')|(\/\/.*)|\b(export|async|function|await|const|typeof)\b|([A-Za-z_]\w*)(?=[(<])|([(){}<>:;,.=])/g;
-  const escaped = { '<': '&lt;', '>': '&gt;' };
-  return line.replace(token, (m, str, comment, kw, fn, punct) => {
-    if (str) return `<span style="color:${C.violet}">${str}</span>`;
-    if (comment) return `<span style="color:#7C8698">${comment}</span>`;
-    if (kw) return `<span style="color:${C.uv}">${kw}</span>`;
-    if (fn) return `<span style="font-weight:700">${fn}</span>`;
-    return `<span style="color:#7C8698">${escaped[punct] || punct}</span>`;
-  });
-}
-// opts.lines: plain TypeScript lines (default: the order code); opts.header: label of the tab on top of the card and
-// opts.file: file name shown next to it (both hidden until card.hdr.style.opacity is set); opts.font, opts.lineH,
-// opts.padY, opts.padX, opts.gutter: text metrics (default: CODE).
-// Returns the card element with: w, h, lineH, padY, lines (one div per line), bar (highlight, see setCodeLine),
-// hdr (tab or null) and lineY(i): y of the middle of line i relative to the card center.
-function makeCodeCard(parent, opts = {}) {
-  const {
-    lines = ORDER_CODE, header = null, file = null, w = CODE.w, font = CODE.font, lineH = CODE.lineH,
-    padY = CODE.padY, padX = CODE.padX, gutter = CODE.gutter,
-  } = opts;
-  const h = padY * 2 + lines.length * lineH;
-  const card = E(parent, '', 'paper', { width: w + 'px', height: h + 'px' });
-  card.w = w; card.h = h; card.lineH = lineH; card.padY = padY;
-  // the highlight sits under the text, so it is created first
-  card.bar = E(card, '', '', {
-    left: '8px', width: (w - 16) + 'px', height: lineH + 'px', borderRadius: 'var(--rs)',
-  });
-  card.lines = lines.map((src, i) => E(card,
-    `<span style="display:inline-block;width:${gutter}px;color:#B4BCCB">${i + 1}</span>${highlightJs(src)}`,
-    'mono', {
-      left: padX + 'px', top: (padY + i * lineH) + 'px', height: lineH + 'px',
-      lineHeight: lineH + 'px', fontSize: font + 'px', whiteSpace: 'pre', opacity: 1,
-    }));
-  card.hdr = null;
-  if (header) {
-    // a tab standing on the top edge, so showing it never moves the code; the file name follows it, in slate
-    const fileLabel = file
-      ? `<span style="font-size:16px;letter-spacing:.04em;color:${C.slate}">${file}</span>` : '';
-    card.hdr = E(card,
-      `<div style="height:${CODE.tabH}px;padding:0 14px 0 12px;display:flex;align-items:center;gap:8px;`
-      + `background:${C.uv};color:#FFFFFF;font-size:15px;letter-spacing:.12em;text-transform:uppercase;`
-      + `border-radius:var(--rs) var(--rs) 0 0">${ICON('code', 18, '#FFFFFF', 2)}<span>${header}</span></div>`
-      + fileLabel,
-      'mono', {
-        left: '18px', top: -CODE.tabH + 'px', height: CODE.tabH + 'px', display: 'flex', alignItems: 'center',
-        gap: '16px', whiteSpace: 'nowrap',
-      });
-  }
-  card.lineY = i => -h / 2 + padY + (i + 0.5) * lineH;
-  return card;
-}
-// Highlight n lines from line i (0-based; a fractional i slides between lines) with opacity o
-function setCodeLine(card, i, o, color = C.highlight, n = 1) {
-  card.bar.style.top = (card.padY + i * card.lineH) + 'px';
-  card.bar.style.height = (n * card.lineH) + 'px';
-  card.bar.style.background = color;
-  card.bar.style.opacity = clamp(o);
-}
 
 // ---------- CARD CHARGED counter: w x 200 px, its note under the amount (see setCounter), e.g. 'CHARGED TWICE!'
 // (red) or 'NOT RE-CHARGED' (neon); center: contents centered

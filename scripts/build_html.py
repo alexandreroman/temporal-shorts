@@ -63,6 +63,7 @@ THEME_TOPICS = {
     "human-in-the-loop": ["Human-in-the-loop", "Approval workflow"],
     "durable-ai-agents": ["AI agent", "Durable Execution"],
     "agent-harness": ["AI agent", "Temporal Agent Harness"],
+    "worker-tuning": ["Worker tuning", "Task Queue"],
 }
 
 MIME_TYPES = {
