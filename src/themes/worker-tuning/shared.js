@@ -37,6 +37,8 @@ function showAt(e, left, top, o) {
 
 // ---------- the Worker diagram: the shared stage of chapters 1 to 6
 // Final stage coordinates (the chapters have no shift), every size even, so resting parts sit on whole pixels.
+// - Chapters 1 and 2 open on a closed Worker: one "orders" lane, and the 10 Activity Slots in 2 rows of 5, the grid
+//   and its ACTIVITY SLOTS label centered as a group in the WORKER panel (see `closed` in the slots state).
 // - Top band, y 150..576: the TEMPORAL panel (x 120..700) holds the "orders" Task Queue as two lanes, Workflow
 //   Tasks (middle y 280) and Activity Tasks (y 452); the WORKER panel (x 860..1800) takes them: Pollers at x 954,
 //   level with each lane, then the Workflow Slots and the WORKFLOW CACHE on the Workflow row, the Activity Slot grid
@@ -62,6 +64,9 @@ const DIAGRAM = {
   poller: { x: 954, size: 22, pitch: 36, max: { wf: 2, act: 5 } },
   // Slots: w x h cells; Activity Slots in rows of `cols` from x 1036 (x 1036..1762 for 10), up to `max`
   slot: { left: 1036, w: 60, h: 34, pitchX: 74, pitchY: 42, cols: 10, max: 50 },
+  // the closed Worker's grid: 2 rows of `cols` Slots, x 1152..1508, y 341..417, its label on y 310..331, so the
+  // label and the grid, 107 px high together, sit centered in the WORKER panel (y 150..576)
+  closed: { left: 1152, top: 341, cols: 5 },
   wfSlots: 2,
   // WORKFLOW CACHE: a strip of order cells from x 1226, up to `max` (x 1226..1762)
   cache: { left: 1226, w: 60, h: 34, pitch: 68, max: 8 },
@@ -109,6 +114,13 @@ function makeLane(root, label, lane, { w = DIAGRAM.lane.w, cap = DIAGRAM.lane.ca
     chips: Array.from({ length: cap }, () => makeTaskChip(root, lane)),
   };
 }
+// Resizes a lane: a track w px wide, holding up to `cap` queued chips (at most the cap it was made with; a fractional
+// cap shows the next chip fading in at its place, from the overflow)
+function resizeLane(lane, w, cap) {
+  lane.w = w;
+  lane.cap = cap;
+  lane.track.style.width = w + 'px';
+}
 // x of the head of a lane whose track starts at x: the queued chip next out
 const laneHeadX = (lane, x) => x + lane.w - DIAGRAM.lane.headInset;
 // Places a lane, its track's left end at x and its middle at y, with opacity o (labelO: its label's). Options:
@@ -127,8 +139,9 @@ function placeLane(lane, x, y, o, { queue = 0, departed = 0, shift = 1, iconOf =
   lane.chips.forEach((chip, p) => {
     const a = clamp(shown - p);
     const fromOverflow = overflow && p === lane.cap - 1;
-    // queued chips sit one pitch further out until the queue has moved up; an arriving tail slides in from the left
-    const cx = headX - p * pitch - (fromOverflow ? 0 : (1 - shift) * pitch) - (1 - a) * pitch;
+    // queued chips sit one pitch further out until the queue has moved up; an arriving tail slides in from the left,
+    // unless it comes from the overflow
+    const cx = headX - p * pitch - (fromOverflow ? 0 : (1 - shift) * pitch) - (overflow ? 0 : (1 - a) * pitch);
     if (lane.lane === 'act') setChipIcon(chip, iconOf(departed + p));
     place(chip, cx, y, 1, a * (fromOverflow ? shift : 1) * o);
   });
@@ -180,6 +193,12 @@ function slotCenter(i, rows) {
   const { left, w, pitchX, pitchY, cols } = DIAGRAM.slot;
   const row = Math.floor(i / cols);
   return [left + w / 2 + (i % cols) * pitchX, DIAGRAM.actY + (row - (rows - 1) / 2) * pitchY];
+}
+// Middle of Activity Slot i in the closed Worker's grid, moved down by drop px
+function closedSlotCenter(i, drop) {
+  const { w, h, pitchX, pitchY } = DIAGRAM.slot;
+  const { left, top, cols } = DIAGRAM.closed;
+  return [left + w / 2 + (i % cols) * pitchX, top + drop + h / 2 + Math.floor(i / cols) * pitchY];
 }
 // Middle of Workflow Slot i
 const wfSlotCenter = i => [DIAGRAM.slot.left + DIAGRAM.slot.w / 2 + i * DIAGRAM.slot.pitchX, DIAGRAM.wfY];
@@ -424,16 +443,18 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 // ---------- placing the diagram
 // Places the whole diagram at time t, from one state object; every field is optional, so a chapter sets only what
 // it shows, phase by phase (its values may depend on t and on its cues c[i]):
-// - show: { temporal, lanes, worker, pollers, wfSlots, slots, cache, backlog, wait, cpu, mem, code }, the opacity
-//   of each part, 1 by default
+// - show: { temporal, lanes, worker, pollers, wfSlots, slots, slotsLabel, cache, backlog, wait, cpu, mem, code },
+//   the opacity of each part, 1 by default (slotsLabel, the ACTIVITY SLOTS label: that of the slots by default)
 // - split: 0 to 1, from one "orders" lane (chapter 1) to two lanes, Workflow Tasks above Activity Tasks (default 1)
 // - queue: { wf, act }, the tasks waiting in each lane (see placeLane); taskIcon(k): the icon of Activity Task k of
 //   its lane (default activityIcon)
 // - flows: task flows from the lanes into the Slots (see FLIGHT), in order of their `from`
-// - slots: { n, grow, busy, replay, icon, glow }, the Activity Slots: n of them (default 10); grow { from, at }: the
-//   grid grows from `from` Slots at `at` (its rows spread out, then the new Slots pop in); busy: how many are
-//   steadily busy, in SLOT_ORDER, besides those the flows hold; replay: indices of the Slots replaying; icon(i): the
-//   icon of a steadily busy Slot; glow: when the grid and its ACTIVITY SLOTS label light up briefly (an emphasis)
+// - slots: { n, grow, busy, replay, icon, glow, closed, drop }, the Activity Slots: n of them (default 10); grow
+//   { from, at }: the grid grows from `from` Slots at `at` (its rows spread out, then the new Slots pop in); busy: how
+//   many are steadily busy, in SLOT_ORDER, besides those the flows hold; replay: indices of the Slots replaying;
+//   icon(i): the icon of a steadily busy Slot; glow: when the grid and its ACTIVITY SLOTS label light up briefly (an
+//   emphasis); closed: 0 to 1, from the diagram's row to the closed Worker's centered grid (default 0); drop: how far
+//   the closed grid moves down, making room for a tag above it (default 0)
 // - wfSlots: { busy, replay }, the Workflow Slots (busy: how many, from the first)
 // - pollers: { wf, act, grow, polling }: Pollers per lane (default 2 each, up to DIAGRAM.poller.max); grow { from,
 //   at }: Activity Pollers from `from` on pop in at `at`; polling { wf, act }: whether a lane's poll lines pulse
@@ -463,7 +484,7 @@ function placeWorkerDiagram(dg, t, state = {}) {
   const layout = slotLayout(state.slots ?? {}, t);
   const flights = flowFlights(state, t);
   placeLanes(dg, t, state, show('lanes'));
-  placeSlots(dg, t, state, layout, flights, show('slots'), show('wfSlots'));
+  placeSlots(dg, t, state, layout, flights, show('slots'), show('wfSlots'), state.show?.slotsLabel ?? show('slots'));
   placePollers(dg, t, state, layout, flights, show('pollers'));
   placeFlights(dg, t, state, layout, flights, show('lanes'), { wf: show('wfSlots'), act: show('slots') });
   placeCache(dg, t, state.cache ?? {}, show('cache'));
@@ -472,27 +493,30 @@ function placeWorkerDiagram(dg, t, state = {}) {
   placeMarks(dg, t, state, layout);
 }
 
-// The Activity Slot grid at t: n Slots, the rows its layout has (fractional while it grows) and how each Slot shows
-// ({ s, o } for place())
-function slotLayout({ n = 10, grow }, t) {
-  if (!grow) return { n, rowsAt: () => slotRows(n), shownAt: () => ({ s: 1, o: 1 }) };
+// The Activity Slot grid at t: n Slots, the rows its layout has (fractional while it grows), how each Slot shows
+// ({ s, o } for place()), and how closed the Worker is (see the slots state)
+function slotLayout({ n = 10, grow, closed = 0, drop = 0 }, t) {
+  if (!grow) return { n, closed, drop, rowsAt: () => slotRows(n), shownAt: () => ({ s: 1, o: 1 }) };
   const spread = P(t, grow.at, 0.5);
   const fromRows = slotRows(grow.from), toRows = slotRows(n);
   return {
-    n,
+    n, closed, drop,
     // the rows spread out first, then the new Slots pop in, 0.02 s apart
     rowsAt: () => lerp(fromRows, toRows, spread),
     shownAt: i => (i < grow.from ? { s: 1, o: 1 } : backPop(t, grow.at + 0.45 + (i - grow.from) * 0.02, 0.35)),
   };
 }
 // Middle of Activity Slot i at t, on whole pixels: while the grid grows, each row eases from its place in the old
-// layout to its place in the new one
+// layout to its place in the new one; while the Worker opens or closes, each Slot eases between the diagram's row and
+// the closed Worker's grid
 function slotPoint(layout, i) {
   const rows = layout.rowsAt();
   const low = Math.floor(rows), high = Math.ceil(rows);
   const [x, y0] = slotCenter(i, low);
   const [, y1] = slotCenter(i, high);
-  return [x, Math.round(lerp(y0, y1, rows - low))];
+  const y = lerp(y0, y1, rows - low);
+  const [closedX, closedY] = closedSlotCenter(i, layout.drop);
+  return [Math.round(lerp(x, closedX, layout.closed)), Math.round(lerp(y, closedY, layout.closed))];
 }
 
 // Every task of the flows that has left its lane and still flies or holds its Slot at t:
@@ -543,7 +567,7 @@ function placeLanes(dg, t, state, o) {
 }
 // Activity and Workflow Slots: steadily busy ones, then those the flows hold (a swell as each task lands), those
 // freeing up for a flow's next task, replays
-function placeSlots(dg, t, state, layout, flights, slotsO, wfO) {
+function placeSlots(dg, t, state, layout, flights, slotsO, wfO, labelO) {
   const { n = 10, busy = 0, replay = [], icon = steadySlotIcon, glow } = state.slots ?? {};
   const iconOf = state.taskIcon ?? activityIcon;
   const looks = dg.slots.map(() => ({ look: 'free', icon: null, s: 1 }));
@@ -579,7 +603,8 @@ function placeSlots(dg, t, state, layout, flights, slotsO, wfO) {
   });
   const { labelTop, labelGap, slot } = DIAGRAM;
   showAt(dg.labels.wfSlots, slot.left, labelTop, wfO);
-  showAt(dg.labels.slots, slot.left, slotPoint(layout, 0)[1] - slot.h / 2 - labelGap, slotsO);
+  const [firstX, firstY] = slotPoint(layout, 0);
+  showAt(dg.labels.slots, firstX - slot.w / 2, firstY - slot.h / 2 - labelGap, labelO);
   dg.labels.slots.style.color = light > 0.5 ? C.violet : '';
   dg.labels.slots.style.textShadow = glowShadow(RGB.violet, light, { blur: 14, alpha: 0.8 });
 }
@@ -660,10 +685,10 @@ function placeFlights(dg, t, state, layout, flights, o, slotsO) {
     if (lane === 'act') setChipIcon(chip, f.flow.icon?.(f.k) ?? iconOf(f.index));
     const laneY = lane === 'wf' ? DIAGRAM.wfY : DIAGRAM.actY;
     const head = [laneHeadX(dg.lanes[lane], DIAGRAM.lane.left), lerp(DIAGRAM.midY, laneY, split)];
-    // the Poller it passes: (k mod the working Pollers), as placePollers lights it
-    const poller = lane === 'wf'
-      ? [DIAGRAM.poller.x, pollerY(laneY, f.k % nWf, nWf)]
-      : [DIAGRAM.poller.x, act.y(f.k % act.working)];
+    // the Poller it passes: (k mod the working Pollers), as placePollers lights it; a closed Worker shows no
+    // Pollers, and its chips pass their column level with the lane, straight into the Slots
+    const pollerAt = lane === 'wf' ? pollerY(laneY, f.k % nWf, nWf) : act.y(f.k % act.working);
+    const poller = [DIAGRAM.poller.x, lerp(pollerAt, head[1], layout.closed)];
     const slotIndex = f.flow.slots[f.k % f.flow.slots.length];
     const slot = lane === 'wf' ? wfSlotCenter(slotIndex) : slotPoint(layout, slotIndex);
     const u = t - f.leave;
@@ -778,7 +803,7 @@ function placeCode(card, t, code, o) {
   setCodeLine(card, light ? rowOf[light[0]] : 0, light ? win(t, light[1], light[2], 0.25) : 0);
   place(card, left + w / 2, top + h / 2, 1, o);
 }
-// The bottleneck markers, round the part each one names
+// The bottleneck markers, round the part each one names (the Activity Slots: on the diagram's grid, not a closed one)
 function placeMarks(dg, t, state, layout) {
   const marks = state.marks ?? {};
   const pad = 8;
@@ -812,22 +837,51 @@ function placeMarks(dg, t, state, layout) {
 }
 
 // ---------- mini Worker (intro, outro): a WORKER panel holding a small grid of Activity Slots
-const MINI = { w: 56, h: 32, pitchX: 70, pitchY: 42, pad: 24, head: 72 };
-// cols x rows Slots under the panel name; returns the panel, with cells (see setSlot) and cellAt(i), the middle of
-// cell i from the panel's center
+// border: the panel's border as drawn, as its cells are placed from its padding edge: Chromium draws the 1.5 px border
+// of .tile 1 px wide in the 1920 x 1080 frames, so the cells rest on whole pixels
+const MINI = { w: 56, h: 32, pitchX: 70, pitchY: 42, pad: 24, head: 72, border: 1 };
+// Size of a mini Worker panel holding cols x rows Slots
+const miniWorkerSize = (cols, rows) => ({
+  w: MINI.pad * 2 + (cols - 1) * MINI.pitchX + MINI.w,
+  h: MINI.head + (rows - 1) * MINI.pitchY + MINI.h + MINI.pad,
+});
+// cols x rows Slots under the panel name; returns the panel, with w and h, its size, cells (see setSlot) and
+// cellAt(i), the middle of cell i from the panel's center
 function makeMiniWorker(root, name, cols, rows) {
-  const w = MINI.pad * 2 + (cols - 1) * MINI.pitchX + MINI.w;
-  const h = MINI.head + (rows - 1) * MINI.pitchY + MINI.h + MINI.pad;
+  const { w, h } = miniWorkerSize(cols, rows);
   const panel = makeAppPanel(root, name, w, h, { font: 18 });
+  Object.assign(panel, { w, h });
   panel.cellAt = i => [
     -w / 2 + MINI.pad + MINI.w / 2 + (i % cols) * MINI.pitchX,
     -h / 2 + MINI.head + MINI.h / 2 + Math.floor(i / cols) * MINI.pitchY,
   ];
   panel.cells = Array.from({ length: cols * rows }, (_, i) => {
-    const [x, y] = panel.cellAt(i);
-    return makeSlot(panel, MINI.w, MINI.h, {
-      left: (w / 2 + x - MINI.w / 2) + 'px', top: (h / 2 + y - MINI.h / 2) + 'px', opacity: 1,
-    });
+    const cell = makeSlot(panel, MINI.w, MINI.h, { opacity: 1 });
+    placeMiniCell(panel, cell, panel.cellAt(i), MINI.w, MINI.h);
+    return cell;
   });
   return panel;
 }
+// Places a cell of a mini Worker, cw x ch px, its middle at [x, y] from the panel's center; panel.w and panel.h hold
+// the panel's current size
+function placeMiniCell(panel, cell, [x, y], cw, ch) {
+  Object.assign(cell.style, {
+    width: cw + 'px', height: ch + 'px',
+    left: (panel.w / 2 + x - cw / 2 - MINI.border) + 'px', top: (panel.h / 2 + y - ch / 2 - MINI.border) + 'px',
+  });
+}
+// Opacity of an app panel's header: its gear and name, and its status
+function setPanelHeader(panel, o) {
+  panel.firstElementChild.style.opacity = o;
+  panel.st.style.opacity = o;
+}
+
+// ---------- the hard cuts of the intro, chapter 1 and chapter 2: each scene ends on the next one's first frame
+// The tasks waiting in the Activity lane as chapters 1 and 2 start: the scene before each one ends on that count.
+// Half-way between whole counts, so the counts shown on either side of a cut agree.
+const QUEUE_AT_CUT = { ch1: 45.5, ch2: 2800.5 };
+// The intro's queue strip and mini Worker, which chapter 1 picks up where the intro leaves them: the strip ends 40 px
+// before the Worker panel (x 1416..1800), its middle level with that of the panel's 2 rows of Slots (y 539)
+const INTRO_WORKER = { x: 1608, y: 515, cols: 5, rows: 2 };
+const INTRO_WORKER_TOP = INTRO_WORKER.y - miniWorkerSize(INTRO_WORKER.cols, INTRO_WORKER.rows).h / 2;
+const INTRO_LANE = { left: 1056, w: 320, cap: 5, y: INTRO_WORKER_TOP + MINI.head + MINI.h / 2 + MINI.pitchY / 2 };

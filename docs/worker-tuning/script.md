@@ -97,18 +97,21 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   Worker setting do you change?
   - Visuals: Temporal logo, kicker "A GUIDE FOR DEVELOPERS AND SRES",
     title "Why is my Task Queue backing up?", tagline "TUNE TEMPORAL
-    WORKERS, ONE BOTTLENECK AT A TIME"; on the right a queue of task
-    chips flows into a small WORKER panel whose Slots are all busy, and
-    the queue keeps growing.
+    WORKERS, ONE BOTTLENECK AT A TIME"; on the right a strip of task
+    chips flows into a small WORKER whose 10 Slots (2 x 5) are all busy,
+    and the queue keeps growing; the title fades out while the queue and
+    the Worker play on, and chapter 1 starts on the same frame.
 
 ## 01 The backlog grows
 
 - **0:12** Black Friday: the shop gets ten times more orders than usual,
   and every order is a Temporal Workflow.
   - Visuals: an orders counter speeds up ("ORDERS / MIN" x10); order
-    chips stream into the "orders" Task Queue. The WORKER panel shows its
-    10 Activity Slots, all busy: each task waits in the queue until a Slot
-    frees up, then lands in it.
+    chips stream into the "orders" Task Queue. The intro's strip glides
+    into the TEMPORAL panel as the "orders" lane, and its Worker grows
+    into WORKER A, its 10 Activity Slots (2 x 5) centered under ACTIVITY
+    SLOTS, all busy: each task waits in the queue until a Slot frees up,
+    then lands in it.
 - **0:20** Tasks pile up in the Task Queue: the backlog
   grows, and each order waits longer to start.
   - Visuals: the queue lengthens; the BACKLOG counter
@@ -117,15 +120,18 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 - **0:29** The first reflex is to add more Workers. Before that, find out
   what is actually full.
   - Visuals: a dashed "+ WORKER" ghost appears, crossed out; a magnifier
-    tag "WHAT IS FULL?" over the Worker.
+    tag "WHAT IS FULL?" lands in WORKER A as the Slots move down beneath
+    it; then the ghost, ORDERS / MIN and the tag fade, and chapter 2
+    starts on the same frame.
 
 ## 02 How a Worker takes work
 
 - **0:40** Workflow Tasks and Activity Tasks wait in two separate queues,
   even under one Task Queue name.
-  - Visuals: the TEMPORAL panel splits the "orders" Task Queue into two
-    lanes, WORKFLOW TASKS (UV chips) and ACTIVITY TASKS (chips with step
-    icons).
+  - Visuals: the Worker opens up: its Slots move into one row beside the
+    Activity lane as the TEMPORAL panel splits the "orders" Task Queue
+    into two lanes, WORKFLOW TASKS (UV chips) and ACTIVITY TASKS (chips
+    with step icons).
 - **0:49** A Poller in the Worker asks a queue for a task, but only
   while a Slot is free.
   - Visuals: the WORKER A panel fills in; Pollers sit at the end of each
