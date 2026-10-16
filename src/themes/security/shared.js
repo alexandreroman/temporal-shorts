@@ -614,7 +614,7 @@ function popVerdict(e, t, label, kind, at) {
 const STORED_HIST = { x: 1480, y: 460, w: 560, h: 398 };
 // Its rows; row 2 holds the payload. HIST_ROW: each row's top in the card, the row height and the text size.
 const HIST_ROWS = [
-  'Workflow started: transfer', 'Activity completed: debitAccount', 'Activity scheduled: creditAccount',
+  'Workflow started: TransferWorkflow', 'Activity completed: debitAccount', 'Activity scheduled: creditAccount',
 ];
 const HIST_ROW = { tops: [56, 92, 352], h: 32, font: 18 };
 // The payload chip of row 2: the payload card itself, a lane-size card (PAYLOAD_IN_WORKER.w) shown at scale k,

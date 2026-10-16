@@ -244,8 +244,8 @@ recap.
   - Visuals: The whip lands close on the EVENT HISTORY with a violet
     ripple, and the Namespace bands fade. The card docks as the payload
     chip under row 2 "Activity completed: debitAccount", its fields shown
-    in full, between rows 1 "Workflow started: transfer" and 3 "Activity
-    scheduled: creditAccount"; each row gets a SAVED tag.
+    in full, between rows 1 "Workflow started: TransferWorkflow" and 3
+    "Activity scheduled: creditAccount"; each row gets a SAVED tag.
 - **0:59** TLS only protects the trip: once stored, the IBAN is readable by
   anyone who can read the history.
   - Visuals: The tube and its corridor fade and, with no camera move, the
