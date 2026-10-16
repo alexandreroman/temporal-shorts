@@ -8,9 +8,9 @@
 // their Pollers, in the column of Worker A's, are joined to the Activity lane by poll lines that carry on down the
 // trunk of Worker A's, past the readouts, and turn into each Poller; tasks fly to them along them, small enough to
 // keep clear of the parts beside them, the three CPU gauges settle around 60%, the execution latency falls back in
-// neon, the tag turns FIXED, and the backlog drains to 0. Last, the move into the recap: the four bottleneck
-// components (the Activity Slot grid, the Activity Pollers, the Workflow cache, the CPU gauge) shrink into
-// the small parts that start the rows of chapter 7's table, at their places, while the rest of the diagram, the
+// neon, the tag turns FIXED, and the backlog drains to 0. Last, the move into the recap: the Activity lane and the
+// four bottleneck components (the Activity Slot grid, the Activity Pollers, the Workflow cache, the CPU gauge) shrink
+// into the small parts that start the rows of chapter 7's table, at their places, while the rest of the diagram, the
 // metric line included, leaves in turn; chapter 7 starts on this chapter's last frame (another hard cut).
 // The block keeps every name declared in this file local to this scene.
 {
@@ -48,12 +48,13 @@
     cell, at: -10, next: finalCacheOrder(cell),
   }));
   // The move into the recap, from MOVE.lead s before the end: the rest of the diagram leaves in groups (LEAVING), each
-  // sliding away over MOVE.leave s, `at` s into the move; from MOVE.travelAt s on, the four bottleneck components
-  // shrink into their parts on the recap's rows (RECAP_PARTS), MOVE.stagger s apart, each over MOVE.travel s, then fade
-  // into them over MOVE.handOver s. The chapter's tasks are all done by then (see REST_LEAD).
+  // sliding away over MOVE.leave s, `at` s into the move; from MOVE.travelAt s on, the Activity lane and the four
+  // bottleneck components shrink into their parts on the recap's rows (RECAP_PARTS), MOVE.stagger s apart, each over
+  // MOVE.travel s, then fade into them over MOVE.handOver s. The chapter's tasks are all done by then (see REST_LEAD).
   const MOVE = { lead: 2.4, leave: 0.5, travelAt: 0.2, stagger: 0.1, travel: 1.2, handOver: 0.3 };
-  // the groups that leave: the TEMPORAL panel and its lanes to the left, the readouts and the metric line down, Worker
-  // A's panel with its labels, Workflow Slots and Workflow Pollers up, B and C to the right; the poll lines fade first
+  // the groups that leave: the TEMPORAL panel, the Workflow lane and the lane labels to the left, the readouts and the
+  // metric line down, Worker A's panel with its labels, Workflow Slots and Workflow Pollers up, B and C to the right;
+  // the poll lines fade first
   const LEAVING = {
     temporal: { at: 0, dx: -160, dy: 0 }, band: { at: 0.1, dx: 0, dy: 80 }, frame: { at: 0.2, dx: 0, dy: -60 },
     helpers: { at: 0.3, dx: 200, dy: 0 },
@@ -126,7 +127,7 @@
     const { lanes } = dg;
     return {
       temporal: {
-        placed: [dg.temporal, lanes.wf.track, lanes.act.track, ...lanes.wf.chips, ...lanes.act.chips],
+        placed: [dg.temporal, lanes.wf.track, ...lanes.wf.chips, ...lanes.act.chips],
         labels: [lanes.wf.label, lanes.act.label, lanes.wf.more, lanes.act.more],
       },
       band: { placed: [dg.backlog, dg.wait, ...dg.metrics], labels: [] },
@@ -137,33 +138,40 @@
   // part's 3 and 2
   const partSlotOf = i => Math.floor((i % DIAGRAM.slot.cols) * 3 / DIAGRAM.slot.cols)
     + 3 * Math.floor(Math.floor(i / DIAGRAM.slot.cols) * 2 / slotRows(SLOTS));
-  // Where each element of the bottleneck components rests in the diagram, where it ends in its part, its scale there
-  // and whether it stays to the end: [element, from, to, scale, stays], component by component in the order of the
-  // recap's rows. Of the elements that end on the same spot, one stays: the others fade out on the way.
+  // Where each element of the Activity lane and the bottleneck components rests in the diagram, where it ends in its
+  // part, its scale there and whether it stays to the end: [element, from, to, scale, stays, size], component by
+  // component in the order of the recap's rows. Of the elements that end on the same spot, one stays: the others fade
+  // out on the way. The lane's track resizes rather than scales, from the diagram's size to the part's (size: [from,
+  // to], each [w, h]): its height shrinks far less than its width.
   function shrinkingComponents(dg) {
     const partCorner = i => [recapPartCenter(i)[0] - RECAP_PART.w / 2, recapPartCenter(i)[1] - RECAP_PART.h / 2];
-    const slotPart = partCorner(0);
+    const { left, w, h } = DIAGRAM.lane;
+    const lane = [[
+      dg.lanes.act.track, [left + w / 2, DIAGRAM.actY], recapPartCenter(0), 1, true,
+      [[w, h], [RECAP_PART.w, RECAP_QUEUE.h]],
+    ]];
+    const slotPart = partCorner(1);
     const slots = dg.slots.map((cell, i) => {
       const j = partSlotOf(i);
       const [x, y] = recapSlotCenter(j);
       const stays = dg.slots.findIndex((_, other) => partSlotOf(other) === j) === i;
       return [cell, slotCenter(i, slotRows(SLOTS)), [slotPart[0] + x, slotPart[1] + y], RECAP_SLOT.w / slot.w, stays];
     });
-    const pollerAt = [partCorner(1)[0] + RECAP_POLLER_X, recapRowY(1)];
+    const pollerAt = [partCorner(2)[0] + RECAP_POLLER_X, recapRowY(2)];
     const pollers = dg.pollers.act.map((e, i) => [
       e, [DIAGRAM.poller.x, pollerY(DIAGRAM.actY, i, DIAGRAM.poller.max.act)], pollerAt, 1, i === 0,
     ]);
     const cache = dg.cache.map((cell, i) => [
-      cell, [cacheCellLeft(i) + DIAGRAM.cache.w / 2, DIAGRAM.wfY], recapPartCenter(2), 1, i === 0,
+      cell, [cacheCellLeft(i) + DIAGRAM.cache.w / 2, DIAGRAM.wfY], recapPartCenter(3), 1, i === 0,
     ]);
     // the CPU gauge, from WORKER A's header, lands with its bar on the part's bar, both at the bottom of their box
     const gauge = cpuMeterBox(1);
     const gaugeScale = RECAP_PART.w / GAUGE.w;
     const barMiddle = h => h / 2 - GAUGE.barH / 2;
-    const [partX, partY] = recapPartCenter(3);
+    const [partX, partY] = recapPartCenter(4);
     const gaugeTo = [partX, partY + barMiddle(RECAP_PART.h) - barMiddle(CPU_GAUGE.h) * gaugeScale];
     const cpu = [[dg.cpu, [gauge.left + gauge.w / 2, gauge.top + gauge.h / 2], gaugeTo, gaugeScale, true]];
-    return [slots, pollers, cache, cpu];
+    return [lane, slots, pollers, cache, cpu];
   }
 
   scene({
@@ -356,7 +364,8 @@
           parts.labels.forEach(e => slideLabelAway(e, Math.round(dx * p), Math.round(dy * p), 1 - p));
         }
       }
-      // ... while each bottleneck component shrinks into its part of the recap, which fades in as it arrives
+      // ... while the Activity lane and each bottleneck component shrink into their parts of the recap, which fade in
+      // as they arrive
       s.shrinking.forEach((elements, k) => {
         const travelAt = moveAt + MOVE.travelAt + k * MOVE.stagger;
         const m = P(t, travelAt, MOVE.travel);
@@ -367,6 +376,13 @@
             const o = (1 - handOver) * (stays ? 1 : 1 - merge);
             place(e, lerp(from[0], to[0], m), lerp(from[1], to[1], m), lerp(1, scale, m), o);
           }
+        }
+        // on every frame, so that the lane's track has its diagram size again before the move
+        for (const [e, , , , , size] of elements) {
+          if (!size) continue;
+          const [[fromW, fromH], [toW, toH]] = size;
+          e.style.width = Math.round(lerp(fromW, toW, m)) + 'px';
+          e.style.height = Math.round(lerp(fromH, toH, m)) + 'px';
         }
         showRecapPart(s.parts[k], k, handOver);
       });

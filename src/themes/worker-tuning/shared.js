@@ -1052,21 +1052,40 @@ const INTRO_LANE = {
 };
 
 // ---------- the recap table of chapter 7, and the parts of the diagram that start its rows
-// Chapter 6 ends with its four bottleneck components shrunk into these parts, on the table's rows, where chapter 7
-// starts: the rows then grow from them. Final stage coordinates (no shift), every size even: the WATCH FIRST strip
-// (stripH px high), a gutter above the column headings (24 px high), which sit a label gap above 4 rows of 104 px, a
-// gutter apart; each row's part partLeft px inside its left edge.
-const RECAP = { left: 120, w: 1680, stripTop: 158, stripH: 56, rowH: 104, partLeft: 32 };
-RECAP.headTop = RECAP.stripTop + RECAP.stripH + GRID.gutter;
+// Chapter 6 ends with the Activity lane and its four bottleneck components shrunk into these parts, on the table's
+// rows, where chapter 7 starts: the rows then grow from them. Final stage coordinates (no shift), every size even: the
+// column headings (24 px high) a label gap above 5 rows of 92 px, a gutter apart, except after the first one, the
+// symptom: a gutter and a cell (split), which sets it apart from the four limits under it; each row's part partLeft px
+// inside its left edge.
+const RECAP = { left: 120, w: 1680, headTop: 158, rowH: 92, split: GRID.gutter + GRID.cell, partLeft: 32 };
 RECAP.rowTop = RECAP.headTop + 24 + GRID.label;
 RECAP.pitch = RECAP.rowH + GRID.gutter;
-const recapRowY = i => RECAP.rowTop + RECAP.rowH / 2 + i * RECAP.pitch;
-// The part drawn at the start of each row, w x h px, one per bottleneck, in the order of the rows
+// Middle of row i: 0 is the symptom, 1 to 4 the limits
+const recapRowY = i => RECAP.rowTop + RECAP.rowH / 2 + i * RECAP.pitch + (i > 0 ? RECAP.split - GRID.gutter : 0);
+// The part drawn at the start of each row, w x h px, in the order of the rows: the Task Queue, then one per bottleneck
 const RECAP_PART = { w: 78, h: 34 };
-const RECAP_PARTS = ['slots', 'poller', 'cache', 'cpu'];
+const RECAP_PARTS = ['queue', 'slots', 'poller', 'cache', 'cpu'];
 // Middle of the part of row i
 const recapPartCenter = i => [RECAP.left + RECAP.partLeft + RECAP_PART.w / 2, recapRowY(i)];
 // The small parts, each drawn in its box:
+// - a Task Queue: a lane track as wide as the part, 3 queued Activity Task chips in it, half the diagram's size,
+//   `pitch` px apart from the head on the right
+const RECAP_QUEUE = { h: 30, chip: 20, icon: 12, pitch: 24 };
+function makeQueuePart(box) {
+  const { h, chip, icon, pitch } = RECAP_QUEUE;
+  E(box, '', '', {
+    top: (RECAP_PART.h - h) / 2 + 'px', width: RECAP_PART.w + 'px', height: h + 'px',
+    background: `rgba(${RGB.ink},.03)`, border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)', opacity: 1,
+  });
+  const headX = RECAP_PART.w / 2 + pitch;
+  for (let k = 0; k < 3; k++) {
+    E(box, ICON(activityIcon(k), icon, C.ink, 1.8), '', {
+      left: headX - k * pitch - chip / 2 + 'px', top: (RECAP_PART.h - chip) / 2 + 'px', width: chip + 'px',
+      height: chip + 'px', background: 'var(--surface)', border: '1.5px solid ' + C.lineLight, borderRadius: '4px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 1,
+    });
+  }
+}
 // - a full Slot grid: 3 x 2 busy Slots, 22 x 14 px, 28 and 20 px apart (see recapSlotCenter)
 const RECAP_SLOT = { w: 22, h: 14, pitchX: 28, pitchY: 20 };
 // Middle of Slot j of the Slot grid part, from the part's top left corner
@@ -1115,7 +1134,9 @@ function makeCpuPart(box) {
     top: '20px', width: RECAP_PART.w + 'px', height: '14px', borderRadius: '3px', background: C.red, opacity: 1,
   });
 }
-const RECAP_PART_MAKERS = { slots: makeSlotsPart, poller: makePollerPart, cache: makeCachePart, cpu: makeCpuPart };
+const RECAP_PART_MAKERS = {
+  queue: makeQueuePart, slots: makeSlotsPart, poller: makePollerPart, cache: makeCachePart, cpu: makeCpuPart,
+};
 // The part of row i, hidden until showRecapPart shows it
 function makeRecapPart(root, i) {
   const box = E(root, '', '', { width: RECAP_PART.w + 'px', height: RECAP_PART.h + 'px' });

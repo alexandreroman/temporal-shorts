@@ -1,32 +1,42 @@
 // ===================== 7. READ THE SIGNALS
-// The recap: a table of the four causes of a growing backlog, one row each, under the headings SYMPTOM, SIGNAL and
-// FIX. Starts on chapter 6's last frame (a hard cut): the small parts of the Worker diagram that start the rows (a full
-// Slot grid, a Poller, a cache cell, a full CPU meter, see RECAP), into which chapter 6 shrinks its bottleneck
-// components; each row grows from its part. As the first subtitle starts, a WATCH FIRST strip above the table lists
-// the symptom's signals, the backlog metrics; then each row lights up as the subtitle names its cause. Under the
-// table, the tuning loop draws in as the second subtitle reads it: CHANGE ONE SETTING, WATCH THE SIGNALS, NEXT
-// BOTTLENECK, and an arrow back to the start. Last, the strip, the rows and the loop leave in turn while the Slot grid
-// part grows into the outro's mini Worker: the outro starts on this chapter's last frame (another hard cut).
+// The recap: a table under the headings SYMPTOM, SIGNAL and FIX, whose first row is the symptom, a growing backlog,
+// with the backlog metrics to watch first, then, a zone gap under it, one row for each of its four causes. Starts on
+// chapter 6's last frame (a hard cut): the small parts of the Worker diagram that start the rows (a queue strip, a
+// full Slot grid, a Poller, a cache cell, a full CPU meter, see RECAP), into which chapter 6 shrinks its Activity lane
+// and its bottleneck components; each row grows from its part. Each row lights up as the first subtitle names it: the
+// symptom first, then the causes. Under the table, the tuning loop draws in as the second subtitle reads it: CHANGE
+// ONE SETTING, WATCH THE SIGNALS, NEXT BOTTLENECK, and an arrow back to the start. Last, the rows and the loop leave in
+// turn while the Slot grid part grows into the outro's mini Worker: the outro starts on this chapter's last frame
+// (another hard cut).
 // The block keeps every name declared in this file local to this scene.
 {
-  // The four causes, in the order the first subtitle names them (name: its words in the subtitle), each row starting
-  // with its part (RECAP_PARTS, in the same order). The signal: an SDK metric (named without the temporal_ prefix, as
-  // in the docs headings) and its reading, or plain words (signalText) in the text font; the fix: what to change, and
-  // the Worker option that does it, on a second line.
+  // The symptom, then the four causes, in the order the first subtitle names them (name: its words in the subtitle),
+  // each row starting with its part (RECAP_PARTS, in the same order). The signal: SDK metrics (named without the
+  // temporal_ prefix, as in the docs headings), one per line, each with its reading, or plain words (signalText) in
+  // the text font; the fix: what to change, and the Worker option that does it, on a second line. The symptom's
+  // metrics are those to watch first, as the label under it says (note): the backlog of the Task Queue, then the wait.
   const ROWS = [
     {
+      name: 'A growing backlog', symptom: 'Backlog grows, tasks wait', note: 'Watch first',
+      metrics: [
+        ['approximate_backlog_count', 'rising'], ['approximate_backlog_age', 'older'],
+        ['schedule_to_start_latency', 'high'],
+      ],
+      fix: 'Find the full limit below', option: '',
+    },
+    {
       name: 'Slots', symptom: 'Slots full, CPU low',
-      metric: 'worker_task_slots_available', reading: 'at 0',
+      metrics: [['worker_task_slots_available', 'at 0']],
       fix: 'More Slots, if downstream keeps up', option: 'maxConcurrentActivityTaskExecutions',
     },
     {
       name: 'Pollers', symptom: 'Slots free, long wait',
-      metric: 'activity_schedule_to_start_latency', reading: 'high',
+      metrics: [['activity_schedule_to_start_latency', 'high']],
       fix: 'Poller Autoscaling', option: 'activityTaskPollerBehavior',
     },
     {
       name: 'cache', symptom: 'Evictions, replays',
-      metric: 'sticky_cache_total_forced_eviction', reading: 'high rate',
+      metrics: [['sticky_cache_total_forced_eviction', 'high rate']],
       fix: 'More memory, larger cache', option: 'maxCachedWorkflows',
     },
     {
@@ -41,8 +51,6 @@
     { name: 'watch the signals', label: 'Watch the signals' },
     { name: 'next bottleneck', label: 'Next bottleneck' },
   ];
-  // The symptom's signals, which the WATCH FIRST strip lists: the backlog metrics of the Task Queue, then the wait
-  const WATCH = ['approximate_backlog_count', 'approximate_backlog_age', 'schedule_to_start_latency'];
   const SUBS = [
     "A growing backlog often comes from one of four Worker limits: Slots, Pollers, cache or CPU.",
     "Change one setting at a time, watch the signals, then look for the next bottleneck.",
@@ -51,26 +59,23 @@
   const namedAt = (text, name) => text.indexOf(name) / 16 + 0.3;
 
   // Final stage coordinates (no shift), every size even, on the theme's grid (GRID). The composition spans
-  // y 158..874, centered on y 516: the WATCH FIRST strip (y 158..214), the column headings and the 4 rows (y 270..746,
-  // see RECAP), then the loop a zone gap under them: its pills (y 786..836) and the arrow back, which runs 36 px under
-  // them.
+  // y 158..872, centered on y 515: the column headings and the 5 rows (y 158..722, see RECAP), then the loop a zone gap
+  // under them: its pills (y 762..812) and the arrow back, which runs 36 px under them.
   // Column lefts, from the rows' outer left edge: 32 px of padding on either side of the rows (RECAP.partLeft), the
-  // symptoms 40 px right of the parts, then equal gaps (134 px) after the widest symptom (248 px) and the widest
+  // symptoms 40 px right of the parts, then equal gaps (96 px) after the widest symptom (324 px) and the widest
   // signal (528 px), measured; the widest fix (453 px) ends 32 px inside the rows' right edge
-  const COL = { symptom: 150, signal: 532, fix: 1194 };
-  // The strip's lefts, from its outer left edge: WATCH FIRST on the symptom column, the first signal on the signal
-  // column, the last one on the fix column, the middle one centered between them (measured: 300 and 276 px wide)
-  const WATCH_LEFTS = [COL.signal, Math.round((COL.signal + 300 + COL.fix - 276) / 2), COL.fix];
-  const LOOP = { top: RECAP.rowTop + 3 * RECAP.pitch + RECAP.rowH + GRID.zone, w: 360, h: 50, xs: [460, 960, 1460] };
+  const COL = { symptom: 150, signal: 570, fix: 1194 };
+  const LOOP = { top: recapRowY(ROWS.length - 1) + RECAP.rowH / 2 + GRID.zone, w: 360, h: 50, xs: [460, 960, 1460] };
   LOOP.backY = LOOP.top + LOOP.h + 36;
   const rowTop = i => recapRowY(i) - RECAP.rowH / 2;
   // Each row grows from its part, from GROW.at + i * GROW.stagger over GROW.d s: a tile around the part (partLeft px
   // on either side) that widens to the row's full width
   const GROW = { at: 0.3, stagger: 0.15, d: 0.8, fromW: 2 * RECAP.partLeft + RECAP_PART.w };
   // The move into the outro, from OUT.lead s before the end: the rows slide out to the right in turn, away from the
-  // first row's part, then the loop's pills down, OUT.stagger s apart, each over OUT.leave s; from OUT.growAt s into
-  // the move, once the rows are nearly gone, that part grows into the outro's mini Worker over OUT.grow s
+  // Slot grid part (GROWING), then the loop's pills down, OUT.stagger s apart, each over OUT.leave s; from OUT.growAt s
+  // into the move, once the rows are nearly gone, that part grows into the outro's mini Worker over OUT.grow s
   const OUT = { lead: 2.2, leave: 0.45, stagger: 0.08, rowDx: 200, loopDy: 40, growAt: 0.35, grow: 1.3 };
+  const GROWING = RECAP_PARTS.indexOf('slots');
 
   // The offset of a row's content from its outer edge: Chromium draws the 1.5 px border of a tile 1 px wide
   const BORDER = 1;
@@ -79,34 +84,30 @@
   const cell = (x, html, css = '', h = RECAP.rowH) => `<div style="position:absolute;left:${x - BORDER}px;`
     + `top:-${BORDER}px;height:${h}px;display:flex;align-items:center;white-space:nowrap;${css}">`
     + `<div style="display:flex;align-items:baseline;gap:12px">${html}</div></div>`;
-  const metricCss = 'font-family:Mono;font-size:20px;line-height:28px';
+  // 24 px lines, so that the symptom's 3 metrics fit its row with room to spare
+  const metricCss = 'font-family:Mono;font-size:20px;line-height:24px';
 
-  // A row of the table, after its part (see makeRecapPart): the symptom, the signal (metric in mono, its reading in
-  // red; plain words as the symptom) and the fix (the Worker option under it, in slate mono)
+  // A row of the table, after its part (see makeRecapPart): the symptom (an optional label under it), the signal (its
+  // metrics in mono, one per line, each followed by its reading in red; plain words as the symptom) and the fix (the
+  // Worker option under it); the lines under the symptom and the fix share one slate mono style
   function makeRow(root, row) {
     const textCss = 'font-size:28px;line-height:36px';
-    const reading = row.reading ? `<span style="color:${C.red}">${row.reading}</span>` : '';
-    const signal = row.metric
-      ? cell(COL.signal, `<span>${row.metric}</span>${reading}`, metricCss)
+    const metricLine = ([metric, reading]) => '<div style="display:flex;align-items:baseline;gap:12px">'
+      + `<span>${metric}</span><span style="color:${C.red}">${reading}</span></div>`;
+    const signal = row.metrics
+      ? cell(COL.signal, `<div>${row.metrics.map(metricLine).join('')}</div>`, metricCss)
       : cell(COL.signal, row.signalText, textCss);
-    const option = row.option
-      ? `<div class="mono" style="font-size:18px;line-height:28px;color:${C.slate}">${row.option}</div>`
-      : '';
+    const subLine = (text, css = '') => (text
+      ? `<div class="mono" style="font-size:18px;line-height:28px;color:${C.slate};${css}">${text}</div>`
+      : '');
+    // the label is uppercase and letter-spaced, as the other labels (.lbl)
+    const note = subLine(row.note, 'letter-spacing:.12em;text-transform:uppercase');
+    const option = subLine(row.option);
     return E(root,
-      cell(COL.symptom, row.symptom, textCss) + signal + cell(COL.fix, `<div>${row.fix}${option}</div>`, textCss),
+      cell(COL.symptom, `<div>${row.symptom}${note}</div>`, textCss) + signal
+        + cell(COL.fix, `<div>${row.fix}${option}</div>`, textCss),
       'tile', { height: RECAP.rowH + 'px', textAlign: 'left' });
   }
-  // The WATCH FIRST strip: a tile as wide as the rows, its label on the symptom column, then the signals (see
-  // WATCH_LEFTS), each one hidden until update() shows it
-  function makeStrip(root) {
-    const label = cell(COL.symptom, '<span class="lbl" style="font-size:18px;line-height:24px;padding-left:0">Watch first</span>', '',
-      RECAP.stripH);
-    const strip = E(root, label + WATCH.map((name, i) => cell(WATCH_LEFTS[i], name, metricCss, RECAP.stripH)).join(''),
-      'tile', { width: RECAP.w + 'px', height: RECAP.stripH + 'px', textAlign: 'left' });
-    strip.signals = [...strip.children].slice(1);
-    return strip;
-  }
-
   scene({
     chapter: 7, title: 'Read the signals',
     pre: 1.5, post: 2.0,
@@ -128,7 +129,6 @@
         paddingLeft: '0',
       });
       s.headings = [heading('Symptom', COL.symptom), heading('Signal', COL.signal), heading('Fix', COL.fix)];
-      s.strip = makeStrip(root);
       s.rows = ROWS.map(row => makeRow(root, row));
       // the parts above their rows, which grow from them; the parts are there from the start, as chapter 6 leaves them
       s.parts = ROWS.map((row, i) => makeRecapPart(root, i));
@@ -155,15 +155,9 @@
       const loopOut = i => P(t, outAt + (ROWS.length + i) * OUT.stagger, OUT.leave, easeIn);
 
       // the rows grow from their parts, 0.15 s apart, then the headings show; each row lights up as the first
-      // subtitle names its cause, until the next one is named (the last one for 1.2 s)
+      // subtitle names it, the symptom then its causes, until the next one is named (the last one for 1.2 s)
       const headO = P(t, GROW.at + 0.6, 0.4) * (1 - rowOut(0));
       s.headings.forEach(e => { e.style.opacity = headO; });
-      // c[0]: the WATCH FIRST strip rises in, then its signals show 0.3 s apart, before the first row lights; it
-      // slides out with the first row
-      const stripOut = rowOut(0);
-      showAt(s.strip, RECAP.left + Math.round(OUT.rowDx * stripOut), RECAP.stripTop,
-        P(t, c[0] + 0.2, 0.4) * (1 - stripOut));
-      s.strip.signals.forEach((e, i) => { e.style.opacity = P(t, c[0] + 0.6 + i * 0.3, 0.3); });
       const litAt = ROWS.map(row => c[0] + namedAt(SUBS[0], row.name));
       s.rows.forEach((e, i) => {
         const growAt = GROW.at + i * GROW.stagger;
@@ -176,8 +170,8 @@
         showAt(e, RECAP.left + dx, rowTop(i), P(t, growAt, 0.25, linear) * (1 - out));
         const litUntil = i + 1 < litAt.length ? litAt[i + 1] : litAt[i] + 1.2;
         e.style.borderColor = t >= litAt[i] && t < litUntil ? C.uv : C.line;
-        // the first row's part grows into the outro's Worker (below); the others leave with their rows
-        if (i > 0) showRecapPart(s.parts[i], i, 1 - out, { dx });
+        // the Slot grid part grows into the outro's Worker (below); the others leave with their rows
+        if (i !== GROWING) showRecapPart(s.parts[i], i, 1 - out, { dx });
       });
 
       // the loop: each pill pops in, lit, as the second subtitle reads it, the arrow to it drawing just before; the
@@ -202,14 +196,14 @@
       // the Worker grows from the part's width, the part fading out under it as it fades in
       const growAt = outAt + OUT.growAt;
       const m = P(t, growAt, OUT.grow);
-      const [partX, partY] = recapPartCenter(0);
+      const [partX, partY] = recapPartCenter(GROWING);
       const x = lerp(partX, OUTRO_WORKER.x + OUTRO_SHIFT[0], m), y = lerp(partY, OUTRO_WORKER.y + OUTRO_SHIFT[1], m);
       const fromScale = RECAP_PART.w / s.worker.w;
       const scale = lerp(fromScale, 1, m);
       const crossFade = P(t, growAt, 0.3, linear);
       setOutroWorker(s.worker);
       place(s.worker, x, y, scale, crossFade);
-      showRecapPart(s.parts[0], 0, 1 - crossFade, {
+      showRecapPart(s.parts[GROWING], GROWING, 1 - crossFade, {
         dx: Math.round(x - partX), dy: Math.round(y - partY), s: scale / fromScale,
       });
     },

@@ -271,12 +271,15 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 - **3:37** A growing backlog often comes from one of four Worker limits:
   Slots, Pollers, cache or CPU.
   - Visuals: each row grows from its icon (the cache icon reads #1049, the
-    order the diagram ends with). Above the table, a WATCH FIRST strip
-    names the symptom's signals: `approximate_backlog_count`,
-    `approximate_backlog_age`, `schedule_to_start_latency`. A table of four
-    rows, SYMPTOM / SIGNAL / FIX, each option name on a smaller line under
-    its fix: Slots full, CPU low / `worker_task_slots_available` at 0 /
-    More Slots, if downstream keeps up
+    order the diagram ends with). The table's first row is the symptom, set
+    slightly apart: a queue-strip icon (chapter 6's Activity lane shrinks into
+    it), "Backlog grows, tasks wait" over a small WATCH FIRST label, the three
+    signals stacked, `approximate_backlog_count` rising,
+    `approximate_backlog_age` older, `schedule_to_start_latency` high, and
+    "Find the full limit below"; it lights as "A growing backlog" is read.
+    Then four rows, under the SYMPTOM / SIGNAL / FIX headings, each option
+    name on a smaller line under its fix: Slots full, CPU low /
+    `worker_task_slots_available` at 0 / More Slots, if downstream keeps up
     (`maxConcurrentActivityTaskExecutions`); Slots free, long wait /
     `activity_schedule_to_start_latency` high / Poller Autoscaling
     (`activityTaskPollerBehavior`); evictions, replays /
