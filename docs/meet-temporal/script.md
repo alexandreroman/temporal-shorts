@@ -255,7 +255,8 @@ its visuals.
     three Workers spread evenly, each an app panel with its code (WORKER 1
     the OrderWorkflow Workflow, WORKER 2 and 3 the chargeCard and shipPackage
     Activities), wired to a DATA CONVERTER level with WORKER 2 (a neon lock,
-    a key and YOUR KEYS); caption YOUR CODE RUNS HERE. A connection draws
+    a key and YOUR KEYS, then IN EACH WORKER in slate: conversion runs on
+    the Workers); caption YOUR CODE RUNS HERE. A connection draws
     from the converter to a dot on Temporal Cloud's edge, labelled OUTBOUND
     ONLY above, MTLS OR API KEY / OVER INTERNET / OR PRIVATE LINK below. On
     the right, Temporal Cloud, titled with the official logo followed by

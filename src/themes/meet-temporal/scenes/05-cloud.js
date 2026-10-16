@@ -22,8 +22,9 @@
     ['activity shipPackage(o)', '  return ship(o.address)'],
   ];
   // the Data Converter, 60 px right of the Workers (the wires' run), level with WORKER 2, where all data leaves and
-  // comes back: 24 px from the zone's right border, so its name fits on one line
-  const CONV = { x: 754, y: workerY(1), w: 164, h: 100 };
+  // comes back: 24 px from the zone's right border, so its name fits on one line; tall enough for a third line, IN
+  // EACH WORKER, as data conversion runs on the Workers, not in a gateway between them and Temporal Cloud
+  const CONV = { x: 754, y: workerY(1), w: 164, h: 120 };
   // the connection: from the Data Converter out to a connector dot on Temporal Cloud's edge
   const DOT = { x: CLOUD.x - CLOUD.w / 2, y: CONV.y, size: 18 };
   // the connection's labels, centered between your zone's edge and Temporal Cloud's
@@ -115,7 +116,8 @@
     return w;
   };
   // The Data Converter: a lock (a lockSvg(), so it can open and snap shut) and its name on one row, then a key and
-  // YOUR KEYS: the encryption keys are yours
+  // YOUR KEYS: the encryption keys are yours; then IN EACH WORKER, in slate: one wire per Worker leads to a single
+  // tile, but each Worker runs its own
   const makeConverter = root => {
     const e = E(root,
       '<div style="display:flex;align-items:center">'
@@ -123,7 +125,8 @@
       + '<div style="margin-left:6px;line-height:18px">Data converter</div></div>'
       + '<div style="display:flex;align-items:center;margin-top:12px;font-size:12px;line-height:16px;'
       + `color:${C.neon}"><div class="key" style="flex:none">${ICON('key', 18, C.neon, 1.8)}</div>`
-      + '<div style="margin-left:6px">Your keys</div></div>',
+      + '<div style="margin-left:6px">Your keys</div></div>'
+      + `<div style="margin-top:10px;line-height:16px;color:${C.slate}">In each Worker</div>`,
       'mono', {
         width: CONV.w + 'px', height: CONV.h + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', fontSize: '13px', letterSpacing: '.03em', paddingLeft: '.03em',
