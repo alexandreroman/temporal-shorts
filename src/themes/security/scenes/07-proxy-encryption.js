@@ -387,8 +387,7 @@
       // the connections and their light; the proxy's connection to TEMPORAL follows TEMPORAL's edge
       s.links.forEach((link, i) => {
         draw(link, 1, offShot);
-        sparkOnPath(s.sparks[i], link, (G / PROXY_FLOW_PERIOD + i / s.apps.length) % 1);
-        s.sparks[i].style.opacity = (+s.sparks[i].style.opacity * offShot).toFixed(3);
+        sparkOnPath(s.sparks[i], link, (G / PROXY_FLOW_PERIOD + i / s.apps.length) % 1, offShot);
       });
       setD(s.out, `M ${PROXY_WIRE.x0} ${PROXY_WIRE.y} L ${temporalZone.x - 4} ${PROXY_WIRE.y}`);
       draw(s.out, 1);

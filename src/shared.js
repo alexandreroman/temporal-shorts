@@ -79,6 +79,8 @@ function useCaseTile(p, icon, label, example, w, h, labelLines = 1) {
 const useCaseX = i => 960 + (i - 1.5) * USE_CASE_ROW.pitch;
 // Perspective (px) and duration (s) of the 3D flip of useCaseScene's `front` option
 const USE_CASE_FLIP = { perspective: 1600, d: 0.7 };
+// Seconds the last use-case tile named by useCaseScene stays lit
+const USE_CASE_LAST_LIT = 1.2;
 // 3D flip (rotateY) of a tile in its slot (x, y), from its front face to its back face (two elements of one size), as
 // turn goes from 0 to 1: the tile lifts a little as it turns, and each face shows for its own half turn. At rest (turn
 // 0 or 1), the face shown has place()'s transform alone, so it rests on the same pixels as a tile that never flips.
@@ -98,7 +100,7 @@ function flipTile(frontFace, backFace, x, y, turn) {
 // [icon, label, example] of each of the 4 useCaseTiles of USE_CASE_ROW; subs, its 2 subtitles. The tiles pop in
 // one at a time, 0.8 s apart from c[0] + firstAt, while subtitle 1 reads; subtitle 2 names them in order, and each
 // lights up (UV border) as it is named, namedAt[i] seconds after c[1], until the next one is named (the last one
-// stays lit for lastLit seconds). Options, which leave the scene as above when unset:
+// stays lit for USE_CASE_LAST_LIT seconds). Options, which leave the scene as above when unset:
 // - labelLines: the label height of every tile, in lines (see useCaseTile);
 // - front: (root, i) => the element that tile i shows first, in its slot at rest (the recap tile that the previous
 //   scene ends on, for a match cut): instead of popping in, each tile flips over in 3D (rotateY) from that face to
@@ -107,7 +109,7 @@ function flipTile(frontFace, backFace, x, y, turn) {
 //   fades in and out;
 // - fadeIn: the scene's fade-in (0 for a match cut).
 function useCaseScene({
-  chapter, uses, namedAt, subs, firstAt = 1.6, lastLit = 1.2, labelLines = 1, front = null, camera = null, fadeIn,
+  chapter, uses, namedAt, subs, firstAt = 1.6, labelLines = 1, front = null, camera = null, fadeIn,
 }) {
   scene({
     chapter, title: 'What you can build', subs, fadeIn,
@@ -128,7 +130,7 @@ function useCaseScene({
           place(e, useCaseX(i), USE_CASE_ROW.y, p.s, p.o);
         }
         const litFrom = c[1] + namedAt[i];
-        const litUntil = i + 1 < namedAt.length ? c[1] + namedAt[i + 1] : litFrom + lastLit;
+        const litUntil = i + 1 < namedAt.length ? c[1] + namedAt[i + 1] : litFrom + USE_CASE_LAST_LIT;
         e.style.borderColor = t >= litFrom && t < litUntil ? C.uv : C.line;
       });
     },
@@ -207,7 +209,7 @@ function makeGlowDot(p, size, rgb, { radius = '50%', blur = size, spread = 0, al
   });
 }
 // Spark: a makeGlowDot with a wide soft halo, size px wide, in a color (an RGB triplet, e.g. RGB.neon)
-function makeSpark(p, size = 14, rgb = RGB.ink) {
+function makeSpark(p, size, rgb) {
   return makeGlowDot(p, size, rgb, { spread: Math.round(size / 2), alpha: 0.55 });
 }
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
@@ -927,14 +929,18 @@ function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enter
   cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
 }
 
-// Puts a spark on the head of a path drawn to prog (0 to 1): it shows only while the path draws
-function sparkOnPath(spark, pathEl, prog, dx = 0, dy = 0) {
+// Puts a spark on the head of a path drawn to prog (0 to 1): it shows only while the path draws, its opacity times
+// the optional factor o
+function sparkOnPath(spark, pathEl, prog, o) {
   if (prog <= 0 || prog >= 1) {
     place(spark, 0, 0, 1, 0);
     return;
   }
   const point = pathEl.getPointAtLength(pathEl._L * prog);
-  place(spark, point.x + dx, point.y + dy, 1, Math.min(1, prog * 6, (1 - prog) * 6));
+  const opacity = Math.min(1, prog * 6, (1 - prog) * 6);
+  // with a factor, the opacity is rounded to 3 decimals, as the flowing sparks of the security scenes have always
+  // been drawn: unrounded, their frames would change by a color level here and there
+  place(spark, point.x, point.y, 1, o === undefined ? opacity : +(opacity * o).toFixed(3));
 }
 
 // Ripple rings: n circles of a color growing from size0 to size1 px and fading, one after the other, from `at`

@@ -186,10 +186,7 @@
       draw(s.out, redrawing ? redraw : 1 - P(t, tearAt, T0.tearD, easeIn));
       sparkOnPath(s.headSpark, s.out, redrawing ? redraw : 0);
       const outLight = 1 - P(t, tearAt, 0.15) * (1 - P(t, landAt, 0.4));
-      s.outSparks.forEach((spark, k) => {
-        sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1);
-        spark.style.opacity = (+spark.style.opacity * outLight).toFixed(3);
-      });
+      s.outSparks.forEach((spark, k) => sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1, outLight));
       s.tearSparks.forEach((spark, i) => {
         const age = t - tearAt;
         if (age <= 0 || age >= TEAR.life) {

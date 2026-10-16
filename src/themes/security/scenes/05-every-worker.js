@@ -184,8 +184,7 @@
       s.links.forEach((link, w) => {
         draw(link, P(t, c[0] + T0.chips[0] + w * T0.chipStep + T0.link, T0.linkD), linksO);
         link.setAttribute('stroke', w === FORGETFUL && t >= cardAt ? C.red : C.slate);
-        sparkOnPath(s.sparks[w], link, (G / FLOW_PERIOD + w / WORKERS.length) % 1);
-        s.sparks[w].style.opacity = (+s.sparks[w].style.opacity * flow).toFixed(3);
+        sparkOnPath(s.sparks[w], link, (G / FLOW_PERIOD + w / WORKERS.length) % 1, flow);
         // its row in TEMPORAL's list rises in as the connection arrives
         const arrived = P(t, c[0] + T0.chips[0] + w * T0.chipStep + T0.link + T0.linkD - 0.1, 0.4);
         rise(s.rows[w], LIST.x, LIST.top + w * LIST.pitch + LIST.h / 2, arrived * linksO, 16);

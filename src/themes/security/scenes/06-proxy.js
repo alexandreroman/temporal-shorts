@@ -169,14 +169,10 @@
         const o = columnO(s.apps[i].col);
         draw(link, P(t, c[0] + T0.links + i * T0.linkStep, T0.linkD), o);
         link.setAttribute('stroke', i === SENDER && riding ? C.ink : C.slate);
-        sparkOnPath(s.sparks[i], link, (G / PROXY_FLOW_PERIOD + i / s.apps.length) % 1);
-        s.sparks[i].style.opacity = (+s.sparks[i].style.opacity * flow * o).toFixed(3);
+        sparkOnPath(s.sparks[i], link, (G / PROXY_FLOW_PERIOD + i / s.apps.length) % 1, flow * o);
       });
       draw(s.out, P(t, c[0] + T0.out, T0.outD));
-      s.outSparks.forEach((spark, k) => {
-        sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1);
-        spark.style.opacity = (+spark.style.opacity * flow).toFixed(3);
-      });
+      s.outSparks.forEach((spark, k) => sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1, flow));
 
       // the dramatic beat: the card leaves its Worker and rides its connection into the proxy, in clear with only
       // its short Namespace name. There it gains, one at a time, each with a click: the TLS tube to Temporal (its
