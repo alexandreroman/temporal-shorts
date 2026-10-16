@@ -61,7 +61,7 @@ function makeOrderStatus(p) {
   e.st = e.querySelector('.st');
   return e;
 }
-// color tints the status text and the border, e.g. C.red for 'PAID, NOT SHIPPED', C.neon for 'COMPLETE'
+// color tints the status text and the border, e.g. C.neon for 'COMPLETE'
 function setOrderStatus(e, text, color = C.slate) {
   e.st.textContent = text; e.st.style.color = color;
   e.style.borderColor = color;
