@@ -252,8 +252,8 @@ suppliers for most workloads), rate limits and Task Queue partitions.
     place, crossed out.
 - **3:18** This is the moment to add Workers: B and C poll the same Task
   Queue and share the load.
-  - Visuals: MEMORY and the code card fade; A's CPU meter shrinks into a
-    compact gauge at the top right of WORKER A, its BOTTLENECK tag beside
+  - Visuals: MEMORY and the "+ SLOTS" ghost fade; A's CPU meter shrinks
+    into a compact gauge at the top right of WORKER A, its BOTTLENECK tag beside
     it; WORKER B and WORKER C, as wide as A, slide in under it, each with a
     Poller in A's Poller column, 5 Slots and its own CPU gauge; their poll
     lines turn off A's Activity trunk into their Pollers, at each Poller's
