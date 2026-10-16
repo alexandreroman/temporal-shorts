@@ -456,6 +456,11 @@ below and the card order in [Home page design](feedback_home-page.md).
   hold dim to `OFF_SHOT` (0.3); zone borders clip to the content frame,
   headings fade instead of being cut; held shots whose message is small
   text render values at 18 px and labels at 14 px or more.
+- Red verdict tags (UNREADABLE, REJECTED, READABLE, IN CLEAR, CALL FAILED,
+  FAIL CLOSED) share a theme-only style: bold near-black text on solid red,
+  about 19-20 px on screen, in their tile's heading row, never straddling a
+  border; text-only tags offset their trailing letter-spacing so the ink
+  sits centered.
 - 08 → 09 and 10 → outro use the engine zoom-through; 09's recap tiles
   flip in 3D into 10's use-case tiles in the same slots.
 
