@@ -575,8 +575,9 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 // ---------- placing the diagram
 // Places the whole diagram at time t, from one state object; every field is optional, so a chapter sets only what
 // it shows, phase by phase (its values may depend on t and on its cues c[i]):
-// - show: { temporal, lanes, worker, pollers, wfSlots, slots, slotsLabel, cache, backlog, wait, cpu, mem, code },
-//   the opacity of each part, 1 by default (slotsLabel, the ACTIVITY SLOTS label: that of the slots by default)
+// - show: { temporal, lanes, worker, status, pollers, wfSlots, slots, slotsLabel, cache, backlog, wait, cpu, mem,
+//   code }, the opacity of each part, 1 by default (status, the WORKER panel's status; slotsLabel, the ACTIVITY SLOTS
+//   label: that of the slots by default)
 // - split: 0 to 1, from one "orders" lane (chapter 1) to two lanes, Workflow Tasks above Activity Tasks (default 1)
 // - queue: { wf, act }, the tasks waiting in each lane (see placeQueueLane); taskIcon(k): the icon of Activity Task k
 //   of its lane (default activityIcon)
@@ -615,6 +616,7 @@ function placeWorkerDiagram(dg, t, state = {}) {
   place(dg.worker, worker.left + worker.w / 2, worker.top + worker.h / 2, 1, show('worker'));
   const [statusText, statusState] = state.status ?? ['RUNNING', 'running'];
   setAppStatus(dg.worker, statusText, statusState);
+  dg.worker.st.style.opacity = show('status');
 
   const layout = slotLayout(state.slots ?? {}, t);
   const flights = flowFlights(state, t);

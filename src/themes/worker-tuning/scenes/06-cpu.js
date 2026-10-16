@@ -254,7 +254,8 @@
       const latency = lerp(lerp(2.0, 3.4, P(t, pinAt, 3.0)), 2.0, P(t, drainFrom, 1.8));
       const latencyTrend = t >= drainFrom ? 'down' : 'up';
       placeWorkerDiagram(s.dg, t, {
-        show: { code: 1 - P(t, c[1] + 0.2, 0.5), mem: 1 - P(t, c[2] + 0.2, 0.4) },
+        // the gauge takes the place of WORKER A's status: B and C show none either
+        show: { code: 1 - P(t, c[1] + 0.2, 0.5), mem: 1 - P(t, c[2] + 0.2, 0.4), status: 1 - P(t, dockAt, 0.3) },
         queue: { wf, act },
         taskIcon,
         flows: [slow, shared],
@@ -280,8 +281,6 @@
           cpu: t < dockEnd ? { at: c[0] + 1.6, out: dockAt } : { at: dockEnd, fixedAt: fixAt, out: moveAt },
         },
       });
-      // the gauge takes the place of WORKER A's status: B and C show none either
-      s.dg.worker.st.style.opacity = 1 - P(t, dockAt, 0.3);
 
       // "+ SLOTS" rises where the code card was, is struck through, and gives way to Workers B and C
       const ghostOut = 1 - P(t, c[2] + 0.2, 0.4);
