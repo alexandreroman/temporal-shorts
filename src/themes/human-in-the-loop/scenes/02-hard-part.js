@@ -23,16 +23,6 @@
   const [DB, FLAGS, JOBS, RESUME] = PLUMBING.map(([, , x, y, w]) => ({
     x, y, left: x - w / 2, right: x + w / 2, top: y - TILE.h / 2, bottom: y + TILE.h / 2,
   }));
-  // S-curve that leaves (x0, y0) and reaches (x1, y1) horizontally
-  const sideCurve = (x0, y0, x1, y1) => {
-    const mx = (x0 + x1) / 2;
-    return `M ${x0} ${y0} C ${mx} ${y0}, ${mx} ${y1}, ${x1} ${y1}`;
-  };
-  // S-curve that leaves (x0, y0) and reaches (x1, y1) vertically
-  const upCurve = (x0, y0, x1, y1) => {
-    const my = (y0 + y1) / 2;
-    return `M ${x0} ${y0} C ${x0} ${my}, ${x1} ${my}, ${x1} ${y1}`;
-  };
   // Long sweep that drops from (x0, y0), then comes into (x1, y1) from x0's side
   const sweep = (x0, y0, x1, y1) => {
     const lead = x1 > x0 ? -160 : 160;
@@ -41,10 +31,10 @@
   // The side tiles reach the app's sides 68 px off its middle; the band tiles cross to the app's bottom edge, 150 px
   // either side of its center; the long sweeps run from under the side tiles to the band, between its two tiles
   const LINKS = [
-    sideCurve(DB.right, DB.y, APP_EDGE.left, APP.y + 68),
-    sideCurve(RESUME.left, RESUME.y, APP_EDGE.right, APP.y - 68),
-    upCurve(FLAGS.x, FLAGS.top, APP.x + 150, APP_EDGE.bottom),
-    upCurve(JOBS.x, JOBS.top, APP.x - 150, APP_EDGE.bottom),
+    sCurveD(DB.right, DB.y, APP_EDGE.left, APP.y + 68),
+    sCurveD(RESUME.left, RESUME.y, APP_EDGE.right, APP.y - 68),
+    sCurveD(FLAGS.x, FLAGS.top, APP.x + 150, APP_EDGE.bottom, true),
+    sCurveD(JOBS.x, JOBS.top, APP.x - 150, APP_EDGE.bottom, true),
     sweep(DB.x, DB.bottom, JOBS.left, BAND_Y),
     sweep(RESUME.x, RESUME.bottom, FLAGS.right, BAND_Y),
   ];
@@ -72,9 +62,7 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.links = LINKS.map(d => path(s.svg, d, C.slate, 2, false));
-      s.line = path(s.svg, `M ${LINE.x0} ${LINE.y} L ${LINE.x1} ${LINE.y}`, C.line, 3, false);
-      s.days = [1, 2, 3].map(n => E(root, 'Day ' + n, 'lbl', { fontSize: '22px' }));
-      s.ticks = [0, 1, 2].map(() => E(root, '', '', { width: '3px', height: '22px', background: C.slate }));
+      s.timeline = makeDayTimeline(root, s.svg, LINE.x0, LINE.x1, LINE.y, [1, 2, 3]);
       s.restartM = E(root, '', '', { width: '2px', height: '40px', background: C.red });
       s.deployM = E(root, '', '', { width: '2px', height: '40px', background: C.slate });
       s.restart = tag(root, 'Restart', 'red'); s.deploy = tag(root, 'Deploy');
@@ -121,11 +109,11 @@
 
       // day timeline: the marker walks from DAY 1 and stops at the restart
       const lp = P(t, c[0] + 0.3, 0.5);
-      draw(s.line, lp, 1 - lineOut);
-      [0, 1, 2].forEach(i => {
-        const x = lerp(LINE.x0, LINE.x1, i / 2);
-        place(s.ticks[i], x, LINE.y, 1, lp * (1 - lineOut));
-        place(s.days[i], x, LINE.y + 44, 1, lp * (1 - lineOut));
+      const { line, ticks, labels, xs } = s.timeline;
+      draw(line, lp, 1 - lineOut);
+      xs.forEach((x, i) => {
+        place(ticks[i], x, LINE.y, 1, lp * (1 - lineOut));
+        place(labels[i], x, LINE.y + 44, 1, lp * (1 - lineOut));
       });
       const mo = P(t, c[0] + 0.6, 0.4) * (1 - lineOut);
       place(s.restartM, RESTART_X, LINE.y - 24, 1, mo); place(s.deployM, DEPLOY_X, LINE.y - 24, 1, mo);

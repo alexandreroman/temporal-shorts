@@ -87,36 +87,33 @@
         + `letter-spacing:.1em;color:${C.neon}">${ICON('check', 16, C.neon, 2.6)}VERIFIED</span>`,
         '', {
           width: LIST.w + 'px', height: LIST.h + 'px', display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', padding: '0 14px', border: `1.5px solid ${C.lineLight}`,
+          justifyContent: 'space-between', padding: '0 14px', border: `1px solid ${C.lineLight}`,
           borderRadius: 'var(--rs)',
         }));
       s.updates = WORKERS.map(() => E(root, `${ICON('retry', 22, C.neon, 2.2)}UPDATE`, 'mono', {
         width: UPDATE.w + 'px', height: UPDATE.h + 'px', display: 'flex', alignItems: 'center',
         justifyContent: 'center', gap: '12px', fontSize: '22px', letterSpacing: '.12em', color: C.neon,
-        border: `1.5px solid ${C.neon}`, borderRadius: 'var(--rs)', background: 'var(--neon-solid)',
+        border: `1px solid ${C.neon}`, borderRadius: 'var(--rs)', background: 'var(--neon-solid)',
         boxShadow: `0 0 18px rgba(${RGB.neon},.4)`,
       }));
       // the forgetful Worker's empty CODEC slot, outlined in red
       s.missing = E(root, 'NO CODEC', 'mono', {
         width: UPDATE.w + 'px', height: WORKER_TILE.chipH + 'px', lineHeight: (WORKER_TILE.chipH - 3) + 'px',
         textAlign: 'center', fontSize: '19px', letterSpacing: '.1em', paddingLeft: '.1em', color: C.red,
-        border: `1.5px dashed ${C.red}`,
+        border: `1px dashed ${C.red}`,
         borderRadius: 'var(--rs)', background: `rgba(${RGB.red},.1)`,
       });
-      s.pill = fixedTag(root, `${ICON('retry', 20, C.violet, 2)}Rotate`, 'violet solid', PILL.w, PILL.h);
-      Object.assign(s.pill.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '20px',
-        lineHeight: '24px', paddingTop: '0', paddingBottom: '0',
+      s.pill = fixedTag(root, `${ICON('retry', 20, C.violet, 2)}Rotate`, 'violet solid', PILL.w, {
+        h: PILL.h, gap: 10,
       });
+      Object.assign(s.pill.style, { fontSize: '20px', lineHeight: '24px', paddingTop: '0', paddingBottom: '0' });
       s.sparks = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       s.card = makePayload(root, { w: CARD.w });
       s.alarm = makeRipples(root, 2, RGB.red);
-      // in the theme's alarm look (STATUS_KINDS.alarm), like the other red verdicts
-      s.inClear = fixedTag(root, `${ICON('eye', 20, C.bg, 2.4)}In clear`, 'red', 200);
-      Object.assign(s.inClear.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: C.red, color: C.bg,
-        borderColor: C.red, fontWeight: '700',
-      });
+      // in the theme's alarm look (STATUS_KINDS.alarm, with its own icon), in bold like the other red verdicts
+      s.inClear = fixedTag(root, `${ICON('eye', 20, C.bg, 2.4)}In clear`, 'red', 200, { gap: 10 });
+      const { icon, ...alarmLook } = STATUS_KINDS.alarm;
+      Object.assign(s.inClear.style, { ...alarmLook, fontWeight: '700' });
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);
     },
@@ -140,7 +137,7 @@
       });
 
       // the camera holds chapter 4's wide shot, which the fleet layout fills; the alarm shakes it
-      const cam = shot(t, BARE_WORKERS_HANDOFF.shot, []);
+      const cam = shot(t, WIDE_SHOT, []);
       const [shakeX, shakeY] = shake(t, hitAt, 10, 0.4);
       setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
       frameLaneEdges(s.lane, cam);
@@ -162,8 +159,7 @@
             clamp(copy * 6));
         }
         const lang = popIn(t, c[0] + T0.langs + w * T0.langStep);
-        tile.langTag.style.opacity = lang.o;
-        tile.langTag.style.transform = `scale(${lang.s})`;
+        popScale(tile.langTag, lang);
         tile.chips.forEach((chip, k) => {
           const at = c[0] + T0.chips[k] + w * T0.chipStep;
           const shown = w === FORGETFUL && k === CODEC ? 0 : 1;
@@ -184,8 +180,7 @@
       s.links.forEach((link, w) => {
         draw(link, P(t, c[0] + T0.chips[0] + w * T0.chipStep + T0.link, T0.linkD), linksO);
         link.setAttribute('stroke', w === FORGETFUL && t >= cardAt ? C.red : C.slate);
-        sparkOnPath(s.sparks[w], link, (G / FLOW_PERIOD + w / WORKERS.length) % 1);
-        s.sparks[w].style.opacity = (+s.sparks[w].style.opacity * flow).toFixed(3);
+        sparkOnPath(s.sparks[w], link, (G / FLOW_PERIOD + w / WORKERS.length) % 1, flow);
         // its row in TEMPORAL's list rises in as the connection arrives
         const arrived = P(t, c[0] + T0.chips[0] + w * T0.chipStep + T0.link + T0.linkD - 0.1, 0.4);
         rise(s.rows[w], LIST.x, LIST.top + w * LIST.pitch + LIST.h / 2, arrived * linksO, 16);

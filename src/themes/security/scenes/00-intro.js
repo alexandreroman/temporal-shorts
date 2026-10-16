@@ -22,7 +22,7 @@
   const GHOSTS = [0.07, 0.14, 0.21]; // how far each ghost outline of the flying card lags behind it, in progress
 
   // Seal and scramble of the loop at loop time u (negative before the first pass: open and in clear)
-  function loopState(u) {
+  const loopState = u => {
     if (u < 0) return { seal: 0, scramble: TRANSFER.map(() => 0) };
     const seal = u < LOOP.open ? P(u, LOOP.seal, LOOP.sealD, linear) : 1 - P(u, LOOP.open, LOOP.sealD, linear);
     const scramble = TRANSFER.map((_, i) => {
@@ -33,7 +33,7 @@
       return Math.min(on, 1 - off);
     });
     return { seal, scramble };
-  }
+  };
 
   scene({
     pre: 1.0,
@@ -51,13 +51,12 @@
       // a soft glow behind the card, sized to stay inside the content frame (y 190-870): the layout check counts it
       s.glow = E(root, '', '', {
         width: '680px', height: '680px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.violet},.22) 0%, `
-          + `rgba(${RGB.uv},.10) 40%, rgba(${RGB.uv},0) 68%)`,
+        background: haloBackground(0.22, 0.1, 40, 68),
       });
       s.t = makeTitleBlock(root, 'AN EXPLAINER FOR SECURITY TEAMS', 'Who can see your<br>Workflow data?',
         'SECURITY WITH TEMPORAL');
       s.ghosts = GHOSTS.map(() => E(root, '', '', {
-        border: `1.5px solid ${C.violet}`, borderRadius: 'var(--r)',
+        border: `1px solid ${C.violet}`, borderRadius: 'var(--r)',
       }));
       s.card = makePayload(root, { w: CARD.w });
       // the lane-size card that lands in the Worker: it takes over from the large one halfway through the flight

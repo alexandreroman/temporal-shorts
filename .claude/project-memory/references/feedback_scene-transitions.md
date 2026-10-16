@@ -13,11 +13,13 @@ carry over exactly, and elements that belong to one scene only leave or
 enter by their own animation inside it. When the content changes, a
 motion transition carries it: components travel, shrink or grow into
 what comes next, the rest slides or scales out, never a whole-screen
-fade. The video's opening fade-in and closing fade-out stay.
+fade. Every video opens with a fade-in and closes with a fade-out.
 
-worker-tuning follows this rule at every boundary; the other themes use
-the engine's default 0.5 s scene fades, except meet-temporal's hard cuts
-around ch3 and ch4.
+worker-tuning follows this rule at every boundary, and security from the
+intro to ch8 and from ch11 to ch12 (match cuts). durable-execution cuts
+hard from ch5 to ch6 and meet-temporal from ch3 to ch4. The other
+boundaries use the engine's default 0.5 s scene fades (with the camera
+zoom-through, `setCamera`, in meet-temporal and security).
 
 **Why:** a fade between two scenes that show the same diagram makes it
 blink for nothing, and a dip to the background breaks the story's

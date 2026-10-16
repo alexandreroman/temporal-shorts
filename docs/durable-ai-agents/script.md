@@ -68,8 +68,8 @@ the figures follow the step count if the scenario changes.
 - **0:33** Then ask again in the next call: it has already forgotten.
   - Visuals: Bubble wiped, NOT KEPT label above the orb, Call 2: "What's my
     name?" / "I don't know. You haven't told me." (red).
-- **0:39** That's by design: LLMs are stateless. So the app resends the whole
-  conversation with every call.
+- **0:39** That's by design: LLMs are stateless. So the whole conversation is
+  sent again with every call.
   - Visuals: STATELESS tag, "Full history" card sent, "You're Alex!".
 
 ## 03 The context window

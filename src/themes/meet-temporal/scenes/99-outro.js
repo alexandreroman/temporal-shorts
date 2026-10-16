@@ -59,21 +59,19 @@
   const DIM_STAR = { size: 6, rgb: '232,234,255' };
 
   // ---------- title: "Meet" and the official lockup, read as one title "Meet Temporal"
-  // The lockup's viewBox is 1570x410 units (405 395 1570 410): its wordmark's capitals run from y 519 to the
-  // baseline at y 684.7, and its symbol spans x 414-804, y 405-795.
+  // The lockup's geometry is LOCKUP; "Meet" is set as lockupWord(LOCKUP_HEIGHT), its font unrounded, and the
+  // wordmark's baseline sits MEET.rise above the bottom of the image
   const LOCKUP_HEIGHT = 133;
-  const LOCKUP_UNIT = LOCKUP_HEIGHT / 410;
-  const LOCKUP_WIDTH = 1570 * LOCKUP_UNIT;
-  // How far the wordmark's baseline sits above the bottom of the image
-  const LOCKUP_BASELINE_RISE = Math.round((805 - 684.7) * LOCKUP_UNIT);
-  // "Meet" in the brand font with capitals exactly as tall as the wordmark's: Instrument Sans capitals are
-  // 0.72 em tall, and the word is 2.405 em wide, its last letter ending 0.023 em before that
-  const MEET_FONT = (684.7 - 519) * LOCKUP_UNIT / 0.72;
-  const MEET_WIDTH = Math.ceil(2.405 * MEET_FONT);
+  const MEET = lockupWord(LOCKUP_HEIGHT);
+  const LOCKUP_WIDTH = LOCKUP.w * MEET.unit;
+  // "Meet" in the brand font with capitals exactly as tall as the wordmark's: the word is 2.405 em wide, its last
+  // letter ending 0.023 em before that
+  const MEET_WIDTH = Math.ceil(2.405 * MEET.font);
   // Clear space from the "t" to the symbol: the lockup's own gap between its symbol and its wordmark, so the
   // symbol sits evenly between the two words
-  const MEET_GAP = Math.round((915 - 804) * LOCKUP_UNIT);
-  const LOCKUP_MARGIN = Math.round(MEET_GAP - (MEET_WIDTH - 2.382 * MEET_FONT) - (414 - 405) * LOCKUP_UNIT);
+  const MEET_GAP = Math.round((LOCKUP.wordLeft - LOCKUP.symbolRight) * MEET.unit);
+  const LOCKUP_MARGIN = Math.round(MEET_GAP - (MEET_WIDTH - 2.382 * MEET.font)
+    - (LOCKUP.symbolLeft - LOCKUP.x) * MEET.unit);
   const TITLE_WIDTH = Math.ceil((MEET_WIDTH + LOCKUP_MARGIN + LOCKUP_WIDTH) / 2) * 2;
   // The tagline's capitals start 8 px below its 32 px line box top: 23 px between the title and the tagline
   // leave 34 px of clear space under the symbol
@@ -101,7 +99,7 @@
   const distance = ([x1, y1], [x2, y2]) => Math.hypot(x2 - x1, y2 - y1);
 
   // The scene time at which the outline's pen, drawing at a steady speed, reaches OUTLINE[index]
-  function penReaches(index) {
+  const penReaches = index => {
     let total = 0, reached = 0;
     OUTLINE.forEach((point, i) => {
       const next = OUTLINE[(i + 1) % OUTLINE.length];
@@ -109,22 +107,22 @@
       total += distance(point, next);
     });
     return OUTLINE_AT + OUTLINE_D * reached / total;
-  }
+  };
 
   // Title block: "Meet" and the lockup on one line, the violet tagline under it. The lockup image rests its
   // wordmark's baseline on the line's baseline (vertical-align lowers the image's bottom under it), where "Meet"
   // sits too.
-  function makeTitleCard(root, tagline) {
+  const makeTitleCard = (root, tagline) => {
     return E(root,
       `<div style="width:${TITLE_WIDTH}px;height:${LOCKUP_HEIGHT}px;margin:0 auto;text-align:left;`
       + 'line-height:0;white-space:nowrap">'
-      + `<span style="display:inline-block;width:${MEET_WIDTH}px;font-size:${MEET_FONT}px">Meet</span>`
+      + `<span style="display:inline-block;width:${MEET_WIDTH}px;font-size:${MEET.font}px">Meet</span>`
       + `<img src="${LOGO}" style="height:${LOCKUP_HEIGHT}px;margin-left:${LOCKUP_MARGIN}px;`
-      + `vertical-align:-${LOCKUP_BASELINE_RISE}px"></div>`
+      + `vertical-align:-${MEET.rise}px"></div>`
       + '<div class="mono" style="font-size:24px;line-height:32px;letter-spacing:.14em;padding-left:.14em;'
       + `color:var(--violet);margin-top:${TAGLINE_GAP}px">${tagline}</div>`,
       '', { width: CARD_WIDTH + 'px', height: CARD_HEIGHT + 'px', textAlign: 'center' });
-  }
+  };
 
   scene({
     pre: 0.4, post: 2.6,

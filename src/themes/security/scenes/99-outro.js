@@ -5,8 +5,6 @@
   // the shield's center and size (its 24 grid box, px); the padlock's size, centered in the shield
   const SHIELD = { x: 960, y: 276, size: 168 };
   const LOCK = { size: 64, dy: 4 };
-  // the outline of the engine's `shield` icon, without its check
-  const SHIELD_PATH = 'M12 3l8 3v6c0 4.5-3.4 7.7-8 9-4.6-1.3-8-4.5-8-9V6z';
   const STROKE_PX = 3.5;
   const SNAP_AT = 1.3;
 
@@ -23,7 +21,7 @@
       // pathLength 1: the outline draws as its dash offset goes from 1 to 0
       s.shield = E(root,
         `<svg width="${SHIELD.size}" height="${SHIELD.size}" viewBox="0 0 24 24" style="display:block">`
-        + `<path d="${SHIELD_PATH}" pathLength="1" fill="rgba(${RGB.uv},.16)" stroke="${C.violet}"`
+        + `<path d="${SHIELD_OUTLINE}" pathLength="1" fill="rgba(${RGB.uv},.16)" stroke="${C.violet}"`
         + ` stroke-width="${(STROKE_PX * 24 / SHIELD.size).toFixed(3)}" stroke-linejoin="miter"`
         + ' stroke-dasharray="1 2"/></svg>',
         '', { width: SHIELD.size + 'px', height: SHIELD.size + 'px' });

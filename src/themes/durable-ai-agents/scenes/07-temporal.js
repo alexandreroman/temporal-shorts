@@ -16,7 +16,11 @@
   // TEMPORAL panel, holding the Event History card (x 1015-1820); the card and its rows (call cards land 110 px
   // inside its left edge)
   const TEMPORAL = { x: 1417.5, y: 555, w: 845, h: 530 };
-  const HIST = { ...historyInset(TEMPORAL), cardX: 1125, row0: 447, rowGap: 44 };
+  const HIST = { ...historyInset(TEMPORAL), cardX: 1125 };
+  // Event History rows, 35 px high: the first one 70 px below the card's top, then one every 44 px; each row's tag
+  // 4 px below the row's top
+  const ROW = { top: 70, gap: 44, tagDy: 4 };
+  const rowTop = i => ROW.top + i * ROW.gap; // inside the card
   // ticket and AGENT COMPLETE: between the bill's right edge and the instance panel's
   const DONE_X = 692;
   // NEW INSTANCE: on the top edge of instance B's panel, centered between its name and its TAKING OVER status
@@ -27,7 +31,8 @@
   const STATUS_AT = { x: APP.x + APP.w / 2 - 100, y: APP.y - APP.h / 2 + 36 };
   // x of context block i, where the LLM CALL and TOOL CALL cards leave and land
   const blockX = i => memSlotX(MEM.x - MEM.w / 2, i, MEM_BLOCK);
-  const rowY = i => HIST.row0 + i * HIST.rowGap;
+  // stage y where the call cards land on row i and leave it: 17 px below its top, a whole pixel (447 for row 0)
+  const rowY = i => HIST.y - HIST.h / 2 + rowTop(i) + 17;
   // the big intro logo flies into the TEMPORAL panel header from c[0] + FLIGHT.at, for FLIGHT.d seconds
   const FLIGHT = { at: 1.9, d: 0.8 };
   scene({
@@ -68,7 +73,7 @@
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, { noteAt: [24, 24] });
       // rows 1-6 survive the crash: tinted block + crash line under them
       s.history = makeHistoryCard(root, LUNCH_HISTORY, {
-        uvRow: isLLMRow, w: HIST.w, h: HIST.h, rowTop: i => 70 + i * 44, font: 21, tagTop: i => 74 + i * 44,
+        uvRow: isLLMRow, w: HIST.w, h: HIST.h, rowTop, font: 21, tagTop: i => rowTop(i) + ROW.tagDy,
         tag: { border: false },
         crash: { keptTop: 64, keptH: 262, cutTop: 330, label: 'APP CRASHED HERE', labelX: '66%', labelFont: 13 },
         scanH: 42, scanDy: -2,

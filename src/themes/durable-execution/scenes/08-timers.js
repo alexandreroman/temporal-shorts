@@ -39,7 +39,7 @@
   const WAKE_X = 740;
   const lineY = i => CODE_CARD_STYLE.y - (CODE_CARD_STYLE.padY * 2 + WAIT_CODE.length * CODE_CARD_STYLE.lineH) / 2
     + CODE_CARD_STYLE.padY + (i + 0.5) * CODE_CARD_STYLE.lineH;
-  const rowY = i => HIST_CARD.y - HIST_CARD.h / 2 + HIST.row0 + (i + 0.5) * HIST.rowGap;
+  const rowY = i => HIST_CARD.y - HIST_CARD.h / 2 + STEP_HIST.row0 + (i + 0.5) * STEP_HIST.rowGap;
 
   // Worker status shown in the block: label, icon (spin: a running spinner) and colors
   const STATUS = {
@@ -78,11 +78,8 @@
   };
   const setStatusBlock = (block, key) => {
     const st = STATUS[key];
-    if (block._key !== key) {
-      block._key = key;
-      block.tx.textContent = st.text;
-      block.tx.style.color = st.color;
-    }
+    setText(block.tx, st.text);
+    block.tx.style.color = st.color;
     block.icons.forEach(e => { e.style.opacity = e.dataset.icon === st.icon ? 1 : 0; });
     block.ring.style.transform = `rotate(${G * 400}deg)`;
   };
@@ -140,7 +137,7 @@
       s.spin = makeLineBadge(s.code, 0, spinnerRing(26), 'none');
       s.status = makeStatusBlock(root);
       s.temporal = makeTemporalPanel(root, EH.temporal.w, EH.temporal.h, TEMPORAL_HEADER);
-      s.hist = makeHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h);
+      s.hist = makeStepHistory(root, ROWS, HIST_CARD.w, HIST_CARD.h);
       s.timer = makeTimerBlock(root);
       s.chips = {
         ship: makeResultCard(root), start: makeResultCard(root, true, 'START TIMER'),
@@ -217,13 +214,11 @@
       // checks: shipPackage once saved, the sleep line once the replay passes it, askForReview once saved
       [shipSaved, slept, reviewSaved].forEach((at, i) => {
         const pop = popIn(t, at);
-        s.checks[i].style.opacity = pop.o;
-        s.checks[i].style.transform = `scale(${pop.s})`;
+        popScale(s.checks[i], pop);
       });
       // the sleep line carries a clock while the Workflow waits, until the replay checks it
       const zz = popIn(t, timerSaved);
-      s.sleeping.style.opacity = zz.o * (1 - P(t, slept - 0.2, 0.2));
-      s.sleeping.style.transform = `scale(${zz.s})`;
+      popScale(s.sleeping, { s: zz.s, o: zz.o * (1 - P(t, slept - 0.2, 0.2)) });
 
       // Temporal and its Event History
       const tp = backPop(t, c[0] + 0.3, 0.5);

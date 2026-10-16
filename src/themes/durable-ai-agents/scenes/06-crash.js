@@ -92,16 +92,18 @@
         width: CHIP.w + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
         padding: '6px 14px 6px 12px', fontSize: '20px', lineHeight: '28px', letterSpacing: '.08em',
         textTransform: 'uppercase', whiteSpace: 'nowrap', color: C.red,
-        border: '1.5px solid ' + C.red, background: 'var(--red-solid)', borderRadius: 'var(--rs)',
+        border: '1px solid ' + C.red, background: 'var(--red-solid)', borderRadius: 'var(--rs)',
       }));
       // tickets as wide as the right column, their content centered: the text changes, the box does not. Built
       // after the panels and the bill: the ticket flies over them to the middle of the stage
       const ticketBox = { width: COL.w + 'px', height: TICKET.h + 'px', display: 'flex', alignItems: 'center',
         justifyContent: 'center' };
-      // the second booking: a blank copy of the ticket, stacked behind it once the table is booked twice
-      s.ticketBack = makeTicket(root);
-      s.ticketBack.firstChild.style.visibility = 'hidden';
-      Object.assign(s.ticketBack.style, ticketBox, { borderColor: C.red, background: 'var(--red-solid)' });
+      // the second booking: a blank box of the ticket's size and red look, stacked behind it once the table is
+      // booked twice
+      s.ticketBack = E(root, '', '', {
+        width: ticketBox.width, height: ticketBox.height, border: '1px solid ' + C.red, background: 'var(--red-solid)',
+        borderRadius: 'var(--rs)',
+      });
       s.ticket = makeTicket(root);
       Object.assign(s.ticket.style, ticketBox);
       s.bolt = E(root, ICON('bolt', 150, C.red, 1.6));

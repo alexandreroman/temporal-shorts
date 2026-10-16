@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=agent-harness` for the live values; the start
-times below are a snapshot from 2026-10-09.
+times below are a snapshot from 2026-10-16.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -28,8 +28,9 @@ The video teaches, in order:
    every agent as a durable Temporal Workflow, and drives it turn by turn:
    a message starts a turn, your loop runs inside it, the reply streams
    back;
-2. crash recovery mid-turn: saved model and tool results are reused, so no
-   finished model call is paid again and no finished tool reruns;
+2. crash recovery mid-turn: saved model and durable tool results are
+   reused, so no finished model call is paid again and no finished durable
+   tool reruns;
 3. human-in-the-loop approvals: a policy decides which tool calls need a
    person; a gated call waits durably, for minutes or days; auto mode lets
    code or a model approve routine calls, deny others outright (the tool
@@ -110,8 +111,8 @@ Lisbon.
 
 ## 02 Survives crashes
 
-- **1:18** Every model call and tool call is saved in the agent's Temporal
-  history as soon as it completes.
+- **1:18** Every model call and durable tool call is saved in the agent's
+  Temporal history as soon as it completes.
   - Visuals: five step tiles (PLAN, SEARCH FLIGHTS, PICK, BOOK FLIGHT,
     REPLY); APP INSTANCE A works on step 1, then step 2: each finished step
     sends a MODEL CALL or TOOL CALL card to the EVENT HISTORY of the
@@ -143,99 +144,99 @@ Lisbon.
     running, the counters show NOT RE-BILLED / NOT RE-RUN; step 5 then runs
     and is SAVED (Model: write the reply).
 - **1:51** Saved results are reused, not redone: no finished model call is
-  paid again, no finished tool reruns.
+  paid again, no finished durable tool reruns.
   - Visuals: tags "REUSED, NOT RE-BILLED" (model rows) and "REUSED, NOT
     RE-RUN" (tool rows); counters glow: MODEL CALLS BILLED 3 "NOT 5",
     FLIGHTS BOOKED 1 "ONLY ONCE"; TURN COMPLETE.
 
 ## 03 Human approvals
 
-- **2:02** Some tool calls need a person's OK first, like a payment. The
+- **2:03** Some tool calls need a person's OK first, like a payment. The
   approval policy decides which ones.
   - Visuals: the AGENT sends tool calls along a lane through the APPROVAL
     POLICY gate and its RULES (`search_flights` ALLOW, `search_hotels`
     ALLOW, everything else ASK) to TOOLS: `search_flights` and
     `search_hotels` are ALLOWED; `book_flight $480` stops at the gate:
     NEEDS APPROVAL.
-- **2:11** The call pauses inside the Workflow, for minutes or days, then
+- **2:12** The call pauses inside the Workflow, for minutes or days, then
   resumes as soon as someone approves.
   - Visuals: pause badge, DURABLE WAIT clock racing from "5 MIN" to "2
     DAYS", a request line to YOU; APPROVE is pressed, the call becomes
     APPROVED, passes the gate and runs: BOOKED.
-- **2:21** Auto mode lets code or a model approve routine calls, judged
+- **2:22** Auto mode lets code or a model approve routine calls, judged
   against criteria you define.
   - Visuals: an AUTO MODE judge docks on the gate with its rules "approve:
     hotel under $500" and "deny: hotel over $5,000"; `book_hotel $390`
     parks while the judge works (UV), then the approve rule lights, and the
     call is AUTO-APPROVED and runs.
-- **2:29** It can also deny a call, like a $6,800 suite: the tool never runs
+- **2:30** It can also deny a call, like a $6,800 suite: the tool never runs
   and the model is told why.
   - Visuals: `book_hotel $6,800` parks while the judge works; the judge
     turns red, the deny rule lights, and the call turns red with a DENIED
     tag; it never reaches TOOLS: it slides back along the lane into the
     AGENT under a red "REASON SENT TO THE MODEL" cue, and the agent thinks.
-- **2:36** Calls it escalates, like a $2,400 hotel, still go to a human.
+- **2:37** Calls it escalates, like a $2,400 hotel, still go to a human.
   - Visuals: `book_hotel $2,400` parks, is ESCALATED (matching neither
     rule) and drops to YOU.
 
 ## 04 One event stream
 
-- **2:47** Every agent publishes the same event stream: turns, model calls,
+- **2:48** Every agent publishes the same event stream: turns, model calls,
   tool calls, approvals and token usage.
   - Visuals: three agents (OpenAI Agents SDK, Google Gemini, Pydantic AI)
     emit typed event chips (TURN, MODEL, TOOL, APPROVAL, TOKENS) that
     merge into one AGENT EVENT STREAM lane: "SAME EVENTS FOR EVERY AGENT".
-- **2:55** Watch an agent live: each event shows up in the console as soon
+- **2:56** Watch an agent live: each event shows up in the console as soon
   as it happens.
   - Visuals: the view pans to a CONSOLE fed by the lane; seven event rows
     appear one by one under a LIVE badge.
-- **3:03** Or replay it afterward: exactly what it did, what it cost and
+- **3:04** Or replay it afterward: exactly what it did, what it cost and
   where a human stepped in.
   - Visuals: the badge switches to REPLAY, the playhead rewinds and replays
     the rows, the highlight snapping from one event to the next; "approved by
-    a human" gets a HUMAN tag and the TURN row "turn total · 2,140 tokens" a
+    a human" gets a HUMAN tag and the TOKENS row "turn total · 2,140 tokens" a
     COST tag.
 
 ## 05 Typed, composable agents
 
-- **3:13** An agent is more than text in, text out: it exposes typed
+- **3:14** An agent is more than text in, text out: it exposes typed
   operations, with their inputs and outputs.
   - Visuals: "TEXT IN, TEXT OUT" struck out in red on the left; the
     TravelAgent card on the right lists its OPERATIONS, INPUT then
     OUTPUT: `plan_trip(request: PlanTrip) → Itinerary`,
     `set_budget(budget: Budget) → Ack`.
-- **3:21** Other agents read that interface and add its operations to their
+- **3:22** Other agents read that interface and add its operations to their
   own tools.
   - Visuals: SELF-DESCRIBING tag; the struck pill gives way to a Trip
     planner agent with its TOOLS (`search_web`); a dashed arrow "READS ITS
     INTERFACE" arches from TravelAgent to the Trip planner, and
     `travel_plan_trip`, the tool generated from `plan_trip`, joins its
     tools, tagged "FROM TravelAgent"; the Trip planner is the PARENT AGENT.
-- **3:29** To use it, the parent starts TravelAgent as a child workflow: a
+- **3:30** To use it, the parent starts TravelAgent as a child workflow: a
   new instance with its own history.
   - Visuals: a `start_travel` call travels from the parent to TravelAgent,
     which lights up and gets a CHILD WORKFLOW tag; under it, "INSTANCE
     7c2e91-3f9a1c" (the parent's id plus a fresh hex segment) with a
     STARTED tag.
-- **3:37** A typed request goes in, TravelAgent does the work, and a typed
+- **3:38** A typed request goes in, TravelAgent does the work, and a typed
   result comes back.
   - Visuals: a TYPED REQUEST (`PlanTrip`, `destination: "Lisbon"`,
     `nights: 3`) travels to TravelAgent, whose row works, and a TYPED
     RESULT (`Itinerary`, `total_usd: 895`) comes back: the tool row checks.
-- **3:45** When its work is done, the parent closes the instance: a subagent
+- **3:46** When its work is done, the parent closes the instance: a subagent
   never outlives its parent.
   - Visuals: a `stop_travel` call travels to TravelAgent; its tag turns
     CLOSED and the card dims, while the parent keeps its checked tool row.
 
 ## 06 Code Mode
 
-- **3:55** Without Code Mode, the model calls its tools one at a time: one
+- **3:56** Without Code Mode, the model calls its tools one at a time: one
   round trip per call.
   - Visuals: only the left zone, WITHOUT CODE MODE: a model calls its three
     tool tiles (FLIGHTS, HOTELS, BOOKING) one after the other, a "call" card
     going out to each tool and a "result" card coming back; the counter
     under them goes 1, 2, 3 ROUND TRIPS and holds.
-- **4:03** With Code Mode, the model writes a short Python script instead.
+- **4:04** With Code Mode, the model writes a short Python script instead.
   - Visuals: the left zone dims (its counter stays readable) and a thin
     vertical divider draws down between the zones; on the right, WITH CODE
     MODE: a SCRIPT WRITTEN BY THE MODEL is typed, in the shape the harness
@@ -243,11 +244,11 @@ Lisbon.
     as dicts): `asyncio.gather` of `search_flights(destination="LIS")` and
     `search_hotels(city="Lisbon")`, `min` by `f["price_usd"]`,
     `return await book_flight(best)`.
-- **4:12** Parallel calls and the logic between them run inside the
+- **4:13** Parallel calls and the logic between them run inside the
   script, as one tool call.
   - Visuals: the script runs: both searches run at once and are SAVED;
     "best: $480" on the `min` line.
-- **4:19** Every call stays durable, gated and visible, and the whole
+- **4:20** Every call stays durable, gated and visible, and the whole
   script takes one round trip, not three.
   - Visuals: `book_flight` passes an APPROVAL gate (APPROVED), runs and is
     SAVED; on the bottom line, 1 ROUND TRIP appears under WITH CODE MODE,
@@ -256,13 +257,13 @@ Lisbon.
 
 ## 07 Callback tools
 
-- **4:30** Callback tools run where the agent can't reach, like the user's
+- **4:31** Callback tools run where the agent can't reach, like the user's
   laptop or a private network.
   - Visuals: one centered column: THE APP (agent on a Temporal worker)
     above USER'S LAPTOP, joined by a straight dashed line;
     `read_file "trip.md"` travels down it to the laptop, which starts
     running it.
-- **4:37** The agent waits durably for the result, for seconds or days,
+- **4:38** The agent waits durably for the result, for seconds or days,
   without tying up compute.
   - Visuals: the app tile dims, a pause badge beside the agent; a DURABLE
     WAIT card slides out under the app, its clock racing from "5 SEC" to "2
@@ -272,12 +273,15 @@ Lisbon.
 
 ## 08 Typed sessions
 
-- **4:47** The harness generates TypeScript types from your agent's Python
+- **4:48** The harness generates TypeScript types from your agent's Python
   class: its state and its messages.
   - Visuals: YOUR AGENT, one centered column: a `travel_agent.py` card
     (PYTHON) holds `class Trip(HarnessState)` with `items: list[Item] = []`
     and `total_usd: int = 0`, then `@agent.defn class TravelAgent` with
-    `trip = agent.state(Trip)` and an `@agent.accepts` handler
+    `trip = agent.state(Trip)`, the `@agent.init` constructor that
+    `@agent.defn` requires,
+    `def __init__(self, config: AgentConfig) -> None: ...`, and an
+    `@agent.accepts` handler
     `async def plan_trip(self, request: PlanTrip) -> Itinerary: ...`; a
     GENERATED TYPES arrow leads down to a `client_sdk/TravelAgent.ts` card
     (GENERATED): `export interface Trip { items: Item[]; total_usd:
@@ -287,7 +291,7 @@ Lisbon.
     `initData` null for an agent without init data); matching lines light
     up pair by pair: the Trip model, the observable state, the `plan_trip`
     handler.
-- **4:56** Typed React and Svelte SDKs turn your agent into a live, typed
+- **4:57** Typed React and Svelte SDKs turn your agent into a live, typed
   session inside your product UI.
   - Visuals: the view pans; YOUR UI: a trip planner in a browser window
     ("Lisbon, 3 nights", flight, hotel, tour, TOTAL $895, Book), linked to
@@ -298,7 +302,7 @@ Lisbon.
 
 ## 09 What you get
 
-- **5:08** Durable, observable, composable agents with human approvals,
+- **5:09** Durable, observable, composable agents with human approvals,
   built with the AI SDKs you already use.
   - Visuals: six recap tiles, the main features, land one by one: Survives
     crashes / Event stream / Typed subagents / Human approvals / Code Mode /
@@ -306,7 +310,7 @@ Lisbon.
 
 ## Outro
 
-- **5:19** Temporal Agent Harness is experimental and open source. Try the
+- **5:20** Temporal Agent Harness is experimental and open source. Try the
   examples and build your own agents.
   - Visuals: LLM orb, title "Temporal Agent Harness", tagline "YOUR LOOP
     AND YOUR SDKS, RUN DURABLY BY TEMPORAL", violet "EXPERIMENTAL" pill,

@@ -8,48 +8,25 @@ Object.assign(ICONS, {
     + 'M12 11v2.5M6 16v-2.5h12V16"/><rect x="2.5" y="16" width="7" height="5.5"/>'
     + '<rect x="14.5" y="16" width="7" height="5.5"/>',
 });
-// The agent's goal and its steps: the user's goal card (YOU), then one row per step (icon, action, a neon result
-// line and a check, both hidden until the step is done); w: their width
-function makeStepList(root, goalText, steps, w = 640) {
-  const goal = makeCard(root, goalText, 'user', null, w);
-  const rows = steps.map(step => {
-    const row = E(root,
-      `${ICON(step.icon, 36, C.ink, 1.6)}<div style="flex:1;margin-left:18px">`
-      + `<div style="font-size:27px">${step.action}</div>`
-      + `<div class="res mono" style="font-size:18px;color:var(--neon);opacity:0">${step.result}</div></div>`
-      + `<div class="ck" style="opacity:0">${ICON('check', 32, C.neon, 2.6)}</div>`,
-      'tile', {
-        width: w + 'px', height: '88px', display: 'flex', alignItems: 'center', padding: '0 22px', textAlign: 'left',
-      });
-    row.res = row.querySelector('.res'); row.ck = row.querySelector('.ck'); return row;
-  });
-  return { goal, rows };
-}
-// Places the goal card at (x, goalY), popping in at goalAt, and the rows from rowY, `gap` apart. Row i slides in
-// half a second into its turn (turnStarts[i]), shows its result and its check at the end of the turn, and has a
-// violet border while its turn runs (`turn` seconds); o: opacity of the whole list
-function placeStepList(list, t, { x, goalY, rowY, gap = 104, goalAt, turnStarts, turn = 1.5, o = 1 }) {
-  place(list.goal, x, goalY, P(t, goalAt, 0.45, backOut), P(t, goalAt, 0.4) * o);
-  list.rows.forEach((r, i) => {
-    const a = turnStarts[i], pr = P(t, a + 0.5, 0.35);
-    place(r, x, rowY + i * gap, 1, pr * o);
-    r.style.transform += ` translateX(${(1 - pr) * 40}px)`;
-    r.res.style.opacity = P(t, a + 1.05, 0.3); r.ck.style.opacity = P(t, a + 1.15, 0.25);
-    r.style.borderColor = (t > a && t < a + turn) ? C.violet : C.line;
-  });
-}
 
-// The app of chapters 1, 2 and 4: a window with a gear that gearSpin() turns while the app works.
-// Its .app* styles are in this theme's index.html; its APP label is an .under-label (src/styles.css).
+// The app of chapters 1, 2 and 4: a 300x220 window (a title bar with three dots, three text lines) with a gear that
+// gearSpin() turns while the app works; its APP label is an .under-label (src/styles.css).
 function makeApp(parent) {
+  const dot = `<i style="width:9px;height:9px;background:${C.slate};opacity:.6;border-radius:2px"></i>`;
+  const line = width => `<b style="display:block;width:${width}%;height:10px;background:rgba(${RGB.ink},.18);`
+    + 'border-radius:3px"></b>';
   const root = E(parent, `
-   <div class="app-win">
-     <div class="app-bar"><i></i><i></i><i></i></div>
-     <div class="app-lines"><b style="width:70%"></b><b style="width:45%"></b><b style="width:60%"></b></div>
-     <div class="app-gear">${ICON('gear', 46, C.ink)}</div>
+   <div style="position:absolute;inset:0;background:var(--surface);border:1px solid ${C.lineLight};
+     border-radius:var(--r);overflow:hidden">
+     <div style="height:32px;border-bottom:1px solid ${C.lineLight};display:flex;gap:8px;align-items:center;
+       padding-left:14px">${dot.repeat(3)}</div>
+     <div style="padding:24px 22px;display:flex;flex-direction:column;gap:16px">
+       ${line(70)}${line(45)}${line(60)}
+     </div>
+     <div class="gear" style="position:absolute;right:18px;bottom:14px;opacity:.35">${ICON('gear', 46, C.ink)}</div>
    </div>
-   <div class="under-label">APP</div>`, 'app');
-  root.gear = root.querySelector('.app-gear');
+   <div class="under-label">APP</div>`, '', { width: '300px', height: '220px' });
+  root.gear = root.querySelector('.gear');
   return root;
 }
 
@@ -114,7 +91,7 @@ function makeTicket(p) {
   const e = E(p,
     `<div style="display:flex;align-items:center;gap:12px">${ICON('ticket', 34, C.ink, 1.6)}`
     + '<span class="n mono" style="font-size:20px;letter-spacing:.08em">1 BOOKING</span></div>',
-    '', { padding: '10px 16px', border: '1.5px solid ' + C.slate, borderRadius: 'var(--rs)' });
+    '', { padding: '10px 16px', border: '1px solid ' + C.slate, borderRadius: 'var(--rs)' });
   e.n = e.querySelector('.n');
   return e;
 }

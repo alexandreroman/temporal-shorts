@@ -18,8 +18,8 @@
   const LINE = { top: 62, gap: 80, h: 56 };
   // the history rows level with the app's lines, as far apart: row i's middle on line i's, so each saved result
   // runs straight across from its line to its row
-  // (the lines sit inside the STEPS card's border, 1.5 px, which renders as 2)
-  const LINE_MID_Y = APP.y - APP.h / 2 + CARD.top + 2 + LINE.top + LINE.h / 2;
+  // (the lines sit inside two borders, the app panel's and the STEPS card's)
+  const LINE_MID_Y = APP.y - APP.h / 2 + CARD.top + 2 * TILE_BORDER + LINE.top + LINE.h / 2;
   const HROW = { gap: LINE.gap, h: 44 };
   HROW.top = LINE_MID_Y - (HIST.y - HIST.h / 2) - HROW.h / 2;
   // NEW APP INSTANCE in the STEPS card, centered in the space under the last line (stage y)
@@ -31,10 +31,10 @@
     + i * LINE.gap + LINE.h / 2];
   const rowEntry = i => [HIST.x - HIST.w / 2 + 14, HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2];
   // the cable a result runs along: from the end of line i, across the gap between the panels, into row i
-  function cableD(i) {
+  const cableD = i => {
     const [x0, y0] = lineEnd(i), [x1, y1] = rowEntry(i);
     return `M ${x0} ${y0} C ${x0 + 90} ${y0}, ${x1 - 90} ${y1}, ${x1} ${y1}`;
-  }
+  };
   const GLITCH_BARS = 7;
 
   // App instance panel holding a STEPS card: one line per step, with a neon check once done; EMPTY in the middle
@@ -67,7 +67,7 @@
       s.temporal = makeTemporalPanel(root, TEMPORAL.w, TEMPORAL.h, TEMPORAL_HEADER_LARGE);
       s.history = makeHistoryCard(root, HISTORY, {
         w: HIST.w, h: HIST.h, headerFont: 20, rowTop, font: 23, rowH: HROW.h, tagTop: i => rowTop(i) + 6,
-        tag: { font: 18, pad: '4px 12px', icon: 18, border: false },
+        tag: { font: 18, padX: 12, icon: 18, border: false },
         crash: {
           keptTop: rowTop(0) - 8, keptH: HROW.gap + HROW.h + 16, cutTop: rowTop(2) - (HROW.gap - HROW.h) / 2 - 1,
           label: 'APP CRASHED HERE', labelX: '66%', labelFont: 15,
@@ -78,10 +78,8 @@
       // width, so it rests on whole pixels centered
       const DONE_H = 46;
       const doneTop = rowTop(HISTORY.length - 1) + HROW.h + (HIST.h - rowTop(HISTORY.length - 1) - HROW.h - DONE_H) / 2;
-      s.history.done = E(s.history, `${ICON('check', 24, C.neon, 2.6)} ORDER COMPLETE`, 'mono', {
-        left: '50%', top: doneTop + 'px', width: '270px', height: DONE_H + 'px', fontSize: '20px',
-        letterSpacing: '.12em', color: C.neon, background: C.bg, padding: '0 18px 0 16px',
-        borderRadius: 'var(--rs)', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center',
+      addHistoryDone(s.history, 'ORDER COMPLETE', doneTop, {
+        width: '270px', height: DONE_H + 'px', padding: '0 18px 0 16px', justifyContent: 'center',
       });
       // each result runs as a neon pulse along a cable into the history; replayed results run back in violet
       s.cableSvg = svgLayer(root);
@@ -193,9 +191,7 @@
       markCrash(s.history, t, crashAt);
       const scanning = replay.findIndex(q => t >= q - 0.2 && t < q + 0.7);
       scanRow(s.history, scanning);
-      const dp = backPop(t, complete);
-      s.history.done.style.opacity = dp.o;
-      s.history.done.style.transform = `translateX(-50%) scale(${dp.s})`;
+      placeHistoryDone(s.history, t, complete);
       placeFlash(s.flash, t, crashAt);
 
       // the crash glitch: color fringes on the whole composition, torn bars and scanlines, re-drawn 24 times a

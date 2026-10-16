@@ -7,7 +7,7 @@
 // leaves with the payload, the KMS key stays put. Each time the bar runs out, the key rotates: the old key drops away,
 // dimmed, the next one pops in, ROTATED, makes a quick trip to the KMS to be wrapped and its bar refills. Every payload
 // that leaves is sealed with the key of the moment (1, 1, 2, 3), while the stored ones keep theirs; NEVER LEAVES on
-// the KMS key. Then the camera pulls back once, out of the proxy to the whole fleet (FULL_LANE_SHOT): the proxy's
+// the KMS key. Then the camera pulls back once, out of the proxy to the whole fleet (WIDE_SHOT): the proxy's
 // built-in Codec Server decrypts row 2 for a CLI and the Web UI window, while TEMPORAL keeps only ciphertext. The
 // chapter clears onto chapter 8's first frame. The camera holds, then pulls back out and left, one way.
 // The block keeps every name declared in this file local to this scene.
@@ -34,7 +34,7 @@
   ROTATE.wrapAt = ROTATE.go + ROTATE.tripD;
   ROTATE.docked = ROTATE.wrapAt + ROTATE.stay + ROTATE.tripD;
   ROTATE.ready = ROTATE.docked + 0.1;
-  // from c[3]: the camera pulls back to FULL_LANE_SHOT (pull, pullD); the Codec Server pops into the proxy (codec);
+  // from c[3]: the camera pulls back to WIDE_SHOT (pull, pullD); the Codec Server pops into the proxy (codec);
   // the CLI and the Web UI open (windows, 0.15 s apart); row 2 goes to the proxy in ciphertext (fetch) and out to
   // both windows (deliver), each tripD long; TEMPORAL keeps ciphertext (ciphertext)
   const T3 = {
@@ -105,12 +105,12 @@
   };
   // the Codec Server, in the proxy box under its name, at camera rest: center and size
   const CODEC = { x: PROXY.x, y: 558, w: 172, h: 160 };
-  // the CLI and the Web UI windows, which open over the SDK client's and the Web UI's tiles: their slots, the
-  // connections they read through (in s.links) and their titles and event lines
+  // the CLI and the Web UI windows, which open over the SDK client's and the Web UI's tiles: their titles and event
+  // lines, their slots and the connections they read through (in s.links, after the Workers')
   const READERS = [
-    { slot: FLEET_CLIENTS[0], link: 6, title: 'TEMPORAL CLI', event: 'ActivityTaskCompleted', body: '#0B0B0B' },
-    { slot: FLEET_CLIENTS[1], link: 7, title: 'TEMPORAL WEB UI', event: 'Activity completed', body: '#111111' },
-  ];
+    { title: 'TEMPORAL CLI', event: 'ActivityTaskCompleted', body: '#0B0B0B' },
+    { title: 'TEMPORAL WEB UI', event: 'Activity completed', body: WEB_UI.page },
+  ].map((reader, i) => ({ ...reader, slot: FLEET_CLIENTS[i], link: WORKERS.length + i }));
   // the IBAN on two lines in a window, and the name
   const IBAN = TRANSFER[0][1];
   const READER_VALUES = [IBAN.slice(0, 19), IBAN.slice(20), TRANSFER[2][1]];
@@ -126,23 +126,23 @@
   const closeRow = i => [LIST_AT.x, LIST_AT.top + i * LIST_AT.pitch];
   const wideRow = i => [WIDE_LIST.x, WIDE_LIST.top + i * WIDE_LIST.pitch];
   // The point at progress p along a path element, from its end back to its start if `back`
-  function alongPath(pathEl, p, back = false) {
+  const alongPath = (pathEl, p, back = false) => {
     const point = pathEl.getPointAtLength(pathEl._L * clamp(back ? 1 - p : p));
     return [point.x, point.y];
-  }
+  };
   // A data key's trip along the KMS link: it leaves the DATA KEY at goAt and takes tripD to reach the KMS, stays
   // there `stay` seconds while the KMS wraps it (wrapped from just after wrapAt), then comes back (from backAt)
-  function kmsTrip(linkEl, t, goAt, { tripD, stay }) {
+  const kmsTrip = (linkEl, t, goAt, { tripD, stay }) => {
     const wrapAt = goAt + tripD, backAt = wrapAt + stay;
     const at = t < backAt ? alongPath(linkEl, P(t, goAt, tripD), true) : alongPath(linkEl, P(t, backAt, tripD));
     return { at, wrapAt, backAt, wrapped: t >= wrapAt + 0.15 };
-  }
+  };
   // A tag of the close shot, sized in screen px (font): its HTML after the leading icon of a statusTag kind (unless
   // `icon` is false), in that kind's look; solid, an opaque fill for a tag over other parts
-  function closeTag(root, html, kind, font, { solid = null, icon: withIcon = true } = {}) {
+  const closeTag = (root, html, kind, font, { solid = null, icon: withIcon = true } = {}) => {
     const { icon, ...look } = STATUS_KINDS[kind];
     const lead = icon && withIcon ? ICON(icon[0], font * U, icon[1], icon[2]) : '';
-    // centered, as balanceTagLabel() centers a statusTag: a label alone (icon: false) gets extra left padding for
+    // centered, as setStatus() centers a statusTag: a label alone (icon: false) gets extra left padding for
     // the letter spacing that trails its last letter, which the margin round a leading icon's stroke already offsets
     const e = E(root, lead + html, 'mono', {
       fontSize: px(font), lineHeight: px(font * 1.4), letterSpacing: '.1em', padding: `${px(6)} ${px(14)}`,
@@ -151,10 +151,10 @@
     });
     if (solid) e.style.background = solid;
     return e;
-  }
+  };
   // YOUR KMS: its name, the KMS key (e.kmsKey, its icon) and the key servers it can be; NEVER LEAVES beside the key
   // (e.never)
-  function makeKms(root) {
+  const makeKms = root => {
     const e = E(root,
       `<div style="position:absolute;left:${px(22)};top:${px(18)};display:flex;align-items:center;gap:${px(10)}">`
       + `${ICON('kms', 26 * U, C.slate, 1.8)}<span class="lbl" style="font-size:${px(20)};color:var(--ink)">`
@@ -170,10 +170,10 @@
     e.never = closeTag(e, 'NEVER LEAVES', 'ok', 15);
     Object.assign(e.never.style, { left: 'auto', right: px(22), top: px(70) });
     return e;
-  }
+  };
   // The DATA KEY: a key, then its name and number (e.num) over its cipher (e.cipher); under them, its lifetime, a
   // clock and a bar (e.fill) that drains as the key seals payloads (setLife)
-  function makeDataKey(root) {
+  const makeDataKey = root => {
     const e = E(root,
       `<div style="display:flex;align-items:center;gap:${px(12)}">${ICON('key', 26 * U, C.neon, 2)}`
       + '<div style="text-align:left">'
@@ -193,79 +193,83 @@
     e.cipher = e.querySelector('.cipher');
     e.fill = e.querySelector('.fill');
     return e;
-  }
+  };
   // The share of a data key's lifetime left, 0 to 1, as the length of its bar
-  function setLife(e, left) {
+  const setLife = (e, left) => {
     e.fill.style.transform = `scaleX(${clamp(left).toFixed(4)})`;
-  }
+  };
   // The tag of a card's data key, a fixed width so it never moves as its text changes: DATA KEY n on its way to the
   // KMS, then WRAPPED KEY n, behind a lock (setKeyTag)
   const makeKeyTag = root => closeTag(root, '', 'wait', 15, { solid: 'var(--violet-solid)' });
-  function setKeyTag(e, n, wrapped) {
+  const setKeyTag = (e, n, wrapped) => {
     const icon = ICON(wrapped ? 'lock' : 'key', 16 * U, wrapped ? C.violet : C.neon, 2);
     setHtml(e, `${icon}${wrapped ? 'WRAPPED' : 'DATA'} KEY ${n}`);
     Object.assign(e.style, { width: px(200), justifyContent: 'center', borderStyle: wrapped ? 'solid' : 'dashed' });
-  }
+  };
   // The ciphertext of stored payload i, its first n glyphs (the same glyphs in both lists and in the windows)
   const storedCipher = (i, n) => Array.from({ length: n }, (_, col) => cipherGlyph(i + 10, col)).join('');
   // A row of the close shot's list (ROW): ciphertext, then the payload's wrapped data key behind the violet lock of
-  // the cards' WRAPPED KEY tag; a wrapped key is ciphertext too, which only your KMS can unwrap
-  const makeListRow = (root, i, key) => E(root,
-    `<span class="mono" style="font-size:16px;color:${C.violet}">${storedCipher(i, 5)}</span>`
-    + `<span class="key mono" style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:15px;`
-    + `line-height:20px;letter-spacing:.04em;padding:0 5px;border:1.5px solid ${C.violet};border-radius:4px;`
-    + `color:${C.violet}">${ICON('lock', 13, C.violet, 2.2)}WRAPPED ${key}</span>`,
-    '', {
-      width: ROW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 8px',
-      background: C.bg, border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
-    });
+  // the cards' WRAPPED KEY tag (row.key); a wrapped key is ciphertext too, which only your KMS can unwrap
+  const makeListRow = (root, i, key) => {
+    const row = E(root,
+      `<span class="mono" style="font-size:16px;color:${C.violet}">${storedCipher(i, 5)}</span>`
+      + `<span class="key mono" style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:15px;`
+      + `line-height:20px;letter-spacing:.04em;padding:0 5px;border:1px solid ${C.violet};border-radius:4px;`
+      + `color:${C.violet}">${ICON('lock', 13, C.violet, 2.2)}WRAPPED ${key}</span>`,
+      '', {
+        width: ROW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center', gap: '8px',
+        padding: '0 8px', background: C.bg, border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+      });
+    row.key = row.querySelector('.key');
+    return row;
+  };
   // A row of the wide shot's list: a neon lock and the payload's ciphertext, at camera rest (values 18.5 px on screen)
   const makeWideRow = (root, i) => E(root,
     `${ICON('lock', 18, C.neon, 2.2)}<span class="mono" style="font-size:21px;color:${C.violet}">`
     + `${storedCipher(i, 8)}</span>`,
     '', {
       width: WIDE_LIST.w + 'px', height: WIDE_LIST.h + 'px', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', gap: '10px', background: C.bg, border: `1.5px solid ${C.lineLight}`,
+      justifyContent: 'center', gap: '10px', background: C.bg, border: `1px solid ${C.lineLight}`,
       borderRadius: 'var(--rs)',
     });
   // A window that reads the payload through the proxy, in the dark look of the Temporal Web UI: a title bar, then row
   // 2 of the Event History (its event line) and the payload's IBAN, on two lines, and name, keys above values
   // (win.values, set by setReader)
-  function makeReader(root, { title, event, body }) {
+  const makeReader = (root, { title, event, body }) => {
     const dot = '<i style="display:block;width:9px;height:9px;border-radius:50%;background:#4B5363"></i>';
     const key = text => `<div class="mono" style="margin-top:10px;font-size:16px;line-height:20px;color:${C.slate}">`
       + `${text}</div>`;
     const value = '<div class="mono value" style="font-size:21px;line-height:27px;white-space:pre"></div>';
     const win = E(root,
-      `<div style="height:36px;background:#191919;border-bottom:1px solid ${C.line};display:flex;align-items:center;`
-      + `gap:7px;padding-left:14px">${dot}${dot}${dot}<span class="mono" style="margin-left:10px;font-size:16px;`
-      + `letter-spacing:.12em;color:${C.slate}">${title}</span></div>`
+      `<div style="height:36px;background:${WEB_UI.panel};border-bottom:1px solid ${C.line};display:flex;`
+      + `align-items:center;gap:7px;padding-left:14px">${dot}${dot}${dot}<span class="mono" style="margin-left:10px;`
+      + `font-size:16px;letter-spacing:.12em;color:${C.slate}">${title}</span></div>`
       + '<div style="padding:14px 18px 0">'
       + `<div class="mono" style="font-size:17px;line-height:24px;white-space:nowrap">`
       + `<span style="color:${C.slate}">2</span>`
       + `&nbsp; ${event}</div>`
       + key('from') + value + value + key('name') + value + '</div>',
       '', {
-        width: FLEET.tile.w + 'px', height: FLEET.tile.h + 'px', background: body, border: `1.5px solid ${C.line}`,
+        width: FLEET.tile.w + 'px', height: FLEET.tile.h + 'px', background: body, border: `1px solid ${C.line}`,
         borderRadius: 'var(--r)', overflow: 'hidden', textAlign: 'left',
       });
     win.values = [...win.querySelectorAll('.value')];
     return win;
-  }
+  };
   // clear (0 to 1): the window's values turn from ciphertext to clear, left to right
-  function setReader(win, clear) {
+  const setReader = (win, clear) => {
     win.values.forEach((e, i) => setHtml(e, scrambledHtml(READER_SEEDS[i], READER_VALUES[i], 1 - clear, true)));
-  }
+  };
   // A small pill that carries the payload along a connection: its text in ciphertext (violet) or in clear (neon)
   const makePacket = (root, html, color) => E(root, html, 'mono', {
     height: '30px', lineHeight: '27px', padding: '0 12px', fontSize: '16px', whiteSpace: 'pre',
-    background: C.bg, border: `1.5px solid ${color}`, borderRadius: 'var(--rs)', color,
+    background: C.bg, border: `1px solid ${color}`, borderRadius: 'var(--rs)', color,
     boxShadow: `0 0 16px rgba(${color === C.neon ? RGB.neon : RGB.violet},.45)`,
   });
 
   scene({
     chapter: 7, title: 'Encryption without code changes',
-    // hard cuts: chapter 6 ends on this chapter's first frame, this chapter on the next one's (FULL_LANE_SHOT)
+    // hard cuts: chapter 6 ends on this chapter's first frame, this chapter on the next one's (WIDE_SHOT)
     fadeIn: 0, fadeOut: 0,
     // presenter mode holds on the decrypted windows, then plays the clear-up and the cut in one go
     holdBeforeEnd: END.clear + 0.1,
@@ -304,15 +308,13 @@
       // 19 px (16.7 px on screen), so CIPHERTEXT leaves room on both sides at the rows' width
       s.cipherTag = E(root, 'Ciphertext<br>only', 'lbl', {
         width: WIDE_LIST.w + 'px', padding: '8px 0 8px .12em', fontSize: '19px', lineHeight: '26px',
-        textAlign: 'center', color: C.violet, border: `1.5px solid ${C.violet}`, borderRadius: 'var(--rs)',
+        textAlign: 'center', color: C.violet, border: `1px solid ${C.violet}`, borderRadius: 'var(--rs)',
         background: VERDICT_FILL.wait,
       });
       s.kms = makeKms(root);
       s.top = svgLayer(root);
       const { x0, y0, x, x1, y1 } = LINK;
-      const r = 8;
-      s.link = path(s.top, `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + r} V ${y1 - r}`
-        + ` Q ${x} ${y1} ${x + r} ${y1} H ${x1}`, C.violet, 2, false);
+      s.link = path(s.top, roundedPath([[x0, y0], [x, y0], [x, y1], [x1, y1]], 8), C.violet, 2, false);
       // the key whose lifetime ran out, under the DATA KEY that replaces it; ROTATED beside them; the new key's tag,
       // which makes the trip to the KMS, with the KMS's ripples for each rotation
       s.oldKey = makeDataKey(root);
@@ -355,7 +357,7 @@
       const clear = P(t, clearAt, END.clearD);
 
       // the camera: chapter 6's push into the proxy, held; then one pull-back, out of the proxy to the whole fleet
-      const cam = shot(t, PROXY_SHOT, [[pullAt, ...FULL_LANE_SHOT, T3.pullD]]);
+      const cam = shot(t, PROXY_SHOT, [[pullAt, ...WIDE_SHOT, T3.pullD]]);
       setCamera(s.cam, t, this.dur, { ...cam, enter: 1, exit: 1 });
       // what the close shot crops at the frame's edge stays dimmed until the pull-back frames it whole, in the last
       // part of the move
@@ -387,8 +389,7 @@
       // the connections and their light; the proxy's connection to TEMPORAL follows TEMPORAL's edge
       s.links.forEach((link, i) => {
         draw(link, 1, offShot);
-        sparkOnPath(s.sparks[i], link, (G / PROXY_FLOW_PERIOD + i / s.apps.length) % 1);
-        s.sparks[i].style.opacity = (+s.sparks[i].style.opacity * offShot).toFixed(3);
+        sparkOnPath(s.sparks[i], link, (G / PROXY_FLOW_PERIOD + i / s.apps.length) % 1, offShot);
       });
       setD(s.out, `M ${PROXY_WIRE.x0} ${PROXY_WIRE.y} L ${temporalZone.x - 4} ${PROXY_WIRE.y}`);
       draw(s.out, 1);
@@ -425,8 +426,7 @@
       const kmsPop = backPop(t, c[1] + T1.kms);
       place(s.kms, KMS.x, KMS.y, kmsPop.s, kmsPop.o * closeOnly);
       const never = popIn(t, c[2] + T2.never);
-      s.kms.never.style.opacity = never.o;
-      s.kms.never.style.transform = `scale(${never.s})`;
+      popScale(s.kms.never, never);
 
       // the link draws from the KMS to the data key
       draw(s.link, P(t, c[1] + T1.link, T1.linkD, linear), closeOnly);
@@ -450,10 +450,10 @@
       // the DATA KEY, which shows its cipher once it first seals a card, pops in again at each rotation and swells as
       // its bar refills
       const keyPop = backPop(t, rotatedAt === null ? c[1] + T1.key : rotatedAt + ROTATE.pop);
-      place(s.dataKey, DATA_KEY.x, DATA_KEY.y, keyPop.s, keyPop.o * closeOnly);
+      const keySwell = swell(t, keys[keyI].ready - 0.1, 0.08);
+      place(s.dataKey, DATA_KEY.x, DATA_KEY.y, keyPop.s * keySwell, keyPop.o * closeOnly);
       setText(s.dataKey.num, String(keyI + 1));
       setLife(s.dataKey, lifeLeft(keys[keyI]));
-      s.dataKey.style.transform += ` scale(${swell(t, keys[keyI].ready - 0.1, 0.08).toFixed(4)})`;
       const firstKeySeal = runAt(RUNS[1]) + RUNS[1].seal;
       s.dataKey.cipher.style.opacity = P(t, firstKeySeal, 0.3);
 
@@ -540,7 +540,7 @@
         place(s.wideRows[i], wideX, wideY, 1, landed * reveal * (1 - clear));
         // the payloads that keep the first data key light up once the key has rotated
         const keep = run.key === 1 ? win(t, c[2] + T2.keep, c[2] + T2.keep + 0.6, 0.2) : 0;
-        rowE.querySelector('.key').style.boxShadow = glowShadow(RGB.neon, keep, { blur: 12, alpha: 0.8 });
+        rowE.key.style.boxShadow = glowShadow(RGB.neon, keep, { blur: 12, alpha: 0.8 });
         rowE.style.borderColor = keep > 0.5 ? C.neon : C.lineLight;
       });
       // the KMS key swells and glows as it wraps a data key: the first card's, then each rotation's

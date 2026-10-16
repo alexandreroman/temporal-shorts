@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=meet-temporal` for the live values; the start
-times below are a snapshot from 2026-10-13.
+times below are a snapshot from 2026-10-16.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -50,6 +50,12 @@ its visuals.
   `src/assets/languages/README.md`
 - https://docs.temporal.io/cloud/security (the Temporal Cloud claims of
   chapter 05)
+- https://docs.temporal.io/cloud/connectivity ("Namespace access is always
+  securely authenticated via API keys or mTLS, regardless of how you
+  choose to connect": how chapter 05's connection is authenticated and
+  where it runs)
+- https://temporal.io/blog/10-reasons-your-ciso-will-love-temporal-cloud
+  ("No inbound connectivity, ever": chapter 05's OUTBOUND ONLY)
 - https://temporal.io/blog/samars-journey (Cadence became the standard way
   to build reliable stateful apps inside Uber)
 - https://github.com/temporalio/temporal (README: "Temporal is a mature
@@ -124,8 +130,8 @@ its visuals.
     and Samar flies onto 2009: AMAZON / "Simple Workflow Service" / AWS
     WORKFLOW SERVICE; Samar travels on to 2014: MICROSOFT / "Durable Task
     Framework" / AZURE DURABLE FUNCTIONS.
-- **0:24** 2015: at Uber, they create Cadence. It becomes the standard for
-  Uber's critical processes.
+- **0:24** 2015: they join Uber, where they create Cadence, the standard
+  for Uber's critical processes.
   - Visuals: Both faces reach 2015: UBER / "Cadence" / UBER'S WORKFLOW
     ENGINE.
 - **0:30** 2019: they found Temporal, a fork of Cadence, to bring it to
@@ -236,29 +242,30 @@ its visuals.
   call is paid twice.
   - Visuals: Under the history, two compact neon pills with a soft glow
     pop in turn, side by side: NO PROGRESS LOST, then NO TOKENS WASTED.
-- **1:53** That's why OpenAI built Codex on Temporal, and Cursor and Lovable
-  rely on it too.
+- **1:53** OpenAI runs Codex on Temporal, and Cursor and Lovable rely on it
+  too.
   - Visuals: The completed state holds.
 
 ## 05 How Temporal Cloud works
 
-- **2:01** With Temporal Cloud, your Workers run your Workflow and Activity
+- **2:00** With Temporal Cloud, your Workers run your Workflow and Activity
   code in your own environment.
   - Visuals: As on slides 6 and 7 of Temporal's deck, two zones of equal
     width from the start. On the left, YOUR ENVIRONMENT (dashed slate):
     three Workers spread evenly, each an app panel with its code (WORKER 1
     the OrderWorkflow Workflow, WORKER 2 and 3 the chargeCard and shipPackage
     Activities), wired to a DATA CONVERTER level with WORKER 2 (a neon lock,
-    a key and YOUR KEYS); caption YOUR CODE RUNS HERE. A connection draws
+    a key and YOUR KEYS, then IN EACH WORKER in slate: conversion runs on
+    the Workers); caption YOUR CODE RUNS HERE. A connection draws
     from the converter to a dot on Temporal Cloud's edge, labelled OUTBOUND
-    ONLY, mTLS OR PRIVATELINK. On the right, Temporal Cloud, titled with the
-    official logo followed by "Cloud", with its two functions: ORCHESTRATION
-    · TASK QUEUE, holding a single OrderWorkflow task, and
-    PERSISTENCE, an empty history; its caption reads ONLY WORKFLOW &
-    ACTIVITY DATA, NEVER YOUR CODE. The Workers poll out to Temporal Cloud
-    one after the other (a violet pulse that lights the orchestration
-    block) and read POLLING.
-- **2:11** Temporal Cloud orchestrates your Workflows and Activities, and
+    ONLY above, MTLS OR API KEY / OVER INTERNET / OR PRIVATE LINK below. On
+    the right, Temporal Cloud, titled with the official logo followed by
+    "Cloud", with its two functions: ORCHESTRATION · TASK QUEUE, holding
+    a single OrderWorkflow task, and PERSISTENCE, an empty history; its
+    caption reads ONLY WORKFLOW & ACTIVITY DATA, NEVER YOUR CODE. The
+    Workers poll out to Temporal Cloud one after the other (a violet pulse
+    that lights the orchestration block) and read POLLING.
+- **2:10** Temporal Cloud orchestrates your Workflows and Activities, and
   persists their history.
   - Visuals: Slowly, a beat at a time, one task at a time in the queue;
     PERSISTENCE records each event the moment it happens, as a simplified
@@ -297,7 +304,7 @@ its visuals.
 
 ## 06 Temporal today
 
-- **2:58** Today, more than 4,300 companies pay for Temporal, and the team
+- **2:57** Today, more than 4,300 companies pay for Temporal, and the team
   has doubled in a year.
   - Visuals: A dark stage. One tiny dot per paying customer, 4,300 at
     seeded places over the band, ignites in rippling waves from the middle
@@ -308,7 +315,7 @@ its visuals.
     column each dot splits in two, the count climbing to 570, and a neon
     ×2 IN A YEAR stamp slams on. Then every dot flows into the outline of
     the Temporal symbol, which takes their place in the middle.
-- **3:14** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
+- **3:13** Its open source SDKs support Go, Java, Python, TypeScript, .NET,
   PHP, Ruby and Rust.
   - Visuals: Eight rounded logo tiles, each the language's logo alone in
     monochrome ink, spiral out of the symbol one after the other in
@@ -316,13 +323,13 @@ its visuals.
     pop and a thin UV link back to the symbol. Once all have landed, the
     ring turns slowly round the symbol, the tiles upright, the links
     following them.
-- **3:21** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
+- **3:20** And they plug into AI frameworks: OpenAI Agents SDK, Vercel AI
   SDK, Pydantic AI, Google ADK, LangGraph, and more.
   - Visuals: Under the ring, in the same rounded tile style, two rows of
     three tiles appear one by one with a calm pop: OpenAI Agents SDK, Vercel
     AI SDK, Pydantic AI, Google ADK, LangGraph (each with a violet sparkle),
     and a dashed "and more" tile with a plus, last, glowing softly.
-- **3:30** In September 2026, investors valued Temporal at $12.55 billion.
+- **3:29** In September 2026, investors valued Temporal at $12.55 billion.
   - Visuals: The chips and the symbol fall away as the camera starts to
     rise over a dark grid and parallax stars, riding the head of a glowing
     line from OCT 2020 ~$75M (Series A, the tilde marking an estimate),
@@ -336,7 +343,7 @@ its visuals.
     climb on the right, clear of the value, its Oct 2020 point low at its
     left, and "$12.55B" holds huge on the left, VALUATION · SEPTEMBER 2026
     under it.
-- **3:38** That's more than 8 times its 2022 value: investors see it as core
+- **3:37** That's more than 8 times its 2022 value: investors see it as core
   infrastructure for AI.
   - Visuals: On the settled chart, dashed guides run from the FEB 2022 and
     SEP 2026 points to a vertical bracket on the right of the climb, which
@@ -349,7 +356,7 @@ its visuals.
 
 ## Outro
 
-- **3:47** Temporal keeps code running through crashes and outages, from
+- **3:46** Temporal keeps code running through crashes and outages, from
   everyday apps to AI agents.
   - Visuals: A constellation of Ziggy, Temporal's mascot, a tardigrade:
     its stars twinkle in one by one, then its lines draw stroke by stroke,

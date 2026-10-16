@@ -16,7 +16,7 @@ rather than only at the end of the work.
 
 **How to apply:** for a new theme, the HTML build needs
 `src/themes/<theme>.md` and `src/themes/<theme>/social.png`: write them
-early with `make markdown THEME=<theme>` and `make social` (restore the
-other themes' `social.png` when only capture noise changed them), and
-leave them uncommitted until the final regeneration. Give the user the
-player link with the times of each new piece of work.
+early with `make markdown THEME=<theme>` and `make social` (see
+[Frame capture noise](project_frame-noise.md) for the other themes'
+images), and leave them uncommitted until the final regeneration. Give
+the user the player link with the times of each new piece of work.

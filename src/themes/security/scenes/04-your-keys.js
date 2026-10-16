@@ -20,14 +20,16 @@
   // over; the Web UI comes back, in ciphertext, in the middle of the history's right
   const T1 = { fly: 0.2, flyD: 1.2, flip: 0.15, webui: 2.0 };
   // from c[2]: the Search Attributes strip rises in under the Web UI, which moves up to make room (strip, stripD),
-  // its two attributes pop in, a light sweeps across them, their tag pops in; then an IBAN tries to join them and is
-  // struck out (secret, strike, secretOut)
+  // its two attributes pop in, the Workflow ID as "Workflow IDs" is read (attrs), a light sweeps across them, their tag
+  // pops in just after "in clear"; then an IBAN tries to join them and is struck out (secret, strike, secretOut), out
+  // by "keep secrets"; each word at its position at 16 characters per second plus 0.3 s
   const T2 = {
-    strip: 0.2, stripD: 0.5, attrs: 0.6, sweep: 1.3, sweepD: 0.8, tag: 1.9, secret: 2.8, strike: 3.4, secretOut: 4.6,
+    strip: 0.2, stripD: 0.5, attrs: [0.6, 1.7], sweep: 2.4, sweepD: 0.8, tag: 3.0, secret: 3.9, strike: 4.5,
+    secretOut: 5.7,
   };
   // from c[3]: the camera pulls back to the whole lane as the Worker steps aside and the Web UI moves into your
   // environment as a browser (move, moveD); the Codec Server pops in; the payload goes down to it in ciphertext and
-  // comes back in clear (down, up, each tripD long); the browser shows it in clear (clear); KEYS NEVER SHARED
+  // comes back in clear (down, up, each tripD long); the browser shows it in clear (clear); KEYS STAY WITH YOU
   const T3 = { worker: 0.2, move: 0.2, moveD: 1.2, codec: 1.4, down: 2.0, up: 2.7, tripD: 0.6, clear: 3.3, keys: 4.1 };
   // the ending, in seconds before the end: the chapter clears and the camera pulls back to WIDE_SHOT, landing 0.15 s
   // before the cut
@@ -42,17 +44,23 @@
     down: BROWSER.x - 60, up: BROWSER.x + 60, y0: BROWSER.y + BROWSER.k * WEBUI.h / 2 + 10,
     y1: CODEC.y - CODEC.h / 2 - 10,
   };
-  // KEYS NEVER SHARED, on the border between the zones, where the wire runs while the Worker is there
+  // KEYS STAY WITH YOU, on the border between the zones, where the wire runs while the Worker is there
   const KEYS_TAG = { x: (LANE.wire.x0 + LANE.wire.x1) / 2, y: LANE.wire.y, w: 340 };
-  // the Search Attributes panel, in the close layout's slot under the Web UI, as large as it
-  const STRIP = { x: CLOSE.column.x, y: CLOSE.slot.y, w: WEBUI.w, h: WEBUI.h };
+  // the Search Attributes panel, in the close layout's slot under the Web UI, as large as it; inside it, px from its
+  // padding box (TILE_BORDER inside its edges): the left edge of its lines, the top of its label, of its two
+  // attributes' rows and of its tag, 34 px apart from the first attribute on, as much room under the tag as above the
+  // label
+  const STRIP = {
+    x: CLOSE.column.x, y: CLOSE.slot.y, w: WEBUI.w, h: WEBUI.h, left: 18 - TILE_BORDER, labelTop: 15 - TILE_BORDER,
+    rowTops: [43 - TILE_BORDER, 77 - TILE_BORDER], tagTop: 111 - TILE_BORDER,
+  };
   // the glyphs that rain off the card as it crosses the gate: how many, and how long each one falls
   const RAIN = { n: 28, life: 0.7 };
   // the first characters of the IBAN, which the trip to the Codec Server carries
   const TRIP_TEXT = TRANSFER[0][1].slice(0, 14);
 
   // A tile of your keys' holder: an icon over its name, and the violet key with YOUR KEYS (tile.key, see turnKey)
-  function makeKeyTile(root, icon, name, w, h) {
+  const makeKeyTile = (root, icon, name, w, h) => {
     const tile = E(root,
       `<div style="display:flex;align-items:center;justify-content:center;gap:10px">${icon}`
       + `<span class="lbl" style="font-size:15px;color:var(--ink)">${name}</span></div>`
@@ -64,15 +72,15 @@
       });
     tile.key = tile.querySelector('.key');
     return tile;
-  }
+  };
   // The key of a key tile turns once round its shaft as turn goes from 0 to 1 (a 3D spin, which ends where it began)
-  function turnKey(tile, turn) {
+  const turnKey = (tile, turn) => {
     const spinning = turn > 0 && turn < 1;
     tile.key.style.transform = spinning ? `perspective(120px) rotateX(${(360 * turn).toFixed(2)}deg)` : 'none';
-  }
+  };
   // A Search Attribute in clear: its name, an equals sign and its value, in a rounded box
   const attribute = (name, value, css = '') => `<span class="mono" style="display:inline-block;font-size:12px;`
-    + `line-height:26px;padding:0 10px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);${css}">`
+    + `line-height:26px;padding:0 10px;border:1px solid ${C.lineLight};border-radius:var(--rs);${css}">`
     + `${name} <span style="color:${C.slate}">=</span> ${value}</span>`;
 
   scene({
@@ -84,7 +92,9 @@
     subs: [
       { text: "A <b>Data Converter</b> encrypts the payload inside the Worker, with your keys, before it leaves." },
       { text: "Temporal stores and passes on only ciphertext: it never sees the IBAN." },
-      { text: "<b>Search Attributes</b> stay in clear, so Temporal can index them: keep secrets out of them." },
+      {
+        text: "<b>Search Attributes</b> and Workflow IDs stay in clear, so Temporal can index them: keep secrets out.",
+      },
       // the round trip, then a hold to read it before the pull-back
       {
         text: "To read payloads in the Web UI, a <b>Codec Server</b> you run decrypts them for your browser.",
@@ -101,21 +111,21 @@
       s.hist = makeStoredHistory(root);
       // the Web UI's place under the history, a faint dashed outline once the window has moved out
       s.webuiSlot = E(root, '', '', {
-        width: WEBUI.w + 'px', height: WEBUI.h + 'px', border: `1.5px dashed ${C.lineLight}`, borderRadius: 'var(--r)',
+        width: WEBUI.w + 'px', height: WEBUI.h + 'px', border: `1px dashed ${C.lineLight}`, borderRadius: 'var(--r)',
       });
       s.webui = makeWebUI(root);
       // the label, the two attributes on two lines (the IBAN that tries to join them beside the second), then the
       // INDEXED, NOT ENCRYPTED tag (s.indexed): the attributes and the tag evenly spaced, as much room above the label
       // as under the tag
       s.strip = E(root,
-        '<div class="lbl" style="position:absolute;left:16.5px;top:13.5px;font-size:13px;padding-left:0">'
-        + 'Search Attributes</div>'
-        + `<span class="attr" style="position:absolute;left:16.5px;top:41.5px">`
+        `<div class="lbl" style="position:absolute;left:${STRIP.left}px;top:${STRIP.labelTop}px;font-size:13px;`
+        + 'padding-left:0">Search Attributes</div>'
+        + `<span class="attr" style="position:absolute;left:${STRIP.left}px;top:${STRIP.rowTops[0]}px">`
         + `${attribute('TransferStatus', 'DEBITED')}</span>`
-        + '<div style="position:absolute;left:16.5px;top:75.5px;display:flex;gap:6px">'
-        + `<span class="attr">${attribute('Region', 'EU')}</span>`
+        + `<div style="position:absolute;left:${STRIP.left}px;top:${STRIP.rowTops[1]}px;display:flex;gap:6px">`
+        + `<span class="attr">${attribute('WorkflowId', 'tx-8812')}</span>`
         + `<span class="secret" style="position:relative">${attribute('iban', 'FR76',
-          `border:1.5px dashed ${C.red};color:${C.red}`)}`
+          `border:1px dashed ${C.red};color:${C.red}`)}`
         + `<i class="strike" style="position:absolute;left:6px;right:6px;top:13px;height:2px;background:${C.red};`
         + 'transform-origin:left center"></i></span></div>'
         + `<div class="sweep" style="position:absolute;top:0;bottom:0;width:120px;background:linear-gradient(90deg,`
@@ -126,12 +136,11 @@
       s.strip.strike = s.strip.querySelector('.strike');
       s.strip.sweep = s.strip.querySelector('.sweep');
       s.indexed = statusTag(s.strip, { font: 11, icon: 11 });
-      Object.assign(s.indexed.style, { left: '16.5px', top: '109.5px', height: '24px' });
-      balanceTagLabel(s.indexed, 'closed');
+      Object.assign(s.indexed.style, { left: STRIP.left + 'px', top: STRIP.tagTop + 'px', height: '24px' });
       s.codec = makeKeyTile(root, ICON('server', 28, C.ink, 1.8), 'Codec Server', CODEC.w, CODEC.h);
       s.packet = E(root, '', 'mono', {
         width: '190px', height: '34px', lineHeight: '31px', textAlign: 'center', fontSize: '18px', whiteSpace: 'pre',
-        background: C.bg, border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+        background: C.bg, border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
       });
       s.converter = makeKeyTile(root, '', 'Data Converter', CONVERTER.tile.w, CONVERTER.tile.h);
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
@@ -146,7 +155,7 @@
       s.landRipples = makeRipples(root, 2, RGB.violet);
       s.chipRipples = makeRipples(root, 2, RGB.neon);
       s.verdict = makeChipVerdict(root);
-      s.keys = fixedTag(root, 'Keys never shared', 'violet solid', KEYS_TAG.w);
+      s.keys = fixedTag(root, 'Keys stay with you', 'violet solid', KEYS_TAG.w);
     },
     update(t, c, s) {
       const crossAt = c[0] + T0.cross;
@@ -215,9 +224,9 @@
       const cross = P(t, crossAt, T0.crossD);
       let cardX = lerp(PAYLOAD_IN_WORKER.x, SEALED_X, cross);
       let cardY = PAYLOAD_IN_WORKER.y;
-      const layout = payloadLayout(PAYLOAD_IN_WORKER.w);
+      const { layout } = PAYLOAD_IN_WORKER;
       // the share of each value already past the gate, from its right end (Mono advances 0.6 em per character)
-      const textLeft = cardX - PAYLOAD_IN_WORKER.w / 2 + 1.5 + layout.pad.x;
+      const textLeft = cardX - PAYLOAD_IN_WORKER.w / 2 + TILE_BORDER + layout.pad.x;
       const scramble = TRANSFER.map(([, value]) => {
         const textW = value.length * 0.6 * layout.value.font;
         return clamp((textLeft + textW - CONVERTER.x) / textW);
@@ -243,7 +252,7 @@
         }
         const x = CONVERTER.x + 14 + (40 + 140 * hash(i + 400)) * age;
         const y = cardTop + 40 + hash(i + 300) * (layout.h - 60) + (-90 + 60 * hash(i + 500)) * age + 280 * age * age;
-        glyph.textContent = cipherGlyph(i, Math.floor(t * 12), 700);
+        setText(glyph, cipherGlyph(i, Math.floor(t * 12), 700));
         place(glyph, x, y, 1, Math.sin(Math.PI * age / RAIN.life));
       });
 
@@ -263,11 +272,11 @@
       const webuiPop = backPop(t, c[1] + T1.webui);
       const move = P(t, c[3] + T3.move, T3.moveD);
       const stripIn = P(t, c[2] + T2.strip, T2.stripD);
-      const column = [CLOSE.column.x, Math.round(lerp(HIST.y, CLOSE.ui.y, stripIn))];
+      const column = [CLOSE.column.x, Math.round(lerp(STORED_HIST.y, CLOSE.ui.y, stripIn))];
       const [winX, winY] = bezier([column, [column[0] - 400, column[1] - 120],
         [BROWSER.x + 400, BROWSER.y - 60], [BROWSER.x, BROWSER.y]], move);
       place(s.webui, winX, winY, webuiPop.s * lerp(1, BROWSER.k, move), webuiPop.o * done);
-      s.webui.caption.textContent = move >= 0.5 ? 'YOUR BROWSER · WEB UI' : 'TEMPORAL WEB UI';
+      setText(s.webui.caption, move >= 0.5 ? 'YOUR BROWSER · WEB UI' : 'TEMPORAL WEB UI');
       place(s.webuiSlot, WEBUI.x, WEBUI.y, 1, 0.6 * P(t, c[3] + T3.move + T3.moveD, 0.4) * done);
       const clearAt = c[3] + T3.clear;
       setWebUI(s.webui, { scramble: 1 - P(t, clearAt, 0.5, linear) });
@@ -280,9 +289,8 @@
       // it leaves with the close layout, as TEMPORAL narrows back
       rise(s.strip, STRIP.x, STRIP.y, stripIn * (1 - wide) * done);
       s.strip.attrs.forEach((e, i) => {
-        const pop = backPop(t, c[2] + T2.attrs + i * 0.2, 0.4);
-        e.style.opacity = pop.o;
-        e.style.transform = `scale(${pop.s})`;
+        const pop = backPop(t, c[2] + T2.attrs[i], 0.4);
+        popScale(e, pop);
       });
       const sweep = P(t, c[2] + T2.sweep, T2.sweepD, linear);
       s.strip.sweep.style.transform = `translateX(${Math.round(lerp(-120, STRIP.w, sweep))}px)`;
@@ -310,7 +318,7 @@
       s.packet.style.borderColor = goingUp ? C.neon : C.violet;
       place(s.packet, goingUp ? TRIP.up : TRIP.down, packetY, 1, inFlight ? 1 : 0);
 
-      // Temporal's side stays sealed: KEYS NEVER SHARED, and neon rings from the chip's lock
+      // Temporal's side stays sealed: KEYS STAY WITH YOU, and neon rings from the chip's lock
       const keysAt = c[3] + T3.keys;
       const keys = backPop(t, keysAt);
       place(s.keys, KEYS_TAG.x, KEYS_TAG.y, keys.s, keys.o * done);

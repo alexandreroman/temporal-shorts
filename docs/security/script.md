@@ -22,9 +22,10 @@ the history, encryption with the customer's keys. Then it shows the cost of
 doing all that in every Worker, and Temporal Proxy as the answer: one
 gateway that carries credentials and encryption, with no change to Worker
 code. It shows how a Workflow calls another team's across Namespaces with
-Temporal Nexus, through an Endpoint that only lets in the Namespaces on its
-allowlist, and closes on Temporal Cloud's certifications and yearly
-third-party audits, the evidence a security review asks for.
+Temporal Nexus, through an Endpoint that, in Temporal Cloud, only lets in
+the Namespaces on its allowlist, and closes on Temporal Cloud's
+certifications and yearly third-party audits, the evidence a security
+review asks for.
 
 Running example: Nora sends €25,000 to Leo. One payload card carries it
 everywhere, the same in every chapter: `from: FR76 3000 6000 0112 3456
@@ -34,14 +35,14 @@ everywhere, the same in every chapter: `from: FR76 3000 6000 0112 3456
 Topics, in order: the Worker runs in your environment and calls out to Temporal
 (ch1); TLS, private connectivity, identity, Namespace isolation (ch2); the Event
 History stores payloads, readable without more (ch3); the Data Converter
-encrypts with your keys, Search Attributes stay in clear, a Codec Server
-decrypts for the Web UI (ch4); the same work in every Worker (ch5); Temporal
-Proxy, a gateway that holds the connection settings and credentials (ch6);
-encryption by the proxy (ch7); switching upstreams with no code change (ch8);
-calls across Namespaces with Temporal Nexus: the Endpoint, its allowlist, mTLS
-and payloads still encrypted by your Data Converter (ch9); Temporal Cloud's
-certifications, yearly audits and pen tests, and the Trust Center that holds
-the reports (ch10).
+encrypts with your keys, Search Attributes and Workflow IDs stay in clear, a
+Codec Server decrypts for the Web UI (ch4); the same work in every Worker (ch5);
+Temporal Proxy, a gateway that holds the connection settings and credentials
+(ch6); encryption by the proxy (ch7); switching upstreams with no code change
+(ch8); calls across Namespaces with Temporal Nexus: the Endpoint, its allowlist
+in Temporal Cloud, mTLS and payloads still encrypted by your Data Converter
+(ch9); Temporal Cloud's certifications, yearly audits and pen tests, and the
+Trust Center to ask for the reports (ch10).
 
 Out of scope: SSO, roles and audit logs (they govern people's access, not
 the payload's way), and the pre-release status of Temporal Proxy, which the
@@ -61,8 +62,9 @@ something from elsewhere, the content comes to the camera. From the intro
 to ch8, and from ch11 to ch12, each chapter ends on the next one's first
 frame (a match cut): a whip carries the card from ch2 into ch3, and a
 rewind whip carries it from ch3 back to the Worker for ch4. Ch9 and ch10
-leave the lane for Temporal Cloud's side alone: the engine's zoom-through
-brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
+leave the lane for Temporal Cloud's side alone: the camera zoom-through
+(setCamera) brings ch9 in from ch8, carries it into ch10, and ch10 into the
+recap.
 
 ### Sources
 
@@ -82,27 +84,34 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
   encrypted by the sender (caller encrypts input, handler encrypts
   result)". "Never need to know" is decoupling, not a confidentiality
   control: the video says the handler's side is not exposed to callers,
-  never that they cannot see it. Self-hosted Nexus relies on the cluster's
-  own security: the chapter shows Temporal Cloud only, and claims its mTLS
-  for Cloud alone.
+  never that they cannot see it. The Endpoint allowlist is Temporal
+  Cloud's: a self-hosted cluster authorizes Nexus calls with a custom
+  Authorizer and relies on its own security, so the subtitle says "In
+  Temporal Cloud", and the chapter shows Temporal Cloud only and claims its
+  mTLS for Cloud alone.
 - Compliance: <https://trust.temporal.io/> (Temporal Trust Center, updated
-  May 29, 2026): SOC 2 Type II, GDPR, HIPAA and CCPA (CCPA comes from the badge here: the
-  docs security page lists SOC 2 Type 2, GDPR and HIPAA only); "Temporal Cloud —
-  Certifications: SOC 2 Type 2, HIPAA"; "One or more annual third-party
-  audit(s)" and "Annual third-party penetration testing"; the Trust Center
-  "is regularly updated to reflect the latest audit results" and lists a
-  SOC 2 Type 2 report among its documents (no pen test report is said to
-  be published). The security model page states
-  "Temporal Technologies is SOC 2 Type 2 certified and compliant with GDPR
-  and HIPAA regulations". No other framework, no customer or third-party
-  logo.
+  May 29, 2026): SOC 2 Type II, GDPR, HIPAA and CCPA (CCPA comes from the
+  badge here: the docs security page lists SOC 2 Type 2, GDPR and HIPAA only);
+  "Temporal Cloud — Certifications: SOC 2 Type 2, HIPAA"; "One or more annual
+  third-party audit(s)" and "Annual third-party penetration testing"; the Trust
+  Center "is regularly updated to reflect the latest audit results" and lists a
+  SOC 2 Type 2 report among its documents (no pen test report is said to be
+  published). Its reports are not public: the Trust Center gates them behind
+  "Get Access", so chapter 10 says to ask it for the reports. The security model
+  page states "Temporal Technologies is SOC 2 Type 2 certified and compliant
+  with GDPR and HIPAA regulations". No other framework, no customer or
+  third-party logo.
 - Temporal Cloud security model:
   <https://docs.temporal.io/evaluate/cloud/security>: Temporal "does not
   run or manage your applications or Workers"; the Data Converter encrypts
   data before it leaves, "Temporal Cloud cannot see or decrypt your data";
-  a Codec Server lets the Web UI decrypt without sharing keys; TLS 1.3 on
-  every connection; mTLS certificates from your CA or API keys; the
-  Namespace is the unit of isolation.
+  a Codec Server lets the Web UI decrypt without sharing keys with
+  Temporal; TLS 1.3 on every connection; mTLS certificates from your CA or
+  API keys; the Namespace is the unit of isolation.
+- Codec Server: <https://docs.temporal.io/codec-server>: it "must be
+  configured with the same keys the Payload Codec uses", so the keys are
+  shared between your own services, never with Temporal: chapter 4's tag
+  says KEYS STAY WITH YOU, not that the keys are never shared.
 - Private connectivity: <https://docs.temporal.io/cloud/connectivity>:
   Temporal Cloud Namespaces can be reached over AWS PrivateLink or Google
   Cloud Private Service Connect, so Worker and client traffic can stay off
@@ -117,13 +126,30 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
   ("No inbound connectivity, ever").
 - Search Attributes are not encrypted, so the service can index them:
   <https://docs.temporal.io/production-deployment/temporal-proxy/encrypt-payloads>.
+  Workflow IDs too: "Workflow Ids are stored in plain text, are not
+  processed by a custom Payload Codec"
+  (<https://docs.temporal.io/workflow-execution/workflowid-runid>). Failure
+  messages and call stacks are another caveat the video leaves out:
+  "Failure messages and call stacks are not encoded as codec-capable
+  Payloads by default"
+  (<https://docs.temporal.io/production-deployment/data-encryption>).
 - Temporal Proxy: <https://docs.temporal.io/production-deployment/temporal-proxy>
   and <https://github.com/temporalio/temporal-proxy>: a gRPC proxy between
   Workers, SDK clients, the Web UI and one or more upstream Temporal
   Services; Workers connect to one local endpoint with a short Namespace
   name, the proxy attaches TLS, credentials (API key or mTLS) and the
   upstream's Namespace name; routing by Namespace, `routing.default`
-  fallback; built-in Codec Server for the Web UI and the CLI.
+  fallback; built-in Codec Server for the Web UI and the CLI. Pointing the
+  proxy at another upstream spares the Worker code change only: running
+  Workflows and their Event Histories stay on the old Service, and moving
+  them is a migration of its own
+  (<https://docs.temporal.io/cloud/migrate/manual>), so chapter 8 says
+  "point the proxy at Temporal Cloud", never that the move is one setting.
+  Inbound authentication on the proxy is off by default
+  (<https://docs.temporal.io/production-deployment/temporal-proxy/configure>):
+  the hop from a Worker to the proxy is not verified unless you configure
+  it, so the recap says "Temporal verifies every client", never that every
+  connection is verified.
 - Proxy encryption:
   <https://docs.temporal.io/production-deployment/temporal-proxy/encrypt-payloads>:
   no Worker or Client code change; short-lived data keys encrypt payloads
@@ -219,8 +245,8 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
   - Visuals: The whip lands close on the EVENT HISTORY with a violet
     ripple, and the Namespace bands fade. The card docks as the payload
     chip under row 2 "Activity completed: debitAccount", its fields shown
-    in full, between rows 1 "Workflow started: transfer" and 3 "Activity
-    scheduled: creditAccount"; each row gets a SAVED tag.
+    in full, between rows 1 "Workflow started: TransferWorkflow" and 3
+    "Activity scheduled: creditAccount"; each row gets a SAVED tag.
 - **0:59** TLS only protects the trip: once stored, the IBAN is readable by
   anyone who can read the history.
   - Visuals: The tube and its corridor fade and, with no camera move, the
@@ -252,12 +278,13 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     in ciphertext; READABLE flips over into a violet NEVER SEES YOUR
     PAYLOADS, and the Web UI comes back in the middle of the right column
     showing the same ciphertext.
-- **1:19** Search Attributes stay in clear, so Temporal can index them:
-  keep secrets out of them.
+- **1:19** Search Attributes and Workflow IDs stay in clear, so Temporal
+  can index them: keep secrets out.
   - Visuals: The Web UI moves up as a SEARCH ATTRIBUTES panel in clear
-    rises in under it: `TransferStatus = DEBITED` and `Region = EU`, a
-    light sweep across them, then a slate INDEXED, NOT ENCRYPTED tag; a
-    red dashed `iban = FR76` slides in beside them and is struck out.
+    rises in under it: `TransferStatus = DEBITED`, then `WorkflowId =
+    tx-8812` as Workflow IDs are named, a light sweep across them, then a
+    slate INDEXED, NOT ENCRYPTED tag; a red dashed `iban = FR76` slides in
+    beside them and is struck out.
 - **1:26** To read payloads in the Web UI, a Codec Server you run decrypts
   them for your browser.
   - Visuals: The camera pulls back to the whole lane; the Worker, the wire
@@ -265,8 +292,8 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     ENVIRONMENT, growing into YOUR BROWSER · WEB UI, centered in it. A
     CODEC SERVER (the same key, YOUR KEYS) appears under it: the IBAN goes
     down to it in ciphertext and comes back up in clear, and the browser
-    shows the IBAN and the name, its border flashing neon. KEYS NEVER
-    SHARED sits between the zones; TEMPORAL's side, dimmed, stays sealed.
+    shows the IBAN and the name, its border flashing neon. KEYS STAY WITH
+    YOU sits between the zones; TEMPORAL's side, dimmed, stays sealed.
     At the end the chapter clears to the bare lane, the Worker back, and
     the camera pulls back a little further.
 
@@ -281,11 +308,11 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     CERTIFICATE, API KEY, CODEC. Each Worker draws its own connection
     through the channel between the rows to TEMPORAL, where a CONNECTIONS
     list adds one VERIFIED row per Worker (worker-1 · Go, and so on).
-- **1:40** Rotate a certificate or a key, and every Worker must pick it up.
+- **1:41** Rotate a certificate or a key, and every Worker must pick it up.
   - Visuals: A ROTATE pill sweeps across the fleet; each Worker flashes
     neon as it passes, an UPDATE panel flipping over its CERTIFICATE and
     API KEY chips.
-- **1:45** Forget the codec in one Worker, and its payloads go out in
+- **1:46** Forget the codec in one Worker, and its payloads go out in
   clear.
   - Visuals: The sixth Worker's CODEC slot blinks into a red dashed NO
     CODEC outline; its border and connection turn red, and a payload card
@@ -329,7 +356,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     rings; NO CODE CHANGE. The sealed card goes out through the tube and
     becomes the first row of STORED PAYLOADS in TEMPORAL: ciphertext and
     WRAPPED 1 behind a lock.
-- **2:20** Payloads are sealed with short-lived data keys, wrapped by a key
+- **2:21** Payloads are sealed with short-lived data keys, wrapped by a key
   you own in your KMS.
   - Visuals: YOUR KMS pops in beside the proxy (a KMS KEY; AWS KMS · AZURE
     KEY VAULT / GCP KMS · YOUR KEY SERVER), linked to a DATA KEY 1 under
@@ -350,7 +377,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     key 3 seals the next card into row 4 (WRAPPED 3). The list reads 1, 1,
     2, 3, and the two rows sealed with key 1 glow: old payloads keep their
     own.
-- **2:34** Its built-in Codec Server lets the Web UI and the CLI show the
+- **2:35** Its built-in Codec Server lets the Web UI and the CLI show the
   decrypted payloads.
   - Visuals: Key 3's bar stops just before the subtitle. The camera pulls
     back in one steady move, out of the proxy to the whole fleet, YOUR KMS,
@@ -364,8 +391,8 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 08 Change Temporal, not your code
 
-- **2:43** Moving from your own Temporal Service to Temporal Cloud is a
-  proxy setting: Workers don't change.
+- **2:43** Point the proxy at Temporal Cloud instead of your own Service:
+  Workers don't change.
   - Visuals: The same wide shot. TEMPORAL narrows into the upper of two
     upstreams, the official logo centered above "Self-hosted" (a server
     icon), the proxy's connection bending up to it; Temporal Cloud rises in
@@ -380,23 +407,23 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 - **2:53** With Temporal Nexus, your Workflow can call another team's
   service, across Namespaces, through an Endpoint.
-  - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
-    (the official lockup followed by "Cloud") holding three Namespaces: the
+  - Visuals: The camera zoom-through (setCamera) brings in a wide Temporal Cloud
+    zone (the official lockup followed by "Cloud") holding three Namespaces: the
     payments Namespace on the left, lit violet, with the analytics Namespace
-    under it, and the fraud team's Namespace on the right. As the subtitle
-    names them, a WORKFLOW tile pops into payments (type `TransferWorkflow`,
-    endpoint `fraud-screening`, operation `screenTransfer`), then a HANDLER
-    tile into fraud (operation `screenTransfer`, starts workflow
-    `ScreenWorkflow`, activity `scoreRisk`) with a TASK QUEUE `fraud-tq`
-    across the bottom of fraud. The Endpoint rises between them: a NEXUS
-    ENDPOINT tile (`fraud-screening`) over an ALLOWLIST tile (`payments`),
-    and a boundary draws down their center axis between them, in the
-    dashed slate look of YOUR ENVIRONMENT's edge (2 px, 10 px dashes 8 px
-    apart): nothing crosses it but through the Endpoint. The Namespaces
-    glow at "across Namespaces", and the transfer Workflow's call line
-    draws from the middle of its tile up to the boundary.
-- **3:01** The Endpoint lets in only the Namespaces on its allowlist, and
-  callers never need to know what is behind it.
+    under it, and the fraud team's Namespace on the right. As the subtitle names
+    them, a WORKFLOW tile pops into payments (type `TransferWorkflow`, endpoint
+    `fraud-screening`, operation `screenTransfer`), then a HANDLER tile into
+    fraud (operation `screenTransfer`, starts workflow `ScreenWorkflow`,
+    activity `scoreRisk`) with a TASK QUEUE `fraud-tq` across the bottom of
+    fraud. The Endpoint rises between them: a NEXUS ENDPOINT tile
+    (`fraud-screening`) over an ALLOWLIST tile (`payments`), and a boundary
+    draws down their center axis between them, in the dashed slate look of YOUR
+    ENVIRONMENT's edge (2 px, 10 px dashes 8 px apart): nothing crosses it but
+    through the Endpoint. The Namespaces glow at "across Namespaces", and the
+    transfer Workflow's call line draws from the middle of its tile up to the
+    boundary.
+- **3:00** In Temporal Cloud, an Endpoint admits only allowlisted
+  Namespaces; callers need only its name.
   - Visuals: Dramatic beat: a call from analytics races up to the gate and
     slams into the boundary, which flashes red, with a red flash, a shake and
     red rings, then turns back to its slate dashes; the allowlist flashes red
@@ -408,7 +435,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     call goes through it on to the handler. A hatched veil wipes over the
     fraud Namespace from the gate's side: an eye struck through, NOT EXPOSED
     TO CALLERS, "Namespace, Task Queue, implementation".
-- **3:08** Calls between Namespaces travel over mTLS, and your Data
+- **3:07** Calls between Namespaces travel over mTLS, and your Data
   Converter still encrypts the payloads.
   - Visuals: The call line turns into a neon tube from the transfer
     Workflow through the Endpoint's opening in the boundary into the veiled
@@ -429,42 +456,42 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 10 Audited and certified
 
-- **3:17** Temporal Cloud is SOC 2 Type 2 certified and compliant
+- **3:15** Temporal Cloud is SOC 2 Type 2 certified and compliant
   with HIPAA, GDPR and CCPA.
-  - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
-    (the official lockup followed by "Cloud") holding four empty dashed
-    seal slots. Dramatic beat: as the subtitle names them, four round
-    violet seals stamp onto the slots one at a time at a steady rhythm
-    (0.6 s apart, the first at "SOC 2 Type 2"), each falling from
-    twice its size, tilted, and landing flat with a press, a violet glow,
-    neon ripples and a jolt of the frame: SOC 2 TYPE 2 (CERTIFIED), then
-    HIPAA, GDPR and CCPA (COMPLIANT), each with a neon check.
-- **3:24** Third parties audit and pen test it every year: audit results
-  are in the Temporal Trust Center.
+  - Visuals: The camera zoom-through (setCamera) brings in a wide Temporal Cloud
+    zone (the official lockup followed by "Cloud") holding four empty dashed
+    seal slots. Dramatic beat: as the subtitle names them, four round violet
+    seals stamp onto the slots one at a time at a steady rhythm (0.6 s apart,
+    the first at "SOC 2 Type 2"), each falling from twice its size, tilted, and
+    landing flat with a press, a violet glow, neon ripples and a jolt of the
+    frame: SOC 2 TYPE 2 (CERTIFIED), then HIPAA, GDPR and CCPA (COMPLIANT), each
+    with a neon check.
+- **3:22** Third parties audit and pen test it every year: ask the Temporal
+  Trust Center for the reports.
   - Visuals: The zone moves up with its seals and a TRUST CENTER card
     rises in under it (a shield, `trust.temporal.io`), listing the SOC 2
     Type 2 report over an empty slot. An ANNUAL AUDIT tag (a magnifier) and
     an ANNUAL PEN TEST tag (a crosshair), each under a THIRD PARTY caption,
     pop in under the first and last seals as the subtitle names them, and
-    swell at "every year". As "audit results" is read, the audit tag sends
-    a document along a dashed line into the empty slot, which fills: Audit
-    results; the pen test tag stays a fact on its own. The card lights up
-    violet as the Trust Center is named. The default fade-out zooms through
-    to the recap.
+    swell at "every year". The card lights up violet as the Trust Center
+    is named; as "reports" is read, the audit tag sends a document along a
+    dashed line into the empty slot, which fills: Audit results; the pen
+    test tag stays a fact on its own. The default fade-out zooms through to
+    the recap.
 
 ## 11 What you get
 
-- **3:33** Your code stays home, every connection is verified, payloads
-  stay encrypted, Workers hold no secrets.
+- **3:31** Your code stays home, Temporal verifies every client, your keys
+  encrypt, Workers need no secrets.
   - Visuals: 4 tall benefit tiles drop in one at a time across the frame
     as the subtitle names them, each lighting up as it lands while the
     padlock badge on its top edge snaps shut with neon ripples: NO INBOUND
-    PORTS (closed door) / VERIFIED CONNECTIONS (badge) / YOUR KEYS ONLY
+    PORTS (closed door) / VERIFIED CLIENTS (badge) / YOUR KEYS ONLY
     (key) / NO SECRETS IN WORKERS (a key struck through).
 
 ## 12 What you can build
 
-- **3:41** A bank transfer is one example: any Workflow that handles
+- **3:40** A bank transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use
@@ -473,14 +500,14 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     "passport scans, encrypted" / PAYROLL RUNS (calendar) "salaries never
     in clear" / AI AGENTS ON CUSTOMER DATA (robot) "prompts and replies
     sealed".
-- **3:47** Health claims, KYC onboarding, payroll runs, AI agents on
+- **3:45** Health claims, KYC onboarding, payroll runs, AI agents on
   customer data: the data stays yours.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **3:55** With Temporal, your code, your keys and your data stay yours.
+- **3:54** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.

@@ -35,13 +35,13 @@
     { company: null, name: null, detail: 'Open source, MIT license', year: '2019' },
   ];
   const LAST = MILESTONES.length - 1;
-  // the fork's arch, from Cadence's year to Temporal's, over the line, clear of the faces on it
+  // the fork's arch, from the Cadence milestone to Temporal's, over the line, clear of the faces on it
   const FORK = { x0: NODE_X[3] + 52, x1: NODE_X[4] - 52, y: YEAR_Y, top: YEAR_Y - 64 };
   const FLY_D = 1.2; // duration of a face's flight onto the line, in seconds
   const TRAIL = [0.06, 0.12, 0.18]; // how far each ghost of a travelling face lags behind it, in seconds
 
   // Milestone tile: company on top, name in a two-line box (or the official logo), a rule, the detail at the bottom
-  function makeMilestone(root, { company, name, detail }) {
+  const makeMilestone = (root, { company, name, detail }) => {
     const head = `<div class="lbl" style="font-size:17px">${company ?? 'Their own company'}</div>`;
     const body = name
       ? `<div style="font-size:32px;line-height:1.12;letter-spacing:-.5px">${name}</div>`
@@ -50,11 +50,11 @@
       `<div style="position:absolute;left:0;right:0;top:32px">${head}</div>`
       + '<div style="position:absolute;left:16px;right:16px;top:72px;height:96px;display:flex;align-items:center;'
       + `justify-content:center">${body}</div>`
-      + `<div style="position:absolute;left:32px;right:32px;top:204px;border-top:1.5px solid ${C.line}"></div>`
+      + `<div style="position:absolute;left:32px;right:32px;top:204px;border-top:1px solid ${C.line}"></div>`
       + `<div class="lbl" style="position:absolute;left:0;right:0;top:234px;font-size:15px;color:var(--ink)">`
       + `${detail}</div>`,
       'tile', { width: TILE.w + 'px', height: TILE.h + 'px' });
-  }
+  };
   // Name and role of a founder, aligned toward the face (align: 'right' or 'left')
   const makeNameLabel = (root, founder, align) => E(root,
     `<div class="mono" style="font-size:24px;letter-spacing:.1em;text-transform:uppercase">`
@@ -78,7 +78,7 @@
         text: "Temporal's ideas come from projects they built at Amazon, Microsoft and Uber.",
         after: 3.8,
       },
-      { text: "2015: at Uber, they create Cadence. It becomes the standard for Uber's critical processes." },
+      { text: "2015: they join Uber, where they create Cadence, the standard for Uber's critical processes." },
       {
         // a FORK link draws from Cadence's tile to Temporal's before it lights
         text: "2019: they found Temporal, a fork of Cadence, to bring it to every company.",
@@ -90,8 +90,7 @@
       // Temporal's arrival: a bloom of light behind its tile (under everything else)
       s.bloom = E(root, '', '', {
         width: '700px', height: '700px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.violet},.45) 0%, `
-          + `rgba(${RGB.uv},.18) 40%, rgba(${RGB.uv},0) 70%)`,
+        background: haloBackground(0.45, 0.18, 40, 70),
       });
       // "20 years" is put forward while the heading is large: a light runs through its letters (a copy of the words
       // filled with a moving gradient), a glow blooms around them, they pop, and sparkles burst out

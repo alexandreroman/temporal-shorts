@@ -19,7 +19,7 @@ Each video is a theme:
   [Workflows](https://docs.temporal.io/workflows),
   [Activities](https://docs.temporal.io/activities), retries, the
   [Event History](https://docs.temporal.io/encyclopedia/event-history),
-  replay and the Temporal web UI.
+  replay and the Temporal Web UI.
 - **Human-in-the-Loop** (`human-in-the-loop`): how a Temporal
   Workflow waits durably for a person's decision, such as an approval, for
   minutes or days, then resumes where it left off.
@@ -42,7 +42,7 @@ Each video is a theme:
   third-party audits, the Trust Center.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
-app instance and Temporal hands back the saved results from the Event
+app instance and Temporal returns the saved results from the Event
 History](preview.png)
 
 [agent-harness]: https://github.com/temporal-community/temporal-agent-harness
@@ -74,10 +74,11 @@ HTML pages.
 ```text
 src/index.html         home page: one card per theme (styles in home.css)
 src/styles.css         Temporal brand styles and the live player's CSS
-src/engine.js          timeline, easing, placement, SVG icons, components,
-                       page start (boot)
-src/shared.js          brand helpers shared by the themes (colors, tiles,
-                       title and end cards, step rows, the agentic loop,
+src/engine.js          timeline, easing, placement, SVG paths and icons,
+                       components, page start (boot)
+src/shared.js          brand helpers shared by the themes (colors, the
+                       lockup and Temporal Cloud zone, tiles, title and
+                       end cards, recap row, step rows, the agentic loop,
                        the lunch example with its context panel and
                        blocks, crash and takeover effects, status tags,
                        app and Temporal panels, the app panel of numbered
@@ -174,9 +175,9 @@ are out of date: each `output/<theme>.mp4`, `-nosubs.mp4`, `.srt` or
 (`src/themes/<theme>/`: its page and its scripts), the shared sources
 (`src/*.js`, `src/*.css`, assets, fonts, `scripts/common.py`) and the render
 or export script. Editing a scene rebuilds its theme only; editing the home
-page (`src/index.html`, `src/home.css`) or the live player (`src/player.js`)
-rebuilds no video. `make html` rebuilds when any source of any page, a
-`social.png` image, a site icon, a Markdown version or
+page (`src/index.html`, `src/home.css`, `src/home.js`) or the live player
+(`src/player.js`) rebuilds no video. `make html` rebuilds when any source of
+any page, a `social.png` image, a site icon, a Markdown version or
 `scripts/build_html.py` changes.
 Use `make -B render` to force a full render.
 
@@ -216,7 +217,7 @@ still scaling counts at its unscaled size), scene `shift` included (and a
 scene camera's zoom, `makeCamera()`, which frames a shot), and prints one
 line per scene: its top, bottom, height, middle and a verdict,
 `ok`, `OUT`, `THIN` or `OFF-CENTER`. `OUT` allows 2 px past the frame, as
-sub-pixel borders and strokes (a 1.5 px border) round past a whole-pixel
+sub-pixel strokes and half-pixel positions round past a whole-pixel
 edge; an `OUT` scene also names the element that leaves the frame and
 when. `OUT` fails the check; `THIN` and `OFF-CENTER` are warnings, as some
 scenes have legitimate exceptions. The check goes on over every theme and
@@ -340,10 +341,12 @@ and the build stops if `og:image` comes after the first inline style or
 script.
 
 These tags need the absolute root URL of the site, which `make html` reads
-from the `SITE_URL` variable. The Pages workflow sets it to the URL given
-by GitHub Pages (see [Deployment](#deployment)). Local builds leave it
-empty and print that they skipped the tags. To check them locally, set it
-and force the rebuild, as an up-to-date build ignores a new value:
+from the `SITE_URL` variable (a make or environment variable; the script,
+`scripts/build_html.py`, reads the environment). The Pages workflow sets it
+to the URL given by GitHub Pages (see [Deployment](#deployment)). Local
+builds leave it empty and print that they skipped the tags. To check them
+locally, set it and force the rebuild, as an up-to-date build ignores a new
+value:
 
 ```bash
 make -B html SITE_URL=https://example.com
@@ -487,12 +490,14 @@ editing different scenes never touch the same file.
   shows neither.
 - New scene: create a file in `src/themes/<theme>/scenes/` that calls
   `scene({...})` inside a `{ ... }` block, so its helpers stay local to the
-  file. Then add one `<script src="scenes/...">` line to
-  `src/themes/<theme>/index.html`, in playing order. Scripts are classic
-  `<script src>` tags, not ES modules: Chromium blocks modules on
-  `file://`, which the renderer uses.
-- Helpers: brand helpers for every theme go in `src/shared.js`; helpers used
-  by one theme only go in `src/themes/<theme>/` (for example
+  file; declare them with `const`, as a function declaration inside the
+  block leaks to the global scope. Then add one
+  `<script src="scenes/...">` line to `src/themes/<theme>/index.html`, in
+  playing order. Scripts are classic `<script src>` tags, not ES modules:
+  Chromium blocks modules on `file://`, which the renderer uses.
+- Helpers: helpers used by two or more themes go in `src/shared.js`
+  (engine-level ones, such as geometry and paths, in `src/engine.js`);
+  helpers used by one theme only go in `src/themes/<theme>/` (for example
   `src/themes/durable-ai-agents/shared.js`), loaded right after
   `../../shared.js`. Icons follow the same rule: `ICONS` in
   `src/engine.js` holds those of two or more themes, and a theme's

@@ -35,28 +35,23 @@
   const CARD_BOTTOM = CODE.y + CODE.h / 2 + 4, STEP_TOP = STEP.y - STEP.h / 2 - 6; // where the fan-out arrows run
   const GATE_HALF = 24; // half the height of the approval pill, which sits on the book_flight arrow
 
-  // Script tokens with simple syntax colors: keywords violet, tool names light UV, the rest ink or slate
-  const kw = s => [s, C.violet], tool = s => [s, '#A5ABFF'], str = s => [s, C.ink];
-  const id = s => [s, C.ink], pun = s => [s, C.slate];
   // The script follows the harness's Code Mode contract: host functions are async, so the script awaits them in
   // an async main() run by asyncio.run(), and their results are plain dicts (f["price_usd"]), for tools declared
   // with keyword parameters
-  const SCRIPT = [
-    [kw('import'), pun(' '), id('asyncio')],
-    [kw('async'), pun(' '), kw('def'), pun(' '), id('main'), pun('():')],
-    [
-      pun('    '), id('flights'), pun(', '), id('hotels'), pun(' = '), kw('await'), pun(' '), id('asyncio'),
-      pun('.'), id('gather'), pun('('),
-    ],
-    [pun('        '), tool('search_flights'), pun('('), id('destination'), pun('='), str('"LIS"'), pun('),')],
-    [pun('        '), tool('search_hotels'), pun('('), id('city'), pun('='), str('"Lisbon"'), pun('))')],
-    [
-      pun('    '), id('best'), pun(' = '), id('min'), pun('('), id('flights'), pun(', '), id('key'), pun('='),
-      kw('lambda'), pun(' '), id('f'), pun(': '), id('f'), pun('['), str('"price_usd"'), pun('])'),
-    ],
-    [pun('    '), kw('return'), pun(' '), kw('await'), pun(' '), tool('book_flight'), pun('('), id('best'), pun(')')],
-    [id('asyncio'), pun('.'), id('run'), pun('('), id('main'), pun('())')],
+  const SCRIPT_LINES = [
+    'import asyncio',
+    'async def main():',
+    '    flights, hotels = await asyncio.gather(',
+    '        search_flights(destination="LIS"),',
+    '        search_hotels(city="Lisbon"))',
+    '    best = min(flights, key=lambda f: f["price_usd"])',
+    '    return await book_flight(best)',
+    'asyncio.run(main())',
   ];
+  // each line as [text, color] tokens: keywords violet, tool names light UV, the rest ink or slate
+  const KEYWORDS = ['import', 'async', 'def', 'await', 'lambda', 'return'];
+  const TOOLS = ['search_flights', 'search_hotels', 'book_flight'];
+  const SCRIPT = SCRIPT_LINES.map(line => codeTokens(line, KEYWORDS, TOOLS));
   const MIN_LINE = 5; // the line that picks the best flight
   const lineLength = line => line.reduce((n, [s]) => n + s.length, 0);
   const TOTAL_CHARS = SCRIPT.reduce((n, line) => n + lineLength(line), 0);
@@ -164,7 +159,7 @@
       s.code = E(root,
         '<div class="lbl" style="position:absolute;left:24px;top:20px;font-size:16px;padding-left:0;'
         + `display:flex;align-items:center;gap:10px">${ICON('code', 20, C.slate, 2)}Script written by the model</div>`
-        + `<div style="position:absolute;left:0;right:0;top:56px;border-top:1.5px solid ${C.line}"></div>`,
+        + `<div style="position:absolute;left:0;right:0;top:56px;border-top:1px solid ${C.line}"></div>`,
         'tile', { width: CODE.w + 'px', height: CODE.h + 'px', textAlign: 'left' });
       // the run highlight sits behind the code lines
       s.hl = E(s.code, '', '', {

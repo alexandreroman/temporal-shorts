@@ -30,14 +30,51 @@ function bezier([p0, p1, p2, p3], u) {
   const at = k => v * v * v * p0[k] + 3 * v * v * u * p1[k] + 3 * v * u * u * p2[k] + u * u * u * p3[k];
   return [at(0), at(1)];
 }
-let G = 0; // global time
-// Ambient clock of a scene: G counted from the scene's start, so it equals the scene time t in frozen frames.
-// Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G keeps real time while t
-// slows down at 0.5x, and the player only counts the story moving on t as motion. Call it from update()
-// as ambientTime(this). Story animations stay on t.
-function ambientTime(sc) {
-  return G - sc.start;
+// SVG path of an S-curve from (x0, y0) to (x1, y1), its control points level with its ends at their midpoint: it
+// leaves and arrives horizontally, or vertically if `vertical`
+function sCurveD(x0, y0, x1, y1, vertical = false) {
+  if (vertical) {
+    const ym = (y0 + y1) / 2;
+    return `M ${x0} ${y0} C ${x0} ${ym} ${x1} ${ym} ${x1} ${y1}`;
+  }
+  const xm = (x0 + x1) / 2;
+  return `M ${x0} ${y0} C ${xm} ${y0} ${xm} ${y1} ${x1} ${y1}`;
 }
+// SVG path through the points of an orthogonal line, its corners rounded with radius r (less where a segment is too
+// short); repeated points are skipped
+function roundedPath(points, r) {
+  const pts = points.filter((p, i) => i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [px, py] = pts[i - 1], [x, y] = pts[i], [nx, ny] = pts[i + 1];
+    const inLen = Math.hypot(x - px, y - py), outLen = Math.hypot(nx - x, ny - y);
+    const corner = Math.min(r, inLen / 2, outLen / 2);
+    const from = [x - (x - px) / inLen * corner, y - (y - py) / inLen * corner];
+    const to = [x + (nx - x) / outLen * corner, y + (ny - y) / outLen * corner];
+    d += ` L ${from[0]} ${from[1]} Q ${x} ${y} ${to[0]} ${to[1]}`;
+  }
+  const last = pts[pts.length - 1];
+  return d + ` L ${last[0]} ${last[1]}`;
+}
+// The point at fraction u (0 to 1) of a line through points (straight segments), at constant speed: a chip or a
+// card moving along a connector
+function pointAlong(points, u) {
+  const lengths = points.slice(1).map((p, i) => Math.hypot(p[0] - points[i][0], p[1] - points[i][1]));
+  let rest = clamp(u) * lengths.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < lengths.length; i++) {
+    if (rest <= lengths[i] || i === lengths.length - 1) {
+      const p = lengths[i] > 0 ? clamp(rest / lengths[i]) : 1;
+      return [lerp(points[i][0], points[i + 1][0], p), lerp(points[i][1], points[i + 1][1], p)];
+    }
+    rest -= lengths[i];
+  }
+  return points[points.length - 1];
+}
+// Global time, the ambient clock. Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G
+// keeps real time while the scene time t slows down at 0.5x, and the player only counts the story moving on t as
+// motion. A loop that starts with its scene reads G - this.start in update(), which equals t in frozen frames.
+// Story animations stay on t.
+let G = 0;
 
 const stage = document.getElementById('stage');
 
@@ -119,6 +156,28 @@ function path(svg, d, color, w, arrow = true, dash = null) {
   p.style.opacity = 0;
   return p;
 }
+// Sets a path's d, and its length (for draw()), only when it changes: update() runs every frame
+function setD(pathEl, d) {
+  if (pathEl._d === d) return;
+  pathEl.setAttribute('d', d);
+  pathEl._L = pathEl.getTotalLength();
+  pathEl._d = d;
+}
+// Sets an element's HTML, only when it changes: update() runs every frame, and rewriting the same HTML costs a
+// relayout for nothing
+function setHtml(e, html) {
+  if (e._html !== html) {
+    e.innerHTML = html;
+    e._html = html;
+  }
+}
+// Sets an element's text, only when it changes, like setHtml()
+function setText(e, text) {
+  if (e._text !== text) {
+    e.textContent = text;
+    e._text = text;
+  }
+}
 // draw: progress p of stroke drawing, o opacity
 function draw(p, prog, o = 1) {
   if (p._dash) {
@@ -135,6 +194,8 @@ function draw(p, prog, o = 1) {
 }
 
 // ---------- icons (stroke, 24 grid)
+// The outline of the `shield` icon, without its check: an SVG path on the 24 grid
+const SHIELD_OUTLINE = 'M12 3l8 3v6c0 4.5-3.4 7.7-8 9-4.6-1.3-8-4.5-8-9V6z';
 const ICONS = {
   cal: '<rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   mail: '<rect x="3" y="6" width="18" height="13"/><path d="M3 7l9 6 9-6"/>',
@@ -159,6 +220,8 @@ const ICONS = {
     + ' 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.6M12 6v1.8M12 16.3V18"/>',
   cart: '<path d="M2 4h3l2.5 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
   card: '<rect x="2.5" y="5" width="19" height="14"/><path d="M2.5 9.5h19M6 15h5"/>',
+  // a screen over a keyboard
+  laptop: '<rect x="5" y="5" width="14" height="10"/><path d="M5 15l-2 4h18l-2-4"/>',
   // an ID card: a portrait (head and shoulders) on the left, two text lines on the right
   idCard: '<rect x="2.5" y="5" width="19" height="14"/><circle cx="8" cy="10.5" r="2"/>'
     + '<path d="M4.5 16.5c0-2 1.6-3 3.5-3s3.5 1 3.5 3M14 10.5h4.5M14 14h4.5"/>',
@@ -167,7 +230,7 @@ const ICONS = {
     + '<circle cx="17" cy="18" r="2"/>',
   lock: '<rect x="5" y="11" width="14" height="10"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/>',
   // a shield with a check
-  shield: '<path d="M12 3l8 3v6c0 4.5-3.4 7.7-8 9-4.6-1.3-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  shield: `<path d="${SHIELD_OUTLINE}"/><path d="M8.5 12l2.5 2.5 4.5-5"/>`,
   // a key: its bow and its bit
   key: '<circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21M17.5 12v3.5M20.5 12v2.5"/>',
   // a cloud on a flat base: a hosted service
@@ -328,8 +391,8 @@ function renderAt(t, g = t) {
     sub.parentNode.style.opacity = so;
   } else sub.parentNode.style.opacity = 0;
   // header, which fades in and out with each chapter, and the Temporal symbol, which stays fully visible across
-  // chapter changes: it fades in with the first chapter and out with the last one, with the same fades as their
-  // scene roots
+  // chapter changes: it fades in over SCENE_FADE from the first chapter's start and out over SCENE_FADE before the
+  // last chapter's end, whatever the fadeIn and fadeOut of those scenes
   const hdr = document.getElementById('hdr');
   const mark = document.getElementById('mark');
   if (cur && cur.chapter) {

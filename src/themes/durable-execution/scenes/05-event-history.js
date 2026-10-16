@@ -5,6 +5,7 @@
 {
   scene({
     chapter: 5, title: 'The Event History',
+    fadeOut: 0, // a hard cut: chapter 6 opens on this chapter's last frame
     subs: [
       {
         text: "Your code runs in <b>Workers</b>, programs on your own servers. "

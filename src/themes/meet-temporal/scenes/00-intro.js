@@ -20,8 +20,7 @@
         'THE STORY OF DURABLE EXECUTION');
       s.glow = E(root, '', '', {
         width: '560px', height: '560px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.violet},.30) 0%, `
-          + `rgba(${RGB.uv},.12) 40%, rgba(${RGB.uv},0) 68%)`,
+        background: haloBackground(0.3, 0.12, 40, 68),
       });
       // stars that converge on the symbol as it draws itself: each starts at a hashed angle and distance
       s.particles = Array.from({ length: PARTICLES }, (_, i) => {

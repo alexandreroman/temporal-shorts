@@ -1,5 +1,7 @@
 """Shared helpers: locate the project and its themes, open a theme page in headless Chromium."""
+import re
 import sys
+from html import unescape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -61,6 +63,16 @@ PRELOAD_MARK = """(() => {
   image.src = getComputedStyle(document.getElementById('mark')).backgroundImage.slice(5, -2);
   return image.decode().then(() => true, () => false);
 })()"""
+
+
+# An HTML tag in a subtitle's text, such as the <b> of a highlighted term.
+HTML_TAG = re.compile(r"<[^>]+>")
+
+
+def subtitle_text(html):
+    """The plain text of a subtitle, for the SRT and Markdown exports: its HTML tags stripped and its entities decoded
+    (&amp; reads &)."""
+    return unescape(HTML_TAG.sub("", html))
 
 
 def add_theme_argument(parser):

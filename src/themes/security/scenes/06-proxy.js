@@ -1,14 +1,14 @@
 // ===================== 6. MEET TEMPORAL PROXY
 // Opens on the bare Workers that chapter 5 ended on (BARE_WORKERS_HANDOFF), in chapter 4's wide shot. Your environment
 // widens as TEMPORAL narrows to the right, an SDK client and the Web UI join the Workers, and the TEMPORAL PROXY box
-// slides into the environment's right edge with a violet glow. Every app's
-// connection converges on it, and one connection leaves it for Temporal. Each Worker learns two lines only, the
-// proxy's local address and a short Namespace name: NO SECRETS. Then the camera pushes in toward the proxy as a
-// payload card leaves a Worker in a plain connection: at the proxy it gains, one at a time, the TLS tube, the API KEY
-// and the full Namespace name (payments typed over into payments.a1b2c), each with a click, and goes out to Temporal:
-// CREDENTIALS IN ONE PLACE. The chapter ends pushing into the proxy box (PROXY_SHOT), where the box fills the content
-// frame's height: only the box, the TLS tube and its label stay bright; everything else is dimmed (OFF_SHOT), faded
-// out (the SDK client and the Web UI, which it crops into the header and subtitle bands) or out of the frame. The camera travels one way: right and in.
+// slides into the environment's right edge with a violet glow. Every app's connection converges on it, and one
+// connection leaves it for Temporal. Each Worker learns two lines only, the proxy's local address and a short Namespace
+// name: NO SECRETS. Then the camera pushes in toward the proxy as a payload card leaves a Worker in a plain connection:
+// at the proxy it gains, one at a time, the TLS tube, the API KEY and the full Namespace name (payments typed over into
+// payments.a1b2c), each with a click, and goes out to Temporal: CREDENTIALS IN ONE PLACE. The chapter ends pushing into
+// the proxy box (PROXY_SHOT), where the box fills the content frame's height: only the box, the TLS tube and its label
+// stay bright; everything else is dimmed (OFF_SHOT), faded out (the SDK client and the Web UI, which it crops into the
+// header and subtitle bands) or out of the frame. The camera travels one way: right and in.
 // The block keeps every name declared in this file local to this scene.
 {
   // camera framings, [x, y, scale] for shot(): from c[2], on the proxy's side of the fleet, the two right columns, the
@@ -49,19 +49,6 @@
   // CREDENTIALS IN ONE PLACE, under the proxy
   const CREDENTIALS = { x: PROXY.x, y: PROXY.y + PROXY.h / 2 + 38 };
 
-  // The point at progress p (0 to 1) along a route of straight legs between points, at constant speed
-  function alongRoute(points, p) {
-    const legs = points.slice(1).map((b, i) => Math.hypot(b[0] - points[i][0], b[1] - points[i][1]));
-    let left = clamp(p) * legs.reduce((a, b) => a + b, 0);
-    for (let i = 0; i < legs.length; i++) {
-      if (left <= legs[i] || i === legs.length - 1) {
-        const u = legs[i] ? clamp(left / legs[i]) : 1;
-        return [lerp(points[i][0], points[i + 1][0], u), lerp(points[i][1], points[i + 1][1], u)];
-      }
-      left -= legs[i];
-    }
-    return points[points.length - 1];
-  }
   // The first round(p * length) characters of text: it types in as p goes from 0 to 1
   const typed = (text, p) => text.slice(0, Math.round(clamp(p) * text.length));
 
@@ -90,10 +77,8 @@
       // 19 px (16.7 px on screen), as WORKERS UNCHANGED in chapter 8, in the same place
       s.noSecrets = statusTag(root, { font: 19, icon: 19 });
       s.noSecrets.style.height = UNDER_WORKERS.h + 'px';
-      balanceTagLabel(s.noSecrets, 'ok');
       s.credentials = statusTag(root, { font: 15, icon: 15 });
       s.credentials.style.height = '30px';
-      balanceTagLabel(s.credentials, 'wait');
       // the card and its tags, over the proxy and the tube
       s.card = makePayload(root, { w: CARD.w });
       s.ns = proxyCardTag(root, '', CARD.nsW);
@@ -108,7 +93,7 @@
 
       // the camera: chapter 4's wide shot on the fleet, then right and in toward the proxy with the card, then into
       // the proxy box
-      const cam = shot(t, BARE_WORKERS_HANDOFF.shot, [
+      const cam = shot(t, WIDE_SHOT, [
         [c[2] + T2.cam, ...SEND_SHOT, T2.camD], [pushAt, ...PROXY_SHOT, PUSH_D],
       ]);
       setCamera(s.cam, t, this.dur, { ...cam, enter: 1, exit: 1 });
@@ -169,14 +154,10 @@
         const o = columnO(s.apps[i].col);
         draw(link, P(t, c[0] + T0.links + i * T0.linkStep, T0.linkD), o);
         link.setAttribute('stroke', i === SENDER && riding ? C.ink : C.slate);
-        sparkOnPath(s.sparks[i], link, (G / PROXY_FLOW_PERIOD + i / s.apps.length) % 1);
-        s.sparks[i].style.opacity = (+s.sparks[i].style.opacity * flow * o).toFixed(3);
+        sparkOnPath(s.sparks[i], link, (G / PROXY_FLOW_PERIOD + i / s.apps.length) % 1, flow * o);
       });
       draw(s.out, P(t, c[0] + T0.out, T0.outD));
-      s.outSparks.forEach((spark, k) => {
-        sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1);
-        spark.style.opacity = (+spark.style.opacity * flow).toFixed(3);
-      });
+      s.outSparks.forEach((spark, k) => sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1, flow));
 
       // the dramatic beat: the card leaves its Worker and rides its connection into the proxy, in clear with only
       // its short Namespace name. There it gains, one at a time, each with a click: the TLS tube to Temporal (its
@@ -184,7 +165,7 @@
       // through the tube into its Namespace in Temporal.
       const sender = WORKERS[SENDER];
       const ride = P(t, cardAt, T2.cardD);
-      let [cardX, cardY] = alongRoute([[sender.x, sender.y], [sender.x, sender.trackY],
+      let [cardX, cardY] = pointAlong([[sender.x, sender.y], [sender.x, sender.trackY],
         [PROXY.linkEnd, sender.trackY], [IN_PROXY.x, IN_PROXY.y]], ride);
       const exit = P(t, exitAt, T2.exitD);
       if (exit > 0) {

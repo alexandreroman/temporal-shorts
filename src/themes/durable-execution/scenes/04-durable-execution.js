@@ -64,7 +64,7 @@
     + `text-transform:uppercase;color:var(--slate)">${name}</span>`,
     '', {
       width: SERVICE.w + 'px', height: SERVICE.h + 'px', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', gap: '12px', border: `1.5px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+      justifyContent: 'center', gap: '12px', border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
     });
   // attempt marker: the attempt number while it runs, then a red x or a neon check
   const makeAttempt = (p, n) => {
@@ -115,11 +115,7 @@
       s.card = makeCodeCard(root, {
         lines: WORKFLOWS_TS, header: 'Workflow', file: 'workflows.ts', w, font, lineH, padY, padX, gutter,
       });
-      s.badge = tag(root, `${ICON('check', 22, C.neon, 2.6)}Runs to completion`, 'neon');
-      // whole-pixel size (content: 349.4 x 50), so the badge centered under the card rests on whole pixels
-      Object.assign(s.badge.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '350px',
-      });
+      s.badge = fixedTag(root, `${ICON('check', 22, C.neon, 2.6)}Runs to completion`, 'neon', null, { gap: 10 });
       // a neon ring around the card each time a bolt bounces off it
       s.ring = E(root, '', '', {
         width: (s.card.w + 20) + 'px', height: (s.card.h + 20) + 'px', border: '2px solid ' + C.neon,
@@ -133,10 +129,9 @@
 
       // calls: await line -> Activity tile (from the card's right edge), Activity -> its service
       const cardRight = CARD.x + s.card.w / 2 + 4, tileLeft = TILE.x - TILE.w / 2 - 4;
-      const mx = (cardRight + tileLeft) / 2;
       s.calls = ORDER_STEPS.map((_, i) => {
-        const y0 = CARD.y + s.card.lineY(awaitLine(WORKFLOWS_TS, i)), y1 = rowY(i);
-        return path(s.svg, `M ${cardRight} ${y0} C ${mx} ${y0} ${mx} ${y1} ${tileLeft} ${y1}`, C.uv, 2.5, false);
+        const y0 = CARD.y + s.card.lineY(awaitLine(WORKFLOWS_TS, i));
+        return path(s.svg, sCurveD(cardRight, y0, tileLeft, rowY(i)), C.uv, 2.5, false);
       });
       s.links = ORDER_STEPS.map((_, i) => path(s.svg,
         `M ${TILE.x + TILE.w / 2 + 4} ${rowY(i)} L ${SERVICE.x - SERVICE.w / 2 - 4} ${rowY(i)}`, C.line, 2, false));
@@ -163,6 +158,7 @@
       s.logo.style.transform = `translateY(${(1 - lp) * 16}px)`;
       s.card.hdr.style.opacity = P(t, c[1] + 1.4, 0.4);
       const bp = popIn(t, c[0] + 2.9, 0.08);
+      fitTag(s.badge);
       place(s.badge, cardX, BADGE_Y, bp.s, bp.o);
 
       // each bolt accelerates in, hits the card's edge with a red spark and bounces off, spinning and fading; the

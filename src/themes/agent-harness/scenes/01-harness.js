@@ -68,16 +68,19 @@
   const BADGE_RIGHT = FRAME.x1 - 26;
   // c[4] compares one model call (top row) with one turn (bottom row), on the content frame (x 140 to 1780,
   // y 150 to 880). Headings on the left edge; the turn runs from the message card to the reply card, its model
-  // calls on one line and its tool calls on a lower one, a bracket under the whole turn. Chips and cards have
-  // even heights, so their whole-pixel centers rest on whole pixels
+  // calls on the cards' line (modelY) and its tool calls on a lower one, a bracket under the whole turn. Chips and
+  // cards have even heights, so their whole-pixel centers rest on whole pixels
   const CMP = {
     left: 140, right: 1780, head1Top: 150, stripTop: 242, stripH: 50, head2Top: 411,
-    cardW: 340, cardY: 584, modelY: 584, toolY: 742, chipH: 50, statusH: 30, statusGap: 10,
+    cardW: 340, modelY: 584, toolY: 742, chipH: 50, statusH: 30, statusGap: 10,
     xs: [660, 810, 960, 1110, 1260], bracketY: 855, tick: 16,
   };
   // the calls of one turn: [tool or Model, chip class]; model calls on even indexes
   const TURN_CALLS = [['Model', 'uv'], ['search_flights', ''], ['Model', 'uv'], ['search_hotels', ''], ['Model', 'uv']];
   const isModelCall = i => i % 2 === 0;
+  // half the width of a Model chip (callCard, 22 px text): the link from the message card stops 8 px before the
+  // first one, the link to the reply card starts 8 px after the last one
+  const MODEL_CHIP_HALF_W = 53;
   const callY = i => (isModelCall(i) ? CMP.modelY : CMP.toolY);
   // the SAVED status sits on the outer side of its chip: above the model calls, below the tool calls
   const statusY = i => {
@@ -88,16 +91,15 @@
   // bottom of a model chip down to the top of a tool chip, or back up), last call to the reply card
   const turnLinks = () => {
     const { xs, chipH, cardW, left, right, modelY } = CMP;
-    const links = [`M ${left + cardW + 8} ${modelY} H ${xs[0] - 53 - 8}`];
+    const links = [`M ${left + cardW + 8} ${modelY} H ${xs[0] - MODEL_CHIP_HALF_W - 8}`];
     for (let i = 0; i + 1 < xs.length; i++) {
       const down = isModelCall(i);
       const x0 = xs[i] + (down ? 20 : 30), x1 = xs[i + 1] - (down ? 30 : 20);
       const y0 = callY(i) + (down ? 1 : -1) * (chipH / 2 + 6);
       const y1 = callY(i + 1) + (down ? -1 : 1) * (chipH / 2 + 8);
-      const ym = (y0 + y1) / 2;
-      links.push(`M ${x0} ${y0} C ${x0} ${ym} ${x1} ${ym} ${x1} ${y1}`);
+      links.push(sCurveD(x0, y0, x1, y1, true));
     }
-    links.push(`M ${xs[xs.length - 1] + 53 + 8} ${modelY} H ${right - cardW - 8}`);
+    links.push(`M ${xs[xs.length - 1] + MODEL_CHIP_HALF_W + 8} ${modelY} H ${right - cardW - 8}`);
     return links;
   };
   // the comparison beat of c[4], in seconds after its cue: the rows appear, then each call pops after the link
@@ -223,7 +225,7 @@
       s.reply2 = card('Added: Tram 28 tour $25. Total $895.', 'llm', 'AGENT', CARD_H.reply2);
       // the empty slot where the next message lands while the harness waits
       s.slot = E(root, 'Waiting for the next message', 'lbl', {
-        width: CAP.w + 'px', height: CARD_H.msg2 + 'px', fontSize: '16px', border: `1.5px dashed ${C.slate}`,
+        width: CAP.w + 'px', height: CARD_H.msg2 + 'px', fontSize: '16px', border: `1px dashed ${C.slate}`,
         borderRadius: 'var(--r)', display: 'flex', alignItems: 'center', justifyContent: 'center',
       });
       // each arrow runs from a card's inner edge to the frame's edge (or back), its head on the far end; the reply
@@ -353,7 +355,7 @@
       place(s.reply2, COL.right, reply2Y, pR2.s, pR2.o * out);
       typeWords(s.reply2, clamp((t - (b2 + BEAT.reply + 0.2)) / 1.0));
       // the empty slot breathes while the harness waits (an ambient loop), then the second message takes its place
-      const breathe = 0.8 + 0.2 * Math.cos((ambientTime(this) - b1 - BEAT.wait) * 4);
+      const breathe = 0.8 + 0.2 * Math.cos((G - this.start - b1 - BEAT.wait) * 4);
       const slotO = P(t, b1 + BEAT.wait, 0.4) * (1 - P(t, b2 + BEAT.msg, 0.3));
       place(s.slot, COL.left, msg2Y, 1, slotO * breathe * out);
       const p2 = backPop(t, b2 + BEAT.msg);
@@ -373,7 +375,7 @@
       showRow(s.callStrip, P(t, b4 + CMP_AT.strip, 0.5) * cmpO);
       fadeIn(s.turnHead, CMP_AT.head2);
       const pMsg = backPop(t, b4 + CMP_AT.msg);
-      place(s.turnMsg, CMP.left + CMP.cardW / 2, CMP.cardY, pMsg.s, pMsg.o * cmpO);
+      place(s.turnMsg, CMP.left + CMP.cardW / 2, CMP.modelY, pMsg.s, pMsg.o * cmpO);
       // link k leads into call k and streams as soon as call k is saved; the last one, into the reply card,
       // streams once the last call is lit
       const streamAt = k => b5 + (k < TURN_CALLS.length ? savedAt(k) : SAVE_AT.reply);
@@ -393,7 +395,7 @@
         place(s.saved[i], CMP.xs[i], statusY(i), pS.s, pS.o * cmpO);
       });
       const pReply = backPop(t, b4 + CMP_AT.reply);
-      place(s.turnReply, CMP.right - CMP.cardW / 2, CMP.cardY, pReply.s, pReply.o * cmpO);
+      place(s.turnReply, CMP.right - CMP.cardW / 2, CMP.modelY, pReply.s, pReply.o * cmpO);
       // the bracket draws under the turn as the reply streams, then the pill pops on it
       draw(s.bracket, P(t, b5 + SAVE_AT.reply, SAVE_AT.streamed - SAVE_AT.reply, linear), cmpO);
       const pSt = backPop(t, b5 + SAVE_AT.streamed);

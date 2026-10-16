@@ -1,13 +1,13 @@
 // ===================== 11. WHAT YOU GET
 // The recap: one tile per benefit, in the use cases' row (USE_CASE_ROW). Each tile lands as the subtitle names its
 // benefit: it drops onto the stage from in front of the camera, its border lights up, and the padlock on its top edge
-// snaps shut with neon ripples. The engine's zoom-through brings the scene in; it ends on the full row at rest,
-// padlocks shut, which is chapter 12's first frame (a match cut: no fade-out, no exit zoom).
+// snaps shut with neon ripples. The camera zoom-through (setCamera) brings the scene in; it ends on the full row at
+// rest, padlocks shut, which is chapter 12's first frame (a match cut: no fade-out, no exit zoom).
 // The block keeps every name declared in this file local to this scene.
 {
   // seconds after c[0] when each tile lands: as the subtitle names its benefit, at its position at 16 characters per
   // second plus 0.3 s; the first one 0.05 s later, so that its drop starts at c[0]
-  const LAND_AT = [0.35, 1.68, 3.55, 5.11];
+  const LAND_AT = [0.35, 1.68, 3.67, 4.86];
   // the drop: the tile falls from DROP.scale to its resting size over DROP.d seconds, ending as it lands, and fades
   // in over the first `fade` of it
   const DROP = { scale: 1.3, d: 0.35, fade: 0.6 };
@@ -25,19 +25,20 @@
     holdBeforeEnd: 0.6,
     subs: [
       {
-        text: 'Your code stays home, every connection is verified, payloads stay encrypted, Workers hold no secrets.',
-        // the last padlock's ripples end at c[0] + 6.7: the full row then holds about 1.4 s before the cut
+        text: 'Your code stays home, Temporal verifies every client, your keys encrypt, Workers need no secrets.',
+        // the last padlock's ripples end at c[0] + 6.45: the full row then holds about 1.4 s before the cut
         after: 0.6,
       },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-      s.tiles = RECAP.map(benefit => makeRecapTile(root, benefit));
-      s.ripples = RECAP.map(() => makeRipples(root, 2, RGB.neon));
+      s.tiles = BENEFITS.map(benefit => makeRecapTile(root, benefit));
+      s.ripples = BENEFITS.map(() => makeRipples(root, 2, RGB.neon));
     },
     update(t, c, s) {
-      // the engine's zoom-through in; no exit zoom, as chapter 12 opens on the last frame
-      setCamera(s.cam, t, this.dur, { exit: 1 });
+      // the camera zoom-through (setCamera) in, the row lowered by RECAP_DY; no exit zoom, as chapter 12 opens on
+      // the last frame
+      setCamera(s.cam, t, this.dur, { dy: RECAP_DY, exit: 1 });
       s.tiles.forEach((tile, i) => {
         const x = useCaseX(i);
         const landAt = c[0] + LAND_AT[i];

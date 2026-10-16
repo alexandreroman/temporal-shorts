@@ -1,19 +1,21 @@
 // ===================== 8. CHANGE TEMPORAL, NOT YOUR CODE
-// Opens on the whole fleet that chapter 7 pulled back to (FULL_LANE_SHOT) and holds it. TEMPORAL splits into two
+// Opens on the whole fleet that chapter 7 pulled back to (WIDE_SHOT) and holds it. TEMPORAL splits into two
 // upstreams: your own Temporal Service on top, Self-hosted and lit, the proxy's connection bending up to it, and
 // Temporal Cloud under it (the official lockup above "Cloud"), dim. A ROUTING switch docks under the proxy. Then
 // the dramatic beat: the switch flips from SELF-HOSTED to CLOUD, the connection tears off the self-hosted service and
 // redraws down to Temporal Cloud with a spark running along it, and Temporal Cloud lights up, while the Workers and
-// their two lines stay perfectly still: WORKERS UNCHANGED. The camera holds; the default fade-out plays the engine's
-// zoom-through into the next scene.
+// their two lines stay perfectly still: WORKERS UNCHANGED. The camera holds; the default fade-out plays the camera
+// zoom-through (setCamera) into the next scene.
 // The block keeps every name declared in this file local to this scene.
 {
   // from c[0]: TEMPORAL narrows to the top upstream (split, splitD) as Temporal Cloud rises in under it (cloud); the
-  // ROUTING switch docks under the proxy (routing); it flips (flip); the connection tears off the self-hosted service
-  // (tear, tearD) and redraws to Temporal Cloud (redraw, redrawD); WORKERS UNCHANGED (unchanged)
+  // ROUTING switch docks under the proxy (routing); it flips as "Temporal Cloud instead" is read (flip); the
+  // connection tears off the self-hosted service (tear, tearD) and redraws to Temporal Cloud (redraw, redrawD);
+  // WORKERS UNCHANGED once Temporal Cloud has lit up, just after "Workers" is read (unchanged; its position at 16
+  // characters per second plus 0.3 s is 4.24)
   const T0 = {
-    split: 0, splitD: 0.8, cloud: 0.4, routing: 1.0, flip: 3.4, tear: 3.6, tearD: 0.3, redraw: 4.0, redrawD: 0.7,
-    unchanged: 5.2,
+    split: 0, splitD: 0.8, cloud: 0.4, routing: 1.0, flip: 2.6, tear: 2.8, tearD: 0.3, redraw: 3.2, redrawD: 0.7,
+    unchanged: 4.4,
   };
   // the two upstreams, one above the other on TEMPORAL's side: your own Temporal Service (self-hosted) and Temporal
   // Cloud; the zones' rectangles
@@ -35,46 +37,44 @@
   const PAD = 14;
   const LABEL = { top: 9, font: 21 };
   // its track, from the panel's top left corner (under the label, as far below its capitals as before), and its
-  // knob's size, inset in the track and travel: the options' spacing
+  // knob's size, its inset in the track (centered across it, inside its border) and its travel: the options' spacing
   const TRACK = { left: PAD, top: 48, w: 30, h: 70 };
-  const KNOB = { size: 24, inset: 1.5 };
-  KNOB.travel = TRACK.h - 3 - KNOB.size - 2 * KNOB.inset;
+  const KNOB = { size: 24 };
+  KNOB.inset = (TRACK.w - 2 * TILE_BORDER - KNOB.size) / 2;
+  KNOB.travel = TRACK.h - 2 * TILE_BORDER - KNOB.size - 2 * KNOB.inset;
   // the panel's center and size, its top 15 px under the proxy box, its height round the track
-  const ROUTING = { x: PROXY.x, w: PROXY.w, h: TRACK.top + TRACK.h + PAD + 3 };
+  const ROUTING = { x: PROXY.x, w: PROXY.w, h: TRACK.top + TRACK.h + PAD + 2 * TILE_BORDER };
   ROUTING.y = PROXY.y + PROXY.h / 2 + 15 + ROUTING.h / 2;
   const STEM = { y0: PROXY.y + PROXY.h / 2, y1: ROUTING.y - ROUTING.h / 2 };
   // the two options: their left edge and line height; each option's line centered on a knob stop (tops)
   const OPTIONS = { left: 56, font: 19, line: 28 };
-  const firstStop = TRACK.top + 1.5 + KNOB.inset + KNOB.size / 2;
+  const firstStop = TRACK.top + TILE_BORDER + KNOB.inset + KNOB.size / 2;
   OPTIONS.tops = [firstStop, firstStop + KNOB.travel].map(y => y - OPTIONS.line / 2);
   // the sparks that fly off the self-hosted service as the connection tears off it: how many, how long each one flies
   const TEAR = { n: 8, life: 0.5 };
   // The two upstreams' titles, a pair: the official lockup at the zone's heading place (the lane's TEMPORAL heading
   // grows to it from its 34 px as TEMPORAL splits), then under it the upstream's name in the brand font: Self-hosted
   // and Cloud (logo: the lockup's height, its wordmark about 20 px on screen; name: its top and size, 21 px on screen)
-  const TITLE = { logo: 40, laneLogo: ZONE_LOGO_H, nameTop: 72, name: 24 };
-  // Both titles are centered in their box: the lockup's left edge, on a whole pixel (the lockup's viewBox is 1570 x
-  // 410), and the lane heading's resting left edge before the split (zoneHeading())
-  TITLE.logoLeft = Math.round((SELF_ZONE.w - TITLE.logo * 1570 / 410) / 2);
-  const LANE_HEAD_LEFT = 24;
+  const TITLE = { logo: 40, laneLogo: ZONE_HEAD.h, nameTop: 72, name: 24 };
+  // Both titles are centered in their box: the lockup's left edge, on a whole pixel (see LOCKUP), and the lane
+  // heading's resting left edge before the split (zoneHeading())
+  TITLE.logoLeft = Math.round((SELF_ZONE.w - TITLE.logo * LOCKUP.w / LOCKUP.h) / 2);
 
-  // SVG path of the proxy's connection to the point (x1, y): straight when y is on the wire's line, else bending at
-  // WIRE.x with rounded corners
-  function wireD(x1, y) {
-    const { x0, x } = WIRE;
-    const y0 = PROXY_WIRE.y, dy = y - y0;
-    if (Math.abs(dy) < 0.5) return `M ${x0} ${y0} L ${x1} ${y0}`;
-    const r = Math.min(WIRE.r, Math.abs(dy) / 2), dir = Math.sign(dy);
-    return `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + dir * r} V ${y - dir * r} Q ${x} ${y} ${x + r} ${y}`
-      + ` H ${x1}`;
-  }
+  // SVG path of the proxy's connection to the point (x1, y): straight when y is within half a pixel of the wire's
+  // line, else bending at WIRE.x with rounded corners
+  const wireD = (x1, y) => {
+    const y0 = PROXY_WIRE.y;
+    if (Math.abs(y - y0) < 0.5) return `M ${WIRE.x0} ${y0} L ${x1} ${y0}`;
+    return roundedPath([[WIRE.x0, y0], [WIRE.x, y0], [WIRE.x, y], [x1, y]], WIRE.r);
+  };
   // An upstream's body: its name, centered under its heading's lockup, and its icon in the middle
-  function upstreamBody(name, icon) {
+  const upstreamBody = (name, icon) => {
     return `<div style="position:absolute;left:0;right:0;top:${TITLE.nameTop}px;font-size:${TITLE.name}px;`
-      + `line-height:30px;text-align:center;color:#F2F2F2">${name}</div>`
+      + `line-height:30px;text-align:center;color:${C.wordmark}">${name}</div>`
       + '<div style="position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;'
-      + `transform:translateY(-50%);margin-top:${UPSTREAM.icon / 2}px">${ICON(icon, 52, C.slate, 1.6)}</div>`;
-  }
+      + `transform:translateY(-50%);margin-top:${UPSTREAM.icon / 2}px">`
+      + `${ICON(icon, UPSTREAM.icon, C.slate, 1.6)}</div>`;
+  };
 
   scene({
     chapter: 8, title: 'Change Temporal, not your code',
@@ -83,7 +83,7 @@
     subs: [
       // the switch and its new connection, then a hold on WORKERS UNCHANGED
       {
-        text: "Moving from your own Temporal Service to Temporal Cloud is a proxy setting: Workers don't change.",
+        text: "Point the proxy at Temporal Cloud instead of your own Service: Workers don't change.",
         after: 1.4,
       },
     ],
@@ -96,9 +96,11 @@
         width: SELF_ZONE.w + 'px', height: SELF_ZONE.h + 'px',
       });
       s.cloud = E(root,
-        `<img src="${LOGO}" style="position:absolute;left:${TITLE.logoLeft}px;top:${ZONE_LABEL_INSET.head}px;height:${TITLE.logo}px;`
-        + `display:block">${upstreamBody('Cloud', 'cloud')}`,
-        'tile', { width: CLOUD_ZONE.w + 'px', height: CLOUD_ZONE.h + 'px', borderColor: C.uv, background: '#17182A' });
+        `<img src="${LOGO}" style="position:absolute;left:${TITLE.logoLeft}px;top:${ZONE_LABEL_INSET.head}px;`
+        + `height:${TITLE.logo}px;display:block">${upstreamBody('Cloud', 'cloud')}`,
+        'tile', {
+          width: CLOUD_ZONE.w + 'px', height: CLOUD_ZONE.h + 'px', borderColor: C.uv, background: C.temporalSurface,
+        });
       s.proxy = makeProxy(root);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
       s.outSparks = [0, 1].map(() => makeSpark(root, 12, RGB.violet));
@@ -110,7 +112,7 @@
         + `font-size:${LABEL.font}px">`
         + 'Routing</div>'
         + `<div style="position:absolute;left:${TRACK.left}px;top:${TRACK.top}px;width:${TRACK.w}px;`
-        + `height:${TRACK.h}px;border:1.5px solid ${C.violet};border-radius:${TRACK.w / 2}px">`
+        + `height:${TRACK.h}px;border:1px solid ${C.violet};border-radius:${TRACK.w / 2}px">`
         + `<div class="knob" style="position:absolute;left:${KNOB.inset}px;top:${KNOB.inset}px;width:${KNOB.size}px;`
         + `height:${KNOB.size}px;`
         + `border-radius:50%;background:${C.violet};box-shadow:0 0 12px rgba(${RGB.violet},.8)"></div></div>`
@@ -128,14 +130,13 @@
       s.unchanged = statusTag(root, { font: 19, icon: 19 });
       s.unchanged.style.height = UNDER_WORKERS.h + 'px';
       s.unchanged.style.letterSpacing = '.04em';
-      balanceTagLabel(s.unchanged, 'ok');
     },
     update(t, c, s) {
       const flipAt = c[0] + T0.flip, tearAt = c[0] + T0.tear, redrawAt = c[0] + T0.redraw;
       const landAt = redrawAt + T0.redrawD;
 
       // the camera holds the whole fleet; the default fade-out zooms through to the next scene
-      const cam = shot(t, FULL_LANE_SHOT, []);
+      const cam = shot(t, WIDE_SHOT, []);
       setCamera(s.cam, t, this.dur, { ...cam, enter: 1 });
 
       // the lane: TEMPORAL narrows to the self-hosted service on top, which dims once the connection leaves it
@@ -147,7 +148,7 @@
       s.lane.temporal.head.style.height = headH;
       s.lane.env.head.style.lineHeight = headH;
       // the heading glides to the centered place as it grows
-      s.lane.temporal.headFrame.style.left = Math.round(lerp(LANE_HEAD_LEFT, TITLE.logoLeft, split)) + 'px';
+      s.lane.temporal.headFrame.style.left = Math.round(lerp(ZONE_LABEL_INSET.left, TITLE.logoLeft, split)) + 'px';
       placeLane(s.lane, {
         ...BARE_WORKERS_HANDOFF.lane, envZone: PROXY_ZONES.env, temporalZone: selfZone,
         temporal: lerp(1, SELF_DIM, selfDim),
@@ -186,10 +187,7 @@
       draw(s.out, redrawing ? redraw : 1 - P(t, tearAt, T0.tearD, easeIn));
       sparkOnPath(s.headSpark, s.out, redrawing ? redraw : 0);
       const outLight = 1 - P(t, tearAt, 0.15) * (1 - P(t, landAt, 0.4));
-      s.outSparks.forEach((spark, k) => {
-        sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1);
-        spark.style.opacity = (+spark.style.opacity * outLight).toFixed(3);
-      });
+      s.outSparks.forEach((spark, k) => sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1, outLight));
       s.tearSparks.forEach((spark, i) => {
         const age = t - tearAt;
         if (age <= 0 || age >= TEAR.life) {
@@ -217,7 +215,7 @@
         option.style.color = active ? C.ink : C.slate;
       });
       s.routing.style.borderColor = t >= flipAt && t < flipAt + 0.6 ? C.neon : C.line;
-      const knobY = ROUTING.y - ROUTING.h / 2 + TRACK.top + 1.5 + KNOB.inset + KNOB.size / 2 + KNOB.travel;
+      const knobY = ROUTING.y - ROUTING.h / 2 + TILE_BORDER + firstStop + KNOB.travel;
       placeRipples(s.click, t, flipAt + 0.2, ROUTING.x - ROUTING.w / 2 + TRACK.left + TRACK.w / 2, knobY, 20, 120,
         { d: 0.6, step: 0.14 });
 

@@ -13,7 +13,7 @@
     'Timer fired: reminder due', 'Timer fired: escalation due',
   ];
   // the Event History card is exactly as wide as the timeline (DAY 0 to DAY 5), 30 px under its day labels
-  const CARD = { w: 5 * LINE.dayW, h: rowTop(TIMER_ROWS.length) - HROW.gap + HROW.h + 24 };
+  const CARD = { w: 5 * LINE.dayW, h: rowTop(TIMER_ROWS.length - 1) + HROW.h + 24 };
   CARD.y = LINE.y + 90 + CARD.h / 2;
   scene({
     chapter: 5, title: 'Deadlines and reminders',
@@ -29,10 +29,8 @@
     ],
     build(root, s) {
       s.svg = svgLayer(root);
-      s.line = path(s.svg, `M ${dayX(0)} ${LINE.y} L ${dayX(5)} ${LINE.y}`, C.line, 3, false);
+      s.timeline = makeDayTimeline(root, s.svg, dayX(0), dayX(5), LINE.y, [0, 1, 2, 3, 4, 5]);
       s.done = path(s.svg, `M ${dayX(0)} ${LINE.y} L ${dayX(5)} ${LINE.y}`, C.violet, 3, false);
-      s.ticks = [0, 1, 2, 3, 4, 5].map(() => E(root, '', '', { width: '3px', height: '22px', background: C.slate }));
-      s.days = [0, 1, 2, 3, 4, 5].map(d => E(root, 'Day ' + d, 'lbl', { fontSize: '22px' }));
       s.marker = E(root, ICON('hourglass', 30, C.ink, 2), '', {
         width: '54px', height: '54px', background: C.violet, borderRadius: '50%', display: 'flex',
         alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 22px 6px rgba(${RGB.violet},.4)`,
@@ -42,7 +40,7 @@
         tag: tag(root, label, 'violet'),
         stem: E(root, '', '', { width: '2px', height: '30px' }),
       }));
-      s.history = makeHistory(root, TIMER_ROWS, CARD.w, CARD.h);
+      s.history = makeSignalHistory(root, TIMER_ROWS, CARD.w, CARD.h);
       s.durable = tag(root, 'Timers are durable too', 'uv big');
     },
     update(t, c, s) {
@@ -50,11 +48,12 @@
       const walkOn = c[0] + 0.4, perDay = 0.68;
       const dayAt = d => walkOn + d * perDay;
       const lp = P(t, c[0] + 0.05, 0.5);
-      draw(s.line, lp);
-      [0, 1, 2, 3, 4, 5].forEach(d => {
+      const { line, ticks, labels, xs } = s.timeline;
+      draw(line, lp);
+      xs.forEach((x, d) => {
         const p = P(t, c[0] + 0.1 + d * 0.05, 0.3);
-        place(s.ticks[d], dayX(d), LINE.y, 1, p);
-        place(s.days[d], dayX(d), LINE.y + 48, 1, p);
+        place(ticks[d], x, LINE.y, 1, p);
+        place(labels[d], x, LINE.y + 48, 1, p);
       });
       const walk = clamp((t - walkOn) / (5 * perDay));
       draw(s.done, walk);

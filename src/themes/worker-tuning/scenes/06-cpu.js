@@ -17,10 +17,7 @@
   const SLOTS = 50;
   // Worker A's steadily busy Slots: 44 as chapter 5 ends, 36 once the CPU is full and tasks come in slowly
   const BUSY = 44, BUSY_SLOW = 36;
-  const { band, code, slot } = DIAGRAM;
-  // the "+ SLOTS" ghost fills the code card's place, as the "+ WORKER" ghost of chapter 1 does
-  const GHOST = { left: code.left, top: band.top, w: code.w, h: band.h, label: 30 };
-  const GHOST_X = GHOST.left + GHOST.w / 2, GHOST_Y = GHOST.top + GHOST.h / 2;
+  const { band, slot } = DIAGRAM;
   // Workers B and C: two panels stacked a zone apart in the bottom band (y 632..736 and 776..880), under WORKER A and
   // as wide (x 860..1800), once the CPU and MEMORY meters have left it. Inside, on a row `row` px below the panel's
   // top, under the header's gear (y 20..50): a Poller in the column of Worker A's (x 936), 5 Slots on Worker A's Slot
@@ -73,57 +70,53 @@
     [headX, DIAGRAM.actY], ...busRoute(w).slice(0, -1), [pollerX, portY(w)], [newSlotX(k), portY(w)],
   ];
   // Worker B or C: an app panel, its Poller, 5 Slots and a CPU gauge. Children are placed from the panel's padding
-  // box, inside its border, drawn 1 px wide (see MINI.border): the offsets put them on whole stage pixels.
-  function makeNewWorker(root, name) {
-    const inset = MINI.border;
+  // box, inside its border (TILE_BORDER): the offsets put them on whole stage pixels.
+  const makeNewWorker = (root, name) => {
+    const inset = TILE_BORDER;
     const panel = makeAppPanel(root, name, NEW.w, NEW.h, { font: 18 });
     panel.cells = Array.from({ length: INSIDE.slots }, (_, k) => makeSlot(panel, slot.w, slot.h, {
       left: (INSIDE.slotLeft + k * slot.pitchX - inset) + 'px', top: (INSIDE.row - slot.h / 2 - inset) + 'px',
       opacity: 1,
     }));
     const size = DIAGRAM.poller.size;
-    E(panel, '', '', {
-      left: (INSIDE.pollerX - size / 2 - inset) + 'px', top: (INSIDE.row - size / 2 - inset) + 'px',
-      width: size + 'px', height: size + 'px', borderRadius: '50%', border: '2px solid ' + C.violet,
-      background: 'var(--surface)', opacity: 1,
+    makePoller(panel, {
+      left: (INSIDE.pollerX - size / 2 - inset) + 'px', top: (INSIDE.row - size / 2 - inset) + 'px', opacity: 1,
     });
-    panel.insertAdjacentHTML('beforeend',
-      `<div class="lbl" style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${GAUGE.labelTop - inset}px;`
-      + 'font-size:16px">CPU</div>'
-      + `<div class="v mono" style="position:absolute;right:${GRID.pad - inset}px;top:${GAUGE.valueTop - inset}px;`
-      + 'font-size:24px;line-height:30px"></div>'
-      + `<div style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${GAUGE.barTop - inset}px;`
-      + `width:${GAUGE.w}px;height:${GAUGE.barH}px;border-radius:3px;background:rgba(${RGB.ink},.08);`
-      + 'overflow:hidden"><div class="fill" style="height:100%;width:0"></div></div>');
+    const cpuLeft = INSIDE.cpuLeft - inset;
+    panel.insertAdjacentHTML('beforeend', meterHtml('CPU', GAUGE.w, {
+      label: `left:${cpuLeft}px;top:${GAUGE.labelTop - inset}px`,
+      value: `right:${GRID.pad - inset}px;top:${GAUGE.valueTop - inset}px`,
+      bar: `left:${cpuLeft}px;top:${GAUGE.barTop - inset}px`,
+    }));
     panel.cpuValue = panel.querySelector('.v');
     panel.cpuFill = panel.querySelector('.fill');
     panel.cpuFill.style.background = `linear-gradient(90deg,${C.uv},${C.violet})`;
     return panel;
-  }
-  function setNewWorkerCpu(panel, cpu) {
+  };
+  const setNewWorkerCpu = (panel, cpu) => {
     panel.cpuValue.textContent = Math.round(cpu) + '%';
     panel.cpuFill.style.width = Math.round(cpu / 100 * GAUGE.w) + 'px';
-  }
+  };
 
   // Fades an element by o, on top of the opacity it was given this frame
-  function fadeBy(e, o) {
+  const fadeBy = (e, o) => {
     const opacity = parseFloat(e.style.opacity) * o;
     e.style.opacity = opacity;
     e.style.visibility = opacity <= 0.001 ? 'hidden' : 'visible';
-  }
+  };
   // Moves an element that the diagram placed this frame with place() dx, dy px further, and fades it by o
-  function slideAway(e, dx, dy, o) {
+  const slideAway = (e, dx, dy, o) => {
     e.style.transform = `translate(${dx}px,${dy}px) ${e.style.transform}`;
     fadeBy(e, o);
-  }
+  };
   // The same for a label that the diagram placed this frame with showAt()
-  function slideLabelAway(e, dx, dy, o) {
+  const slideLabelAway = (e, dx, dy, o) => {
     e.style.left = parseFloat(e.style.left) + dx + 'px';
     e.style.top = parseFloat(e.style.top) + dy + 'px';
     fadeBy(e, o);
-  }
+  };
   // The parts of the diagram in each group that leaves (see LEAVING), placed or labels
-  function leavingGroups(dg) {
+  const leavingGroups = dg => {
     const { lanes } = dg;
     return {
       temporal: {
@@ -133,7 +126,7 @@
       band: { placed: [dg.backlog, dg.wait, ...dg.metrics], labels: [] },
       frame: { placed: [dg.worker, ...dg.wfSlots, ...dg.pollers.wf], labels: Object.values(dg.labels) },
     };
-  }
+  };
   // Slot j of the Slot grid part that Activity Slot i shrinks into: the grid's 10 columns and 5 rows fold into the
   // part's 3 and 2
   const partSlotOf = i => Math.floor((i % DIAGRAM.slot.cols) * 3 / DIAGRAM.slot.cols)
@@ -143,7 +136,7 @@
   // component in the order of the recap's rows. Of the elements that end on the same spot, one stays: the others fade
   // out on the way. The lane's track resizes rather than scales, from the diagram's size to the part's (size: [from,
   // to], each [w, h]): its height shrinks far less than its width.
-  function shrinkingComponents(dg) {
+  const shrinkingComponents = dg => {
     const partCorner = i => [recapPartCenter(i)[0] - RECAP_PART.w / 2, recapPartCenter(i)[1] - RECAP_PART.h / 2];
     const { left, w, h } = DIAGRAM.lane;
     const lane = [[
@@ -172,7 +165,7 @@
     const gaugeTo = [partX, partY + barMiddle(RECAP_PART.h) - barMiddle(CPU_GAUGE.h) * gaugeScale];
     const cpu = [[dg.cpu, [gauge.left + gauge.w / 2, gauge.top + gauge.h / 2], gaugeTo, gaugeScale, true]];
     return [lane, slots, pollers, cache, cpu];
-  }
+  };
 
   scene({
     chapter: 6, title: 'The CPU is full',
@@ -193,24 +186,17 @@
         after: 2.0,
       },
       {
-        text: "This is the moment to add Workers: B and C poll the same Task Queue and share the load.",
+        text: "Add Workers on more hosts: B and C poll the same Task Queue and share the load.",
         after: 2.0,
       },
       { text: "The backlog drains, and new orders start right away again.", after: 2.0 },
     ],
     build(root, s) {
       s.dg = makeWorkerDiagram(root);
-      s.ghost = E(root,
-        `<div class="mono" style="font-size:${GHOST.label}px;letter-spacing:.1em;padding-left:.1em;color:var(--slate)">`
-        + '+ SLOTS</div>',
-        '', {
-          width: GHOST.w + 'px', height: GHOST.h + 'px', border: '2px dashed ' + C.lineLight, borderRadius: 'var(--r)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        });
-      s.svg = svgLayer(root);
-      s.strike = path(s.svg, `M ${GHOST_X - 95} ${GHOST_Y} L ${GHOST_X + 95} ${GHOST_Y}`, C.red, 4, false);
+      // the "+ SLOTS" ghost fills the code card's place, as the "+ WORKER" ghost of chapter 1 does
+      s.ghost = makeGhost(root, '+ SLOTS', 95);
       // in the poll lines' layer of the diagram, where they share Worker A's segments seamlessly
-      s.bus = NEW.names.map((_, w) => path(s.dg.svg, roundedPath(busRoute(w)), C.violet, 2, false, '5,7'));
+      s.bus = NEW.names.map((_, w) => path(s.dg.svg, roundedPath(busRoute(w), GRID.corner), C.violet, 2, false, '5,7'));
       s.workers = NEW.names.map(name => makeNewWorker(root, name));
       // under the poll lines' layer, so that the lines show inside the panels up to the Pollers, as in WORKER A
       s.workers.forEach(panel => s.dg.svg.before(panel));
@@ -245,7 +231,7 @@
       const freed = Math.min(BUSY - BUSY_SLOW, Math.floor(Math.max(0, t - (c[0] + 2.2)) / 0.3));
 
       // invoices come in a wave from waveAt, 2 tasks out of 3: through the Slots in filling order, and through the
-      // queue from its head (queued chip p is task departed + p, see placeLane)
+      // queue from its head (queued chip p is task departed + p, see placeQueueLane)
       const waveAt = c[0] + 0.4;
       const isInvoice = k => k % 3 !== 2;
       const rankOf = i => SLOT_ORDER.indexOf(i);
@@ -268,7 +254,8 @@
       const latency = lerp(lerp(2.0, 3.4, P(t, pinAt, 3.0)), 2.0, P(t, drainFrom, 1.8));
       const latencyTrend = t >= drainFrom ? 'down' : 'up';
       placeWorkerDiagram(s.dg, t, {
-        show: { code: 1 - P(t, c[1] + 0.2, 0.5), mem: 1 - P(t, c[2] + 0.2, 0.4) },
+        // the gauge takes the place of WORKER A's status: B and C show none either
+        show: { code: 1 - P(t, c[1] + 0.2, 0.5), mem: 1 - P(t, c[2] + 0.2, 0.4), status: 1 - P(t, dockAt, 0.3) },
         queue: { wf, act },
         taskIcon,
         flows: [slow, shared],
@@ -294,14 +281,11 @@
           cpu: t < dockEnd ? { at: c[0] + 1.6, out: dockAt } : { at: dockEnd, fixedAt: fixAt, out: moveAt },
         },
       });
-      // the gauge takes the place of WORKER A's status: B and C show none either
-      s.dg.worker.st.style.opacity = 1 - P(t, dockAt, 0.3);
 
       // "+ SLOTS" rises where the code card was, is struck through, and gives way to Workers B and C
-      const ghostO = P(t, c[1] + 0.6, 0.5) * (1 - P(t, c[2] + 0.2, 0.4));
-      rise(s.ghost, GHOST_X, GHOST_Y, ghostO);
-      s.ghost.style.borderColor = t >= strikeAt ? C.red : C.lineLight;
-      draw(s.strike, P(t, strikeAt, 0.35, easeOut), 1 - P(t, c[2] + 0.2, 0.4));
+      const ghostOut = 1 - P(t, c[2] + 0.2, 0.4);
+      const ghostO = P(t, c[1] + 0.6, 0.5) * ghostOut;
+      placeGhost(s.ghost, t, ghostO, ghostO, strikeAt, ghostOut);
 
       // B and C slide in from the right and glow a moment; their poll lines join them to the lanes. They slide out to
       // the right with the move.

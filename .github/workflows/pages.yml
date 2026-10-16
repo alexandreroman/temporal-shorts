@@ -36,7 +36,7 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: "3.15"
 
       # Calls the Pages API, which a pull request token (from a fork in particular) cannot reach. Gives the URL of
       # the site, custom domain included, for the link preview tags.

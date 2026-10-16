@@ -1,12 +1,12 @@
 // ===================== 10. AUDITED AND CERTIFIED
-// Temporal Cloud's compliance, on TEMPORAL's side: a wide Temporal Cloud zone (the official lockup followed by
-// "Cloud") holds four empty seal slots. The dramatic beat: as the first subtitle names them, four seals stamp onto
-// their slots one at a time, SOC 2 TYPE 2 (certified), then HIPAA, GDPR and CCPA (compliant), each slamming down
-// with a press, neon ripples and a jolt. For the second subtitle the zone moves up and a TRUST CENTER card rises in
-// under it, listing the SOC 2 Type 2 report over an empty slot; an ANNUAL AUDIT and an ANNUAL PEN TEST tag pop in
-// on its sides, each under a THIRD PARTY caption. The audit tag sends its results along a dashed line into the empty
-// slot, and the card lights up as the Trust Center is named. The camera holds; the engine's zoom-through brings the
-// scene in and plays into the recap.
+// Temporal Cloud's compliance, on TEMPORAL's side: a wide Temporal Cloud zone (the official lockup followed by "Cloud")
+// holds four empty seal slots. The dramatic beat: as the first subtitle names them, four seals stamp onto their slots
+// one at a time, SOC 2 TYPE 2 (certified), then HIPAA, GDPR and CCPA (compliant), each slamming down with a press, neon
+// ripples and a jolt. For the second subtitle the zone moves up and a TRUST CENTER card rises in under it, listing the
+// SOC 2 Type 2 report over an empty slot; an ANNUAL AUDIT and an ANNUAL PEN TEST tag pop in on its sides, each under a
+// THIRD PARTY caption. The card lights up as the Trust Center is named, and the audit tag sends its results along a
+// dashed line into the empty slot as the reports are named. The camera zoom-through (setCamera) brings the scene in and
+// plays into the recap; in between, the camera holds.
 // The block keeps every name declared in this file local to this scene.
 {
   // seconds after c[0] when each seal lands: SOC 2 Type 2 as the subtitle names it, at its position at 16
@@ -16,19 +16,19 @@
   // lands flat; the press squashes it to 1 - STAMP.press, back to its size in STAMP.pressD seconds; the frame jolts
   const STAMP = { from: 2.0, tilt: -10, d: 0.18, press: 0.06, pressD: 0.22, shake: 4, shakeD: 0.25 };
   // from c[1]: the zone moves up (rise, riseD) as the TRUST CENTER card comes in (card); the tags pop in as the
-  // subtitle names them (audit, penTest); both swell at "every year" (yearly); the audit results leave for the card
-  // as "audit results" is read (results, resultsD); the card lights up at "Temporal Trust Center" (lit)
+  // subtitle names them (audit, penTest); both swell at "every year" (yearly); the card lights up at "Temporal Trust
+  // Center" (lit); the audit results leave for the card as "reports" is read (results, resultsD)
   const T1 = {
-    rise: 0, riseD: 0.8, card: 0.4, audit: 1.18, penTest: 1.8, yearly: 2.55, results: 3.3, resultsD: 0.5, lit: 4.86,
+    rise: 0, riseD: 0.8, card: 0.4, audit: 1.18, penTest: 1.8, yearly: 2.55, lit: 3.8, results: 5.68, resultsD: 0.5,
   };
 
   // The Temporal Cloud zone, left and top, size: held through the stamps, then moved up for the Trust Center row
   // (both centered on x 960; the first on y 515, the second with the row under it)
   const ZONE_STAMPS = { x: 120, y: 285, w: 1680, h: 460 };
   const ZONE_REPORTS = { x: 120, y: 175, w: 1680, h: 400 };
-  // the room the heading takes at the zone's top: its inset and the lockup's height; the seals center in the rest
-  const HEAD = { inset: ZONE_LABEL_INSET.head, logo: ZONE_LOGO_H };
-  const sealY = zone => zone.y + HEAD.inset + HEAD.logo + (zone.h - HEAD.inset - HEAD.logo) / 2;
+  // the room the heading takes at the zone's top: its inset and its height (ZONE_HEAD); the seals center in the rest
+  const HEAD_ROOM = ZONE_HEAD.top + ZONE_HEAD.h;
+  const sealY = zone => zone.y + HEAD_ROOM + (zone.h - HEAD_ROOM) / 2;
 
   // The seals, one per column of the use cases' row (useCaseX): [name lines, status]. Each is a round badge of
   // SEAL.size px, a dashed inner ring SEAL.ring px inside its edge, a neon check, its name in two lines' room (so the
@@ -61,19 +61,18 @@
   const PILL_Y = (slotY(0) + slotY(1)) / 2;
   TAG.y = PILL_Y - TAG.pillDy;
   // SVG path from the audit tag's inner edge to the card's left edge, level with the results row: a smooth S
-  function linkD() {
+  const linkD = () => {
     const x0 = TAG.xs[0] + TAG.w / 2 + LINK.gap, x1 = CARD.x - CARD.w / 2 - LINK.gap;
-    const y0 = PILL_Y, y1 = slotY(RESULTS_ROW), xm = (x0 + x1) / 2;
-    return `M ${x0} ${y0} C ${xm} ${y0} ${xm} ${y1} ${x1} ${y1}`;
-  }
+    return sCurveD(x0, PILL_Y, x1, slotY(RESULTS_ROW));
+  };
 
   // A seal: its ring, its dashed inner ring, a neon check, its name and status
-  function makeSeal(root, [lines, status]) {
+  const makeSeal = (root, [lines, status]) => {
     const nameBlock = SEAL.nameLine * 2;
     const inner = SEAL.size - 2 * SEAL.ring;
     return E(root,
       `<div style="position:absolute;left:${SEAL.ring - 3}px;top:${SEAL.ring - 3}px;width:${inner}px;`
-      + `height:${inner}px;border-radius:50%;border:1.5px dashed rgba(${RGB.violet},.55)"></div>`
+      + `height:${inner}px;border-radius:50%;border:1px dashed rgba(${RGB.violet},.55)"></div>`
       + ICON('check', SEAL.check, C.neon, 2.6)
       + `<div class="mono" style="height:${nameBlock}px;display:flex;flex-direction:column;justify-content:center;`
       + `margin-top:6px;font-size:${SEAL.name}px;line-height:${SEAL.nameLine}px;font-weight:700;color:${C.ink}">`
@@ -85,14 +84,14 @@
         background: '#221A33', display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', textAlign: 'center',
       });
-  }
+  };
   // An empty seal slot: a faint dashed circle where a seal lands
   const makeSlot = root => E(root, '', '', {
     width: SEAL.size + 'px', height: SEAL.size + 'px', borderRadius: '50%',
     border: `2px dashed rgba(${RGB.ink},.22)`,
   });
   // A tag of a third-party check, under its THIRD PARTY caption: one element, centered on its pill and caption
-  function makeAuditTag(root, [icon, label]) {
+  const makeAuditTag = (root, [icon, label]) => {
     return E(root,
       '<div class="lbl" style="font-size:16px;line-height:22px">Third party</div>'
       + `<div class="mono" style="margin-top:16px;width:${TAG.w}px;height:52px;display:flex;align-items:center;`
@@ -100,16 +99,16 @@
       + `color:${C.ink};border:2px solid ${C.violet};border-radius:var(--rs);background:var(--violet-solid)">`
       + `${ICON(icon, 22, C.violet, 2)}${label}</div>`,
       '', { display: 'flex', flexDirection: 'column', alignItems: 'center' });
-  }
+  };
   // The TRUST CENTER card: its heading and address, then one slot per row of CARD_ROWS, dashed while empty
   // (card.slots[i], with .fill, the filled row, hidden until a scene shows it)
-  function makeTrustCard(root) {
+  const makeTrustCard = root => {
     const slots = CARD_ROWS.map((row, i) => {
       const top = CARD.slotTop + i * (CARD.slotH + CARD.slotGap);
       return `<div class="slot" style="position:absolute;left:${CARD.pad}px;right:${CARD.pad}px;top:${top}px;`
-        + `height:${CARD.slotH}px;border:1.5px dashed ${C.line};border-radius:var(--rs)">`
-        + '<div class="fill" style="position:absolute;inset:-1.5px;display:flex;align-items:center;gap:12px;'
-        + `padding-left:16px;border:1.5px solid rgba(${RGB.violet},.45);border-left:3px solid ${C.violet};`
+        + `height:${CARD.slotH}px;border:1px dashed ${C.line};border-radius:var(--rs)">`
+        + `<div class="fill" style="position:absolute;inset:-${TILE_BORDER}px;display:flex;align-items:center;gap:12px;`
+        + `padding-left:16px;border:1px solid rgba(${RGB.violet},.45);border-left:3px solid ${C.violet};`
         + 'border-radius:var(--rs);'
         + `background:rgba(${RGB.violet},.12);opacity:0">`
         + `${ICON('book', 24, C.violet, 1.8)}<span class="mono" style="font-size:19px;color:${C.ink}">${row}`
@@ -125,7 +124,7 @@
       'tile', { width: CARD.w + 'px', height: CARD.h + 'px', textAlign: 'left', background: C.bg });
     card.slots = [...card.querySelectorAll('.slot')].map(slot => ({ slot, fill: slot.querySelector('.fill') }));
     return card;
-  }
+  };
 
   scene({
     chapter: 10, title: 'Audited and certified',
@@ -136,9 +135,9 @@
         after: 1.0,
       },
       {
-        text: 'Third parties audit and pen test it every year: audit results are in the <b>Temporal Trust Center</b>.',
-        // the card lights up at c[1] + 4.86: the full composition then holds about 2.7 s before the fade
-        after: 1.0,
+        text: 'Third parties audit and pen test it every year: ask the <b>Temporal Trust Center</b> for the reports.',
+        // the results land at c[1] + 6.18: the full composition then holds about 1.7 s before the fade
+        after: 1.4,
       },
     ],
     build(stage, s) {
@@ -156,14 +155,14 @@
       s.tags = AUDITS.map(audit => makeAuditTag(root, audit));
       s.results = E(root, ICON('book', REPORT.icon, C.violet, 1.8), '', {
         width: REPORT.w + 'px', height: REPORT.h + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', background: C.bg, border: `1.5px solid ${C.violet}`, borderRadius: 'var(--rs)',
+        justifyContent: 'center', background: C.bg, border: `1px solid ${C.violet}`, borderRadius: 'var(--rs)',
       });
       s.landing = makeRipples(root, 2, RGB.violet);
     },
     update(t, c, s) {
       const hits = STAMP_AT.map(at => c[0] + at);
 
-      // the camera holds; each stamp jolts the frame. The engine's zoom-through in and out.
+      // the camera holds; each stamp jolts the frame. The camera zoom-through (setCamera) in and out.
       const jolt = hits.map(hit => shake(t, hit, STAMP.shake, STAMP.shakeD));
       const dx = jolt.reduce((sum, [x]) => sum + x, 0), dy = jolt.reduce((sum, [, y]) => sum + y, 0);
       setCamera(s.cam, t, this.dur, { dx, dy });

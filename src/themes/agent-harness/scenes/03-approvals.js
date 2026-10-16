@@ -44,10 +44,6 @@
   const through = (at, row) => [[at, EXIT_X, LANE, 0.8], [at + 0.65, TOOLS.rowX, TOOLS.rows[row], 0.7]];
   const GATE_HIT = 0.42, LAND = 1.4;
 
-  // statusTag options of the tag under a call, a little larger than the shared one; its left padding offsets the
-  // trailing letter spacing. Kinds: 'ok' (allowed, approved, done), 'denied' or 'wait'
-  const CALL_TAG = { font: 17, pad: '4px 10px 4px calc(10px + .1em)' };
-
   scene({
     chapter: 3, title: 'Human approvals',
     // the chapter header reads before the first subtitle; the final composition holds before the fade
@@ -149,7 +145,9 @@
         Object.assign(e.style, { width: CALL_W + 'px', textAlign: 'center' });
         return e;
       });
-      s.tags = s.calls.map(() => statusTag(root, CALL_TAG));
+      // the tag under each call, a little larger than the shared one. Kinds: 'ok' (allowed, approved, done),
+      // 'denied' or 'wait'
+      s.tags = s.calls.map(() => statusTag(root, { font: 17 }));
     },
     update(t, c, s) {
       // c[0]: the two searches pop next to the agent and cross the gate one after the other; book_flight stops

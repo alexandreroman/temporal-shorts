@@ -7,7 +7,6 @@ Object.assign(ICONS, {
     + 'l2.4-1.8v-4.2L3 15.8v-2.1l7.6-4.4V4.7c0-1.3.5-2.2 1.4-2.2z"/>',
   bed: '<path d="M3 5v15M3 16h18v4M11 16v-5h8a2 2 0 0 1 2 2v3"/><circle cx="7" cy="13" r="2"/>',
   pause: '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>',
-  laptop: '<rect x="5" y="5" width="14" height="10"/><path d="M5 15l-2 4h18l-2-4"/>',
   layers: '<path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"/>',
   stream: '<path d="M3 7h11M3 12h17M3 17h11M17 9l3 3-3 3"/>',
   // a clock whose two hands turn, the minute hand up and the hour hand at 3 o'clock at rest (see setClockHands)
@@ -24,18 +23,20 @@ function callCard(p, name, arg = '', cls = '') {
   });
 }
 
-// Pops in an element laid out by its CSS rather than by place() (a pill in a row, a badge on a card): the scale and
-// opacity of a backPop()
-function popScale(e, pop) {
-  e.style.transform = `scale(${pop.s})`;
-  e.style.opacity = pop.o;
+// Light UV of the names a code card singles out (tool names, types)
+const CODE_LIGHT = '#A5ABFF';
+// A line of code as [text, color] tokens, with simple syntax colors (chapters 6 and 8): decorators and `keywords`
+// violet, `light` names CODE_LIGHT, other names, numbers and "strings" ink, punctuation and spaces slate
+function codeTokens(line, keywords, light) {
+  const tokens = line.match(/"[^"]*"|@[\w.]+|\w+|\s+|[^\w\s"]+/g) || [];
+  return tokens.map(token => {
+    if (token.startsWith('@') || keywords.includes(token)) return [token, C.violet];
+    if (light.includes(token)) return [token, CODE_LIGHT];
+    if (/^["\w]/.test(token)) return [token, C.ink];
+    return [token, C.slate];
+  });
 }
-// Turns the hands of the clockHands icon in e: the hour hand by `turns` full turns, the minute hand twelve times as
-// fast
-function setClockHands(e, turns) {
-  e.querySelector('.mh').setAttribute('transform', `rotate(${turns * 360 * 12} 12 12)`);
-  e.querySelector('.hh').setAttribute('transform', `rotate(${turns * 360} 12 12)`);
-}
+
 // place() anchored on the element's left edge, so a label or a pill keeps its gap to what it follows
 function placeLeft(e, x, y, o, s = 1) {
   e.style.transform = `translate(${x}px,${y}px) translateY(-50%) scale(${s})`;
@@ -70,15 +71,15 @@ function makeWaitCard(p, w, h, { gap = 10 } = {}) {
   return e;
 }
 // The waiting time races through `waits` (e.g. ['5 MIN', ..., '2 DAYS']) as race goes from 0 to 1, and the clock
-// hands spin with it
+// hands spin with it: 12 hours, one turn of the hour hand
 function setWaitRace(card, waits, race) {
   card.waitD.textContent = waits[Math.min(waits.length - 1, Math.floor(race * waits.length))];
-  setClockHands(card, race);
+  setClockHands(card, race * 12, 12);
 }
 // Pause badge: a 44 px violet square with a pause icon, beside the call or the agent that waits
 function makePauseBadge(p) {
   return E(p, ICON('pause', 22, C.violet, 1.8), '', {
     width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: 'var(--violet-solid)', border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)',
+    background: 'var(--violet-solid)', border: '1px solid ' + C.violet, borderRadius: 'var(--rs)',
   });
 }

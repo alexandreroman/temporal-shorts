@@ -35,11 +35,7 @@
     update(t, c, s) {
       // the budget line first, then one tile per benefit
       rise(s.budget, 960, BUDGET_Y, P(t, c[0] + 0.5, 0.6), 20);
-      const at = [c[0] + 2.2, c[0] + 3.4, c[0] + 4.3, c[0] + 5.2];
-      s.ben.forEach((e, i) => {
-        const p = backPop(t, at[i]);
-        place(e, useCaseX(i), BEN.y, p.s, p.o);
-      });
+      placeRecapRow(s.ben, t, [c[0] + 2.2, c[0] + 3.4, c[0] + 4.3, c[0] + 5.2], BEN.y);
     }
   });
 }

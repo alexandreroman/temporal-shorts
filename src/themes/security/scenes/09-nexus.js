@@ -1,16 +1,16 @@
 // ===================== 9. ACROSS NAMESPACES WITH NEXUS
-// Temporal Nexus, on Temporal Cloud's side: a wide Temporal Cloud zone (the official lockup followed by "Cloud")
-// holds the payments Namespace on the left, where Nora's transfer Workflow runs, the fraud team's Namespace on the
-// right, where the screenTransfer handler and its Task Queue live, and between them the Nexus Endpoint
-// fraud-screening, a gate: its tile over its ALLOWLIST's, and between them, on their center axis, a boundary in the
-// theme's boundary look, YOUR ENVIRONMENT's dashed edge. The transfer Workflow's call runs up to that boundary. The
-// dramatic beat: a call from the analytics Namespace slams into it (a red flash, a shake): NOT ON ALLOWLIST; then the
-// call from payments is checked against the allowlist, ALLOWED, the Endpoint opens a gap in the boundary at the call's
-// height, as a door in it, and the call goes through to the handler. A veil drops over the fraud Namespace: its
-// Namespace, Task Queue and implementation are not exposed to callers. Then an mTLS tube replaces the call line,
-// through the same opening, the payload card, already sealed by the caller's Worker, rides it behind the veil, and
-// the result comes back sealed too, by the handler. The camera holds; the engine's zoom-through brings the scene in
-// and plays into the next one.
+// Temporal Nexus, on Temporal Cloud's side: a wide Temporal Cloud zone (the official lockup followed by "Cloud") holds
+// the payments Namespace on the left, where Nora's transfer Workflow runs, the fraud team's Namespace on the right,
+// where the screenTransfer handler and its Task Queue live, and between them the Nexus Endpoint fraud-screening, a
+// gate: its tile over its ALLOWLIST's, and between them, on their center axis, a boundary in the theme's boundary look,
+// YOUR ENVIRONMENT's dashed edge. The transfer Workflow's call runs up to that boundary. The dramatic beat: a call from
+// the analytics Namespace slams into it (a red flash, a shake): NOT ON ALLOWLIST; then the call from payments is
+// checked against the allowlist, ALLOWED, the Endpoint opens a gap in the boundary at the call's height, as a door in
+// it, and the call goes through to the handler. A veil drops over the fraud Namespace: its Namespace, Task Queue and
+// implementation are not exposed to callers. Then an mTLS tube replaces the call line, through the same opening, the
+// payload card, already sealed by the caller's Worker, rides it behind the veil, and the result comes back sealed too,
+// by the handler. The camera zoom-through (setCamera) brings the scene in and plays into the next one; in between, the
+// camera holds.
 // The block keeps every name declared in this file local to this scene.
 {
   // The Temporal Cloud zone, the scene's whole space: left, top and size, centered on (960, 515)
@@ -96,26 +96,26 @@
   const DENY_MID = (DENY_FROM + GATE.left) / 2;
   const DENY_D = `M ${DENY_FROM} ${ANALYTICS_Y} C ${DENY_MID} ${ANALYTICS_Y} ${DENY_MID} ${HIT.y} ${GATE.left} ${HIT.y}`
     + ` H ${HIT.x}`;
-  // Where payments' verdict tag (ALLOWED) ends as it renders, right and bottom: Chromium draws the Namespace's 1.5 px
-  // border 1 px wide, so the tag, set from inside it, ends at x 760.5 and y 309.5 and lights pixel column 760 and row
-  // 309, as a whole-pixel box ending at 761 and 310 does. TAG_EDGE holds those whole-pixel ends; the tube's label and
-  // the cards in payments end on its right one.
-  const TAG_EDGE = {
-    right: PAYMENTS.x + PAYMENTS.w - 1 - (INSET - 1.5) + 0.5,
-    bottom: PAYMENTS.y + 1 + PAYMENTS.headTop - 1.5 + NS_HEAD.h / 2 + VERDICT.h / 2 + 0.5,
+  // Where payments' heading row ends, right and bottom: its verdict tag (ALLOWED) ends INSET px inside the
+  // Namespace's right edge and centers on the heading; the tube's label and the cards in payments end on its right
+  const PAYMENTS_HEAD = {
+    right: PAYMENTS.x + PAYMENTS.w - INSET, bottom: PAYMENTS.y + PAYMENTS.headTop + NS_HEAD.h / 2 + VERDICT.h / 2,
   };
   // The mTLS tube between the Namespaces, in the theme's TLS tube look (makeTube): from the transfer Workflow's tile,
   // its mouth ring (24 px wide) 16 px clear of it, to 24 px inside fraud, where the veil covers its end. Its label, a
   // big pill (chapter 2's TLS label as it shows on screen), sits above it as in chapter 2: its right edge on
-  // TAG_EDGE.right, in line with ALLOWED, and as far under that tag as above the tube.
+  // PAYMENTS_HEAD.right, in line with ALLOWED, and as far under that tag as above the tube.
   const NEXUS_TUBE = { x0: WORKFLOW.x + WORKFLOW.w + 16 + 12, x1: FRAUD.x + 24, y: CALL_Y, h: TUBE_H };
-  const TUBE_LABEL = { w: 180, h: 66 };
-  NEXUS_TUBE.label = { x: TAG_EDGE.right - TUBE_LABEL.w / 2, y: (TAG_EDGE.bottom + CALL_Y - TUBE_H / 2) / 2 };
+  const TUBE_LABEL = { w: TUBE_LABEL_W.big, h: 66 };
+  NEXUS_TUBE.label = {
+    x: PAYMENTS_HEAD.right - TUBE_LABEL.w / 2, y: (PAYMENTS_HEAD.bottom + CALL_Y - TUBE_H / 2) / 2,
+  };
   // The payload card in the tube: as wide as chapter 2's card in its tube on screen (PAYLOAD_IN_WORKER.w at its scale
   // and zoom), built at that width so it rests on whole pixels. Where it waits in payments, its right edge on
-  // TAG_EDGE.right (17 px clear of the tube's mouth ring), and where it is hidden under the veil, fully inside fraud.
+  // PAYMENTS_HEAD.right (16 px clear of the tube's mouth ring), and where it is hidden under the veil, fully inside
+  // fraud.
   const CARD = { w: 284 };
-  const CARD_AT = { x: TAG_EDGE.right - CARD.w / 2, hiddenX: FRAUD.x + CARD.w / 2 + 20 };
+  const CARD_AT = { x: PAYMENTS_HEAD.right - CARD.w / 2, hiddenX: FRAUD.x + CARD.w / 2 + 20 };
   // The sealed result that comes back: its size (as wide as the tube's label, so it lands right under it, both edges
   // in line), its padlock badge and padlock, its one field (TRANSFER's ciphertext glyphs for row `row`, so its glyphs
   // differ from the payload's), its center x where it lands, under the label, and its center y in the tube
@@ -124,19 +124,20 @@
     x: NEXUS_TUBE.label.x, y: CALL_Y + 6,
   };
 
-  // the beats, in seconds from their cue. c[0]: the transfer Workflow (workflow) and the handler (handler) come in,
-  // the Namespaces light up (across), the gate rises (gate), its boundary draws down (boundary, boundaryD) and the
-  // call line draws to it (call, callD). c[1]: the analytics call (deny, denyD) hits the boundary; the payments call
-  // (allow, allowD) reaches it, the allowlist row lights, ALLOWED (allowed), the Endpoint opens the boundary (open,
-  // openD) and the call goes on to the handler (pass, passD); the veil wipes over fraud (veil, veilD), its caption
-  // (caption). c[2]: the tube draws (tube, tubeD), its label (label); the payload card, sealed by the caller's Worker,
-  // comes out (card) and rides behind the veil (ride, rideD); the result comes back (back, backD)
+  // the beats, in seconds from their cue. c[0]: the transfer Workflow (workflow) and the handler (handler) come in, the
+  // Namespaces light up (across), the gate rises (gate), its boundary draws down (boundary, boundaryD) and the call
+  // line draws to it (call, callD). c[1]: the analytics call (deny, denyD) hits the boundary as "Endpoint" is read; the
+  // payments call (allow, allowD) reaches it, the allowlist row lights, ALLOWED as "allowlisted" is read (allowed), the
+  // Endpoint opens the boundary (open, openD) and the call goes on to the handler (pass, passD); the veil wipes over
+  // fraud as "callers" is read (veil, veilD), its caption (caption); each word at its position at 16 characters per
+  // second plus 0.3 s. c[2]: the tube draws (tube, tubeD), its label (label); the payload card, sealed by the caller's
+  // Worker, comes out (card) and rides behind the veil (ride, rideD); the result comes back (back, backD)
   const T0 = {
     workflow: 1.3, handler: 2.6, gate: 3.9, boundary: 4.3, boundaryD: 0.4, across: 4.4, call: 5.4, callD: 0.6,
   };
   const T1 = {
-    deny: 1.0, denyD: 0.45, allow: 2.5, allowD: 0.5, allowed: 3.2, open: 3.3, openD: 0.3, pass: 3.5, passD: 0.5,
-    veil: 4.2, veilD: 0.7, caption: 4.8,
+    deny: 1.0, denyD: 0.45, allow: 2.3, allowD: 0.5, allowed: 3.0, open: 3.1, openD: 0.3, pass: 3.3, passD: 0.5,
+    veil: 4.45, veilD: 0.7, caption: 5.05,
   };
   const T2 = { tube: 0.3, tubeD: 0.9, label: 2.4, card: 3.3, ride: 3.8, rideD: 1.1, back: 5.0, backD: 1.2 };
 
@@ -145,38 +146,38 @@
   const headHtml = (text, css = '') => `<div class="mono" style="${css}font-size:${HEAD.font}px;`
     + `line-height:${HEAD.line}px;letter-spacing:.1em;color:${C.ink}">${text}</div>`;
   // A Namespace: its border, its NAMESPACE label and name at the top left (headTop px under its top edge, INSET px
-  // from its left edge), and its verdict tag on the right of the heading (box.verdict, hidden)
-  function makeNamespaceBox(root, box, name) {
-    // offsets from inside the 1.5 px border, so its text rests on whole pixels
-    const top = box.headTop - 1.5;
+  // from its left edge), and its verdict tag on the right of the heading, INSET px from its right edge (box.verdict,
+  // hidden)
+  const makeNamespaceBox = (root, box, name) => {
+    // offsets from the padding box, TILE_BORDER inside the edges
+    const top = box.headTop - TILE_BORDER;
+    const inset = INSET - TILE_BORDER;
     const e = E(root,
-      `<div style="position:absolute;left:${INSET - 1.5}px;top:${top}px">`
+      `<div style="position:absolute;left:${inset}px;top:${top}px">`
       + `<div class="mono" style="font-size:${NS_HEAD.label}px;line-height:${NS_HEAD.labelLine}px;letter-spacing:.14em;`
       + `color:${C.slate}">NAMESPACE</div>`
       + `<div class="mono" style="font-size:${NS_HEAD.name}px;line-height:${NS_HEAD.nameLine}px">${name}</div></div>`,
-      '', { width: box.w + 'px', height: box.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)' });
-    e.verdict = statusTag(e, { font: VERDICT.font, icon: VERDICT.font });
-    Object.assign(e.verdict.style, {
-      left: 'auto', right: INSET - 1.5 + 'px', top: top + NS_HEAD.h / 2 - VERDICT.h / 2 + 'px',
-      height: VERDICT.h + 'px', transformOrigin: 'right center',
-    });
+      '', { width: box.w + 'px', height: box.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)' });
+    e.verdict = makeHeadingVerdict(e, { ...VERDICT, right: inset, top: top + NS_HEAD.h / 2 - VERDICT.h / 2 });
     return e;
-  }
-  // A tile of the box's size: its heading, then its rows, a key over a value, centered in the room under it
-  function makeInfoTile(root, box, heading, rows) {
+  };
+  // A tile of the box's size: its heading, then its rows, a key over a value, centered in the room under it (offsets
+  // from its padding box, TILE_BORDER inside its edges)
+  const makeInfoTile = (root, box, heading, rows) => {
     const rowH = ROW.keyLine + ROW.valueLine;
     const headBottom = TILE.headTop + HEAD.line;
     const block = rows.length * rowH + (rows.length - 1) * ROW.gap;
     const rowsTop = Math.round(headBottom + (box.h - headBottom - block) / 2);
-    const rowsHtml = rows.map(([key, value], i) => `<div style="position:absolute;left:${TILE.inset - 1.5}px;`
-      + `top:${rowsTop + i * (rowH + ROW.gap) - 1.5}px">`
+    const left = TILE.inset - TILE_BORDER;
+    const rowsHtml = rows.map(([key, value], i) => `<div style="position:absolute;left:${left}px;`
+      + `top:${rowsTop + i * (rowH + ROW.gap) - TILE_BORDER}px">`
       + `<div class="mono" style="font-size:${ROW.key}px;line-height:${ROW.keyLine}px;color:${C.slate}">${key}</div>`
       + `<div class="mono" style="font-size:${ROW.value}px;line-height:${ROW.valueLine}px">${value}</div></div>`)
       .join('');
     return E(root,
-      headHtml(heading, `position:absolute;left:${TILE.inset - 1.5}px;top:${TILE.headTop - 1.5}px;`) + rowsHtml,
+      headHtml(heading, `position:absolute;left:${left}px;top:${TILE.headTop - TILE_BORDER}px;`) + rowsHtml,
       'tile', { width: box.w + 'px', height: box.h + 'px', textAlign: 'left' });
-  }
+  };
   // The fraud Task Queue: its heading on the left, its name on the right, on one line
   const makeQueueTile = root => E(root,
     headHtml('TASK QUEUE') + `<div class="mono" style="font-size:${ROW.value}px">fraud-tq</div>`,
@@ -198,16 +199,16 @@
   const makeEndpointBlock = root => makeGateTile(root, GATE.top.h, 'gateway', 'NEXUS ENDPOINT',
     `<div class="mono" style="font-size:${ROW.value}px;line-height:${ROW.valueLine}px">fraud-screening</div>`);
   // The gate's bottom tile: ALLOWLIST and its one row, payments (block.row, its check block.check)
-  function makeAllowlistBlock(root) {
+  const makeAllowlistBlock = root => {
     const block = makeGateTile(root, GATE.bottom.h, 'shield', 'ALLOWLIST',
       `<div class="row" style="width:${ALLOW_ROW.w}px;height:${ALLOW_ROW.h}px;display:flex;align-items:center;`
-      + 'justify-content:center;gap:8px;border:1.5px solid;border-radius:var(--rs);'
+      + 'justify-content:center;gap:8px;border:1px solid;border-radius:var(--rs);'
       + `background:${C.bg}"><span class="check">${ICON('check', 18, C.slate, 2.6)}</span>`
       + `<span class="mono" style="font-size:${ROW.value}px">payments</span></div>`);
     block.row = block.querySelector('.row');
     block.check = block.querySelector('.check svg');
     return block;
-  }
+  };
   // The veil over fraud's inside, within its border: a frosted, hatched pane, an eye struck through and what is not
   // exposed to callers. update() wipes it in from the gate's side.
   const makeVeil = root => E(root,
@@ -217,14 +218,15 @@
     + `<div style="margin-top:8px;font-size:18px;line-height:26px;color:${C.slate}">`
     + 'Namespace, Task Queue, implementation</div>',
     '', {
-      width: FRAUD.w - 3 + 'px', height: FRAUD.h - 3 + 'px', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', borderRadius: 'calc(var(--r) - 1.5px)',
+      width: FRAUD.w - 2 * TILE_BORDER + 'px', height: FRAUD.h - 2 * TILE_BORDER + 'px', display: 'flex',
+      flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      borderRadius: `calc(var(--r) - ${TILE_BORDER}px)`,
       background: `repeating-linear-gradient(135deg, rgba(${RGB.ink},.05) 0 2px, rgba(${RGB.ink},0) 2px 14px), `
         + '#1A1B2C',
     });
   // The sealed result: a small card in the payload card's look, RESULT and one field in ciphertext, its padlock shut
   // on its top edge
-  function makeSealedResult(root) {
+  const makeSealedResult = root => {
     const { w, h, badge, lock } = RESULT;
     const card = E(root,
       `<div class="mono" style="font-size:14px;line-height:18px;letter-spacing:.14em;color:${C.slate};`
@@ -233,30 +235,16 @@
       + `<div class="mono" style="font-size:19px;line-height:26px;white-space:pre">`
       + `${scrambledHtml(RESULT.row, RESULT.value, 1)}</div>`,
       'tile', { width: w + 'px', height: h + 'px', textAlign: 'left', padding: '16px 20px' });
-    // centered on the card's top edge, offsets from inside its 1.5 px border
-    const lockBadge = E(card, '', '', {
-      left: (w - badge) / 2 - 1.5 + 'px', top: -badge / 2 - 1.5 + 'px', width: badge + 'px', height: badge + 'px',
-      borderRadius: '50%', background: C.bg, border: `1.5px solid ${C.neon}`, opacity: 1,
-    });
-    const padlock = makeLock(lockBadge, lock, 1.9, {
-      left: (badge - lock) / 2 - 1.5 + 'px', top: (badge - lock) / 2 - 1.5 + 'px', opacity: 1,
-    });
+    const { badge: lockBadge, lock: padlock } = makeLockBadge(card, w, badge, lock);
+    lockBadge.style.borderColor = C.neon;
     setLock(padlock, 1);
     return card;
-  }
-  // Pops a Namespace's verdict in at `at`: its label and kind ('alarm', the theme's red verdict, or 'ok')
-  function popVerdict(box, t, label, kind, at) {
-    if (kind === 'alarm') setAlarmTag(box.verdict, label);
-    else setStatus(box.verdict, label, kind);
-    const pop = popIn(t, at);
-    box.verdict.style.opacity = pop.o;
-    box.verdict.style.transform = `scale(${pop.s})`;
-  }
+  };
   // The center of a box given by its left, top and size
   const center = box => [box.x + box.w / 2, box.y + box.h / 2];
   // The boundary's dashes (BOUNDARY_DASHES) drawn down to `drawn` px along it, with the Endpoint's opening, open px
   // on each side of the call line, cut out of them
-  function boundaryDashes(drawn, open) {
+  const boundaryDashes = (drawn, open) => {
     const cutFrom = BOUNDARY.mid - open;
     const cutTo = BOUNDARY.mid + open;
     const dashes = [];
@@ -268,10 +256,10 @@
       });
     });
     return dashes;
-  }
+  };
   // Strokes path p as the given dashes, [from, to] along it in order; hides it when there are none. The pattern's
   // last gap runs past the path's end, and the offset starts it the first dash's distance in.
-  function strokeDashes(p, dashes) {
+  const strokeDashes = (p, dashes) => {
     if (dashes.length === 0) {
       p.style.opacity = 0;
       return;
@@ -286,7 +274,7 @@
     p.setAttribute('stroke-dasharray', parts.map(n => +n.toFixed(3)).join(' '));
     p.setAttribute('stroke-dashoffset', -lead);
     p.style.opacity = 1;
-  }
+  };
 
   scene({
     chapter: 9, title: 'Across Namespaces with Nexus',
@@ -298,8 +286,7 @@
         after: 0.4,
       },
       {
-        text: 'The Endpoint lets in only the Namespaces on its <b>allowlist</b>, and callers never need to know '
-          + 'what is behind it.',
+        text: 'In Temporal Cloud, an Endpoint admits only <b>allowlisted</b> Namespaces; callers need only its name.',
       },
       {
         text: 'Calls between Namespaces travel over <b>mTLS</b>, and your Data Converter still encrypts the payloads.',
@@ -314,9 +301,7 @@
       // payments, the caller's Namespace, in violet
       s.payments = makeNamespaceBox(root, PAYMENTS, 'payments');
       Object.assign(s.payments.style, { borderColor: C.violet, background: `rgba(${RGB.violet},.08)` });
-      balanceTagLabel(s.payments.verdict, 'ok');
       s.analytics = makeNamespaceBox(root, ANALYTICS, 'analytics');
-      balanceTagLabel(s.analytics.verdict, 'alarm');
       s.fraud = makeNamespaceBox(root, FRAUD, 'fraud');
       s.endpoint = makeEndpointBlock(root);
       s.allowlist = makeAllowlistBlock(root);
@@ -332,13 +317,9 @@
       s.queue = makeQueueTile(root);
 
       // its opaque body in the zone's own fill, over the Namespaces: the borders it crosses (payments', fraud's) stop
-      // at its walls, so it reads as one channel, not as cut by the Namespaces' edges
-      s.tube = makeTube(root, NEXUS_TUBE, s.zone.style.backgroundColor);
-      // its label names mTLS, cased as written (a pill sets its text in capitals), in a big pill: chapter 2's TLS
-      // label at its zoom
-      s.tube.label.classList.add('big');
-      s.tube.label.innerHTML = `${ICON('lock', 24, C.neon, 2)}mTLS`;
-      Object.assign(s.tube.label.style, { width: TUBE_LABEL.w + 'px', textTransform: 'none' });
+      // at its walls, so it reads as one channel, not as cut by the Namespaces' edges; its label names mTLS in a big
+      // pill: chapter 2's TLS label at its zoom
+      s.tube = makeTube(root, NEXUS_TUBE, { body: s.zone.style.backgroundColor, label: 'mTLS', big: true });
       s.card = makePayload(root, { w: CARD.w });
       s.result = makeSealedResult(root);
       // over the tube's end and the cards, which go behind it
@@ -356,7 +337,7 @@
       const hitAt = c[1] + T1.deny + T1.denyD;
       const allowAt = c[1] + T1.allow + T1.allowD;
 
-      // the camera holds; the analytics call's hit shakes it. The engine's zoom-through in and out.
+      // the camera holds; the analytics call's hit shakes it. The camera zoom-through (setCamera) in and out.
       const [shakeX, shakeY] = shake(t, hitAt, 10, 0.4);
       setCamera(s.cam, t, this.dur, { dx: shakeX, dy: shakeY });
       placeFlash(s.flash, t, hitAt, 0.3);
@@ -396,7 +377,7 @@
       draw(s.deny, deny, 0.8 * (1 - P(t, hitAt, 0.3)));
       sparkOnPath(s.denySpark, s.deny, deny);
       placeRipples(s.redRipples, t, hitAt, HIT.x, HIT.y, 40, 200, { d: 0.8, step: 0.15 });
-      popVerdict(s.analytics, t, 'NOT ON ALLOWLIST', 'alarm', hitAt + 0.1);
+      popVerdict(s.analytics.verdict, t, 'NOT ON ALLOWLIST', 'alarm', hitAt + 0.1);
       const red = t >= hitAt && t < hitAt + 0.7;
       s.allowlist.style.borderColor = red ? C.red : C.violet;
 
@@ -410,7 +391,7 @@
       s.allowlist.row.style.boxShadow = glowShadow(RGB.neon, listed ? 0.5 : 0, { blur: 16, alpha: 0.5 });
       placeRipples(s.allowRipples, t, allowAt, GATE.x, ALLOW_ROW_Y, 60, 240,
         { d: 0.6, step: 0.14 });
-      popVerdict(s.payments, t, 'ALLOWED', 'ok', c[1] + T1.allowed);
+      popVerdict(s.payments.verdict, t, 'ALLOWED', 'ok', c[1] + T1.allowed);
       const drawn = P(t, c[0] + T0.boundary, T0.boundaryD) * BOUNDARY.length;
       const open = P(t, c[1] + T1.open, T1.openD) * OPEN_HALF;
       strokeDashes(s.boundary, boundaryDashes(drawn, open));

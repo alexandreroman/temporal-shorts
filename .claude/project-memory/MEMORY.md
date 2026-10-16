@@ -22,15 +22,15 @@
 > rewrite it.
 
 - [Temporal Web UI reference](references/reference_temporal-web-ui.md) — local dev server UI, dark-mode colors, real page layout
-- [Temporal brand rules](references/project_brand.md) — colors, style, Noto Sans Mono + Aeonik stand-in, icons, sources
+- [Temporal brand rules](references/project_brand.md) — colors, style, icons, sources
 - [Official Temporal logo](references/reference_logo.md) — official lockup and symbol only, cropped viewBox; corner symbol on chapters
 - [Frame capture noise](references/project_frame-noise.md) — delta-2 specks, render-order diffs on curves only; whole-pixel resting elements
 - [Home page design](references/feedback_home-page.md) — lockup header, equal cards, count-agnostic grid, order, hover icons, no "silent"
 - [Player presenter mode](references/project_player-presenter-mode.md) — why holds sit at cues and fade-outs; held = playing, G runs
-- [Custom domain](references/project_custom-domain.md) — durable.withtemporal.dev, Cloudflare CNAME to Pages, DNS only, shared zone
+- [Custom domain durable.withtemporal.dev](references/project_custom-domain.md) — Cloudflare CNAME to Pages, DNS only, shared zone
 - [Themes: shared anatomy and stories](references/project_theme-anatomy.md) — structure, layout, subtitles, vocabulary, docs, per-theme stories
-- [Markdown for coding agents](references/project_agent-markdown.md) — /themes/<theme>.md only, generated text, absolute links, no llms.txt
-- [Search engine optimization](references/project_seo.md) — hidden transcript, title suffix, markdown-title, personal author, git lastmod
-- [Scene transitions without fades](references/feedback_scene-transitions.md) — hard cuts on the last frame, motion for content changes, no scene fades
+- [Markdown versions for coding agents](references/project_agent-markdown.md) — /themes/<theme>.md only, generated text, no llms.txt
+- [Search engine optimization of the site](references/project_seo.md) — hidden transcript, search titles, personal author, own-content lastmod
+- [Scene transitions without fades](references/feedback_scene-transitions.md) — hard cuts on the last frame, motion between contents
 - [Live follow-up of a theme in progress](references/feedback_live-follow-up.md) — HTML player served and rebuilt while a theme is built
 - [Camera moves within a scene](references/feedback_camera-moves.md) — one direction per scene, no ping-pong; content comes to the camera

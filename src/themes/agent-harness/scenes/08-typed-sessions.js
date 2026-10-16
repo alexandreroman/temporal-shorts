@@ -6,16 +6,18 @@
   // link. Both headings share one baseline; both zones start at y 196 and end at y 880 (the TypeScript card, the
   // SDK row).
   const TOP = 196, BOTTOM = 880, HEADING_Y = 163;
-  // Code cards: a 52 px header (file name), then 18 px code lines of 24 px from y 66, 16 px of bottom padding.
-  // At 18 px, a Noto Sans Mono character advances 10.8 px: the longest lines (66 characters, 713 px) fit the
-  // column with 28 px of padding on each side.
-  const CODE = { x: 530, w: 780, head: 52, lineTop: 66, lineH: 24, font: 18, textX: 28, bottom: 16 };
+  // Code cards: a 52 px header (file name), then 18 px code lines of 23 px from y 66, 15 px of bottom padding: with
+  // an odd line count and padding sum, both cards have even heights and rest on whole pixels, and the 11 Python
+  // lines leave room for the GENERATED TYPES arrow. At 18 px, a Noto Sans Mono character advances 10.8 px: the
+  // longest lines (66 characters, 713 px) fit the column with 28 px of padding on each side.
+  const CODE = { x: 530, w: 780, head: 52, lineTop: 66, lineH: 23, font: 18, textX: 28, bottom: 15 };
   const cardHeight = lineCount => CODE.lineTop + lineCount * CODE.lineH + CODE.bottom;
 
   // The agent's Python class (top of the column) and the TypeScript generated from it (bottom of the column).
   // Same names as chapter 5 (TravelAgent, plan_trip, PlanTrip, Itinerary); the state follows the harness's
   // HarnessState / agent.state() API and the TypeScript the shape harness-codegen writes (initData, null for an
-  // agent without init data, then handlers and states).
+  // agent without init data, then handlers and states). @agent.defn requires an @agent.init __init__ taking the
+  // AgentConfig; the stub methods sit together, without blank lines between them, as PEP 8 allows for one-liners.
   const PYTHON = [
     'class Trip(HarnessState):',
     '    items: list[Item] = []',
@@ -24,7 +26,8 @@
     '@agent.defn',
     'class TravelAgent:',
     '    trip = agent.state(Trip)',
-    '',
+    '    @agent.init',
+    '    def __init__(self, config: AgentConfig) -> None: ...',
     '    @agent.accepts',
     '    async def plan_trip(self, request: PlanTrip) -> Itinerary: ...',
   ];
@@ -50,7 +53,7 @@
   const PAIRS = [
     { py: [0, 2], ts: [0, 3] },
     { py: [6, 6], ts: [7, 7] },
-    { py: [8, 9], ts: [6, 6] },
+    { py: [9, 10], ts: [6, 6] },
   ];
   // the Trip fields the UI binds to, in the TypeScript card
   const TS_ITEMS = 1, TS_TOTAL = 2;
@@ -69,28 +72,26 @@
   };
 
   // Simple syntax colors, as in chapter 6: keywords and decorators violet, types light UV, the rest ink or slate
-  const KEYWORDS = new Set(['class', 'async', 'def', 'export', 'interface']);
-  const TYPES = new Set(['Trip', 'HarnessState', 'Item', 'TravelAgent', 'PlanTrip', 'Itinerary', 'int', 'number',
-    'list']);
-  const tokenColor = token => {
-    if (token.startsWith('@') || KEYWORDS.has(token)) return C.violet;
-    if (TYPES.has(token)) return '#A5ABFF';
-    if (/^\w/.test(token)) return C.ink;
-    return C.slate;
-  };
+  const KEYWORDS = ['class', 'async', 'def', 'export', 'interface'];
+  const TYPES = [
+    'Trip', 'HarnessState', 'Item', 'TravelAgent', 'AgentConfig', 'PlanTrip', 'Itinerary', 'int', 'number', 'list',
+    'None',
+  ];
+  // the generated TypeScript may hold generics (Array<Item>), so the code is escaped
   const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const codeHtml = line => line.replace(/@[\w.]+|\w+|[^\w\s]+/g,
-    token => `<span style="color:${tokenColor(token)}">${escapeHtml(token)}</span>`);
+  const codeHtml = line => codeTokens(line, KEYWORDS, TYPES)
+    .map(([text, color]) => `<span style="color:${color}">${escapeHtml(text)}</span>`)
+    .join('');
 
-  // code card: a header with the file name and a tag on the right, a rule, then the code lines. e.highlight(range,
-  // tint, color) adds a line highlight behind the code, hidden until update() shows it.
-  const makeCodeCard = (p, fileName, tag, tagColor, lines, h) => {
+  // source card: a header with the file name and a tag on the right, a rule, then the code lines.
+  // e.highlight(range, tint, color) adds a line highlight behind the code, hidden until update() shows it.
+  const makeSourceCard = (p, fileName, tag, tagColor, lines, h) => {
     const e = E(p,
       `<div style="position:absolute;left:24px;right:24px;top:0;height:${CODE.head}px;display:flex;`
       + `align-items:center;gap:10px">${ICON('code', 20, C.slate, 2)}`
       + `<span class="mono" style="font-size:18px">${fileName}</span>`
       + `<span class="lbl" style="margin-left:auto;font-size:15px;color:${tagColor}">${tag}</span></div>`
-      + `<div style="position:absolute;left:0;right:0;top:${CODE.head}px;border-top:1.5px solid ${C.line}"></div>`,
+      + `<div style="position:absolute;left:0;right:0;top:${CODE.head}px;border-top:1px solid ${C.line}"></div>`,
       'tile', { width: CODE.w + 'px', height: h + 'px', textAlign: 'left' });
     // line highlights sit in a layer under the code lines
     // the layer stays on, each highlight fades on its own
@@ -113,14 +114,14 @@
     + 'font-size:16px;line-height:23px;padding:0 10px;opacity:0">' + field + '</span>';
   // one itinerary row of the trip planner: icon, item and price
   const planRow = (icon, item, price) => '<div class="row" style="display:flex;align-items:center;gap:22px;'
-    + `height:84px;padding:0 26px;border:1.5px solid ${C.line};border-radius:var(--rs);margin-top:16px;opacity:0">`
+    + `height:84px;padding:0 26px;border:1px solid ${C.line};border-radius:var(--rs);margin-top:16px;opacity:0">`
     + `${ICON(icon, 34, C.ink, 1.7)}<span style="flex:1;font-size:30px">${item}</span>`
     + `<span class="mono" style="font-size:28px;color:var(--slate)">${price}</span></div>`;
   // browser window holding a small trip planner (top bar with three dots), with the badges of its bound fields:
   // trip.items at the right end of the label line, over the rows, and trip.total_usd beside the total
   const makePlanner = p => {
     const e = E(p,
-      `<div style="height:48px;border-bottom:1.5px solid ${C.line};display:flex;gap:10px;align-items:center;`
+      `<div style="height:48px;border-bottom:1px solid ${C.line};display:flex;gap:10px;align-items:center;`
       + 'padding-left:20px"><i></i><i></i><i></i></div>'
       + '<div style="padding:30px 44px">'
       + '<div style="font-size:52px;line-height:1.15">Lisbon, 3 nights</div>'
@@ -172,10 +173,10 @@
 
       // left: the agent's Python class, the generated types arrow, the generated TypeScript
       s.lblL = E(root, 'Your agent', 'lbl');
-      s.python = makeCodeCard(root, 'travel_agent.py', 'Python', C.slate, PYTHON, PY.h);
+      s.python = makeSourceCard(root, 'travel_agent.py', 'Python', C.slate, PYTHON, PY.h);
       s.gen = path(s.svg, `M ${CODE.x} ${GEN.top} L ${CODE.x} ${GEN.bottom}`, C.violet, 3, true);
       s.genL = E(root, 'Generated types', 'lbl', { fontSize: '16px', color: C.ink });
-      s.ts = makeCodeCard(root, 'client_sdk/TravelAgent.ts', 'Generated', C.violet, TYPESCRIPT, TS.h);
+      s.ts = makeSourceCard(root, 'client_sdk/TravelAgent.ts', 'Generated', C.violet, TYPESCRIPT, TS.h);
       // the highlights of each mirrored pair, one in each card, and the UV highlights of the bound Trip fields
       s.pairs = PAIRS.map(pair => [
         s.python.highlight(pair.py, PAIR_TINT, C.violet),
@@ -241,7 +242,7 @@
       // session traffic: once the link is drawn, a pulse runs along it in an endless loop. It starts on the story
       // clock t but runs its laps on the ambient clock, which equals t in frozen frames
       const pulseStart = c[1] + 3.9, pulseLap = 1.4;
-      const lap = ((ambientTime(this) - pulseStart) % pulseLap) / pulseLap;
+      const lap = ((G - this.start - pulseStart) % pulseLap) / pulseLap;
       const pulseOn = t >= pulseStart ? Math.sin(Math.PI * lap) : 0;
       place(s.pulse, lerp(LINK.from + 10, LINK.to - 16, lap), LINK.y, 1, pulseOn);
       // bindings: the rows read trip.items, then the total reads trip.total_usd; each lights its Trip field

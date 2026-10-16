@@ -2,10 +2,10 @@
 
   python scripts/export_srt.py --theme <theme>
 """
-import argparse, json, re, sys
+import argparse, json, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import OUTPUT, add_theme_argument, open_page
+from common import OUTPUT, add_theme_argument, open_page, subtitle_text
 from playwright.sync_api import sync_playwright
 
 def ts(t):
@@ -21,6 +21,6 @@ with sync_playwright() as pw:
     browser.close()
 OUTPUT.mkdir(exist_ok=True)
 out = OUTPUT / f"{args.theme}.srt"
-cues = [f"{i}\n{ts(a)} --> {ts(b)}\n{re.sub('<[^>]+>', '', t)}\n\n" for i, (a, b, t) in enumerate(subs, 1)]
+cues = [f"{i}\n{ts(a)} --> {ts(b)}\n{subtitle_text(t)}\n\n" for i, (a, b, t) in enumerate(subs, 1)]
 out.write_text("".join(cues), encoding="utf-8")
 print(out)

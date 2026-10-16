@@ -29,30 +29,6 @@ Object.assign(ICONS, {
   eyeOff: '<path d="M2 12c3-6 17-6 20 0-3 6-17 6-20 0z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/>',
 });
 
-// ---------- DOM writes that skip unchanged values: update() runs every frame, and rewriting the same HTML, text or
-// path costs a relayout for nothing
-// Sets an element's HTML, rewritten only when it changes
-function setHtml(e, html) {
-  if (e._html !== html) {
-    e.innerHTML = html;
-    e._html = html;
-  }
-}
-// Sets an element's text, rewritten only when it changes
-function setText(e, text) {
-  if (e._text !== text) {
-    e.textContent = text;
-    e._text = text;
-  }
-}
-// Sets a path's d, and its length (for draw()), only when it changes
-function setD(pathEl, d) {
-  if (pathEl._d === d) return;
-  pathEl.setAttribute('d', d);
-  pathEl._L = pathEl.getTotalLength();
-  pathEl._d = d;
-}
-
 // ---------- the running example: Nora sends €25,000 to Leo, one payload carried through every chapter
 // The payload's fields, [key, value], in the order the card lists them
 const TRANSFER = [
@@ -69,22 +45,14 @@ const cipherGlyph = (row, col, salt = 0) =>
   CIPHER_GLYPHS[Math.floor(hash(row * 97 + col + salt) * CIPHER_GLYPHS.length)];
 
 // ---------- padlock
-// How far the shackle of an open padlock rises above the body, in units of its 24 grid
-const LOCK_LIFT = 4;
 // Seal progress at which the shackle of setLock() lands in the body (backOut first reaches 1 there)
 const LOCK_SHUT = 0.37;
-// Stroke padlock in a size px box (24 grid, like ICON('lock')), open or shut by setLock(). Its body is filled with
-// the stage black, so the shackle's legs hide inside it as the lock snaps shut. css: extra styles of its box.
+// A lockSvg() padlock in a size px box, open or shut by setLock(). Its body is filled with the stage black, so the
+// shackle's legs hide inside it as the lock snaps shut. css: extra styles of its box.
 function makeLock(p, size, stroke = 1.8, css = {}) {
-  const e = E(p,
-    `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke-width="${stroke}"`
-    + ' stroke-linecap="square" stroke-linejoin="miter" style="display:block;overflow:visible">'
-    + '<path class="shackle" d="M8 11V7a4 4 0 0 1 8 0v4"/>'
-    + `<rect x="5" y="11" width="14" height="10" fill="${C.bg}"/><path d="M12 15v2"/></svg>`,
-    '', { width: size + 'px', height: size + 'px', ...css });
+  const e = E(p, lockSvg(size, { stroke, fill: C.bg }), '', { width: size + 'px', height: size + 'px', ...css });
   e.size = size;
   e.svg = e.querySelector('svg');
-  e.shackle = e.querySelector('.shackle');
   return e;
 }
 // seal: 0 open (the shackle lifted out of the body) to 1 shut. Pass a linear progress: the shackle snaps down with a
@@ -92,7 +60,7 @@ function makeLock(p, size, stroke = 1.8, css = {}) {
 function setLock(lock, seal) {
   const s = clamp(seal);
   const lift = (1 - backOut(s)) * LOCK_LIFT;
-  lock.shackle.setAttribute('transform', `translate(0 ${-lift})`);
+  liftShackle(lock.svg, lift);
   const shut = s >= LOCK_SHUT;
   lock.svg.setAttribute('stroke', shut ? C.neon : C.ink);
   // a steady glow once shut, brighter for an instant as the shackle lands
@@ -100,6 +68,20 @@ function setLock(lock, seal) {
   lock.svg.style.filter = glow
     ? `drop-shadow(0 0 ${Math.round(lock.size * 0.3 * glow)}px rgba(${RGB.neon},${(0.8 * glow).toFixed(3)}))`
     : 'none';
+}
+
+// The round padlock badge centered on the top edge of a box w px wide (the payload card, a recap tile, the sealed
+// result): a badge `badge` px across, in the stage black with a line border, and a makeLock() padlock lockSize px
+// in its middle; pass even sizes, so both center on whole pixels. The scenes set the border color and the lock's state.
+// Both are placed from the padding box of their parent, TILE_BORDER inside its outer edge.
+function makeLockBadge(parent, w, badge, lockSize) {
+  const e = E(parent, '', '', {
+    left: (w - badge) / 2 - TILE_BORDER + 'px', top: -badge / 2 - TILE_BORDER + 'px', width: badge + 'px',
+    height: badge + 'px', borderRadius: '50%', background: C.bg, border: `1px solid ${C.line}`, opacity: 1,
+  });
+  const inset = (badge - lockSize) / 2 - TILE_BORDER;
+  const lock = makeLock(e, lockSize, 1.9, { left: inset + 'px', top: inset + 'px', opacity: 1 });
+  return { badge: e, lock };
 }
 
 // ---------- the payload card
@@ -156,8 +138,8 @@ function makePayload(p, { w = 420 } = {}) {
     + `<div class="mono value" style="font-size:${value.font}px;line-height:${value.line}px;white-space:pre"></div>`
     + '</div>').join('');
   const card = E(p,
-    `<div class="alarm" style="position:absolute;inset:-1.5px;border:1.5px solid ${C.red};border-radius:var(--r);`
-    + `background:rgba(${RGB.red},.12);opacity:0"></div>`
+    `<div class="alarm" style="position:absolute;inset:-${TILE_BORDER}px;border:1px solid ${C.red};`
+    + `border-radius:var(--r);background:rgba(${RGB.red},.12);opacity:0"></div>`
     + `<div class="mono" style="font-size:${head.font}px;line-height:${head.line}px;letter-spacing:.14em;`
     + `color:${C.slate};margin-bottom:${head.gap}px">PAYLOAD</div>`
     + rowsHtml,
@@ -165,17 +147,9 @@ function makePayload(p, { w = 420 } = {}) {
       width: w + 'px', height: h + 'px', textAlign: 'left',
       padding: `${pad.top}px ${pad.x}px ${pad.bottom}px`,
     });
-  // centered on the card's top edge; offsets from the padding box, inside the card's 1.5 px border
-  const lockBadge = E(card, '', '', {
-    left: (w - badge) / 2 - 1.5 + 'px', top: -badge / 2 - 1.5 + 'px', width: badge + 'px', height: badge + 'px',
-    borderRadius: '50%', background: C.bg, border: `1.5px solid ${C.line}`, opacity: 1,
-  });
-  const lockSize = 2 * px(12);
-  // centered in the badge, offsets from inside its 1.5 px border
-  card.lock = makeLock(lockBadge, lockSize, 1.9, {
-    left: (badge - lockSize) / 2 - 1.5 + 'px', top: (badge - lockSize) / 2 - 1.5 + 'px', opacity: 1,
-  });
+  const { badge: lockBadge, lock } = makeLockBadge(card, w, badge, 2 * px(12));
   card.lockBadge = lockBadge;
+  card.lock = lock;
   card.alarm = card.querySelector('.alarm');
   card.rows = [...card.querySelectorAll('.row')].map((e, i) => ({ e, value: e.querySelector('.value'), i }));
   card.u = u;
@@ -218,7 +192,9 @@ const LANE = {
 };
 // Hand-off from the intro to chapter 1: the payload card in the Worker, its center and width. The intro's card flies
 // there and shrinks to this width; chapter 1 opens on it. In the Worker panel, under its heading and code line.
+// layout: the sizes of a card of that width (payloadLayout), the lane-size card of every lane scene.
 const PAYLOAD_IN_WORKER = { x: LANE.worker.x, y: LANE.worker.y + 55, w: 340 };
+PAYLOAD_IN_WORKER.layout = payloadLayout(PAYLOAD_IN_WORKER.w);
 
 // The environment's dashed edge, the theme's boundary look: a slate stroke `width` px wide, dashes of `dash` px, `gap`
 // px apart (chapter 9's Nexus gate draws its boundary in it too)
@@ -240,14 +216,13 @@ function drawDashed(p, prog, o = 1, dash = ENV_EDGE.dash, gap = ENV_EDGE.gap) {
 const roundRectD = (x, y, w, h, r) => `M ${x + w / 2} ${y} H ${x + w - r} A ${r} ${r} 0 0 1 ${x + w} ${y + r}`
   + ` V ${y + h - r} A ${r} ${r} 0 0 1 ${x + w - r} ${y + h} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + h - r}`
   + ` V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
-// How far a zone's labels sit inside it: its heading under its top edge, its caption above its bottom edge, in px
-const ZONE_LABEL_INSET = { head: 20, cap: 24 };
-// The height of TEMPORAL's heading, the official lockup, px; YOUR ENVIRONMENT's line is as high
-const ZONE_LOGO_H = 34;
-// A zone's heading (zone.head), 24 px from its left edge, inside a frame of its own (zone.headFrame): placeLane() sets
-// the heading's opacity, frameLaneEdges() the frame's
-const zoneHeading = html => '<div class="head-frame" style="position:absolute;left:24px;'
-  + `top:${ZONE_LABEL_INSET.head}px">${html}</div>`;
+// How far a zone's labels sit inside it: its heading under its top edge and from its left edge (ZONE_HEAD), its
+// caption above its bottom edge, in px. TEMPORAL's heading, the official lockup, is ZONE_HEAD.h high.
+const ZONE_LABEL_INSET = { head: ZONE_HEAD.top, left: ZONE_HEAD.left, cap: 24 };
+// A zone's heading (zone.head), inside a frame of its own (zone.headFrame): placeLane() sets the heading's opacity,
+// frameLaneEdges() the frame's
+const zoneHeading = html => '<div class="head-frame" style="position:absolute;'
+  + `left:${ZONE_LABEL_INSET.left}px;top:${ZONE_LABEL_INSET.head}px">${html}</div>`;
 // A zone's caption (zone.cap), centered, inside a frame of its own (zone.capFrame) like the heading; hidden until a
 // scene sets its opacity
 const zoneCaption = text => '<div class="cap-frame" style="position:absolute;left:0;right:0;'
@@ -329,18 +304,18 @@ function makeLane(root) {
   const lane = {};
   lane.env = E(root,
     // its line as high as TEMPORAL's logo, so both headings share a center line
-    zoneHeading(`<div class="head lbl" style="padding-left:0;font-size:18px;line-height:${ZONE_LOGO_H}px">`
+    zoneHeading(`<div class="head lbl" style="padding-left:0;font-size:18px;line-height:${ZONE_HEAD.h}px">`
       + 'Your environment</div>')
     + zoneCaption('Your code runs here'),
     // a transparent border as thick as TEMPORAL's, so both zones' labels sit as far from their edges
     '', {
       width: env.w + 'px', height: env.h + 'px', background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)',
-      border: '1.5px solid transparent',
+      border: '1px solid transparent',
     });
   lane.temporal = E(root,
-    zoneHeading(`<img class="head" src="${LOGO}" style="height:${ZONE_LOGO_H}px;display:block">`)
+    zoneHeading(`<img class="head" src="${LOGO}" style="height:${ZONE_HEAD.h}px;display:block">`)
     + zoneCaption('Your code never runs here'),
-    'tile', { width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: '#17182A' });
+    'tile', { width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: C.temporalSurface });
   [lane.env, lane.temporal].forEach(zone => {
     zone.head = zone.querySelector('.head');
     zone.headFrame = zone.querySelector('.head-frame');
@@ -375,19 +350,22 @@ function makeLane(root) {
   // on the dashed edge, which it hides
   lane.door = E(root, ICON('door', 32, C.ink, 1.8), '', {
     width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: C.bg, border: `1.5px solid ${C.slate}`, borderRadius: 'var(--rs)',
+    background: C.bg, border: `1px solid ${C.slate}`, borderRadius: 'var(--rs)',
   });
   lane.door.icon = lane.door.querySelector('svg');
   return lane;
 }
-// Shows the lane's parts in place, each with its opacity in o (1 by default): env (with its dashed edge), temporal,
-// worker, history, wire, door, and heads, the zones' headings (YOUR ENVIRONMENT and the logo), which a close shot
-// pushes up under the chapter header (frameLaneEdges also fades them out at the frame's top edge); close, TEMPORAL's
-// widening into the close layout (CLOSE); envZone and temporalZone, the zones' rectangles when they move away from
-// LANE's (the fleet layout, FLEET; see lerpZone). The Worker runs, its gear turning; the door is in its slate and white
-// look. The zone captions (env.cap, temporal.cap) keep the opacity a scene gives them.
+// The opacities of the lane's parts that placeLane() shows: every part shown, unless a scene says otherwise
+const LANE_SHOWN = { env: 1, temporal: 1, worker: 1, history: 1, wire: 1, door: 1, heads: 1 };
+// Shows the lane's parts in place, each with its opacity in o (LANE_SHOWN by default): env (with its dashed edge),
+// temporal, worker, history, wire, door, and heads, the zones' headings (YOUR ENVIRONMENT and the logo), which a close
+// shot pushes up under the chapter header (frameLaneEdges also fades them out at the frame's top edge); close,
+// TEMPORAL's widening into the close layout (CLOSE); envZone and temporalZone, the zones' rectangles when they move
+// away from LANE's (the fleet layout, FLEET; see lerpZone). The Worker runs, its gear turning; the door is in its slate
+// and white look. The zone captions (env.cap, temporal.cap) keep the opacity a scene gives them.
 function placeLane(lane, o = {}) {
-  const { env = 1, temporal = 1, worker = 1, history = 1, wire = 1, door = 1, heads = 1, close = 0 } = o;
+  const { env, temporal, worker, history, wire, door, heads } = { ...LANE_SHOWN, ...o };
+  const { close = 0 } = o;
   lane.env.head.style.opacity = heads;
   lane.temporal.head.style.opacity = heads;
   const center = zone => [zone.x + zone.w / 2, zone.y + zone.h / 2];
@@ -395,11 +373,7 @@ function placeLane(lane, o = {}) {
   if (lane.envKey !== zoneKey(envZone)) {
     lane.env.style.width = envZone.w + 'px';
     lane.env.style.height = envZone.h + 'px';
-    envEdgeDs(envZone).forEach((d, i) => {
-      const edge = lane.envEdges[i];
-      edge.setAttribute('d', d);
-      edge._L = edge.getTotalLength();
-    });
+    envEdgeDs(envZone).forEach((d, i) => setD(lane.envEdges[i], d));
     lane.envKey = zoneKey(envZone);
   }
   place(lane.env, ...center(envZone), 1, env);
@@ -434,6 +408,8 @@ const TUBE = { x0: LANE.worker.x + LANE.worker.w / 2, x1: LANE.temporal.x, y: LA
 TUBE.label = { x: TUBE.x0 + 120, y: TUBE.y - TUBE.h / 2 - 42 };
 // How far the ring of a tube's mouth reaches past the tube's end, px: half the mouth's width
 const TUBE_MOUTH = 12;
+// The width of a tube's label pill (makeTube), px: the regular one, and the big one of chapter 9
+const TUBE_LABEL_W = { regular: 112, big: 180 };
 // A TLS tube along a connection, for its geometry geom (TUBE, or PROXY_TUBE from chapter 6: x0 and x1, its ends; y,
 // its line; h, its height; label, its label's center): a glass pipe with neon walls, a neon ring at each mouth and a
 // flow of light inside it (tube.flow) running toward Temporal; then its TLS label (tube.label). placeTube() shows them.
@@ -442,8 +418,9 @@ const TUBE_MOUTH = 12;
 // stop at its walls, so it reads as one channel. Its mouths are opaque too, their face filled like the body: the
 // edge of the tile or panel it leaves (the Worker's, at the tube's x0) stops at the mouth's ring instead of showing
 // inside it. Whatever rides inside it (a card, a connection) goes after it. Under it, a backing in the same fill
-// (tube.backing), mouths included, which keeps the tube opaque while placeTube() dims it.
-function makeTube(root, { x0, x1, h }, body = C.bg) {
+// (tube.backing), mouths included, which keeps the tube opaque while placeTube() dims it. label: the protocol its
+// label names, cased as written (a pill sets its text in capitals); big: the label in a big pill (TUBE_LABEL_W).
+function makeTube(root, { x0, x1, h }, { body = C.bg, label = 'TLS', big = false } = {}) {
   const glass = `linear-gradient(to bottom, rgba(${RGB.neon},.16), rgba(${RGB.neon},.03) 45%, rgba(${RGB.neon},.08))`;
   // the mouth spans the tube's border box (top -2px, under its top wall), so its face's gradient, set on its padding
   // box, lines up with the body's
@@ -466,8 +443,10 @@ function makeTube(root, { x0, x1, h }, body = C.bg) {
     });
   tube.backing = backing;
   tube.flow = tube.querySelector('.flow');
-  tube.label = fixedTag(root, `${ICON('lock', 18, C.neon, 2)}TLS`, 'neon solid', 112);
-  Object.assign(tube.label.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' });
+  const labelHtml = `${ICON('lock', big ? 24 : 18, C.neon, 2)}${label}`;
+  const labelW = big ? TUBE_LABEL_W.big : TUBE_LABEL_W.regular;
+  tube.label = fixedTag(root, labelHtml, big ? 'neon solid big' : 'neon solid', labelW, { gap: 8 });
+  tube.label.style.textTransform = 'none';
   return tube;
 }
 // The tube from x0 to x1 of geom (see makeTube; a scene may pass a shorter x1, the tube's width follows), drawn from
@@ -535,18 +514,20 @@ const NS_SWEEP_W = 160;
 // shows them.
 function makeNamespaces(lane) {
   const bands = NAMESPACES.map(ns => {
-    // offsets from inside the band's 1.5 px border, so its label and lock rest on whole pixels
-    const labelTop = (ns.mine ? 20 : (ns.h - 44) / 2) - 1.5;
+    // offsets from the band's padding box, TILE_BORDER inside its edge
+    const labelTop = (ns.mine ? 20 : (ns.h - 44) / 2) - TILE_BORDER;
     const band = E(lane.temporal.parentNode,
-      `<div style="position:absolute;left:18.5px;top:${labelTop}px">`
+      `<div style="position:absolute;left:${20 - TILE_BORDER}px;top:${labelTop}px">`
       + `<div class="mono" style="font-size:13px;line-height:18px;letter-spacing:.14em;color:${C.slate}">`
       + 'NAMESPACE</div>'
       + `<div class="mono" style="font-size:20px;line-height:26px">${ns.name}</div></div>`,
-      '', { width: NS_BAND.w + 'px', height: ns.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)' });
+      '', { width: NS_BAND.w + 'px', height: ns.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)' });
     lane.svg.before(band);
     band.ns = ns;
     if (!ns.mine) {
-      band.lock = makeLock(band, 30, 1.9, { left: NS_BAND.w - 54 - 1.5 + 'px', top: (ns.h - 30) / 2 - 1.5 + 'px' });
+      band.lock = makeLock(band, 30, 1.9, {
+        left: NS_BAND.w - 54 - TILE_BORDER + 'px', top: (ns.h - 30) / 2 - TILE_BORDER + 'px',
+      });
     }
     return band;
   });
@@ -591,15 +572,6 @@ function placeNamespaces(ns, split, lit = 0, seals = [0, 0], o = 1) {
   });
 }
 
-// Centers the label of a statusTag (src/shared.js) of kind `kind` in its box, this theme's tags only (pad: the tag's
-// side padding). The letter spacing also trails the last letter: a label alone gets as much extra left padding, while
-// the margin round a leading icon's stroke inside its viewBox already offsets it. The 1-2 px that setStatus() adds to
-// round the width up to an even number go to both sides, not only to the right. Call it before setStatus(), which
-// measures the width.
-function balanceTagLabel(e, kind, pad = '10px') {
-  e.style.paddingLeft = STATUS_KINDS[kind].icon ? pad : `calc(${pad} + .1em)`;
-  e.style.justifyContent = 'center';
-}
 // The red alarm look of this theme's verdicts (UNREADABLE, REJECTED, READABLE; IN CLEAR in its pill): a solid red
 // fill under dark bold text, which reads at a glance. A statusTag kind of this theme only, so other themes keep theirs.
 STATUS_KINDS.alarm = { background: C.red, color: C.bg, borderColor: C.red, icon: ['x', C.bg, 2.8] };
@@ -608,16 +580,40 @@ function setAlarmTag(e, label) {
   e.style.fontWeight = '700';
   setStatus(e, label, 'alarm');
 }
+// Sets a verdict tag's label and kind: 'alarm' (setAlarmTag) or another statusTag kind (setStatus), in regular weight
+function setVerdict(e, label, kind) {
+  if (kind === 'alarm') {
+    setAlarmTag(e, label);
+  } else {
+    e.style.fontWeight = '';
+    setStatus(e, label, kind);
+  }
+}
+// A verdict tag in the heading row of a tile or a Namespace (a statusTag, its icon as large as its text, font px):
+// h px high, its right edge `right` px and its top `top` px from the parent's padding box; it pops from its right
+// edge (popVerdict) and stays hidden until then
+function makeHeadingVerdict(parent, { font, h, right, top }) {
+  const e = statusTag(parent, { font, icon: font });
+  Object.assign(e.style, {
+    left: 'auto', right: right + 'px', top: top + 'px', height: h + 'px', transformOrigin: 'right center',
+  });
+  return e;
+}
+// Pops verdict tag e in at `at`, with its label and kind (see setVerdict)
+function popVerdict(e, t, label, kind, at) {
+  setVerdict(e, label, kind);
+  popScale(e, popIn(t, at));
+}
 
 // ---------- the Event History that stores the payload, and the Web UI (chapters 3 and 4)
 // Inside TEMPORAL, at camera rest: the stored Event History, with the Web UI's place (LANE.ui) under it; in the close
 // layout (CLOSE), the history on the left and a column on its right, the Web UI over the viewers (chapter 3) or the
-// Search Attributes (chapter 4). The Event History grows from the lane's (LANE.history) to HIST, 28 px clear of the
-// TLS tube's mouth on its left.
-const HIST = { x: 1480, y: 460, w: 560, h: 398 };
+// Search Attributes (chapter 4). The Event History grows from the lane's (LANE.history) to STORED_HIST, 28 px clear of
+// the TLS tube's mouth on its left.
+const STORED_HIST = { x: 1480, y: 460, w: 560, h: 398 };
 // Its rows; row 2 holds the payload. HIST_ROW: each row's top in the card, the row height and the text size.
 const HIST_ROWS = [
-  'Workflow started: transfer', 'Activity completed: debitAccount', 'Activity scheduled: creditAccount',
+  'Workflow started: TransferWorkflow', 'Activity completed: debitAccount', 'Activity scheduled: creditAccount',
 ];
 const HIST_ROW = { tops: [56, 92, 352], h: 32, font: 18 };
 // The payload chip of row 2: the payload card itself, a lane-size card (PAYLOAD_IN_WORKER.w) shown at scale k,
@@ -627,13 +623,13 @@ const HIST_ROW = { tops: [56, 92, 352], h: 32, font: 18 };
 // 3 px low, clear of its last value.
 const HIST_CHIP = { k: 0.8 };
 HIST_CHIP.w = PAYLOAD_IN_WORKER.w * HIST_CHIP.k;
-HIST_CHIP.h = payloadLayout(PAYLOAD_IN_WORKER.w).h * HIST_CHIP.k;
-HIST_CHIP.x = HIST.x - HIST.w / 2 + 70 + HIST_CHIP.w / 2;
-HIST_CHIP.y = HIST.y - HIST.h / 2 + 143 + HIST_CHIP.h / 2;
+HIST_CHIP.h = PAYLOAD_IN_WORKER.layout.h * HIST_CHIP.k;
+HIST_CHIP.x = STORED_HIST.x - STORED_HIST.w / 2 + 70 + HIST_CHIP.w / 2;
+HIST_CHIP.y = STORED_HIST.y - STORED_HIST.h / 2 + 143 + HIST_CHIP.h / 2;
 HIST_CHIP.tagY = HIST_CHIP.y + HIST_CHIP.h / 2 + 3;
 // The close shot that reads the small text of TEMPORAL, [x, y, scale] for shot(): the stored history, centered; at 1.6
 // the chip's values render at 19.7 px and its labels at 14.5 px. TEMPORAL's zone, cut by the frame there, dims.
-const HIST_SHOT = [HIST.x, HIST.y, 1.6];
+const HIST_SHOT = [STORED_HIST.x, STORED_HIST.y, 1.6];
 // The close layout of TEMPORAL in HIST_SHOT, when the message needs more than the history: rather than the camera
 // moving, the content comes to it. The zone widens on both sides (zone: its left edge x and width; it narrows back
 // before any wider shot), the history slides left (hist: its center x) and a column comes in on its right, the Web
@@ -642,37 +638,37 @@ const HIST_SHOT = [HIST.x, HIST.y, 1.6];
 const CLOSE = {
   zone: { x: 956, w: 1048 }, hist: { x: 1260 }, column: { x: 1830 },
   // the Web UI and the slot, 24 px apart, centered on the history
-  ui: { y: HIST.y - (LANE.ui.h + 24) / 2 }, slot: { y: HIST.y + (LANE.ui.h + 24) / 2 },
+  ui: { y: STORED_HIST.y - (LANE.ui.h + 24) / 2 }, slot: { y: STORED_HIST.y + (LANE.ui.h + 24) / 2 },
 };
 // How far the history and its chip move left in the close layout, at progress `close` (0 to 1)
-const closeDx = close => Math.round(lerp(0, CLOSE.hist.x - HIST.x, close));
-// The stored Event History: the white card (HIST) with its rows, a SAVED tag per row and the lane history's EMPTY
-// note, then its payload chip (card.chip, a makePayload). placeStoredHistory() shows them; the chip's state
+const closeDx = close => Math.round(lerp(0, CLOSE.hist.x - STORED_HIST.x, close));
+// The stored Event History: the white card (STORED_HIST) with its rows, a SAVED tag per row and the lane history's
+// EMPTY note, then its payload chip (card.chip, a makePayload). placeStoredHistory() shows them; the chip's state
 // (setPayload) stays with the scenes.
 function makeStoredHistory(root) {
   const card = makeHistoryCard(root, HIST_ROWS, {
-    w: HIST.w, h: HIST.h, font: HIST_ROW.font, rowH: HIST_ROW.h, rowTop: i => HIST_ROW.tops[i],
+    w: STORED_HIST.w, h: STORED_HIST.h, font: HIST_ROW.font, rowH: HIST_ROW.h, rowTop: i => HIST_ROW.tops[i],
     tagTop: i => HIST_ROW.tops[i] + (HIST_ROW.h - 24) / 2, tagRight: 20, tag: { font: 12, icon: 12 },
   });
   card.tags.forEach(tag => {
     tag.style.height = '24px';
-    balanceTagLabel(tag, 'saved');
   });
   card.insertAdjacentHTML('beforeend', historyEmptyNote());
   card.empty = card.querySelector('.empty');
   card.chip = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
   return card;
 }
-// grow (0 to 1): the card grows from the lane's history, EMPTY, to HIST, as EMPTY fades; o: the opacity of the card;
-// rows: the progress of each row as it slides in (showRow); saved: the opacity of each row's SAVED tag; chip: the
+// grow (0 to 1): the card grows from the lane's history, EMPTY, to STORED_HIST, as EMPTY fades; o: the opacity of the
+// card; rows: the progress of each row as it slides in (showRow); saved: the opacity of each row's SAVED tag; chip: the
 // opacity of the chip, which rests at HIST_CHIP; close: the slide of both into the close layout (closeDx).
 function placeStoredHistory(card, { grow = 1, o = 1, rows = [1, 1, 1], saved = [1, 1, 1], chip = 1, close = 0 } = {}) {
   const { history } = LANE;
   // even sizes, so the card rests on whole pixels
-  card.style.width = 2 * Math.round(lerp(history.w, HIST.w, grow) / 2) + 'px';
-  card.style.height = 2 * Math.round(lerp(history.h, HIST.h, grow) / 2) + 'px';
+  card.style.width = 2 * Math.round(lerp(history.w, STORED_HIST.w, grow) / 2) + 'px';
+  card.style.height = 2 * Math.round(lerp(history.h, STORED_HIST.h, grow) / 2) + 'px';
   const dx = closeDx(close);
-  place(card, Math.round(lerp(history.x, HIST.x, grow)) + dx, Math.round(lerp(history.y, HIST.y, grow)), 1, o);
+  const x = Math.round(lerp(history.x, STORED_HIST.x, grow)) + dx;
+  place(card, x, Math.round(lerp(history.y, STORED_HIST.y, grow)), 1, o);
   card.empty.style.opacity = 1 - clamp(grow * 3);
   card.rows.forEach((row, i) => showRow(row, rows[i], 26, true));
   card.tags.forEach((tag, i) => {
@@ -690,17 +686,10 @@ function makeChipVerdict(root) {
 }
 // The opaque fill of each verdict kind: the tag straddles the chip's edge, which must not show through it
 const VERDICT_FILL = { alarm: C.red, wait: 'var(--violet-solid)' };
-// The verdict tag at HIST_CHIP.tagY: its label and kind ('alarm', see setAlarmTag, or 'wait', see setStatus), its
-// scale and opacity, flip, its height as it flips over (1 flat on the chip, 0 edge on), and close, the chip's slide
-// (closeDx)
+// The verdict tag at HIST_CHIP.tagY: its label and kind ('alarm' or 'wait', see setVerdict), its scale and opacity,
+// flip, its height as it flips over (1 flat on the chip, 0 edge on), and close, the chip's slide (closeDx)
 function setChipVerdict(e, label, kind, { s = 1, o = 1, flip = 1, close = 0 } = {}) {
-  balanceTagLabel(e, kind);
-  if (kind === 'alarm') {
-    setAlarmTag(e, label);
-  } else {
-    e.style.fontWeight = '';
-    setStatus(e, label, kind);
-  }
+  setVerdict(e, label, kind);
   e.style.background = VERDICT_FILL[kind];
   place(e, HIST_CHIP.x + closeDx(close), HIST_CHIP.tagY, s, o);
   if (flip < 1) e.style.transform += ` scaleY(${flip.toFixed(3)})`;
@@ -720,15 +709,15 @@ function makeWebUI(root) {
     + '<div class="mono value" style="font-size:13px;line-height:20px;white-space:pre;margin:0 -6px;padding:0 6px;'
     + 'border-radius:4px"></div></div>';
   const win = E(root,
-    `<div style="height:30px;background:#191919;border-bottom:1px solid ${C.line};display:flex;align-items:center;`
-    + `gap:6px;padding-left:12px">${dot}${dot}${dot}<span class="ttl mono" style="margin-left:10px;font-size:11px;`
-    + `letter-spacing:.14em;color:${C.slate}">TEMPORAL WEB UI</span></div>`
+    `<div style="height:30px;background:${WEB_UI.panel};border-bottom:1px solid ${C.line};display:flex;`
+    + `align-items:center;gap:6px;padding-left:12px">${dot}${dot}${dot}<span class="ttl mono" style="margin-left:10px;`
+    + `font-size:11px;letter-spacing:.14em;color:${C.slate}">TEMPORAL WEB UI</span></div>`
     + '<div style="padding:10px 16px 0">'
     + `<div class="line mono" style="font-size:13px;line-height:18px"><span style="color:${C.slate}">2</span>`
     + '&nbsp; Activity completed</div>'
     + WEBUI_FIELDS.map(field).join('') + '</div>',
     '', {
-      width: WEBUI.w + 'px', height: WEBUI.h + 'px', background: '#111111', border: `1.5px solid ${C.line}`,
+      width: WEBUI.w + 'px', height: WEBUI.h + 'px', background: WEB_UI.page, border: `1px solid ${C.line}`,
       borderRadius: 'var(--r)', overflow: 'hidden', textAlign: 'left',
     });
   win.caption = win.querySelector('.ttl');
@@ -801,8 +790,7 @@ const FLEET_CLIENTS = [['SDK client', 'code', 3, 0], ['Web UI', 'window', 3, 1]]
 // track (a rounded corner between them)
 function fleetLinkD({ x, row, trackY }, x1) {
   const edgeY = row ? FLEET.rows[1] - FLEET.tile.h / 2 : FLEET.rows[0] + FLEET.tile.h / 2;
-  const r = 4, dir = row ? -1 : 1;
-  return `M ${x} ${edgeY} V ${trackY - dir * r} Q ${x} ${trackY} ${x + r} ${trackY} H ${x1}`;
+  return roundedPath([[x, edgeY], [x, trackY], [x1, trackY]], 4);
 }
 
 // The official logo of each Workers' language (their sources and licenses are in the README of their folder), its
@@ -812,16 +800,6 @@ const LANGUAGE_LOGOS = {
   Java: { url: assetUrl('assets/languages/java.svg'), w: 16, h: 22 },
   TypeScript: { url: assetUrl('assets/languages/typescript.svg'), w: 19, h: 19 },
 };
-// The SVG filter that paints a logo in ink, its shape untouched; added to the stage by the first Worker tile
-const LOGO_INK_ID = 'security-logo-ink';
-function addLogoInkFilter() {
-  if (document.getElementById(LOGO_INK_ID)) return;
-  const svg = document.createElementNS(SVGNS, 'svg');
-  Object.assign(svg.style, { position: 'absolute', width: 0, height: 0 });
-  svg.innerHTML = `<filter id="${LOGO_INK_ID}" color-interpolation-filters="sRGB"><feFlood flood-color="${C.ink}"/>`
-    + '<feComposite in2="SourceAlpha" operator="in"/></filter>';
-  stage.appendChild(svg);
-}
 // The four chips a Worker carries in chapter 5, top to bottom: icon and label
 const WORKER_CHIPS = [['globe', 'Address'], ['badge', 'Certificate'], ['key', 'API key'], ['lock', 'Codec']];
 // Inside a Worker tile, px from its top: the chips' slots (chipTop, chipH apart by chipGap), inset px from its sides;
@@ -833,7 +811,7 @@ const workerSlotTop = i => WORKER_TILE.chipTop + i * (WORKER_TILE.chipH + WORKER
 // (tile.langTag), then its four chips (tile.chips, hidden) and two code lines in the first two slots (tile.lines,
 // empty). The scenes show its parts; gearSpin() turns its gear (tile.gear).
 function makeWorkerTile(root, worker) {
-  addLogoInkFilter();
+  addInkFilter();
   const logo = LANGUAGE_LOGOS[worker.lang];
   const name = logo.named ? '' : `<span class="mono" style="font-size:16px">${worker.lang}</span>`;
   const inset = WORKER_TILE.inset;
@@ -844,11 +822,11 @@ function makeWorkerTile(root, worker) {
     + `<div class="gear">${ICON('gear', 30, C.ink, 1.8)}</div>`
     + '<span class="mono" style="font-size:20px;letter-spacing:.1em">WORKER</span></div>'
     + `<div class="lang" style="position:absolute;left:${inset}px;top:56px;height:32px;display:flex;`
-    + `align-items:center;gap:8px;padding:0 12px;border:1.5px solid ${C.lineLight};border-radius:var(--rs)">`
+    + `align-items:center;gap:8px;padding:0 12px;border:1px solid ${C.lineLight};border-radius:var(--rs)">`
     + `<img src="${logo.url}" alt="" width="${logo.w}" height="${logo.h}" style="display:block;`
-    + `filter:url(#${LOGO_INK_ID})">${name}</div>`
+    + `filter:url(#${INK_FILTER_ID})">${name}</div>`
     + WORKER_CHIPS.map(([icon, label], i) => `<div class="chip" style="${slot(i, 'display:flex;align-items:center;'
-      + `gap:10px;padding-left:12px;border:1.5px solid ${C.lineLight};border-radius:var(--rs);background:${C.bg};`
+      + `gap:10px;padding-left:12px;border:1px solid ${C.lineLight};border-radius:var(--rs);background:${C.bg};`
       + `opacity:0`)}">${ICON(icon, 20, C.violet, 1.9)}<span class="mono" style="font-size:19px;letter-spacing:.08em">`
       + `${label.toUpperCase()}</span></div>`).join('')
     + [0, 1].map(i => `<div class="code mono" style="${slot(i, `font-size:21px;line-height:${WORKER_TILE.chipH}px;`
@@ -942,19 +920,20 @@ PROXY_CARD.keyDy = PROXY_CARD.nsDy + PROXY_CARD.tagH + PROXY_CARD.gap;
 // bottom edge as the tags are apart
 const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 280 };
 PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 78 + PROXY_CARD.h / 2 };
-// The payments Namespace band (PROXY_BAND), labelled with its full name at its top left
+// The payments Namespace band (PROXY_BAND), labelled with its full name at its top left, 18 px from its left edge and
+// 14 px under its top edge (offsets from its padding box, TILE_BORDER inside them)
 const makeProxyBand = root => E(root,
-  '<div style="position:absolute;left:16.5px;top:12.5px">'
+  `<div style="position:absolute;left:${18 - TILE_BORDER}px;top:${14 - TILE_BORDER}px">`
   + `<div class="mono" style="font-size:12px;line-height:18px;letter-spacing:.14em;color:${C.slate}">NAMESPACE</div>`
   + `<div class="mono" style="font-size:18px;line-height:26px">${FULL_NS}</div></div>`,
   '', {
-    width: PROXY_BAND.w + 'px', height: PROXY_BAND.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)',
+    width: PROXY_BAND.w + 'px', height: PROXY_BAND.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)',
   });
 // A small tag beside the card (PROXY_CARD): a fixed width w, its HTML centered, in the violet look; 15 px (18 px on
 // screen in chapter 6's shot), so the full Namespace name leaves room on both sides in its band
 const proxyCardTag = (root, html, w) => E(root, html, 'mono', {
   width: w + 'px', height: PROXY_CARD.tagH + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  gap: '6px', fontSize: '15px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1.5px solid ${C.violet}`,
+  gap: '6px', fontSize: '15px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1px solid ${C.violet}`,
   borderRadius: 'var(--rs)', background: 'var(--violet-solid)',
 });
 // The Namespace tag's text: the full name's room always laid out (the tag's font is monospace), its first `shown`
@@ -967,33 +946,11 @@ function namespaceHtml(shown, caret) {
     + `<span style="opacity:0">${FULL_NS.slice(shown)}</span>${cursor}</span>`;
 }
 
-// ---------- the Temporal Cloud zone (chapters 9 and 10)
-// The title of Temporal Cloud: the official lockup, ZONE_LOGO_H high, then "Cloud" in the brand font and the
-// wordmark's color, its capitals as tall as the wordmark's and on its baseline. The lockup's viewBox is 1570 x 410
-// units, from y 395: the wordmark's capitals run from y 519 to its baseline at y 684.7, 805 being the image's bottom;
-// Instrument Sans capitals are 0.72 em tall. rise: how far the word's baseline sits above the image's bottom; font:
-// its size; gap: a word space (0.2 em of that font) after the wordmark's last letter.
-const CLOUD_TITLE = (() => {
-  const unit = ZONE_LOGO_H / 410;
-  const font = +((684.7 - 519) * unit / 0.72).toFixed(2);
-  return { rise: Math.round((805 - 684.7) * unit), font, gap: Math.round(0.2 * font) };
-})();
-// A Temporal Cloud zone: a tile in TEMPORAL's look, titled with CLOUD_TITLE at the zone's heading place (24 px from
-// its left edge, ZONE_LABEL_INSET.head under its top). The scene sizes and places it.
-function makeCloudZone(root) {
-  return E(root,
-    `<div style="position:absolute;left:24px;top:${ZONE_LABEL_INSET.head}px;height:${ZONE_LOGO_H}px;line-height:0;`
-    + `white-space:nowrap"><img src="${LOGO}" style="height:${ZONE_LOGO_H}px;vertical-align:-${CLOUD_TITLE.rise}px">`
-    + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`
-    + '</div>',
-    'tile', { borderColor: C.uv, background: '#17182A' });
-}
-
 // ---------- the recap tiles (chapters 11 and 12)
 // The benefits of the recap, [icon, label], one tile each in the use cases' row (USE_CASE_ROW); a <br> splits a label
 // that would crowd its tile
-const RECAP = [
-  ['door', 'No inbound ports'], ['badge', 'Verified<br>connections'], ['key', 'Your keys only'],
+const BENEFITS = [
+  ['door', 'No inbound ports'], ['badge', 'Verified<br>clients'], ['key', 'Your keys only'],
   ['keyOff', 'No secrets<br>in Workers'],
 ];
 // The label height of the recap and use-case tiles, in lines (padTileLabel): one label in a row may take two lines,
@@ -1002,7 +959,11 @@ const TILE_LABEL_LINES = 2;
 // The padlock badge centered on a recap tile's top edge, as on the payload card: its diameter and the padlock's size,
 // px, both even, so they center on whole pixels
 const RECAP_BADGE = { size: 56, lock: 32 };
-// A recap tile of USE_CASE_ROW's size and type scale for a benefit of RECAP, with its padlock badge (.badge, .lock),
+// How far the camera of chapters 11 and 12 moves the recap row down from USE_CASE_ROW, px: the badges rise half their
+// size above the tiles, so the row comes down by half that, which centers badges and tiles together on y 515. Chapter
+// 12 keeps it, so its use-case tiles flip in the recap tiles' slots.
+const RECAP_DY = RECAP_BADGE.size / 4;
+// A recap tile of USE_CASE_ROW's size and type scale for one of BENEFITS, with its padlock badge (.badge, .lock),
 // open and unlit until setRecapTile() sets its state. Chapter 11 lands these tiles; chapter 12 opens on them, padlocks
 // shut, and flips them over into the use cases.
 function makeRecapTile(p, [icon, label]) {
@@ -1010,15 +971,8 @@ function makeRecapTile(p, [icon, label]) {
   const { size, lock } = RECAP_BADGE;
   const tile = iconTile(p, icon, label, w, h, C.ink, USE_CASE_TYPE);
   padTileLabel(tile, TILE_LABEL_LINES);
-  // offsets from the tile's padding box, inside its 1.5 px border; out of the flex flow, as absolutely positioned
-  tile.badge = E(tile, '', '', {
-    left: (w - size) / 2 - 1.5 + 'px', top: -size / 2 - 1.5 + 'px', width: size + 'px', height: size + 'px',
-    borderRadius: '50%', background: C.bg, border: `1.5px solid ${C.line}`, opacity: 1,
-  });
-  // centered in the badge, offsets from inside its 1.5 px border
-  tile.lock = makeLock(tile.badge, lock, 1.9, {
-    left: (size - lock) / 2 - 1.5 + 'px', top: (size - lock) / 2 - 1.5 + 'px', opacity: 1,
-  });
+  // the padlock badge (tile.badge, tile.lock), out of the flex flow, as absolutely positioned
+  Object.assign(tile, makeLockBadge(tile, w, size, lock));
   setRecapTile(tile);
   return tile;
 }
@@ -1075,32 +1029,28 @@ const REWIND_HANDOFF = {
   lane: { env: OFF_SHOT, temporal: OFF_SHOT, history: 0, door: 0, heads: 0 },
   stored: OFF_SHOT,
 };
-// Chapter 4 to 5: the pull-back that chapter 4 ends on and chapter 5 opens on, [x, y, scale] for shot(): the whole
-// lane, a little smaller than at rest, with room round it. WIDE_LANE: the lane's opacities there (placeLane; the
-// others are 1): the bare lane, the Worker running with no card, the wire, TEMPORAL with its logo only (the stored
-// history, the Web UI and the Search Attributes have faded out). Call frameLaneEdges() with the camera.
+// The wide shot, [x, y, scale] for shot(): the whole lane, a little smaller than at rest, with room round it; the
+// fleet layout (FLEET) fills it. Chapter 4 pulls back to it and chapters 5 and 6 open on it; chapter 7 pulls back to
+// it, out of the proxy, and chapter 8 opens on it. Chapter 4 to 5: WIDE_LANE, the lane's opacities there (placeLane;
+// the others are 1): the bare lane, the Worker running with no card, the wire, TEMPORAL with its logo only (the stored
+// history, the Web UI and the Search Attributes have faded out). Chapter 7 to 8: the whole fleet with the proxy, every
+// part at full opacity: the lane in the proxy layout (placeLane() with BARE_WORKERS_HANDOFF.lane and PROXY_ZONES), the
+// six Workers with their two lines (WORKER_LINES), the SDK client and the Web UI, the eight connections and the
+// proxy's connection to TEMPORAL (PROXY_WIRE) with their light (PROXY_FLOW_PERIOD), and the proxy box; TEMPORAL holds
+// only its logo. Call frameLaneEdges() with the camera.
 const WIDE_SHOT = [960, 515, 0.88];
 const WIDE_LANE = { history: 0, door: 0 };
-// Chapter 5 to 6: the six Workers, bare, that chapter 5 ends on once their chips have fallen, and chapter 6 opens on.
-// shot: the framing, [x, y, scale] for shot(), chapter 4's wide shot, which chapter 5 holds throughout. lane:
-// placeLane()'s options there (the others are 1): the fleet layout of chapter 5 (FLEET_ZONES), the lane's Worker panel,
-// wire, history and door hidden. The six Worker tiles (makeWorkerTile at WORKERS, built after the lane) show their
-// gear turning and their language tag, no chip and no code line. Nothing else shows. Call placeLane(), then
-// frameLaneEdges() with the camera.
+// Chapter 5 to 6: the six Workers, bare, that chapter 5 ends on once their chips have fallen, and chapter 6 opens on,
+// in WIDE_SHOT, which chapter 5 holds throughout. lane: placeLane()'s options there (the others are 1): the fleet
+// layout of chapter 5 (FLEET_ZONES), the lane's Worker panel, wire, history and door hidden. The six Worker tiles
+// (makeWorkerTile at WORKERS, built after the lane) show their gear turning and their language tag, no chip and no
+// code line. Nothing else shows. Call placeLane(), then frameLaneEdges() with the camera.
 const BARE_WORKERS_HANDOFF = {
-  shot: WIDE_SHOT,
   lane: { envZone: FLEET_ZONES.env, temporalZone: FLEET_ZONES.temporal, worker: 0, wire: 0, history: 0, door: 0 },
 };
 // Chapter 6 to 7: the push into the TEMPORAL PROXY box that chapter 6 ends on and chapter 7 opens on, [x, y, scale]
 // for shot(): the box fills the content frame's height (y 155-875). See chapter 6's header for what shows there.
 const PROXY_SHOT = [PROXY.x, PROXY.y, 2.4];
-// Chapter 7 to 8: the pull-back out of the proxy that chapter 7 ends on and chapter 8 opens on, [x, y, scale] for
-// shot(): the whole fleet with the proxy, in chapter 4's wide shot. What shows there, every part at full opacity: the
-// lane in the proxy layout (placeLane() with BARE_WORKERS_HANDOFF.lane and PROXY_ZONES), the six Workers with their two
-// lines (WORKER_LINES), the SDK client and the Web UI, the eight connections and the proxy's connection to TEMPORAL
-// (PROXY_WIRE) with their light (PROXY_FLOW_PERIOD), and the proxy box; TEMPORAL holds only its logo. Call
-// frameLaneEdges() with the camera.
-const FULL_LANE_SHOT = WIDE_SHOT;
 
 // ---------- camera and motion
 // Camera framing eased between stops, like pan(): from and each stop give [x, y, scale], the stage point (x, y)

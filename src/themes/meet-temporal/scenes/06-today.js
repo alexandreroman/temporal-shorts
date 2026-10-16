@@ -87,8 +87,10 @@
   const AI_AT = [...AI, 'more'].map((_, j) => [960 + (j % 3 - 1) * (AI_CHIP.w + AI_CHIP.gapX),
     AI_Y[Math.floor(j / 3)]]);
   // the tiles of both groups: one style, well rounded
-  const TILE = { background: '#17182A', color: C.ink, border: '1.5px solid ' + C.uv, fontSize: '24px', gap: '14px',
-    padding: '0 24px', borderRadius: '22px' };
+  const TILE = {
+    background: C.temporalSurface, color: C.ink, border: '1px solid ' + C.uv, fontSize: '24px', gap: '14px',
+    padding: '0 24px', borderRadius: '22px',
+  };
 
   // ---------- beat 3: the valuation, drawn on a full-stage canvas. Every round with a reported valuation as a world
   // point (x right, y up the value, both scales shaped by hand), joined by one curve per step; the camera keeps the
@@ -209,39 +211,32 @@
       s.langLinks = LANGUAGES.map((_, k) => path(s.links, linkD(edgePoint(ringAt(k), LANG_CHIP, SYMBOL_SIZE / 2 + 12)),
         C.uv, 2, false));
       // a link follows its tile as the ring turns: its line redrawn, its length measured again
-      s.setLink = (k, at) => {
-        const link = s.langLinks[k];
-        link.setAttribute('d', linkD(edgePoint(at, LANG_CHIP, SYMBOL_SIZE / 2 + 12)));
-        link._L = link.getTotalLength();
-      };
-      // Each logo, a monochrome mark, in ink: an SVG filter floods its shape (its opaque parts) with the ink colour
-      s.inkDefs = document.createElementNS(SVGNS, 'svg');
-      Object.assign(s.inkDefs.style, { position: 'absolute', width: 0, height: 0 });
-      s.inkDefs.innerHTML = '<filter id="logo-ink" color-interpolation-filters="sRGB">'
-        + `<feFlood flood-color="${C.ink}"/><feComposite in2="SourceAlpha" operator="in"/></filter>`;
-      root.appendChild(s.inkDefs);
+      s.setLink = (k, at) => setD(s.langLinks[k], linkD(edgePoint(at, LANG_CHIP, SYMBOL_SIZE / 2 + 12)));
+      // each logo, a monochrome mark, in ink
+      addInkFilter();
       s.symbolGlow = E(root, '', '', {
         width: '460px', height: '460px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.violet},.35) 0, `
-          + `rgba(${RGB.uv},.12) 45%, rgba(${RGB.uv},0) 70%)`,
+        background: haloBackground(0.35, 0.12, 45, 70),
       });
       s.symbol = E(root, `<img src="${SYMBOL}" style="width:${SYMBOL_SIZE}px;height:${SYMBOL_SIZE}px;display:block">`);
       // the logo alone, the subtitle names the language; whole-pixel sizes keep its edges crisp
       s.langs = LANGUAGES.map(([name, logo]) => makeChip(root,
         `<img src="${logo}" alt="${name}" width="${LOGO_SIZE[name][0]}" height="${LOGO_SIZE[name][1]}" `
-        + 'style="display:block;filter:url(#logo-ink)">', LANG_CHIP, { ...TILE, padding: '0' }));
+        + `style="display:block;filter:url(#${INK_FILTER_ID})">`, LANG_CHIP, { ...TILE, padding: '0' }));
       s.ais = AI.map(name => makeChip(root, `${ICON('sparkle', 24, C.violet, 1.8)}<span>${name}</span>`, AI_CHIP,
         TILE));
       // and more: the same tile, dashed and a little dimmer
       s.ais.push(makeChip(root, `${ICON('plus', 24, C.violet, 2)}<span style="opacity:.75">and more</span>`,
-        AI_CHIP, { ...TILE, border: '1.5px dashed ' + C.uv }));
+        AI_CHIP, { ...TILE, border: '1px dashed ' + C.uv }));
 
       // beat 3's labels: the rounds, then the valuation
       s.rounds = ROUNDS.slice(0, LAST).map(round => E(root,
         `<div class="lbl" style="font-size:16px;color:var(--slate)">${round.date}</div>`
         + `<div style="font-size:34px;font-weight:700;line-height:1.15;color:var(--ink)">${round.label}</div>`
         + `<div class="lbl" style="font-size:14px;color:var(--violet)">${round.series}</div>`,
-        'tile', { width: '176px', height: '104px', padding: '12px 0', textAlign: 'center', background: '#17182A' }));
+        'tile', {
+          width: '176px', height: '104px', padding: '12px 0', textAlign: 'center', background: C.temporalSurface,
+        }));
       s.value = makeNumber(root, 200);
       s.valueLabel = makeLabel(root, 'Valuation · September 2026');
       // the ×8 bracket: its dashed guides, its line drawn bottom to top with an arrowhead, its ticks, its pulse, its
@@ -325,8 +320,7 @@
       const count = Math.min(CUSTOMERS, ignitedBy(t - waves));
       const rate = count - Math.min(CUSTOMERS, ignitedBy(t - waves - 0.1));
       const done = t >= full;
-      const custText = count.toLocaleString('en-US') + (done ? '+' : '');
-      if (s.custNum.textContent !== custText) s.custNum.textContent = custText;
+      setText(s.custNum, withCommas(count) + (done ? '+' : ''));
       s.custNum.style.filter = !done && rate > 0 ? `blur(${Math.min(3, rate / 60).toFixed(2)}px)` : '';
       // to the left column as the team comes in
       const toLeft = ease(P(t, teamIn - 0.6, 0.8));
@@ -337,8 +331,7 @@
         P(t, waves + 0.6, 0.4) * out1);
       place(s.burst, 960, 460, lerp(0.4, 1.4, P(t, full, 0.7)), win(t, full, full + 0.7, 0.2) * 0.9);
       // the team's count, 285 then up to 570 with the splits, then the stamp
-      const teamText = String(285 + split);
-      if (s.teamNum.textContent !== teamText) s.teamNum.textContent = teamText;
+      setText(s.teamNum, String(285 + split));
       place(s.teamNum, TEAM.x, NUMBER_Y, swell(t, stampAt - 0.2, 0.1), P(t, teamIn, 0.4) * out1);
       place(s.teamLabel, TEAM.x, LABEL_Y, 1, P(t, teamIn + 0.3, 0.4) * out1);
       const st = P(t, stampAt, 0.35, easeIn);
@@ -505,8 +498,7 @@
       });
       // the value: racing with the head, blurred while it surges, then to the middle, big, with its label. Below a
       // billion it counts in millions with the tilde of the Series A estimate it starts from
-      const valueText = value < 1 ? '~$' + Math.round(value * 1000) + 'M' : '$' + value.toFixed(2) + 'B';
-      if (s.value.textContent !== valueText) s.value.textContent = valueText;
+      setText(s.value, value < 1 ? '~$' + Math.round(value * 1000) + 'M' : '$' + value.toFixed(2) + 'B');
       const speed = seg === segs.length - 1 && t < arrive ? P(t, lastSeg[0], lastSeg[1], easeIn) : 0;
       s.value.style.filter = speed > 0.05 ? `blur(${(2.5 * speed).toFixed(2)}px)` : '';
       place(s.value, Math.round(lerp(700, REST.valueX, settle) + kx), Math.round(lerp(300, 480, settle) + ky),

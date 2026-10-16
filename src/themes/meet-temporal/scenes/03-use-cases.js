@@ -34,12 +34,12 @@
     return [hub.x + Math.cos(a) * BUBBLE.r, hub.y + Math.sin(a) * BUBBLE.r];
   };
   // the spoke from the symbol's edge to the hub's edge
-  function spokeD(hub) {
+  const spokeD = hub => {
     const dx = hub.x - CENTER.x, dy = hub.y - CENTER.y, d = Math.hypot(dx, dy);
     const from = SYMBOL_SIZE / 2 + 16, to = d - HUB_SIZE / 2 - 8;
     return `M ${CENTER.x + dx / d * from} ${CENTER.y + dy / d * from} L ${CENTER.x + dx / d * to} `
       + `${CENTER.y + dy / d * to}`;
-  }
+  };
 
   // Round category hub: the category in bold, then WORKFLOWS lighter, on UV
   const makeHub = (root, name) => E(root,
@@ -50,7 +50,7 @@
     });
   // Example bubble: a round tile with a stroke icon, its mono label on its outer side, away from the link to its
   // hub: beside it when the bubble sits mostly left or right of the hub (angle in degrees), else above or under it
-  function makeBubble(root, [icon, label], angle) {
+  const makeBubble = (root, [icon, label], angle) => {
     const a = angle * Math.PI / 180;
     let labelAt;
     if (Math.abs(Math.cos(a)) >= 0.6) {
@@ -61,12 +61,12 @@
     }
     return E(root,
       `<div style="width:${BUBBLE.size}px;height:${BUBBLE.size}px;border-radius:50%;`
-      + `background:var(--surface);border:1.5px solid ${C.line};display:flex;align-items:center;`
+      + `background:var(--surface);border:1px solid ${C.line};display:flex;align-items:center;`
       + `justify-content:center">${ICON(icon, BUBBLE.icon, C.ink, 1.7)}</div>`
       + `<div class="lbl" style="position:absolute;${labelAt};font-size:${BUBBLE.font}px">`
       + `${label}</div>`,
       '', { width: BUBBLE.size + 'px', height: BUBBLE.size + 'px' });
-  }
+  };
 
   scene({
     chapter: 3, title: 'Where Temporal is used',
@@ -89,13 +89,12 @@
       const root = s.cam = makeCamera(stage);
       s.glow = E(root, '', '', {
         width: '620px', height: '620px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.violet},.35) 0%, `
-          + `rgba(${RGB.uv},.12) 45%, rgba(${RGB.uv},0) 70%)`,
+        background: haloBackground(0.35, 0.12, 45, 70),
       });
       // the AI hub's halo, which travels with it at the end
       s.halo = E(root, '', '', {
         width: HANDOFF_HALO.size + 'px', height: HANDOFF_HALO.size + 'px', borderRadius: '50%',
-        background: HALO_BACKGROUND,
+        background: HANDOFF_HALO.background,
       });
       s.svg = svgLayer(root);
       s.spokes = HUBS.map(hub => path(s.svg, spokeD(hub), C.violet, 2.5, false));
@@ -173,7 +172,7 @@
           const d = Math.hypot(x - hub.x, y - hub.y);
           const ux = (x - hub.x) / d, uy = (y - hub.y) / d;
           const link = s.links[i][k];
-          link.setAttribute('d', `M ${hub.x + ux * (HUB_SIZE / 2 + 6)} ${hub.y + uy * (HUB_SIZE / 2 + 6)} `
+          setD(link, `M ${hub.x + ux * (HUB_SIZE / 2 + 6)} ${hub.y + uy * (HUB_SIZE / 2 + 6)} `
             + `L ${x - ux * (BUBBLE.size / 2 + 6)} ${y - uy * (BUBBLE.size / 2 + 6)}`);
           link.style.opacity = bp.o * rest;
         });

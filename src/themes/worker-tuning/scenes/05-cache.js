@@ -31,13 +31,13 @@
   // REST_LEAD), each one holding its Slot WORK.hold s
   const WORK = { from: 0.6, count: 30, hold: 2.6 };
   // the metric values: forced evictions per second, and the replay latency of an order's short history (five
-  // Activities), in ms
+  // Activities), in ms; after the fix, the latency of the few replays left falls back to `from`
   const EVICTIONS = { from: 6, peak: 46 };
-  const REPLAY_MS = { from: 12, peak: 58 };
+  const REPLAY_MS = { from: 3, peak: 58 };
 
   // Where waiting order `order` is at t, as { x, o }: it arrives at the end of the line, moves up as each eviction
   // frees a cell, slides into the cell its eviction frees, or into a new cell when the strip grows
-  function waitingOrder(order, t, evictions, firstAt, growAt) {
+  const waitingOrder = (order, t, evictions, firstAt, growAt) => {
     const j = order - FIRST_WAITING;
     // the first PRESS.n orders line up at the start; the others arrive as the line moves up
     const arriveAt = j < PRESS.n ? firstAt + j * 0.4 : evictions[j - PRESS.n].at + 0.6;
@@ -57,7 +57,7 @@
     const grow = P(t, growAt - 0.3, 0.4);
     const newCell = GROWN.from + Math.round(rank);
     return { x: lerp(x, cellX(newCell), grow), o: arrive * (1 - P(t, growAt + 0.05 + rank * 0.12, 0.2)) };
-  }
+  };
 
   scene({
     chapter: 5, title: 'The cache runs out',
@@ -93,8 +93,8 @@
         return cell;
       });
       s.more = E(root, '', 'mono', { fontSize: '16px', lineHeight: '20px', color: C.slate, whiteSpace: 'nowrap' });
-      s.evicted = statusTag(root);
-      s.evicted.style.lineHeight = '21px'; // 32 px high, as the bottleneck tags: it rests on whole pixels
+      // as high as the bottleneck tags: it rests on whole pixels
+      s.evicted = markTag(root);
     },
     update(t, c, s) {
       // c[0]: the open orders line up; c[1]: the first eviction, then the replay of #1045; c[2]: three more
@@ -142,6 +142,7 @@
       const cells = lerp(GROWN.from, GROWN.to, P(t, growAt, 0.6));
       const fixed = t >= fixAt;
       const outAt = this.dur - LEAVE_LEAD;
+      const replayMs = fixed ? REPLAY_MS.from : Math.round(lerp(REPLAY_MS.from, REPLAY_MS.peak, P(t, c[2] + 1.2, 2.5)));
       placeWorkerDiagram(s.dg, t, {
         queue: { wf, act },
         flows: [hitsBefore, work, ...replays, hitsAfter],
@@ -166,7 +167,7 @@
           },
           {
             name: 'temporal_workflow_task_replay_latency', at: c[2] + 1.2, out: outAt,
-            value: fixed ? 'rare' : Math.round(lerp(REPLAY_MS.from, REPLAY_MS.peak, P(t, c[2] + 1.2, 2.5))) + ' ms',
+            value: replayMs + ' ms',
             color: fixed ? C.neon : C.red,
           },
         ],
@@ -193,14 +194,14 @@
       // the count fades out before the strip grows: its last new cell pops in where the count was
       showAt(s.more, PRESS.countLeft, DIAGRAM.wfY - 10, P(t, c[0] + 1.8, 0.4) * (1 - P(t, growAt - 0.3, 0.3)));
 
-      // EVICTED over the first evicted cell until the replay has started, 20 px clear of the WORKFLOW CACHE label at
-      // least, as the bottleneck tag
+      // EVICTED over the first evicted cell until the replay has started, a label gap above the strip, and 20 px clear
+      // of the WORKFLOW CACHE label at least, as the bottleneck tag
       const first = evictions[0];
       placeStatusTag(s.evicted, t, 'EVICTED', 'denied', win(t, first.at, replayFrom + 1.0, 0.3), first.at);
       const tagW = parseFloat(s.evicted.style.width) || 0;
       const minLeft = DIAGRAM.cache.left + s.dg.labels.cache.offsetWidth + 20;
       s.evicted.style.left = Math.max(minLeft, cellX(first.cell) - tagW / 2) + 'px';
-      s.evicted.style.top = (DIAGRAM.wfY - DIAGRAM.cache.h / 2 - 12 - 32) + 'px';
+      s.evicted.style.top = (DIAGRAM.wfY - DIAGRAM.cache.h / 2 - GRID.label - TAG_H) + 'px';
     },
   });
 }

@@ -20,15 +20,9 @@
   // ORDERS / MIN: a readout like BACKLOG, in the meter column under the Worker; its x10 tag (72 x 40) astride its
   // top right corner, centered between the end of its label (x 1023) and the "+ WORKER" ghost (x 1120), about 12 px
   // from each, and 20 px under the WORKER panel
-  const { meter, code } = DIAGRAM;
+  const { meter } = DIAGRAM;
   const ORDERS = { left: meter.left, top: meter.top.cpu, w: meter.w, h: meter.h };
   const TIMES10 = { x: 1072, y: ORDERS.top, w: 72 };
-  // the "+ WORKER" ghost: a dashed panel in the place of the code card (with its tab) of the later chapters, the whole
-  // band high, its label struck through; it also keeps the composition centered on y 515, which the hard cuts leave
-  // no shift to do
-  const { band } = DIAGRAM;
-  const GHOST = { left: code.left, top: band.top, w: code.w, h: band.h, label: 30 };
-  const GHOST_X = GHOST.left + GHOST.w / 2, GHOST_Y = GHOST.top + GHOST.h / 2;
   // WHAT IS FULL? (66 px high): the Slots move down DROP px to make room for it, 20 px above their label, so the tag,
   // the label and the grid (y 274..469) stay centered as a group in the Worker panel
   const DROP = 43;
@@ -41,7 +35,7 @@
 
   // The intro's mini Worker at morph progress m: its panel grows from the intro's place into the WORKER A panel, its
   // header fades out early, and its Slots move into the closed Worker's grid, growing to the diagram's Slot size
-  function placeMorphingWorker(mini, m) {
+  const placeMorphingWorker = (mini, m) => {
     const { worker, slot } = DIAGRAM;
     const left = lerp(MINI_FROM.left, worker.left, m), top = lerp(MINI_FROM.top, worker.top, m);
     mini.w = lerp(MINI_FROM.w, worker.w, m);
@@ -55,7 +49,7 @@
       const at = [lerp(fromX, toX - center[0], m), lerp(fromY, toY - center[1], m)];
       placeMiniCell(mini, cell, at, lerp(MINI.w, slot.w, m), lerp(MINI.h, slot.h, m));
     });
-  }
+  };
 
   scene({
     chapter: 1, title: 'The backlog grows',
@@ -77,27 +71,15 @@
     ],
     build(root, s) {
       s.dg = makeWorkerDiagram(root);
-      // the intro's strip and mini Worker, until the diagram takes over (the lane holds up to the diagram's 9 chips)
-      s.lane = makeLane(root, null, 'act');
+      // the intro's strip and mini Worker, until the diagram takes over (the lane holds up to the diagram's 11 chips)
+      s.lane = makeQueueLane(root, null, 'act');
       s.mini = makeMiniWorker(root, 'WORKER', INTRO_WORKER.cols, INTRO_WORKER.rows);
       s.orders = makeReadout(root, 'Orders / min', ORDERS.w, ORDERS.h);
       s.times10 = fixedTag(root, '&times;10', 'violet solid', TIMES10.w);
       // 29 + 2 x 4 + 3 = 40 px high, with less padding than a pill: it stands on the readout's edge
       Object.assign(s.times10.style, { lineHeight: '29px', padding: '4px 12px 4px calc(12px + .1em)' });
-      s.ghost = E(root,
-        `<div class="mono" style="font-size:${GHOST.label}px;letter-spacing:.1em;padding-left:.1em;color:var(--slate)">`
-        + '+ WORKER</div>',
-        '', {
-          width: GHOST.w + 'px', height: GHOST.h + 'px', border: '2px dashed ' + C.lineLight, borderRadius: 'var(--r)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        });
-      s.svg = svgLayer(root);
-      s.strike = path(s.svg, `M ${GHOST_X - 110} ${GHOST_Y} L ${GHOST_X + 110} ${GHOST_Y}`, C.red, 4, false);
-      s.what = tag(root, `${ICON('search', 26, C.violet, 2)}What is full?`, 'violet solid big');
-      // whole-pixel width (measured: 370 px), so the centered tag rests on whole pixels
-      Object.assign(s.what.style, {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', width: '370px',
-      });
+      s.ghost = makeGhost(root, '+ WORKER', 110);
+      s.what = fixedTag(root, `${ICON('search', 26, C.violet, 2)}What is full?`, 'violet solid big', null, { gap: 14 });
     },
     update(t, c, s) {
       const outAt = this.dur - OUT_LEAD;
@@ -123,7 +105,7 @@
       const morphing = t < HANDOFF;
       resizeLane(s.lane, lerp(INTRO_LANE.w, DIAGRAM.lane.w, m), lerp(INTRO_LANE.cap, DIAGRAM.lane.cap, m));
       const laneLeft = lerp(INTRO_LANE.left, DIAGRAM.lane.left, m), laneY = lerp(INTRO_LANE.y, DIAGRAM.midY, m);
-      placeLane(s.lane, laneLeft, laneY, morphing ? 1 : 0, { queue });
+      placeQueueLane(s.lane, laneLeft, laneY, morphing ? 1 : 0, { queue });
       placeMorphingWorker(s.mini, m);
       s.mini.style.opacity = morphing ? 1 : 0;
       s.mini.style.visibility = morphing ? 'visible' : 'hidden';
@@ -169,12 +151,10 @@
 
       // c[2]: "+ WORKER" rises, is struck through once "add more Workers" is read, then WHAT IS FULL? lands as the
       // Slots make room for it
-      const strikeAt = c[2] + 2.7;
-      rise(s.ghost, GHOST_X, GHOST_Y, P(t, c[2] + 0.4, 0.5));
-      s.ghost.style.opacity = P(t, c[2] + 0.4, 0.5) * extras;
-      s.ghost.style.borderColor = t >= strikeAt ? C.red : C.lineLight;
-      draw(s.strike, P(t, strikeAt, 0.35, easeOut), extras);
+      const ghostIn = P(t, c[2] + 0.4, 0.5);
+      placeGhost(s.ghost, t, ghostIn, ghostIn * extras, c[2] + 2.7, extras);
       const what = backPop(t, c[2] + 3.4);
+      fitTag(s.what);
       place(s.what, WHAT_X, WHAT_Y, what.s, what.o * extras);
     },
   });

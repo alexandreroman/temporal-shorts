@@ -63,13 +63,12 @@ become rare.
 
 Now renderInvoice keeps the CPU at 100%: every task slows down and holds its
 Slot longer. More Slots would not help: a Slot adds no CPU. This Worker has used
-all the CPU it has. This is the moment to add Workers: B and C poll the same
-Task Queue and share the load. The backlog drains, and new orders start right
-away again.
+all the CPU it has. Add Workers on more hosts: B and C poll the same Task Queue
+and share the load. The backlog drains, and new orders start right away again.
 
 ## Chapter 7: Read the signals
 
-[Watch from 3:36](/themes/worker-tuning/#t=216)
+[Watch from 3:35](/themes/worker-tuning/#t=215)
 
 A growing backlog often comes from one of four Worker limits: Slots, Pollers,
 cache or CPU. Change one setting at a time, watch the signals, then look for the

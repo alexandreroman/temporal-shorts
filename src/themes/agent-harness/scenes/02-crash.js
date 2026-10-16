@@ -60,7 +60,8 @@
     pre: 1.5, post: 2.0,
     subs: [
       {
-        text: "Every model call and tool call is saved in the agent's Temporal history as soon as it completes.",
+        text: "Every model call and durable tool call is saved in the agent's Temporal history "
+          + 'as soon as it completes.',
         after: 1.75,
       },
       { text: 'The next step starts only after the previous result is saved, outside the app.', after: 2.2 },
@@ -70,7 +71,8 @@
         after: 2.5,
       },
       {
-        text: 'Saved results are reused, not redone: no finished model call is paid again, no finished tool reruns.',
+        text: 'Saved results are reused, not redone: no finished model call is paid again, '
+          + 'no finished durable tool reruns.',
         after: 0.5,
       },
     ],

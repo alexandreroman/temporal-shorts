@@ -29,9 +29,8 @@
       s.t = makeTitleBlock(root, 'AN INTRODUCTION FOR EVERYONE', 'What is Durable<br>Execution?',
         'WITH TEMPORAL WORKFLOWS', {
           logoH: 64, logoGap: 52, kickerFont: 24, titleFont: 128, titleGap: 26, taglineFont: 26, taglineGap: 40,
+          box: [894, 510],
         });
-      // whole-pixel box (measured content: 893.8 x 509), so the centered block lands on whole pixels
-      Object.assign(s.t.style, { width: '894px', height: '510px' });
       s.links = [0, 1, 2].map(i => path(s.svg, linkPath(i), C.line, 2, false));
       s.lit = [0, 1, 2].map(i => path(s.svg, linkPath(i), C.neon, 2.5, false)); // neon trail of the pulse
       s.tiles = ORDER_STEPS.map(step => iconTile(root, step.icon, null, CHAIN.tile, CHAIN.tile, C.ink,

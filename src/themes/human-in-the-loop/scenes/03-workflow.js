@@ -56,7 +56,7 @@
       s.causes = HITS.map(h => fixedTag(root, h.label, '', TAG_W));
       // a neon ring round the Event History card, 10 px out, each time a hit leaves it untouched
       s.ring = E(root, '', '', {
-        width: (HIST.w + 20) + 'px', height: (HIST.h + 20) + 'px', border: '2px solid ' + C.neon,
+        width: (ORDER_HIST.w + 20) + 'px', height: (ORDER_HIST.h + 20) + 'px', border: '2px solid ' + C.neon,
         borderRadius: 'calc(var(--r) + 10px)',
       });
       s.flash = makeFlash(root);
@@ -135,9 +135,9 @@
       // Temporal and its Event History, outside the app: never moved by the hits, it lights a neon ring at each one
       place(s.temporal, TEMPORAL.x, TEMPORAL.y, 1, P(t, c[0] + 0.6, 0.5));
       s.temporal.out.style.color = t >= c[2] + 0.4 ? C.ink : C.slate;
-      place(s.history, HIST.x, HIST.y, 1, P(t, c[0] + 0.8, 0.5));
+      place(s.history, ORDER_HIST.x, ORDER_HIST.y, 1, P(t, c[0] + 0.8, 0.5));
       const hold = Math.max(...HITS.map(h => win(t, c[2] + h.at - 0.05, c[2] + h.at + 0.35, 0.12)));
-      place(s.ring, HIST.x, HIST.y, 1, 0.9 * hold);
+      place(s.ring, ORDER_HIST.x, ORDER_HIST.y, 1, 0.9 * hold);
       // the saved rows pulse once when the subtitle points at the history
       saved.forEach((at, i) => {
         showRow(s.history.rows[i], P(t, at - 0.1, 0.3));

@@ -90,7 +90,7 @@
         return { row, hl: row.querySelector('.hl') };
       });
       s.gauge = E(root, '<div class="f" style="position:absolute;left:0;right:0;bottom:0"></div>', '', {
-        width: '22px', height: '600px', background: `rgba(${RGB.ink},.08)`, border: '1.5px solid ' + C.line,
+        width: '22px', height: '600px', background: `rgba(${RGB.ink},.08)`, border: '1px solid ' + C.line,
         overflow: 'hidden', borderRadius: 'var(--rs)',
       });
       s.gf = s.gauge.querySelector('.f');
@@ -101,18 +101,19 @@
         `<div class="mono" style="font-size:22px">Yesterday's email</div>`
         + '<div class="lbl" style="font-size:15px;margin-top:4px">not in context</div>',
         '', {
-          border: `1.5px dashed ${C.lineLight}`, padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)',
+          border: `1px dashed ${C.lineLight}`, padding: '10px 18px', color: 'var(--slate)', borderRadius: 'var(--r)',
         });
       s.bill = E(root,
         '<div style="display:flex;align-items:center;gap:16px">'
         + `<div class="coin">${ICON('coin', 46, C.neon, 1.6)}</div><div>`
-        // fixed width, sized for "12,400 tokens" in tabular figures, so the box and "+N" never move
+        // fixed width, sized for "12,400 tokens" in tabular figures, so the box and "+N" never move; the 7 px gap
+        // makes the text 72 px high (44 + 7 + 21), an even height that centers the big coin on a whole pixel
         + '<div class="tok" style="width:288px;font-size:44px;line-height:1;font-variant-numeric:tabular-nums">'
         + '0 tokens</div>'
-        + '<div class="lbl" style="font-size:16px;margin-top:6px;color:var(--neon)">billed so far</div>'
+        + '<div class="lbl" style="font-size:16px;margin-top:7px;color:var(--neon)">billed so far</div>'
         + '</div></div>',
         '', {
-          padding: '16px 22px', border: '1.5px solid ' + C.neon, background: `rgba(${RGB.neon},.06)`,
+          padding: '16px 22px', border: '1px solid ' + C.neon, background: `rgba(${RGB.neon},.06)`,
           borderRadius: 'var(--r)',
         });
       s.tok = s.bill.querySelector('.tok');
@@ -122,10 +123,11 @@
       s.spends = PART_PX.map(px => {
         const gain = tokensFor(pagePx + px) - tokensFor(pagePx);
         pagePx += px;
-        // 36 px icon, a 27 px coin, centered on the big coin (1.5 px border + 22 px padding + 23 px)
-        const coin = E(s.bill, ICON('coin', 36, C.neon, 1.8), '', { left: '28.5px', top: 'calc(50% - 18px)' });
+        // 36 px icon, a 27 px coin, centered on the big coin. Offsets from the box's padding edge, inside its border
+        // (TILE_BORDER): 22 px of padding + 23 px to the big coin's center - 18 px, a whole pixel
+        const coin = E(s.bill, ICON('coin', 36, C.neon, 1.8), '', { left: '27px', top: 'calc(50% - 18px)' });
         coin.querySelector('circle').setAttribute('fill', `rgba(${RGB.neon},.2)`);
-        const plus = E(s.bill, '+' + gain.toLocaleString('en-US'), 'mono', {
+        const plus = E(s.bill, '+' + withCommas(gain), 'mono', {
           left: 'calc(100% + 20px)', top: '14px', fontSize: '22px', color: C.neon, whiteSpace: 'nowrap',
         });
         return { coin, plus };
@@ -176,9 +178,9 @@
       place(s.gaugeL, 1130, 810, 1, P(t, c[0] + 1.6, 0.5));
       // the token count arrives with the gauge and follows it part by part
       const bp = backPop(t, c[0] + 1.6, 0.5);
-      // the 105 px box ends on the sheet's bottom edge (480 + 300)
-      place(s.bill, 1560, 727.5, bp.s, bp.o);
-      s.tok.textContent = tokensFor(used).toLocaleString('en-US') + ' tokens';
+      // the 106 px box ends on the sheet's bottom edge (480 + 300)
+      place(s.bill, 1560, 727, bp.s, bp.o);
+      s.tok.textContent = withCommas(tokensFor(used)) + ' tokens';
       // money spent at each part, mid-slide: the big coin swells, a small coin flies off, "+N" rises and fades
       const spendAt = partAt.map(at => at + 0.1);
       s.coin.style.transform = `scale(${Math.max(...spendAt.map(at => swell(t, at, 0.25)))})`;

@@ -23,8 +23,6 @@ const ORDER_ACTIVITIES = [
 ];
 // Icon of Activity Task k of a lane: the five steps of an order, in turn
 const activityIcon = k => ORDER_ACTIVITIES[k % ORDER_ACTIVITIES.length].icon;
-// A count with thousands separators, the same whatever the locale: 2400 -> '2,400'
-const withCommas = n => Math.round(n).toLocaleString('en-US');
 // A SCHEDULE-TO-START value in seconds: one decimal below 10 s ('9.4 s', '44 s')
 const formatWait = v => (v < 10 ? v.toFixed(1) : String(Math.round(v))) + ' s';
 // Shows a label positioned by its top left corner (whole pixels, so its text always rasters the same way)
@@ -117,40 +115,11 @@ const LANE_EXIT_X = DIAGRAM.lane.left + DIAGRAM.lane.w;
 // Middle of a lane ('wf' or 'act') at split (see the split state): both lanes sit on midY before the split
 const laneMidY = (lane, split) => Math.round(lerp(DIAGRAM.midY, lane === 'wf' ? DIAGRAM.wfY : DIAGRAM.actY, split));
 
-// ---------- right-angle connectors
-// An SVG path through the points of an orthogonal line, its corners rounded with GRID.corner (less where a segment
-// is too short); repeated points are skipped
-function roundedPath(points) {
-  const pts = points.filter((p, i) => i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
-  let d = `M ${pts[0][0]} ${pts[0][1]}`;
-  for (let i = 1; i < pts.length - 1; i++) {
-    const [px, py] = pts[i - 1], [x, y] = pts[i], [nx, ny] = pts[i + 1];
-    const inLen = Math.hypot(x - px, y - py), outLen = Math.hypot(nx - x, ny - y);
-    const r = Math.min(GRID.corner, inLen / 2, outLen / 2);
-    const from = [x - (x - px) / inLen * r, y - (y - py) / inLen * r];
-    const to = [x + (nx - x) / outLen * r, y + (ny - y) / outLen * r];
-    d += ` L ${from[0]} ${from[1]} Q ${x} ${y} ${to[0]} ${to[1]}`;
-  }
-  const last = pts[pts.length - 1];
-  return d + ` L ${last[0]} ${last[1]}`;
-}
+// ---------- right-angle connectors (see roundedPath(), with GRID.corner)
 // The points of the poll line from the end of a lane whose middle is laneY to a Poller at (x, y): along the lane's
 // line to the trunk, along the trunk, then into the Poller. Every line starts at the lane's end, so the lines of one
 // lane share their first segments and their dashes, which flow from the lane to the Pollers (see draw()).
 const pollRoute = (laneY, x, y) => [[LANE_EXIT_X + 3, laneY], [DIAGRAM.trunkX, laneY], [DIAGRAM.trunkX, y], [x, y]];
-// The point at fraction u of a line through points (straight segments): a chip moving along a connector
-function pointAlong(points, u) {
-  const lengths = points.slice(1).map((p, i) => Math.hypot(p[0] - points[i][0], p[1] - points[i][1]));
-  let rest = clamp(u) * lengths.reduce((a, b) => a + b, 0);
-  for (let i = 0; i < lengths.length; i++) {
-    if (rest <= lengths[i] || i === lengths.length - 1) {
-      const p = lengths[i] > 0 ? rest / lengths[i] : 1;
-      return [lerp(points[i][0], points[i + 1][0], p), lerp(points[i][1], points[i + 1][1], p)];
-    }
-    rest -= lengths[i];
-  }
-  return points[points.length - 1];
-}
 
 // ---------- task chips and lanes
 // Task chip: an Activity Task is a small tile carrying its step's icon (see setChipIcon), a Workflow Task a small UV
@@ -162,24 +131,22 @@ function makeTaskChip(root, lane) {
   }
   const size = DIAGRAM.chip.act + 'px';
   return E(root, '', '', {
-    width: size, height: size, background: 'var(--surface)', border: '1.5px solid ' + C.lineLight,
+    width: size, height: size, background: 'var(--surface)', border: '1px solid ' + C.lineLight,
     borderRadius: 'var(--rs)', display: 'flex', alignItems: 'center', justifyContent: 'center',
   });
 }
 // The icon of an Activity Task chip; the DOM is only rewritten when it changes
 function setChipIcon(chip, icon) {
-  if (chip._icon === icon) return;
-  chip.innerHTML = ICON(icon, 22, C.ink, 1.8);
-  chip._icon = icon;
+  setHtml(chip, ICON(icon, 22, C.ink, 1.8));
 }
 // Lane of a Task Queue: a track, an optional label above it, up to `cap` queued chips and a "+N" count of the tasks
 // beyond them. lane: 'wf' or 'act', the kind of chips; w: the track width.
-function makeLane(root, label, lane, { w = DIAGRAM.lane.w, cap = DIAGRAM.lane.cap } = {}) {
+function makeQueueLane(root, label, lane, { w = DIAGRAM.lane.w, cap = DIAGRAM.lane.cap } = {}) {
   return {
     lane, w, cap,
     track: E(root, '', '', {
       width: w + 'px', height: DIAGRAM.lane.h + 'px', background: `rgba(${RGB.ink},.03)`,
-      border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)',
+      border: '1px solid ' + C.line, borderRadius: 'var(--rs)',
     }),
     label: label ? E(root, label, 'lbl', { fontSize: '16px' }) : null,
     more: E(root, '', 'mono', { fontSize: '16px', lineHeight: '20px', color: C.slate, whiteSpace: 'nowrap' }),
@@ -201,7 +168,7 @@ const laneHeadX = (lane, x) => x + lane.w - DIAGRAM.lane.headInset;
 //   (iconOf(k), Activity lanes only)
 // - shift: 0 to 1, how far the queue has moved up since the last departure (1 at rest); past the cap, the tail
 //   chip fades in at its place as the queue moves, coming from the overflow
-function placeLane(lane, x, y, o, { queue = 0, departed = 0, shift = 1, iconOf = activityIcon, labelO = 1 } = {}) {
+function placeQueueLane(lane, x, y, o, { queue = 0, departed = 0, shift = 1, iconOf = activityIcon, labelO = 1 } = {}) {
   const { pitch } = DIAGRAM.lane;
   place(lane.track, x + lane.w / 2, y, 1, o);
   if (lane.label) showAt(lane.label, x, y - DIAGRAM.lane.labelTop, o * labelO);
@@ -234,7 +201,7 @@ const SLOT_LOOKS = {
 // Slot cell of w x h px (parent: the stage root, or a mini Worker panel)
 function makeSlot(parent, w, h, css = {}) {
   return E(parent, '', '', {
-    width: w + 'px', height: h + 'px', border: '1.5px solid', borderRadius: '5px',
+    width: w + 'px', height: h + 'px', border: '1px solid', borderRadius: '5px',
     display: 'flex', alignItems: 'center', justifyContent: 'center', ...css,
   });
 }
@@ -276,6 +243,14 @@ function closedSlotCenter(i, drop) {
 const wfSlotCenter = i => [DIAGRAM.slot.left + DIAGRAM.slot.w / 2 + i * DIAGRAM.slot.pitchX, DIAGRAM.wfY];
 // Middle of Poller i of n on a lane whose middle is laneY
 const pollerY = (laneY, i, n) => laneY + (i - (n - 1) / 2) * DIAGRAM.poller.pitch;
+// Poller: a violet ring DIAGRAM.poller.size px wide (css: its place in a Worker panel or a recap part, if any)
+function makePoller(parent, css = {}) {
+  const size = DIAGRAM.poller.size + 'px';
+  return E(parent, '', '', {
+    width: size, height: size, borderRadius: '50%', border: '2px solid ' + C.violet, background: 'var(--surface)',
+    ...css,
+  });
+}
 
 // ---------- task flows: chips from a lane through a Poller into a Slot
 // A flow is a stream of tasks, a pure function of time: { lane, from, every, count, hold, slots, icon, freeAhead }.
@@ -340,17 +315,24 @@ const TREND_COLORS = { up: C.red, down: C.neon };
 const trendColor = trend => TREND_COLORS[trend] || C.ink;
 // Insets of a meter tile's label, value and bar, from its padding box
 const METER_INSET = { labelLeft: 22, labelTop: 20, valueRight: 24, valueTop: 16, bar: 24 };
+// The HTML of a meter's label, value (.v) and bar (a .fill in a track barW px wide), shared by the meter tiles and
+// the CPU gauges of Workers B and C; at: { label, value, bar }, the CSS offsets of each, e.g. 'left:22px;top:20px'
+function meterHtml(label, barW, at) {
+  return `<div class="lbl" style="position:absolute;${at.label};font-size:16px">${label}</div>`
+    + `<div class="v mono" style="position:absolute;${at.value};font-size:24px;line-height:30px;`
+    + 'transform-origin:right center"></div>'
+    + `<div style="position:absolute;${at.bar};width:${barW}px;height:${GAUGE.barH}px;border-radius:3px;`
+    + `background:rgba(${RGB.ink},.08);overflow:hidden"><div class="fill" style="height:100%;width:0"></div></div>`;
+}
 // Meter tile, w x h: a label and a value on top, a bar gauge under them (see setMeter)
 function makeMeter(p, label, w, h) {
   const { labelLeft, labelTop, valueRight, valueTop, bar } = METER_INSET;
   const barW = w - 2 * bar;
   const e = E(p,
-    `<div class="lbl" style="position:absolute;left:${labelLeft}px;top:${labelTop}px;font-size:16px">${label}</div>`
-    + `<div class="v mono" style="position:absolute;right:${valueRight}px;top:${valueTop}px;font-size:24px;`
-    + 'line-height:30px;transform-origin:right center"></div>'
-    + `<div style="position:absolute;left:${bar}px;bottom:${bar}px;width:${barW}px;height:${GAUGE.barH}px;`
-    + `border-radius:3px;background:rgba(${RGB.ink},.08);overflow:hidden">`
-    + '<div class="fill" style="height:100%;width:0"></div></div>',
+    meterHtml(label, barW, {
+      label: `left:${labelLeft}px;top:${labelTop}px`, value: `right:${valueRight}px;top:${valueTop}px`,
+      bar: `left:${bar}px;bottom:${bar}px`,
+    }),
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
   e.lbl = e.querySelector('.lbl');
   e.v = e.querySelector('.v');
@@ -360,10 +342,10 @@ function makeMeter(p, label, w, h) {
   return e;
 }
 // The CPU meter's outer box at dock: 0, its tile in the bottom band; 1, the compact gauge in the WORKER panel
-// (CPU_GAUGE, plus the tile's border, drawn 1 px wide as MINI.border says); whole pixels in between
+// (CPU_GAUGE, plus the tile's border, TILE_BORDER); whole pixels in between
 function cpuMeterBox(dock) {
   const { meter } = DIAGRAM;
-  const b = MINI.border;
+  const b = TILE_BORDER;
   const at = (from, to) => Math.round(lerp(from, to, dock));
   return {
     left: at(meter.left, CPU_GAUGE.left - b), top: at(meter.top.cpu, CPU_GAUGE.top - b),
@@ -464,21 +446,56 @@ function makeWorkerCode(root) {
   return card;
 }
 
+// ---------- the "+ WORKER" (chapter 1) and "+ SLOTS" (chapter 6) ghosts: the reflex fix, struck through
+// A dashed panel in the place of the code card (with its tab), the whole band high, its label in 30 px mono; it also
+// keeps the composition centered on y 515, which the hard cuts leave no shift to do
+const GHOST = { left: DIAGRAM.code.left, top: DIAGRAM.band.top, w: DIAGRAM.code.w, h: DIAGRAM.band.h, label: 30 };
+GHOST.x = GHOST.left + GHOST.w / 2;
+GHOST.y = GHOST.top + GHOST.h / 2;
+// The ghost and its red strike, strikeHalfW px on either side of its middle (in a layer of its own, over the ghost)
+function makeGhost(root, label, strikeHalfW) {
+  const ghost = E(root,
+    `<div class="mono" style="font-size:${GHOST.label}px;letter-spacing:.1em;padding-left:.1em;color:var(--slate)">`
+    + label + '</div>',
+    '', {
+      width: GHOST.w + 'px', height: GHOST.h + 'px', border: '2px dashed ' + C.lineLight, borderRadius: 'var(--r)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    });
+  const svg = svgLayer(root);
+  const { x, y } = GHOST;
+  ghost.strike = path(svg, `M ${x - strikeHalfW} ${y} L ${x + strikeHalfW} ${y}`, C.red, 4, false);
+  return ghost;
+}
+// Places a ghost: risen by p (see rise()), with opacity o; from strikeAt on, its border turns red and the strike draws
+// across it, with opacity strikeO
+function placeGhost(ghost, t, p, o, strikeAt, strikeO) {
+  rise(ghost, GHOST.x, GHOST.y, p);
+  ghost.style.opacity = o;
+  ghost.style.borderColor = t >= strikeAt ? C.red : C.lineLight;
+  draw(ghost.strike, P(t, strikeAt, 0.35, easeOut), strikeO);
+}
+
 // ---------- bottleneck markers: a red outline round a part and a BOTTLENECK tag, which turn neon (FIXED)
-// A tag's height: 21 px of line, 8 of padding and 3 of border, so a tag centered on a whole pixel rests on whole pixels
-const TAG_H = 32;
+// A tag's height: 21 px of line, 8 of padding and 2 of border (1 px a side); odd, so a tag centered on a line has its
+// top rounded to a whole pixel
+const TAG_H = 31;
+const TAG_GAP = 6; // the gap between a tag above an outline and the outline
+// A statusTag TAG_H px high: the bottleneck tags, and chapter 5's EVICTED
+function markTag(root) {
+  const tag = statusTag(root);
+  tag.style.lineHeight = '21px';
+  return tag;
+}
 function makeMark(root) {
   // the tag after the outline, so that it covers the outline where they cross
   const box = E(root, '', '', { border: '2px solid ' + C.red, borderRadius: 'var(--r)' });
-  const tag = statusTag(root);
-  tag.style.lineHeight = '21px';
-  return { box, tag };
+  return { box, tag: markTag(root) };
 }
 // The top left corner of a tag w px wide by an outline box at spot (see placeMark)
 function tagCorner(box, spot, w, minLeft) {
   if (spot === 'left') return [box.left - 20 - w, Math.round(box.top + box.h / 2 - TAG_H / 2)];
   const left = spot === 'above-right' ? box.left + box.w - w : box.left + box.w / 2 - w / 2;
-  const top = spot === 'astride' ? box.top - TAG_H / 2 : box.top - 38;
+  const top = spot === 'astride' ? Math.round(box.top - TAG_H / 2) : box.top - TAG_GAP - TAG_H;
   return [Math.max(minLeft, left), top];
 }
 // box: { left, top, w, h } of the outline; spot: where the tag sits, 'above' (centered over the outline),
@@ -516,7 +533,7 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
   const dg = {};
   dg.temporal = makeTemporalPanel(root, temporal.w, temporal.h, { ...TEMPORAL_HEADER_LARGE, note: QUEUE_NOTE });
   dg.worker = makeAppPanel(root, name, worker.w, worker.h, APP_TEXT_LARGE);
-  dg.lanes = { wf: makeLane(root, 'Workflow Tasks', 'wf'), act: makeLane(root, 'Activity Tasks', 'act') };
+  dg.lanes = { wf: makeQueueLane(root, 'Workflow Tasks', 'wf'), act: makeQueueLane(root, 'Activity Tasks', 'act') };
   const label = text => E(root, text, 'lbl', { fontSize: '16px' });
   // POLLERS is centered on the Poller column: a fixed even width, its text centered
   dg.labels = {
@@ -540,10 +557,7 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
   const pollLine = () => path(dg.svg, 'M 0 0 L 1 0', C.violet, 2, false, '5,7');
   const { max } = DIAGRAM.poller;
   dg.pollLines = { wf: Array.from({ length: max.wf }, pollLine), act: Array.from({ length: max.act }, pollLine) };
-  const poller = () => E(root, '', '', {
-    width: DIAGRAM.poller.size + 'px', height: DIAGRAM.poller.size + 'px', borderRadius: '50%',
-    border: '2px solid ' + C.violet, background: 'var(--surface)',
-  });
+  const poller = () => makePoller(root);
   dg.pollers = { wf: Array.from({ length: max.wf }, poller), act: Array.from({ length: max.act }, poller) };
   // chips in flight, reused in turn
   dg.flying = {
@@ -563,11 +577,12 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 // ---------- placing the diagram
 // Places the whole diagram at time t, from one state object; every field is optional, so a chapter sets only what
 // it shows, phase by phase (its values may depend on t and on its cues c[i]):
-// - show: { temporal, lanes, worker, pollers, wfSlots, slots, slotsLabel, cache, backlog, wait, cpu, mem, code },
-//   the opacity of each part, 1 by default (slotsLabel, the ACTIVITY SLOTS label: that of the slots by default)
+// - show: { temporal, lanes, worker, status, pollers, wfSlots, slots, slotsLabel, cache, backlog, wait, cpu, mem,
+//   code }, the opacity of each part, 1 by default (status, the WORKER panel's status; slotsLabel, the ACTIVITY SLOTS
+//   label: that of the slots by default)
 // - split: 0 to 1, from one "orders" lane (chapter 1) to two lanes, Workflow Tasks above Activity Tasks (default 1)
-// - queue: { wf, act }, the tasks waiting in each lane (see placeLane); taskIcon(k): the icon of Activity Task k of
-//   its lane (default activityIcon)
+// - queue: { wf, act }, the tasks waiting in each lane (see placeQueueLane); taskIcon(k): the icon of Activity Task k
+//   of its lane (default activityIcon)
 // - flows: task flows from the lanes into the Slots (see FLIGHT), in order of their `from`
 // - slots: { n, grow, busy, replay, icon, glow, closed, drop }, the Activity Slots: n of them (default 10); grow
 //   { from, at }: the grid grows from `from` Slots at `at` (its rows spread out, then the new Slots pop in); busy: how
@@ -603,6 +618,7 @@ function placeWorkerDiagram(dg, t, state = {}) {
   place(dg.worker, worker.left + worker.w / 2, worker.top + worker.h / 2, 1, show('worker'));
   const [statusText, statusState] = state.status ?? ['RUNNING', 'running'];
   setAppStatus(dg.worker, statusText, statusState);
+  dg.worker.st.style.opacity = show('status');
 
   const layout = slotLayout(state.slots ?? {}, t);
   const flights = flowFlights(state, t);
@@ -681,7 +697,7 @@ function placeLanes(dg, t, state, o) {
     // the queue moves up after each departure, quicker than the departures come
     const shift = P(t, lastLeave, Math.min(0.3, every * 0.9));
     const laneO = lane === 'wf' ? o * split : o;
-    placeLane(dg.lanes[lane], DIAGRAM.lane.left, laneMidY(lane, split), laneO, {
+    placeQueueLane(dg.lanes[lane], DIAGRAM.lane.left, laneMidY(lane, split), laneO, {
       queue: state.queue?.[lane] ?? 0, departed, shift, iconOf, labelO: split,
     });
   }
@@ -786,7 +802,7 @@ function placePollers(dg, t, state, layout, flights, o) {
       e.style.background = glow > 0.5 ? C.violet : 'var(--surface)';
       place(e, x, y, shown.s, shown.o * o);
       const line = dg.pollLines[lane][i];
-      line.setAttribute('d', roundedPath(pollRoute(col.laneY, x - size / 2 - 3, y)));
+      setD(line, roundedPath(pollRoute(col.laneY, x - size / 2 - 3, y), GRID.corner));
       draw(line, 1, polling[lane] && i < col.n ? shown.o * o : 0);
     });
   }
@@ -965,10 +981,9 @@ function placeMarks(dg, t, state, layout) {
 }
 
 // ---------- mini Worker (intro, outro): a WORKER panel holding a small grid of Activity Slots
-// Cells GRID.cell apart, GRID.pad from the panel's edges, under a header `head` px high. border: the panel's border
-// as drawn, as its cells are placed from its padding edge: Chromium draws the 1.5 px border of .tile 1 px wide in the
-// 1920 x 1080 frames, so the cells rest on whole pixels
-const MINI = { w: 56, h: 32, pitchX: 56 + GRID.cell, pitchY: 32 + GRID.cell, pad: GRID.pad, head: 72, border: 1 };
+// Cells GRID.cell apart, GRID.pad from the panel's edges, under a header `head` px high; placed from the panel's
+// padding edge, TILE_BORDER inside its outer edge, so they rest on whole pixels
+const MINI = { w: 56, h: 32, pitchX: 56 + GRID.cell, pitchY: 32 + GRID.cell, pad: GRID.pad, head: 72 };
 // Size of a mini Worker panel holding cols x rows Slots
 const miniWorkerSize = (cols, rows) => ({
   w: MINI.pad * 2 + (cols - 1) * MINI.pitchX + MINI.w,
@@ -996,7 +1011,7 @@ function makeMiniWorker(root, name, cols, rows) {
 function placeMiniCell(panel, cell, [x, y], cw, ch) {
   Object.assign(cell.style, {
     width: cw + 'px', height: ch + 'px',
-    left: (panel.w / 2 + x - cw / 2 - MINI.border) + 'px', top: (panel.h / 2 + y - ch / 2 - MINI.border) + 'px',
+    left: (panel.w / 2 + x - cw / 2 - TILE_BORDER) + 'px', top: (panel.h / 2 + y - ch / 2 - TILE_BORDER) + 'px',
   });
 }
 // Opacity of an app panel's header: its gear and name, and its status
@@ -1008,9 +1023,10 @@ function setPanelHeader(panel, o) {
 // ---------- the hard cuts: from the intro to the outro, each scene ends on the next one's first frame
 // The values carried across the cuts, as each chapter starts: the scene before it ends on them. act and wf: the tasks
 // waiting in the Activity and Workflow lanes; wait: SCHEDULE-TO-START, in seconds; cpu: in %; mem: the share of memory
-// used; gb: the Worker's memory, in GB (raised by chapter 5: at about 600 cached Workflows per GB of heap in the
-// TypeScript SDK, a cache of 500 nearly fills 1 GB). Activity counts sit half-way between whole counts, so the counts
-// shown on either side of a cut agree; Workflow counts are whole, so that no chip is half-way in.
+// used; gb: the Worker's memory, in GB (raised by chapter 5: the TypeScript SDK sizes its default cache at about 600
+// Workflows per GB of heap, after a 200 MB reserve, so a cache of 500 fills 1 GB). Activity counts sit half-way between
+// whole counts, so the counts shown on either side of a cut agree; Workflow counts are whole, so that no chip is
+// half-way in.
 const AT_CUT = {
   ch1: { act: 45.5 },
   ch2: { act: 2800.5 },
@@ -1022,7 +1038,7 @@ const AT_CUT = {
 // The task flows of a chapter that ends on a cut are done REST_LEAD s before its end: no task flies, swells or frees
 // its Slot as the cut comes, so the cut and the hold of presenter mode before it fall on a still frame. Each chapter
 // takes a multiple of five tasks from the Activity lane: its queued chips then show at the cut the icons the next
-// chapter starts with (see placeLane).
+// chapter starts with (see placeQueueLane).
 const REST_LEAD = 0.4;
 // The parts that only one chapter shows (a metric line, a FIXED tag) leave LEAVE_LEAD s before its end, over 0.4 s;
 // presenter mode holds just before (holdBeforeEnd)
@@ -1075,13 +1091,13 @@ function makeQueuePart(box) {
   const { h, chip, icon, pitch } = RECAP_QUEUE;
   E(box, '', '', {
     top: (RECAP_PART.h - h) / 2 + 'px', width: RECAP_PART.w + 'px', height: h + 'px',
-    background: `rgba(${RGB.ink},.03)`, border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)', opacity: 1,
+    background: `rgba(${RGB.ink},.03)`, border: '1px solid ' + C.line, borderRadius: 'var(--rs)', opacity: 1,
   });
   const headX = RECAP_PART.w / 2 + pitch;
   for (let k = 0; k < 3; k++) {
     E(box, ICON(activityIcon(k), icon, C.ink, 1.8), '', {
       left: headX - k * pitch - chip / 2 + 'px', top: (RECAP_PART.h - chip) / 2 + 'px', width: chip + 'px',
-      height: chip + 'px', background: 'var(--surface)', border: '1.5px solid ' + C.lineLight, borderRadius: '4px',
+      height: chip + 'px', background: 'var(--surface)', border: '1px solid ' + C.lineLight, borderRadius: '4px',
       display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 1,
     });
   }
@@ -1110,10 +1126,7 @@ function makePollerPart(box) {
     + `<path d="M 2 17 L 52 17" stroke="${C.violet}" stroke-width="2" stroke-linecap="round"`
     + ' stroke-dasharray="5,7"/></svg>');
   box.line = box.querySelector('path');
-  E(box, '', '', {
-    left: RECAP_POLLER_X - DIAGRAM.poller.size / 2 + 'px', top: '6px', width: '22px', height: '22px',
-    borderRadius: '50%', border: '2px solid ' + C.violet, background: 'var(--surface)', opacity: 1,
-  });
+  makePoller(box, { left: RECAP_POLLER_X - DIAGRAM.poller.size / 2 + 'px', top: '6px', opacity: 1 });
 }
 // - a WORKFLOW CACHE cell, of the diagram's size, in the middle, holding the order of the first cell as chapter 6
 //   leaves the cache

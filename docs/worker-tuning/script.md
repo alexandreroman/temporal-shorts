@@ -37,7 +37,7 @@ The video teaches, in order:
    too slowly; turn on Poller Autoscaling;
 5. a cache too small: evictions force replays of the Event History, which
    burn CPU and hold Slots; give the Worker more memory and a larger cache;
-6. a full CPU: more Slots add no CPU; only then add Workers;
+6. a full CPU: more Slots add no CPU; only then add Workers on more hosts;
 7. change one setting at a time, then look for the next bottleneck: fixing
    one limit moves the constraint somewhere else.
 
@@ -93,8 +93,19 @@ and the TypeScript SDK (v1.24.0):
   `approximate_backlog_count` and `approximate_backlog_age_seconds`.
 - https://docs.temporal.io/troubleshooting/performance-bottlenecks: a
   schedule-to-start p95 above 1 s is high; replay latency is high above a
-  few milliseconds. The TypeScript cache default holds about 600
-  Workflows per GB of heap.
+  few milliseconds.
+- The TypeScript Workflow cache lives in the V8 heap: its default size is
+  `max(floor((heap - 200 MB) * 600 / 1024 MB), 10)`, about 600 Workflows
+  per GB of heap after a 200 MB reserve (`worker-options.ts`). More memory
+  helps only if the heap limit grows with it, or if `maxCachedWorkflows`
+  is set, as in the story.
+- https://docs.temporal.io/develop/worker-performance/configuration:
+  Poller Autoscaling requires Temporal Server 1.28.0 or later.
+- https://docs.temporal.io/troubleshooting/worker-capacity: "If Workers
+  are healthy and slots are free but latency stays high, your Worker pool
+  is too small ... Scale horizontally". Chapter 4 follows the task-queues
+  page instead: with Slots free and a long schedule-to-start, the Pollers
+  are the limit, and more Pollers come first.
 
 Poller and Workflow Slot counts are schematic: the diagram draws 2
 Workflow Pollers, 2 Workflow Slots, and 2 Activity Pollers growing to 5
@@ -225,14 +236,14 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   move forward.
   - Visuals: the cache gets the red outline and BOTTLENECK tag; the
     metric lines `temporal_sticky_cache_total_forced_eviction` (up to
-    46/s) and `temporal_workflow_task_replay_latency` (12 to 58 ms) climb;
+    46/s) and `temporal_workflow_task_replay_latency` (3 to 58 ms) climb;
     SCHEDULE-TO-START rises from 0.8 s to 6.8 s; the CPU meter jumps to
     96%; the Workflow lane lengthens.
 - **2:49** Give the Worker more memory and a larger cache: open orders
   stay cached, and replays become rare.
   - Visuals: MEMORY 1 GB becomes 4 GB; the code line `maxCachedWorkflows: 500`
     lights and becomes 2000; the strip widens to 7 cells and the waiting
-    orders move in; the metric lines read 0/s and "rare" in neon; the
+    orders move in; the metric lines read 0/s and 3 ms in neon; the
     tag turns neon; CPU 88%. Before the cut, the metric lines and the FIXED
     tag sink out.
 
@@ -250,8 +261,8 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   used all the CPU it has.
   - Visuals: the code card fades; a dashed "+ SLOTS" ghost takes its
     place, crossed out.
-- **3:18** This is the moment to add Workers: B and C poll the same Task
-  Queue and share the load.
+- **3:18** Add Workers on more hosts: B and C poll the same Task Queue and
+  share the load.
   - Visuals: MEMORY and the "+ SLOTS" ghost fade; A's CPU meter shrinks
     into a compact gauge at the top right of WORKER A, its BOTTLENECK tag beside
     it; WORKER B and WORKER C, as wide as A, slide in under it, each with a
@@ -270,24 +281,24 @@ suppliers for most workloads), rate limits and Task Queue partitions.
 
 - **3:37** A growing backlog often comes from one of four Worker limits:
   Slots, Pollers, cache or CPU.
-  - Visuals: each row grows from its icon (the cache icon reads #1049, the
-    order the diagram ends with). The table's first row is the symptom, set
-    slightly apart, with a 2 px violet-to-UV gradient border, an even violet
-    glow and a violet WATCH FIRST badge astride its top border on the right: a
-    queue-strip icon (chapter 6's Activity lane shrinks into it), "Backlog
-    grows, tasks wait", the three signals stacked, `approximate_backlog_count`
-    rising, `approximate_backlog_age` older, `schedule_to_start_latency` high,
+  - Visuals: each row grows from its icon (the cache icon reads #1049, the order
+    the diagram ends with). The table's first row is the symptom, set slightly
+    apart, with a 2 px violet-to-UV gradient border, an even violet glow and a
+    violet WATCH FIRST badge astride its top border on the right: a queue-strip
+    icon (chapter 6's Activity lane shrinks into it), "Backlog grows, tasks
+    wait", the three signals stacked, `approximate_backlog_count` rising,
+    `approximate_backlog_age` older, `activity_schedule_to_start_latency` high,
     and "Find the full limit below"; its glow swells as "A growing backlog" is
-    read. Then four rows, under the SYMPTOM / SIGNAL / FIX headings, each
-    option name on a smaller line under its fix: Slots full, CPU low /
+    read. Then four rows, under the SYMPTOM / SIGNAL / FIX headings, each option
+    name on a smaller line under its fix: Slots full, CPU low /
     `worker_task_slots_available` at 0 / More Slots, if downstream keeps up
     (`maxConcurrentActivityTaskExecutions`); Slots free, long wait /
     `activity_schedule_to_start_latency` high / Poller Autoscaling
     (`activityTaskPollerBehavior`); evictions, replays /
     `sticky_cache_total_forced_eviction` high rate / More memory, larger cache
-    (`maxCachedWorkflows`); CPU at 100% / CPU usage / More Workers; each row
-    starts with a small icon of the diagram (Slots, a Poller, a cache cell, a
-    full CPU bar) and lights as it is named.
+    (`maxCachedWorkflows`); CPU at 100% / CPU usage / More Workers on more
+    hosts; each row starts with a small icon of the diagram (Slots, a Poller, a
+    cache cell, a full CPU bar) and lights as it is named.
 - **3:45** Change one setting at a time, watch the signals, then look for
   the next bottleneck.
   - Visuals: under the table, three pills CHANGE ONE SETTING → WATCH THE

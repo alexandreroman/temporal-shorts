@@ -11,16 +11,17 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // The symptom, then the four causes, in the order the first subtitle names them (name: its words in the subtitle),
-  // each row starting with its part (RECAP_PARTS, in the same order). The signal: SDK metrics (named without the
-  // temporal_ prefix, as in the docs headings), one per line, each with its reading, or plain words (signalText) in
-  // the text font; the fix: what to change, and the Worker option that does it, on a second line. The symptom's
-  // metrics are those to watch first, as the badge on its row says: the backlog of the Task Queue, then the wait.
+  // each row starting with its part (RECAP_PARTS, in the same order). The signal: metrics (named without their
+  // temporal_ or temporal_cloud_v1_ prefix, as in the docs headings), one per line, each with its reading, or plain
+  // words (signalText) in the text font; the fix: what to change, and the Worker option that does it, on a second line.
+  // The symptom's metrics are those to watch first, as the badge on its row says: the backlog of the Task Queue (server
+  // or Temporal Cloud metrics), then the wait (an SDK metric); the limits' metrics are SDK metrics.
   const ROWS = [
     {
       name: 'A growing backlog', symptom: 'Backlog grows, tasks wait',
       metrics: [
         ['approximate_backlog_count', 'rising'], ['approximate_backlog_age', 'older'],
-        ['schedule_to_start_latency', 'high'],
+        ['activity_schedule_to_start_latency', 'high'],
       ],
       fix: 'Find the full limit below', option: '',
     },
@@ -42,7 +43,7 @@
     {
       name: 'CPU', symptom: 'CPU at 100%',
       signalText: 'CPU usage',
-      fix: 'More Workers', option: '',
+      fix: 'More Workers on more hosts', option: '',
     },
   ];
   // The loop, in the order the second subtitle reads it (name: its words in the subtitle)
@@ -89,12 +90,10 @@
   const OUT = { lead: 2.2, leave: 0.45, stagger: 0.08, rowDx: 200, loopDy: 40, growAt: 0.35, grow: 1.3 };
   const GROWING = RECAP_PARTS.indexOf('slots');
 
-  // The offset of a row's content from its outer edge: Chromium draws the 1.5 px border of a tile 1 px wide
-  const BORDER = 1;
   // A cell of a row, at x from the row's outer left edge, as high as the row, its content centered vertically on
   // whole pixels; its parts sit on one baseline, 12 px apart
-  const cell = (x, html, css = '', h = RECAP.rowH) => `<div style="position:absolute;left:${x - BORDER}px;`
-    + `top:-${BORDER}px;height:${h}px;display:flex;align-items:center;white-space:nowrap;${css}">`
+  const cell = (x, html, css = '', h = RECAP.rowH) => `<div style="position:absolute;left:${x - TILE_BORDER}px;`
+    + `top:-${TILE_BORDER}px;height:${h}px;display:flex;align-items:center;white-space:nowrap;${css}">`
     + `<div style="display:flex;align-items:baseline;gap:12px">${html}</div></div>`;
   // 24 px lines, so that the symptom's 3 metrics fit its row with room to spare
   const metricCss = 'font-family:Mono;font-size:20px;line-height:24px';
@@ -102,7 +101,7 @@
   // A row of the table, after its part (see makeRecapPart): the symptom, the signal (its metrics in mono, one per line,
   // each followed by its reading in red; plain words as the symptom) and the fix (the Worker option under it, in slate
   // mono)
-  function makeRow(root, row) {
+  const makeRow = (root, row) => {
     const textCss = 'font-size:28px;line-height:36px';
     const metricLine = ([metric, reading]) => '<div style="display:flex;align-items:baseline;gap:12px">'
       + `<span>${metric}</span><span style="color:${C.red}">${reading}</span></div>`;
@@ -115,7 +114,7 @@
     return E(root,
       cell(COL.symptom, row.symptom, textCss) + signal + cell(COL.fix, `<div>${row.fix}${option}</div>`, textCss),
       'tile', { height: RECAP.rowH + 'px', textAlign: 'left' });
-  }
+  };
 
   scene({
     chapter: 7, title: 'Read the signals',
@@ -149,7 +148,7 @@
         ...rowBox, padding: FRAME.border + 'px', background: `linear-gradient(90deg, ${C.violet}, ${C.uv})`,
         mask: 'linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)',
       });
-      s.badge = fixedTag(root, BADGE.text, 'violet solid', BADGE.w, BADGE.h);
+      s.badge = fixedTag(root, BADGE.text, 'violet solid', BADGE.w, { h: BADGE.h });
       // smaller than a pill, with less padding: it stands on the row's border, as the x10 tag
       Object.assign(s.badge.style, { fontSize: '16px', lineHeight: '22px', padding: '4px 10px 4px calc(10px + .1em)' });
       // the parts above their rows, which grow from them; the parts are there from the start, as chapter 6 leaves them

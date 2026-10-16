@@ -22,8 +22,11 @@
     ['activity shipPackage(o)', '  return ship(o.address)'],
   ];
   // the Data Converter, 60 px right of the Workers (the wires' run), level with WORKER 2, where all data leaves and
-  // comes back: 24 px from the zone's right border, so its name fits on one line
-  const CONV = { x: 754, y: workerY(1), w: 164, h: 100 };
+  // comes back: 24 px from the zone's right border, so its name fits on one line; tall enough for a third line, IN
+  // EACH WORKER, as data conversion runs on the Workers, not in a gateway between them and Temporal Cloud
+  const CONV = { x: 754, y: workerY(1), w: 164, h: 120 };
+  // the width of the scan line that sweeps across the Data Converter
+  const SCAN_W = 3;
   // the connection: from the Data Converter out to a connector dot on Temporal Cloud's edge
   const DOT = { x: CLOUD.x - CLOUD.w / 2, y: CONV.y, size: 18 };
   // the connection's labels, centered between your zone's edge and Temporal Cloud's
@@ -51,8 +54,10 @@
   const VISIBLE = 5;
   // the middle of row i in the viewport, unscrolled
   const rowInView = i => VIEW.first + ROW.h / 2 + i * PITCH;
-  // the middle of a row's payload chip (210 px wide), 20 px inside the row's right border
-  const PAYLOAD_X = BLOCK.x + BLOCK.w / 2 - 24 - 1.5 - 20 - 105;
+  // the middle of a row's payload chip (210 px wide), 20 px inside the row's right border: the viewport, and so the
+  // row, ends VIEW.left px from the block's padding edge, TILE_BORDER inside its outer edge
+  const ROW_RIGHT = BLOCK.x - BLOCK.w / 2 + TILE_BORDER + VIEW.left + VIEW.w;
+  const PAYLOAD_X = ROW_RIGHT - TILE_BORDER - 20 - 105;
   // The tasks, in the order Temporal queues them, and the Worker each goes to: the Workflow task starts the
   // Workflow, which runs until it awaits chargeCard; the chargeCard task runs; a new Workflow task resumes the
   // Workflow until it awaits shipPackage; the shipPackage task runs; a last Workflow task resumes it to its end
@@ -86,78 +91,62 @@
   const scrambleHex = (text, n, frame) => [...text].map((ch, i) => (i < n && ch !== ' '
     ? HEX[Math.floor(hash(i * 31 + frame) * HEX.length)] : ch)).join('');
 
-  // Temporal Cloud's title: the official lockup, 34 px high, then "Cloud" in the brand font and the wordmark's
-  // color, its capitals as tall as the wordmark's and on its baseline. The lockup's viewBox is 1570x410 units: the
-  // wordmark's capitals run from y 519 to its baseline at y 684.7, 805 being the image's bottom; Instrument Sans
-  // capitals are 0.72 em tall. gap: a word space (0.2 em of that font) after the wordmark's last letter, which ends
-  // at the image's right edge
-  const CLOUD_UNIT = 34 / 410;
-  const CLOUD_TITLE = {
-    rise: Math.round((805 - 684.7) * CLOUD_UNIT), font: +((684.7 - 519) * CLOUD_UNIT / 0.72).toFixed(2),
-  };
-  CLOUD_TITLE.gap = Math.round(0.2 * CLOUD_TITLE.font);
-  // A zone with a label at its top left (yours) or the title Temporal Cloud (Temporal's), and a caption at its
-  // bottom
-  function makeZone(root, zone, caption, mine) {
-    const head = mine
-      ? '<div class="lbl" style="position:absolute;left:24px;top:20px;padding-left:0;font-size:18px">'
-        + 'Your environment</div>'
-      : '<div style="position:absolute;left:24px;top:20px;height:34px;line-height:0;white-space:nowrap">'
-        + `<img src="${LOGO}" style="height:34px;vertical-align:-${CLOUD_TITLE.rise}px">`
-        + `<span style="font-size:${CLOUD_TITLE.font}px;margin-left:${CLOUD_TITLE.gap}px;color:#F2F2F2">Cloud</span>`
-        + '</div>';
-    const look = mine
-      ? { border: '2px dashed ' + C.slate, background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)' }
-      : { borderColor: C.uv, background: '#17182A' };
-    const e = E(root, head
-      + '<div class="cap lbl" style="position:absolute;left:0;right:0;bottom:24px;text-align:center;font-size:18px;'
-      + `color:var(--ink)">${caption}</div>`, mine ? '' : 'tile',
-    { width: zone.w + 'px', height: zone.h + 'px', ...look });
+  // The zone where your code runs: a dashed frame with a label at its top left
+  const makeYoursZone = root => E(root,
+    '<div class="lbl" style="position:absolute;left:24px;top:20px;padding-left:0;font-size:18px">'
+    + 'Your environment</div>', '',
+    { border: '2px dashed ' + C.slate, background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)' });
+  // Sizes a zone (yours or Temporal Cloud's) and adds its caption at its bottom
+  const finishZone = (e, zone, caption) => {
+    Object.assign(e.style, { width: zone.w + 'px', height: zone.h + 'px' });
+    e.insertAdjacentHTML('beforeend',
+      '<div class="cap lbl" style="position:absolute;left:0;right:0;bottom:24px;text-align:center;font-size:18px;'
+      + `color:var(--ink)">${caption}</div>`);
     e.cap = e.querySelector('.cap');
     return e;
-  }
+  };
   // A Worker: an app panel with its code in a card, its keywords in violet
-  function makeWorker(root, k, lines) {
+  const makeWorker = (root, k, lines) => {
     const w = makeAppPanel(root, `WORKER ${k + 1}`, WORKER.w, WORKER.h, { font: 19, statusFont: 15, statusTop: 23 });
     const keyword = /^(\s*)(workflow|activity|await|return)/;
     const code = lines.map(line => '<div style="white-space:pre;margin:0 -8px;padding:0 8px;border-radius:4px">'
       + `${line.replace(keyword, `$1<span style="color:${C.violet}">$2</span>`)}</div>`).join('');
     w.insertAdjacentHTML('beforeend',
       `<div class="code mono" style="position:absolute;left:${CODE.inset}px;right:${CODE.inset}px;top:${CODE.top}px;`
-      + `height:${CODE.h}px;padding:10px ${CODE.inset - 1.5}px;font-size:19px;line-height:${CODE.line}px;`
-      + `background:rgba(${RGB.ink},.03);border:1.5px solid ${C.line};border-radius:var(--rs)">${code}</div>`);
+      + `height:${CODE.h}px;padding:10px ${CODE.inset - TILE_BORDER}px;font-size:19px;line-height:${CODE.line}px;`
+      + `background:rgba(${RGB.ink},.03);border:1px solid ${C.line};border-radius:var(--rs)">${code}</div>`);
     w.code = w.querySelector('.code');
     w.lines = [...w.code.children];
     return w;
-  }
-  // The Data Converter: a lock (its shackle its own path, so it can open and snap shut) and its name on one row,
-  // then a key and YOUR KEYS: the encryption keys are yours
-  function makeConverter(root) {
+  };
+  // The Data Converter: a lock (a lockSvg(), so it can open and snap shut) and its name on one row, then a key and
+  // YOUR KEYS: the encryption keys are yours; then IN EACH WORKER, in slate: one wire per Worker leads to a single
+  // tile, but each Worker runs its own
+  const makeConverter = root => {
     const e = E(root,
       '<div style="display:flex;align-items:center">'
-      + `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${C.neon}" stroke-width="2"`
-      + ' stroke-linecap="square" style="display:block;overflow:visible"><rect x="5" y="11" width="14" height="10"/>'
-      + '<path d="M12 15v2"/><path class="shackle" d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
+      + lockSvg(22, { stroke: 2, color: C.neon })
       + '<div style="margin-left:6px;line-height:18px">Data converter</div></div>'
       + '<div style="display:flex;align-items:center;margin-top:12px;font-size:12px;line-height:16px;'
       + `color:${C.neon}"><div class="key" style="flex:none">${ICON('key', 18, C.neon, 1.8)}</div>`
-      + '<div style="margin-left:6px">Your keys</div></div>',
+      + '<div style="margin-left:6px">Your keys</div></div>'
+      + `<div style="margin-top:10px;line-height:16px;color:${C.slate}">In each Worker</div>`,
       'mono', {
         width: CONV.w + 'px', height: CONV.h + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', fontSize: '13px', letterSpacing: '.03em', paddingLeft: '.03em',
-        textTransform: 'uppercase', textAlign: 'center', background: '#1E2418', border: '1.5px solid ' + C.neon,
+        textTransform: 'uppercase', textAlign: 'center', background: '#1E2418', border: '1px solid ' + C.neon,
         borderRadius: 'var(--rs)',
       });
-    e.shackle = e.querySelector('.shackle');
     e.key = e.querySelector('.key');
     e.lock = e.querySelector('svg');
-    // the scan line that sweeps across the tile as data goes through it, behind the tile's text
+    // the scan line that sweeps across the tile as data goes through it, behind the tile's text, as tall as the
+    // tile inside its border
     e.scan = E(e, '', '', {
-      width: '3px', height: (CONV.h - 3) + 'px', zIndex: -1, background: C.neon,
+      width: SCAN_W + 'px', height: (CONV.h - 2 * TILE_BORDER) + 'px', zIndex: -1, background: C.neon,
       boxShadow: `0 0 12px 3px rgba(${RGB.neon},.45)`,
     });
     return e;
-  }
+  };
   // A block of Temporal Cloud: its label (an icon and a name) at its top left, top px from its top
   const makeBlock = (root, icon, name, h, top = 20) => E(root,
     panelLabel(icon, name, `left:22px;top:${top}px`), 'tile', {
@@ -167,7 +156,7 @@
   // A history row: its number, its name on the left, then two fixed columns on the right: its state, a quiet slate
   // label right-aligned 20 px left of the payload column, and its payload, encrypted (an empty slot for an event
   // without data)
-  function makeRow(root, i, [name, state, payload]) {
+  const makeRow = (root, i, [name, state, payload]) => {
     const chip = payload === null ? '<span style="flex:none;width:210px"></span>'
       : '<span class="pl" style="flex:none;display:flex;align-items:center;justify-content:center;gap:8px;'
         + 'width:210px;height:40px;'
@@ -183,11 +172,11 @@
       'mono', {
         width: VIEW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center',
         padding: '0 20px 0 20px', fontSize: '22px', whiteSpace: 'nowrap', background: `rgba(${RGB.ink},.03)`,
-        border: '1.5px solid ' + C.line, borderRadius: 'var(--rs)',
+        border: '1px solid ' + C.line, borderRadius: 'var(--rs)',
       });
     e.pl = e.querySelector('.pl');
     return e;
-  }
+  };
 
   scene({
     chapter: 5, title: 'How Temporal Cloud works',
@@ -209,13 +198,13 @@
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-      s.yours = makeZone(root, YOURS, 'Your code runs here', true);
-      s.cloud = makeZone(root, CLOUD, 'Only Workflow & Activity data, never your code', false);
+      s.yours = finishZone(makeYoursZone(root), YOURS, 'Your code runs here');
+      s.cloud = finishZone(makeCloudZone(root), CLOUD, 'Only Workflow & Activity data, never your code');
       s.workers = WORKERS.map((lines, k) => makeWorker(root, k, lines));
       s.conv = makeConverter(root);
       s.orch = makeBlock(root, 'clock', 'Orchestration · task queue', ORCH.h, (ORCH.h - 26) / 2);
       s.orch.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:${LANE.left}px;`
-        + `top:${LANE.top}px;width:${LANE.w}px;height:${LANE.h}px;border:1.5px dashed rgba(148,163,184,.5);`
+        + `top:${LANE.top}px;width:${LANE.w}px;height:${LANE.h}px;border:1px dashed rgba(148,163,184,.5);`
         + 'border-radius:var(--rs)"></div>');
       // its payloads show locked; NEVER SEES YOUR PAYLOADS takes the label row's right
       s.pers = makeBlock(root, 'book', 'Persistence', PERS.h);
@@ -239,20 +228,23 @@
       s.line = path(s.svg, `M ${CONV.x + CONV.w / 2} ${CONV.y} L ${DOT.x - DOT.size / 2 - 8} ${DOT.y}`, C.ink, 3);
       s.routes = WORKERS.map((_, k) => path(s.svg, `${wire(k)} L ${DOT.x} ${DOT.y}`, 'none', 1, false));
       s.dot = E(root, '', '', {
-        width: DOT.size + 'px', height: DOT.size + 'px', borderRadius: '50%', background: '#17182A',
+        width: DOT.size + 'px', height: DOT.size + 'px', borderRadius: '50%', background: C.temporalSurface,
         border: '3px solid ' + C.ink,
       });
       s.outbound = E(root, 'Outbound only', 'lbl', { color: 'var(--ink)', fontSize: '16px' });
-      s.mtls = E(root, 'mTLS<br>or PrivateLink', 'lbl', { fontSize: '14px', textAlign: 'center', lineHeight: '22px' });
+      // how the connection is authenticated, and the network paths it can take
+      s.auth = E(root, 'mTLS or API key<br>over internet<br>or private link', 'lbl', {
+        fontSize: '14px', textAlign: 'center', lineHeight: '22px',
+      });
       s.tasks = TASKS.map(([name]) => E(root, name, 'mono', {
-        width: TASK.w + 'px', height: TASK.h + 'px', lineHeight: (TASK.h - 3) + 'px', textAlign: 'center',
+        width: TASK.w + 'px', height: TASK.h + 'px', lineHeight: (TASK.h - 2 * TILE_BORDER) + 'px', textAlign: 'center',
         // opaque, so nothing it passes over shows through its text
-        fontSize: '20px', background: '#2B2F78', border: '1.5px solid ' + C.uv, borderRadius: 'var(--rs)',
+        fontSize: '20px', background: '#2B2F78', border: '1px solid ' + C.uv, borderRadius: 'var(--rs)',
       }));
       // the Workflow's schedule requests: violet, opaque, so nothing shows through their text
       s.schedules = SCHEDULES.map(text => E(root, text, 'mono', {
         fontSize: '17px', padding: '8px 14px', background: '#3A2766', color: C.ink,
-        border: '1.5px solid ' + C.violet, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
+        border: '1px solid ' + C.violet, borderRadius: 'var(--rs)', whiteSpace: 'nowrap',
       }));
       s.polls = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       // on a Worker's wire, a task or a schedule request travels as a violet spark, so no card ever covers the
@@ -306,9 +298,10 @@
       s.wires.forEach((wire, k) => draw(wire, P(t, c[0] + 1.6 + k * 0.1, 0.4), 0.8));
       draw(s.line, P(t, c[0] + 1.9, 0.6));
       place(s.dot, DOT.x, DOT.y, P(t, c[0] + 2.3, 0.3, backOut), P(t, c[0] + 2.3, 0.2));
-      // the labels clear of the payload that crosses on the connection in the close-up
+      // the labels clear of the payload that crosses on the connection in the close-up: the three lines under the
+      // connection (66 px tall) start 36 px below it
       place(s.outbound, LINE_X, CONV.y - 46, 1, P(t, c[0] + 2.6, 0.4));
-      place(s.mtls, LINE_X, CONV.y + 58, 1, P(t, c[0] + 2.8, 0.4));
+      place(s.auth, LINE_X, CONV.y + 36 + 33, 1, P(t, c[0] + 2.8, 0.4));
       s.polls.forEach((e, k) => {
         const p = P(t, pollAt(k), 1.2, linear);
         if (p <= 0 || p >= 1) {
@@ -460,7 +453,7 @@
       let text = SECRET;
       if (encrypted >= 1) text = CIPHER;
       else if (encrypted > 0) text = scrambleHex(SECRET, Math.round(encrypted * SECRET.length), frame);
-      if (s.secret.textContent !== text) s.secret.textContent = text;
+      setText(s.secret, text);
       s.secret.style.background = encrypted > 0.5 ? C.violetTint : C.uvTint;
       const k3 = 1.1 * pop.s * (1 - 0.2 * drop);
       place(s.secret, Math.round(sx), Math.round(sy), k3, pop.o * (1 - P(t, landed - 0.15, 0.2)));
@@ -478,21 +471,22 @@
       const active = passes.find(pass => Math.abs(t - pass.mid) < 0.22);
       const pulse = active ? win(t, active.mid - 0.22, active.mid + 0.22, 0.12) : 0;
       const sweep = active ? P(t, active.mid - 0.22, 0.44, linear) : 0;
-      place(s.conv.scan, (active && active.out ? sweep : 1 - sweep) * (CONV.w - 6) + 1.5, (CONV.h - 3) / 2, 1,
-        active ? pulse * 0.8 : 0);
+      // the scan line runs inside the tile's border, from its left edge to its right one
+      const scanRun = CONV.w - 2 * TILE_BORDER - SCAN_W;
+      place(s.conv.scan, (active && active.out ? sweep : 1 - sweep) * scanRun + SCAN_W / 2,
+        (CONV.h - 2 * TILE_BORDER) / 2, 1, active ? pulse * 0.8 : 0);
       const decrypt = active && !active.out ? win(t, active.mid - 0.2, active.mid + 0.15, 0.1) : 0;
       const click = active && active.out ? swell(t, active.mid - 0.1, 0.25) : 1;
       s.conv.lock.style.transform = `scale(${click})`;
       const open = Math.max(P(t, openAt, 0.25) * (1 - P(t, snap, 0.15, easeIn)), decrypt);
-      s.conv.shackle.setAttribute('transform', `translate(0 ${(-4 * open).toFixed(2)})`);
+      liftShackle(s.conv.lock, +(LOCK_LIFT * open).toFixed(2));
       s.conv.key.style.transform = `scale(${swell(t, snap - 0.25, 0.5)})`;
       const glow = Math.max(pulse * 0.7, win(t, snap - 0.1, snap + 0.5, 0.15));
       s.conv.style.boxShadow = glowShadow(RGB.neon, glow, { blur: 24, alpha: 0.45 });
       // Temporal Cloud never sees your payloads, held
       setStatus(s.never, 'NEVER SEES YOUR PAYLOADS', 'ok');
       const np = popIn(t, c[2] + 7.9);
-      s.never.style.opacity = np.o;
-      s.never.style.transform = `scale(${np.s})`;
+      popScale(s.never, np);
     }
   });
 }

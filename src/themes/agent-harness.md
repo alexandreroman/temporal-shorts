@@ -26,16 +26,17 @@ recovery, approvals, observability, composition.
 
 [Watch from 1:17](/themes/agent-harness/#t=77)
 
-Every model call and tool call is saved in the agent's Temporal history as soon
-as it completes. The next step starts only after the previous result is saved,
-outside the app. If the app crashes mid-turn, another copy picks up the agent
-exactly where it left off. Instance B replays the history: steps 1 to 4 return
-their saved results, then step 5 runs for real. Saved results are reused, not
-redone: no finished model call is paid again, no finished tool reruns.
+Every model call and durable tool call is saved in the agent's Temporal history
+as soon as it completes. The next step starts only after the previous result is
+saved, outside the app. If the app crashes mid-turn, another copy picks up the
+agent exactly where it left off. Instance B replays the history: steps 1 to 4
+return their saved results, then step 5 runs for real. Saved results are reused,
+not redone: no finished model call is paid again, no finished durable tool
+reruns.
 
 ## Chapter 3: Human approvals
 
-[Watch from 2:01](/themes/agent-harness/#t=121)
+[Watch from 2:02](/themes/agent-harness/#t=122)
 
 Some tool calls need a person's OK first, like a payment. The approval policy
 decides which ones. The call pauses inside the Workflow, for minutes or days,
@@ -46,7 +47,7 @@ escalates, like a $2,400 hotel, still go to a human.
 
 ## Chapter 4: One event stream
 
-[Watch from 2:46](/themes/agent-harness/#t=166)
+[Watch from 2:47](/themes/agent-harness/#t=167)
 
 Every agent publishes the same event stream: turns, model calls, tool calls,
 approvals and token usage. Watch an agent live: each event shows up in the
@@ -55,7 +56,7 @@ it cost and where a human stepped in.
 
 ## Chapter 5: Typed, composable agents
 
-[Watch from 3:12](/themes/agent-harness/#t=192)
+[Watch from 3:13](/themes/agent-harness/#t=193)
 
 An agent is more than text in, text out: it exposes typed operations, with their
 inputs and outputs. Other agents read that interface and add its operations to
@@ -66,7 +67,7 @@ the instance: a subagent never outlives its parent.
 
 ## Chapter 6: Code Mode
 
-[Watch from 3:54](/themes/agent-harness/#t=234)
+[Watch from 3:55](/themes/agent-harness/#t=235)
 
 Without Code Mode, the model calls its tools one at a time: one round trip per
 call. With Code Mode, the model writes a short Python script instead. Parallel
@@ -76,7 +77,7 @@ trip, not three.
 
 ## Chapter 7: Callback tools
 
-[Watch from 4:29](/themes/agent-harness/#t=269)
+[Watch from 4:30](/themes/agent-harness/#t=270)
 
 Callback tools run where the agent can't reach, like the user's laptop or a
 private network. The agent waits durably for the result, for seconds or days,
@@ -84,7 +85,7 @@ without tying up compute.
 
 ## Chapter 8: Typed sessions
 
-[Watch from 4:46](/themes/agent-harness/#t=286)
+[Watch from 4:47](/themes/agent-harness/#t=287)
 
 The harness generates TypeScript types from your agent's Python class: its state
 and its messages. Typed React and Svelte SDKs turn your agent into a live, typed
@@ -92,14 +93,14 @@ session inside your product UI.
 
 ## Chapter 9: What you get
 
-[Watch from 5:07](/themes/agent-harness/#t=307)
+[Watch from 5:08](/themes/agent-harness/#t=308)
 
 Durable, observable, composable agents with human approvals, built with the AI
 SDKs you already use.
 
 ## Outro
 
-[Watch from 5:19](/themes/agent-harness/#t=319)
+[Watch from 5:20](/themes/agent-harness/#t=320)
 
 Temporal Agent Harness is experimental and open source. Try the examples and
 build your own agents.

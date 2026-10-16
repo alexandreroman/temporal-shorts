@@ -12,7 +12,18 @@ const C = {
   // a light violet tint (a Workflow handed to a new instance)
   uvTint: '#E6E7FC', neonTint: '#F3FBD2', neonDark: '#9DB82A', highlight: `rgba(${RGB.violet},.28)`,
   violetTint: '#F2E6FF',
+  // TEMPORAL's surface: the fill of Temporal's tiles and zones on the stage
+  temporalSurface: '#17182A',
+  // the grey of the official logo's wordmark (LOGO), for words set with it
+  wordmark: '#F2F2F2',
 };
+// Temporal Web UI colors, sampled from the real UI in dark mode: the page background, and the panels (sidebar, top
+// bar, cards) and window title bars
+const WEB_UI = { page: '#111111', panel: '#191919' };
+// Border width of .tile (styles.css) and of the other bordered boxes, px: whole, as Chromium rounds a border width
+// down to whole device pixels (a 1.5px border lays out and draws 1 px wide in the 1920 x 1080 frames). What a box
+// holds is placed from its padding edge, TILE_BORDER inside its outer edge.
+const TILE_BORDER = 1;
 // URL of this script, in src/: asset URLs resolve against it, not against the page, as theme pages live in
 // subfolders. Read while the script loads, the only time document.currentScript is set.
 const SRC_BASE = document.currentScript.src || document.baseURI;
@@ -22,14 +33,80 @@ const SRC_BASE = document.currentScript.src || document.baseURI;
 const assetUrl = path => new URL(path, SRC_BASE).href;
 // Official Temporal logo (white horizontal lockup)
 const LOGO = assetUrl('assets/temporal-logo-horizontal-light-cropped.svg');
+// LOGO's geometry in its viewBox units (405 395 1570 410): the image's left edge and size, its symbol's left and right
+// edges, the wordmark's left edge, the wordmark's capitals from capTop to the baseline, the image's bottom; capEm: the
+// height of Instrument Sans capitals, em
+const LOCKUP = {
+  x: 405, w: 1570, h: 410, symbolLeft: 414, symbolRight: 804, wordLeft: 915,
+  capTop: 519, baseline: 684.7, bottom: 805, capEm: 0.72,
+};
+// A word in the brand font beside LOGO drawn h px high, its capitals as tall as the wordmark's and on its baseline:
+// unit, px per viewBox unit; rise, how far the baseline sits above the image's bottom, whole px; font, its size, px
+const lockupWord = h => {
+  const unit = h / LOCKUP.h;
+  return {
+    unit,
+    rise: Math.round((LOCKUP.bottom - LOCKUP.baseline) * unit),
+    font: (LOCKUP.baseline - LOCKUP.capTop) * unit / LOCKUP.capEm,
+  };
+};
+// A zone's heading: how far it sits from the zone's left edge and under its top edge, and its height, px
+const ZONE_HEAD = { left: 24, top: 20, h: 34 };
+// A Temporal Cloud zone: a tile in TEMPORAL's look, titled with Temporal Cloud at ZONE_HEAD. The title is LOGO, then
+// "Cloud" in the wordmark's color, set as lockupWord() with its font rounded to 1/100 px, a word space (0.2 em of that
+// font) after the wordmark's last letter, which ends at the image's right edge. The scene sizes and places the zone.
+function makeCloudZone(root) {
+  const word = lockupWord(ZONE_HEAD.h);
+  const font = +word.font.toFixed(2);
+  const gap = Math.round(0.2 * font);
+  const title = `<img src="${LOGO}" style="height:${ZONE_HEAD.h}px;vertical-align:-${word.rise}px">`
+    + `<span style="font-size:${font}px;margin-left:${gap}px;color:${C.wordmark}">Cloud</span>`;
+  return E(root,
+    `<div style="position:absolute;left:${ZONE_HEAD.left}px;top:${ZONE_HEAD.top}px;height:${ZONE_HEAD.h}px;`
+    + `line-height:0;white-space:nowrap">${title}</div>`,
+    'tile', { borderColor: C.uv, background: C.temporalSurface });
+}
+// The SVG filter that paints a monochrome logo in ink, its shape untouched: it floods the logo's opaque parts with
+// the ink color. An <img> uses it with filter:url(#INK_FILTER_ID); addInkFilter() adds it to the stage once.
+const INK_FILTER_ID = 'logo-ink';
+function addInkFilter() {
+  if (document.getElementById(INK_FILTER_ID)) return;
+  const svg = document.createElementNS(SVGNS, 'svg');
+  Object.assign(svg.style, { position: 'absolute', width: 0, height: 0 });
+  svg.innerHTML = `<filter id="${INK_FILTER_ID}" color-interpolation-filters="sRGB"><feFlood flood-color="${C.ink}"/>`
+    + '<feComposite in2="SourceAlpha" operator="in"/></filter>';
+  stage.appendChild(svg);
+}
 const tag = (p, html, cls = '') => E(p, html, 'pill ' + cls);
 // A tag of a fixed even width w (and height h if given), its label centered in it. The .1em letter spacing gives
-// fractional natural widths: with an even size, a tag centered on a whole pixel rests on whole pixels.
-function fixedTag(p, html, cls, w, h = null) {
+// fractional natural widths: with an even size, a tag centered on a whole pixel rests on whole pixels. gap: an icon
+// and a label side by side, gap px apart, centered in the tag. w null: the tag's natural width rounded up to an even
+// number of pixels, set by fitTag(), which update() calls.
+function fixedTag(p, html, cls, w, { h = null, gap = null } = {}) {
   const e = tag(p, html, cls);
-  Object.assign(e.style, { width: w + 'px', textAlign: 'center' });
+  e.style.textAlign = 'center';
+  if (w) e.style.width = w + 'px';
   if (h) e.style.height = h + 'px';
+  if (gap !== null) {
+    Object.assign(e.style, { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: gap + 'px' });
+  }
   return e;
+}
+// Rounds the width of e, an element of fractional natural width, up to an even number of pixels, so that its edges
+// land on whole pixels whether it is centered or anchored by an edge. Returns false while e is not laid out (its
+// scene hidden): call it again later.
+function roundUpWidth(e) {
+  e.style.width = '';
+  const width = parseFloat(getComputedStyle(e).width);
+  if (Number.isNaN(width)) return false;
+  e.style.width = 2 * Math.ceil(width / 2) + 'px';
+  return true;
+}
+// Sizes a fixedTag() built with no width (see roundUpWidth) on the first frame it is laid out; in the live player, a
+// width measured before the fonts load is measured again on the next call
+function fitTag(e) {
+  if (e._fitted) return;
+  if (roundUpWidth(e) && document.fonts.status === 'loaded') e._fitted = true;
 }
 // icon + label centred in the tile (label null for an icon alone); padding-left offsets the trailing
 // letter-spacing. Options: size and stroke of the icon, font of the label and gap above it; a tile over 130 px
@@ -79,6 +156,8 @@ function useCaseTile(p, icon, label, example, w, h, labelLines = 1) {
 const useCaseX = i => 960 + (i - 1.5) * USE_CASE_ROW.pitch;
 // Perspective (px) and duration (s) of the 3D flip of useCaseScene's `front` option
 const USE_CASE_FLIP = { perspective: 1600, d: 0.7 };
+// Seconds the last use-case tile named by useCaseScene stays lit
+const USE_CASE_LAST_LIT = 1.2;
 // 3D flip (rotateY) of a tile in its slot (x, y), from its front face to its back face (two elements of one size), as
 // turn goes from 0 to 1: the tile lifts a little as it turns, and each face shows for its own half turn. At rest (turn
 // 0 or 1), the face shown has place()'s transform alone, so it rests on the same pixels as a tile that never flips.
@@ -94,11 +173,25 @@ function flipTile(frontFace, backFace, x, y, turn) {
     backFace.style.transform += rotateY(180 * turn - 180);
   }
 }
+// A recap row ("What you get"): one iconTile per [icon, label] of benefits, h px high, at the width and type scale
+// of USE_CASE_ROW; placeRecapRow() shows it
+function makeRecapRow(root, benefits, h) {
+  return benefits.map(([icon, label]) => iconTile(root, icon, label, USE_CASE_ROW.w, h, C.ink, USE_CASE_TYPE));
+}
+// A recap row's tiles in the slots of USE_CASE_ROW, on line y: tile i pops in at at[i]; litFor: how long each tile
+// lights up (UV border) once it lands, s (0: never lit)
+function placeRecapRow(tiles, t, at, y, litFor = 0) {
+  tiles.forEach((e, i) => {
+    const p = backPop(t, at[i]);
+    place(e, useCaseX(i), y, p.s, p.o);
+    if (litFor) e.style.borderColor = t >= at[i] && t < at[i] + litFor ? C.uv : C.line;
+  });
+}
 // The "What you can build" chapter of an explainer, its scene before the outro: chapter, its number; uses, the
 // [icon, label, example] of each of the 4 useCaseTiles of USE_CASE_ROW; subs, its 2 subtitles. The tiles pop in
 // one at a time, 0.8 s apart from c[0] + firstAt, while subtitle 1 reads; subtitle 2 names them in order, and each
 // lights up (UV border) as it is named, namedAt[i] seconds after c[1], until the next one is named (the last one
-// stays lit for lastLit seconds). Options, which leave the scene as above when unset:
+// stays lit for USE_CASE_LAST_LIT seconds). Options, which leave the scene as above when unset:
 // - labelLines: the label height of every tile, in lines (see useCaseTile);
 // - front: (root, i) => the element that tile i shows first, in its slot at rest (the recap tile that the previous
 //   scene ends on, for a match cut): instead of popping in, each tile flips over in 3D (rotateY) from that face to
@@ -107,7 +200,7 @@ function flipTile(frontFace, backFace, x, y, turn) {
 //   fades in and out;
 // - fadeIn: the scene's fade-in (0 for a match cut).
 function useCaseScene({
-  chapter, uses, namedAt, subs, firstAt = 1.6, lastLit = 1.2, labelLines = 1, front = null, camera = null, fadeIn,
+  chapter, uses, namedAt, subs, firstAt = 1.6, labelLines = 1, front = null, camera = null, fadeIn,
 }) {
   scene({
     chapter, title: 'What you can build', subs, fadeIn,
@@ -128,7 +221,7 @@ function useCaseScene({
           place(e, useCaseX(i), USE_CASE_ROW.y, p.s, p.o);
         }
         const litFrom = c[1] + namedAt[i];
-        const litUntil = i + 1 < namedAt.length ? c[1] + namedAt[i + 1] : litFrom + lastLit;
+        const litUntil = i + 1 < namedAt.length ? c[1] + namedAt[i + 1] : litFrom + USE_CASE_LAST_LIT;
         e.style.borderColor = t >= litFrom && t < litUntil ? C.uv : C.line;
       });
     },
@@ -143,21 +236,28 @@ const spinnerRing = (size, alpha = 0.3, css = '') => `<div class="spin" style="$
   + `height:${size}px;border:3px solid rgba(${RGB.violet},${alpha});border-top-color:${C.violet};border-radius:50%">`
   + '</div>';
 
+// A count with thousands separators, the same whatever the locale: 2400 -> '2,400'
+const withCommas = n => Math.round(n).toLocaleString('en-US');
+
 // ---------- title and end cards
 // Intro title block: the official logo, a slate kicker, the big title (HTML) and a violet tagline, left-aligned.
-// sizes: logo height, font sizes and gaps in px, defaulting to the intro of most themes.
+// sizes: logo height, font sizes and gaps in px, defaulting to the intro of most themes; box: [w, h], a fixed size
+// in even numbers round the block's fractional natural size, so that the block centered on a whole pixel rests on
+// whole pixels (null: its natural size).
 function makeTitleBlock(root, kicker, titleHtml, tagline, sizes = {}) {
   const {
     logoH = 58, logoGap = 46, kickerFont = 22, titleFont = 116, titleLineHeight = 1.02, titleGap = 22,
-    taglineFont = 24, taglineGap = 34,
+    taglineFont = 24, taglineGap = 34, box = null,
   } = sizes;
-  return E(root,
+  const block = E(root,
     `<img src="${LOGO}" style="height:${logoH}px;display:block;margin-bottom:${logoGap}px">`
     + `<div class="mono" style="font-size:${kickerFont}px;letter-spacing:.14em;color:var(--slate)">${kicker}</div>`
     + `<div style="font-size:${titleFont}px;line-height:${titleLineHeight};letter-spacing:-3px;`
     + `margin-top:${titleGap}px">${titleHtml}</div>`
     + `<div class="mono" style="font-size:${taglineFont}px;letter-spacing:.12em;color:var(--violet);`
     + `margin-top:${taglineGap}px">${tagline}</div>`);
+  if (box) Object.assign(block.style, { width: box[0] + 'px', height: box[1] + 'px' });
+  return block;
 }
 // Where icon i of n orbiting an intro's theme visual is: evenly spaced on an ellipse, they turn on the ambient clock
 // G. orbit: { x, y, rx, ry, speed }, the ellipse's center and radii, and the angular speed in radians per second;
@@ -207,9 +307,13 @@ function makeGlowDot(p, size, rgb, { radius = '50%', blur = size, spread = 0, al
   });
 }
 // Spark: a makeGlowDot with a wide soft halo, size px wide, in a color (an RGB triplet, e.g. RGB.neon)
-function makeSpark(p, size = 14, rgb = RGB.ink) {
+function makeSpark(p, size, rgb) {
   return makeGlowDot(p, size, rgb, { spread: Math.round(size / 2), alpha: 0.55 });
 }
+// CSS background of a round halo: violet at its core (opacity core), UV at midAt % of its radius (opacity mid),
+// faded out at end %
+const haloBackground = (core, mid, midAt, end) => `radial-gradient(circle, rgba(${RGB.violet},${core}) 0%, `
+  + `rgba(${RGB.uv},${mid}) ${midAt}%, rgba(${RGB.uv},0) ${end}%)`;
 // Fades e in at (x, y) with p (0 to 1) as it rises d px into place
 function rise(e, x, y, p, d = 24) {
   place(e, x, y, 1, p);
@@ -278,6 +382,12 @@ function backPop(t, at, d = 0.45) {
   const s = P(t, at, d, backOut);
   return { s, o: clamp(s * 2) };
 }
+// Pops in an element laid out by its CSS rather than by place() (a pill in a row, a badge on a card): the scale and
+// opacity of a popIn() or a backPop()
+function popScale(e, pop) {
+  e.style.transform = `scale(${pop.s})`;
+  e.style.opacity = pop.o;
+}
 // Damped shake of an element hit at `at`: `swings` half swings of amp px, fading out linearly over d seconds.
 // Exactly 0 outside them, so the element rests on the same pixels as before the hit.
 function dampedShake(t, at, amp, d, swings) {
@@ -298,6 +408,13 @@ function showRow(e, p, dx = 26, round = false) {
   const x = (1 - clamp(p)) * dx;
   e.style.opacity = clamp(p);
   e.style.transform = `translateX(${round ? Math.round(x) : x}px)`;
+}
+// Turns the hands of a clock in root, the SVG paths .hh (hour) and .mh (minute) of a viewBox centered on
+// (center, center), from where they are drawn: hours is the clock time, the minute hand turns once per hour, the
+// hour hand once per 12 hours
+function setClockHands(root, hours, center) {
+  root.querySelector('.hh').setAttribute('transform', `rotate(${(hours * 30) % 360} ${center} ${center})`);
+  root.querySelector('.mh').setAttribute('transform', `rotate(${(hours * 360) % 360} ${center} ${center})`);
 }
 // Neon token that runs round an agentic loop
 const makeToken = root => makeGlowDot(root, 22, RGB.neon, { radius: '5px', spread: 6, alpha: 0.45 });
@@ -478,7 +595,7 @@ function glitchPanel(panel, glitch) {
 function makeCrashMarks(root, label, bolt, crashTag) {
   return {
     bolt: E(root, ICON('bolt', bolt.size, C.red, 1.6)),
-    tag: fixedTag(root, label, 'red big solid', crashTag.w, crashTag.h),
+    tag: fixedTag(root, label, 'red big solid', crashTag.w, { h: crashTag.h }),
     boltSpot: bolt, tagSpot: crashTag,
   };
 }
@@ -546,7 +663,7 @@ function setArrivalGlow(panel, t, at, out) {
 }
 // "New Worker" or "New instance" fixedTag on the new instance, violet and solid (the panel border does not show
 // through)
-const makeNewTag = (root, label, w, h = null) => fixedTag(root, label, 'violet solid', w, h);
+const makeNewTag = (root, label, w, h = null) => fixedTag(root, label, 'violet solid', w, { h });
 // The tag pops in at `at` and fades out from `out` within 0.3 s, at (x, y): add the arriving panel's dx to x so it
 // slides in with it
 function placeNewTag(e, t, at, out, x, y) {
@@ -561,17 +678,36 @@ function makeHandOffCard(root, label) {
   return e;
 }
 
+// ---------- padlock
+// How far the shackle of an open padlock rises above the body, in units of its 24 grid
+const LOCK_LIFT = 4;
+// Stroke padlock in a size px box (24 grid, like ICON('lock')), its shackle a path of its own (.shackle) that
+// liftShackle() raises. stroke: the stroke width; color: the stroke color (none: set later on the <svg>); fill: the
+// body's fill. A filled body is drawn over the shackle, so it hides the shackle's legs as it snaps shut; a hollow
+// body under it.
+function lockSvg(size, { stroke = 1.8, color = '', fill = 'none' } = {}) {
+  const shackle = '<path class="shackle" d="M8 11V7a4 4 0 0 1 8 0v4"/>';
+  const body = `<rect x="5" y="11" width="14" height="10" fill="${fill}"/><path d="M12 15v2"/>`;
+  const parts = fill === 'none' ? body + shackle : shackle + body;
+  const strokeColor = color ? ` stroke="${color}"` : '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none"${strokeColor} stroke-width="${stroke}"`
+    + ` stroke-linecap="square" stroke-linejoin="miter" style="display:block;overflow:visible">${parts}</svg>`;
+}
+// Raises the shackle of a lockSvg() (svg: its <svg> element) lift units of its 24 grid above the body
+const liftShackle = (svg, lift) => svg.querySelector('.shackle').setAttribute('transform', `translate(0 ${-lift})`);
+
 // ---------- status tags
-// Small status label (e.g. on an Event History row); its text and colors are set by setStatus(). font and pad
-// size the text; icon: size of the leading icon of the checked kinds; border: a 1.5 px border, transparent for
-// the filled kinds, so every kind keeps the same size.
-function statusTag(p, { font = 15, pad = '4px 10px', icon = 16, border = true } = {}) {
+// Small status label (e.g. on an Event History row); its text and colors are set by setStatus(). font sizes the
+// text; padX and padY: its side and top and bottom padding, px; icon: size of the leading icon of the checked kinds;
+// border: a 1 px border, transparent for the filled kinds, so every kind keeps the same size.
+function statusTag(p, { font = 15, padX = 10, padY = 4, icon = 16, border = true } = {}) {
   const e = E(p, '', 'mono', {
-    fontSize: font + 'px', letterSpacing: '.1em', padding: pad, borderRadius: '4px', whiteSpace: 'nowrap',
-    display: 'flex', alignItems: 'center', gap: '6px',
+    fontSize: font + 'px', letterSpacing: '.1em', padding: `${padY}px ${padX}px`, borderRadius: '4px',
+    whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
   });
-  if (border) e.style.border = '1.5px solid';
+  if (border) e.style.border = '1px solid';
   e.iconSize = icon;
+  e.padX = padX;
   return e;
 }
 // Looks of the statusTag kinds, each with an optional leading icon as [name, color, stroke width]:
@@ -588,23 +724,22 @@ const STATUS_KINDS = {
   closed: { background: 'transparent', color: C.slate, borderColor: C.slate },
 };
 // kind: a key of STATUS_KINDS; the DOM is only rewritten when label or kind changes.
+// The letter spacing also trails the last letter: a label alone gets as much extra left padding, so its ink sits
+// centered, while the margin round a leading icon's stroke inside its viewBox already offsets it.
 // The .1em letter spacing gives fractional widths, and a tag anchored by its right edge or centered then has
 // half-pixel edges, which rasterize differently depending on the frames drawn before. So the width is rounded up
-// to an even number of pixels: the edges land on whole pixels whichever way the tag is anchored. The text keeps
-// its left padding (the 1-2 px extra goes to the right), so it starts on a whole pixel too.
+// to an even number of pixels: the edges land on whole pixels whichever way the tag is anchored, and the label stays
+// centered in the 1-2 px extra.
 function setStatus(e, label, kind) {
   const key = kind + ':' + label;
   if (e._l === key) return;
   const { icon, ...colors } = STATUS_KINDS[kind];
   e.innerHTML = icon ? ICON(icon[0], e.iconSize, icon[1], icon[2]) + label : label;
   Object.assign(e.style, colors);
-  e.style.width = '';
-  const width = parseFloat(getComputedStyle(e).width);
-  // no width while the scene is hidden: measured again on the next call
-  if (Number.isNaN(width)) return;
-  e.style.width = 2 * Math.ceil(width / 2) + 'px';
-  // in the live player, a width measured before the fonts load is measured again on the next call
-  if (document.fonts.status === 'loaded') e._l = key;
+  e.style.paddingLeft = icon ? e.padX + 'px' : `calc(${e.padX}px + .1em)`;
+  // in the live player, a width measured before the fonts load, or while the scene is hidden, is measured again on
+  // the next call
+  if (roundUpWidth(e) && document.fonts.status === 'loaded') e._l = key;
 }
 // A status tag at time t: its label and kind (see setStatus) and its opacity o; it swells briefly when its label
 // changes at `at`
@@ -657,7 +792,7 @@ function makeLinesApp(p, name, w, h, lines, opts) {
   const cardW = w - 48, cardH = h - cardTop - 24;
   app.insertAdjacentHTML('beforeend',
     `<div style="position:absolute;left:24px;top:${cardTop}px;width:${cardW}px;height:${cardH}px;`
-    + `background:rgba(${RGB.ink},.03);border:1.5px solid ${C.line};border-radius:var(--r)">`
+    + `background:rgba(${RGB.ink},.03);border:1px solid ${C.line};border-radius:var(--r)">`
     + panelLabel('code', label, 'left:20px;top:16px;padding-left:0') + emptyNote(emptyTop) + '</div>');
   app.card = app.lastElementChild;
   app.empty = app.card.querySelector('.empty');
@@ -784,6 +919,22 @@ function scanRow(card, i, o = 1) {
 function markCrash(card, t, crashAt) {
   card.kept.style.opacity = P(t, crashAt + 0.7, 0.4);
   card.cut.style.opacity = P(t, crashAt + 0.3, 0.3);
+}
+// Neon chip with a check, e.g. WORKFLOW COMPLETE, centered in an Event History card with its top at `top` px; css adds
+// to or overrides its style (a fixed size, the padding). Returns the chip, also kept as card.done.
+function addHistoryDone(card, label, top, css = {}) {
+  card.done = E(card, `${ICON('check', 24, C.neon, 2.6)} ${label}`, 'mono', {
+    left: '50%', top: top + 'px', fontSize: '20px', letterSpacing: '.12em', color: C.neon, background: C.bg,
+    padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)', display: 'flex', gap: '10px', alignItems: 'center',
+    ...css,
+  });
+  return card.done;
+}
+// Pops the chip of addHistoryDone() in at `at`
+function placeHistoryDone(card, t, at) {
+  const pop = backPop(t, at);
+  card.done.style.opacity = pop.o;
+  card.done.style.transform = `translateX(-50%) scale(${pop.s})`;
 }
 // Small card carrying one step result between the app and Temporal: UV for a model call or an Activity, green
 // for a tool result; label: the card text, e.g. the kind of call the result comes from
@@ -927,14 +1078,18 @@ function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enter
   cam.style.transform = `translate(${dx}px,${dy}px) scale(${scale * zoom})`;
 }
 
-// Puts a spark on the head of a path drawn to prog (0 to 1): it shows only while the path draws
-function sparkOnPath(spark, pathEl, prog, dx = 0, dy = 0) {
+// Puts a spark on the head of a path drawn to prog (0 to 1): it shows only while the path draws, its opacity times
+// the optional factor o
+function sparkOnPath(spark, pathEl, prog, o) {
   if (prog <= 0 || prog >= 1) {
     place(spark, 0, 0, 1, 0);
     return;
   }
   const point = pathEl.getPointAtLength(pathEl._L * prog);
-  place(spark, point.x + dx, point.y + dy, 1, Math.min(1, prog * 6, (1 - prog) * 6));
+  const opacity = Math.min(1, prog * 6, (1 - prog) * 6);
+  // with a factor, the opacity is rounded to 3 decimals, which keeps the security scenes' flowing sparks on the same
+  // color levels
+  place(spark, point.x, point.y, 1, o === undefined ? opacity : +(opacity * o).toFixed(3));
 }
 
 // Ripple rings: n circles of a color growing from size0 to size1 px and fading, one after the other, from `at`

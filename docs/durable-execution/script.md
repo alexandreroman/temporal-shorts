@@ -218,7 +218,7 @@ workflow icons, and a retried Activity reads "N • name": a faded red to
 green band from its first start to its last attempt, then that attempt
 bright red to green.
 
-- **2:16** Temporal also shows every Workflow in its web UI: which ones are
+- **2:16** Temporal also shows every Workflow in its Web UI: which ones are
   running, completed or failed.
   - Visuals: The "6 Workflows" page: count pills 1 RUNNING, 4 COMPLETED,
     1 FAILED, a Start Workflow button, filter tabs and a table Status /

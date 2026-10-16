@@ -70,14 +70,14 @@
       },
       // NO PROGRESS LOST, then NO TOKENS WASTED
       { text: "No progress is lost and no tokens are wasted: no finished LLM call is paid twice.", after: 0.4 },
-      { text: "That's why OpenAI built Codex on Temporal, and Cursor and Lovable rely on it too.", after: 1.4 },
+      { text: "OpenAI runs Codex on Temporal, and Cursor and Lovable rely on it too.", after: 1.4 },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
       // the halo the LLM node arrives with from the previous chapter, which settles into the LLM's own glow
       s.carry = E(root, '', '', {
         width: HANDOFF_HALO.size + 'px', height: HANDOFF_HALO.size + 'px', borderRadius: '50%',
-        background: HALO_BACKGROUND,
+        background: HANDOFF_HALO.background,
       });
       // the app instances that run the loop: built first, so the loop and its arcs sit on top of them
       s.appA = makeAppPanel(root, 'APP INSTANCE A', APP.w, APP.h, APP_TEXT_LARGE);
@@ -223,8 +223,7 @@
       const restoredAt = landAt(5) + 0.45;
       setStatus(s.restored, 'CONTEXT RESTORED', 'ok');
       const rp = popIn(t, restoredAt);
-      s.restored.style.opacity = rp.o;
-      s.restored.style.transform = `scale(${rp.s})`;
+      popScale(s.restored, rp);
       placeCrashMarks(s.crash, t, crashAt, crashAt + 0.3, aOut, ax, ay);
       placeFlash(s.flash, t, crashAt);
       const cp = backPop(t, complete);

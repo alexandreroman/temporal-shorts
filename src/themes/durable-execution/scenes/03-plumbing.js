@@ -24,10 +24,12 @@
   const tileX = p => (p.side < 0 ? TILE.leftX : TILE.rightX);
   const tileY = p => Y0 + (p.row - 1) * TILE.pitch;
   const wireY = p => CARD.y + (p.row - 1) * 80; // where the wire meets the card edge
-  // LINES OF CODE bar: business logic stays thin, plumbing grows to fill the rest (whole pixels at rest)
-  const BAR = { w: CODE_CARD.w, h: 44, biz: 96, gap: 4 };
+  // LINES OF CODE bar: business logic stays thin, plumbing grows to fill the rest (whole pixels at rest). The block:
+  // its label's line, the bar, the legend's line, gap px apart; blockH, odd, centers it on a half pixel, so that its
+  // edges land on whole pixels
+  const BAR = { w: CODE_CARD.w, h: 44, biz: 96, gap: 4, labelLine: 23, legendLine: 22, blockGap: 12 };
+  BAR.blockH = BAR.labelLine + BAR.blockGap + BAR.h + BAR.blockGap + BAR.legendLine;
   const plumbingWidth = BAR.w - BAR.biz - BAR.gap;
-  const BAR_HALF_H = 56.5; // half the measured height (113 px) of the bar block: its edges land on whole pixels
   // Bug badges in landing order; at: when the badge lands (s after c[1]). The first four land one by one, then the
   // pace quickens until every tile is buggy and four of them carry a second badge, all before the subtitle ends.
   // dx, dy: where the 50 px badge lands, from the tile center in whole px, fully inside the tile (10 px from its
@@ -53,23 +55,23 @@
   // 0.4 amp up and down, within 0.35 s
   const jolt = (t, at, amp) => [dampedShake(t, at, amp, 0.35, 5), dampedShake(t, at, amp * 0.4, 0.35, 4)];
   // Sum of the jolts of every hit in `hits`
-  function jolts(t, hits, amp) {
+  const jolts = (t, hits, amp) => {
     let dx = 0, dy = 0;
     for (const at of hits) {
       const [x, y] = jolt(t, at, amp);
       dx += x; dy += y;
     }
     return [dx, dy];
-  }
+  };
   // Red flicker after each of `hits`: on and off every 0.06 s for 0.36 s, fading, as an intensity from 0 to 1
-  function flicker(t, hits) {
+  const flicker = (t, hits) => {
     let k = 0;
     for (const at of hits) {
       const u = t - at;
       if (u >= 0 && u < 0.36 && Math.floor(u / 0.06) % 2 === 0) k = Math.max(k, 1 - u / 0.36);
     }
     return k;
-  }
+  };
   // Red glow around a tile at flicker intensity k; '' leaves the tile's own style
   const redGlow = k => (k > 0
     ? `0 0 0 2px rgba(${RGB.red},${k.toFixed(3)}), 0 0 30px rgba(${RGB.red},${(0.7 * k).toFixed(3)})`
@@ -95,31 +97,30 @@
       // wires run from the tile's inner edge to the card edge, with horizontal tangents at both ends
       s.wires = PLUMBING.map(p => {
         const x0 = tileX(p) - p.side * (TILE.w / 2 + 4), x1 = CARD.x + p.side * (s.card.w / 2 + 4);
-        const mx = (x0 + x1) / 2;
-        return path(s.svg, `M ${x0} ${tileY(p)} C ${mx} ${tileY(p)} ${mx} ${wireY(p)} ${x1} ${wireY(p)}`,
-          C.slate, 2, false);
+        return path(s.svg, sCurveD(x0, tileY(p), x1, wireY(p)), C.slate, 2, false);
       });
       s.tiles = PLUMBING.map(p => iconTile(root, p.icon, p.label, TILE.w, TILE.h));
       s.bugs = BUGS.map(b => {
         const badge = E(root, ICON('bug', 30, C.red, 1.8), '', {
           width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: C.bg, border: '1.5px solid ' + C.red, borderRadius: '50%',
+          background: C.bg, border: '1px solid ' + C.red, borderRadius: '50%',
         });
         // only the bug turns, not the round badge around it
         badge.querySelector('svg').style.transform = `rotate(${b.angle}deg)`;
         return badge;
       });
       s.bar = E(root,
-        '<div class="lbl" style="font-size:18px;text-align:center">Lines of code</div>'
-        + `<div style="position:relative;height:${BAR.h}px;margin-top:12px;background:rgba(${RGB.ink},.06);`
-        + 'border-radius:var(--rs);overflow:hidden">'
+        `<div class="lbl" style="font-size:18px;line-height:${BAR.labelLine}px;text-align:center">Lines of code</div>`
+        + `<div style="position:relative;height:${BAR.h}px;margin-top:${BAR.blockGap}px;`
+        + `background:rgba(${RGB.ink},.06);border-radius:var(--rs);overflow:hidden">`
         + `<div class="biz" style="position:absolute;left:0;top:0;bottom:0;background:${C.neon}"></div>`
         + `<div class="plumb" style="position:absolute;left:${BAR.biz + BAR.gap}px;top:0;bottom:0;`
         + `background:${C.red}"></div></div>`
-        + '<div style="display:flex;justify-content:space-between;margin-top:12px">'
+        + `<div style="display:flex;justify-content:space-between;margin-top:${BAR.blockGap}px;`
+        + `line-height:${BAR.legendLine}px">`
         + '<span class="lbl bizL" style="font-size:17px;color:var(--neon)">Business logic</span>'
         + '<span class="lbl plumbL" style="font-size:17px;color:var(--red)">Plumbing</span></div>',
-        '', { width: BAR.w + 'px' });
+        '', { width: BAR.w + 'px', height: BAR.blockH + 'px' });
       s.biz = s.bar.querySelector('.biz'); s.plumb = s.bar.querySelector('.plumb');
       s.bizL = s.bar.querySelector('.bizL'); s.plumbL = s.bar.querySelector('.plumbL');
     },
@@ -149,7 +150,7 @@
       // LINES OF CODE bar under the card: the business logic stays thin, the plumbing grows, and pulses brighter as
       // each bug lands
       const barBottom = Y0 + TILE.pitch + TILE.h / 2; // level with the bottom of the bottom tiles
-      place(s.bar, CARD.x, barBottom - BAR_HALF_H, 1, P(t, c[1] + 0.2, 0.4));
+      place(s.bar, CARD.x, barBottom - BAR.blockH / 2, 1, P(t, c[1] + 0.2, 0.4));
       s.biz.style.width = Math.round(BAR.biz * P(t, c[1] + 0.5, 0.5)) + 'px';
       s.bizL.style.opacity = P(t, c[1] + 0.7, 0.4);
       const grow = P(t, c[1] + 1.2, 2.2);

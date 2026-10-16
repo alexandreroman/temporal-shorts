@@ -153,11 +153,8 @@
       // same size and centered contents as the status tile
       s.charge = makeCharge(root, BOTTOM.w, true);
       s.causes = CAUSES.map(cause => {
-        const e = tag(root, `${ICON(cause.icon, 24, C.red, 2)}${cause.label}`, 'red');
         // one fixed whole-pixel size for the three tags, centered on their links: equal gaps between them
-        Object.assign(e.style, {
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '250px', height: '50px',
-        });
+        const e = fixedTag(root, `${ICON(cause.icon, 24, C.red, 2)}${cause.label}`, 'red', 250, { h: 50, gap: 10 });
         e.icon = e.querySelector('svg');
         return e;
       });
@@ -167,7 +164,7 @@
         sparks: SPARKS.map(() => svgLine(s.svg)),
       }));
       s.bolt = E(root, ICON('bolt', 100, C.red, 1.6));
-      s.crash = fixedTag(root, 'Server crash', 'red big', 310, 66);
+      s.crash = fixedTag(root, 'Server crash', 'red big', 310, { h: 66 });
       s.flash = makeFlash(root);
       const [x0, x1] = s.steps.xs, top = ROW.y - ROW.h / 2 - 6;
       s.redo = makeRestartArc(root, s.svg, `M ${x1 - 40} ${top} Q ${(x0 + x1) / 2} ${top - 130} ${x0 + 40} ${top}`,

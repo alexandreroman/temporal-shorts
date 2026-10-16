@@ -8,8 +8,8 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // the docking, in seconds from c[0], in the close shot the whip lands on (HIST_SHOT): the history grows from the
-  // lane's to HIST while the card grows from its tube scale into the chip's place (at, d), and what that shot crops
-  // dims (dim, dimD); the rows slide in, then their SAVED tags, one after the other (rows, saved, step)
+  // lane's to STORED_HIST while the card grows from its tube scale into the chip's place (at, d), and what that shot
+  // crops dims (dim, dimD); the rows slide in, then their SAVED tags, one after the other (rows, saved, step)
   const T0 = { at: -0.1, d: 0.9, dim: -0.1, dimD: 0.6, ns: -0.1, rows: 0.6, saved: 1.3, step: 0.15 };
   // from c[1]: the tube fades; TEMPORAL widens into its close layout (close, closeD); the Web UI and the viewers
   // come in; READABLE slams onto the chip; the lens scans the IBAN; the viewers' eyes turn to it
@@ -34,21 +34,20 @@
   // The IBAN line of the chip (a lane-size card shown at HIST_CHIP.k), in stage coordinates at camera rest, before the
   // close layout moves it (closeDx): its top left corner, its line height and font size, and its width (Mono advances
   // 0.6 em per character)
-  const CHIP_LAYOUT = payloadLayout(PAYLOAD_IN_WORKER.w);
   const IBAN = {
-    x: HIST_CHIP.x - HIST_CHIP.w / 2 + (1.5 + CHIP_LAYOUT.pad.x) * HIST_CHIP.k,
-    y: HIST_CHIP.y - HIST_CHIP.h / 2 + (1.5 + CHIP_LAYOUT.valueTop(0)) * HIST_CHIP.k,
-    line: CHIP_LAYOUT.value.line * HIST_CHIP.k, font: CHIP_LAYOUT.value.font * HIST_CHIP.k,
+    x: HIST_CHIP.x - HIST_CHIP.w / 2 + (TILE_BORDER + PAYLOAD_IN_WORKER.layout.pad.x) * HIST_CHIP.k,
+    y: HIST_CHIP.y - HIST_CHIP.h / 2 + (TILE_BORDER + PAYLOAD_IN_WORKER.layout.valueTop(0)) * HIST_CHIP.k,
+    line: PAYLOAD_IN_WORKER.layout.value.line * HIST_CHIP.k, font: PAYLOAD_IN_WORKER.layout.value.font * HIST_CHIP.k,
   };
   IBAN.w = TRANSFER[0][1].length * 0.6 * IBAN.font;
 
   // A viewer's tile: a person and a name, and the eye that marks it once it reads the IBAN (tile.eye), on its right;
   // its person in line with the Web UI's text, its eye as far from its right edge
-  function makeViewer(root, name) {
+  const makeViewer = (root, name) => {
     const tile = E(root,
       '<div style="display:flex;align-items:center;gap:12px">'
       + `${ICON('user', 28, C.ink, 1.8)}<span class="lbl" style="font-size:14px;color:var(--ink)">${name}</span></div>`
-      + `<div class="eye" style="position:absolute;right:16px;top:${(VIEWER.h - 24) / 2 - 1.5}px;opacity:0">`
+      + `<div class="eye" style="position:absolute;right:16px;top:${(VIEWER.h - 24) / 2 - TILE_BORDER}px;opacity:0">`
       + `${ICON('eye', 24, C.red, 2)}</div>`,
       'tile', {
         width: VIEWER.w + 'px', height: VIEWER.h + 'px', display: 'flex', alignItems: 'center',
@@ -56,9 +55,9 @@
       });
     tile.eye = tile.querySelector('.eye');
     return tile;
-  }
+  };
   // The lens: a red ring holding a copy of the IBAN, LENS.zoom times larger, and a scan line through its center
-  function makeLens(root) {
+  const makeLens = root => {
     const lens = E(root,
       `<div class="mono" style="position:absolute;white-space:pre;color:${C.ink};font-size:${IBAN.font * LENS.zoom}px;`
       + `line-height:${IBAN.line * LENS.zoom}px">${TRANSFER[0][1]}</div>`
@@ -70,14 +69,14 @@
       });
     lens.text = lens.firstElementChild;
     return lens;
-  }
+  };
   // The stutter before the rewind, from `at` for d seconds: every 0.05 s the picture jumps sideways (dx, whole px) and
   // splits into red and UV copies `split` px apart; { dx: 0, split: 0 } outside it
-  function stutter(t, at, d) {
+  const stutter = (t, at, d) => {
     if (t < at || t >= at + d) return { dx: 0, split: 0 };
     const step = Math.floor((t - at) / 0.05);
     return { dx: Math.round((hash(step + 70) * 2 - 1) * 16), split: 4 + Math.round(hash(step + 90) * 8) };
-  }
+  };
 
   scene({
     chapter: 3, title: 'In the Event History',
@@ -107,7 +106,7 @@
       s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
       // the rewind: a copy of the card leaves the chip, under its verdict, with fading outlines behind it
       s.ghosts = GHOSTS.map(() => E(root, '', '', {
-        width: PAYLOAD_IN_WORKER.w + 'px', height: CHIP_LAYOUT.h + 'px', border: `1.5px solid ${C.violet}`,
+        width: PAYLOAD_IN_WORKER.w + 'px', height: PAYLOAD_IN_WORKER.layout.h + 'px', border: `1px solid ${C.violet}`,
         borderRadius: 'var(--r)',
       }));
       s.copy = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
@@ -147,10 +146,10 @@
       const settled = P(t, c[0] + T0.dim, T0.dimD);
       const away = P(t, streakAt, 0.45);
       const close = P(t, c[1] + T1.close, T1.closeD) * (1 - P(t, streakAt, REWIND.d * 0.8));
-      // every part starts as chapter 2 left it (TUBE_HANDOFF.lane, 1 where it says nothing) and ends as chapter 4
-      // opens (REWIND_HANDOFF.lane, 1 where it says nothing)
-      const open = { env: 1, worker: 1, temporal: 1, history: 1, wire: 1, door: 1, heads: 1, ...TUBE_HANDOFF.lane };
-      const rewind = { env: 1, worker: 1, temporal: 1, history: 1, wire: 1, door: 1, heads: 1, ...REWIND_HANDOFF.lane };
+      // every part starts as chapter 2 left it (TUBE_HANDOFF.lane, shown where it says nothing) and ends as chapter 4
+      // opens (REWIND_HANDOFF.lane, likewise)
+      const open = { ...LANE_SHOWN, ...TUBE_HANDOFF.lane };
+      const rewind = { ...LANE_SHOWN, ...REWIND_HANDOFF.lane };
       const tubeOut = P(t, c[1] + T1.tube, T1.tubeD);
       const headsOut = P(t, 0, whipEnd);
       placeLane(s.lane, {
@@ -206,8 +205,7 @@
         rise(tile, CLOSE.column.x, VIEWER.ys[i], P(t, c[1] + T1.viewers + i * 0.15, 0.5) * unseen);
         tile.style.borderColor = t >= eyesAt ? C.red : C.line;
         const eye = popIn(t, eyesAt, 0.3);
-        tile.eye.style.opacity = eye.o;
-        tile.eye.style.transform = `scale(${eye.s})`;
+        popScale(tile.eye, eye);
       });
 
       // the dramatic beat: READABLE slams onto the chip from above its size, red rings, a red flash and a shake;

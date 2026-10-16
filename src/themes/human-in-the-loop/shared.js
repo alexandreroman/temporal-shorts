@@ -5,8 +5,6 @@ Object.assign(ICONS, {
   db: '<ellipse cx="12" cy="5.5" rx="7.5" ry="2.5"/><path d="M4.5 5.5v13c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-13'
     + 'M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/>',
   flag: '<path d="M5 21V3M5 4h13l-3 4.5 3 4.5H5"/>',
-  // a screen over a flat base line (agent-harness's `laptop` has a keyboard)
-  laptopFlat: '<rect x="5" y="5" width="14" height="10"/><path d="M2.5 19h19"/>',
   clipboard: '<rect x="5" y="4.5" width="14" height="16.5"/><path d="M9 3h6v3H9zM8.5 13.5l2.5 2.5 4.5-5"/>',
   up: '<path d="M12 20V5M6 11l6-6 6 6"/>',
 });
@@ -26,30 +24,38 @@ const ROW = { w: 344, h: 140 };
 ROW.x0 = FRAME.x0 + ROW.w / 2; // center of the first tile
 ROW.gap = (FRAME.x1 - FRAME.x0 - ROW.w) / 3; // from one tile center to the next
 
-// The steps as a makeStepRow on the line y; each tile also carries an hourglass for the waiting state (place the
-// row with setStep, see placeLaptopRow)
-function makeLaptopRow(root, svg, y) {
-  const row = makeStepRow(root, svg, STEPS, ROW.x0, ROW.gap, y, ROW.w, ROW.h);
-  row.tiles.forEach(e => {
-    e.insertAdjacentHTML('beforeend',
-      '<div class="hg" style="position:absolute;right:10px;top:10px;opacity:0">'
-      + `${ICON('hourglass', 30, C.violet, 2)}</div>`);
-    e.hg = e.querySelector('.hg');
-  });
-  return row;
+// Violet waiting hourglass of size px as markup, hidden, in the top right corner of its parent: right and top are its
+// insets in px (see setHourglass)
+function hourglassMark(size, right, top) {
+  return `<div class="hg" style="position:absolute;right:${right}px;top:${top}px;opacity:0">`
+    + `${ICON('hourglass', size, C.violet, 2)}</div>`;
 }
 // Hourglass turn in degrees: it rests, then flips over every 2.4 s (idle motion, driven by G)
 function hourglassTurn() {
   const flips = Math.floor(G / 2.4), flip = P(G - flips * 2.4, 2.0, 0.4);
   return ((flips + flip) * 180) % 360;
 }
+// An hourglass at opacity o, at its current turn
+function setHourglass(hg, o) {
+  hg.style.opacity = o;
+  hg.style.transform = `rotate(${hourglassTurn()}deg)`;
+}
+// The steps as a makeStepRow on the line y; each tile also carries an hourglass for the waiting state (place the
+// row with setStep, see placeLaptopRow)
+function makeLaptopRow(root, svg, y) {
+  const row = makeStepRow(root, svg, STEPS, ROW.x0, ROW.gap, y, ROW.w, ROW.h);
+  row.tiles.forEach(e => {
+    e.insertAdjacentHTML('beforeend', hourglassMark(30, 10, 10));
+    e.hg = e.querySelector('.hg');
+  });
+  return row;
+}
 // 0 pending, 1 running, 2 done, 3 failed, 4 waiting for a person (violet border, hourglass instead of the spinner)
 function setStep(e, st) {
   const waiting = st === 4;
   stepState(e, waiting ? 1 : st);
   if (waiting) e.spin.style.opacity = 0;
-  e.hg.style.opacity = waiting ? 1 : 0;
-  e.hg.style.transform = `rotate(${hourglassTurn()}deg)`;
+  setHourglass(e.hg, waiting ? 1 : 0);
 }
 // states: one setStep value per tile (see placeStepRow)
 function placeLaptopRow(row, t, a, states, dx = 0, dy = 0) {
@@ -91,9 +97,8 @@ function clockFace(size, col = C.ink) {
 // blur (0 to 1) dims the minute and seconds hands while days fly by: at several turns per second they would
 // only flicker.
 function setClock(root, hours, blur = 0) {
-  root.querySelector('.hh').setAttribute('transform', `rotate(${(hours * 30) % 360} 50 50)`);
+  setClockHands(root, hours, 50);
   const minute = root.querySelector('.mh'), seconds = root.querySelector('.sh');
-  minute.setAttribute('transform', `rotate(${(hours * 360) % 360} 50 50)`);
   minute.style.opacity = 1 - 0.85 * blur;
   seconds.setAttribute('transform', `rotate(${(G * 6) % 360} 50 50)`);
   seconds.style.opacity = 1 - blur;
@@ -103,7 +108,8 @@ function setClock(root, hours, blur = 0) {
 const APPROVAL_CARD = { k: 1.2 };
 APPROVAL_CARD.w = Math.round(400 * APPROVAL_CARD.k);
 // White approval request card with a ticking mini clock, Approve (brand UV) and Reject (outline) buttons.
-// k scales every size natively (fonts, paddings, width; 400 px wide at 1), so a larger card stays sharp at rest.
+// k scales the fonts, paddings and width natively (400 px wide at 1), so a larger card stays sharp at rest. The tap
+// effects keep fixed sizes, drawn for APPROVAL_CARD.k: the 120 px ripple, the 24 px check and its 8 px gap.
 function makeApprovalCard(p, k) {
   const px = v => Math.round(v * k) + 'px';
   const button = `flex:1;position:relative;overflow:hidden;font-size:${px(24)};text-align:center;`
@@ -119,7 +125,7 @@ function makeApprovalCard(p, k) {
     + '<div class="ring" style="position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;'
     + `border-radius:50%;background:rgba(${RGB.ink},.55);opacity:0"></div>`
     + '<span class="apt" style="position:relative;display:inline-flex;align-items:center;gap:8px">Approve</span></div>'
-    + `<div class="rj" style="${button};border:1.5px solid #9AA3B5;color:${C.bg}">Reject</div></div>`,
+    + `<div class="rj" style="${button};border:1px solid #9AA3B5;color:${C.bg}">Reject</div></div>`,
     'paper', {
       width: px(400), padding: `${px(20)} ${px(26)} ${px(26)}`, borderLeft: `${px(6)} solid ${C.violet}`,
     });
@@ -133,11 +139,7 @@ function tapApprove(card, t, at) {
   card.ring.style.opacity = t >= at ? 1 - ripple : 0;
   card.ring.style.transform = `scale(${0.2 + 1.6 * ripple})`;
   const approved = t >= at + 0.15;
-  const label = approved ? 'approved' : 'approve';
-  if (card._l !== label) {
-    card._l = label;
-    card.apt.innerHTML = approved ? ICON('check', 24, C.bg, 2.6) + 'Approved' : 'Approve';
-  }
+  setHtml(card.apt, approved ? ICON('check', 24, C.bg, 2.6) + 'Approved' : 'Approve');
   card.ap.style.background = approved ? C.neon : C.uv;
   card.ap.style.color = approved ? C.bg : '#FFFFFF';
   // pressed in, then a small bounce as it turns approved
@@ -175,8 +177,17 @@ function setWaitClock(e, elapsed, blur = 0) {
   setClock(e.clk, hours, blur);
   e.day.textContent = 'DAY ' + (1 + Math.floor(hours / 24));
 }
+// Day timeline of chapters 2 and 5: a grey line from x0 to x1 on y, and a tick and a "Day n" label for each n of
+// days, evenly spaced from x0 to x1 (xs); each scene places the ticks and labels
+function makeDayTimeline(root, svg, x0, x1, y, days) {
+  const line = path(svg, `M ${x0} ${y} L ${x1} ${y}`, C.line, 3, false);
+  const xs = days.map((_, i) => x0 + (x1 - x0) * i / (days.length - 1));
+  const ticks = days.map(() => E(root, '', '', { width: '3px', height: '22px', background: C.slate }));
+  const labels = days.map(n => E(root, 'Day ' + n, 'lbl', { fontSize: '22px' }));
+  return { line, ticks, labels, xs };
+}
 
-// ===================== app and Temporal panels (chapters 2, 3 and 4)
+// ===================== app and Temporal panels (chapters 3 and 4)
 // Chapters 3 and 4 share one layout on the content frame, y 153-877 around y 515: the step row on top; 30 px under
 // it, the app column (instance panel, then 30 px lower a strip with the clock) on the left and the Temporal panel on
 // the right, both ending on y 877
@@ -214,8 +225,7 @@ function makeWorkflowApp(p, name) {
     + `background:rgba(${RGB.violet},.2);border-left:4px solid ${C.violet};border-radius:var(--rs)"></div>`);
   app.cur = app.card.querySelector('.cur');
   app.lines.forEach(line => {
-    line.insertAdjacentHTML('beforeend',
-      `<div class="hg" style="position:absolute;right:16px;top:6px">${ICON('hourglass', 28, C.violet, 2)}</div>`);
+    line.insertAdjacentHTML('beforeend', hourglassMark(28, 16, 6));
     line.hg = line.querySelector('.hg');
   });
   return app;
@@ -224,9 +234,7 @@ function makeWorkflowApp(p, name) {
 // bright, no mark yet). fall (0 to 1) drops the line out of the card when the app crashes.
 function setWfLine(app, i, state, fall = 0) {
   setCardLine(app, i, state, fall);
-  const hourglass = app.lines[i].hg;
-  hourglass.style.opacity = state === 'waiting' ? 1 : 0;
-  hourglass.style.transform = `rotate(${hourglassTurn()}deg)`;
+  setHourglass(app.lines[i].hg, state === 'waiting' ? 1 : 0);
 }
 // Cursor bar on line pos (fractional while it moves from one line to the next), with opacity o
 function setWfCursor(app, pos, o) {
@@ -248,24 +256,24 @@ const HISTORY = [
 const HROW = { top: 74, gap: 52, h: 40 }; // rows inside an Event History card: first row top, spacing, height
 const rowTop = i => HROW.top + i * HROW.gap;
 // the chapter 3 and 4 Event History card, in the Temporal panel
-const HIST = historyInset(WF_LAYOUT.temporal);
+const ORDER_HIST = historyInset(WF_LAYOUT.temporal);
 // stage y of the middle of row i in that card, where things flying into the history land
-const historyRowY = i => HIST.y - HIST.h / 2 + rowTop(i) + HROW.h / 2;
+const historyRowY = i => ORDER_HIST.y - ORDER_HIST.h / 2 + rowTop(i) + HROW.h / 2;
 // Kinds of the row tags (see setRowTag): SAVED (neon on black), REPLAYED (white on UV, the look of reused rows),
 // STILL WAITING (white on violet)
 const ROW_TAG_KINDS = { 'SAVED': 'saved', 'REPLAYED': 'reused', 'STILL WAITING': 'waiting' };
 // makeHistoryCard with this theme's sizes: numbered rows (Signal rows in UV) and one status tag per row;
 // scanH: height of the row highlight, null for none
-function makeHistory(p, rows, w, h, scanH = null) {
+function makeSignalHistory(p, rows, w, h, scanH = null) {
   return makeHistoryCard(p, rows, {
     uvRow: i => rows[i].startsWith('Signal'), w, h, headerFont: 20, rowTop, font: 23, rowH: HROW.h,
-    tagTop: i => rowTop(i) + 4, tag: { font: 18, pad: '4px 12px', icon: 18, border: false }, scanH,
+    tagTop: i => rowTop(i) + 4, tag: { font: 18, padX: 12, icon: 18, border: false }, scanH,
   });
 }
 // The laptop order history of chapters 3 and 4, with a scan highlight for the replay, the pulsing line shown in
 // the slot of row 4 while the Workflow waits for the Signal, and WORKFLOW COMPLETE 26 px under the rows
 function makeOrderHistory(p) {
-  const history = makeHistory(p, HISTORY, HIST.w, HIST.h, HROW.h + 6);
+  const history = makeSignalHistory(p, HISTORY, ORDER_HIST.w, ORDER_HIST.h, HROW.h + 6);
   // UV, as light violet is too faint on white
   history.wait = E(history,
     `<span class="hg" style="display:inline-block">${ICON('hourglass', 22, C.uv, 2.2)}</span>`
@@ -275,11 +283,7 @@ function makeOrderHistory(p) {
       letterSpacing: '.12em', color: C.uv, padding: '0 10px', display: 'flex', gap: '12px', alignItems: 'center',
     });
   history.wait.hg = history.wait.querySelector('.hg');
-  history.done = E(history, `${ICON('check', 24, C.neon, 2.6)} WORKFLOW COMPLETE`, 'mono', {
-    left: '50%', top: (rowTop(HISTORY.length - 1) + HROW.h + 26) + 'px', fontSize: '20px', letterSpacing: '.12em',
-    color: C.neon, background: C.bg, padding: '10px 18px 10px 16px', borderRadius: 'var(--rs)',
-    display: 'flex', gap: '10px', alignItems: 'center',
-  });
+  addHistoryDone(history, 'WORKFLOW COMPLETE', rowTop(HISTORY.length - 1) + HROW.h + 26);
   return history;
 }
 // Status tag of row i, a key of ROW_TAG_KINDS; it pops when its label changes at `at`
@@ -289,6 +293,6 @@ function setRowTag(history, i, t, label, at, o) {
 // The "waiting for a Signal" line pulses while shown
 function setWaitLine(history, o) {
   history.wait.style.opacity = o * (0.8 + 0.2 * Math.sin(G * 4)); // never below 0.6, so it stays readable
-  history.wait.hg.style.transform = `rotate(${hourglassTurn()}deg)`;
+  setHourglass(history.wait.hg, 1);
 }
 

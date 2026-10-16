@@ -58,6 +58,7 @@
       const running = t >= openAt;
       placeWorkerDiagram(s.dg, t, {
         show: {
+          status: running ? P(t, openAt, 0.25) : 1 - P(t, openAt - 0.25, 0.25),
           pollers: P(t, c[1] + 0.4, 0.5), wfSlots: P(t, c[1] + 0.8, 0.5),
           cpu: P(t, c[2] + 0.3, 0.5), mem: P(t, c[2] + 0.4, 0.5), cache: P(t, c[3] + 0.3, 0.5), code: 0,
         },
@@ -75,7 +76,6 @@
         wait: { text: formatWait(next.wait), trend: 'up' },
         status: running ? ['RUNNING', 'running'] : ['BUSY', 'running'],
       });
-      s.dg.worker.st.style.opacity = running ? P(t, openAt, 0.25) : 1 - P(t, openAt - 0.25, 0.25);
     },
   });
 }

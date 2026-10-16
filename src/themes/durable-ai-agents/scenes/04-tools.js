@@ -22,7 +22,7 @@
         + `background:${C.red};transform:rotate(-35deg)"></div>`;
       s.no = ['sun', 'mail'].map(n => E(root, ICON(n, 54, C.slate, 1.6) + strike));
       s.box = E(root, '', '', {
-        width: '1000px', height: '210px', border: `1.5px dashed ${C.lineLight}`, borderRadius: 'var(--r)',
+        width: '1000px', height: '210px', border: `1px dashed ${C.lineLight}`, borderRadius: 'var(--r)',
       });
       s.boxL = E(root, 'Available tools', 'lbl');
       const tools = [['sun', 'Weather'], ['cal', 'Calendar'], ['mail', 'Email'], ['search', 'Web search']];

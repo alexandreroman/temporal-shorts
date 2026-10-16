@@ -18,7 +18,7 @@ Object.assign(ICONS, {
 // Official Temporal symbol alone (white)
 const SYMBOL = assetUrl('assets/temporal-symbol-light-cropped.svg');
 // Official photo of the two founders (https://temporal.io/about), 900x929 px
-const PHOTO = { url: assetUrl('assets/temporal-founders.jpg'), w: 900, h: 929 };
+const PHOTO = { url: assetUrl('assets/temporal-founders.jpg'), w: 900 };
 
 // The languages of Temporal's SDKs, in the order chapter 6 reads them, each with its official logo (their sources
 // and licenses are in the README of their folder)
@@ -100,7 +100,6 @@ const AGENT_LLM_SEED = 0.37;
 // The stage point where chapter 4's LLM node (THINK, on top of the loop) shows, and its size there: chapter 3's AI
 // hub turns into that LLM node, so the same bubble carries across the cut
 const AGENT_HANDOFF = { x: AGENT_LOOP.cx, y: AGENT_LOOP.cy - AGENT_LOOP.r, size: AGENT_LOOP.node };
-// The halo around the bubble at the cut: its size on screen (diameter, px) and opacity, the same on both sides
-const HANDOFF_HALO = { size: 300, o: 0.8 };
-const HALO_BACKGROUND = `radial-gradient(circle, rgba(${RGB.violet},.4) 0%, rgba(${RGB.uv},.15) 45%, `
-  + `rgba(${RGB.uv},0) 70%)`;
+// The halo around the bubble at the cut: its size on screen (diameter, px), opacity and background, the same on both
+// sides
+const HANDOFF_HALO = { size: 300, o: 0.8, background: haloBackground(0.4, 0.15, 45, 70) };

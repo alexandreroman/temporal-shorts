@@ -106,23 +106,27 @@ workspaces run `make setup` automatically.
     background; captured by `make social` only, not a site page; its icons
     are copies, see the comment above the chain
   - `styles.css`: brand styles and live-player CSS
-  - `engine.js`: timeline, easing and layout helpers, icons, components,
-    star field and `boot()`, called last by every theme page (builds the
-    scenes, then freezes on `?t=` or starts the player); chapter titles come
-    from the scenes
+  - `engine.js`: timeline, easing and layout helpers, SVG path helpers
+    (`setD()`, `sCurveD()`, `roundedPath()`, `pointAlong()`), DOM writes
+    that skip unchanged values (`setHtml()`, `setText()`), icons,
+    components, star field and `boot()`, called last by every theme page
+    (builds the scenes, then freezes on `?t=` or starts the player);
+    chapter titles come from the scenes
   - `shared.js`: brand constants and components used by two or more
-    themes (`C` and `RGB` colors, `assetUrl()` and `LOGO`, tiles, tags,
-    glows, step rows, the agentic loop (`makeAgentLoop()`), the lunch
-    example (`LUNCH_STEPS`, `LUNCH_HISTORY`) with its CONTEXT panel and
-    blocks (`makeMemory()`, `makeMemBlocks()`), app and TEMPORAL panels,
-    the app panel of numbered step lines (`makeLinesApp()`), the Event
-    History card, the code card of TypeScript lines (`makeCodeCard()`,
+    themes (`C`, `RGB` and `WEB_UI` colors, `TILE_BORDER`, `assetUrl()`
+    and `LOGO`, the lockup and Temporal Cloud zone, tiles, tags, glows,
+    step rows, the agentic loop (`makeAgentLoop()`), the lunch example
+    (`LUNCH_STEPS`, `LUNCH_HISTORY`) with its CONTEXT panel and blocks
+    (`makeMemory()`, `makeMemBlocks()`), app and TEMPORAL panels, the app
+    panel of numbered step lines (`makeLinesApp()`), the Event History
+    card, the code card of TypeScript lines (`makeCodeCard()`,
     `highlightJs()`, `setCodeLine()`), status tags, counters, crash and
-    takeover effects, small animation helpers such as `backPop()`, camera
-    and motion helpers (`makeCamera`, `setCamera`, `hash`, ripples, sparks
-    on paths), title and end cards) and the whole "What you can build"
-    chapter, `useCaseScene()`; icons used by two or more themes are in
-    `ICONS` in `engine.js`, the others in their theme's `shared.js`
+    takeover effects, the recap row of benefit tiles, small animation
+    helpers such as `popScale()` and `backPop()`, camera and motion
+    helpers (`makeCamera`, `setCamera`, `hash`, ripples, sparks on paths),
+    title and end cards) and the whole "What you can build" chapter,
+    `useCaseScene()`; icons used by two or more themes are in `ICONS` in
+    `engine.js`, the others in their theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page; opens paused at a `#t=<time>` URL fragment
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
@@ -134,9 +138,9 @@ workspaces run `make setup` automatically.
     `<meta name="markdown-title">` (the name of the video, heading of its
     Markdown version)
   - `themes/<theme>/`: the theme's own scripts, e.g.
-    `themes/durable-ai-agents/shared.js` (extra icons, the step list,
-    `makeApp`, the context block size `MEM_BLOCK`, the bill, the takeover
-    of chapters 6 and 7, the booking ticket) or
+    `themes/durable-ai-agents/shared.js` (extra icons, `makeApp`, the
+    context block size `MEM_BLOCK`, the bill, the takeover of chapters 6
+    and 7, the booking ticket) or
     `themes/worker-tuning/shared.js` (the Worker diagram shared by its
     chapters, `makeWorkerDiagram()` and `placeWorkerDiagram()`: Task Queue
     lanes, Pollers, Slots, Workflow cache, readouts, meters, the
@@ -158,43 +162,28 @@ workspaces run `make setup` automatically.
     theme page to it (`<link rel="alternate" type="text/markdown"
     href="/themes/<theme>.md">`)
   - `themes/<theme>/scenes/`: one file per scene (subtitles and
-    animations), wrapped in a `{ ... }` block so its helpers stay local;
-    each chapter is one scene, which sets `chapter` and `title`; `shift`
-    (`[dx, dy]` or `(t, c) => [dx, dy]`, see `pan()`) centers the
-    composition at (960, 515)
-- `scripts/`: setup, font download (`fonts.sh`, run by `setup.sh` and
-  any make target when the fonts are missing), frame preview, parallel
-  render, timeline, layout check (`layout_check.py`), SRT export, Markdown
-  export (`export_markdown.py`), social preview images
-  (`social_images.py`, which also writes the touch icon), standalone HTML
-  build and server (which also serves `/themes/<theme>.md` as
-  `text/markdown`, the site icons, and `/sitemap.xml` and `/robots.txt`
-  when built); the per-theme scripts require `--theme` (no default). The
-  HTML build links every page to the site icons and gives each theme page
-  a visually hidden transcript of its Markdown version (after the stage,
-  for screen readers and search engines; `src/` pages never hold it, so
-  frames are unaffected) and the ` | Temporal Shorts` suffix to its
-  `<title>`. It adds the Open Graph and X card tags, a canonical link and
-  JSON-LD structured data (author and publisher Alexandre Roman, a person:
-  the site is no official Temporal site; topics in `THEME_TOPICS`), and
-  writes `output/sitemap.xml` (home page and listed themes, each with the
-  git date of the last commit that changed its own content as `<lastmod>`:
-  `src/index.html`, or the theme folder and its Markdown version; none in
-  a shallow clone or without git) and
-  `output/robots.txt`, only when the `SITE_URL` environment variable (or
-  make variable) holds the site's root URL: local builds have none, and
-  delete those of an earlier build
-- `.github/workflows/pages.yml`: on push to `main`, checks out the full
-  history (blobless, for the sitemap dates), runs `make html`
-  (which downloads the fonts) with `SITE_URL` set to the Pages URL given by
-  `actions/configure-pages` (no domain in the build or the workflow) and
-  deploys `output/` to GitHub Pages (pages, images, the Markdown
-  versions of the themes, the site icons, `sitemap.xml` and `robots.txt`;
-  no video, no SRT); served at a domain root, as the player's home button
-  links to `/`. Pull requests to `main` run the build only, without the
-  Pages step, so with no social tags, structured data, sitemap or
-  `robots.txt`, and no deploy: the pages are attached to the run as an
-  artifact
+    animations), wrapped in a `{ ... }` block so its helpers stay local
+    (declare them with `const`: a function declaration inside the block
+    leaks to the global scope); each chapter is one scene, which sets
+    `chapter` and `title`; `shift` (`[dx, dy]` or `(t, c) => [dx, dy]`,
+    see `pan()`) centers the composition at (960, 515)
+- `scripts/`: setup, fonts (`fonts.sh`, run by `setup.sh` and any make
+  target when the fonts are missing), preview, parallel render, timeline,
+  layout check (`layout_check.py`), SRT and Markdown export
+  (`export_markdown.py`), social images and touch icon
+  (`social_images.py`), HTML build and server (which also serves the
+  Markdown versions, site icons, sitemap and robots); the per-theme
+  scripts require `--theme` (no default). The HTML build adds the hidden
+  transcript (built pages only, so frames are unaffected), the
+  ` | Temporal Shorts` title suffix and the site icons, and, only with
+  `SITE_URL`, link preview tags, JSON-LD (personal author: no official
+  Temporal site; topics in `THEME_TOPICS`), `sitemap.xml` (git lastmod)
+  and `robots.txt` (README.md, Search engines)
+- `.github/workflows/pages.yml`: on push to `main`, full blobless history
+  (sitemap dates), `make html` with `SITE_URL` from
+  `actions/configure-pages`, deploy `output/` to GitHub Pages (no video,
+  no SRT), served at a domain root; pull requests build only and attach
+  the pages as an artifact (README.md, Deployment)
 - `docs/<theme>/script.md`: full script of a theme: subtitles, timings,
   visuals
 - `output/`: generated `<theme>.srt`, `<theme>.mp4`, and the HTML pages
