@@ -21,7 +21,8 @@ reveals one security layer at each stage: where the code runs, the wire,
 the history, encryption with the customer's keys. Then it shows the cost of
 doing all that in every Worker, and Temporal Proxy as the answer: one
 gateway that carries credentials and encryption, with no change to Worker
-code.
+code. It closes on Temporal Cloud's certifications and yearly third-party
+audits, the evidence a security review asks for.
 
 Running example: Nora sends €25,000 to Leo. One payload card carries it
 everywhere, the same in every chapter: `from: FR76 3000 6000 0112 3456
@@ -34,11 +35,13 @@ History stores payloads, readable without more (ch3); the Data Converter
 encrypts with your keys, Search Attributes stay in clear, a Codec Server
 decrypts for the Web UI (ch4); the same work in every Worker (ch5); Temporal
 Proxy, a gateway that holds the connection settings and credentials (ch6);
-encryption by the proxy (ch7); switching upstreams with no code change (ch8).
+encryption by the proxy (ch7); switching upstreams with no code change (ch8);
+Temporal Cloud's certifications, yearly audits and pen tests, and the Trust
+Center that holds the reports (ch9).
 
-Out of scope: SSO, roles, audit logs and certifications (they govern
-people's access, not the payload's way), and the pre-release status of
-Temporal Proxy, which the video does not mention.
+Out of scope: SSO, roles and audit logs (they govern people's access, not
+the payload's way), and the pre-release status of Temporal Proxy, which the
+video does not mention.
 
 ### The journey lane
 
@@ -51,12 +54,22 @@ leaves through it.
 
 Within a chapter the camera travels one way; when the story needs
 something from elsewhere, the content comes to the camera. From the intro
-to ch8, and from ch9 to ch10, each chapter ends on the next one's first
+to ch8, and from ch10 to ch11, each chapter ends on the next one's first
 frame (a match cut): a whip carries the card from ch2 into ch3, and a
-rewind whip carries it from ch3 back to the Worker for ch4.
+rewind whip carries it from ch3 back to the Worker for ch4. Ch9 leaves the
+lane for TEMPORAL's side alone: the engine's zoom-through brings it in from
+ch8 and carries it into the recap.
 
 ### Sources
 
+- Compliance: <https://trust.temporal.io/> (Temporal Trust Center, updated
+  May 29, 2026): SOC 2 Type II, GDPR, HIPAA and CCPA; "Temporal Cloud —
+  Certifications: SOC 2 Type 2, HIPAA"; "One or more annual third-party
+  audit(s)" and "Annual third-party penetration testing"; the documents of
+  a security review are available there. The security model page states
+  "Temporal Technologies is SOC 2 Type 2 certified and compliant with GDPR
+  and HIPAA regulations". No other framework, no customer or third-party
+  logo.
 - Temporal Cloud security model:
   <https://docs.temporal.io/evaluate/cloud/security>: Temporal "does not
   run or manage your applications or Workers"; the Data Converter encrypts
@@ -339,9 +352,32 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     Cloud, which lights up, while the Workers and their two lines stay
     still; WORKERS UNCHANGED.
 
-## 09 What you get
+## 09 Audited and certified
 
-- **2:59** Your code stays home, every connection is verified, payloads
+- **2:59** Temporal Cloud is SOC 2 Type 2 certified and compliant
+  with HIPAA, GDPR and CCPA.
+  - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
+    (the official lockup followed by "Cloud") holding four empty dashed
+    seal slots. Dramatic beat: as the subtitle names them, four round
+    violet seals stamp onto the slots one at a time, each falling from
+    twice its size, tilted, and landing flat with a press, a violet glow,
+    neon ripples and a jolt of the frame: SOC 2 TYPE 2 (CERTIFIED), then
+    HIPAA, GDPR and CCPA (COMPLIANT), each with a neon check.
+- **3:06** Third parties audit and pen test it every year: the reports are
+  in the Temporal Trust Center.
+  - Visuals: The zone moves up with its seals and a TRUST CENTER card
+    rises in under it (a shield, `trust.temporal.io`, two empty report
+    slots). An ANNUAL AUDIT tag (a magnifier) and an ANNUAL PEN TEST tag (a
+    crosshair), each under a THIRD PARTY caption, pop in under the first
+    and last seals as the subtitle names them, and swell at "every year".
+    Each sends a report along a dashed line into the card, where its slot
+    fills: Audit report, Pen test report; the card lights up violet as the
+    Trust Center is named. The default fade-out zooms through to the
+    recap.
+
+## 10 What you get
+
+- **3:15** Your code stays home, every connection is verified, payloads
   stay encrypted, Workers hold no secrets.
   - Visuals: 4 tall benefit tiles drop in one at a time across the frame
     as the subtitle names them, each lighting up as it lands while the
@@ -349,9 +385,9 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     PORTS (closed door) / VERIFIED CONNECTIONS (badge) / YOUR KEYS ONLY
     (key) / NO SECRETS IN WORKERS (a key struck through).
 
-## 10 What you can build
+## 11 What you can build
 
-- **3:08** Nora's transfer is one example: any Workflow that handles
+- **3:23** Nora's transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use
@@ -360,14 +396,14 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     "passport scans, encrypted" / PAYROLL RUNS (calendar) "salaries never
     in clear" / AI AGENTS ON CUSTOMER DATA (robot) "prompts and replies
     sealed".
-- **3:14** Health claims, KYC onboarding, payroll runs, AI agents on
+- **3:29** Health claims, KYC onboarding, payroll runs, AI agents on
   customer data: the data stays yours.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **3:22** With Temporal, your code, your keys and your data stay yours.
+- **3:37** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.

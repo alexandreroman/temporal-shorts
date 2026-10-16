@@ -34,10 +34,11 @@ Each video is a theme:
   how a Worker takes work, and how to find and fix the bottleneck behind a
   growing Task Queue backlog: Slots, Pollers, the Workflow cache, CPU.
 - **Security** (`security`): for security teams, one payload on its way
-  from the Worker to the Event History: where the code runs, TLS and
-  identity, what Temporal stores, encryption with your keys, then
-  [Temporal Proxy][temporal-proxy], which keeps credentials and encryption
-  out of the Workers.
+  from the Worker to the Event History: where the code runs, TLS, private
+  connectivity and identity, what Temporal stores, encryption with your
+  keys, then [Temporal Proxy][temporal-proxy], which keeps credentials and
+  encryption out of the Workers, and Temporal Cloud's compliance:
+  certifications, yearly third-party audits, the Trust Center.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal hands back the saved results from the Event

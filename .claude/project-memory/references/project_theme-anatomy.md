@@ -440,12 +440,15 @@ below and the card order in [Home page design](feedback_home-page.md).
   (ch5), then Temporal Proxy: a gateway holding the address, credentials
   and Namespace (ch6), encryption with the customer's KMS, fail closed,
   built-in Codec Server (ch7), switching upstreams with no Worker change
-  (ch8), recap (ch9), use cases (ch10: health claims, KYC onboarding,
-  payroll runs, AI agents on customer data). Every Proxy claim follows
-  docs.temporal.io and the temporal-proxy repository (`### Sources` in
-  `script.md`).
-- Out of scope: SSO, roles, audit logs, certifications, and the
-  pre-release status of Temporal Proxy, which the video never mentions.
+  (ch8), Temporal Cloud's compliance (ch9: SOC 2 Type 2 certified, HIPAA,
+  GDPR and CCPA compliant, yearly third-party audits and pen tests, reports
+  in the Temporal Trust Center; no other framework, no logos), recap
+  (ch10), use cases (ch11: health claims, KYC onboarding, payroll runs, AI
+  agents on customer data). Every Proxy claim follows docs.temporal.io and
+  the temporal-proxy repository, every compliance claim trust.temporal.io
+  and the Temporal Cloud security model (`### Sources` in `script.md`).
+- Out of scope: SSO, roles, audit logs, and the pre-release status of
+  Temporal Proxy, which the video never mentions.
 - Nothing on screen implies Temporal stores credentials or keys: TEMPORAL
   shows connections as VERIFIED, and stored payloads carry "WRAPPED n"
   (the wrapped data key that travels with the payload), never "KEY".
@@ -463,8 +466,10 @@ below and the card order in [Home page design](feedback_home-page.md).
   about 19-20 px on screen, in their tile's heading row, never straddling a
   border; text-only tags offset their trailing letter-spacing so the ink
   sits centered.
-- 08 → 09 and 10 → outro use the engine zoom-through; 09's recap tiles
-  flip in 3D into 10's use-case tiles in the same slots.
+- 08 → 09, 09 → 10 and 11 → outro use the engine zoom-through; ch9 holds
+  TEMPORAL's side alone (a Temporal Cloud zone, the lockup followed by
+  "Cloud"). 10's recap tiles flip in 3D into 11's use-case tiles in the
+  same slots.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title

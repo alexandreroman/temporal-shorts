@@ -28,9 +28,10 @@ from a deterministic HTML animation. Each video is a theme:
   cache, CPU
 - `security`: Security with Temporal, a video for security teams that
   follows a payload from the Worker to the Event History: where the code
-  runs, TLS and identity, what Temporal stores, encryption with your keys,
-  then Temporal Proxy, which keeps credentials and encryption out of the
-  Workers
+  runs, TLS, private connectivity and identity, what Temporal stores,
+  encryption with your keys, then Temporal Proxy, which keeps credentials
+  and encryption out of the Workers, and Temporal Cloud's compliance:
+  certifications, yearly third-party audits, the Trust Center
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page

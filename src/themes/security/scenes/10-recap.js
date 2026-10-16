@@ -1,8 +1,8 @@
-// ===================== 9. WHAT YOU GET
+// ===================== 10. WHAT YOU GET
 // The recap: one tile per benefit, in the use cases' row (USE_CASE_ROW). Each tile lands as the subtitle names its
 // benefit: it drops onto the stage from in front of the camera, its border lights up, and the padlock on its top edge
 // snaps shut with neon ripples. The engine's zoom-through brings the scene in; it ends on the full row at rest,
-// padlocks shut, which is chapter 10's first frame (a match cut: no fade-out, no exit zoom).
+// padlocks shut, which is chapter 11's first frame (a match cut: no fade-out, no exit zoom).
 // The block keeps every name declared in this file local to this scene.
 {
   // seconds after c[0] when each tile lands: as the subtitle names its benefit, at its position at 16 characters per
@@ -19,7 +19,7 @@
   const BADGE_Y = USE_CASE_ROW.y - USE_CASE_ROW.h / 2;
 
   scene({
-    chapter: 9, title: 'What you get',
+    chapter: 10, title: 'What you get',
     fadeOut: 0,
     // the presenter holds on the full row before the header fades out, long after the last ripple
     holdBeforeEnd: 0.6,
@@ -36,7 +36,7 @@
       s.ripples = RECAP.map(() => makeRipples(root, 2, RGB.neon));
     },
     update(t, c, s) {
-      // the engine's zoom-through in; no exit zoom, as chapter 10 opens on the last frame
+      // the engine's zoom-through in; no exit zoom, as chapter 11 opens on the last frame
       setCamera(s.cam, t, this.dur, { exit: 1 });
       s.tiles.forEach((tile, i) => {
         const x = useCaseX(i);

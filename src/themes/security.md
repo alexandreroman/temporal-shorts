@@ -79,16 +79,24 @@ payloads.
 Moving from your own Temporal Service to Temporal Cloud is a proxy setting:
 Workers don't change.
 
-## Chapter 9: What you get
+## Chapter 9: Audited and certified
 
 [Watch from 2:59](/themes/security/#t=179)
+
+Temporal Cloud is SOC 2 Type 2 certified and compliant with HIPAA, GDPR and
+CCPA. Third parties audit and pen test it every year: the reports are in the
+Temporal Trust Center.
+
+## Chapter 10: What you get
+
+[Watch from 3:15](/themes/security/#t=195)
 
 Your code stays home, every connection is verified, payloads stay encrypted,
 Workers hold no secrets.
 
-## Chapter 10: What you can build
+## Chapter 11: What you can build
 
-[Watch from 3:08](/themes/security/#t=188)
+[Watch from 3:23](/themes/security/#t=203)
 
 Nora's transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -96,6 +104,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 3:22](/themes/security/#t=202)
+[Watch from 3:37](/themes/security/#t=217)
 
 With Temporal, your code, your keys and your data stay yours.

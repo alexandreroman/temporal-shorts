@@ -21,6 +21,8 @@ Object.assign(ICONS, {
     + '<path d="M3.5 3.5l17 17"/>',
   // a medical cross, outlined: health data
   medical: '<path d="M9 3.5h6V9h5.5v6H15v5.5H9V15H3.5V9H9z"/>',
+  // a crosshair: a penetration test
+  target: '<circle cx="12" cy="12" r="7.5"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>',
 });
 
 // ---------- DOM writes that skip unchanged values: update() runs every frame, and rewriting the same HTML, text or
@@ -919,7 +921,7 @@ function namespaceHtml(shown, caret) {
     + `<span style="opacity:0">${FULL_NS.slice(shown)}</span>${cursor}</span>`;
 }
 
-// ---------- the recap tiles (chapters 9 and 10)
+// ---------- the recap tiles (chapters 10 and 11)
 // The benefits of the recap, [icon, label], one tile each in the use cases' row (USE_CASE_ROW); a <br> splits a label
 // that would crowd its tile
 const RECAP = [
@@ -933,7 +935,7 @@ const TILE_LABEL_LINES = 2;
 // px, both even, so they center on whole pixels
 const RECAP_BADGE = { size: 56, lock: 32 };
 // A recap tile of USE_CASE_ROW's size and type scale for a benefit of RECAP, with its padlock badge (.badge, .lock),
-// open and unlit until setRecapTile() sets its state. Chapter 9 lands these tiles; chapter 10 opens on them, padlocks
+// open and unlit until setRecapTile() sets its state. Chapter 10 lands these tiles; chapter 11 opens on them, padlocks
 // shut, and flips them over into the use cases.
 function makeRecapTile(p, [icon, label]) {
   const { w, h } = USE_CASE_ROW;
