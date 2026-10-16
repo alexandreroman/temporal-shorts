@@ -3,9 +3,10 @@
 // "Cloud") holds four empty seal slots. The dramatic beat: as the first subtitle names them, four seals stamp onto
 // their slots one at a time, SOC 2 TYPE 2 (certified), then HIPAA, GDPR and CCPA (compliant), each slamming down
 // with a press, neon ripples and a jolt. For the second subtitle the zone moves up and a TRUST CENTER card rises in
-// under it, with two empty report slots; an ANNUAL AUDIT and an ANNUAL PEN TEST tag pop in on its sides, each under
-// a THIRD PARTY caption, and send a report along a dashed line into the card, which lights up as the Trust Center
-// is named. The camera holds; the engine's zoom-through brings the scene in and plays into the recap.
+// under it, listing the SOC 2 Type 2 report over an empty slot; an ANNUAL AUDIT and an ANNUAL PEN TEST tag pop in
+// on its sides, each under a THIRD PARTY caption. The audit tag sends its results along a dashed line into the empty
+// slot, and the card lights up as the Trust Center is named. The camera holds; the engine's zoom-through brings the
+// scene in and plays into the recap.
 // The block keeps every name declared in this file local to this scene.
 {
   // seconds after c[0] when each seal lands: as the subtitle names it, at its position at 16 characters per second
@@ -15,11 +16,10 @@
   // lands flat; the press squashes it to 1 - STAMP.press, back to its size in STAMP.pressD seconds; the frame jolts
   const STAMP = { from: 2.0, tilt: -10, d: 0.18, press: 0.06, pressD: 0.22, shake: 4, shakeD: 0.25 };
   // from c[1]: the zone moves up (rise, riseD) as the TRUST CENTER card comes in (card); the tags pop in as the
-  // subtitle names them (audit, penTest); both swell at "every year" (yearly); their reports leave for the card
-  // (reports, one per tag, and reportD) as "the reports" is read; the card lights up at "Temporal Trust Center" (lit)
+  // subtitle names them (audit, penTest); both swell at "every year" (yearly); the audit results leave for the card
+  // as "audit results" is read (results, resultsD); the card lights up at "Temporal Trust Center" (lit)
   const T1 = {
-    rise: 0, riseD: 0.8, card: 0.4, audit: 1.18, penTest: 1.8, yearly: 2.55, reports: [3.55, 3.75], reportD: 0.5,
-    lit: 4.74,
+    rise: 0, riseD: 0.8, card: 0.4, audit: 1.18, penTest: 1.8, yearly: 2.55, results: 3.3, resultsD: 0.5, lit: 4.86,
   };
 
   // The Temporal Cloud zone, left and top, size: held through the stamps, then moved up for the Trust Center row
@@ -50,28 +50,29 @@
   const RIPPLE = { to: 430, d: 0.6, step: 0.12 };
 
   // The Trust Center row, under the moved-up zone: the card in the middle, on x 960, and the tags centered under the
-  // first and last seals, their pills level with the middle of the card's two report slots, so that both reports
-  // ride mirrored curves. pillDy: how far the pill's middle sits below the tag's, its caption line (22 px) and the
-  // 16 px gap above it
+  // first and last seals, their pills level with the middle of the card's two rows. pillDy: how far the pill's
+  // middle sits below the tag's, its caption line (22 px) and the 16 px gap above it
   const CARD = { x: 960, y: 735, w: 560, h: 240, pad: 24, slotTop: 102, slotH: 52, slotGap: 10 };
   const TAG = { w: 300, xs: [useCaseX(0), useCaseX(3)], font: 20, pillDy: 19 };
-  // the tags and their reports: [icon, label, report]
-  const AUDITS = [['search', 'Annual audit', 'Audit report'], ['target', 'Annual pen test', 'Pen test report']];
-  // the report that travels from a tag to its slot in the card: a small document tile
+  // the tags, [icon, label]: the audit, then the pen test
+  const AUDITS = [['search', 'Annual audit'], ['target', 'Annual pen test']];
+  // the card's rows: the SOC 2 Type 2 report, listed from the start, and the audit results, which the audit tag
+  // delivers into the row's empty slot (RESULTS_ROW)
+  const CARD_ROWS = ['SOC 2 Type 2 report', 'Audit results'];
+  const RESULTS_ROW = 1;
+  // the results that travel from the audit tag to their row: a small document tile
   const REPORT = { w: 40, h: 48, icon: 26 };
-  // the dashed line a report rides: from a tag's inner edge, LINK.gap px out, to LINK.gap px short of the card
+  // the dashed line they ride: from the audit tag's inner edge, LINK.gap px out, to LINK.gap px short of the card
   const LINK = { gap: 16 };
 
-  // Stage y of the middle of the card's report slot i
+  // Stage y of the middle of the card's row i
   const slotY = i => CARD.y - CARD.h / 2 + CARD.slotTop + i * (CARD.slotH + CARD.slotGap) + CARD.slotH / 2;
   const PILL_Y = (slotY(0) + slotY(1)) / 2;
   TAG.y = PILL_Y - TAG.pillDy;
-  // SVG path from tag i's inner edge to the card's edge, level with its report slot: a smooth S between the two
-  function linkD(i) {
-    const toRight = i === 0;
-    const x0 = TAG.xs[i] + (toRight ? 1 : -1) * (TAG.w / 2 + LINK.gap);
-    const x1 = CARD.x + (toRight ? -1 : 1) * (CARD.w / 2 + LINK.gap);
-    const y0 = PILL_Y, y1 = slotY(i), xm = (x0 + x1) / 2;
+  // SVG path from the audit tag's inner edge to the card's left edge, level with the results row: a smooth S
+  function linkD() {
+    const x0 = TAG.xs[0] + TAG.w / 2 + LINK.gap, x1 = CARD.x - CARD.w / 2 - LINK.gap;
+    const y0 = PILL_Y, y1 = slotY(RESULTS_ROW), xm = (x0 + x1) / 2;
     return `M ${x0} ${y0} C ${xm} ${y0} ${xm} ${y1} ${x1} ${y1}`;
   }
 
@@ -109,10 +110,10 @@
       + `${ICON(icon, 22, C.violet, 2)}${label}</div>`,
       '', { display: 'flex', flexDirection: 'column', alignItems: 'center' });
   }
-  // The TRUST CENTER card: its heading and address, then one report slot per tag, empty (dashed) until its report
-  // lands (card.slots[i], with .fill, the filled row)
+  // The TRUST CENTER card: its heading and address, then one slot per row of CARD_ROWS, dashed while empty
+  // (card.slots[i], with .fill, the filled row, hidden until a scene shows it)
   function makeTrustCard(root) {
-    const slots = AUDITS.map(([, , report], i) => {
+    const slots = CARD_ROWS.map((row, i) => {
       const top = CARD.slotTop + i * (CARD.slotH + CARD.slotGap);
       return `<div class="slot" style="position:absolute;left:${CARD.pad}px;right:${CARD.pad}px;top:${top}px;`
         + `height:${CARD.slotH}px;border:1.5px dashed ${C.line};border-radius:var(--rs)">`
@@ -120,7 +121,7 @@
         + `padding-left:16px;border:1.5px solid rgba(${RGB.violet},.45);border-left:3px solid ${C.violet};`
         + 'border-radius:var(--rs);'
         + `background:rgba(${RGB.violet},.12);opacity:0">`
-        + `${ICON('book', 24, C.violet, 1.8)}<span class="mono" style="font-size:19px;color:${C.ink}">${report}`
+        + `${ICON('book', 24, C.violet, 1.8)}<span class="mono" style="font-size:19px;color:${C.ink}">${row}`
         + '</span></div></div>';
     }).join('');
     const card = E(root,
@@ -144,8 +145,8 @@
         after: 1.0,
       },
       {
-        text: 'Third parties audit and pen test it every year: the reports are in the Temporal Trust Center.',
-        // the card lights up at c[1] + 4.74: the full composition then holds about 2.7 s before the fade
+        text: 'Third parties audit and pen test it every year: audit results are in the Temporal Trust Center.',
+        // the card lights up at c[1] + 4.86: the full composition then holds about 2.7 s before the fade
         after: 1.0,
       },
     ],
@@ -162,14 +163,16 @@
       s.ripples = SEALS.map(() => makeRipples(root, 2, RGB.neon));
 
       s.svg = svgLayer(root);
-      s.links = AUDITS.map((_, i) => path(s.svg, linkD(i), C.violet, 2, true, '8 8'));
+      s.link = path(s.svg, linkD(), C.violet, 2, true, '8 8');
       s.card = makeTrustCard(root);
+      // the SOC 2 Type 2 report is listed from the start
+      s.card.slots[0].fill.style.opacity = 1;
       s.tags = AUDITS.map(audit => makeAuditTag(root, audit));
-      s.reports = AUDITS.map(() => E(root, ICON('book', REPORT.icon, C.violet, 1.8), '', {
+      s.results = E(root, ICON('book', REPORT.icon, C.violet, 1.8), '', {
         width: REPORT.w + 'px', height: REPORT.h + 'px', display: 'flex', alignItems: 'center',
         justifyContent: 'center', background: C.bg, border: `1.5px solid ${C.violet}`, borderRadius: 'var(--rs)',
-      }));
-      s.landings = AUDITS.map(() => makeRipples(root, 2, RGB.violet));
+      });
+      s.landing = makeRipples(root, 2, RGB.violet);
     },
     update(t, c, s) {
       const hits = STAMP_AT.map(at => c[0] + at);
@@ -201,7 +204,7 @@
         placeRipples(s.ripples[i], t, hit, x, y, SEAL.size, RIPPLE.to, { d: RIPPLE.d, step: RIPPLE.step });
       });
 
-      // the TRUST CENTER card rises in under the zone, its report slots empty
+      // the TRUST CENTER card rises in under the zone, the SOC 2 Type 2 report listed over an empty slot
       rise(s.card, CARD.x, CARD.y, P(t, c[1] + T1.card, 0.5));
       // the tags pop in as the subtitle names them, and swell at "every year"
       s.tags.forEach((tag, i) => {
@@ -209,18 +212,16 @@
         place(tag, TAG.xs[i], TAG.y, pop.s * swell(t, c[1] + T1.yearly + 0.1 * i, 0.08), pop.o);
       });
 
-      // each tag sends its report along a dashed line into its slot in the card, which fills as it lands
-      s.links.forEach((link, i) => {
-        const leave = c[1] + T1.reports[i];
-        draw(link, P(t, leave - 0.3, 0.3));
-        const ride = P(t, leave, T1.reportD);
-        const point = link.getPointAtLength(link._L * ride);
-        place(s.reports[i], point.x, point.y, 1, ride > 0 && ride < 1 ? 1 : 0);
-        const landAt = leave + T1.reportD;
-        const { fill } = s.card.slots[i];
-        fill.style.opacity = P(t, landAt, 0.25);
-        placeRipples(s.landings[i], t, landAt, point.x, slotY(i), 40, 160, { d: 0.6, step: 0.14 });
-      });
+      // the audit tag sends its results along a dashed line into the empty slot, which fills as they land; the pen
+      // test tag stays a fact on its own
+      const leave = c[1] + T1.results;
+      draw(s.link, P(t, leave - 0.3, 0.3));
+      const ride = P(t, leave, T1.resultsD);
+      const point = s.link.getPointAtLength(s.link._L * ride);
+      place(s.results, point.x, point.y, 1, ride > 0 && ride < 1 ? 1 : 0);
+      const landAt = leave + T1.resultsD;
+      s.card.slots[RESULTS_ROW].fill.style.opacity = P(t, landAt, 0.25);
+      placeRipples(s.landing, t, landAt, point.x, slotY(RESULTS_ROW), 40, 160, { d: 0.6, step: 0.14 });
 
       // the card lights up as the Temporal Trust Center is named
       const litAt = c[1] + T1.lit;

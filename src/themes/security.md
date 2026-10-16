@@ -84,7 +84,7 @@ Workers don't change.
 [Watch from 2:59](/themes/security/#t=179)
 
 Temporal Cloud is SOC 2 Type 2 certified and compliant with HIPAA, GDPR and
-CCPA. Third parties audit and pen test it every year: the reports are in the
+CCPA. Third parties audit and pen test it every year: audit results are in the
 Temporal Trust Center.
 
 ## Chapter 10: What you get
