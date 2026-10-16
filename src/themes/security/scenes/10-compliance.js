@@ -63,8 +63,7 @@
   // SVG path from the audit tag's inner edge to the card's left edge, level with the results row: a smooth S
   const linkD = () => {
     const x0 = TAG.xs[0] + TAG.w / 2 + LINK.gap, x1 = CARD.x - CARD.w / 2 - LINK.gap;
-    const y0 = PILL_Y, y1 = slotY(RESULTS_ROW), xm = (x0 + x1) / 2;
-    return `M ${x0} ${y0} C ${xm} ${y0} ${xm} ${y1} ${x1} ${y1}`;
+    return sCurveD(x0, PILL_Y, x1, slotY(RESULTS_ROW));
   };
 
   // A seal: its ring, its dashed inner ring, a neon check, its name and status

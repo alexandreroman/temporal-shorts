@@ -30,6 +30,16 @@ function bezier([p0, p1, p2, p3], u) {
   const at = k => v * v * v * p0[k] + 3 * v * v * u * p1[k] + 3 * v * u * u * p2[k] + u * u * u * p3[k];
   return [at(0), at(1)];
 }
+// SVG path of an S-curve from (x0, y0) to (x1, y1), its control points level with its ends at their midpoint: it
+// leaves and arrives horizontally, or vertically if `vertical`
+function sCurveD(x0, y0, x1, y1, vertical = false) {
+  if (vertical) {
+    const ym = (y0 + y1) / 2;
+    return `M ${x0} ${y0} C ${x0} ${ym} ${x1} ${ym} ${x1} ${y1}`;
+  }
+  const xm = (x0 + x1) / 2;
+  return `M ${x0} ${y0} C ${xm} ${y0} ${xm} ${y1} ${x1} ${y1}`;
+}
 // Global time, the ambient clock. Endless loops (a pulse, a flow, a breathing slot) read it: in the live player G
 // keeps real time while the scene time t slows down at 0.5x, and the player only counts the story moving on t as
 // motion. A loop that starts with its scene reads G - this.start in update(), which equals t in frozen frames.

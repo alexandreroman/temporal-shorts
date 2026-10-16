@@ -95,9 +95,7 @@
       // wires run from the tile's inner edge to the card edge, with horizontal tangents at both ends
       s.wires = PLUMBING.map(p => {
         const x0 = tileX(p) - p.side * (TILE.w / 2 + 4), x1 = CARD.x + p.side * (s.card.w / 2 + 4);
-        const mx = (x0 + x1) / 2;
-        return path(s.svg, `M ${x0} ${tileY(p)} C ${mx} ${tileY(p)} ${mx} ${wireY(p)} ${x1} ${wireY(p)}`,
-          C.slate, 2, false);
+        return path(s.svg, sCurveD(x0, tileY(p), x1, wireY(p)), C.slate, 2, false);
       });
       s.tiles = PLUMBING.map(p => iconTile(root, p.icon, p.label, TILE.w, TILE.h));
       s.bugs = BUGS.map(b => {

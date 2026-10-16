@@ -133,10 +133,9 @@
 
       // calls: await line -> Activity tile (from the card's right edge), Activity -> its service
       const cardRight = CARD.x + s.card.w / 2 + 4, tileLeft = TILE.x - TILE.w / 2 - 4;
-      const mx = (cardRight + tileLeft) / 2;
       s.calls = ORDER_STEPS.map((_, i) => {
-        const y0 = CARD.y + s.card.lineY(awaitLine(WORKFLOWS_TS, i)), y1 = rowY(i);
-        return path(s.svg, `M ${cardRight} ${y0} C ${mx} ${y0} ${mx} ${y1} ${tileLeft} ${y1}`, C.uv, 2.5, false);
+        const y0 = CARD.y + s.card.lineY(awaitLine(WORKFLOWS_TS, i));
+        return path(s.svg, sCurveD(cardRight, y0, tileLeft, rowY(i)), C.uv, 2.5, false);
       });
       s.links = ORDER_STEPS.map((_, i) => path(s.svg,
         `M ${TILE.x + TILE.w / 2 + 4} ${rowY(i)} L ${SERVICE.x - SERVICE.w / 2 - 4} ${rowY(i)}`, C.line, 2, false));

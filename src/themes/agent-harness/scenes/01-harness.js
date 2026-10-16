@@ -94,8 +94,7 @@
       const x0 = xs[i] + (down ? 20 : 30), x1 = xs[i + 1] - (down ? 30 : 20);
       const y0 = callY(i) + (down ? 1 : -1) * (chipH / 2 + 6);
       const y1 = callY(i + 1) + (down ? -1 : 1) * (chipH / 2 + 8);
-      const ym = (y0 + y1) / 2;
-      links.push(`M ${x0} ${y0} C ${x0} ${ym} ${x1} ${ym} ${x1} ${y1}`);
+      links.push(sCurveD(x0, y0, x1, y1, true));
     }
     links.push(`M ${xs[xs.length - 1] + 53 + 8} ${modelY} H ${right - cardW - 8}`);
     return links;
