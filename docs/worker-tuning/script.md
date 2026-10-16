@@ -93,8 +93,19 @@ and the TypeScript SDK (v1.24.0):
   `approximate_backlog_count` and `approximate_backlog_age_seconds`.
 - https://docs.temporal.io/troubleshooting/performance-bottlenecks: a
   schedule-to-start p95 above 1 s is high; replay latency is high above a
-  few milliseconds. The TypeScript cache default holds about 600
-  Workflows per GB of heap.
+  few milliseconds.
+- The TypeScript Workflow cache lives in the V8 heap: its default size is
+  `max(floor((heap - 200 MB) * 600 / 1024 MB), 10)`, about 600 Workflows
+  per GB of heap after a 200 MB reserve (`worker-options.ts`). More memory
+  helps only if the heap limit grows with it, or if `maxCachedWorkflows`
+  is set, as in the story.
+- https://docs.temporal.io/develop/worker-performance/configuration:
+  Poller Autoscaling requires Temporal Server 1.28.0 or later.
+- https://docs.temporal.io/troubleshooting/worker-capacity: "If Workers
+  are healthy and slots are free but latency stays high, your Worker pool
+  is too small ... Scale horizontally". Chapter 4 follows the task-queues
+  page instead: with Slots free and a long schedule-to-start, the Pollers
+  are the limit, and more Pollers come first.
 
 Poller and Workflow Slot counts are schematic: the diagram draws 2
 Workflow Pollers, 2 Workflow Slots, and 2 Activity Pollers growing to 5
