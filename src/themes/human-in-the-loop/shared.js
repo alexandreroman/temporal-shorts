@@ -177,6 +177,15 @@ function setWaitClock(e, elapsed, blur = 0) {
   setClock(e.clk, hours, blur);
   e.day.textContent = 'DAY ' + (1 + Math.floor(hours / 24));
 }
+// Day timeline of chapters 2 and 5: a grey line from x0 to x1 on y, and a tick and a "Day n" label for each n of
+// days, evenly spaced from x0 to x1 (xs); each scene places the ticks and labels
+function makeDayTimeline(root, svg, x0, x1, y, days) {
+  const line = path(svg, `M ${x0} ${y} L ${x1} ${y}`, C.line, 3, false);
+  const xs = days.map((_, i) => x0 + (x1 - x0) * i / (days.length - 1));
+  const ticks = days.map(() => E(root, '', '', { width: '3px', height: '22px', background: C.slate }));
+  const labels = days.map(n => E(root, 'Day ' + n, 'lbl', { fontSize: '22px' }));
+  return { line, ticks, labels, xs };
+}
 
 // ===================== app and Temporal panels (chapters 3 and 4)
 // Chapters 3 and 4 share one layout on the content frame, y 153-877 around y 515: the step row on top; 30 px under

@@ -62,9 +62,7 @@
     build(root, s) {
       s.svg = svgLayer(root);
       s.links = LINKS.map(d => path(s.svg, d, C.slate, 2, false));
-      s.line = path(s.svg, `M ${LINE.x0} ${LINE.y} L ${LINE.x1} ${LINE.y}`, C.line, 3, false);
-      s.days = [1, 2, 3].map(n => E(root, 'Day ' + n, 'lbl', { fontSize: '22px' }));
-      s.ticks = [0, 1, 2].map(() => E(root, '', '', { width: '3px', height: '22px', background: C.slate }));
+      s.timeline = makeDayTimeline(root, s.svg, LINE.x0, LINE.x1, LINE.y, [1, 2, 3]);
       s.restartM = E(root, '', '', { width: '2px', height: '40px', background: C.red });
       s.deployM = E(root, '', '', { width: '2px', height: '40px', background: C.slate });
       s.restart = tag(root, 'Restart', 'red'); s.deploy = tag(root, 'Deploy');
@@ -111,11 +109,11 @@
 
       // day timeline: the marker walks from DAY 1 and stops at the restart
       const lp = P(t, c[0] + 0.3, 0.5);
-      draw(s.line, lp, 1 - lineOut);
-      [0, 1, 2].forEach(i => {
-        const x = lerp(LINE.x0, LINE.x1, i / 2);
-        place(s.ticks[i], x, LINE.y, 1, lp * (1 - lineOut));
-        place(s.days[i], x, LINE.y + 44, 1, lp * (1 - lineOut));
+      const { line, ticks, labels, xs } = s.timeline;
+      draw(line, lp, 1 - lineOut);
+      xs.forEach((x, i) => {
+        place(ticks[i], x, LINE.y, 1, lp * (1 - lineOut));
+        place(labels[i], x, LINE.y + 44, 1, lp * (1 - lineOut));
       });
       const mo = P(t, c[0] + 0.6, 0.4) * (1 - lineOut);
       place(s.restartM, RESTART_X, LINE.y - 24, 1, mo); place(s.deployM, DEPLOY_X, LINE.y - 24, 1, mo);
