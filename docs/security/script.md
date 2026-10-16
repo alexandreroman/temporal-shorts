@@ -300,14 +300,14 @@ rewind whip carries it from ch3 back to the Worker for ch4.
 - **2:42** Moving from your own Temporal Service to Temporal Cloud is a
   proxy setting: Workers don't change.
   - Visuals: The same wide shot. TEMPORAL narrows into the upper of two
-    upstreams, the official logo above "Self-hosted" (a server icon), the
-    proxy's connection bending up to it; Temporal Cloud rises in under it,
-    the logo above "Cloud" (a cloud icon), dim; a ROUTING switch docks
-    under the proxy box, its knob on SELF-HOSTED. Dramatic beat: the
-    switch flips to CLOUD with neon rings, the connection tears off the
-    self-hosted service in sparks and redraws down to Temporal Cloud,
-    which lights up, while the Workers and their two lines stay still;
-    WORKERS UNCHANGED.
+    upstreams, the official logo centered above "Self-hosted" (a server
+    icon), the proxy's connection bending up to it; Temporal Cloud rises in
+    under it, the logo centered above "Cloud" (a cloud icon), dim; a ROUTING
+    switch docks under the proxy box, its knob on SELF-HOSTED. Dramatic
+    beat: the switch flips to CLOUD with neon rings, the connection tears
+    off the self-hosted service in sparks and redraws down to Temporal
+    Cloud, which lights up, while the Workers and their two lines stay
+    still; WORKERS UNCHANGED.
 
 ## 09 What you get
 

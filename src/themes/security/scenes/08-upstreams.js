@@ -44,6 +44,10 @@
   // grows to it from its 34 px as TEMPORAL splits), then under it the upstream's name in the brand font: Self-hosted
   // and Cloud (logo: the lockup's height, its wordmark about 20 px on screen; name: its top and size, 21 px on screen)
   const TITLE = { logo: 40, laneLogo: 34, nameTop: 72, name: 24 };
+  // Both titles are centered in their box: the lockup's left edge, on a whole pixel (the lockup's viewBox is 1570 x
+  // 410), and the lane heading's resting left edge before the split (zoneHeading())
+  TITLE.logoLeft = Math.round((SELF_ZONE.w - TITLE.logo * 1570 / 410) / 2);
+  const LANE_HEAD_LEFT = 24;
 
   // SVG path of the proxy's connection to the point (x1, y): straight when y is on the wire's line, else bending at
   // WIRE.x with rounded corners
@@ -55,10 +59,10 @@
     return `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + dir * r} V ${y - dir * r} Q ${x} ${y} ${x + r} ${y}`
       + ` H ${x1}`;
   }
-  // An upstream's body: its name under its heading's lockup, and its icon in the middle
+  // An upstream's body: its name, centered under its heading's lockup, and its icon in the middle
   function upstreamBody(name, icon) {
-    return `<div style="position:absolute;left:24px;top:${TITLE.nameTop}px;font-size:${TITLE.name}px;`
-      + `line-height:30px;color:#F2F2F2">${name}</div>`
+    return `<div style="position:absolute;left:0;right:0;top:${TITLE.nameTop}px;font-size:${TITLE.name}px;`
+      + `line-height:30px;text-align:center;color:#F2F2F2">${name}</div>`
       + '<div style="position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;'
       + `transform:translateY(-50%);margin-top:${UPSTREAM.icon / 2}px">${ICON(icon, 52, C.slate, 1.6)}</div>`;
   }
@@ -83,7 +87,7 @@
         width: SELF_ZONE.w + 'px', height: SELF_ZONE.h + 'px',
       });
       s.cloud = E(root,
-        `<img src="${LOGO}" style="position:absolute;left:24px;top:${ZONE_LABEL_INSET.head}px;height:${TITLE.logo}px;`
+        `<img src="${LOGO}" style="position:absolute;left:${TITLE.logoLeft}px;top:${ZONE_LABEL_INSET.head}px;height:${TITLE.logo}px;`
         + `display:block">${upstreamBody('Cloud', 'cloud')}`,
         'tile', { width: CLOUD_ZONE.w + 'px', height: CLOUD_ZONE.h + 'px', borderColor: C.uv, background: '#17182A' });
       s.proxy = makeProxy(root);
@@ -125,6 +129,8 @@
       const selfDim = P(t, tearAt, 0.3);
       const selfZone = lerpZone(PROXY_ZONES.temporal, SELF_ZONE, split);
       s.lane.temporal.head.style.height = Math.round(lerp(TITLE.laneLogo, TITLE.logo, split)) + 'px';
+      // the heading glides to the centered place as it grows
+      s.lane.temporal.headFrame.style.left = Math.round(lerp(LANE_HEAD_LEFT, TITLE.logoLeft, split)) + 'px';
       placeLane(s.lane, {
         ...BARE_WORKERS_HANDOFF.lane, envZone: PROXY_ZONES.env, temporalZone: selfZone,
         temporal: lerp(1, SELF_DIM, selfDim),
