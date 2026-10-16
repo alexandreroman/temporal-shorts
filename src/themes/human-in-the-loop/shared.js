@@ -100,7 +100,8 @@ function setClock(root, hours, blur = 0) {
 const APPROVAL_CARD = { k: 1.2 };
 APPROVAL_CARD.w = Math.round(400 * APPROVAL_CARD.k);
 // White approval request card with a ticking mini clock, Approve (brand UV) and Reject (outline) buttons.
-// k scales every size natively (fonts, paddings, width; 400 px wide at 1), so a larger card stays sharp at rest.
+// k scales the fonts, paddings and width natively (400 px wide at 1), so a larger card stays sharp at rest. The tap
+// effects keep fixed sizes, drawn for APPROVAL_CARD.k: the 120 px ripple, the 24 px check and its 8 px gap.
 function makeApprovalCard(p, k) {
   const px = v => Math.round(v * k) + 'px';
   const button = `flex:1;position:relative;overflow:hidden;font-size:${px(24)};text-align:center;`
@@ -169,7 +170,7 @@ function setWaitClock(e, elapsed, blur = 0) {
   e.day.textContent = 'DAY ' + (1 + Math.floor(hours / 24));
 }
 
-// ===================== app and Temporal panels (chapters 2, 3 and 4)
+// ===================== app and Temporal panels (chapters 3 and 4)
 // Chapters 3 and 4 share one layout on the content frame, y 153-877 around y 515: the step row on top; 30 px under
 // it, the app column (instance panel, then 30 px lower a strip with the clock) on the left and the Temporal panel on
 // the right, both ending on y 877
