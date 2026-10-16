@@ -1074,6 +1074,37 @@ function sparkOnPath(spark, pathEl, prog, o) {
   place(spark, point.x, point.y, 1, o === undefined ? opacity : +(opacity * o).toFixed(3));
 }
 
+// SVG path through the points of an orthogonal line, its corners rounded with radius r (less where a segment is too
+// short); repeated points are skipped
+function roundedPath(points, r) {
+  const pts = points.filter((p, i) => i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [px, py] = pts[i - 1], [x, y] = pts[i], [nx, ny] = pts[i + 1];
+    const inLen = Math.hypot(x - px, y - py), outLen = Math.hypot(nx - x, ny - y);
+    const corner = Math.min(r, inLen / 2, outLen / 2);
+    const from = [x - (x - px) / inLen * corner, y - (y - py) / inLen * corner];
+    const to = [x + (nx - x) / outLen * corner, y + (ny - y) / outLen * corner];
+    d += ` L ${from[0]} ${from[1]} Q ${x} ${y} ${to[0]} ${to[1]}`;
+  }
+  const last = pts[pts.length - 1];
+  return d + ` L ${last[0]} ${last[1]}`;
+}
+// The point at fraction u (0 to 1) of a line through points (straight segments), at constant speed: a chip or a
+// card moving along a connector
+function pointAlong(points, u) {
+  const lengths = points.slice(1).map((p, i) => Math.hypot(p[0] - points[i][0], p[1] - points[i][1]));
+  let rest = clamp(u) * lengths.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < lengths.length; i++) {
+    if (rest <= lengths[i] || i === lengths.length - 1) {
+      const p = lengths[i] > 0 ? clamp(rest / lengths[i]) : 1;
+      return [lerp(points[i][0], points[i + 1][0], p), lerp(points[i][1], points[i + 1][1], p)];
+    }
+    rest -= lengths[i];
+  }
+  return points[points.length - 1];
+}
+
 // Ripple rings: n circles of a color growing from size0 to size1 px and fading, one after the other, from `at`
 function makeRipples(p, n, rgb) {
   return Array.from({ length: n }, () => E(p, '', '', { borderRadius: '50%', border: `3px solid rgb(${rgb})` }));

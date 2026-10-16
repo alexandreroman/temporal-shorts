@@ -49,19 +49,6 @@
   // CREDENTIALS IN ONE PLACE, under the proxy
   const CREDENTIALS = { x: PROXY.x, y: PROXY.y + PROXY.h / 2 + 38 };
 
-  // The point at progress p (0 to 1) along a route of straight legs between points, at constant speed
-  const alongRoute = (points, p) => {
-    const legs = points.slice(1).map((b, i) => Math.hypot(b[0] - points[i][0], b[1] - points[i][1]));
-    let left = clamp(p) * legs.reduce((a, b) => a + b, 0);
-    for (let i = 0; i < legs.length; i++) {
-      if (left <= legs[i] || i === legs.length - 1) {
-        const u = legs[i] ? clamp(left / legs[i]) : 1;
-        return [lerp(points[i][0], points[i + 1][0], u), lerp(points[i][1], points[i + 1][1], u)];
-      }
-      left -= legs[i];
-    }
-    return points[points.length - 1];
-  };
   // The first round(p * length) characters of text: it types in as p goes from 0 to 1
   const typed = (text, p) => text.slice(0, Math.round(clamp(p) * text.length));
 
@@ -178,7 +165,7 @@
       // through the tube into its Namespace in Temporal.
       const sender = WORKERS[SENDER];
       const ride = P(t, cardAt, T2.cardD);
-      let [cardX, cardY] = alongRoute([[sender.x, sender.y], [sender.x, sender.trackY],
+      let [cardX, cardY] = pointAlong([[sender.x, sender.y], [sender.x, sender.trackY],
         [PROXY.linkEnd, sender.trackY], [IN_PROXY.x, IN_PROXY.y]], ride);
       const exit = P(t, exitAt, T2.exitD);
       if (exit > 0) {

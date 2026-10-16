@@ -754,8 +754,7 @@ const FLEET_CLIENTS = [['SDK client', 'code', 3, 0], ['Web UI', 'window', 3, 1]]
 // track (a rounded corner between them)
 function fleetLinkD({ x, row, trackY }, x1) {
   const edgeY = row ? FLEET.rows[1] - FLEET.tile.h / 2 : FLEET.rows[0] + FLEET.tile.h / 2;
-  const r = 4, dir = row ? -1 : 1;
-  return `M ${x} ${edgeY} V ${trackY - dir * r} Q ${x} ${trackY} ${x + r} ${trackY} H ${x1}`;
+  return roundedPath([[x, edgeY], [x, trackY], [x1, trackY]], 4);
 }
 
 // The official logo of each Workers' language (their sources and licenses are in the README of their folder), its

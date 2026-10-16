@@ -310,9 +310,7 @@
       s.kms = makeKms(root);
       s.top = svgLayer(root);
       const { x0, y0, x, x1, y1 } = LINK;
-      const r = 8;
-      s.link = path(s.top, `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + r} V ${y1 - r}`
-        + ` Q ${x} ${y1} ${x + r} ${y1} H ${x1}`, C.violet, 2, false);
+      s.link = path(s.top, roundedPath([[x0, y0], [x, y0], [x, y1], [x1, y1]], 8), C.violet, 2, false);
       // the key whose lifetime ran out, under the DATA KEY that replaces it; ROTATED beside them; the new key's tag,
       // which makes the trip to the KMS, with the KMS's ripples for each rotation
       s.oldKey = makeDataKey(root);

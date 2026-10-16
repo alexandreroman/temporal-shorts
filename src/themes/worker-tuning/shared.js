@@ -115,40 +115,11 @@ const LANE_EXIT_X = DIAGRAM.lane.left + DIAGRAM.lane.w;
 // Middle of a lane ('wf' or 'act') at split (see the split state): both lanes sit on midY before the split
 const laneMidY = (lane, split) => Math.round(lerp(DIAGRAM.midY, lane === 'wf' ? DIAGRAM.wfY : DIAGRAM.actY, split));
 
-// ---------- right-angle connectors
-// An SVG path through the points of an orthogonal line, its corners rounded with GRID.corner (less where a segment
-// is too short); repeated points are skipped
-function roundedPath(points) {
-  const pts = points.filter((p, i) => i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
-  let d = `M ${pts[0][0]} ${pts[0][1]}`;
-  for (let i = 1; i < pts.length - 1; i++) {
-    const [px, py] = pts[i - 1], [x, y] = pts[i], [nx, ny] = pts[i + 1];
-    const inLen = Math.hypot(x - px, y - py), outLen = Math.hypot(nx - x, ny - y);
-    const r = Math.min(GRID.corner, inLen / 2, outLen / 2);
-    const from = [x - (x - px) / inLen * r, y - (y - py) / inLen * r];
-    const to = [x + (nx - x) / outLen * r, y + (ny - y) / outLen * r];
-    d += ` L ${from[0]} ${from[1]} Q ${x} ${y} ${to[0]} ${to[1]}`;
-  }
-  const last = pts[pts.length - 1];
-  return d + ` L ${last[0]} ${last[1]}`;
-}
+// ---------- right-angle connectors (see roundedPath(), with GRID.corner)
 // The points of the poll line from the end of a lane whose middle is laneY to a Poller at (x, y): along the lane's
 // line to the trunk, along the trunk, then into the Poller. Every line starts at the lane's end, so the lines of one
 // lane share their first segments and their dashes, which flow from the lane to the Pollers (see draw()).
 const pollRoute = (laneY, x, y) => [[LANE_EXIT_X + 3, laneY], [DIAGRAM.trunkX, laneY], [DIAGRAM.trunkX, y], [x, y]];
-// The point at fraction u of a line through points (straight segments): a chip moving along a connector
-function pointAlong(points, u) {
-  const lengths = points.slice(1).map((p, i) => Math.hypot(p[0] - points[i][0], p[1] - points[i][1]));
-  let rest = clamp(u) * lengths.reduce((a, b) => a + b, 0);
-  for (let i = 0; i < lengths.length; i++) {
-    if (rest <= lengths[i] || i === lengths.length - 1) {
-      const p = lengths[i] > 0 ? rest / lengths[i] : 1;
-      return [lerp(points[i][0], points[i + 1][0], p), lerp(points[i][1], points[i + 1][1], p)];
-    }
-    rest -= lengths[i];
-  }
-  return points[points.length - 1];
-}
 
 // ---------- task chips and lanes
 // Task chip: an Activity Task is a small tile carrying its step's icon (see setChipIcon), a Workflow Task a small UV
@@ -782,7 +753,7 @@ function placePollers(dg, t, state, layout, flights, o) {
       e.style.background = glow > 0.5 ? C.violet : 'var(--surface)';
       place(e, x, y, shown.s, shown.o * o);
       const line = dg.pollLines[lane][i];
-      line.setAttribute('d', roundedPath(pollRoute(col.laneY, x - size / 2 - 3, y)));
+      line.setAttribute('d', roundedPath(pollRoute(col.laneY, x - size / 2 - 3, y), GRID.corner));
       draw(line, 1, polling[lane] && i < col.n ? shown.o * o : 0);
     });
   }

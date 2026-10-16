@@ -58,15 +58,12 @@
   TITLE.logoLeft = Math.round((SELF_ZONE.w - TITLE.logo * 1570 / 410) / 2);
   const LANE_HEAD_LEFT = 24;
 
-  // SVG path of the proxy's connection to the point (x1, y): straight when y is on the wire's line, else bending at
-  // WIRE.x with rounded corners
+  // SVG path of the proxy's connection to the point (x1, y): straight when y is within half a pixel of the wire's
+  // line, else bending at WIRE.x with rounded corners
   const wireD = (x1, y) => {
-    const { x0, x } = WIRE;
-    const y0 = PROXY_WIRE.y, dy = y - y0;
-    if (Math.abs(dy) < 0.5) return `M ${x0} ${y0} L ${x1} ${y0}`;
-    const r = Math.min(WIRE.r, Math.abs(dy) / 2), dir = Math.sign(dy);
-    return `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + dir * r} V ${y - dir * r} Q ${x} ${y} ${x + r} ${y}`
-      + ` H ${x1}`;
+    const y0 = PROXY_WIRE.y;
+    if (Math.abs(y - y0) < 0.5) return `M ${WIRE.x0} ${y0} L ${x1} ${y0}`;
+    return roundedPath([[WIRE.x0, y0], [WIRE.x, y0], [WIRE.x, y], [x1, y]], WIRE.r);
   };
   // An upstream's body: its name, centered under its heading's lockup, and its icon in the middle
   const upstreamBody = (name, icon) => {

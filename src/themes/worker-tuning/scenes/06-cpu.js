@@ -210,7 +210,7 @@
       s.svg = svgLayer(root);
       s.strike = path(s.svg, `M ${GHOST_X - 95} ${GHOST_Y} L ${GHOST_X + 95} ${GHOST_Y}`, C.red, 4, false);
       // in the poll lines' layer of the diagram, where they share Worker A's segments seamlessly
-      s.bus = NEW.names.map((_, w) => path(s.dg.svg, roundedPath(busRoute(w)), C.violet, 2, false, '5,7'));
+      s.bus = NEW.names.map((_, w) => path(s.dg.svg, roundedPath(busRoute(w), GRID.corner), C.violet, 2, false, '5,7'));
       s.workers = NEW.names.map(name => makeNewWorker(root, name));
       // under the poll lines' layer, so that the lines show inside the panels up to the Pollers, as in WORKER A
       s.workers.forEach(panel => s.dg.svg.before(panel));
