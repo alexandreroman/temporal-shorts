@@ -3,12 +3,13 @@
 // the Slots in a wave, the CPU pins at 100% in red and gets a BOTTLENECK tag; tasks come in slowly and a few Slots stay
 // free, and a temporal_activity_execution_latency metric line climbs in red under the readouts. The code card fades
 // out: a dashed "+ SLOTS" ghost rises in its place and is struck through. Then the MEMORY meter leaves, the CPU meter
-// moves down into its place, and WORKER B and WORKER C slide in, each with its own Poller, Slots and CPU meter, their
-// Pollers joined to the Activity lane by a poll line that carries on down the trunk of Worker A's, runs under Worker
-// A's panel and drops down a corridor between the CPU meter and their panels; tasks fly to them along it, small
-// enough to keep clear of the parts beside it, the three CPU meters settle around 60%, the execution latency
-// falls back in neon, the tag turns FIXED, and the backlog drains to 0. Last, the move into the recap: the four
-// bottleneck components (the Activity Slot grid, the Activity Pollers, the Workflow cache, the CPU meter) shrink into
+// shrinks into a compact gauge in WORKER A's header, in place of its status, its BOTTLENECK tag on its left, and
+// WORKER B and WORKER C slide in under WORKER A, as wide as it, each with its own Poller, Slots and the same CPU gauge;
+// their Pollers, in the column of Worker A's, are joined to the Activity lane by poll lines that carry on down the
+// trunk of Worker A's, past the readouts, and turn into each Poller; tasks fly to them along them, small enough to
+// keep clear of the parts beside them, the three CPU gauges settle around 60%, the execution latency falls back in
+// neon, the tag turns FIXED, and the backlog drains to 0. Last, the move into the recap: the four bottleneck
+// components (the Activity Slot grid, the Activity Pollers, the Workflow cache, the CPU gauge) shrink into
 // the small parts that start the rows of chapter 7's table, at their places, while the rest of the diagram, the
 // metric line included, leaves in turn; chapter 7 starts on this chapter's last frame (another hard cut).
 // The block keeps every name declared in this file local to this scene.
@@ -16,37 +17,29 @@
   const SLOTS = 50;
   // Worker A's steadily busy Slots: 44 as chapter 5 ends, 36 once the CPU is full and tasks come in slowly
   const BUSY = 44, BUSY_SLOW = 36;
-  const { band, meter, code, slot } = DIAGRAM;
+  const { band, code, slot } = DIAGRAM;
   // the "+ SLOTS" ghost fills the code card's place, as the "+ WORKER" ghost of chapter 1 does
   const GHOST = { left: code.left, top: band.top, w: code.w, h: band.h, label: 30 };
   const GHOST_X = GHOST.left + GHOST.w / 2, GHOST_Y = GHOST.top + GHOST.h / 2;
-  // Workers B and C: two panels stacked a zone apart in the bottom band (y 632..736 and 776..880), from x 1190 to
-  // the right edge, so that their Slots sit on Worker A's Slot columns 3 to 7 (x 1256..1624) and a corridor of 90 px
-  // separates them from the CPU meter. Inside, on a row `row` px below the panel's top, a cell under the header's
-  // gear (y 20..50): a Poller on the padding line, 5 Slots of the diagram's size a gutter after it, and a CPU gauge a
-  // zone after them, up to the panel's right padding line (x 1664..1776, the right edge of Worker A's Slots)
+  // Workers B and C: two panels stacked a zone apart in the bottom band (y 632..736 and 776..880), under WORKER A and
+  // as wide (x 860..1800), once the CPU and MEMORY meters have left it. Inside, on a row `row` px below the panel's
+  // top, under the header's gear (y 20..50): a Poller in the column of Worker A's (x 936), 5 Slots on Worker A's Slot
+  // columns 0 to 4 (x 1028..1392), and the CPU gauge of every Worker (GAUGE), its bar on the row
   const NEW_H = (band.h - GRID.zone) / 2;
   const NEW = {
-    left: 1190, w: 610, h: NEW_H, tops: [band.top, band.top + NEW_H + GRID.zone], names: ['WORKER B', 'WORKER C'],
+    left: DIAGRAM.worker.left, w: DIAGRAM.worker.w, h: NEW_H, tops: [band.top, band.top + NEW_H + GRID.zone],
+    names: ['WORKER B', 'WORKER C'],
   };
-  const INSIDE = { row: 78, pollerX: GRID.pad + 11, slotLeft: 66, slots: 5, cpuLeft: 474, cpuW: 112 };
-  // the CPU meter moves down to the MEMORY meter's place once that one has left, making room for the poll line of B
-  // and C
-  const CPU_TOP = { from: meter.top.cpu, to: meter.top.mem };
+  const INSIDE = {
+    row: GAUGE.barTop + GAUGE.barH / 2, pollerX: DIAGRAM.poller.x - NEW.left, slotLeft: slot.left - NEW.left, slots: 5,
+    cpuLeft: NEW.w - GRID.pad - GAUGE.w,
+  };
   const newSlotX = k => NEW.left + INSIDE.slotLeft + slot.w / 2 + k * slot.pitchX;
   const portY = w => NEW.tops[w] + INSIDE.row;
-  // the poll line of B and C keeps CLEAR px from every part it does not join: from the Activity lane down the trunk
-  // of Worker A's poll lines (x 840) to y 616, CLEAR px under Worker A's panel, along it to a collector in the middle
-  // of the corridor between the CPU meter and the panels (x 1145), down the collector, then into B's or C's Poller
-  const CLEAR = 24;
-  const BUS = {
-    runY: DIAGRAM.worker.top + DIAGRAM.worker.h + CLEAR,
-    collector: (meter.left + meter.w + NEW.left) / 2,
-    pollerX: NEW.left + INSIDE.pollerX,
-  };
+  const pollerX = NEW.left + INSIDE.pollerX;
   // a task flies to B or C in FLY s, along the poll line, shrinking to CHIP_SCALE as it leaves the lane: 28 px, it
-  // passes the 40 px gap between the TEMPORAL and WORKER panels with room on both sides; the first one leaves
-  // TASKS.first s after the line shows
+  // passes the 40 px gaps of the trunk, between the panels and between the readouts and B and C, with room on both
+  // sides; the first one leaves TASKS.first s after the lines show
   const FLY = 1.4;
   const CHIP_SCALE = 0.7;
   const TASKS = { first: 0.4, every: 1.0, hold: 3.2 };
@@ -66,18 +59,17 @@
     helpers: { at: 0.3, dx: 200, dy: 0 },
   };
   const LINES_OUT = 0.3;
+  // how long the CPU meter takes to dock into WORKER A's header
+  const DOCK = 0.6;
 
-  // The points of the poll line from the Activity lane's end to the Poller of Worker w: A's route to the trunk and
-  // down it to the run under Worker A's panel, along the run to the collector, down to w's row and into its Poller
-  function busRoute(w) {
-    const trunk = pollRoute(DIAGRAM.actY, DIAGRAM.trunkX, BUS.runY).slice(0, 3);
-    const pollerLeft = BUS.pollerX - DIAGRAM.poller.size / 2 - 3;
-    return [...trunk, [BUS.collector, BUS.runY], [BUS.collector, portY(w)], [pollerLeft, portY(w)]];
-  }
+  // The points of the poll line from the Activity lane's end to the Poller of Worker w, a route like Worker A's: down
+  // the trunk (x 840), between the readouts and the panels of B and C a gap's half from each, as between the panels
+  // above, then along w's row into its Poller
+  const busRoute = w => pollRoute(DIAGRAM.actY, pollerX - DIAGRAM.poller.size / 2 - 3, portY(w));
   // The path of a task from the head of the Activity lane to Slot k of Worker w, as points: along the poll line, then
   // on along the Slot row
   const taskPath = (headX, w, k) => [
-    [headX, DIAGRAM.actY], ...busRoute(w).slice(0, -1), [BUS.pollerX, portY(w)], [newSlotX(k), portY(w)],
+    [headX, DIAGRAM.actY], ...busRoute(w).slice(0, -1), [pollerX, portY(w)], [newSlotX(k), portY(w)],
   ];
   // Worker B or C: an app panel, its Poller, 5 Slots and a CPU gauge. Children are placed from the panel's padding
   // box, inside its border, drawn 1 px wide (see MINI.border): the offsets put them on whole stage pixels.
@@ -95,13 +87,13 @@
       background: 'var(--surface)', opacity: 1,
     });
     panel.insertAdjacentHTML('beforeend',
-      `<div class="lbl" style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${20 - inset}px;`
+      `<div class="lbl" style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${GAUGE.labelTop - inset}px;`
       + 'font-size:16px">CPU</div>'
-      + `<div class="v mono" style="position:absolute;right:${24 - inset}px;top:${16 - inset}px;font-size:24px;`
-      + 'line-height:30px"></div>'
-      + `<div style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${INSIDE.row - 7 - inset}px;`
-      + `width:${INSIDE.cpuW}px;height:14px;border-radius:3px;background:rgba(${RGB.ink},.08);overflow:hidden">`
-      + '<div class="fill" style="height:100%;width:0"></div></div>');
+      + `<div class="v mono" style="position:absolute;right:${GRID.pad - inset}px;top:${GAUGE.valueTop - inset}px;`
+      + 'font-size:24px;line-height:30px"></div>'
+      + `<div style="position:absolute;left:${INSIDE.cpuLeft - inset}px;top:${GAUGE.barTop - inset}px;`
+      + `width:${GAUGE.w}px;height:${GAUGE.barH}px;border-radius:3px;background:rgba(${RGB.ink},.08);`
+      + 'overflow:hidden"><div class="fill" style="height:100%;width:0"></div></div>');
     panel.cpuValue = panel.querySelector('.v');
     panel.cpuFill = panel.querySelector('.fill');
     panel.cpuFill.style.background = `linear-gradient(90deg,${C.uv},${C.violet})`;
@@ -109,7 +101,7 @@
   }
   function setNewWorkerCpu(panel, cpu) {
     panel.cpuValue.textContent = Math.round(cpu) + '%';
-    panel.cpuFill.style.width = Math.round(cpu / 100 * INSIDE.cpuW) + 'px';
+    panel.cpuFill.style.width = Math.round(cpu / 100 * GAUGE.w) + 'px';
   }
 
   // Fades an element by o, on top of the opacity it was given this frame
@@ -164,8 +156,13 @@
     const cache = dg.cache.map((cell, i) => [
       cell, [cacheCellLeft(i) + DIAGRAM.cache.w / 2, DIAGRAM.wfY], recapPartCenter(2), 1, i === 0,
     ]);
-    const meterAt = [meter.left + meter.w / 2, CPU_TOP.to + meter.h / 2];
-    const cpu = [[dg.cpu, meterAt, recapPartCenter(3), RECAP_PART.w / meter.w, true]];
+    // the CPU gauge, from WORKER A's header, lands with its bar on the part's bar, both at the bottom of their box
+    const gauge = cpuMeterBox(1);
+    const gaugeScale = RECAP_PART.w / GAUGE.w;
+    const barMiddle = h => h / 2 - GAUGE.barH / 2;
+    const [partX, partY] = recapPartCenter(3);
+    const gaugeTo = [partX, partY + barMiddle(RECAP_PART.h) - barMiddle(CPU_GAUGE.h) * gaugeScale];
+    const cpu = [[dg.cpu, [gauge.left + gauge.w / 2, gauge.top + gauge.h / 2], gaugeTo, gaugeScale, true]];
     return [slots, pollers, cache, cpu];
   }
 
@@ -207,6 +204,8 @@
       // in the poll lines' layer of the diagram, where they share Worker A's segments seamlessly
       s.bus = NEW.names.map((_, w) => path(s.dg.svg, roundedPath(busRoute(w)), C.violet, 2, false, '5,7'));
       s.workers = NEW.names.map(name => makeNewWorker(root, name));
+      // under the poll lines' layer, so that the lines show inside the panels up to the Pollers, as in WORKER A
+      s.workers.forEach(panel => s.dg.svg.before(panel));
       s.chips = Array.from({ length: 6 }, () => makeTaskChip(root, 'act'));
       s.leaving = leavingGroups(s.dg);
       s.shrinking = shrinkingComponents(s.dg);
@@ -218,8 +217,9 @@
       // queue empties; last, the move into the recap
       const pinAt = c[0] + 0.8;
       const strikeAt = c[1] + 1.6;
-      // the MEMORY meter is gone at c[2] + 0.6, as the CPU meter moves down into its place
-      const cpuMoveAt = c[2] + 0.6;
+      // as the MEMORY meter leaves, the CPU meter docks into WORKER A's header, over DOCK s, before B and C arrive
+      const dockAt = c[2] + 0.2;
+      const dockEnd = dockAt + DOCK;
       const arriveAt = [c[2] + 0.8, c[2] + 1.2];
       const busAt = c[2] + 1.6;
       const drainFrom = c[2] + 2.4, drainEnd = c[3] + 3.0;
@@ -268,7 +268,7 @@
         pollers: { act: 5 },
         cache: { cells: DIAGRAM.cache.max, evictions: CACHED },
         cpu: start.cpu + 12 * P(t, pinAt, 1.2) - 40 * P(t, drainFrom, 1.8),
-        cpuTop: Math.round(lerp(CPU_TOP.from, CPU_TOP.to, P(t, cpuMoveAt, 0.6))),
+        cpuDock: P(t, dockAt, DOCK),
         mem: { use: start.mem, gb: start.gb },
         backlog: { trend },
         wait: { text: formatWait(wait), trend },
@@ -280,9 +280,14 @@
           },
         ],
         code: { swap: { slots: ['50', -10], cache: ['2000', -10] }, insert: { poller: -10 } },
-        // the tag leaves as the CPU meter starts its move
-        marks: { cpu: { at: c[0] + 1.6, fixedAt: fixAt, out: moveAt } },
+        // the tag fades as the CPU meter docks, shows again by the gauge once it has, and leaves as the move into the
+        // recap starts
+        marks: {
+          cpu: t < dockEnd ? { at: c[0] + 1.6, out: dockAt } : { at: dockEnd, fixedAt: fixAt, out: moveAt },
+        },
       });
+      // the gauge takes the place of WORKER A's status: B and C show none either
+      s.dg.worker.st.style.opacity = 1 - P(t, dockAt, 0.3);
 
       // "+ SLOTS" rises where the code card was, is struck through, and gives way to Workers B and C
       const ghostO = P(t, c[1] + 0.6, 0.5) * (1 - P(t, c[2] + 0.2, 0.4));
@@ -290,7 +295,7 @@
       s.ghost.style.borderColor = t >= strikeAt ? C.red : C.lineLight;
       draw(s.strike, P(t, strikeAt, 0.35, easeOut), 1 - P(t, c[2] + 0.2, 0.4));
 
-      // B and C slide in from the right and glow a moment; their poll line joins them to the lanes. They slide out to
+      // B and C slide in from the right and glow a moment; their poll lines join them to the lanes. They slide out to
       // the right with the move.
       const leave = group => P(t, moveAt + LEAVING[group].at, MOVE.leave, easeIn);
       const helpersOut = leave('helpers');
@@ -305,7 +310,7 @@
       const linesO = 1 - P(t, moveAt, LINES_OUT);
       s.bus.forEach(line => draw(line, 1, P(t, busAt, 0.4) * linesO));
 
-      // tasks fly to B and C in turn along the poll line, each holding a Slot TASKS.hold s, the last ones landing
+      // tasks fly to B and C in turn along their poll lines, each holding a Slot TASKS.hold s, the last ones landing
       // before the move
       const taskCount = Math.floor((moveAt - REST_LEAD - FLY - busAt - TASKS.first - 0.5) / TASKS.every) + 1;
       const headX = laneHeadX(s.dg.lanes.act, DIAGRAM.lane.left);

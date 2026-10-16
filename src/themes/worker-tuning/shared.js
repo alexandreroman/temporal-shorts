@@ -100,6 +100,18 @@ const DIAGRAM = {
   // code, so the longest line (54 characters) fits
   code: { left: 1120, top: 666, w: 680, font: 18, lineH: 30, padY: 17, padX: 24, gutter: 34 },
 };
+// The compact CPU gauge of a Worker panel (Workers B and C of chapter 6, and Worker A's CPU meter once chapter 6 docks
+// it into the WORKER panel): no tile round it, w px wide, its right edge on the panel's right padding line; the CPU
+// label and the value on the header's line, labelTop and valueTop px under the panel's top, the bar barTop px under it
+const GAUGE = { w: 112, labelTop: 20, valueTop: 16, barTop: 71, barH: 14 };
+// Where the CPU meter docks in the WORKER panel: the gauge's box, from the value's top to the bar's bottom
+// (x 1664..1776, y 166..235), where the panel's status sits otherwise
+const CPU_GAUGE = {
+  left: DIAGRAM.worker.left + DIAGRAM.worker.w - GRID.pad - GAUGE.w,
+  top: DIAGRAM.worker.top + GAUGE.valueTop,
+  w: GAUGE.w,
+  h: GAUGE.barTop + GAUGE.barH - GAUGE.valueTop,
+};
 // Right end of the lanes, where the poll lines leave them
 const LANE_EXIT_X = DIAGRAM.lane.left + DIAGRAM.lane.w;
 // Middle of a lane ('wf' or 'act') at split (see the split state): both lanes sit on midY before the split
@@ -326,20 +338,60 @@ function setReadout(e, text, color = C.ink, s = 1) {
 // Color of a readout that trends: red while it grows (trouble), neon once it falls (relief), ink otherwise
 const TREND_COLORS = { up: C.red, down: C.neon };
 const trendColor = trend => TREND_COLORS[trend] || C.ink;
+// Insets of a meter tile's label, value and bar, from its padding box
+const METER_INSET = { labelLeft: 22, labelTop: 20, valueRight: 24, valueTop: 16, bar: 24 };
 // Meter tile, w x h: a label and a value on top, a bar gauge under them (see setMeter)
 function makeMeter(p, label, w, h) {
-  const barW = w - 48;
+  const { labelLeft, labelTop, valueRight, valueTop, bar } = METER_INSET;
+  const barW = w - 2 * bar;
   const e = E(p,
-    `<div class="lbl" style="position:absolute;left:22px;top:20px;font-size:16px">${label}</div>`
-    + '<div class="v mono" style="position:absolute;right:24px;top:16px;font-size:24px;line-height:30px;'
-    + 'transform-origin:right center"></div>'
-    + `<div style="position:absolute;left:24px;bottom:24px;width:${barW}px;height:14px;border-radius:3px;`
-    + `background:rgba(${RGB.ink},.08);overflow:hidden"><div class="fill" style="height:100%;width:0"></div></div>`,
+    `<div class="lbl" style="position:absolute;left:${labelLeft}px;top:${labelTop}px;font-size:16px">${label}</div>`
+    + `<div class="v mono" style="position:absolute;right:${valueRight}px;top:${valueTop}px;font-size:24px;`
+    + 'line-height:30px;transform-origin:right center"></div>'
+    + `<div style="position:absolute;left:${bar}px;bottom:${bar}px;width:${barW}px;height:${GAUGE.barH}px;`
+    + `border-radius:3px;background:rgba(${RGB.ink},.08);overflow:hidden">`
+    + '<div class="fill" style="height:100%;width:0"></div></div>',
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left' });
+  e.lbl = e.querySelector('.lbl');
   e.v = e.querySelector('.v');
   e.fill = e.querySelector('.fill');
+  e.bar = e.fill.parentElement;
   e.barW = barW;
   return e;
+}
+// The CPU meter's outer box at dock: 0, its tile in the bottom band; 1, the compact gauge in the WORKER panel
+// (CPU_GAUGE, plus the tile's border, drawn 1 px wide as MINI.border says); whole pixels in between
+function cpuMeterBox(dock) {
+  const { meter } = DIAGRAM;
+  const b = MINI.border;
+  const at = (from, to) => Math.round(lerp(from, to, dock));
+  return {
+    left: at(meter.left, CPU_GAUGE.left - b), top: at(meter.top.cpu, CPU_GAUGE.top - b),
+    w: at(meter.w, CPU_GAUGE.w + 2 * b), h: at(meter.h, CPU_GAUGE.h + 2 * b),
+  };
+}
+// Places the CPU meter at cpu % and dock (see cpuMeterBox), with opacity o: on its way into the WORKER panel, the tile
+// narrows round its label, value and bar, which move to the gauge's places, and its border and background fade out
+function placeCpuMeter(e, cpu, dock, o) {
+  const { labelLeft, labelTop, valueRight, valueTop, bar } = METER_INSET;
+  const box = cpuMeterBox(dock);
+  const at = (from, to) => Math.round(lerp(from, to, dock)) + 'px';
+  Object.assign(e.style, { width: box.w + 'px', height: box.h + 'px' });
+  Object.assign(e.lbl.style, { left: at(labelLeft, 0), top: at(labelTop, GAUGE.labelTop - GAUGE.valueTop) });
+  Object.assign(e.v.style, { right: at(valueRight, 0), top: at(valueTop, 0) });
+  e.barW = Math.round(lerp(DIAGRAM.meter.w - 2 * bar, GAUGE.w, dock));
+  Object.assign(e.bar.style, { left: at(bar, 0), bottom: at(bar, 0), width: e.barW + 'px' });
+  const red = cpu >= 90;
+  setMeter(e, cpu / 100, Math.round(cpu) + '%', red);
+  if (dock > 0) {
+    // the frame fades on the last quarter of the way only: a solid tile crosses the panel's parts, not a clear one
+    const kept = Math.round(clamp((1 - dock) * 4) * 100);
+    e.style.borderColor = `color-mix(in srgb, ${red ? C.red : C.line} ${kept}%, transparent)`;
+    e.style.background = `color-mix(in srgb, var(--surface) ${kept}%, transparent)`;
+  } else {
+    e.style.background = '';
+  }
+  place(e, box.left + box.w / 2, box.top + box.h / 2, 1, o);
 }
 // fill: 0 to 1; text: the value; red: saturated (red bar and value); s: the value's scale (a swell)
 function setMeter(e, fill, text, red = false, s = 1) {
@@ -413,17 +465,26 @@ function makeWorkerCode(root) {
 }
 
 // ---------- bottleneck markers: a red outline round a part and a BOTTLENECK tag, which turn neon (FIXED)
+// A tag's height: 21 px of line, 8 of padding and 3 of border, so a tag centered on a whole pixel rests on whole pixels
+const TAG_H = 32;
 function makeMark(root) {
   // the tag after the outline, so that it covers the outline where they cross
   const box = E(root, '', '', { border: '2px solid ' + C.red, borderRadius: 'var(--r)' });
   const tag = statusTag(root);
-  tag.style.lineHeight = '21px'; // 21 + 8 + 3 = 32 px high, so a tag centered on a whole pixel rests on whole pixels
+  tag.style.lineHeight = '21px';
   return { box, tag };
 }
+// The top left corner of a tag w px wide by an outline box at spot (see placeMark)
+function tagCorner(box, spot, w, minLeft) {
+  if (spot === 'left') return [box.left - 20 - w, Math.round(box.top + box.h / 2 - TAG_H / 2)];
+  const left = spot === 'above-right' ? box.left + box.w - w : box.left + box.w / 2 - w / 2;
+  const top = spot === 'astride' ? box.top - TAG_H / 2 : box.top - 38;
+  return [Math.max(minLeft, left), top];
+}
 // box: { left, top, w, h } of the outline; spot: where the tag sits, 'above' (centered over the outline),
-// 'above-right' (over its right end) or 'astride' (centered on its top edge); m: { at, fixedAt, out }, when the
-// marker shows (BOTTLENECK), turns FIXED and fades out (undefined: hidden); minLeft: the leftmost x of the tag, which
-// keeps it clear of a label on its left
+// 'above-right' (over its right end), 'astride' (centered on its top edge) or 'left' (20 px left of it, centered on
+// its middle); m: { at, fixedAt, out }, when the marker shows (BOTTLENECK), turns FIXED and fades out (undefined:
+// hidden); minLeft: the leftmost x of the tag, which keeps it clear of a label on its left
 function placeMark(mark, t, box, spot, m, minLeft = -Infinity) {
   const on = m ? P(t, m.at, 0.3) * (1 - P(t, m.out ?? Infinity, 0.4)) : 0;
   const fixed = m && m.fixedAt !== undefined && t >= m.fixedAt;
@@ -437,9 +498,7 @@ function placeMark(mark, t, box, spot, m, minLeft = -Infinity) {
   }
   setStatus(mark.tag, fixed ? 'FIXED' : 'BOTTLENECK', fixed ? 'fixed' : 'bottleneck');
   const w = parseFloat(mark.tag.style.width) || 0;
-  const right = box.left + box.w;
-  const left = Math.max(minLeft, spot === 'above-right' ? right - w : box.left + box.w / 2 - w / 2);
-  const top = spot === 'astride' ? box.top - 16 : box.top - 38;
+  const [left, top] = tagCorner(box, spot, w, minLeft);
   mark.tag.style.left = left + 'px';
   mark.tag.style.top = top + 'px';
   mark.tag.style.opacity = on;
@@ -524,9 +583,9 @@ function makeWorkerDiagram(root, name = 'WORKER A') {
 //   #1042, #1043...; grow { from, at }: the strip widens; filledAt [at, every]: cell i fills at at + i * every
 //   (default: filled); hits [[cell, at]]: the cell flashes; evictions [{ cell, at, next }]: its order slides out in
 //   red and order `next` takes its place
-// - cpu: 0 to 100 (red from 90); cpuTop: the CPU meter's top (default DIAGRAM.meter.top.cpu; chapter 6 moves it
-//   down to the MEMORY meter's place); mem: { use, gb, swapAt }, the share used (red from 0.9), the size shown in GB
-//   (1 shows '1 GB') and when it last changed (a swell)
+// - cpu: 0 to 100 (red from 90); cpuDock: 0 to 1, from the CPU meter's tile in the bottom band to the compact gauge
+//   in the WORKER panel's header (default 0; see placeCpuMeter); mem: { use, gb, swapAt }, the share used (red from
+//   0.9), the size shown in GB (1 shows '1 GB') and when it last changed (a swell)
 // - backlog: { n, trend }, the BACKLOG count (default: the Activity lane's queue, as the backlog metrics count each
 //   task type on its own) and its trend, 'up' (red) or 'down' (neon); wait: { text, trend }, the SCHEDULE-TO-START
 //   value ('38 s')
@@ -833,10 +892,7 @@ function placeBottomBand(dg, t, state, show) {
     const shown = P(t, m.at, 0.4) * (1 - P(t, m.out ?? Infinity, 0.4));
     rise(e, metric.left + metric.w / 2, top + metric.h / 2, shown, 12);
   });
-  const cpu = state.cpu ?? 0;
-  setMeter(dg.cpu, cpu / 100, Math.round(cpu) + '%', cpu >= 90);
-  const cpuTop = state.cpuTop ?? meter.top.cpu;
-  place(dg.cpu, meter.left + meter.w / 2, cpuTop + meter.h / 2, 1, show('cpu'));
+  placeCpuMeter(dg.cpu, state.cpu ?? 0, state.cpuDock ?? 0, show('cpu'));
   const mem = state.mem ?? {};
   const use = mem.use ?? 0.3;
   const size = mem.gb === undefined ? '' : mem.gb + ' GB';
@@ -874,7 +930,7 @@ function placeCode(card, t, code, o) {
 function placeMarks(dg, t, state, layout) {
   const marks = state.marks ?? {};
   const pad = 8;
-  const { slot, cache, poller, meter } = DIAGRAM;
+  const { slot, cache, poller } = DIAGRAM;
   // the Activity Slot grid, from its first row to its last one, following the rows while the grid grows: the rows are
   // centered on the Activity lane, so the outline opens evenly up and down as they spread out
   const gridW = (slot.cols - 1) * slot.pitchX + slot.w;
@@ -897,9 +953,15 @@ function placeMarks(dg, t, state, layout) {
     left: cache.left - pad, top: DIAGRAM.wfY - cache.h / 2 - pad,
     w: (cells - 1) * cache.pitch + cache.w + 2 * pad, h: cache.h + 2 * pad,
   }, 'above-right', marks.cache, cache.left + dg.labels.cache.offsetWidth + 20);
-  // the CPU meter, the outline on its own border: a tile needs no room round it
-  const cpuTop = state.cpuTop ?? meter.top.cpu;
-  placeMark(dg.marks.cpu, t, { left: meter.left, top: cpuTop, w: meter.w, h: meter.h }, 'astride', marks.cpu);
+  // the CPU meter, the outline on its own border: a tile needs no room round it. Docked in the WORKER panel, the
+  // gauge has no outline, which would crowd the panel's top: its tag sits on its left, and its own red shows the rest.
+  const dock = state.cpuDock ?? 0;
+  if (dock < 1) {
+    placeMark(dg.marks.cpu, t, cpuMeterBox(dock), 'astride', marks.cpu);
+  } else {
+    placeMark(dg.marks.cpu, t, CPU_GAUGE, 'left', marks.cpu);
+    place(dg.marks.cpu.box, 0, 0, 1, 0);
+  }
 }
 
 // ---------- mini Worker (intro, outro): a WORKER panel holding a small grid of Activity Slots
