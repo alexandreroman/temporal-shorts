@@ -2,9 +2,10 @@
 // Temporal Nexus, on Temporal Cloud's side: a wide Temporal Cloud zone (the official lockup followed by "Cloud")
 // holds the payments Namespace on the left, where Nora's transfer Workflow runs, the fraud team's Namespace on the
 // right, where the screenTransfer handler and its Task Queue live, and between them the Nexus Endpoint
-// fraud-screening, a gate with its ALLOWLIST. The transfer Workflow's call runs up to the gate. The dramatic beat: a
-// call from the analytics Namespace slams into the gate (a red flash, a shake): NOT ON ALLOWLIST; then the call from
-// payments is checked against the allowlist, ALLOWED, the gate opens and the call reaches the handler. A veil drops
+// fraud-screening, a gate: its tile over its ALLOWLIST's, a violet line on their center axis closing the opening
+// between them. The transfer Workflow's call runs up to that line. The dramatic beat: a call from the analytics
+// Namespace slams into the gate (a red flash, a shake): NOT ON ALLOWLIST; then the call from payments is checked
+// against the allowlist, ALLOWED, the gate opens and the call reaches the handler. A veil drops
 // over the fraud Namespace: its Namespace, Task Queue and implementation are not exposed to callers. Then an mTLS
 // tube replaces the call line, the payload card, already sealed by the caller's Worker, rides it behind the veil, and
 // the result comes back sealed too, by the handler. The camera holds; the engine's zoom-through brings the scene in
@@ -14,97 +15,122 @@
   // The Temporal Cloud zone, the scene's whole space: left, top and size, centered on (960, 515)
   const ZONE = { x: 120, y: 170, w: 1680, h: 690 };
   // The call line: the stage y where calls leave the transfer Workflow, pass the Endpoint and reach the handler; the
-  // mTLS tube's axis
-  const CALL_Y = 500;
+  // mTLS tube's axis and the middle of the Namespaces' column (y 250-830), so the gate's two tiles match
+  const CALL_Y = 540;
+  // The mTLS tube's height: the theme's TLS tube as chapter 2 shows it on screen (TUBE.h at its 1.4 zoom), a little
+  // lower to fit between the Namespace headings and the gate's tiles
+  const TUBE_H = 240;
+  // How far the tiles sit inside a Namespace, as its heading does, px
+  const INSET = 20;
+  // The tiles inside the Namespaces, left, top and size: the transfer Workflow (WORKFLOW) and the fraud team's
+  // handler (HANDLER), mirrored, both on the tube's top and bottom lines; the fraud Task Queue (QUEUE) across fraud
+  // under the handler, its top in line with analytics'
+  const WORKFLOW = { x: 180, y: CALL_Y - TUBE_H / 2, w: 240, h: TUBE_H };
+  const HANDLER = { x: 1500, y: CALL_Y - TUBE_H / 2, w: 240, h: TUBE_H };
   // The Namespaces, left, top and size: payments and analytics, the callers, stacked on the left; fraud, the
-  // handler's, on the right. headTop: their heading's top, px under their top edge (analytics: centered).
-  const PAYMENTS = { x: 160, y: 250, w: 520, h: 440, headTop: 20 };
-  const ANALYTICS = { x: 160, y: 730, w: 520, h: 100, headTop: 27 };
-  const FRAUD = { x: 1240, y: 250, w: 520, h: 580, headTop: 20 };
-  // A Namespace heading: the NAMESPACE label and the name, their sizes and line heights, px; its verdict tag (19 px,
-  // in the theme's red verdict size) sits on the right of the heading, centered on it
-  const NS_HEAD = { label: 14, labelLine: 18, name: 22, nameLine: 28, inset: 20 };
+  // handler's, on the right, mirroring them; all three INSET px round their tiles. headTop: their heading's top, px
+  // under their top edge (analytics: centered).
+  const PAYMENTS = { x: 160, y: 250, w: 620, h: WORKFLOW.y + WORKFLOW.h + INSET - 250, headTop: 20 };
+  const ANALYTICS = { x: 160, y: 720, w: 620, h: 110, headTop: 32 };
+  const FRAUD = { x: 1140, y: 250, w: 620, h: 580, headTop: 20 };
+  const QUEUE = { x: FRAUD.x + INSET, y: ANALYTICS.y, w: FRAUD.w - 2 * INSET, h: FRAUD.y + FRAUD.h - INSET - 720 };
+  // A Namespace heading, as in chapter 2: the NAMESPACE label and the name, their sizes and line heights, px; its
+  // verdict tag (19 px, in the theme's red verdict size) sits on the right of the heading, centered on it
+  const NS_HEAD = { label: 14, labelLine: 18, name: 22, nameLine: 28 };
   NS_HEAD.h = NS_HEAD.labelLine + NS_HEAD.nameLine;
   const VERDICT = { font: 19, h: 34 };
-  // The tiles inside the Namespaces, left, top and size: the transfer Workflow (WORKFLOW), the fraud team's handler
-  // (HANDLER), both centered on the call line, and the fraud Task Queue (QUEUE) under the handler, sharing its right
-  // edge
-  const WORKFLOW = { x: 190, y: 340, w: 240, h: 320 };
-  const HANDLER = { x: 1490, y: 340, w: 240, h: 320 };
-  const QUEUE = { x: 1270, y: 720, w: 460, h: 80 };
-  // Inside a tile, px: its heading's top and line, the text inset from its sides; its rows (a key over a value) are
-  // centered in the room under the heading, ROW.gap apart
-  const TILE = { headTop: 18, headLine: 26, inset: 20 };
-  const ROW = { key: 14, keyLine: 18, value: 20, valueLine: 28, gap: 24 };
-  // What each tile shows: its heading and its rows, [key, value]
+  // A heading of this scene's tiles: uppercase mono, letter-spaced, its size and line height, px
+  const HEAD = { font: 18, line: 26 };
+  // Inside a tile, px: its heading's top, the text inset from its sides; its rows (a key over a value) are centered
+  // in the room under the heading, ROW.gap apart
+  const TILE = { headTop: 18, inset: 20 };
+  const ROW = { key: 14, keyLine: 18, value: 20, valueLine: 28, gap: 12 };
+  // What each tile shows: its rows, [key, value]
   const WORKFLOW_ROWS = [
     ['type', 'TransferWorkflow'], ['endpoint', 'fraud-screening'], ['operation', 'screenTransfer'],
   ];
   const HANDLER_ROWS = [
     ['operation', 'screenTransfer'], ['starts workflow', 'ScreenWorkflow'], ['activity', 'scoreRisk'],
   ];
-  // The Endpoint, a gate on the call line between the Namespaces: its center x and width; its two blocks, top (the
-  // Endpoint's name) and bottom (its allowlist), 20 px clear of the tube; the bar that closes the opening between
-  // them, on the gate's left edge (bar: its width)
-  const GATE = { x: 960, w: 200, bar: 6 };
-  GATE.open = { top: CALL_Y - TUBE.h / 2 - 20, bottom: CALL_Y + TUBE.h / 2 + 20 };
-  GATE.top = { y: PAYMENTS.y, h: GATE.open.top - PAYMENTS.y };
+  // The Endpoint, a gate on x 960 between the Namespaces, as wide as the gaps on its sides allow: its two tiles, top
+  // (the Endpoint's name) and bottom (its allowlist), 20 px clear of the tube, as tall as each other, the top one's top
+  // and the bottom one's bottom in line with the Namespaces'; and, on the gate's center axis, its line (bar: its
+  // width, as chapter 4's Data Converter gate), which closes the opening between them
+  const GATE = { x: 960, w: 220, bar: 2 };
+  GATE.open = { top: CALL_Y - TUBE_H / 2 - 20, bottom: CALL_Y + TUBE_H / 2 + 20 };
+  GATE.top = { y: FRAUD.y, h: GATE.open.top - FRAUD.y };
   GATE.bottom = { y: GATE.open.bottom, h: FRAUD.y + FRAUD.h - GATE.open.bottom };
   GATE.left = GATE.x - GATE.w / 2;
-  // the allowlist's row: its size
-  const ALLOW_ROW = { w: 150, h: 40 };
+  // A gate tile's stack, centered in it, px: its icon, the gap under it, its heading line, the gap under that; then
+  // the Endpoint's name (a value line) or the allowlist's one row (its size)
+  const STACK = { icon: 28, iconGap: 10, gap: 14 };
+  const ALLOW_ROW = { w: 160, h: 40 };
+  // the middle y of the allowlist's row, at the bottom of its tile's stack
+  const ALLOW_ROW_Y = GATE.bottom.y + GATE.bottom.h / 2
+    + (STACK.icon + STACK.iconGap + HEAD.line + STACK.gap + ALLOW_ROW.h) / 2 - ALLOW_ROW.h / 2;
   // The calls, as SVG paths: the transfer Workflow's, from its tile's right edge along the call line to the handler's
-  // tile, its first part (CALL_TO_GATE of its length) up to the bar; the analytics call, from its Namespace's right
-  // edge up to the bar (HIT: where it hits)
-  const CALL_D = `M ${WORKFLOW.x + WORKFLOW.w + 4} ${CALL_Y} H ${HANDLER.x - 4}`;
-  const CALL_TO_GATE = (GATE.left - 4 - WORKFLOW.x - WORKFLOW.w - 4) / (HANDLER.x - WORKFLOW.x - WORKFLOW.w - 8);
-  const HIT = { x: GATE.left - 4, y: CALL_Y + 60 };
+  // tile, its first part (CALL_TO_GATE of its length) up to the gate's line; the analytics call, from its Namespace's
+  // right edge, up through the gap beside the gate and into the opening, to the gate's line (HIT: where it hits). The
+  // round caps end under the tiles and the line.
+  const BAR_LEFT = GATE.x - GATE.bar / 2;
+  const CALL_D = `M ${WORKFLOW.x + WORKFLOW.w} ${CALL_Y} H ${HANDLER.x}`;
+  const CALL_TO_GATE = (BAR_LEFT - WORKFLOW.x - WORKFLOW.w) / (HANDLER.x - WORKFLOW.x - WORKFLOW.w);
+  const HIT = { x: BAR_LEFT, y: CALL_Y + 60 };
   const ANALYTICS_Y = ANALYTICS.y + ANALYTICS.h / 2;
-  const DENY_D = `M ${ANALYTICS.x + ANALYTICS.w + 4} ${ANALYTICS_Y} C 780 ${ANALYTICS_Y} 780 ${HIT.y}`
-    + ` ${HIT.x} ${HIT.y}`;
-  // The mTLS tube between the Namespaces: from 16 px right of the transfer Workflow's tile (its mouth clear of the
-  // tile) to 24 px inside fraud, where the veil
-  // covers its end, in the theme's TLS tube look (makeTube); its label above it, between payments and the gate
-  const NEXUS_TUBE = {
-    x0: WORKFLOW.x + WORKFLOW.w + 16, x1: FRAUD.x + 24, y: CALL_Y, h: TUBE.h,
-    label: { x: (PAYMENTS.x + PAYMENTS.w + GATE.left) / 2, y: CALL_Y - TUBE.h / 2 - 44 },
+  const DENY_FROM = ANALYTICS.x + ANALYTICS.w;
+  const DENY_MID = (DENY_FROM + GATE.left) / 2;
+  const DENY_D = `M ${DENY_FROM} ${ANALYTICS_Y} C ${DENY_MID} ${ANALYTICS_Y} ${DENY_MID} ${HIT.y} ${GATE.left} ${HIT.y}`
+    + ` H ${HIT.x}`;
+  // The mTLS tube between the Namespaces, in the theme's TLS tube look (makeTube): from the transfer Workflow's tile,
+  // its mouth ring (24 px wide) 16 px clear of it, to 24 px inside fraud, where the veil covers its end. Its label, a
+  // big pill (chapter 2's TLS label as it shows on screen), sits where chapter 2 puts it: 168 px right of the tube's
+  // start and 24 px above it, clear of payments' heading row.
+  const NEXUS_TUBE = { x0: WORKFLOW.x + WORKFLOW.w + 16 + 12, x1: FRAUD.x + 24, y: CALL_Y, h: TUBE_H };
+  const TUBE_LABEL = { w: 180, h: 66 };
+  NEXUS_TUBE.label = { x: NEXUS_TUBE.x0 + 168, y: CALL_Y - TUBE_H / 2 - 24 - TUBE_LABEL.h / 2 };
+  // The payload card in the tube: as wide as chapter 2's card in its tube on screen (PAYLOAD_IN_WORKER.w at its scale
+  // and zoom), built at that width so it rests on whole pixels. Where it waits in payments, 16 px clear of the tube's
+  // mouth ring and INSET px from payments' right edge, and where it is hidden under the veil, fully inside fraud.
+  const CARD = { w: 284 };
+  const CARD_AT = {
+    x: (NEXUS_TUBE.x0 + 12 + 16 + PAYMENTS.x + PAYMENTS.w - INSET) / 2, hiddenX: FRAUD.x + CARD.w / 2 + 20,
   };
-  // where the cards wait in payments, centered between the tube's left mouth and payments' right edge, and where they
-  // are hidden under the veil, fully inside fraud
-  const CARD_AT = { x: (NEXUS_TUBE.x0 + 12 + PAYMENTS.x + PAYMENTS.w) / 2, hiddenX: FRAUD.x + 120 };
   // The sealed result that comes back: its size, its padlock badge and padlock, its one field (TRANSFER's ciphertext
   // glyphs for row `row`, so its glyphs differ from the payload's) and its center y in the tube
   const RESULT = { w: 160, h: 104, badge: 28, lock: 16, key: 'decision', value: 'approve', row: 4, y: CALL_Y + 6 };
 
   // the beats, in seconds from their cue. c[0]: the transfer Workflow (workflow) and the handler (handler) come in,
-  // the Namespaces light up (across), the gate rises (gate) and the call line draws to it (call, callD). c[1]: the
-  // analytics call (deny, denyD) hits the gate; the payments call (allow, allowD) reaches it, the allowlist row
-  // lights, ALLOWED (allowed), the gate opens (open) and the call goes on to the handler (pass, passD); the veil
-  // wipes over fraud (veil, veilD), its caption (caption). c[2]: the tube draws (tube, tubeD), its label (label); the
-  // payload card, sealed by the caller's Worker, comes out (card) and rides behind the veil (ride, rideD); the result
-  // comes back
-  // (back, backD)
-  const T0 = { workflow: 1.3, handler: 2.6, gate: 3.9, across: 4.4, call: 5.4, callD: 0.6 };
+  // the Namespaces light up (across), the gate rises (gate), its line draws down (bar, barD) and the call line draws
+  // to it (call, callD). c[1]: the analytics call (deny, denyD) hits the gate; the payments call (allow, allowD)
+  // reaches it, the allowlist row lights, ALLOWED (allowed), the gate opens (open) and the call goes on to the handler
+  // (pass, passD); the veil wipes over fraud (veil, veilD), its caption (caption). c[2]: the tube draws (tube,
+  // tubeD), its label (label); the payload card, sealed by the caller's Worker, comes out (card) and rides behind the
+  // veil (ride, rideD); the result comes back (back, backD)
+  const T0 = { workflow: 1.3, handler: 2.6, gate: 3.9, bar: 4.3, barD: 0.4, across: 4.4, call: 5.4, callD: 0.6 };
   const T1 = {
     deny: 1.0, denyD: 0.45, allow: 2.5, allowD: 0.5, allowed: 3.2, open: 3.3, pass: 3.5, passD: 0.5, veil: 4.2,
     veilD: 0.7, caption: 4.8,
   };
   const T2 = { tube: 0.3, tubeD: 0.9, label: 2.4, card: 3.3, ride: 3.8, rideD: 1.1, back: 5.0, backD: 1.2 };
 
-  // A Namespace: its border, its NAMESPACE label and name at the top left (headTop px under its top edge), and its
-  // verdict tag on the right of the heading (box.verdict, hidden)
+  // A tile heading: uppercase mono, letter-spaced, the trailing spacing offset by as much padding on the left when
+  // centered (css: its position)
+  const headHtml = (text, css = '') => `<div class="mono" style="${css}font-size:${HEAD.font}px;`
+    + `line-height:${HEAD.line}px;letter-spacing:.1em;color:${C.ink}">${text}</div>`;
+  // A Namespace: its border, its NAMESPACE label and name at the top left (headTop px under its top edge, INSET px
+  // from its left edge), and its verdict tag on the right of the heading (box.verdict, hidden)
   function makeNamespaceBox(root, box, name) {
     // offsets from inside the 1.5 px border, so its text rests on whole pixels
     const top = box.headTop - 1.5;
     const e = E(root,
-      `<div style="position:absolute;left:${NS_HEAD.inset - 1.5}px;top:${top}px">`
+      `<div style="position:absolute;left:${INSET - 1.5}px;top:${top}px">`
       + `<div class="mono" style="font-size:${NS_HEAD.label}px;line-height:${NS_HEAD.labelLine}px;letter-spacing:.14em;`
       + `color:${C.slate}">NAMESPACE</div>`
       + `<div class="mono" style="font-size:${NS_HEAD.name}px;line-height:${NS_HEAD.nameLine}px">${name}</div></div>`,
       '', { width: box.w + 'px', height: box.h + 'px', border: `1.5px solid ${C.line}`, borderRadius: 'var(--r)' });
     e.verdict = statusTag(e, { font: VERDICT.font, icon: VERDICT.font });
     Object.assign(e.verdict.style, {
-      left: 'auto', right: NS_HEAD.inset - 1.5 + 'px', top: top + NS_HEAD.h / 2 - VERDICT.h / 2 + 'px',
+      left: 'auto', right: INSET - 1.5 + 'px', top: top + NS_HEAD.h / 2 - VERDICT.h / 2 + 'px',
       height: VERDICT.h + 'px', transformOrigin: 'right center',
     });
     return e;
@@ -112,7 +138,7 @@
   // A tile of the box's size: its heading, then its rows, a key over a value, centered in the room under it
   function makeInfoTile(root, box, heading, rows) {
     const rowH = ROW.keyLine + ROW.valueLine;
-    const headBottom = TILE.headTop + TILE.headLine;
+    const headBottom = TILE.headTop + HEAD.line;
     const block = rows.length * rowH + (rows.length - 1) * ROW.gap;
     const rowsTop = Math.round(headBottom + (box.h - headBottom - block) / 2);
     const rowsHtml = rows.map(([key, value], i) => `<div style="position:absolute;left:${TILE.inset - 1.5}px;`
@@ -121,41 +147,36 @@
       + `<div class="mono" style="font-size:${ROW.value}px;line-height:${ROW.valueLine}px">${value}</div></div>`)
       .join('');
     return E(root,
-      `<div class="mono" style="position:absolute;left:${TILE.inset - 1.5}px;top:${TILE.headTop - 1.5}px;`
-      + `font-size:18px;line-height:${TILE.headLine}px;letter-spacing:.1em">${heading}</div>${rowsHtml}`,
+      headHtml(heading, `position:absolute;left:${TILE.inset - 1.5}px;top:${TILE.headTop - 1.5}px;`) + rowsHtml,
       'tile', { width: box.w + 'px', height: box.h + 'px', textAlign: 'left' });
   }
   // The fraud Task Queue: its heading on the left, its name on the right, on one line
   const makeQueueTile = root => E(root,
-    `<div class="mono" style="font-size:18px;letter-spacing:.1em">TASK QUEUE</div>`
-    + `<div class="mono" style="font-size:${ROW.value}px">fraud-tq</div>`,
+    headHtml('TASK QUEUE') + `<div class="mono" style="font-size:${ROW.value}px">fraud-tq</div>`,
     'tile', {
       width: QUEUE.w + 'px', height: QUEUE.h + 'px', display: 'flex', alignItems: 'center',
       justifyContent: 'space-between', padding: `0 ${TILE.inset}px`,
     });
-  // The gate's top block: the Endpoint's icon, its kind and its name, centered
-  const makeEndpointBlock = root => E(root,
-    ICON('gateway', 30, C.violet, 1.8)
-    + '<div class="lbl" style="margin-top:10px;font-size:15px;line-height:20px;color:var(--ink)">Nexus Endpoint</div>'
-    + `<div class="mono" style="margin-top:10px;font-size:18px;line-height:26px">fraud-screening</div>`,
+  // A tile of the gate, of height h: its icon, its heading and what it holds (html), stacked and centered, in the
+  // gate's violet
+  const makeGateTile = (root, h, icon, heading, html) => E(root,
+    ICON(icon, STACK.icon, C.violet, 1.8)
+    + headHtml(heading, `margin-top:${STACK.iconGap}px;padding-left:.1em;`)
+    + `<div style="margin-top:${STACK.gap}px">${html}</div>`,
     'tile', {
-      width: GATE.w + 'px', height: GATE.top.h + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center',
+      width: GATE.w + 'px', height: h + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center',
       justifyContent: 'center', borderColor: C.violet, background: 'var(--violet-solid)',
     });
-  // The gate's bottom block: ALLOWLIST, what it lists, and its one row, payments (block.row, its check block.check)
+  // The gate's top tile: the Endpoint's kind and its name
+  const makeEndpointBlock = root => makeGateTile(root, GATE.top.h, 'gateway', 'NEXUS ENDPOINT',
+    `<div class="mono" style="font-size:${ROW.value}px;line-height:${ROW.valueLine}px">fraud-screening</div>`);
+  // The gate's bottom tile: ALLOWLIST and its one row, payments (block.row, its check block.check)
   function makeAllowlistBlock(root) {
-    const block = E(root,
-      `<div style="display:flex;align-items:center;gap:8px">${ICON('shield', 22, C.violet, 1.8)}`
-      + '<span class="lbl" style="font-size:15px;line-height:20px;color:var(--ink)">Allowlist</span></div>'
-      + `<div style="margin-top:8px;font-size:16px;line-height:22px;color:${C.slate}">caller Namespaces</div>`
-      + `<div class="row" style="margin-top:18px;width:${ALLOW_ROW.w}px;height:${ALLOW_ROW.h}px;display:flex;`
-      + 'align-items:center;justify-content:center;gap:8px;border:1.5px solid;border-radius:var(--rs);'
+    const block = makeGateTile(root, GATE.bottom.h, 'shield', 'ALLOWLIST',
+      `<div class="row" style="width:${ALLOW_ROW.w}px;height:${ALLOW_ROW.h}px;display:flex;align-items:center;`
+      + 'justify-content:center;gap:8px;border:1.5px solid;border-radius:var(--rs);'
       + `background:${C.bg}"><span class="check">${ICON('check', 18, C.slate, 2.6)}</span>`
-      + '<span class="mono" style="font-size:18px">payments</span></div>',
-      'tile', {
-        width: GATE.w + 'px', height: GATE.bottom.h + 'px', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', borderColor: C.violet, background: 'var(--violet-solid)',
-      });
+      + `<span class="mono" style="font-size:${ROW.value}px">payments</span></div>`);
     block.row = block.querySelector('.row');
     block.check = block.querySelector('.check svg');
     return block;
@@ -249,15 +270,21 @@
       s.queue = makeQueueTile(root);
 
       s.tube = makeTube(root, NEXUS_TUBE);
-      // its label names mTLS, cased as written (a pill sets its text in capitals)
-      s.tube.label.innerHTML = `${ICON('lock', 18, C.neon, 2)}mTLS`;
-      Object.assign(s.tube.label.style, { width: '132px', textTransform: 'none' });
-      s.card = makePayload(root, { w: PAYLOAD_IN_WORKER.w });
+      // its label names mTLS, cased as written (a pill sets its text in capitals), in a big pill: chapter 2's TLS
+      // label at its zoom
+      s.tube.label.classList.add('big');
+      s.tube.label.innerHTML = `${ICON('lock', 24, C.neon, 2)}mTLS`;
+      Object.assign(s.tube.label.style, { width: TUBE_LABEL.w + 'px', textTransform: 'none' });
+      s.card = makePayload(root, { w: CARD.w });
       s.result = makeSealedResult(root);
       // over the tube's end and the cards, which go behind it
       s.veil = makeVeil(root);
 
-      s.bar = E(root, '', '', { width: GATE.bar + 'px', borderRadius: '3px' });
+      // the gate's line, over the calls' ends: drawn down from the Endpoint's tile to the allowlist's, as chapter 4's
+      // Data Converter gate, and lifted back up to open the gate
+      s.bar = E(root, '', '', {
+        width: GATE.bar + 'px', height: GATE.open.bottom - GATE.open.top + 'px', transformOrigin: 'center top',
+      });
       s.denySpark = makeSpark(root, 12, RGB.ink);
       s.callSpark = makeSpark(root, 12, RGB.ink);
       s.redRipples = makeRipples(root, 2, RGB.red);
@@ -294,7 +321,8 @@
       const queuePop = backPop(t, c[0] + T0.handler + 0.12);
       place(s.queue, ...center(QUEUE), queuePop.s, queuePop.o);
 
-      // the Endpoint rises between the Namespaces, its bar closing the opening, and the call line draws to it
+      // the Endpoint rises between the Namespaces, its line draws down to close the opening, and the call line draws
+      // to it
       const gate = P(t, c[0] + T0.gate, 0.5);
       rise(s.endpoint, GATE.x, GATE.top.y + GATE.top.h / 2, gate);
       rise(s.allowlist, GATE.x, GATE.bottom.y + GATE.bottom.h / 2, P(t, c[0] + T0.gate + 0.1, 0.5));
@@ -303,7 +331,7 @@
       const tubeAt = c[2] + T2.tube;
       draw(s.call, lerp(toGate * CALL_TO_GATE, 1, pass), 1 - P(t, tubeAt, T2.tubeD));
 
-      // The dramatic beat: the analytics call races to the gate and slams into its bar, which flashes red (a flash, a
+      // The dramatic beat: the analytics call races to the gate and slams into its line, which flashes red (a flash, a
       // shake, red rings): NOT ON ALLOWLIST
       const deny = P(t, c[1] + T1.deny, T1.denyD, easeIn);
       draw(s.deny, deny, 0.8 * (1 - P(t, hitAt, 0.3)));
@@ -313,7 +341,7 @@
       const red = t >= hitAt && t < hitAt + 0.7;
       s.allowlist.style.borderColor = red ? C.red : C.violet;
 
-      // the payments call reaches the gate: its row on the allowlist lights up, ALLOWED, the bar lifts and the call
+      // the payments call reaches the gate: its row on the allowlist lights up, ALLOWED, the line lifts and the call
       // goes on to the handler
       const allow = P(t, c[1] + T1.allow, T1.allowD, linear);
       sparkOnPath(s.callSpark, s.call, t < allowAt ? CALL_TO_GATE * allow : lerp(CALL_TO_GATE, 1, pass));
@@ -321,15 +349,15 @@
       s.allowlist.row.style.borderColor = listed ? C.neon : C.lineLight;
       s.allowlist.check.setAttribute('stroke', listed ? C.neon : C.slate);
       s.allowlist.row.style.boxShadow = glowShadow(RGB.neon, listed ? 0.5 : 0, { blur: 16, alpha: 0.5 });
-      placeRipples(s.allowRipples, t, allowAt, GATE.x, GATE.bottom.y + GATE.bottom.h / 2 + 38, 60, 240,
+      placeRipples(s.allowRipples, t, allowAt, GATE.x, ALLOW_ROW_Y, 60, 240,
         { d: 0.6, step: 0.14 });
       popVerdict(s.payments, t, 'ALLOWED', 'ok', c[1] + T1.allowed);
       const opened = P(t, c[1] + T1.open, 0.3);
-      const barH = Math.round((GATE.open.bottom - GATE.open.top) * (1 - opened));
-      s.bar.style.height = barH + 'px';
+      const barShown = P(t, c[0] + T0.bar, T0.barD) * (1 - opened);
+      place(s.bar, GATE.x, (GATE.open.top + GATE.open.bottom) / 2, 1, barShown > 0 ? 1 : 0);
+      s.bar.style.transform += ` scaleY(${barShown.toFixed(3)})`;
       s.bar.style.background = red ? C.red : C.violet;
-      s.bar.style.boxShadow = red ? `0 0 18px 4px rgba(${RGB.red},.6)` : `0 0 12px rgba(${RGB.violet},.7)`;
-      place(s.bar, GATE.left, GATE.open.top + barH / 2, 1, barH > 0 ? gate : 0);
+      s.bar.style.boxShadow = glowShadow(RGB.red, red ? 1 : 0, { blur: 18, alpha: 0.8 });
 
       // what is behind the Endpoint is not exposed to callers: a veil wipes over fraud from the gate's side
       const veil = P(t, c[1] + T1.veil, T1.veilD);
@@ -340,8 +368,8 @@
       });
 
       // the calls between the Namespaces travel in an mTLS tube
-      placeTube(s.tube, NEXUS_TUBE, { drawn: P(t, tubeAt, T2.tubeD, linear), label: popIn(t, c[2] + T2.label).o });
-      s.tube.label.style.transform += ` scale(${popIn(t, c[2] + T2.label).s})`;
+      const labelPop = popIn(t, c[2] + T2.label);
+      placeTube(s.tube, NEXUS_TUBE, { drawn: P(t, tubeAt, T2.tubeD, linear), label: labelPop.o, labelS: labelPop.s });
 
       // the payload card comes out of the transfer Workflow already sealed by the caller's Data Converter, in its
       // Worker, and rides behind the veil
@@ -349,7 +377,7 @@
       const ride = P(t, c[2] + T2.ride, T2.rideD);
       setPayload(s.card, { seal: 1, scramble: 1 });
       const cardX = lerp(CARD_AT.x, CARD_AT.hiddenX, ride);
-      place(s.card, cardX, CALL_Y, TUBE.k * cardPop.s, ride < 1 ? cardPop.o : 0);
+      place(s.card, cardX, CALL_Y, cardPop.s, ride < 1 ? cardPop.o : 0);
 
       // the handler's result comes back sealed too, out from behind the veil into payments
       const back = P(t, c[2] + T2.back, T2.backD);

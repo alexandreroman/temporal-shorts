@@ -382,30 +382,32 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     endpoint `fraud-screening`, operation `screenTransfer`), then a HANDLER
     tile into fraud (operation `screenTransfer`, starts workflow
     `ScreenWorkflow`, activity `scoreRisk`) with a TASK QUEUE `fraud-tq`
-    under it. The Endpoint rises between them: a NEXUS ENDPOINT block
-    (`fraud-screening`) over an ALLOWLIST block (caller Namespaces:
-    `payments`), a violet bar closing the opening between them; the
-    Namespaces glow at "across Namespaces", and the transfer Workflow's call
-    line draws up to the bar.
+    across the bottom of fraud. The Endpoint rises between them: a NEXUS
+    ENDPOINT tile (`fraud-screening`) over an ALLOWLIST tile (`payments`),
+    and a thin violet line draws down their center axis, closing the
+    opening between them; the Namespaces glow at "across Namespaces", and
+    the transfer Workflow's call line draws from the middle of its tile up
+    to the line.
 - **3:01** The Endpoint lets in only the Namespaces on its allowlist, and
   callers never need to know what is behind it.
   - Visuals: Dramatic beat: a call from analytics races up to the gate and
-    slams into the bar, which flashes red, with a red flash, a shake and red
+    slams into the line, which flashes red, with a red flash, a shake and red
     rings; the allowlist flashes red and a solid red NOT ON ALLOWLIST tag
-    pops in analytics' heading row. Then the payments call runs to the bar:
+    pops in analytics' heading row. Then the payments call runs to the line:
     its row on the allowlist lights up neon with a check, a neon ALLOWED tag
-    pops in payments' heading row, the bar lifts and the call goes on to the
+    pops in payments' heading row, the line lifts and the call goes on to the
     handler. A hatched veil wipes over the fraud Namespace from the gate's
     side: an eye struck through, NOT EXPOSED TO CALLERS, "Namespace, Task
     Queue, implementation".
 - **3:08** Calls between Namespaces travel over mTLS, and your Data
   Converter still encrypts the payloads.
   - Visuals: The call line turns into a neon tube from the transfer
-    Workflow through the gate's opening into the veiled Namespace, labelled
-    mTLS. The payload card comes out of the Workflow already sealed by the
-    caller's Worker (its lock shut, every field in ciphertext: it is never
-    in clear inside Temporal Cloud), then rides the tube through the gate
-    and disappears behind the veil. A
+    Workflow through the gate's opening into the veiled Namespace, as high
+    as the Workflow tile, labelled mTLS above its start as in chapter 2. The
+    payload card, at the size it rides chapter 2's tube, comes out of the
+    Workflow already sealed by the caller's Worker (its lock shut, every
+    field in ciphertext: it is never in clear inside Temporal Cloud), then
+    rides the tube through the gate and disappears behind the veil. A
     RESULT card comes back out of the veil already sealed (the handler
     encrypts it: `decision` in ciphertext, its lock shut) and lands in the
     tube on payments' side. The default fade-out zooms through to the next
