@@ -68,7 +68,7 @@ function setOrderStatus(e, text, color = C.slate) {
 }
 
 // ---------- TEMPORAL panel header (makeTemporalPanel options): the logo and an "outside the Workers" note
-const TEMPORAL_HEADER = { logoAt: [26, 22], noteAt: [24, 30], note: 'Outside the Workers' };
+const TEMPORAL_HEADER = { ...TEMPORAL_HEADER_LARGE, note: 'Outside the Workers' };
 
 // ---------- Event History card
 // Row i spans HIST.row0 + i * HIST.rowGap (from the card top) over HIST.rowGap px; the rows below a crash line
