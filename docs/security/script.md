@@ -102,9 +102,13 @@ recap.
   <https://docs.temporal.io/evaluate/cloud/security>: Temporal "does not
   run or manage your applications or Workers"; the Data Converter encrypts
   data before it leaves, "Temporal Cloud cannot see or decrypt your data";
-  a Codec Server lets the Web UI decrypt without sharing keys; TLS 1.3 on
-  every connection; mTLS certificates from your CA or API keys; the
-  Namespace is the unit of isolation.
+  a Codec Server lets the Web UI decrypt without sharing keys with
+  Temporal; TLS 1.3 on every connection; mTLS certificates from your CA or
+  API keys; the Namespace is the unit of isolation.
+- Codec Server: <https://docs.temporal.io/codec-server>: it "must be
+  configured with the same keys the Payload Codec uses", so the keys are
+  shared between your own services, never with Temporal: chapter 4's tag
+  says KEYS STAY WITH YOU, not that the keys are never shared.
 - Private connectivity: <https://docs.temporal.io/cloud/connectivity>:
   Temporal Cloud Namespaces can be reached over AWS PrivateLink or Google
   Cloud Private Service Connect, so Worker and client traffic can stay off
@@ -285,8 +289,8 @@ recap.
     ENVIRONMENT, growing into YOUR BROWSER · WEB UI, centered in it. A
     CODEC SERVER (the same key, YOUR KEYS) appears under it: the IBAN goes
     down to it in ciphertext and comes back up in clear, and the browser
-    shows the IBAN and the name, its border flashing neon. KEYS NEVER
-    SHARED sits between the zones; TEMPORAL's side, dimmed, stays sealed.
+    shows the IBAN and the name, its border flashing neon. KEYS STAY WITH
+    YOU sits between the zones; TEMPORAL's side, dimmed, stays sealed.
     At the end the chapter clears to the bare lane, the Worker back, and
     the camera pulls back a little further.
 

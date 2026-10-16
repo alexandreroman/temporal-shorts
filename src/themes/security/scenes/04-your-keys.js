@@ -29,7 +29,7 @@
   };
   // from c[3]: the camera pulls back to the whole lane as the Worker steps aside and the Web UI moves into your
   // environment as a browser (move, moveD); the Codec Server pops in; the payload goes down to it in ciphertext and
-  // comes back in clear (down, up, each tripD long); the browser shows it in clear (clear); KEYS NEVER SHARED
+  // comes back in clear (down, up, each tripD long); the browser shows it in clear (clear); KEYS STAY WITH YOU
   const T3 = { worker: 0.2, move: 0.2, moveD: 1.2, codec: 1.4, down: 2.0, up: 2.7, tripD: 0.6, clear: 3.3, keys: 4.1 };
   // the ending, in seconds before the end: the chapter clears and the camera pulls back to WIDE_SHOT, landing 0.15 s
   // before the cut
@@ -44,7 +44,7 @@
     down: BROWSER.x - 60, up: BROWSER.x + 60, y0: BROWSER.y + BROWSER.k * WEBUI.h / 2 + 10,
     y1: CODEC.y - CODEC.h / 2 - 10,
   };
-  // KEYS NEVER SHARED, on the border between the zones, where the wire runs while the Worker is there
+  // KEYS STAY WITH YOU, on the border between the zones, where the wire runs while the Worker is there
   const KEYS_TAG = { x: (LANE.wire.x0 + LANE.wire.x1) / 2, y: LANE.wire.y, w: 340 };
   // the Search Attributes panel, in the close layout's slot under the Web UI, as large as it
   const STRIP = { x: CLOSE.column.x, y: CLOSE.slot.y, w: WEBUI.w, h: WEBUI.h };
@@ -149,7 +149,7 @@
       s.landRipples = makeRipples(root, 2, RGB.violet);
       s.chipRipples = makeRipples(root, 2, RGB.neon);
       s.verdict = makeChipVerdict(root);
-      s.keys = fixedTag(root, 'Keys never shared', 'violet solid', KEYS_TAG.w);
+      s.keys = fixedTag(root, 'Keys stay with you', 'violet solid', KEYS_TAG.w);
     },
     update(t, c, s) {
       const crossAt = c[0] + T0.cross;
@@ -312,7 +312,7 @@
       s.packet.style.borderColor = goingUp ? C.neon : C.violet;
       place(s.packet, goingUp ? TRIP.up : TRIP.down, packetY, 1, inFlight ? 1 : 0);
 
-      // Temporal's side stays sealed: KEYS NEVER SHARED, and neon rings from the chip's lock
+      // Temporal's side stays sealed: KEYS STAY WITH YOU, and neon rings from the chip's lock
       const keysAt = c[3] + T3.keys;
       const keys = backPop(t, keysAt);
       place(s.keys, KEYS_TAG.x, KEYS_TAG.y, keys.s, keys.o * done);
