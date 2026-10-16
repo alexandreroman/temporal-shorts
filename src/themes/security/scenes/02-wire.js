@@ -22,7 +22,7 @@
   // padding box: its heading's top, with its verdict tag (VERDICT) on the right of the same line, its second row's
   // top, and the inset of both from its sides.
   const OUTSIDER = {
-    x: (LANE.wire.x0 + LANE.wire.x1) / 2, top: 672, w: 336, spyH: 120, clientH: 88,
+    x: (LANE.wire.x0 + LANE.wire.x1) / 2, top: 672, w: 340, spyH: 120, clientH: 88,
     headTop: 14.5, rowTop: 50.5, inset: 14.5,
   };
   // a verdict tag: its text size and height, centered on the heading's line (icon 22 px high)

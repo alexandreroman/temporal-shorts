@@ -93,7 +93,7 @@
   // FAIL CLOSED's center, this far above the wire's line
   const FAIL_CLOSED_RISE = 32;
   // NO CODE CHANGE, in your environment under the connections, centered under YOUR KMS (on screen, about 370, 720)
-  const NO_CODE = { x: KMS.x, y: 600 };
+  const NO_CODE = { x: KMS.x, y: 622 };
   // TEMPORAL in the close layout: its left edge and width (on screen x 1373-1790); the TLS tube shortens with it
   const CLOSE_ZONE = { x: 1602, y: FLEET.y, w: 174, h: FLEET.h };
   // TEMPORAL's list of stored payloads in the close shot, one row per card that went through, each with its wrapped

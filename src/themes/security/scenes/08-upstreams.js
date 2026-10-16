@@ -118,6 +118,7 @@
       // 19 px (16.7 px on screen), as NO SECRETS in chapter 6, in the same place: clearly narrower than the tile above
       s.unchanged = statusTag(root, { font: 19, icon: 19 });
       s.unchanged.style.height = UNDER_WORKERS.h + 'px';
+      s.unchanged.style.letterSpacing = '.04em';
       balanceTagLabel(s.unchanged, 'ok');
     },
     update(t, c, s) {
