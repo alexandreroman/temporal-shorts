@@ -64,7 +64,7 @@ THEME_TOPICS = {
     "durable-ai-agents": ["AI agent", "Durable Execution"],
     "agent-harness": ["AI agent", "Temporal Agent Harness"],
     "worker-tuning": ["Worker tuning", "Task Queue"],
-    "security": ["Security", "Temporal Proxy"],
+    "security": ["Security", "Temporal Proxy", "Temporal Nexus"],
 }
 
 MIME_TYPES = {

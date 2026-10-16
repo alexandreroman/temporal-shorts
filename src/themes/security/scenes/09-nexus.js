@@ -5,9 +5,10 @@
 // fraud-screening, a gate with its ALLOWLIST. The transfer Workflow's call runs up to the gate. The dramatic beat: a
 // call from the analytics Namespace slams into the gate (a red flash, a shake): NOT ON ALLOWLIST; then the call from
 // payments is checked against the allowlist, ALLOWED, the gate opens and the call reaches the handler. A veil drops
-// over the fraud Namespace: callers never see what is behind the Endpoint. Then an mTLS tube replaces the call line,
-// the payload card is sealed in payments and rides it behind the veil, and the result comes back sealed too. The
-// camera holds; the engine's zoom-through brings the scene in and plays into the next one.
+// over the fraud Namespace: its Namespace, Task Queue and implementation are not exposed to callers. Then an mTLS
+// tube replaces the call line, the payload card, already sealed by the caller's Worker, rides it behind the veil, and
+// the result comes back sealed too, by the handler. The camera holds; the engine's zoom-through brings the scene in
+// and plays into the next one.
 // The block keeps every name declared in this file local to this scene.
 {
   // The Temporal Cloud zone, the scene's whole space: left, top and size, centered on (960, 515)
@@ -61,10 +62,11 @@
   const ANALYTICS_Y = ANALYTICS.y + ANALYTICS.h / 2;
   const DENY_D = `M ${ANALYTICS.x + ANALYTICS.w + 4} ${ANALYTICS_Y} C 780 ${ANALYTICS_Y} 780 ${HIT.y}`
     + ` ${HIT.x} ${HIT.y}`;
-  // The mTLS tube between the Namespaces: from the transfer Workflow's tile to 24 px inside fraud, where the veil
+  // The mTLS tube between the Namespaces: from 16 px right of the transfer Workflow's tile (its mouth clear of the
+  // tile) to 24 px inside fraud, where the veil
   // covers its end, in the theme's TLS tube look (makeTube); its label above it, between payments and the gate
   const NEXUS_TUBE = {
-    x0: WORKFLOW.x + WORKFLOW.w, x1: FRAUD.x + 24, y: CALL_Y, h: TUBE.h,
+    x0: WORKFLOW.x + WORKFLOW.w + 16, x1: FRAUD.x + 24, y: CALL_Y, h: TUBE.h,
     label: { x: (PAYMENTS.x + PAYMENTS.w + GATE.left) / 2, y: CALL_Y - TUBE.h / 2 - 44 },
   };
   // where the cards wait in payments, centered between the tube's left mouth and payments' right edge, and where they
@@ -79,14 +81,15 @@
   // analytics call (deny, denyD) hits the gate; the payments call (allow, allowD) reaches it, the allowlist row
   // lights, ALLOWED (allowed), the gate opens (open) and the call goes on to the handler (pass, passD); the veil
   // wipes over fraud (veil, veilD), its caption (caption). c[2]: the tube draws (tube, tubeD), its label (label); the
-  // payload card comes out (card), is sealed (seal) and rides behind the veil (ride, rideD); the result comes back
+  // payload card, sealed by the caller's Worker, comes out (card) and rides behind the veil (ride, rideD); the result
+  // comes back
   // (back, backD)
-  const T0 = { workflow: 1.3, handler: 2.75, across: 3.75, gate: 5.0, call: 5.6, callD: 0.6 };
+  const T0 = { workflow: 1.3, handler: 2.6, gate: 3.9, across: 4.4, call: 5.4, callD: 0.6 };
   const T1 = {
     deny: 1.0, denyD: 0.45, allow: 2.5, allowD: 0.5, allowed: 3.2, open: 3.3, pass: 3.5, passD: 0.5, veil: 4.2,
     veilD: 0.7, caption: 4.8,
   };
-  const T2 = { tube: 0.3, tubeD: 0.9, label: 2.4, card: 3.0, seal: 3.5, ride: 4.4, rideD: 1.1, back: 5.6, backD: 1.2 };
+  const T2 = { tube: 0.3, tubeD: 0.9, label: 2.4, card: 3.3, ride: 3.8, rideD: 1.1, back: 5.0, backD: 1.2 };
 
   // A Namespace: its border, its NAMESPACE label and name at the top left (headTop px under its top edge), and its
   // verdict tag on the right of the heading (box.verdict, hidden)
@@ -157,12 +160,12 @@
     block.check = block.querySelector('.check svg');
     return block;
   }
-  // The veil over fraud's inside, within its border: a frosted, hatched pane, an eye struck through and what callers
-  // never see. placeVeil() wipes it in from the gate's side.
+  // The veil over fraud's inside, within its border: a frosted, hatched pane, an eye struck through and what is not
+  // exposed to callers. update() wipes it in from the gate's side.
   const makeVeil = root => E(root,
     ICON('eyeOff', 44, C.slate, 1.8)
     + '<div class="lbl" style="margin-top:16px;font-size:18px;line-height:24px;color:var(--ink)">'
-    + 'Hidden from callers</div>'
+    + 'Not exposed to callers</div>'
     + `<div style="margin-top:8px;font-size:18px;line-height:26px;color:${C.slate}">`
     + 'Namespace, Task Queue, implementation</div>',
     '', {
@@ -208,16 +211,19 @@
     chapter: 9, title: 'Across Namespaces with Nexus',
     subs: [
       {
-        text: "With <b>Temporal Nexus</b>, your Workflow can call another team's, across Namespaces, through an "
-          + '<b>Endpoint</b>.',
-        // the call line reaches the gate at c[0] + 6.2: the setting then holds before the calls
+        text: "With <b>Temporal Nexus</b>, your Workflow can call another team's service, across Namespaces, "
+          + 'through an <b>Endpoint</b>.',
+        // the call line reaches the gate at c[0] + 6.0: the setting then holds before the calls
         after: 0.4,
       },
-      { text: 'The Endpoint lets in only the Namespaces on its allowlist, and callers never see what is behind it.' },
       {
-        text: 'Calls between Namespaces travel over mTLS, and your Data Converter still encrypts the payloads.',
-        // the result lands at c[2] + 6.8: it then holds about 1.3 s before the fade
-        after: 1.5,
+        text: 'The Endpoint lets in only the Namespaces on its <b>allowlist</b>, and callers never need to know '
+          + 'what is behind it.',
+      },
+      {
+        text: 'Calls between Namespaces travel over <b>mTLS</b>, and your Data Converter still encrypts the payloads.',
+        // the result lands at c[2] + 6.2: it then holds about 1.4 s before the fade
+        after: 1.0,
       },
     ],
     build(stage, s) {
@@ -256,7 +262,6 @@
       s.callSpark = makeSpark(root, 12, RGB.ink);
       s.redRipples = makeRipples(root, 2, RGB.red);
       s.allowRipples = makeRipples(root, 2, RGB.neon);
-      s.sealRipples = makeRipples(root, 2, RGB.violet);
       s.landing = makeRipples(root, 2, RGB.violet);
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);
@@ -326,7 +331,7 @@
       s.bar.style.boxShadow = red ? `0 0 18px 4px rgba(${RGB.red},.6)` : `0 0 12px rgba(${RGB.violet},.7)`;
       place(s.bar, GATE.left, GATE.open.top + barH / 2, 1, barH > 0 ? gate : 0);
 
-      // callers never see what is behind the Endpoint: a veil wipes over fraud from the gate's side
+      // what is behind the Endpoint is not exposed to callers: a veil wipes over fraud from the gate's side
       const veil = P(t, c[1] + T1.veil, T1.veilD);
       place(s.veil, ...center(FRAUD), 1, veil > 0 ? 1 : 0);
       s.veil.style.clipPath = `inset(0 ${((1 - veil) * 100).toFixed(3)}% 0 0)`;
@@ -338,14 +343,13 @@
       placeTube(s.tube, NEXUS_TUBE, { drawn: P(t, tubeAt, T2.tubeD, linear), label: popIn(t, c[2] + T2.label).o });
       s.tube.label.style.transform += ` scale(${popIn(t, c[2] + T2.label).s})`;
 
-      // the payload card comes out of the transfer Workflow, the Data Converter seals it, and it rides behind the veil
+      // the payload card comes out of the transfer Workflow already sealed by the caller's Data Converter, in its
+      // Worker, and rides behind the veil
       const cardPop = backPop(t, c[2] + T2.card);
       const ride = P(t, c[2] + T2.ride, T2.rideD);
-      const sealAt = c[2] + T2.seal;
-      setPayload(s.card, { seal: P(t, sealAt, 0.35, linear), scramble: P(t, sealAt, 0.6, linear) });
+      setPayload(s.card, { seal: 1, scramble: 1 });
       const cardX = lerp(CARD_AT.x, CARD_AT.hiddenX, ride);
       place(s.card, cardX, CALL_Y, TUBE.k * cardPop.s, ride < 1 ? cardPop.o : 0);
-      placeRipples(s.sealRipples, t, sealAt + 0.35 * LOCK_SHUT, CARD_AT.x, CALL_Y, 120, 240, { d: 0.6, step: 0.14 });
 
       // the handler's result comes back sealed too, out from behind the veil into payments
       const back = P(t, c[2] + T2.back, T2.backD);

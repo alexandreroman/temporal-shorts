@@ -443,10 +443,12 @@ below and the card order in [Home page design](feedback_home-page.md).
   (ch8), calls across Namespaces with Temporal Nexus (ch9: the transfer
   Workflow in `payments` calls the fraud team's Endpoint `fraud-screening`,
   operation `screenTransfer`, handled in `fraud`; the Endpoint's allowlist
-  refuses `analytics` and lets `payments` in, a veil hides fraud's
-  Namespace, Task Queue and implementation from callers, the payload rides
-  an mTLS tube sealed by the caller and the result comes back sealed by the
-  handler; Temporal Cloud only, mTLS never claimed for self-hosted),
+  refuses `analytics` and lets `payments` in; a veil marks fraud's
+  Namespace, Task Queue and implementation as not exposed to callers
+  (decoupling: callers never need to know them, never "cannot see" them);
+  the payload, sealed by the caller's Worker from its first frame, rides an
+  mTLS tube and the result comes back sealed by the handler; Temporal Cloud
+  only, mTLS never claimed for self-hosted),
   Temporal Cloud's compliance (ch10: SOC 2 Type 2 certified, HIPAA, GDPR
   and CCPA compliant, yearly third-party audits and pen tests, reports in
   the Temporal Trust Center; no other framework, no logos), recap (ch11),

@@ -80,8 +80,11 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
   Account through the Temporal SDK - not externally accessible"; "If you use
   a Codec for encryption, it also encrypts Nexus payloads": "Payloads are
   encrypted by the sender (caller encrypts input, handler encrypts
-  result)". Self-hosted Nexus relies on the cluster's own security: the
-  chapter shows Temporal Cloud only, and claims its mTLS for Cloud alone.
+  result)". "Never need to know" is decoupling, not a confidentiality
+  control: the video says the handler's side is not exposed to callers,
+  never that they cannot see it. Self-hosted Nexus relies on the cluster's
+  own security: the chapter shows Temporal Cloud only, and claims its mTLS
+  for Cloud alone.
 - Compliance: <https://trust.temporal.io/> (Temporal Trust Center, updated
   May 29, 2026): SOC 2 Type II, GDPR, HIPAA and CCPA (CCPA comes from the badge here: the
   docs security page lists SOC 2 Type 2, GDPR and HIPAA only); "Temporal Cloud —
@@ -377,8 +380,8 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 09 Across Namespaces with Nexus
 
-- **2:59** With Temporal Nexus, your Workflow can call another
-  team's, across Namespaces, through an Endpoint.
+- **2:59** With Temporal Nexus, your Workflow can call another team's
+  service, across Namespaces, through an Endpoint.
   - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
     (the official lockup followed by "Cloud") holding three Namespaces: the
     payments Namespace on the left, lit violet, with the analytics Namespace
@@ -387,13 +390,13 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     endpoint `fraud-screening`, operation `screenTransfer`), then a HANDLER
     tile into fraud (operation `screenTransfer`, starts workflow
     `ScreenWorkflow`, activity `scoreRisk`) with a TASK QUEUE `fraud-tq`
-    under it; the Namespaces glow at "across Namespaces". The Endpoint rises
-    between them: a NEXUS ENDPOINT block (`fraud-screening`) over an
-    ALLOWLIST block (caller Namespaces: `payments`), a violet bar closing
-    the opening between them, and the transfer Workflow's call line draws up
-    to the bar.
+    under it. The Endpoint rises between them: a NEXUS ENDPOINT block
+    (`fraud-screening`) over an ALLOWLIST block (caller Namespaces:
+    `payments`), a violet bar closing the opening between them; the
+    Namespaces glow at "across Namespaces", and the transfer Workflow's call
+    line draws up to the bar.
 - **3:07** The Endpoint lets in only the Namespaces on its allowlist, and
-  callers never see what is behind it.
+  callers never need to know what is behind it.
   - Visuals: Dramatic beat: a call from analytics races up to the gate and
     slams into the bar, which flashes red, with a red flash, a shake and red
     rings; the allowlist flashes red and a solid red NOT ON ALLOWLIST tag
@@ -401,15 +404,16 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     its row on the allowlist lights up neon with a check, a neon ALLOWED tag
     pops in payments' heading row, the bar lifts and the call goes on to the
     handler. A hatched veil wipes over the fraud Namespace from the gate's
-    side: an eye struck through, HIDDEN FROM CALLERS, "Namespace, Task
+    side: an eye struck through, NOT EXPOSED TO CALLERS, "Namespace, Task
     Queue, implementation".
-- **3:14** Calls between Namespaces travel over mTLS, and your Data
+- **3:15** Calls between Namespaces travel over mTLS, and your Data
   Converter still encrypts the payloads.
   - Visuals: The call line turns into a neon tube from the transfer
     Workflow through the gate's opening into the veiled Namespace, labelled
-    mTLS. The payload card comes out of the Workflow in clear and is sealed
-    in payments (the lock snaps shut, the fields scramble, violet rings),
-    then rides the tube through the gate and disappears behind the veil. A
+    mTLS. The payload card comes out of the Workflow already sealed by the
+    caller's Worker (its lock shut, every field in ciphertext: it is never
+    in clear inside Temporal Cloud), then rides the tube through the gate
+    and disappears behind the veil. A
     RESULT card comes back out of the veil already sealed (the handler
     encrypts it: `decision` in ciphertext, its lock shut) and lands in the
     tube on payments' side. The default fade-out zooms through to the next
@@ -417,7 +421,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 10 Audited and certified
 
-- **3:23** Temporal Cloud is SOC 2 Type 2 certified and compliant
+- **3:24** Temporal Cloud is SOC 2 Type 2 certified and compliant
   with HIPAA, GDPR and CCPA.
   - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
     (the official lockup followed by "Cloud") holding four empty dashed
@@ -426,7 +430,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     twice its size, tilted, and landing flat with a press, a violet glow,
     neon ripples and a jolt of the frame: SOC 2 TYPE 2 (CERTIFIED), then
     HIPAA, GDPR and CCPA (COMPLIANT), each with a neon check.
-- **3:30** Third parties audit and pen test it every year: audit results
+- **3:31** Third parties audit and pen test it every year: audit results
   are in the Temporal Trust Center.
   - Visuals: The zone moves up with its seals and a TRUST CENTER card
     rises in under it (a shield, `trust.temporal.io`), listing the SOC 2
@@ -451,7 +455,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 12 What you can build
 
-- **3:47** Nora's transfer is one example: any Workflow that handles
+- **3:48** Nora's transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use
@@ -460,14 +464,14 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     "passport scans, encrypted" / PAYROLL RUNS (calendar) "salaries never
     in clear" / AI AGENTS ON CUSTOMER DATA (robot) "prompts and replies
     sealed".
-- **3:53** Health claims, KYC onboarding, payroll runs, AI agents on
+- **3:54** Health claims, KYC onboarding, payroll runs, AI agents on
   customer data: the data stays yours.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **4:01** With Temporal, your code, your keys and your data stay yours.
+- **4:02** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.
