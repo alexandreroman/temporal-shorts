@@ -257,13 +257,13 @@ its visuals.
     Activities), wired to a DATA CONVERTER level with WORKER 2 (a neon lock,
     a key and YOUR KEYS); caption YOUR CODE RUNS HERE. A connection draws
     from the converter to a dot on Temporal Cloud's edge, labelled OUTBOUND
-    ONLY, mTLS OR PRIVATELINK. On the right, Temporal Cloud, titled with the
-    official logo followed by "Cloud", with its two functions: ORCHESTRATION
-    · TASK QUEUE, holding a single OrderWorkflow task, and
-    PERSISTENCE, an empty history; its caption reads ONLY WORKFLOW &
-    ACTIVITY DATA, NEVER YOUR CODE. The Workers poll out to Temporal Cloud
-    one after the other (a violet pulse that lights the orchestration
-    block) and read POLLING.
+    ONLY above, MTLS OR API KEY / OVER INTERNET / OR PRIVATE LINK below. On
+    the right, Temporal Cloud, titled with the official logo followed by
+    "Cloud", with its two functions: ORCHESTRATION · TASK QUEUE, holding
+    a single OrderWorkflow task, and PERSISTENCE, an empty history; its
+    caption reads ONLY WORKFLOW & ACTIVITY DATA, NEVER YOUR CODE. The
+    Workers poll out to Temporal Cloud one after the other (a violet pulse
+    that lights the orchestration block) and read POLLING.
 - **2:11** Temporal Cloud orchestrates your Workflows and Activities, and
   persists their history.
   - Visuals: Slowly, a beat at a time, one task at a time in the queue;

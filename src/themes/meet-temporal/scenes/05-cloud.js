@@ -224,7 +224,10 @@
         border: '3px solid ' + C.ink,
       });
       s.outbound = E(root, 'Outbound only', 'lbl', { color: 'var(--ink)', fontSize: '16px' });
-      s.mtls = E(root, 'mTLS<br>or PrivateLink', 'lbl', { fontSize: '14px', textAlign: 'center', lineHeight: '22px' });
+      // how the connection is authenticated, and the network paths it can take
+      s.auth = E(root, 'mTLS or API key<br>over internet<br>or private link', 'lbl', {
+        fontSize: '14px', textAlign: 'center', lineHeight: '22px',
+      });
       s.tasks = TASKS.map(([name]) => E(root, name, 'mono', {
         width: TASK.w + 'px', height: TASK.h + 'px', lineHeight: (TASK.h - 3) + 'px', textAlign: 'center',
         // opaque, so nothing it passes over shows through its text
@@ -287,9 +290,10 @@
       s.wires.forEach((wire, k) => draw(wire, P(t, c[0] + 1.6 + k * 0.1, 0.4), 0.8));
       draw(s.line, P(t, c[0] + 1.9, 0.6));
       place(s.dot, DOT.x, DOT.y, P(t, c[0] + 2.3, 0.3, backOut), P(t, c[0] + 2.3, 0.2));
-      // the labels clear of the payload that crosses on the connection in the close-up
+      // the labels clear of the payload that crosses on the connection in the close-up: the three lines under the
+      // connection (66 px tall) start 36 px below it
       place(s.outbound, LINE_X, CONV.y - 46, 1, P(t, c[0] + 2.6, 0.4));
-      place(s.mtls, LINE_X, CONV.y + 58, 1, P(t, c[0] + 2.8, 0.4));
+      place(s.auth, LINE_X, CONV.y + 36 + 33, 1, P(t, c[0] + 2.8, 0.4));
       s.polls.forEach((e, k) => {
         const p = P(t, pollAt(k), 1.2, linear);
         if (p <= 0 || p >= 1) {
