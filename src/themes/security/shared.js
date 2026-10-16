@@ -437,20 +437,27 @@ TUBE.label = { x: TUBE.x0 + 120, y: TUBE.y - TUBE.h / 2 - 42 };
 // flow of light inside it (tube.flow) running toward Temporal; then its TLS label (tube.label). placeTube() shows them.
 // Its glass lies on an opaque body in the fill `body` (the stage's by default; a tube inside a zone takes the zone's
 // fill): build the tube after the lines it crosses (zone borders, dashed edges, rails, Namespace bands), which then
-// stop at its walls, so it reads as one channel. Whatever rides inside it (a card, a connection) goes after it. Under
-// it, a backing in the same fill (tube.backing), which keeps the body opaque while placeTube() dims the tube.
+// stop at its walls, so it reads as one channel. Its mouths are opaque too, their face filled like the body: the
+// edge of the tile or panel it leaves (the Worker's, at the tube's x0) stops at the mouth's ring instead of showing
+// inside it. Whatever rides inside it (a card, a connection) goes after it. Under it, a backing in the same fill
+// (tube.backing), mouths included, which keeps the tube opaque while placeTube() dims it.
 function makeTube(root, { x0, x1, h }, body = C.bg) {
+  const glass = `linear-gradient(to bottom, rgba(${RGB.neon},.16), rgba(${RGB.neon},.03) 45%, rgba(${RGB.neon},.08))`;
+  // the mouth spans the tube's border box (top -2px, under its top wall), so its face's gradient, set on its padding
+  // box, lines up with the body's
   const mouth = side => `<div style="position:absolute;${side}:-12px;top:-2px;width:24px;height:${h}px;`
-    + `border:2px solid ${C.neon};border-radius:50%"></div>`;
-  const backing = E(root, '', '', { width: (x1 - x0) + 'px', height: h + 'px', background: body });
+    + `border:2px solid ${C.neon};border-radius:50%;background:${glass};background-color:${body}"></div>`;
+  const backingMouth = side => `<div style="position:absolute;${side}:-12px;top:0;width:24px;height:${h}px;`
+    + `border-radius:50%;background:${body}"></div>`;
+  const backing = E(root, backingMouth('left') + backingMouth('right'), '',
+    { width: (x1 - x0) + 'px', height: h + 'px', background: body });
   const tube = E(root,
     '<div class="flow" style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,'
     + `rgba(${RGB.neon},0) 0 40px,rgba(${RGB.neon},.16) 40px 42px)"></div>${mouth('left')}${mouth('right')}`,
     '', {
       width: (x1 - x0) + 'px', height: h + 'px', borderTop: `2px solid ${C.neon}`,
       borderBottom: `2px solid ${C.neon}`,
-      background: `linear-gradient(to bottom, rgba(${RGB.neon},.16), rgba(${RGB.neon},.03) 45%, `
-        + `rgba(${RGB.neon},.08))`,
+      background: glass,
       backgroundColor: body,
       boxShadow: `0 0 28px rgba(${RGB.neon},.22)`,
     });
