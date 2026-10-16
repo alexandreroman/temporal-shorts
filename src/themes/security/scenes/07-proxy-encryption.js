@@ -7,9 +7,7 @@
 // leaves with the payload, the KMS key stays put. Each time the bar runs out, the key rotates: the old key drops away,
 // dimmed, the next one pops in, ROTATED, makes a quick trip to the KMS to be wrapped and its bar refills. Every payload
 // that leaves is sealed with the key of the moment (1, 1, 2, 3), while the stored ones keep theirs; NEVER LEAVES on
-// the KMS key. Then the dramatic beat: the link to the KMS snaps with red sparks, a gate drops
-// at the proxy's exit, the next card slams into it in clear, CALL FAILED, and FAIL CLOSED stamps onto the empty tube.
-// The link heals, and the camera pulls back once, out of the proxy to the whole fleet (FULL_LANE_SHOT): the proxy's
+// the KMS key. Then the camera pulls back once, out of the proxy to the whole fleet (FULL_LANE_SHOT): the proxy's
 // built-in Codec Server decrypts row 2 for a CLI and the Web UI window, while TEMPORAL keeps only ciphertext. The
 // chapter clears onto chapter 8's first frame. The camera holds, then pulls back out and left, one way.
 // The block keeps every name declared in this file local to this scene.
@@ -36,16 +34,11 @@
   ROTATE.wrapAt = ROTATE.go + ROTATE.tripD;
   ROTATE.docked = ROTATE.wrapAt + ROTATE.stay + ROTATE.tripD;
   ROTATE.ready = ROTATE.docked + 0.1;
-  // from c[3]: the link snaps (snap); the gate drops at the proxy's exit (gate); CALL FAILED and FAIL CLOSED slam in
-  // (callFailed, failClosed, slamD)
-  const T3 = { snap: 0.3, gate: 0.55, callFailed: 1.7, failClosed: 2.3, slamD: 0.17 };
-  // from c[4]: the link heals and the failed card goes back (heal); the camera pulls back to FULL_LANE_SHOT (pull,
-  // pullD); the Codec Server pops into the proxy (codec); the CLI and the Web UI open (windows, 0.15 s apart); row 2
-  // goes to the proxy in ciphertext (fetch) and out to both windows (deliver), each tripD long; TEMPORAL keeps
-  // ciphertext (ciphertext)
-  const T4 = {
-    heal: 0.2, pull: 0.9, pullD: 1.5, codec: 2.3, windows: 2.5, fetch: 3.2, deliver: 3.8, tripD: 0.6,
-    ciphertext: 5.0,
+  // from c[3]: the camera pulls back to FULL_LANE_SHOT (pull, pullD); the Codec Server pops into the proxy (codec);
+  // the CLI and the Web UI open (windows, 0.15 s apart); row 2 goes to the proxy in ciphertext (fetch) and out to
+  // both windows (deliver), each tripD long; TEMPORAL keeps ciphertext (ciphertext)
+  const T3 = {
+    pull: 0.6, pullD: 1.5, codec: 2.3, windows: 2.5, fetch: 3.2, deliver: 3.8, tripD: 0.6, ciphertext: 5.0,
   };
   // the ending, in seconds before the end: the windows close and everything 07 added clears (clear, clearD)
   const END = { clear: 1.1, clearD: 0.5 };
@@ -53,16 +46,14 @@
   // The payloads that go through the proxy, one card each: from, the Worker it leaves (WORKERS); cue and at, when it
   // leaves, seconds after c[cue]; ride, how long it takes to reach the proxy; seal, when the data key seals it, seconds
   // after it leaves; out and outD, when it leaves the proxy for Temporal and how long it takes; key, the number of the
-  // data key that seals it; wrap, the one whose data key makes the trip to the KMS (the others get theirs at once);
-  // fails, the card that the closed gate stops (sealed by nothing, it stays in clear). The first card is sealed before
-  // the data key shows, so its key shows only in TEMPORAL's list. Each card is sealed while its key's bar runs, and
-  // has left the proxy before that key rotates.
+  // data key that seals it; wrap, the one whose data key makes the trip to the KMS (the others get theirs at once).
+  // The first card is sealed before the data key shows, so its key shows only in TEMPORAL's list. Each card is sealed
+  // while its key's bar runs, and has left the proxy before that key rotates.
   const RUNS = [
     { from: 2, cue: 0, at: 0.3, ride: 1.2, seal: 1.6, out: 3.1, outD: 0.9, key: 1, noKey: true },
     { from: 4, cue: 1, at: 0.3, ride: 1.1, seal: 1.3, out: 3.5, outD: 0.9, key: 1, wrap: true },
     { from: 0, cue: 2, at: 0.1, ride: 0.8, seal: 1.05, out: 1.8, outD: 0.7, key: 2 },
     { from: 3, cue: 2, at: 4.35, ride: 0.8, seal: 1.05, out: 1.8, outD: 0.7, key: 3 },
-    { from: 1, cue: 3, at: 0.8, ride: 0.75, fails: true },
   ];
   // the data key's trip to the KMS and back, seconds after its card is sealed: it leaves (go), takes tripD each way,
   // is wrapped at the KMS (stay seconds there), then docks on its card's bottom edge (dockD)
@@ -72,11 +63,8 @@
   // them (168 px: 403 px on screen, values 18.2 px)
   const CARD = { w: 168 };
   CARD.h = payloadLayout(CARD.w).h;
-  // inside the proxy: where a card is sealed, in the room under the proxy's name; where the failed card stops, its
-  // right edge on the gate
+  // inside the proxy: where a card is sealed, in the room under the proxy's name
   const SEAL = { x: PROXY.x, y: 571 };
-  const GATE = { x: PROXY.x + PROXY.w / 2, w: 8 };
-  const STOP = { x: GATE.x - GATE.w / 2 - CARD.w / 2 - 1, y: SEAL.y };
   // the DATA KEY in the proxy, between its name and the card: center and size; where its key icon sits (icon, from
   // the center), the start of the key that flies onto a card
   const DATA_KEY = { x: PROXY.x, y: 477, w: 84, h: 32, icon: [-28, -4] };
@@ -86,12 +74,8 @@
   // and size
   const KMS = { x: 1184, y: 430, w: 184, h: 92 };
   // the KMS link: from the KMS's right edge, under NEVER LEAVES so that a key tag at the KMS clears it, to the data
-  // key's left edge, a corner on the way down at x; it breaks at breakY
-  const LINK = {
-    x0: KMS.x + KMS.w / 2, y0: KMS.y + 14, x: 1304, x1: DATA_KEY.x - DATA_KEY.w / 2, y1: DATA_KEY.y, breakY: 460,
-  };
-  // FAIL CLOSED's center, this far above the wire's line
-  const FAIL_CLOSED_RISE = 32;
+  // key's left edge, a corner on the way down at x
+  const LINK = { x0: KMS.x + KMS.w / 2, y0: KMS.y + 14, x: 1304, x1: DATA_KEY.x - DATA_KEY.w / 2, y1: DATA_KEY.y };
   // NO CODE CHANGE, in your environment under the connections, centered under YOUR KMS (on screen, about 370, 720)
   const NO_CODE = { x: KMS.x, y: 622 };
   // TEMPORAL in the close layout: its left edge and width (on screen x 1373-1790); the TLS tube shortens with it
@@ -130,8 +114,6 @@
   const READER_VALUES = [IBAN.slice(0, 19), IBAN.slice(20), TRANSFER[2][1]];
   // the seeds of their ciphertext (scrambledHtml): the IBAN's first line reads as stored row 2 (storedCipher(1))
   const READER_SEEDS = [11, 111, 211];
-  // the red sparks that burst from the link as it snaps: how many, how long each one flies
-  const SPARKS = { n: 12, life: 0.7 };
 
   // The card's way in from its Worker: along the Worker's track in the channel, then into the proxy, to `end`
   const rideIn = (run, end) => [[850, WORKERS[run.from].trackY], [1210, WORKERS[run.from].trackY],
@@ -152,13 +134,6 @@
     const wrapAt = goAt + tripD, backAt = wrapAt + stay;
     const at = t < backAt ? alongPath(linkEl, P(t, goAt, tripD), true) : alongPath(linkEl, P(t, backAt, tripD));
     return { at, wrapAt, backAt, wrapped: t >= wrapAt + 0.15 };
-  }
-  // Shows only the last q (0 to 1) of a path's length, with opacity o: a line that shrinks toward its end
-  function drawTail(pathEl, q, o = 1) {
-    const L = pathEl._L;
-    pathEl.setAttribute('stroke-dasharray', `${L * clamp(q)} ${L}`);
-    pathEl.setAttribute('stroke-dashoffset', -L * (1 - clamp(q)));
-    pathEl.style.opacity = q > 0.001 ? o : 0;
   }
   // A tag of the close shot, sized in screen px (font): its HTML after the leading icon of a statusTag kind (unless
   // `icon` is false), in that kind's look; solid, an opaque fill for a tag over other parts
@@ -301,8 +276,6 @@
       },
       // the second rotation, its card, and the stored payloads that keep the first key
       { text: "Data keys rotate on their own, and the proxy never holds your KMS key.", after: 2.4 },
-      // a hold on the alarm
-      { text: "If the KMS can't be reached, the call fails: nothing leaves in clear.", after: 1.6 },
       // the pull-back and the round trip, then a hold to read the windows
       { text: "Its built-in Codec Server lets the Web UI and the CLI show the decrypted payloads.", after: 2.0 },
     ],
@@ -319,9 +292,9 @@
       s.sentNs = proxyCardTag(root, namespaceHtml(FULL_NS.length, false), PROXY_CARD.nsW);
       s.sentKey = proxyCardTag(root, `${ICON('key', 17, C.violet, 2)}API KEY`, PROXY_CARD.keyW);
 
-      // this chapter's parts: TEMPORAL's list, YOUR KMS and its link, the DATA KEY, the gate
+      // this chapter's parts: TEMPORAL's list, YOUR KMS and its link, the DATA KEY
       s.listLabel = E(root, 'Stored payloads', 'lbl', { fontSize: '16px', width: ROW.w + 'px', paddingLeft: '0' });
-      s.rows = RUNS.filter(run => !run.fails).map((run, i) => makeListRow(root, i, run.key));
+      s.rows = RUNS.map((run, i) => makeListRow(root, i, run.key));
       s.wideLabel = E(root, 'Stored<br>payloads', 'lbl', {
         fontSize: '21px', lineHeight: '28px', width: WIDE_LIST.w + 'px', paddingLeft: '0',
       });
@@ -334,13 +307,10 @@
       });
       s.kms = makeKms(root);
       s.top = svgLayer(root);
-      const { x0, y0, x, x1, y1, breakY } = LINK;
+      const { x0, y0, x, x1, y1 } = LINK;
       const r = 8;
-      s.linkPath = path(s.top, `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + r} V ${y1 - r}`
+      s.link = path(s.top, `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + r} V ${y1 - r}`
         + ` Q ${x} ${y1} ${x + r} ${y1} H ${x1}`, C.violet, 2, false);
-      s.linkA = path(s.top, `M ${x0} ${y0} H ${x - r} Q ${x} ${y0} ${x} ${y0 + r} V ${breakY}`, C.violet, 2, false);
-      s.linkB = path(s.top, `M ${x} ${breakY} V ${y1 - r} Q ${x} ${y1} ${x + r} ${y1} H ${x1}`, C.violet, 2, false);
-      s.breakMark = E(root, ICON('x', 22 * U, C.red, 2.6));
       // the key whose lifetime ran out, under the DATA KEY that replaces it; ROTATED beside them; the new key's tag,
       // which makes the trip to the KMS, with the KMS's ripples for each rotation
       s.oldKey = makeDataKey(root);
@@ -348,11 +318,6 @@
       s.rotated = closeTag(root, 'ROTATED', 'ok', 14, { solid: 'var(--neon-solid)', icon: false });
       s.rotateTag = makeKeyTag(root);
       s.rotateRipples = [0, 1].map(() => makeRipples(root, 2, RGB.violet));
-      s.gate = E(root, '', '', {
-        width: GATE.w + 'px', height: PROXY_TUBE.h + 'px', borderRadius: px(4), transformOrigin: 'center top',
-        background: `repeating-linear-gradient(-45deg, ${C.red} 0 ${px(10)}, var(--red-solid) ${px(10)} ${px(20)})`,
-        border: `${px(2)} solid ${C.red}`, boxShadow: `0 0 ${px(24)} rgba(${RGB.red},.6)`,
-      });
       s.codec = E(root,
         `${ICON('server', 26, C.ink, 1.8)}<div class="lbl" style="font-size:21px;line-height:26px;color:var(--ink);`
         + 'text-align:center;margin-top:8px">Codec<br>Server</div><div class="mono" style="font-size:21px;'
@@ -378,48 +343,25 @@
       // at this size and place, its capitals render 2 px above the box's middle; text sits on whole stage px, so one
       // stage px of padding moves from its bottom to its top (2.4 px on screen), which leaves them 1 px low at most
       Object.assign(s.noCode.style, { paddingTop: `calc(${px(6)} + 1px)`, paddingBottom: `calc(${px(6)} - 1px)` });
-      // in the theme's alarm look (STATUS_KINDS.alarm), like the other red verdicts
-      s.callFailed = closeTag(root, 'CALL FAILED', 'alarm', 18);
-      s.callFailed.style.fontWeight = '700';
-      // the stamp, in the same alarm look: dark bold text on solid red
-      s.failClosed = E(root, 'FAIL CLOSED', 'mono', {
-        fontSize: px(26), lineHeight: px(36), letterSpacing: '.12em', padding: `${px(8)} ${px(16)}`,
-        paddingLeft: `calc(${px(16)} + .12em)`, border: `${px(3)} solid ${C.red}`, borderRadius: px(8),
-        color: C.bg, background: C.red, whiteSpace: 'nowrap', fontWeight: 700,
-        boxShadow: `0 0 ${px(30)} rgba(${RGB.red},.5)`,
-      });
       s.sealRipples = RUNS.map(() => makeRipples(root, 2, RGB.violet));
       s.wrapRipples = makeRipples(root, 2, RGB.violet);
-      s.gateRipples = makeRipples(root, 2, RGB.red);
-      s.snapSparks = Array.from({ length: SPARKS.n }, () => makeSpark(root, 5, RGB.red));
-      s.healSpark = makeSpark(root, 6, RGB.violet);
-      // the flash covers the stage, outside the camera
-      s.flash = makeFlash(stage);
     },
     update(t, c, s) {
       const runAt = run => c[run.cue] + run.at;
-      const snapAt = c[3] + T3.snap, healAt = c[4] + T4.heal;
-      const failRun = RUNS[RUNS.length - 1];
-      const hitAt = runAt(failRun) + failRun.ride;
-      const failClosedHit = c[3] + T3.failClosed + T3.slamD;
-      const pullAt = c[4] + T4.pull;
+      const pullAt = c[3] + T3.pull;
       const clearAt = this.dur - END.clear;
       const clear = P(t, clearAt, END.clearD);
 
-      // the camera: chapter 6's push into the proxy, held; then one pull-back, out of the proxy to the whole fleet.
-      // The snap, the slam and the stamp jolt it.
-      const cam = shot(t, PROXY_SHOT, [[pullAt, ...FULL_LANE_SHOT, T4.pullD]]);
-      const jolts = [shake(t, snapAt, 5, 0.3), shake(t, hitAt, 12, 0.4), shake(t, failClosedHit, 4, 0.25)];
-      const shakeX = jolts.reduce((sum, [dx]) => sum + dx, 0), shakeY = jolts.reduce((sum, [, dy]) => sum + dy, 0);
-      setCamera(s.cam, t, this.dur, { ...cam, dx: cam.dx + shakeX, dy: cam.dy + shakeY, enter: 1, exit: 1 });
-      placeFlash(s.flash, t, hitAt, 0.3);
+      // the camera: chapter 6's push into the proxy, held; then one pull-back, out of the proxy to the whole fleet
+      const cam = shot(t, PROXY_SHOT, [[pullAt, ...FULL_LANE_SHOT, T3.pullD]]);
+      setCamera(s.cam, t, this.dur, { ...cam, enter: 1, exit: 1 });
       // what the close shot crops at the frame's edge stays dimmed until the pull-back frames it whole, in the last
       // part of the move
-      const wide = P(t, pullAt, T4.pullD);
+      const wide = P(t, pullAt, T3.pullD);
       const reveal = clamp((wide - 0.7) / 0.3);
       const offShot = lerp(OFF_SHOT, 1, reveal);
       // what only the close shot shows leaves with the pull-back
-      const closeOnly = 1 - P(t, pullAt, T4.pullD * 0.6);
+      const closeOnly = 1 - P(t, pullAt, T3.pullD * 0.6);
 
       // the lane: TEMPORAL slides into its close layout, near the proxy, and back out with the pull-back
       const zoneIn = P(t, c[0] + T0.close, T0.closeD) * (1 - wide);
@@ -448,25 +390,17 @@
         s.sparks[i].style.opacity = (+s.sparks[i].style.opacity * offShot).toFixed(3);
       });
       setD(s.out, `M ${PROXY_WIRE.x0} ${PROXY_WIRE.y} L ${temporalZone.x - 4} ${PROXY_WIRE.y}`);
-      // nothing leaves while the call fails: the wire dims and its light stops
-      const failed = P(t, hitAt, 0.3) * (1 - P(t, healAt, 0.4));
-      draw(s.out, 1, 1 - 0.6 * failed);
-      s.outSparks.forEach((spark, k) => {
-        sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1);
-        spark.style.opacity = (+spark.style.opacity * (1 - failed)).toFixed(3);
-      });
+      draw(s.out, 1);
+      s.outSparks.forEach((spark, k) => sparkOnPath(spark, s.out, (G / (PROXY_FLOW_PERIOD / 2) + k / 2) % 1));
 
-      // the TLS tube, as long as the way to TEMPORAL, dimmed while the call fails; its label smaller in the close shot
+      // the TLS tube, as long as the way to TEMPORAL; its label smaller in the close shot
       const tubeX1 = temporalZone.x + lerp(TUBE_IN.close, TUBE_IN.wide, wide);
       const tubeMid = (PROXY_TUBE.x0 + tubeX1) / 2;
       const tubeGeom = { ...PROXY_TUBE, x1: tubeX1, label: { x: tubeMid, y: PROXY_TUBE.label.y } };
-      placeTube(s.tube, tubeGeom, {
-        o: (1 - 0.55 * failed) * (1 - clear), label: 1 - clear, labelS: lerp(1, 0.55, zoneIn),
-      });
-      s.tube.flow.style.opacity = 1 - failed;
+      placeTube(s.tube, tubeGeom, { o: 1 - clear, labelS: lerp(1, 0.55, zoneIn) });
 
       // the proxy, its glow swelling as it seals a card and as its Codec Server decrypts
-      const glowAt = [...RUNS.filter(run => !run.fails).map(run => runAt(run) + run.seal), c[4] + T4.deliver - 0.1];
+      const glowAt = [...RUNS.map(run => runAt(run) + run.seal), c[3] + T3.deliver - 0.1];
       const glow = Math.max(0, ...glowAt.map(at => 1 - Math.abs(t - at - 0.15) / 0.4));
       placeProxy(s.proxy, { glow });
 
@@ -488,45 +422,18 @@
 
       // YOUR KMS beside the proxy, and its link to the data key; the KMS key NEVER LEAVES
       const kmsPop = backPop(t, c[1] + T1.kms);
-      const kmsDown = P(t, snapAt, 0.2) * (1 - P(t, healAt, 0.3));
       place(s.kms, KMS.x, KMS.y, kmsPop.s, kmsPop.o * closeOnly);
-      s.kms.style.borderColor = kmsDown > 0.5 ? C.red : C.line;
       const never = popIn(t, c[2] + T2.never);
-      s.kms.never.style.opacity = never.o * (1 - kmsDown);
+      s.kms.never.style.opacity = never.o;
       s.kms.never.style.transform = `scale(${never.s})`;
 
-      // the link draws from the KMS to the data key. The dramatic beat: it snaps in the middle, both halves recoil
-      // in red and red sparks burst from the break; then it heals.
-      const linkIn = P(t, c[1] + T1.link, T1.linkD, linear);
-      const recoil = P(t, snapAt, 0.25, easeOut) * (1 - P(t, healAt, 0.35));
-      const broken = t >= snapAt && t < healAt + 0.35;
-      const linkColor = broken ? C.red : C.violet;
-      [s.linkA, s.linkB].forEach(half => half.setAttribute('stroke', linkColor));
-      draw(s.linkA, Math.min(clamp(linkIn * 2), 1 - 0.5 * recoil), closeOnly);
-      if (broken) drawTail(s.linkB, 1 - 0.5 * recoil, closeOnly);
-      else draw(s.linkB, clamp(linkIn * 2 - 1), closeOnly);
-      const mark = popIn(t, snapAt + 0.05, 0.3);
-      place(s.breakMark, LINK.x, LINK.breakY, mark.s, mark.o * (1 - P(t, healAt, 0.2)) * closeOnly);
-      s.snapSparks.forEach((spark, i) => {
-        const age = t - snapAt;
-        if (age <= 0 || age >= SPARKS.life) {
-          place(spark, 0, 0, 1, 0);
-          return;
-        }
-        const angle = hash(i + 800) * Math.PI * 2;
-        const speed = 40 + 60 * hash(i + 900);
-        const x = LINK.x + Math.cos(angle) * speed * age;
-        const y = LINK.breakY + Math.sin(angle) * speed * age + 90 * age * age;
-        place(spark, x, y, 1, 1 - age / SPARKS.life);
-      });
-      // the healed link carries a violet pulse from the KMS to the data key
-      sparkOnPath(s.healSpark, s.linkPath, P(t, healAt + 0.35, 0.5, linear));
-      s.healSpark.style.opacity = (+s.healSpark.style.opacity * closeOnly).toFixed(3);
+      // the link draws from the KMS to the data key
+      draw(s.link, P(t, c[1] + T1.link, T1.linkD, linear), closeOnly);
 
       // The data keys: each seals payloads until its lifetime runs out, then the proxy rotates to the next one, at
       // `rotations`. A key's bar drains over ROTATE.life from drainAt: key 1 has sealed payloads since before it shows;
-      // key 2's bar holds full until c[2], and key 3's stops draining just before c[3], so the presenter stops there
-      // are at rest
+      // key 2's bar holds full until c[2], and key 3's drains from the moment it is ready until just before c[3],
+      // where the pull-back soon carries it away, so the presenter stops there are at rest
       const rotations = [c[1] + T1.rotate, c[2] + ROTATE.life];
       const keys = [
         { ready: -Infinity, drainAt: rotations[0] - ROTATE.life },
@@ -540,12 +447,9 @@
       const rotatedAt = keyI > 0 ? rotations[keyI - 1] : null;
 
       // the DATA KEY, which shows its cipher once it first seals a card, pops in again at each rotation and swells as
-      // its bar refills; it dims while the KMS can't be reached
+      // its bar refills
       const keyPop = backPop(t, rotatedAt === null ? c[1] + T1.key : rotatedAt + ROTATE.pop);
-      const keyDown = P(t, snapAt + 0.1, 0.25) * (1 - P(t, healAt, 0.3));
-      place(s.dataKey, DATA_KEY.x, DATA_KEY.y, keyPop.s, keyPop.o * (1 - 0.55 * keyDown) * closeOnly);
-      s.dataKey.style.borderColor = keyDown > 0.5 ? C.red : C.neon;
-      s.dataKey.style.borderStyle = keyDown > 0.5 ? 'dashed' : 'solid';
+      place(s.dataKey, DATA_KEY.x, DATA_KEY.y, keyPop.s, keyPop.o * closeOnly);
       setText(s.dataKey.num, String(keyI + 1));
       setLife(s.dataKey, lifeLeft(keys[keyI]));
       s.dataKey.style.transform += ` scale(${swell(t, keys[keyI].ready - 0.1, 0.08).toFixed(4)})`;
@@ -570,7 +474,7 @@
         place(s.rotated, ROTATED_AT.x, ROTATED_AT.y, rotatedTag.s, rotatedO * closeOnly);
         // the new key's tag goes to the KMS, which wraps it, and docks back into the DATA KEY as its bar refills
         const goAt = rotatedAt + ROTATE.go;
-        const trip = kmsTrip(s.linkPath, t, goAt, ROTATE);
+        const trip = kmsTrip(s.link, t, goAt, ROTATE);
         const docking = P(t, rotatedAt + ROTATE.docked, 0.15);
         setKeyTag(s.rotateTag, keyI + 1, trip.wrapped);
         const tagPop = popIn(t, goAt);
@@ -581,51 +485,37 @@
       // the cards: each rides in from its Worker, in clear, and is sealed in the proxy (the data key flies onto its
       // lock); the first one with the data key sends that key to the KMS, which wraps it; each goes out with its
       // wrapped key through the tube into TEMPORAL's list, as a row with its key's number
-      let row = 0;
       RUNS.forEach((run, i) => {
         const { card, keyTag, fly } = s.runs[i];
         const at = runAt(run);
         const sealAt = at + run.seal;
-        const end = run.fails ? STOP : SEAL;
-        const rideP = P(t, at, run.ride, run.fails ? p => p * p : ease);
-        let [x, y] = bezier(rideIn(run, end), rideP);
+        let [x, y] = bezier(rideIn(run, SEAL), P(t, at, run.ride));
         let k = 1, o = P(t, at, 0.15);
-        const rowI = run.fails ? -1 : row++;
-        if (!run.fails) {
-          const out = P(t, at + run.out, run.outD);
-          if (out > 0) {
-            [x, y] = bezier(rideOut(closeRow(rowI)), out);
-            k = lerp(1, 0.4, out);
-            o *= 1 - P(out, 0.6, 0.4, linear);
-          }
-          setPayload(card, { seal: P(t, sealAt, 0.35, linear), scramble: P(t, sealAt + 0.1, 0.5, linear) });
-        } else {
-          // the failed card jolts back off the gate, red, and goes back to its Worker once the call has failed
-          x += dampedShake(t, hitAt, 10, 0.45, 3);
-          const back = P(t, healAt, 0.8);
-          if (back > 0) [x, y] = bezier(rideIn(run, end), 1 - back);
-          o *= 1 - P(t, healAt + 0.3, 0.5);
-          setPayload(card, { red: P(t, hitAt, 0.15) * (1 - P(t, healAt, 0.5)) });
+        const out = P(t, at + run.out, run.outD);
+        if (out > 0) {
+          [x, y] = bezier(rideOut(closeRow(i)), out);
+          k = lerp(1, 0.4, out);
+          o *= 1 - P(out, 0.6, 0.4, linear);
         }
+        setPayload(card, { seal: P(t, sealAt, 0.35, linear), scramble: P(t, sealAt + 0.1, 0.5, linear) });
         place(card, x, y, k, o);
         placeRipples(s.sealRipples[i], t, sealAt + 0.35 * LOCK_SHUT, x, y - CARD.h / 2, 12, 110,
           { d: 0.8, step: 0.15 });
-        if (run.fails) placeRipples(s.gateRipples, t, hitAt, GATE.x, SEAL.y, 30, 150, { d: 0.7, step: 0.14 });
 
         // the data key flies from the DATA KEY onto the card's lock as it seals it
         const flyP = P(t, sealAt - 0.3, 0.3);
-        const flyOn = !run.noKey && !run.fails && flyP > 0 && t < sealAt + 0.1;
+        const flyOn = !run.noKey && flyP > 0 && t < sealAt + 0.1;
         const [iconDx, iconDy] = DATA_KEY.icon;
         place(fly, lerp(DATA_KEY.x + iconDx, x, flyP), lerp(DATA_KEY.y + iconDy, y - CARD.h / 2, flyP), 1,
           flyOn ? 1 : 0);
 
         // its data key's tag: it docks on the card's bottom edge, at once or after the trip to the KMS
         const dock = [x, y + k * CARD.h / 2 + 1];
-        if (run.noKey || run.fails) {
+        if (run.noKey) {
           place(keyTag, 0, 0, 1, 0);
         } else if (run.wrap) {
           const goAt = sealAt + WRAP.go;
-          const trip = kmsTrip(s.linkPath, t, goAt, WRAP);
+          const trip = kmsTrip(s.link, t, goAt, WRAP);
           let tagAt = trip.at;
           const docking = P(t, trip.backAt + WRAP.tripD, WRAP.dockD);
           if (docking > 0) tagAt = [lerp(LINK.x1, dock[0], docking), lerp(LINK.y1, dock[1], docking)];
@@ -641,13 +531,12 @@
 
         // its row in TEMPORAL's list rises in as it lands; the pull-back carries the row toward the wide list as it
         // fades, and the wide list's row comes in once the shot holds it
-        if (run.fails) return;
         const landed = P(t, at + run.out + run.outD - 0.15, 0.3);
-        const [closeX, closeY] = closeRow(rowI), [wideX, wideY] = wideRow(rowI);
-        const rowE = s.rows[rowI];
+        const [closeX, closeY] = closeRow(i), [wideX, wideY] = wideRow(i);
+        const rowE = s.rows[i];
         place(rowE, lerp(closeX, wideX, wide), lerp(closeY, wideY, wide) + (1 - landed) * 6,
           lerp(ROW.closeK, 1, wide), landed * closeOnly);
-        place(s.wideRows[rowI], wideX, wideY, 1, landed * reveal * (1 - clear));
+        place(s.wideRows[i], wideX, wideY, 1, landed * reveal * (1 - clear));
         // the payloads that keep the first data key light up once the key has rotated
         const keep = run.key === 1 ? win(t, c[2] + T2.keep, c[2] + T2.keep + 0.6, 0.2) : 0;
         rowE.querySelector('.key').style.boxShadow = glowShadow(RGB.neon, keep, { blur: 12, alpha: 0.8 });
@@ -672,37 +561,23 @@
       const noCode = popIn(t, c[0] + T0.noCode);
       place(s.noCode, NO_CODE.x, NO_CODE.y, noCode.s, noCode.o * closeOnly);
 
-      // the gate drops across the proxy's exit as the KMS link snaps, and lifts as it heals
-      const gate = P(t, c[3] + T3.gate, 0.25, backOut) * (1 - P(t, healAt + 0.05, 0.25));
-      place(s.gate, GATE.x, PROXY_TUBE.y, 1, gate > 0.001 ? closeOnly : 0);
-      s.gate.style.transform += ` scaleY(${clamp(gate, 0, 1.2).toFixed(3)})`;
-      // CALL FAILED slams onto the failed card's bottom edge; FAIL CLOSED stamps onto the empty tube, above the
-      // wire, its tilted ends clear of the failed card and of TEMPORAL's list
-      const healed = 1 - P(t, healAt, 0.3);
-      const callSlam = P(t, c[3] + T3.callFailed, T3.slamD, easeIn);
-      place(s.callFailed, STOP.x, STOP.y + CARD.h / 2 + 1, lerp(1.7, 1, callSlam),
-        P(t, c[3] + T3.callFailed, 0.08, linear) * healed);
-      const stamp = P(t, c[3] + T3.failClosed, T3.slamD, easeIn);
-      place(s.failClosed, tubeMid, PROXY_TUBE.y - FAIL_CLOSED_RISE, lerp(2.2, 1, stamp),
-        P(t, c[3] + T3.failClosed, 0.08, linear) * healed, -8);
-
       // after the pull-back: the proxy's built-in Codec Server, and the CLI and the Web UI, which open over their
       // tiles in ciphertext. Row 2 goes from TEMPORAL into the proxy in ciphertext, the Codec Server decrypts it and
       // sends it on to both windows, which show it in clear; TEMPORAL keeps ciphertext only.
-      const codecPop = backPop(t, c[4] + T4.codec);
-      const decryptAt = c[4] + T4.deliver - 0.1;
+      const codecPop = backPop(t, c[3] + T3.codec);
+      const decryptAt = c[3] + T3.deliver - 0.1;
       place(s.codec, CODEC.x, CODEC.y, codecPop.s * swell(t, decryptAt, 0.1), codecPop.o * (1 - clear));
       s.codec.style.borderColor = t >= decryptAt ? C.violet : C.line;
-      const fetch = P(t, c[4] + T4.fetch, T4.tripD);
+      const fetch = P(t, c[3] + T3.fetch, T3.tripD);
       const [fromX, fromY] = wideRow(1);
       const [fetchX, fetchY] = bezier([[fromX, fromY], [fromX - 60, LANE.wire.y], [PROXY_WIRE.x1, LANE.wire.y],
         [PROXY_WIRE.x0 + 10, LANE.wire.y]], fetch);
       place(s.fetch, fetchX, fetchY, 1, fetch > 0 && fetch < 1 ? 1 : 0);
-      const deliver = P(t, c[4] + T4.deliver, T4.tripD);
-      const delivered = c[4] + T4.deliver + T4.tripD;
+      const deliver = P(t, c[3] + T3.deliver, T3.tripD);
+      const delivered = c[3] + T3.deliver + T3.tripD;
       READERS.forEach((reader, i) => {
         const winE = s.readers[i];
-        const open = backPop(t, c[4] + T4.windows + 0.15 * i);
+        const open = backPop(t, c[3] + T3.windows + 0.15 * i);
         const closing = 1 - 0.15 * clear;
         place(winE, reader.slot.x, reader.slot.y, lerp(0.6, 1, open.s) * closing, open.o * (1 - clear));
         setReader(winE, P(t, delivered, 0.5, linear));
@@ -712,7 +587,7 @@
         const [px1, py1] = alongPath(s.links[reader.link], deliver, true);
         place(s.deliver[i], px1, py1, 1, deliver > 0 && deliver < 1 ? 1 : 0);
       });
-      const cipherIn = popIn(t, c[4] + T4.ciphertext);
+      const cipherIn = popIn(t, c[3] + T3.ciphertext);
       place(s.cipherTag, WIDE_LIST.x, WIDE_LIST.cipherY, cipherIn.s, cipherIn.o * (1 - clear));
     }
   });

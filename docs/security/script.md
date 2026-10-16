@@ -129,8 +129,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
   no Worker or Client code change; short-lived data keys encrypt payloads
   with AES-256-GCM, wrapped by a KMS key you own (AWS KMS, Azure Key Vault,
   GCP KMS, or your own key server); "The proxy never holds key material";
-  DEK rotation is automatic; fail-closed: if the KMS is unavailable, the
-  request fails rather than falling back to plaintext.
+  DEK rotation is automatic.
 
 ## Intro
 
@@ -345,28 +344,21 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     key 3 seals the next card into row 4 (WRAPPED 3). The list reads 1, 1,
     2, 3, and the two rows sealed with key 1 glow: old payloads keep their
     own.
-- **2:34** If the KMS can't be reached, the call fails: nothing leaves in
-  clear.
-  - Visuals: Dramatic beat: the link to YOUR KMS snaps (red halves,
-    sparks, a red cross, a shake) and the data key dims; a red
-    hazard-striped gate drops across the tube's mouth. The next card, in
-    clear, slams into the gate (a red flash, a shake) and turns red: CALL
-    FAILED, in solid red; the tube goes dark and FAIL CLOSED, a solid red
-    stamp, lands across it above the wire.
-- **2:41** Its built-in Codec Server lets the Web UI and the CLI show the
+- **2:34** Its built-in Codec Server lets the Web UI and the CLI show the
   decrypted payloads.
-  - Visuals: The link heals, the gate lifts and the failed card goes back
-    to its Worker. The camera pulls back in one steady move, out of the
-    proxy to the whole fleet: CODEC SERVER / BUILT IN appears in the proxy
-    box, and a TEMPORAL CLI and a TEMPORAL WEB UI window open over the
-    client tiles, showing row 2 in ciphertext. Row 2 travels from TEMPORAL
+  - Visuals: Key 3's bar stops just before the subtitle. The camera pulls
+    back in one steady move, out of the proxy to the whole fleet, YOUR KMS,
+    the data key and the close-shot tags leaving with the move: CODEC
+    SERVER / BUILT IN appears in the proxy box, and a TEMPORAL CLI and a
+    TEMPORAL WEB UI window open over the client tiles, showing row 2 in
+    ciphertext. Row 2 travels from TEMPORAL
     into the proxy, and both windows decrypt it, the IBAN and Leo Martin in
     clear, while TEMPORAL's STORED PAYLOADS stay in ciphertext: CIPHERTEXT
     ONLY.
 
 ## 08 Change Temporal, not your code
 
-- **2:50** Moving from your own Temporal Service to Temporal Cloud is a
+- **2:43** Moving from your own Temporal Service to Temporal Cloud is a
   proxy setting: Workers don't change.
   - Visuals: The same wide shot. TEMPORAL narrows into the upper of two
     upstreams, the official logo centered above "Self-hosted" (a server
@@ -380,7 +372,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 09 Across Namespaces with Nexus
 
-- **2:59** With Temporal Nexus, your Workflow can call another team's
+- **2:53** With Temporal Nexus, your Workflow can call another team's
   service, across Namespaces, through an Endpoint.
   - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
     (the official lockup followed by "Cloud") holding three Namespaces: the
@@ -395,7 +387,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     `payments`), a violet bar closing the opening between them; the
     Namespaces glow at "across Namespaces", and the transfer Workflow's call
     line draws up to the bar.
-- **3:07** The Endpoint lets in only the Namespaces on its allowlist, and
+- **3:01** The Endpoint lets in only the Namespaces on its allowlist, and
   callers never need to know what is behind it.
   - Visuals: Dramatic beat: a call from analytics races up to the gate and
     slams into the bar, which flashes red, with a red flash, a shake and red
@@ -406,7 +398,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     handler. A hatched veil wipes over the fraud Namespace from the gate's
     side: an eye struck through, NOT EXPOSED TO CALLERS, "Namespace, Task
     Queue, implementation".
-- **3:15** Calls between Namespaces travel over mTLS, and your Data
+- **3:08** Calls between Namespaces travel over mTLS, and your Data
   Converter still encrypts the payloads.
   - Visuals: The call line turns into a neon tube from the transfer
     Workflow through the gate's opening into the veiled Namespace, labelled
@@ -421,7 +413,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 10 Audited and certified
 
-- **3:24** Temporal Cloud is SOC 2 Type 2 certified and compliant
+- **3:17** Temporal Cloud is SOC 2 Type 2 certified and compliant
   with HIPAA, GDPR and CCPA.
   - Visuals: The engine's zoom-through brings in a wide Temporal Cloud zone
     (the official lockup followed by "Cloud") holding four empty dashed
@@ -430,7 +422,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     twice its size, tilted, and landing flat with a press, a violet glow,
     neon ripples and a jolt of the frame: SOC 2 TYPE 2 (CERTIFIED), then
     HIPAA, GDPR and CCPA (COMPLIANT), each with a neon check.
-- **3:31** Third parties audit and pen test it every year: audit results
+- **3:24** Third parties audit and pen test it every year: audit results
   are in the Temporal Trust Center.
   - Visuals: The zone moves up with its seals and a TRUST CENTER card
     rises in under it (a shield, `trust.temporal.io`), listing the SOC 2
@@ -445,7 +437,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 11 What you get
 
-- **3:39** Your code stays home, every connection is verified, payloads
+- **3:33** Your code stays home, every connection is verified, payloads
   stay encrypted, Workers hold no secrets.
   - Visuals: 4 tall benefit tiles drop in one at a time across the frame
     as the subtitle names them, each lighting up as it lands while the
@@ -455,7 +447,7 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
 
 ## 12 What you can build
 
-- **3:48** Nora's transfer is one example: any Workflow that handles
+- **3:41** Nora's transfer is one example: any Workflow that handles
   sensitive data fits.
   - Visuals: Opens on the recap row, padlocks shut; one at a time, each
     tile flips over in 3D into a use-case tile, the row every theme's use
@@ -464,14 +456,14 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
     "passport scans, encrypted" / PAYROLL RUNS (calendar) "salaries never
     in clear" / AI AGENTS ON CUSTOMER DATA (robot) "prompts and replies
     sealed".
-- **3:54** Health claims, KYC onboarding, payroll runs, AI agents on
+- **3:47** Health claims, KYC onboarding, payroll runs, AI agents on
   customer data: the data stays yours.
   - Visuals: The full row; each tile lights up in turn as the subtitle
     names it.
 
 ## Outro
 
-- **4:02** With Temporal, your code, your keys and your data stay yours.
+- **3:55** With Temporal, your code, your keys and your data stay yours.
   - Visuals: A shield draws itself and fills above the title "Security",
     a padlock pops in and snaps shut with neon ripples; tagline "YOUR
     CODE, YOUR KEYS, YOUR DATA", Temporal logo.

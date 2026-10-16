@@ -68,20 +68,19 @@ the full Namespace name.
 The proxy can also encrypt every payload on its way out, with no change to
 Worker code. Payloads are sealed with short-lived data keys, wrapped by a key
 you own in your KMS. Data keys rotate on their own, and the proxy never holds
-your KMS key. If the KMS can't be reached, the call fails: nothing leaves in
-clear. Its built-in Codec Server lets the Web UI and the CLI show the decrypted
-payloads.
+your KMS key. Its built-in Codec Server lets the Web UI and the CLI show the
+decrypted payloads.
 
 ## Chapter 8: Change Temporal, not your code
 
-[Watch from 2:50](/themes/security/#t=170)
+[Watch from 2:43](/themes/security/#t=163)
 
 Moving from your own Temporal Service to Temporal Cloud is a proxy setting:
 Workers don't change.
 
 ## Chapter 9: Across Namespaces with Nexus
 
-[Watch from 2:59](/themes/security/#t=179)
+[Watch from 2:52](/themes/security/#t=172)
 
 With Temporal Nexus, your Workflow can call another team's service, across
 Namespaces, through an Endpoint. The Endpoint lets in only the Namespaces on its
@@ -91,7 +90,7 @@ payloads.
 
 ## Chapter 10: Audited and certified
 
-[Watch from 3:24](/themes/security/#t=204)
+[Watch from 3:17](/themes/security/#t=197)
 
 Temporal Cloud is SOC 2 Type 2 certified and compliant with HIPAA, GDPR and
 CCPA. Third parties audit and pen test it every year: audit results are in the
@@ -99,14 +98,14 @@ Temporal Trust Center.
 
 ## Chapter 11: What you get
 
-[Watch from 3:39](/themes/security/#t=219)
+[Watch from 3:32](/themes/security/#t=212)
 
 Your code stays home, every connection is verified, payloads stay encrypted,
 Workers hold no secrets.
 
 ## Chapter 12: What you can build
 
-[Watch from 3:48](/themes/security/#t=228)
+[Watch from 3:41](/themes/security/#t=221)
 
 Nora's transfer is one example: any Workflow that handles sensitive data fits.
 Health claims, KYC onboarding, payroll runs, AI agents on customer data: the
@@ -114,6 +113,6 @@ data stays yours.
 
 ## Outro
 
-[Watch from 4:02](/themes/security/#t=242)
+[Watch from 3:55](/themes/security/#t=235)
 
 With Temporal, your code, your keys and your data stay yours.

@@ -438,9 +438,9 @@ below and the card order in [Home page design](feedback_home-page.md).
   the Data Converter, Search Attributes in clear and the Codec Server
   (ch4), the same work in every Worker
   (ch5), then Temporal Proxy: a gateway holding the address, credentials
-  and Namespace (ch6), encryption with the customer's KMS, fail closed,
-  built-in Codec Server (ch7), switching upstreams with no Worker change
-  (ch8), calls across Namespaces with Temporal Nexus (ch9: the transfer
+  and Namespace (ch6), encryption with the customer's KMS, data key
+  rotation, built-in Codec Server (ch7), switching upstreams with no Worker
+  change (ch8), calls across Namespaces with Temporal Nexus (ch9: the transfer
   Workflow in `payments` calls the fraud team's Endpoint `fraud-screening`,
   operation `screenTransfer`, handled in `fraud`; the Endpoint's allowlist
   refuses `analytics` and lets `payments` in; a veil marks fraud's
@@ -471,11 +471,11 @@ below and the card order in [Home page design](feedback_home-page.md).
   hold dim to `OFF_SHOT` (0.3); zone borders clip to the content frame,
   headings fade instead of being cut; held shots whose message is small
   text render values at 18 px and labels at 14 px or more.
-- Red verdict tags (UNREADABLE, REJECTED, READABLE, IN CLEAR, CALL FAILED,
-  FAIL CLOSED, NOT ON ALLOWLIST) share a theme-only style: bold near-black
-  text on solid red, about 19-20 px on screen, in their tile's heading row,
-  never straddling a border; text-only tags offset their trailing
-  letter-spacing so the ink sits centered.
+- Red verdict tags (UNREADABLE, REJECTED, READABLE, IN CLEAR, NOT ON
+  ALLOWLIST) share a theme-only style: bold near-black text on solid red,
+  about 19-20 px on screen, in their tile's heading row, never straddling a
+  border; text-only tags offset their trailing letter-spacing so the ink
+  sits centered.
 - 08 → 09, 09 → 10, 10 → 11 and 12 → outro use the engine zoom-through;
   ch9 and ch10 hold Temporal Cloud's side alone, each in a Temporal Cloud
   zone titled with the lockup followed by "Cloud" (`makeCloudZone()` in the
