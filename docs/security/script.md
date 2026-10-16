@@ -112,8 +112,8 @@ rewind whip carries it from ch3 back to the Worker for ch4.
     RUNS HERE swells in under the Worker.
 - **0:17** Temporal never runs your code: the Worker calls out to Temporal,
   with no inbound port open.
-  - Visuals: TEMPORAL's caption NEVER YOUR CODE; violet poll pulses run
-    outward only along the wire, an OUTBOUND ONLY tag above it, and a
+  - Visuals: TEMPORAL's caption YOUR CODE NEVER RUNS HERE; violet poll
+    pulses run outward only along the wire, an OUTBOUND ONLY tag above it, and a
     closed door appears on the environment's edge. Dramatic beat: a red
     probe flies in from outside, hits the door (red ripples) and bounces
     off; NO INBOUND PORTS slams in beside the door and shakes the frame.

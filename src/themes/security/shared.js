@@ -322,7 +322,7 @@ function makeLane(root) {
       width: env.w + 'px', height: env.h + 'px', background: 'rgba(148,163,184,.04)', borderRadius: 'var(--r)',
     });
   lane.temporal = E(root,
-    zoneHeading(`<img class="head" src="${LOGO}" style="height:34px;display:block">`) + zoneCaption('Never your code'),
+    zoneHeading(`<img class="head" src="${LOGO}" style="height:34px;display:block">`) + zoneCaption('Your code never runs here'),
     'tile', { width: temporal.w + 'px', height: temporal.h + 'px', borderColor: C.uv, background: '#17182A' });
   [lane.env, lane.temporal].forEach(zone => {
     zone.head = zone.querySelector('.head');
