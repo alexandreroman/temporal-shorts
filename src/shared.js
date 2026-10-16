@@ -146,6 +146,20 @@ function flipTile(frontFace, backFace, x, y, turn) {
     backFace.style.transform += rotateY(180 * turn - 180);
   }
 }
+// A recap row ("What you get"): one iconTile per [icon, label] of benefits, h px high, at the width and type scale
+// of USE_CASE_ROW; placeRecapRow() shows it
+function makeRecapRow(root, benefits, h) {
+  return benefits.map(([icon, label]) => iconTile(root, icon, label, USE_CASE_ROW.w, h, C.ink, USE_CASE_TYPE));
+}
+// A recap row's tiles in the slots of USE_CASE_ROW, on line y: tile i pops in at at[i]; litFor: how long each tile
+// lights up (UV border) once it lands, s (0: never lit)
+function placeRecapRow(tiles, t, at, y, litFor = 0) {
+  tiles.forEach((e, i) => {
+    const p = backPop(t, at[i]);
+    place(e, useCaseX(i), y, p.s, p.o);
+    if (litFor) e.style.borderColor = t >= at[i] && t < at[i] + litFor ? C.uv : C.line;
+  });
+}
 // The "What you can build" chapter of an explainer, its scene before the outro: chapter, its number; uses, the
 // [icon, label, example] of each of the 4 useCaseTiles of USE_CASE_ROW; subs, its 2 subtitles. The tiles pop in
 // one at a time, 0.8 s apart from c[0] + firstAt, while subtitle 1 reads; subtitle 2 names them in order, and each

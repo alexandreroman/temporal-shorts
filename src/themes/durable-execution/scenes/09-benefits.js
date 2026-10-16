@@ -34,7 +34,7 @@
         + `<img src="${LOGO}" style="height:${HANDLES_LOGO_H}px;display:block">`
         + '<span class="lbl" style="font-size:28px;line-height:28px;margin-top:27px">handles the rest</span>'
         + '</div>');
-      s.ben = BENEFITS.map(([icon, label]) => iconTile(root, icon, label, BEN.w, BEN.h, C.ink, USE_CASE_TYPE));
+      s.ben = makeRecapRow(root, BENEFITS, BEN.h);
     },
     update(t, c, s) {
       // you write the logic, Temporal handles the rest
@@ -43,11 +43,7 @@
       place(s.handles, 960, HANDLES_Y, 1, P(t, c[0] + 1.9, 0.5));
       // the tiles pop in one by one as the subtitle names what Temporal handles: "retries", "crashes", "waits",
       // "visibility" (word position at 16 characters per second, plus 0.3 s)
-      const at = [c[0] + 3.25, c[0] + 3.8, c[0] + 4.55, c[0] + 5.6];
-      s.ben.forEach((e, i) => {
-        const p = backPop(t, at[i]);
-        place(e, useCaseX(i), BEN.y, p.s, p.o);
-      });
+      placeRecapRow(s.ben, t, [c[0] + 3.25, c[0] + 3.8, c[0] + 4.55, c[0] + 5.6], BEN.y);
     }
   });
 }

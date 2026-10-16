@@ -20,17 +20,12 @@
       },
     ],
     build(root, s) {
-      const { w, h } = USE_CASE_ROW;
-      s.benefits = BENEFITS.map(([icon, label]) => iconTile(root, icon, label, w, h, C.ink, USE_CASE_TYPE));
+      s.benefits = makeRecapRow(root, BENEFITS, USE_CASE_ROW.h);
     },
     update(t, c, s) {
       // one benefit tile at a time, each lighting up as it lands
-      s.benefits.forEach((e, i) => {
-        const at = c[0] + 0.7 + i * 1.1;
-        const p = backPop(t, at);
-        place(e, useCaseX(i), USE_CASE_ROW.y, p.s, p.o);
-        e.style.borderColor = t >= at && t < at + 1.0 ? C.uv : C.line;
-      });
+      const at = BENEFITS.map((_, i) => c[0] + 0.7 + i * 1.1);
+      placeRecapRow(s.benefits, t, at, USE_CASE_ROW.y, 1.0);
     }
   });
 }
