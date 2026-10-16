@@ -81,23 +81,33 @@
   const DENY_MID = (DENY_FROM + GATE.left) / 2;
   const DENY_D = `M ${DENY_FROM} ${ANALYTICS_Y} C ${DENY_MID} ${ANALYTICS_Y} ${DENY_MID} ${HIT.y} ${GATE.left} ${HIT.y}`
     + ` H ${HIT.x}`;
+  // Where payments' verdict tag (ALLOWED) ends as it renders, right and bottom: Chromium draws the Namespace's 1.5 px
+  // border 1 px wide, so the tag, set from inside it, ends at x 760.5 and y 309.5 and lights pixel column 760 and row
+  // 309, as a whole-pixel box ending at 761 and 310 does. TAG_EDGE holds those whole-pixel ends; the tube's label and
+  // the cards in payments end on its right one.
+  const TAG_EDGE = {
+    right: PAYMENTS.x + PAYMENTS.w - 1 - (INSET - 1.5) + 0.5,
+    bottom: PAYMENTS.y + 1 + PAYMENTS.headTop - 1.5 + NS_HEAD.h / 2 + VERDICT.h / 2 + 0.5,
+  };
   // The mTLS tube between the Namespaces, in the theme's TLS tube look (makeTube): from the transfer Workflow's tile,
   // its mouth ring (24 px wide) 16 px clear of it, to 24 px inside fraud, where the veil covers its end. Its label, a
-  // big pill (chapter 2's TLS label as it shows on screen), sits where chapter 2 puts it: 168 px right of the tube's
-  // start and 24 px above it, clear of payments' heading row.
+  // big pill (chapter 2's TLS label as it shows on screen), sits above it as in chapter 2: its right edge on
+  // TAG_EDGE.right, in line with ALLOWED, and as far under that tag as above the tube.
   const NEXUS_TUBE = { x0: WORKFLOW.x + WORKFLOW.w + 16 + 12, x1: FRAUD.x + 24, y: CALL_Y, h: TUBE_H };
   const TUBE_LABEL = { w: 180, h: 66 };
-  NEXUS_TUBE.label = { x: NEXUS_TUBE.x0 + 168, y: CALL_Y - TUBE_H / 2 - 24 - TUBE_LABEL.h / 2 };
+  NEXUS_TUBE.label = { x: TAG_EDGE.right - TUBE_LABEL.w / 2, y: (TAG_EDGE.bottom + CALL_Y - TUBE_H / 2) / 2 };
   // The payload card in the tube: as wide as chapter 2's card in its tube on screen (PAYLOAD_IN_WORKER.w at its scale
-  // and zoom), built at that width so it rests on whole pixels. Where it waits in payments, 16 px clear of the tube's
-  // mouth ring and INSET px from payments' right edge, and where it is hidden under the veil, fully inside fraud.
+  // and zoom), built at that width so it rests on whole pixels. Where it waits in payments, its right edge on
+  // TAG_EDGE.right (17 px clear of the tube's mouth ring), and where it is hidden under the veil, fully inside fraud.
   const CARD = { w: 284 };
-  const CARD_AT = {
-    x: (NEXUS_TUBE.x0 + 12 + 16 + PAYMENTS.x + PAYMENTS.w - INSET) / 2, hiddenX: FRAUD.x + CARD.w / 2 + 20,
+  const CARD_AT = { x: TAG_EDGE.right - CARD.w / 2, hiddenX: FRAUD.x + CARD.w / 2 + 20 };
+  // The sealed result that comes back: its size (as wide as the tube's label, so it lands right under it, both edges
+  // in line), its padlock badge and padlock, its one field (TRANSFER's ciphertext glyphs for row `row`, so its glyphs
+  // differ from the payload's), its center x where it lands, under the label, and its center y in the tube
+  const RESULT = {
+    w: TUBE_LABEL.w, h: 104, badge: 28, lock: 16, key: 'decision', value: 'approve', row: 4,
+    x: NEXUS_TUBE.label.x, y: CALL_Y + 6,
   };
-  // The sealed result that comes back: its size, its padlock badge and padlock, its one field (TRANSFER's ciphertext
-  // glyphs for row `row`, so its glyphs differ from the payload's) and its center y in the tube
-  const RESULT = { w: 160, h: 104, badge: 28, lock: 16, key: 'decision', value: 'approve', row: 4, y: CALL_Y + 6 };
 
   // the beats, in seconds from their cue. c[0]: the transfer Workflow (workflow) and the handler (handler) come in,
   // the Namespaces light up (across), the gate rises (gate), its line draws down (bar, barD) and the call line draws
@@ -270,6 +280,9 @@
       s.queue = makeQueueTile(root);
 
       s.tube = makeTube(root, NEXUS_TUBE);
+      // its glass on an opaque body in the zone's own fill, over the Namespaces: the borders it crosses (payments',
+      // fraud's) stop at its walls, so it reads as one channel, not as cut by the Namespaces' edges
+      s.tube.style.backgroundColor = s.zone.style.backgroundColor;
       // its label names mTLS, cased as written (a pill sets its text in capitals), in a big pill: chapter 2's TLS
       // label at its zoom
       s.tube.label.classList.add('big');
@@ -382,8 +395,8 @@
       // the handler's result comes back sealed too, out from behind the veil into payments
       const back = P(t, c[2] + T2.back, T2.backD);
       const landAt = c[2] + T2.back + T2.backD;
-      place(s.result, lerp(CARD_AT.hiddenX, CARD_AT.x, back), RESULT.y, 1, back > 0 ? 1 : 0);
-      placeRipples(s.landing, t, landAt, CARD_AT.x, RESULT.y, RESULT.w, 240, { d: 0.6, step: 0.14 });
+      place(s.result, lerp(CARD_AT.hiddenX, RESULT.x, back), RESULT.y, 1, back > 0 ? 1 : 0);
+      placeRipples(s.landing, t, landAt, RESULT.x, RESULT.y, RESULT.w, 240, { d: 0.6, step: 0.14 });
     }
   });
 }

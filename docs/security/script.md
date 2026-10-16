@@ -403,15 +403,19 @@ brings ch9 in from ch8, carries it into ch10, and ch10 into the recap.
   Converter still encrypts the payloads.
   - Visuals: The call line turns into a neon tube from the transfer
     Workflow through the gate's opening into the veiled Namespace, as high
-    as the Workflow tile, labelled mTLS above its start as in chapter 2. The
-    payload card, at the size it rides chapter 2's tube, comes out of the
-    Workflow already sealed by the caller's Worker (its lock shut, every
-    field in ciphertext: it is never in clear inside Temporal Cloud), then
-    rides the tube through the gate and disappears behind the veil. A
-    RESULT card comes back out of the veil already sealed (the handler
-    encrypts it: `decision` in ciphertext, its lock shut) and lands in the
-    tube on payments' side. The default fade-out zooms through to the next
-    chapter.
+    as the Workflow tile, labelled mTLS above it as in chapter 2. The tube
+    has an opaque body: the Namespace borders it crosses stop at its walls,
+    so it reads as one channel. The label, the payload card at rest and the
+    RESULT card end on the right edge of the ALLOWED tag, and the label sits
+    as far under that tag as above the tube. The payload card, at the size
+    it rides chapter 2's tube, comes out of the Workflow already sealed by
+    the caller's Worker (its lock shut, every field in ciphertext: it is
+    never in clear inside Temporal Cloud), then rides the tube through the
+    gate and disappears behind the veil. A RESULT card, as wide as the
+    label, comes back out of the veil already sealed (the handler encrypts
+    it: `decision` in ciphertext, its lock shut) and lands in the tube on
+    payments' side, right under the label. The default fade-out zooms
+    through to the next chapter.
 
 ## 10 Audited and certified
 
