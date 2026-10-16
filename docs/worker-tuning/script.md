@@ -261,8 +261,8 @@ suppliers for most workloads), rate limits and Task Queue partitions.
   used all the CPU it has.
   - Visuals: the code card fades; a dashed "+ SLOTS" ghost takes its
     place, crossed out.
-- **3:18** Now add Workers on more hosts: B and C poll the same Task Queue
-  and share the load.
+- **3:18** Add Workers on more hosts: B and C poll the same Task Queue and
+  share the load.
   - Visuals: MEMORY and the "+ SLOTS" ghost fade; A's CPU meter shrinks
     into a compact gauge at the top right of WORKER A, its BOTTLENECK tag beside
     it; WORKER B and WORKER C, as wide as A, slide in under it, each with a

@@ -186,7 +186,7 @@
         after: 2.0,
       },
       {
-        text: "Now add Workers on more hosts: B and C poll the same Task Queue and share the load.",
+        text: "Add Workers on more hosts: B and C poll the same Task Queue and share the load.",
         after: 2.0,
       },
       { text: "The backlog drains, and new orders start right away again.", after: 2.0 },
