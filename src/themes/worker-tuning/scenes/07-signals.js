@@ -72,9 +72,9 @@
   // row's inner padding line (GRID.pad), whole pixels; small enough to end 20 px clear of the fix under it (measured)
   const BADGE = { text: 'Watch first', w: 148, h: 32 };
   BADGE.x = RECAP.left + RECAP.w - GRID.pad - BADGE.w / 2;
-  // Its glow: a soft halo blur px wide at opacity alpha, which fades in over `in` s once the row has its full width,
-  // turns UV with the row's border while the subtitle names it, over `light` s each way, and leaves with the row
-  const GLOW = { blur: 20, alpha: 0.3, in: 0.5, light: 0.3 };
+  // Its glow: a soft violet halo blur px wide at opacity alpha, which fades in over `in` s once the row has its full
+  // width, then stays the same, the light included (a UV halo would show much darker), until it leaves with the row
+  const GLOW = { blur: 20, alpha: 0.3, in: 0.5 };
   const rowTop = i => recapRowY(i) - RECAP.rowH / 2;
   // Each row grows from its part, from GROW.at + i * GROW.stagger over GROW.d s: a tile around the part (partLeft px
   // on either side) that widens to the row's full width
@@ -136,7 +136,10 @@
       s.headings = [heading('Symptom', COL.symptom), heading('Signal', COL.signal), heading('Fix', COL.fix)];
       // the symptom row's glow, under the rows: an empty box of the row's full size whose outer shadow shows round
       // the row, so it follows neither the row's width while it grows nor its fade-in; its opacity sets its strength
-      s.glow = E(root, '', '', { width: RECAP.w + 'px', height: RECAP.rowH + 'px', borderRadius: 'var(--r)' });
+      s.glow = E(root, '', '', {
+        width: RECAP.w + 'px', height: RECAP.rowH + 'px', borderRadius: 'var(--r)',
+        boxShadow: `0 0 ${GLOW.blur}px ${C.violet}`,
+      });
       s.rows = ROWS.map(row => makeRow(root, row));
       s.badge = fixedTag(root, BADGE.text, 'violet solid', BADGE.w, BADGE.h);
       // smaller than a pill, with less padding: it stands on the row's border, as the x10 tag
@@ -180,20 +183,15 @@
         e.style.overflow = grow < 1 ? 'hidden' : '';
         showAt(e, RECAP.left + dx, rowTop(i), P(t, growAt, 0.25, linear) * (1 - out));
         const litUntil = i + 1 < litAt.length ? litAt[i + 1] : litAt[i] + 1.2;
-        // the symptom row's border eases between violet and UV with its glow (below)
-        if (i > 0) e.style.borderColor = t >= litAt[i] && t < litUntil ? C.uv : C.line;
+        const restColor = i === 0 ? C.violet : C.line;
+        e.style.borderColor = t >= litAt[i] && t < litUntil ? C.uv : restColor;
         // the Slot grid part grows into the outro's Worker (below); the others leave with their rows
         if (i !== GROWING) showRecapPart(s.parts[i], i, 1 - out, { dx });
       });
-      // the symptom row's glow fades in once the row has its full width, eases to UV and back with its border while
-      // the row is named, and slides out with the row
+      // the symptom row's glow fades in once the row has its full width and slides out with the row
       const glowOut = rowOut(0);
       const glowO = GLOW.alpha * P(t, GROW.at + GROW.d, GLOW.in) * (1 - glowOut);
-      const lit = P(t, litAt[0], GLOW.light) * (1 - P(t, litAt[1], GLOW.light));
-      const color = `color-mix(in srgb, ${C.uv} ${(100 * lit).toFixed(1)}%, ${C.violet})`;
       showAt(s.glow, RECAP.left + Math.round(OUT.rowDx * glowOut), rowTop(0), glowO);
-      s.glow.style.boxShadow = `0 0 ${GLOW.blur}px ${color}`;
-      s.rows[0].style.borderColor = color;
       // the badge pops in as the symptom row reaches its full width, and slides out with it
       const badgeIn = popIn(t, GROW.at + GROW.d - 0.2);
       const badgeOut = rowOut(0);
