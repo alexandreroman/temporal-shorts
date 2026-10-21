@@ -7,10 +7,11 @@
 // INTERNET and DATABASES, and the red beat lands on "the bad included": the targets flare red, ripples and a jolt.
 // In c[2] the reach pulls back and the WORKFLOW checkpoint drops in between the orb and the tools: the lanes shoot
 // out of it, YOUR WORKERS draws round the tools and the Event History strip rises under it, the board every later
-// chapter uses. In c[3] each part gets its role: the orb THINKS and an action card grows out of it, passes the
-// checkpoint (your code, where the agent's state lives) and lands on its tool, which ACTS on the servers you choose
-// (YOUR WORKERS lights up); the checkpoint KEEPS STATE and the Event History RECORDS the step. The camera holds; the
-// default fade-out plays the camera zoom-through (setCamera) into chapter 2.
+// chapter uses. The first step starts: the orb thinks, an action card grows out of it and stops at the checkpoint,
+// which records the model's pick in the Event History. In c[3] each part gets its role: the orb THINKS; the card
+// passes the checkpoint (your code, where the agent's state lives) and lands on its tool, which ACTS on the servers
+// you choose (YOUR WORKERS lights up); the checkpoint KEEPS STATE and the Event History RECORDS the step. The camera
+// holds; the default fade-out plays the camera zoom-through (setCamera) into chapter 2.
 // The block keeps every name declared in this file local to this scene.
 {
   // the beats of c[0], in seconds from c[0]: the AI MODEL label fades in as "AI model" is read (label); the tools pop
@@ -31,16 +32,20 @@
   // the beats of c[2], from c[2]: the reach pulls back into the tools and its targets sink away (out, over outD);
   // the checkpoint drops in (drop, dropD, landing at drop + dropD), the lanes shoot out of it (lanes), YOUR WORKERS
   // draws round the tools (zone), the Event History strip rises in (history); the checkpoint glows as "your code" is
-  // read (yourCode)
-  const T2 = { out: 0, outD: 0.45, drop: 0.5, dropD: 0.45, lanes: 1.0, zone: 1.5, history: 2.1, yourCode: 3.2 };
-  // the beats of c[3], from c[3]: THINKS lights and the orb thinks (think); the action card grows out of it and
-  // travels to the checkpoint (emerge, emergeD), passes it (through, throughD) and lands on its tool (toTool,
-  // toToolD); ACTS lights as "the tools act" is read (acts) and YOUR WORKERS glows on "each where you choose"
-  // (zone); the Event History writes the model's pick and the step (rows); KEEPS STATE lights with the checkpoint's
-  // glow on "keeps the state" (keeps), RECORDS with the strip's glow on "the record" (records)
+  // read (yourCode). Once the board stands, the first step starts: the orb thinks (think), the action card grows out
+  // of it and travels to the checkpoint (emerge, emergeD), where it waits; the Event History writes the model's pick
+  // as "records" is read (row)
+  const T2 = {
+    out: 0, outD: 0.45, drop: 0.5, dropD: 0.45, lanes: 1.0, zone: 1.5, history: 2.1, yourCode: 3.2,
+    think: 3.2, emerge: 3.7, emergeD: 0.8, row: 4.8,
+  };
+  // the beats of c[3], from c[3]: THINKS lights (think); the card passes the checkpoint (through, throughD) and lands
+  // on its tool (toTool, toToolD); ACTS lights as "the tools act" is read (acts) and YOUR WORKERS glows on "each
+  // where you choose" (zone); the Event History writes the step (row); KEEPS STATE lights with the checkpoint's glow
+  // on "keeps the state" (keeps), RECORDS with the strip's glow on "the record" (records)
   const T3 = {
-    think: 0.2, emerge: 0.6, emergeD: 0.8, through: 1.4, throughD: 0.5, toTool: 1.95, toToolD: 0.8,
-    acts: 1.4, zone: 2.1, rows: [1.9, 3.0], keeps: 3.9, records: 5.2,
+    think: 0.2, through: 1.4, throughD: 0.5, toTool: 1.95, toToolD: 0.8, acts: 1.4, zone: 2.1, row: 3.0, keeps: 3.9,
+    records: 5.2,
   };
 
   // the loop between the orb and the tools: it leaves the orb at (x0, actsY) and comes back to it at (x0, readsY),
@@ -252,12 +257,12 @@
       });
 
       // ---- the orb: its label fades in; it thinks while it decides, looks toward the tools once the loop runs, and
-      // thinks again before its step in c[3]
+      // thinks again before its step in c[2]
       place(board.orb.el, model.x, model.y, 1, 1);
       board.orb.label.style.opacity = P(t, c[0] + T0.label, 0.5);
-      const thinkingInC3 = t >= c[3] + T3.think && t < c[3] + T3.emerge;
+      const thinkingInC2 = t >= c[2] + T2.think && t < c[2] + T2.emerge;
       const look = 0.5 * P(t, c[0] + T0.loop, 0.6);
-      board.orb.set(deciding || thinkingInC3 ? 'thinking' : 'idle', { look });
+      board.orb.set(deciding || thinkingInC2 ? 'thinking' : 'idle', { look });
 
       // ---- c[1]: the reach. Each line draws out of its tool into its target, then pulls back into the tool as
       // c[2] starts; the lines flare at the beat
@@ -328,14 +333,15 @@
       place(board.zone, tools.x, tools.y, lerp(1.04, 1, zone), zone);
       rise(board.history, history.x, history.y, P(t, c[2] + T2.history, 0.6), 30);
 
-      // ---- c[3]: the model thinks up a step, which passes the Workflow and lands on its tool; each part's role
-      const emergeAt = c[3] + T3.emerge;
+      // ---- the step: the model thinks it up in c[2] and it waits at the checkpoint; in c[3] it passes the Workflow
+      // and lands on its tool, and each part gets its role
+      const emergeAt = c[2] + T2.emerge;
       const throughAt = c[3] + T3.through;
       // the card reaches the beam halfway through its pass (the pass eases in and out)
       const passAt = throughAt + T3.throughD / 2;
       const toToolAt = c[3] + T3.toTool;
       const stops = actionStops(s.card, ACTION.toolIndex);
-      const emerge = P(t, emergeAt, T3.emergeD);
+      const emerge = P(t, emergeAt, T2.emergeD);
       const through = P(t, throughAt, T3.throughD);
       const toTool = P(t, toToolAt, T3.toToolD);
       let [cx, cy] = [lerp(stops.from[0], stops.gate[0], emerge), laneY];
@@ -365,8 +371,9 @@
         label.style.color = C.ink;
       });
 
-      // the Event History: a spark drops from the checkpoint to the strip, then the row slides in
-      const rowsAt = T3.rows.map(at => c[3] + at);
+      // the Event History: a spark drops from the checkpoint to the strip, then the row slides in; the model's pick
+      // in c[2], the step in c[3]
+      const rowsAt = [c[2] + T2.row, c[3] + T3.row];
       fillHistoryStrip(board.history, t, [
         { at: rowsAt[0], tag: 'SAVED', tone: 'saved' },
         { at: rowsAt[1], tag: 'DONE', tone: 'neon' },

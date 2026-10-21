@@ -35,9 +35,9 @@ from a deterministic HTML animation. Each video is a theme:
   third-party audits, the Trust Center
 - `ai-agent-security`: AI Agent Security, a video for everyone that tells
   real AI agent incidents of 2026, one per chapter, and Temporal's role in
-  each: sandboxed tools, keys kept on separate Workers, human approvals in
-  code the model cannot bypass, the Event History as a searchable audit
-  trail
+  each: sandboxed tools, keys kept with their team, behind Nexus, human
+  approvals in code the model cannot bypass, the Event History as a
+  searchable audit trail
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page

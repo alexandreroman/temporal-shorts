@@ -42,8 +42,9 @@ Each video is a theme:
   third-party audits, the Trust Center.
 - **AI Agent Security** (`ai-agent-security`): for everyone, real AI agent
   incidents of 2026, one per chapter, and Temporal's role in each:
-  sandboxed tools, keys kept on separate Workers, human approvals in code
-  the model cannot bypass, the Event History as a searchable audit trail.
+  sandboxed tools, keys kept with their team, behind Nexus, human
+  approvals in code the model cannot bypass, the Event History as a
+  searchable audit trail.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal returns the saved results from the Event

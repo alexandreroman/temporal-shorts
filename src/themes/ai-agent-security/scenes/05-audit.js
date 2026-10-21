@@ -68,21 +68,22 @@
     thisRun: { text: 'THIS RUN', look: { background: C.uv, color: '#FFFFFF', icon: ['search', '#FFFFFF', 2.6] } },
   };
   // One run of the agent, as chapters 2 to 4 told it, in order: each row's time, type, event (tool: a tool call, in
-  // bold), details and result tag. The shared document at the top is the cause the magnifier walks back to.
+  // bold), details and result tag. The shared document at the top is the cause the magnifier walks back to. The times
+  // follow chapter 3's waiting clock: the request goes to Maya on WED 10:00 and she answers on THU 16:20.
   const ROWS = [
-    { time: '09:14:02', type: 'READ', event: 'outside content read', detail: '"Q3 plan", a shared document',
+    { time: 'WED 09:52', type: 'READ', event: 'outside content read', detail: '"Q3 plan", a shared document',
       tag: TAGS.flagged },
-    { time: '09:14:03', type: 'DECIDED', event: 'model call', detail: 'next: add-on step' },
-    { time: '09:14:05', type: 'DID', event: 'add-on step', tool: true, detail: 'wallet-helper, in a sandbox',
+    { time: 'WED 09:53', type: 'DECIDED', event: 'model call', detail: 'next: add-on step' },
+    { time: 'WED 09:55', type: 'DID', event: 'add-on step', tool: true, detail: 'wallet-helper, in a sandbox',
       tag: TAGS.sandbox },
-    { time: '09:14:09', type: 'WORKFLOW', event: 'box replaced', detail: 'a fresh sandbox, progress kept' },
-    { time: '09:14:10', type: 'DECIDED', event: 'model call', detail: 'next: delete volume' },
-    { time: '09:31:47', type: 'MAYA', event: 'delete volume prod-db', tool: true, detail: 'cannot be undone',
+    { time: 'WED 09:57', type: 'WORKFLOW', event: 'box replaced', detail: 'a fresh sandbox, progress kept' },
+    { time: 'WED 09:59', type: 'DECIDED', event: 'model call', detail: 'next: delete volume' },
+    { time: 'THU 16:20', type: 'MAYA', event: 'delete volume prod-db', tool: true, detail: 'cannot be undone',
       tag: TAGS.rejected },
-    { time: '09:31:48', type: 'DECIDED', event: 'model call', detail: 'next: create ticket' },
-    { time: '09:31:50', type: 'WORKFLOW', event: 'create ticket', tool: true, detail: 'to an outside project',
+    { time: 'THU 16:21', type: 'DECIDED', event: 'model call', detail: 'next: create ticket' },
+    { time: 'THU 16:22', type: 'WORKFLOW', event: 'create ticket', tool: true, detail: 'to an outside project',
       tag: TAGS.held },
-    { time: '10:02:15', type: 'MAYA', event: 'create ticket', tool: true, detail: 'to an outside project',
+    { time: 'THU 17:05', type: 'MAYA', event: 'create ticket', tool: true, detail: 'to an outside project',
       tag: TAGS.rejected },
   ];
   CARD.h = CARD.headH + ROWS.length * CARD.rowH + CARD.footH;
@@ -521,7 +522,7 @@
         label: 'Help Net Security, October 2026',
         url: 'https://www.helpnetsecurity.com/2026/10/14/ciso-ai-agent-insider-risk/',
       },
-      { label: 'Temporal docs', url: 'https://docs.temporal.io/search-attribute' },
+      { label: 'Temporal docs, Search Attributes', url: 'https://docs.temporal.io/search-attribute' },
     ],
     subs: [
       {

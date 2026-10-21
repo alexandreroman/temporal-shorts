@@ -137,14 +137,16 @@
   const ORB_ASIDE = { x: PHONE.x, y: 226, scale: 2 / 3 };
   const UNDER_Y = 630;
   // the allowlist's one row, in the gate's bottom tile: its size, and its center y (for the ripples): the tile
-  // centers a 20 px heading row, a 12 px gap and the row, whose middle sits 16 px under the tile's
-  const ALLOW_ROW = { w: 172, h: 40 };
-  const ALLOW_ROW_Y = LANE_Y + CHECKPOINT.gap / 2 + GATE.tileH / 2 + 16;
-  // the SAFE tag, in the database tile's top right corner; the CRASH tag in the Worker tile, on its right
+  // centers a 20 px heading row, an 18 px line (Temporal Cloud) 2 px under it, then a 10 px gap and the row, 100 px
+  // in all, so the row's middle sits 25 px under the tile's
+  const ALLOW_ROW = { w: 172, h: 50 };
+  const ALLOW_ROW_Y = LANE_Y + CHECKPOINT.gap / 2 + GATE.tileH / 2 + 25;
+  // the SAFE tag, in the database tile's top right corner; the CRASH tag outside the Worker tile, 20 px left of it,
+  // 2 px above its top edge, so it stays 20 px clear of NEEDS APPROVAL under it
   const SAFE_X = DB_SAFE.x + DB_SAFE.w / 2 - 20 - agentTagWidth('SAFE') / 2;
   const SAFE_Y = DB_SAFE.y - DB_SAFE.h / 2 + 16 + AGENT_TAG.h / 2;
-  const CRASH_X = WORKER.x + WORKER.w / 2 - 20 - agentTagWidth('CRASH') / 2;
-  const CRASH_Y = WORKER.y;
+  const CRASH_X = WORKER.x - WORKER.w / 2 - 20 - agentTagWidth('CRASH') / 2;
+  const CRASH_Y = WORKER.y - WORKER.h / 2 - 2 + AGENT_TAG.h / 2;
   // the card's route: out of the stepped-aside model down onto the lane, then along it to the Endpoint's doorway
   // (where it stops), then on to the handler's spot; it crosses the checkpoint's middle at a fraction of its first
   // leg (CROSS_CP, along the route), from which update() finds when the checkpoint lets it pass
@@ -389,17 +391,21 @@
     + '<div class="mono" style="font-size:20px;line-height:26px;margin-top:4px;color:var(--ink)">db-operations</div>'
     + `<div class="mono" style="font-size:16px;line-height:20px;margin-top:10px;color:${C.slate}">delete volume</div>`
     + `<div class="mono" style="font-size:16px;line-height:20px;color:${C.slate}">restore backup</div>`);
-  // The gate's bottom tile: ALLOWLIST and its one row, the agent's Namespace, assistant (tile.row, its check
-  // tile.check)
+  // The gate's bottom tile: ALLOWLIST, "in Temporal Cloud" (the Endpoint allowlist is a Temporal Cloud feature),
+  // and its one row, the agent's Namespace: NAMESPACE over assistant (tile.row, its check tile.check)
   const makeAllowlistTile = root => {
     const tile = makeGateTile(root,
       `<div style="display:flex;align-items:center;gap:8px">${ICON('shield', 20, C.violet, 1.8)}`
       + `<span class="mono" style="font-size:14px;line-height:18px;letter-spacing:.14em;color:${C.violet}">`
       + 'ALLOWLIST</span></div>'
-      + `<div class="row" style="margin-top:12px;width:${ALLOW_ROW.w}px;height:${ALLOW_ROW.h}px;display:flex;`
-      + 'align-items:center;justify-content:center;gap:8px;border:1px solid;border-radius:var(--rs);'
+      + `<div class="mono" style="font-size:14px;line-height:18px;margin-top:2px;color:${C.slate}">`
+      + 'in Temporal Cloud</div>'
+      + `<div class="row" style="margin-top:10px;width:${ALLOW_ROW.w}px;height:${ALLOW_ROW.h}px;display:flex;`
+      + 'align-items:center;justify-content:center;gap:10px;border:1px solid;border-radius:var(--rs);'
       + `background:${C.bg}"><span class="check">${ICON('check', 18, C.slate, 2.6)}</span>`
-      + '<span class="mono" style="font-size:18px;color:var(--ink)">assistant</span></div>');
+      + '<div style="text-align:left"><div class="mono" style="font-size:14px;line-height:16px;letter-spacing:.14em;'
+      + `color:${C.slate}">NAMESPACE</div>`
+      + '<div class="mono" style="font-size:18px;line-height:22px;color:var(--ink)">assistant</div></div></div>');
     tile.row = tile.querySelector('.row');
     tile.check = tile.querySelector('.check svg');
     return tile;
@@ -723,7 +729,8 @@
           const back = backPop(t, c[2] + backAt);
           place(tile, box.x, box.y, back.s, back.o);
           tile.style.borderColor = guarded && safe ? C.neon : C.line;
-          tile.style.boxShadow = guarded && safe ? glowShadow(RGB.neon, P(t, safeAt, 0.4), { blur: 30, alpha: 0.4 }) : '';
+          const glow = guarded && safe ? P(t, safeAt, 0.4) : 0;
+          tile.style.boxShadow = glow > 0 ? glowShadow(RGB.neon, glow, { blur: 30, alpha: 0.4 }) : '';
         });
       const zoneIn = P(t, c[2] + T2.zone, T2.zoneD);
       place(s.zone, PLATFORM.x, PLATFORM.y, lerp(1.03, 1, zoneIn), zoneIn);

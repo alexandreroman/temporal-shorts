@@ -67,7 +67,7 @@ decide and do? Its own account may be wrong. The Event History records each
 model call, tool call and approval, in order, out of the agent's reach. Follow
 it back to the cause, then find every other run that read the same document.
 
-Sources: [Help Net Security, October 2026](https://www.helpnetsecurity.com/2026/10/14/ciso-ai-agent-insider-risk/), [Temporal docs](https://docs.temporal.io/search-attribute)
+Sources: [Help Net Security, October 2026](https://www.helpnetsecurity.com/2026/10/14/ciso-ai-agent-insider-risk/), [Temporal docs, Search Attributes](https://docs.temporal.io/search-attribute)
 
 ## Chapter 6: What you get
 

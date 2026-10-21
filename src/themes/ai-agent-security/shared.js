@@ -196,8 +196,7 @@ const CHECKPOINT = { w: 200, gap: 130 };
 // (default 400; the opening is CHECKPOINT.gap px, each post (h - gap) / 2). The top post holds the official Temporal
 // symbol, WORKFLOW and "your code"; the bottom post a status icon (an eye while it watches). A dashed beam spans the
 // opening. It is placed and shown: move or fade it with place(cp.el, x, y, scale, opacity). Build it before the
-// action cards, which pass over its beam. tagSpot: [x, y] at rest, where a verdict tag centers above it (20 px clear
-// of its top). Returns { el, check, tagSpot, w, h }.
+// action cards, which pass over its beam. Returns { el, check, w, h }.
 // cp.check(t, t0, verdict) every frame: idle before t0 (or with verdict null), then from t0, when the card reaches
 // the beam:
 // - 'pass': a neon flash (0.6 s) through the beam and the posts; the status shows a neon check
@@ -268,7 +267,7 @@ function makeCheckpoint(root, { x, y, h = 400 }) {
   };
   place(el, x, y, 1, 1);
   check(0, 0, null);
-  return { el, check, tagSpot: [x, y - h / 2 - 40], w, h };
+  return { el, check, w, h };
 }
 
 // ---------- the action card: a step the model proposes, the moving element of the theme
@@ -478,11 +477,10 @@ const APPROVAL_CARD = { w: 320, h: 500 };
 // A phone that asks a person (who, e.g. 'Maya') to decide on a step: a header with the person and APPROVAL NEEDED,
 // the question (HTML, e.g. 'Delete the production database?'), a deadline line with a clock (e.g. 'Answer by Friday
 // 18:00'), then Approve (neon) and Reject (red) buttons. Hidden until placed: place(card.el, x, y, scale, opacity).
-// Returns { el, set, deadline }:
+// Returns { el, set }:
 // - card.set(t, t0, decision, decidedAt): the screen slides up into the phone from t0 (0.6 s); decision 'approve' |
 //   'reject' | null: at decidedAt the chosen button presses (a dip and a tap ring) and fills, the other one dims, and
 //   the header reads APPROVED (neon) or REJECTED (red)
-// - card.deadline: the deadline line's text element, which a scene may light up
 function makeApprovalCard(root, { who, question, deadline }) {
   const { w, h } = APPROVAL_CARD;
   const button = (kind, label, color) => `<div class="btn-${kind} mono" style="width:124px;height:52px;`
@@ -505,14 +503,13 @@ function makeApprovalCard(root, { who, question, deadline }) {
     + '<div style="position:absolute;left:24px;right:24px;top:144px;font-size:28px;line-height:36px">'
     + `${question}</div>`
     + `<div style="position:absolute;left:24px;bottom:112px;display:flex;align-items:center;gap:10px">`
-    + `${ICON('clock', 20, C.slate, 2)}<span class="deadline mono" style="font-size:16px;line-height:20px;`
+    + `${ICON('clock', 20, C.slate, 2)}<span class="mono" style="font-size:16px;line-height:20px;`
     + `color:${C.slate}">${deadline}</span></div>`
     + '<div style="position:absolute;left:24px;right:24px;bottom:32px;display:flex;justify-content:space-between">'
     + button('approve', 'APPROVE', C.neon) + button('reject', 'REJECT', C.red) + '</div>',
     '', { left: '-2px', top: '-2px', width: w + 'px', height: h + 'px', opacity: 1 });
   const buttons = { approve: screen.querySelector('.btn-approve'), reject: screen.querySelector('.btn-reject') };
   const colors = { approve: C.neon, reject: C.red };
-  const deadlineEl = screen.querySelector('.deadline');
   // the header's status, which reports the decision once the chosen button fills
   const statusEl = screen.querySelector('.status');
   const statusTexts = { approve: 'APPROVED', reject: 'REJECTED' };
@@ -545,7 +542,7 @@ function makeApprovalCard(root, { who, question, deadline }) {
     const ringX = decision === 'approve' ? 24 + 62 : w - 24 - 62;
     place(ring, ringX, h - 32 - 26, lerp(0.6, 1.8, tap), tap > 0 && tap < 1 ? 0.8 * (1 - tap) : 0);
   };
-  return { el, set, deadline: deadlineEl };
+  return { el, set };
 }
 
 // ---------- the YOUR WORKERS zone
