@@ -43,7 +43,10 @@ the visuals belong to each theme (last section).
   a theme visual on the right, one subtitle. The kicker names the audience
   or format ("AN EXPLAINER FOR EVERYONE", "AN EXPERIMENTAL PROJECT"); the
   title is a question for explainers ("How does an AI agent work?") or
-  the product name; the uppercase tagline ties the topic to Temporal. This
+  the product name; the uppercase tagline ties the topic to Temporal. A
+  product title splits after "Temporal" ("Temporal<br>Agent Harness",
+  "Temporal<br>Proxy 1.0"): a version number stays with the product name,
+  never alone on a line, which reads unbalanced. This
   title card is the theme's `social.png` (README.md, Social link
   previews).
 - Chapters: `chapter` and `title` drive the `NN / TITLE` header and the
