@@ -174,7 +174,10 @@
   scene({
     chapter: 2, title: 'A hidden order',
     sources: [
-      { label: 'PromptArmor, August 2026', url: 'https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data' },
+      {
+        label: 'PromptArmor, August 2026',
+        url: 'https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data',
+      },
     ],
     subs: [
       { text: "August 2026: researchers showed that hidden text in a document could make a work assistant leak data." },

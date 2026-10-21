@@ -4,8 +4,8 @@
 // wallet-helper, leaves the store for the assistant; its fake setup step, "install prerequisites", runs and turns out
 // to install a password thief: the add-on turns red, and a few more add-ons of the store with it (341 malicious). Its
 // red tendrils reach every item as the subtitle names them (FULL ACCESS), then three of them fly off to the attacker's
-// server. With Temporal, the board comes in: the model's `run_addon` card passes the WORKFLOW checkpoint, which routes
-// it down a fork, away from YOUR WORKERS, into a glass SANDBOX box: a sealed Worker, with no keys and no network.
+// server, which rose in on the right as the thief showed. With Temporal, the board comes in: the model's `run_addon` card passes the WORKFLOW checkpoint, which routes
+// it down a fork, away from YOUR WORKERS, into a glass SANDBOX box: a sealed Worker, with no keys and no internet.
 // The dramatic beat: the add-on's code turns red and lashes out at the walls of the box, four hits with sparks, each
 // one shaking the box alone; the glass cracks, the box drops out of the frame, a fresh one pops in, and the Workflow
 // carries on: CONTAINED, the `run_addon · SANDBOX` row of the Event History gets its tag and the model's next step
@@ -75,8 +75,9 @@
   const BOX_LEFT = BOX.x - BOX.w / 2, BOX_TOP = BOX.y - BOX.h / 2;
   // its badges, side by side at its bottom: size, icon size, distance of each center from the box's middle, bottom
   // inset; [icon, label] of each
-  const BADGE = { w: 150, h: 88, icon: 32, dx: 85, bottom: 24 };
-  const BADGES = [['keyOff', 'No keys'], ['wifiOff', 'No network']];
+  const BADGE = { w: 160, h: 88, icon: 32, dx: 88, bottom: 24 };
+  // (the sandboxed Worker still reaches Temporal, hence no internet rather than no network)
+  const BADGES = [['keyOff', 'No keys'], ['wifiOff', 'No internet']];
   // the action card at rest in the box, centered between the box's heading and its badges
   const CARD_REST = [1610, 623];
   // the CONTAINED tag, between the zone and the box, 20 px clear of each
@@ -111,14 +112,14 @@
   // rise in, the laptop's items pop in one after the other (items, itemStep) round the assistant (assistant); the
   // add-on leaves the store (leave) and flies to the assistant (flyD); its setup step runs (install) and turns out to
   // install a password thief as "a password thief" is read (hijack); the store's other malicious add-ons turn red
-  // (found)
+  // (found) and the attacker's server rises in on the right (page)
   const T0 = {
-    file: 0.1, pin: 2.8, pinD: 0.8, store: 2.9, laptop: 3.0, items: 3.3, itemStep: 0.06, assistant: 3.4, leave: 3.8,
-    flyD: 0.6, install: 4.5, hijack: 5.1, found: 5.5,
+    file: 0.1, pin: 2.8, pinD: 0.8, store: 2.9, laptop: 3.0, items: 3.3, itemStep: 0.06, assistant: 3.4, leave: 4.1,
+    flyD: 0.6, install: 4.9, hijack: 5.5, found: 5.9, page: 6.2,
   };
-  // c[1]: FULL ACCESS lands as "full access" is read (full); the tendrils reach the items (ITEMS.grab); the
-  // attacker's server rises in (page), then the leaks fly (LEAKS)
-  const T1 = { full: 1.7, page: 4.7 };
+  // c[1]: FULL ACCESS lands as "full access" is read (full); the tendrils reach the items (ITEMS.grab), then the
+  // leaks fly (LEAKS)
+  const T1 = { full: 1.7 };
   // c[2]: the replay sinks away (away, awayD) as the board pops in (orb, checkpoint, lanes, zone, tools, box, history);
   // the orb thinks (think), the card grows out of it (card) and reaches the gate (gate), which lets it pass (pass);
   // it rides the lower branch (ride, rideD), which lights up, into the box; the history records the model call
@@ -144,8 +145,6 @@
   const isModelRow = i => i !== 1;
 
   // ---------- helpers
-  // The point at p (0 to 1) between two points [x, y]
-  const lerp2 = (a, b, p) => [lerp(a[0], b[0], p), lerp(a[1], b[1], p)];
   // An add-on icon, a puzzle piece (stroke, 24 grid, the style of ICON()); local to this scene, the only one that
   // draws add-ons
   const ADDON_PATH = '<path d="M4 7h4.5a2.5 2.5 0 0 1 5 0H18v4.5a2.5 2.5 0 0 1 0 5V20H4z"/>';
@@ -202,7 +201,6 @@
     svg.setAttribute('width', w);
     svg.setAttribute('height', h);
     svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-    svg.innerHTML = '<defs></defs>';
     Object.assign(svg.style, { position: 'absolute', left: -border + 'px', top: -border + 'px', ...css });
     parent.appendChild(svg);
     return svg;
@@ -391,8 +389,9 @@
     ],
     subs: [
       {
-        text: 'February 2026: 341 add-ons for an AI assistant were found secretly installing a password thief.',
-        // the store's malicious add-ons turn red at c[0] + 5.5: the infected computer then holds about 1.5 s
+        text: 'February 2026: 341 malicious add-ons for an AI assistant were found, most installing a password '
+          + 'thief.',
+        // the attacker's server is up at c[0] + 6.7: the infected computer then holds about 1.3 s
         after: 0.8,
       },
       {
@@ -423,7 +422,7 @@
           + `rgba(${RGB.red},0) 100%)`,
       });
       s.caseFile = makeCaseFile(s.replay, {
-        date: 'FEBRUARY 2026', tag: 'MALICIOUS ADD-ONS', headline: '341 assistant add-ons steal passwords',
+        date: 'FEBRUARY 2026', tag: 'MALICIOUS ADD-ONS', headline: '341 malicious assistant add-ons',
         source: 'THE HACKER NEWS, FEB 2026',
       });
       s.store = makeStore(s.replay);
@@ -578,8 +577,8 @@
       });
       placeAgentTag(s.fullAccess, t, c[1] + T1.full, ...FULL_ACCESS);
 
-      // three of them fly off to the attacker's server, landing as its rows
-      rise(s.page, PAGE.x, PAGE.y, P(t, c[1] + T1.page, 0.5));
+      // the attacker's server rises in as the thief shows; three of the items fly off to it, landing as its rows
+      rise(s.page, PAGE.x, PAGE.y, P(t, c[0] + T0.page, 0.5));
       LEAKS.forEach(({ item, at }, i) => {
         const leaveAt = c[1] + at;
         const flight = P(t, leaveAt, LEAK_D);

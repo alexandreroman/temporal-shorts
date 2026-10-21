@@ -46,9 +46,7 @@
   // the Database tool tile on the board, and its SAFE tag, inside the tile, 20 px from its right edge
   const DB_TOOL = 1;
   const [dbToolX, dbToolY] = toolSlot(DB_TOOL);
-  // An agentTag's width (see agentTag)
-  const agentTagW = text => 2 * AGENT_TAG.padX + AGENT_TAG.icon + AGENT_TAG.gap + text.length * 14;
-  const SAFE_X = dbToolX + TOOL_TILE.w / 2 - 20 - agentTagW('SAFE') / 2;
+  const SAFE_X = dbToolX + TOOL_TILE.w / 2 - 20 - agentTagWidth('SAFE') / 2;
   // the clock's start (Wednesday 10:00) and the time Maya answers, in minutes from it (Thursday 16:20)
   const WAIT = { startMin: 10 * 60, answerMin: 30 * 60 + 20, days: ['WED', 'THU', 'FRI'] };
 
@@ -298,7 +296,6 @@
       s.phone = makeApprovalCard(root, {
         who: 'Maya', question: 'Delete the production database?', deadline: 'Answer by Friday 18:00',
       });
-      s.deadline = s.phone.el.querySelector('.deadline');
       s.toPhone = makeSpark(root, 18, RGB.violet);
       s.toCheckpoint = makeSpark(root, 18, RGB.red);
       s.phoneRipples = makeRipples(root, 2, RGB.violet);
@@ -446,7 +443,7 @@
         tile.style.boxShadow = safe ? glowShadow(RGB.neon, P(t, safeAt, 0.4), { blur: 30, alpha: 0.5 }) : '';
       });
       s.board.zone.style.transform += glitch.dx ? ` translateX(${glitch.dx}px)` : '';
-      const crashTagX = BOARD.tools.x + BOARD.tools.w / 2 - 20 - agentTagW('CRASH') / 2;
+      const crashTagX = BOARD.tools.x + BOARD.tools.w / 2 - 20 - agentTagWidth('CRASH') / 2;
       placeAgentTag(s.crashTag, t, crashAt, crashTagX, BOARD.tools.y - BOARD.tools.h / 2 + 37,
         crashAt + T3.crashD);
 
@@ -487,8 +484,8 @@
       place(s.phone.el, PHONE.x, PHONE.y + Math.round(80 * (1 - phoneIn)), 1, phoneIn);
       s.phone.set(t, c[2] + T2.screen, 'reject', rejectAt);
       const lit = P(t, c[3] + T3.deadline, 0.3);
-      s.deadline.style.color = lit > 0.5 ? C.ink : C.slate;
-      s.deadline.style.textShadow = glowShadow(RGB.violet, lit, { blur: 14, alpha: 0.9 });
+      s.phone.deadline.style.color = lit > 0.5 ? C.ink : C.slate;
+      s.phone.deadline.style.textShadow = glowShadow(RGB.violet, lit, { blur: 14, alpha: 0.9 });
       const phoneTop = PHONE.y - APPROVAL_CARD.h / 2;
       const cpTop = [BOARD.checkpoint.x - CHECKPOINT.w / 2, BOARD.checkpoint.y - 132];
       const phoneEdge = [PHONE.x + APPROVAL_CARD.w / 2, phoneTop + 60];

@@ -49,23 +49,23 @@ Sources: [Hackread, April 2026](https://hackread.com/cursor-ai-agent-wipes-pocke
 
 [Watch from 1:38](/themes/ai-agent-security/#t=98)
 
-Early 2026: a social network for AI agents left about 1.5 million of their
+February 2026: a social network for AI agents left about 1.5 million of their
 access keys open to anyone. March 2026: researchers showed a cloud AI agent
-using its own keys to read every file of its company. With Temporal, the keys
-stay on your own servers, the Workers, which run each tool for the agent. The
-model only sees the results. Ask a hijacked agent for the keys: it has none to
-give.
+using its own keys to read every storage bucket of its project. With Temporal,
+the keys stay on your own servers, the Workers, which run each tool for the
+agent. The model only sees the results. Ask a hijacked agent for the keys: it
+has none to give.
 
 Sources: [Wiz, February 2026](https://www.wiz.io/blog/exposed-moltbook-database-reveals-millions-of-api-keys), [Unit 42, March 2026](https://unit42.paloaltonetworks.com/double-agents-vertex-ai/)
 
 ## Chapter 5: Locked in a sandbox
 
-[Watch from 2:07](/themes/ai-agent-security/#t=127)
+[Watch from 2:08](/themes/ai-agent-security/#t=128)
 
-February 2026: 341 add-ons for an AI assistant were found secretly installing a
-password thief. Those add-ons ran with full access: every file, every saved
-password, the whole network. With Temporal, risky work like add-ons or
-AI-written code goes to a sandbox: a sealed Worker, no keys. If the code
+February 2026: 341 malicious add-ons for an AI assistant were found, most
+installing a password thief. Those add-ons ran with full access: every file,
+every saved password, the whole network. With Temporal, risky work like add-ons
+or AI-written code goes to a sandbox: a sealed Worker, no keys. If the code
 misbehaves, the damage stays in the box. The box is thrown away; the Workflow
 carries on.
 
@@ -73,7 +73,7 @@ Source: [The Hacker News, February 2026](https://thehackernews.com/2026/02/resea
 
 ## Chapter 6: An agent that won't stop
 
-[Watch from 2:39](/themes/ai-agent-security/#t=159)
+[Watch from 2:40](/themes/ai-agent-security/#t=160)
 
 February 2026: asked only to suggest emails to delete, an AI assistant started
 deleting them. Its owner typed STOP from a phone, again and again. To the agent,
@@ -85,7 +85,7 @@ Source: [SF Standard, February 2026](https://sfstandard.com/2026/02/25/openclaw-
 
 ## Chapter 7: What went wrong?
 
-[Watch from 3:07](/themes/ai-agent-security/#t=187)
+[Watch from 3:09](/themes/ai-agent-security/#t=189)
 
 October 2026: in a survey of 600 security chiefs, 95% reported an incident tied
 to an AI agent that year. Then comes the question: what did the agent read,
@@ -98,14 +98,14 @@ Source: [Help Net Security, October 2026](https://www.helpnetsecurity.com/2026/1
 
 ## Chapter 8: What you get
 
-[Watch from 3:38](/themes/ai-agent-security/#t=218)
+[Watch from 3:39](/themes/ai-agent-security/#t=219)
 
 Rules in code, a person's yes, keys at home, sandboxes, a real stop and a full
 record.
 
 ## Chapter 9: What you can build
 
-[Watch from 3:46](/themes/ai-agent-security/#t=226)
+[Watch from 3:47](/themes/ai-agent-security/#t=227)
 
 These incidents are real and recent: any agent that acts on real systems needs
 the same guardrails. Support refunds, coding agents, invoice payments, IT help
@@ -113,7 +113,7 @@ desks: powerful agents, kept in check.
 
 ## Outro
 
-[Watch from 4:01](/themes/ai-agent-security/#t=241)
+[Watch from 4:02](/themes/ai-agent-security/#t=242)
 
 With Temporal, your agents act within your rules, and every step stays on the
 record.

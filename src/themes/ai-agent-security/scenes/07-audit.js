@@ -4,9 +4,9 @@
 // into the header of the Event History card, which grows to fill the frame: a Web UI-like list (number, time, type,
 // event, details, result) labelled OUTSIDE THE AGENT, whose rows fill in order, from the shared document the agent
 // read to the emails put back. The dramatic beat: the camera pushes in on the latest rows and travels back up the
-// history with a magnifier, which stops at each outcome of the earlier chapters (the cancel, the sandbox, Maya's no,
-// the blocked link) while a red thread links their results one to the next, up to the document at the top, which
-// lights as THE CAUSE with a red flash and a jolt.
+// history with a magnifier, which stops at each outcome of the earlier chapters (the cancel, the contained add-on,
+// Maya's no, the blocked link) while a red thread links their results one to the next, up to the document at the
+// top, which lights as THE CAUSE with a red flash and a jolt.
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- 95%: the stat block on the left, the crowd of figures on the right, centered on y 515
@@ -39,8 +39,8 @@
 
   // ---------- the Event History card
   // Its center and width; the header (title row, then the column heads band), the rows and the bottom padding, px.
-  // The card is a stack of white segments (header, one per row, footer), so each segment dims on its own where the
-  // pushed-in camera crops it (frameDim): a cropped edge then never shows at full opacity.
+  // The card is a stack of white segments (header, one per row, footer): a segment that the pushed-in camera crops
+  // off the frame hides on its own (see EDGE_FADE).
   const CARD = { x: 960, y: 515, w: 1360, headH: 120, bandTop: 80, rowH: 48, footH: 24, from: 0.35 };
   // the columns, from the card's left edge: number, time, type chip, event, details; the result tag ends `result`
   // px from the right edge; the type chip's size
@@ -63,11 +63,11 @@
     { time: '09:14:04', type: 'DID', event: 'open_url', code: true, detail: 'an outside address',
       tag: 'BLOCKED', tone: 'red' },
     { time: '09:14:06', type: 'DECIDED', event: 'model call', detail: 'next: delete_database' },
-    { time: '09:52:31', type: 'DID', event: 'delete_database', code: true, detail: 'the live database',
+    { time: '09:52:31', type: 'DID', event: 'delete_database', code: true, detail: 'the production database',
       tag: 'REJECTED BY MAYA', tone: 'red' },
-    { time: '09:52:33', type: 'DECIDED', event: 'model call', detail: 'next: run_code' },
-    { time: '09:52:35', type: 'DID', event: 'run_code', code: true, detail: 'code the AI wrote',
-      tag: 'SANDBOX', tone: 'neon' },
+    { time: '09:52:33', type: 'DECIDED', event: 'model call', detail: 'next: run_addon' },
+    { time: '09:52:35', type: 'DID', event: 'run_addon', code: true, detail: 'the wallet-helper add-on',
+      tag: 'CONTAINED', tone: 'neon' },
     { time: '09:52:36', type: 'DECIDED', event: 'model call', detail: 'next: delete_email' },
     { time: '09:52:37', type: 'DID', event: 'delete_email', code: true, detail: 'emails in the inbox' },
     { time: '09:52:40', type: 'MAYA', event: 'Workflow canceled', detail: 'a command to Temporal',
@@ -83,9 +83,10 @@
   // ---------- the dramatic beat
   // The camera, from rest (the stage point (960, 515) at scale 1): it pushes in on the latest rows (pushY, from c[3]
   // + push), then travels back up the history with the magnifier (to endY, from c[3] + travel): one push-in, then the
-  // rewind, the one way back the scene allows (a story beat)
+  // rewind, the one way back the scene allows (a story beat). At endY the header clears the vignette at the top (see
+  // EDGE_FADE) and the frame's bottom edge falls just above a row boundary, so no row is half cut there
   const REST = [960, 515, 1];
-  const SHOT = { zoom: 1.25, pushY: 600, endY: 420 };
+  const SHOT = { zoom: 1.25, pushY: 600, endY: 400 };
   const T3 = { push: 0, pushD: 1.1, travel: 1.3, travelD: 2.9, lens: 0.6 };
   // The magnifier's walk back in time, rows by index (0 is #1 on screen): it appears on the latest row, then each move
   // (from c[3] + at, d long) ends on an outcome, where a pin lands and the thread draws from the previous pin; the last
@@ -106,11 +107,15 @@
   const THREAD = { pin: 16, x: CARD.x + CARD.w / 2 - COL.result + 14, bulge: 80, width: 4 };
   // THE CAUSE tag's approximate width, to center the ripples on it
   const CAUSE_TAG_W = 164;
-  // Where the pushed-in camera crops the card, its segments fade out over a band this many px on screen inside the
-  // content frame's edges: a soft vignette rather than security's OFF_SHOT dim, as a dimmed white segment would show
-  // as a grey bar behind the header and the subtitles
+  // Where the pushed-in camera crops the card, it fades out over a band this many px on screen inside the content
+  // frame's edge: a gradient mask on the card's layer (an ease-in from transparent at the edge), a soft vignette
+  // rather than security's OFF_SHOT dim, as a white segment dimmed by its opacity would show as a grey bar behind
+  // the header and the subtitles. A segment whose part in the frame the mask hides almost entirely (below
+  // HIDDEN_ALPHA) hides too, which shows no change on screen and keeps the layout check from counting it. The
+  // thread and its pins, red on dark, dim by their opacity instead (frameDim).
   const EDGE_FADE = 60;
-  const FRAME = { top: 150, bottom: 880 };
+  const HIDDEN_ALPHA = 0.05;
+  const FRAME = { top: 150, bottom: 880, middle: 515 };
 
   // The top of row i in the card (0 at the card's center) and its center on the stage at camera rest
   const rowTop = i => -CARD.h / 2 + CARD.headH + i * CARD.rowH;
@@ -345,9 +350,11 @@
       s.stat = makeStat(root);
       s.crowd = makeCrowd(root);
 
-      // the card: a point at its center (class cam, as makeCaseFile's: the layout check measures the segments as
-      // its growth shows them), holding the segments
-      s.card = E(root, '', 'cam', { width: 0, height: 0 });
+      // the card's layer, the full stage, which the vignette masks; in it, the card: a point at its center (class
+      // cam, as makeCaseFile's: the layout check measures the segments as its growth shows them), holding the
+      // segments
+      s.cardLayer = E(root, '', '', { width: '1920px', height: '1080px', opacity: 1 });
+      s.card = E(s.cardLayer, '', 'cam', { width: 0, height: 0 });
       s.head = makeHeader(s.card);
       s.rows = ROWS.map((row, i) => makeRow(s.card, row, i));
       s.foot = makeSegment(s.card, CARD.h / 2 - CARD.footH, CARD.footH, '0 0 var(--r) var(--r)');
@@ -379,14 +386,18 @@
         [c[3] + T3.travel, CARD.x, SHOT.endY, SHOT.zoom, T3.travelD],
       ]);
       const [jx, jy] = shake(t, hitAt, 10, 0.4);
-      setCamera(s.cam, t, this.dur, { scale: cam.scale, dx: cam.dx + jx, dy: cam.dy + jy });
+      const camDy = cam.dy + jy;
+      setCamera(s.cam, t, this.dur, { scale: cam.scale, dx: cam.dx + jx, dy: camDy });
       placeFlash(s.flash, t, hitAt, 0.2);
-      // The opacity of a part spanning stage y top to bottom: 1 at least EDGE_FADE px inside the content frame, 0 where
-      // the shot crops it. It applies with the push-in only, so the whole card shows at rest. (setCamera scales round
-      // y 540; its brief zooms in and out at the scene's ends are left out.)
+      // Where the shot puts a stage y on the screen, and back. (setCamera scales round y 540; its brief zooms in and
+      // out at the scene's ends are left out.)
+      const toScreen = y => 540 + camDy + (y - 540) * cam.scale;
+      const toStage = y => 540 + (y - 540 - camDy) / cam.scale;
+      // The opacity of a red part (the thread, a pin) spanning stage y top to bottom: 1 at least EDGE_FADE px inside
+      // the content frame, 0 where the shot crops it. It applies with the push-in only, so the whole thread shows at
+      // rest.
       const pushed = clamp((cam.scale - 1) / (SHOT.zoom - 1));
       const frameDim = (top, bottom) => {
-        const toScreen = y => 540 + cam.dy + (y - 540) * cam.scale;
         const inside = Math.min(toScreen(top) - FRAME.top, FRAME.bottom - toScreen(bottom));
         return lerp(1, clamp(inside / EDGE_FADE), pushed);
       };
@@ -427,10 +438,37 @@
         popScale(s.head.chips[i], popIn(t, flyAt + T1.flyD * 0.85));
       });
 
-      // each segment dims where the shot crops it
+      // The card's vignette (see EDGE_FADE): an ease-in over EDGE_FADE px toward each edge of the frame that crops
+      // the card. Where the card crosses an edge by less than EDGE_FADE px, that edge's band slides out past the edge
+      // by the difference: an edge of the card inside the frame never fades, and the fade grows as the card crosses.
       const stageY = local => CARD.y + local * cardK;
-      s.head.style.opacity = frameDim(stageY(-CARD.h / 2), stageY(-CARD.h / 2 + CARD.headH));
-      s.foot.style.opacity = frameDim(stageY(CARD.h / 2 - CARD.footH), stageY(CARD.h / 2));
+      const cardTop = toScreen(stageY(-CARD.h / 2)), cardBottom = toScreen(stageY(CARD.h / 2));
+      const topEnd = FRAME.top - Math.max(0, EDGE_FADE - (FRAME.top - cardTop));
+      const bottomEnd = FRAME.bottom + Math.max(0, EDGE_FADE - (cardBottom - FRAME.bottom));
+      // its alpha at screen y
+      const vignette = y => {
+        const u = clamp(Math.min(y - topEnd, bottomEnd - y) / EDGE_FADE);
+        return u * u * u;
+      };
+      // the mask: its layer is the stage, so each stop sits at the stage y of its screen y, five stops across each
+      // band; none while the card sits inside the frame
+      if (cardTop < FRAME.top || cardBottom > FRAME.bottom) {
+        const band = (end, dir) => [0, 0.25, 0.5, 0.75, 1].map(u => end + dir * u * EDGE_FADE);
+        const screenStops = [...band(topEnd, 1), ...band(bottomEnd, -1).reverse()];
+        const stops = screenStops.map(y => `rgba(0,0,0,${vignette(y).toFixed(3)}) ${toStage(y).toFixed(1)}px`);
+        s.cardLayer.style.maskImage = `linear-gradient(to bottom, ${stops.join(', ')})`;
+      } else {
+        s.cardLayer.style.maskImage = 'none';
+      }
+      // A segment spanning stage y top to bottom: 1, or 0 where the vignette hides its most visible point
+      const segmentShown = (top, bottom) => {
+        const nearest = clamp(FRAME.middle, toScreen(top), toScreen(bottom));
+        return vignette(nearest) < HIDDEN_ALPHA ? 0 : 1;
+      };
+
+      // each segment hides where the vignette hides it
+      s.head.style.opacity = segmentShown(stageY(-CARD.h / 2), stageY(-CARD.h / 2 + CARD.headH));
+      s.foot.style.opacity = segmentShown(stageY(CARD.h / 2 - CARD.footH), stageY(CARD.h / 2));
       const outside = popIn(t, c[2] + T2.outside, 0.2);
       popScale(s.head.outside, outside);
 
@@ -440,7 +478,7 @@
       const lensPop = backPop(t, c[3] + T3.lens, 0.4);
       const arrivals = new Map(moves.map(move => [move.to, c[3] + move.at + move.d]));
       s.rows.forEach((seg, i) => {
-        seg.style.opacity = frameDim(stageY(rowTop(i)), stageY(rowTop(i) + CARD.rowH));
+        seg.style.opacity = segmentShown(stageY(rowTop(i)), stageY(rowTop(i) + CARD.rowH));
         const at = c[2] + T2.rows + i * T2.step;
         showRow(seg.content, P(t, at, 0.35), 26, true);
         seg.band.style.opacity = (lensPop.o * clamp(1 - Math.abs(lensRow - i))).toFixed(3);

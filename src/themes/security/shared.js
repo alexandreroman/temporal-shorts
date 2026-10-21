@@ -1051,35 +1051,3 @@ const BARE_WORKERS_HANDOFF = {
 // Chapter 6 to 7: the push into the TEMPORAL PROXY box that chapter 6 ends on and chapter 7 opens on, [x, y, scale]
 // for shot(): the box fills the content frame's height (y 155-875). See chapter 6's header for what shows there.
 const PROXY_SHOT = [PROXY.x, PROXY.y, 2.4];
-
-// ---------- camera and motion
-// Camera framing eased between stops, like pan(): from and each stop give [x, y, scale], the stage point (x, y)
-// centered on (960, 515) at that scale; a stop is [at, x, y, scale, d = 0.9]. Returns the offsets for
-// setCamera(cam, t, dur, { ...shot(t, from, stops), enter: 1, exit: 1 }), in whole pixels. setCamera() scales
-// around (960, 540), hence the 25 px between 540 and 515 in dy.
-// It eases each framing's offsets, together with the scale, rather than its center: every stage point's screen
-// position is then a straight blend of its positions in the two framings, so it moves one way. Easing the center
-// and the scale together would swing points far from the center out and back when the scale changes.
-function shot(t, from, stops) {
-  const offsets = (x, y, scale) => ({ dx: (960 - x) * scale, dy: (540 - y) * scale - 25 });
-  let { dx, dy } = offsets(...from);
-  let scale = from[2];
-  for (const [at, sx, sy, ss, d = 0.9] of stops) {
-    const p = P(t, at, d);
-    const to = offsets(sx, sy, ss);
-    dx = lerp(dx, to.dx, p);
-    dy = lerp(dy, to.dy, p);
-    scale = lerp(scale, ss, p);
-  }
-  return { scale, dx: Math.round(dx), dy: Math.round(dy) };
-}
-// Shake of an alarm hit at `at`, as [dx, dy] in whole pixels: a new hashed offset every frame (1/30 s), up to amp
-// px, dying out over d seconds; [0, 0] outside [at, at + d], so the composition rests on the same pixels before and
-// after
-function shake(t, at, amp, d = 0.4) {
-  const u = (t - at) / d;
-  if (u < 0 || u >= 1) return [0, 0];
-  const frame = Math.floor((t - at) * 30);
-  const k = amp * (1 - u);
-  return [Math.round((hash(frame * 2 + 1) * 2 - 1) * k), Math.round((hash(frame * 2 + 2) * 2 - 1) * k)];
-}

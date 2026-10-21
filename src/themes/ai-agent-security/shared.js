@@ -9,8 +9,8 @@
 //   decides (NEEDS APPROVAL).
 // - Camera: build each scene in a camera layer (makeCamera) and frame it with setCamera(): its zoom-through brings
 //   every chapter in and plays into the next one. The one exception is chapter 1, which opens on the intro's last
-//   frame (a match cut, see INTRO_ORB). Within a scene the camera moves one way only (shot(), see the project memory
-//   note on camera moves); shake() jolts it on a hit.
+//   frame (a match cut, see INTRO_ORB). Within a scene the camera moves one way only (shot() in src/shared.js, see
+//   the project memory note on camera moves); shake() jolts it on a hit.
 // - Colors: the incident replay is red (C.red, RGB.red); Temporal is UV (the checkpoint); the model is the violet
 //   orb; neon is for status only (a step that passes, a safe outcome).
 // - Maya is the agent's owner: she says no in chapter 3, cancels in chapter 6 and shows in chapter 7's history. Name
@@ -28,8 +28,6 @@ Object.assign(ICONS, {
   // a database: a cylinder of two stacked disks
   database: '<ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/>'
     + '<path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
-  // a phone: its body and a home bar
-  phone: '<rect x="6.5" y="2.5" width="11" height="19"/><path d="M10.5 18.5h3"/>',
   // a trash can: its lid, its handle and two slats
   trash: '<path d="M4 6.5h16M9.5 6.5v-3h5v3M6 6.5l1 14h10l1-14M10 10.5v6M14 10.5v6"/>',
   // undo: an arrow that turns back on itself
@@ -45,19 +43,18 @@ Object.assign(ICONS, {
   // a stop sign: an octagon with an exclamation mark
   stop: '<path d="M8.3 3h7.4L21 8.3v7.4L15.7 21H8.3L3 15.7V8.3z"/><path d="M12 7.5v5.5M12 16.5h.01"/>',
   // a sandbox: code brackets inside a dashed box
-  sandbox: '<rect x="3" y="3" width="18" height="18" stroke-dasharray="3 2.2"/><path d="M9.5 9l-3 3 3 3M14.5 9l3 3-3 3"/>',
+  sandbox: '<rect x="3" y="3" width="18" height="18" stroke-dasharray="3 2.2"/>'
+    + '<path d="M9.5 9l-3 3 3 3M14.5 9l3 3-3 3"/>',
   // a saved password: a field of masked characters
   password: '<rect x="2.5" y="7" width="19" height="10"/>'
     + '<path d="M7 10v4M5.3 11l3.4 2M5.3 13l3.4-2M12 10v4M10.3 11l3.4 2M10.3 13l3.4-2M15.5 14h3"/>',
-  // an eye struck through: hidden text, unseen
-  eyeOff: '<path d="M2 12c3-6 17-6 20 0-3 6-17 6-20 0z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/>',
   // a key struck through: no key held
   keyOff: '<circle cx="5.5" cy="18.5" r="3.5"/><path d="M8 16l2-2M14 10l6.5-6.5M17 7l2 2M19.5 4.5l1.5 1.5"/>'
     + '<path d="M3.5 3.5l17 17"/>',
   // a globe: the public internet, an outside address
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/>'
     + '<path d="M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z"/>',
-  // a network struck through: no network
+  // a network struck through: no internet
   wifiOff: '<path d="M2 9a14.5 14.5 0 0 1 20 0M5.5 12.5a9.5 9.5 0 0 1 13 0M9 16a4.5 4.5 0 0 1 6 0M12 19.5h.01"/>'
     + '<path d="M3.5 3.5l17 17"/>',
 });
@@ -76,13 +73,14 @@ STATUS_KINDS.approval = { background: C.violet, color: C.bg, borderColor: C.viol
 // (x, y) and its size; every scene reads them, so adjust them here, never in a scene.
 // - laneY: the line the action cards travel along, from the model through the checkpoint's opening to the tools
 // - model: the AI model orb (makeModelOrb), on the left; size, its diameter; its AI MODEL label hangs under it
-// - checkpoint: the WORKFLOW checkpoint (makeCheckpoint), in the middle, its opening on laneY
+// - checkpoint: the WORKFLOW checkpoint (makeCheckpoint), in the middle, its opening on laneY; h, its height (its
+//   width is CHECKPOINT.w)
 // - tools: the YOUR WORKERS zone (makeWorkerZone) on the right, holding the column of tool tiles (TOOLS, toolSlot)
-// - history: the Event History strip (makeHistoryStrip) under the checkpoint, HISTORY_STRIP.rows rows
+// - history: the Event History strip (makeHistoryStrip) under the checkpoint, three rows
 const BOARD = {
   laneY: 410,
   model: { x: 330, y: 410, size: 180 },
-  checkpoint: { x: 960, y: 410, w: 200, h: 400 },
+  checkpoint: { x: 960, y: 410, h: 400 },
   tools: { x: 1590, y: 410, w: 420, h: 456 },
   history: { x: 960, y: 768, w: 800, h: 176 },
 };
@@ -302,9 +300,11 @@ function makeActionCard(root, { tool, arg, icon = null }) {
     },
   };
 }
+// The point at p (0 to 1) between two points a and b, each [x, y]
+const lerp2 = (a, b, p) => [lerp(a[0], b[0], p), lerp(a[1], b[1], p)];
 // The stops of an action card on the board, each [x, y]: from, the orb's center (the card grows out of it); gate,
 // in front of the checkpoint, 20 px clear of it (where it waits or is blocked); past, just behind it, 20 px clear;
-// tool, the center of tool tile i (where it lands, shrinking into the tile). Ease between them with lerp() or
+// tool, the center of tool tile i (where it lands, shrinking into the tile). Ease between them with lerp2() or
 // pointAlong([from, gate, past, tool], u).
 function actionStops(card, i) {
   const { model, checkpoint, laneY } = BOARD;
@@ -320,18 +320,21 @@ function actionStops(card, i) {
 const AGENT_TAG = { font: 20, h: 40, padX: 14, icon: 20, gap: 8 };
 // The fill and icon of each tone: red, a refused or harmful step; neon, a safe outcome; violet, waiting for a person
 const AGENT_TONES = { red: [C.red, 'x'], neon: [C.neon, 'check'], violet: [C.violet, 'hourglass'] };
+// The width of a verdict tag of this text, px: its padding, icon and gap, then its text (Mono with .1em spacing
+// advances 14 px per character), always even
+const agentTagWidth = text => 2 * AGENT_TAG.padX + AGENT_TAG.icon + AGENT_TAG.gap + text.length * 14;
 // A verdict tag, e.g. BLOCKED, SAFE, NEEDS APPROVAL, CONTAINED, RESTORED, NO KEYS HERE: bold dark uppercase text and
-// an icon on a solid fill in tone ('red' | 'neon' | 'violet'), AGENT_TAG.h px high, its width from its text (Mono
-// with .1em spacing advances 14 px per character), always even, so it rests on whole pixels at a whole center.
-// Appended to parent when given; hidden until placed (placeAgentTag, or place()). Pass the text in capitals.
+// an icon on a solid fill in tone ('red' | 'neon' | 'violet'), AGENT_TAG.h px high, agentTagWidth(text) px wide, so
+// it rests on whole pixels at a whole center. Appended to parent when given; hidden until placed (placeAgentTag, or
+// place()). Pass the text in capitals.
 function agentTag(text, tone, parent = null) {
-  const { font, h, padX, icon, gap } = AGENT_TAG;
+  const { font, h, icon, gap } = AGENT_TAG;
   const [fill, iconName] = AGENT_TONES[tone];
   const e = document.createElement('div');
   e.className = 'abs mono';
   e.innerHTML = ICON(iconName, icon, C.bg, tone === 'violet' ? 2.4 : 2.8) + `<span>${text}</span>`;
   Object.assign(e.style, {
-    width: (2 * padX + icon + gap + text.length * 14) + 'px', height: h + 'px', display: 'flex',
+    width: agentTagWidth(text) + 'px', height: h + 'px', display: 'flex',
     alignItems: 'center', justifyContent: 'center', gap: gap + 'px', paddingLeft: '2px', background: fill,
     color: C.bg, fontSize: font + 'px', lineHeight: '24px', letterSpacing: '.1em', fontWeight: 700,
     borderRadius: 'var(--rs)', whiteSpace: 'nowrap', opacity: 0, visibility: 'hidden',
@@ -357,11 +360,11 @@ const CASE_FILE = {
   at: { x: 960, y: 515 }, pin: { x: 330, y: 244, scale: 420 / 900 },
   label: { w: 420, h: 188, tab: { w: 140, h: 24 } },
 };
-// The incident dossier: a white folder (a CASE FILE tab on its top left), a date line (e.g. 'JUNE 2025') and a red
-// tag ('ZERO-CLICK') side by side, a large headline on up to two lines (HTML, e.g. 'One email takes over a work
-// assistant'), an optional source line under it (source, in capitals, e.g. 'PROMPTARMOR, AUG 2026', shown as
-// "SOURCE · PROMPTARMOR, AUG 2026" in dark slate mono: it shows in the video too, where the scene's `sources` cannot
-// be clicked), and a red INCIDENT stamp in its bottom right corner. Hidden until set.
+// The incident dossier: a white folder (a CASE FILE tab on its top left), a date line (e.g. 'AUGUST 2026') and a red
+// tag ('HIDDEN TEXT') side by side, a large headline on up to two lines (HTML, e.g. 'A shared document takes
+// over<br>a work assistant'), an optional source line under it (source, in capitals, e.g. 'PROMPTARMOR, AUG 2026',
+// shown as "SOURCE · PROMPTARMOR, AUG 2026" in dark slate mono: it shows in the video too, where the scene's
+// `sources` cannot be clicked), and a red INCIDENT stamp in its bottom right corner. Hidden until set.
 // Pinned, it becomes a compact evidence label at its own size (the full card shrunk that far would be unreadable):
 // the same tab, date and tag on one line, the headline on two lines below, the source line, a smaller stamp.
 // Returns { el, set, pin }:
@@ -467,13 +470,13 @@ function makeCaseFile(root, { date, tag, headline, source = null }) {
 // The phone's size, px
 const APPROVAL_CARD = { w: 320, h: 500 };
 // A phone that asks a person (who, e.g. 'Maya') to decide on a step: a header with the person and APPROVAL NEEDED,
-// the question (HTML, e.g. 'Delete the live database?'), a deadline line with a clock (e.g. 'Answer by Friday
+// the question (HTML, e.g. 'Delete the production database?'), a deadline line with a clock (e.g. 'Answer by Friday
 // 18:00'), then Approve (neon) and Reject (red) buttons. Hidden until placed: place(card.el, x, y, scale, opacity).
-// Returns { el, set, setDeadline }:
+// Returns { el, set, deadline }:
 // - card.set(t, t0, decision, decidedAt): the screen slides up into the phone from t0 (0.6 s); decision 'approve' |
 //   'reject' | null: at decidedAt the chosen button presses (a dip and a tap ring) and fills, the other one dims, and
 //   the header reads APPROVED (neon) or REJECTED (red)
-// - card.setDeadline(text): rewrites the deadline line (e.g. a countdown)
+// - card.deadline: the deadline line's text element, which a scene may light up
 function makeApprovalCard(root, { who, question, deadline }) {
   const { w, h } = APPROVAL_CARD;
   const button = (kind, label, color) => `<div class="btn-${kind} mono" style="width:124px;height:52px;`
@@ -536,7 +539,7 @@ function makeApprovalCard(root, { who, question, deadline }) {
     const ringX = decision === 'approve' ? 24 + 62 : w - 24 - 62;
     place(ring, ringX, h - 32 - 26, lerp(0.6, 1.8, tap), tap > 0 && tap < 1 ? 0.8 * (1 - tap) : 0);
   };
-  return { el, set, setDeadline: text => setText(deadlineEl, text) };
+  return { el, set, deadline: deadlineEl };
 }
 
 // ---------- the YOUR WORKERS zone
@@ -557,10 +560,10 @@ function makeWorkerZone(root, { x, y, w, h, label = 'Your workers' }) {
 }
 
 // ---------- the Event History strip
-// Rows of the strip at BOARD.history: how many fit, the top of the first one, the pitch, a row's height and text size
-const HISTORY_STRIP = { rows: 3, rowTop: 52, pitch: 38, rowH: 32, font: 19 };
+// Rows of the strip at BOARD.history: the top of the first one, the pitch, a row's height and text size
+const HISTORY_STRIP = { rowTop: 52, pitch: 38, rowH: 32, font: 19 };
 // The board's Event History: the series' white Event History card (makeHistoryCard) at BOARD.history's size, with
-// HISTORY_STRIP.rows rows at most (rowsHtml: each row's HTML after its number, e.g. '<b>send_email</b> outside
+// three rows at most (rowsHtml: each row's HTML after its number, e.g. '<b>send_email</b> outside
 // address') and a status tag on the right of each. uvRow(i): whether row i reads in UV (a model call). Hidden until
 // placed; fill it with fillHistoryStrip().
 function makeHistoryStrip(root, rowsHtml, { uvRow } = {}) {
@@ -625,32 +628,4 @@ function placeBoard(board, o = {}) {
   board.tools.forEach((tile, i) => place(tile, ...toolSlot(i), 1, shown.tools));
   place(board.history, history.x, history.y, 1, shown.history);
   board.lanes.forEach(lane => draw(lane, 1, shown.lanes));
-}
-
-// ---------- camera and motion (as in the security theme)
-// Camera framing eased between stops, like pan(): from and each stop give [x, y, scale], the stage point (x, y)
-// centered on (960, 515) at that scale; a stop is [at, x, y, scale, d = 0.9]. Returns the offsets for
-// setCamera(cam, t, dur, { ...shot(t, from, stops) }), in whole pixels (setCamera() scales round (960, 540), hence
-// the 25 px in dy). Each framing's offsets ease with the scale, so every point moves one way.
-function shot(t, from, stops) {
-  const offsets = (x, y, scale) => ({ dx: (960 - x) * scale, dy: (540 - y) * scale - 25 });
-  let { dx, dy } = offsets(...from);
-  let scale = from[2];
-  for (const [at, sx, sy, ss, d = 0.9] of stops) {
-    const p = P(t, at, d);
-    const to = offsets(sx, sy, ss);
-    dx = lerp(dx, to.dx, p);
-    dy = lerp(dy, to.dy, p);
-    scale = lerp(scale, ss, p);
-  }
-  return { scale, dx: Math.round(dx), dy: Math.round(dy) };
-}
-// Shake of a hit at `at`, as [dx, dy] in whole pixels: a new hashed offset every frame (1/30 s), up to amp px, dying
-// out over d seconds; [0, 0] outside [at, at + d]. Add it to setCamera's dx and dy.
-function shake(t, at, amp, d = 0.4) {
-  const u = (t - at) / d;
-  if (u < 0 || u >= 1) return [0, 0];
-  const frame = Math.floor((t - at) * 30);
-  const k = amp * (1 - u);
-  return [Math.round((hash(frame * 2 + 1) * 2 - 1) * k), Math.round((hash(frame * 2 + 2) * 2 - 1) * k)];
 }

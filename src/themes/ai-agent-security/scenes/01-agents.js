@@ -97,7 +97,8 @@
     sources: [
       {
         label: 'SailPoint survey, May 2025',
-        url: 'https://www.hpcwire.com/aiwire/2025/06/04/sailpoint-research-reveals-ai-agents-as-enterprise-security-blind-spot/',
+        url: 'https://www.hpcwire.com/aiwire/2025/06/04/'
+          + 'sailpoint-research-reveals-ai-agents-as-enterprise-security-blind-spot/',
       },
     ],
     // a hard cut: the intro ends on this chapter's first frame; the default fade-out to the next scene
@@ -282,7 +283,7 @@
       const toTool = P(t, toToolAt, T3.toToolD);
       let [cx, cy] = [lerp(stops.from[0], stops.gate[0], emerge), laneY];
       if (through > 0) cx = lerp(stops.gate[0], stops.past[0], through);
-      if (toTool > 0) [cx, cy] = [lerp(stops.past[0], stops.tool[0], toTool), lerp(stops.past[1], stops.tool[1], toTool)];
+      if (toTool > 0) [cx, cy] = lerp2(stops.past, stops.tool, toTool);
       const cardScale = lerp(0.3, 1, emerge) * lerp(1, 0.5, P(t, toToolAt + T3.toToolD * 0.6, T3.toToolD * 0.4));
       const cardO = P(t, emergeAt, 0.25) * (1 - P(t, toToolAt + T3.toToolD * 0.7, T3.toToolD * 0.3));
       s.card.place(cx, cy, cardScale, cardO);

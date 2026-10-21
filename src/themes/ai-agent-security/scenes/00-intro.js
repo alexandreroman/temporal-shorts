@@ -68,14 +68,16 @@
       s.halo = E(root, '', '', { width: '600px', height: '600px', borderRadius: '50%',
         background: haloBackground(0.2, 0.09, 40, 68) });
       s.redHalo = E(root, '', '', { width: '600px', height: '600px', borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${RGB.red},.26) 0%, rgba(${RGB.red},.1) 40%, rgba(${RGB.red},0) 68%)` });
+        background: `radial-gradient(circle, rgba(${RGB.red},.26) 0%, rgba(${RGB.red},.1) 40%, `
+          + `rgba(${RGB.red},0) 68%)` });
       s.t = makeTitleBlock(root, 'AN EXPLAINER FOR EVERYONE', 'Who keeps an AI agent<br>in check?',
         'REAL INCIDENTS, AND HOW TEMPORAL HELPS', { titleFont: 100, titleLineHeight: 1.04 });
 
       // the ring's arcs, in a box of their own round the ring's center, which the collapse shrinks
       const box = RING.r + 40;
-      s.ringBox = E(root, `<svg width="${2 * box}" height="${2 * box}" style="display:block;overflow:visible">`
-        + '<defs></defs></svg>', '', { width: 2 * box + 'px', height: 2 * box + 'px' });
+      s.ringBox = E(root,
+        `<svg width="${2 * box}" height="${2 * box}" style="display:block;overflow:visible"></svg>`, '',
+        { width: 2 * box + 'px', height: 2 * box + 'px' });
       s.ringBox.style.filter = `drop-shadow(0 0 8px rgba(${RGB.violet},.6))`;
       const svg = s.ringBox.querySelector('svg');
       s.arcs = Array.from({ length: RING.n }, (_, k) => {
