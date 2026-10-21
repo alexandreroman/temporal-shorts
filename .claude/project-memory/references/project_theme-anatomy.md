@@ -500,7 +500,12 @@ below and the card order in [Home page design](feedback_home-page.md).
   Preview", "GA" or "generally available" (user decision). Every claim
   follows the release, the temporal-proxy README and
   docs.temporal.io/production-deployment/temporal-proxy (`### Sources`).
-- Four chapters: security in every Worker (ch1), one gateway, no secrets
+- Four chapters: security in every team (ch1: the six Workers belong to
+  three teams, PAYMENTS, ORDERS and FRAUD, a column of two each, and
+  their chips diverge, a codec version per Worker, expiring certificates,
+  API keys in env vars, until no two match; no payload goes out in clear;
+  the dramatic beat is a solid red NO CENTRAL CONTROL verdict under the
+  Workers, on the spot of ch2's NO SECRETS), one gateway, no secrets
   (ch2), encryption with your keys and failing closed (ch3), why 1.0
   matters and how it installs (ch4). A news short ends on its last topic
   chapter: no "What you get" recap, no "What you can build" chapter.

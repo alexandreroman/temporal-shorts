@@ -19,20 +19,20 @@ no code or configuration on screen, apart from the two short lines a
 Worker knows behind the proxy, `proxy:7233` and `payments`.
 
 The video states the problem in one chapter (every Worker carries an
-address, credentials and encryption code, and one forgotten codec sends
-payloads out in clear), then shows the proxy: one gateway that adds TLS,
-the credentials and the full Namespace name on the way out, encrypts every
-payload with data keys wrapped by your KMS, with no Worker code change,
-and fails closed when encryption is required and no key is configured.
-It closes on what 1.0 means (ready for production, supported) and how
-the proxy runs next to the Workers.
+address, credentials and encryption code, and with many teams, each
+wires its own, with no central control), then shows the proxy: one
+gateway that adds TLS, the credentials and the full Namespace name on
+the way out, encrypts every payload with data keys wrapped by your KMS,
+with no Worker code change, and fails closed when encryption is required
+and no key is configured. It closes on what 1.0 means (ready for
+production, supported) and how the proxy runs next to the Workers.
 
 Running example: the security theme's transfer, Nora sends €25,000 to
 Leo. One payload card carries it, the same card as in the security theme:
 `from: FR76 3000 6000 0112 3456 7890 189`, `to: DE89 3704 0044 0532 0130
 00`, `name: Leo Martin`, `amount: €25,000`.
 
-Topics, in order: security in every Worker without the proxy (ch1); one
+Topics, in order: security in every team without the proxy (ch1); one
 gateway, no secrets in the Workers (ch2); encryption with your keys,
 failing closed (ch3); what 1.0 means and how to install it (ch4).
 
@@ -76,7 +76,7 @@ you can build" chapter.
     peel off them to a second row) as YOUR ENVIRONMENT and TEMPORAL fade in
     round them: chapter 1 opens on that frame.
 
-## 01 Security in every Worker
+## 01 Security in every team
 
 - **0:09** Without it, every Worker carries an address, credentials and
   encryption code.
@@ -88,17 +88,20 @@ you can build" chapter.
     words; each Worker draws its own connection to TEMPORAL, light flowing
     along it, and TEMPORAL lists the six connections (worker-1 to
     worker-6, each with its language and VERIFIED).
-- **0:15** Forget the codec in one Worker, and its payloads go out in
-  clear.
-  - Visuals: On "Forget the codec", the bottom-right Worker (Go) loses
-    its CODEC chip, which drops off with a tilt and fades; the empty slot
-    blinks red and stays a red dashed NO CODEC outline; its payload card
-    leaves it in clear and grows into TEMPORAL, under the list, as that
-    Worker, its connection and its row turn red. Dramatic beat: a solid
-    red IN CLEAR tag slams onto the card, with red rings, a red flash and
-    a shake, and the card turns red. At the end every remaining chip
-    falls off the Workers and the connections, the list and the card go,
-    leaving the bare fleet that chapter 02 opens on.
+- **0:15** With many teams, each wires its own: security varies from one
+  Worker to the next.
+  - Visuals: On "With many teams", a violet team tag pops onto each
+    Worker's top right corner, one column after the other: PAYMENTS,
+    ORDERS, FRAUD, two Workers each. On "each wires its own", every
+    Worker's CODEC chip flips, down each column, to its own codec: CODEC
+    V1, CODEC V2 or CUSTOM CODEC. On "security varies from one Worker to
+    the next", four more chips flip and turn red, one Worker after the
+    next: two CERT EXPIRING, two KEY IN ENV VAR; no two Workers match.
+    Dramatic beat: a solid red NO CENTRAL CONTROL verdict slams in under
+    the Workers, with red rings, a red flash and a shake. At the end every
+    chip falls off the Workers and the team tags, the verdict, the
+    connections and the list go, leaving the bare fleet that chapter 02
+    opens on.
 
 ## 02 One gateway, no secrets
 
