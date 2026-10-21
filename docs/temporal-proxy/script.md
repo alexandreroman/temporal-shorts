@@ -3,7 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=temporal-proxy` for the live values; the start
-times below are a snapshot from 2026-10-21. Chapters 01 to 04 are still
+times below are a snapshot from 2026-10-21. Chapters 03 and 04 are still
 to be built: their start times read `-:--` until then, and the outro's
 time is the snapshot without them.
 
@@ -78,37 +78,50 @@ you can build" chapter.
 
 ## 01 Security in every Worker
 
-- **-:--** Without it, every Worker carries an address, credentials and
+- **0:09** Without it, every Worker carries an address, credentials and
   encryption code.
-  - Visuals: Six Worker tiles (Go, Java, TypeScript logos) in YOUR
-    ENVIRONMENT, TEMPORAL on the right; the chips ADDRESS, CERTIFICATE,
+  - Visuals: Opens on the intro's last frame: six Worker tiles (Go, Java,
+    TypeScript logos) in YOUR ENVIRONMENT, TEMPORAL on the right, in a
+    camera that holds still. A neon light sweeps over the Workers' borders
+    as the subtitle reads "every Worker"; the chips ADDRESS, CERTIFICATE,
     API KEY and CODEC drop into each Worker in step with the words; each
-    Worker draws its own connection to TEMPORAL.
-- **-:--** Forget the codec in one Worker, and its payloads go out in
+    Worker draws its own connection to TEMPORAL, light flowing along it,
+    and TEMPORAL lists the six connections (worker-1 to worker-6, each
+    with its language and VERIFIED).
+- **0:15** Forget the codec in one Worker, and its payloads go out in
   clear.
-  - Visuals: One Worker's CODEC slot turns into a red dashed NO CODEC
-    outline; a payload card leaves it in clear into TEMPORAL. Dramatic
-    beat: a solid red IN CLEAR tag slams onto the card, with a red flash,
-    a shake and rings. At the end every chip falls off every Worker and
-    the connections go, leaving the bare fleet.
+  - Visuals: The bottom-right Worker (Go) never got its CODEC chip: the
+    empty slot blinks red and stays a red dashed NO CODEC outline; its
+    payload card leaves it in clear and grows into TEMPORAL, under the
+    list, as that Worker, its connection and its row turn red. Dramatic
+    beat: a solid red IN CLEAR tag slams onto the card, with red rings, a
+    red flash and a shake, and the card turns red. At the end every chip
+    falls off every Worker and the connections, the list and the card
+    go, leaving the bare fleet that chapter 02 opens on.
 
 ## 02 One gateway, no secrets
 
-- **-:--** Temporal Proxy is one gateway in your network: Workers only know
+- **0:22** Temporal Proxy is one gateway in your network: Workers only know
   a local address.
-  - Visuals: The TEMPORAL PROXY box slides onto YOUR ENVIRONMENT's right
-    edge as TEMPORAL narrows, and lands with a violet glow; the Workers'
-    connections converge into it, and one violet connection leaves it for
-    TEMPORAL. Each Worker types `proxy:7233` and `payments`; NO SECRETS
-    under the Workers.
-- **-:--** On the way out, it adds TLS, the credentials and the full
+  - Visuals: Opens on chapter 01's last frame. YOUR ENVIRONMENT widens as
+    TEMPORAL narrows to the right, and the TEMPORAL PROXY box slides onto
+    the environment's right edge, landing with a violet glow and rings;
+    the Workers' connections converge into it, and one violet connection
+    leaves it for TEMPORAL, light flowing along them. Each Worker types
+    `proxy:7233` and `payments` (in violet); NO SECRETS under the Workers.
+- **0:28** On the way out, it adds TLS, the credentials and the full
   Namespace name.
-  - Visuals: A payload card rides from a Worker into the proxy as the
-    camera pushes right. Dramatic beat, three clicks at the proxy, each
-    with neon rings: the TLS tube draws to TEMPORAL, an API KEY tag docks,
-    `.a1b2c` types after `payments`; the card goes out to the
-    payments.a1b2c Namespace in TEMPORAL; CREDENTIALS IN ONE PLACE. The
-    chapter ends close on the proxy.
+  - Visuals: A payload card, with a `payments` tag under it, leaves the
+    top-right Worker and rides its connection into the proxy as the camera
+    pushes right and in to a close shot on the proxy (the Workers and the
+    zones dim). Dramatic beat, three clicks at the proxy, each with neon
+    rings and a swell of its glow: the TLS tube draws to TEMPORAL (the
+    card's border turns neon), an API KEY tag docks, `.a1b2c` types after
+    `payments`. The card goes out through the tube into the
+    payments.a1b2c Namespace in TEMPORAL, which lights up; CREDENTIALS IN
+    ONE PLACE under the proxy. Before the cut the card, its tags, the
+    Namespace and that tag fade out, leaving the close shot on the proxy
+    and its TLS tube that chapter 03 opens on.
 
 ## 03 Encryption with your keys
 
@@ -142,7 +155,7 @@ you can build" chapter.
 
 ## Outro
 
-- **0:09** Credentials and encryption leave your Workers for one place you
+- **0:36** Credentials and encryption leave your Workers for one place you
   control.
   - Visuals: Opens on the proxy box with its 1.0 badge, small at the top;
     the end card fades in under it: title "Temporal Proxy 1.0", tagline

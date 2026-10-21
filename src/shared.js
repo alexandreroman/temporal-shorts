@@ -1528,6 +1528,21 @@ function makeMissingChip(root, label) {
   });
 }
 
+// A row of TEMPORAL's list of connections, w x h px: the Worker's name and language on the left, a quiet VERIFIED on
+// the right (Temporal checked the credentials that Worker presented, it does not keep them). It stays hidden until
+// placed.
+function makeConnectionRow(root, name, lang, { w, h }) {
+  return E(root,
+    `<span class="mono" style="font-size:18px">${name} <span style="color:${C.slate}">·</span> `
+    + `${lang}</span><span class="mono" style="display:flex;align-items:center;gap:6px;font-size:16px;`
+    + `letter-spacing:.1em;color:${C.neon}">${ICON('check', 16, C.neon, 2.6)}VERIFIED</span>`,
+    '', {
+      width: w + 'px', height: h + 'px', display: 'flex', alignItems: 'center',
+      justifyContent: 'space-between', padding: '0 14px', border: `1px solid ${C.lineLight}`,
+      borderRadius: 'var(--rs)',
+    });
+}
+
 // ---------- Temporal Proxy (security, temporal-proxy)
 // The TEMPORAL PROXY box's size, and head: its shield and name at its top (top, the shield's size, the gap under it,
 // the name's line height) and where they end, px under the box's top, which leaves the room under them to what the
@@ -1567,6 +1582,32 @@ function namespaceHtml(shown, caret) {
   return `<span style="position:relative">${FULL_NS.slice(0, shown)}`
     + `<span style="opacity:0">${FULL_NS.slice(shown)}</span>${cursor}</span>`;
 }
+
+// The card that goes through the proxy, a payload card w px wide at scale k (security's lane-size card), with its
+// Namespace tag under it and the API KEY under that (tagH: their height; nsW and keyW: their widths; gap: the clear
+// space between the card and each tag, 14 px: 16.8 px on screen at 1.2, 33.6 px at 2.4); h: its height on the stage;
+// nsDy and keyDy: from its center to the Namespace tag's and to the API KEY's
+const PROXY_CARD = { w: 340, k: 0.45, tagH: 28, nsW: 156, keyW: 124, gap: 14 };
+PROXY_CARD.h = payloadLayout(PROXY_CARD.w).h * PROXY_CARD.k;
+PROXY_CARD.nsDy = PROXY_CARD.h / 2 + PROXY_CARD.gap + PROXY_CARD.tagH / 2;
+PROXY_CARD.keyDy = PROXY_CARD.nsDy + PROXY_CARD.tagH + PROXY_CARD.gap;
+// A small tag beside the card (PROXY_CARD): a fixed width w, its HTML centered, in the violet look; 15 px (18 px on
+// screen at 1.2), so the full Namespace name leaves room on both sides in its band
+const proxyCardTag = (root, html, w) => E(root, html, 'mono', {
+  width: w + 'px', height: PROXY_CARD.tagH + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  gap: '6px', fontSize: '15px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1px solid ${C.violet}`,
+  borderRadius: 'var(--rs)', background: 'var(--violet-solid)',
+});
+// The payments Namespace band inside TEMPORAL that the card goes into, of the size of band ({ w, h }, each theme's
+// PROXY_BAND), labelled with its full name (FULL_NS) at its top left, 18 px from its left edge and 14 px under its top
+// edge (offsets from its padding box, TILE_BORDER inside them)
+const makeProxyBand = (root, band) => E(root,
+  `<div style="position:absolute;left:${18 - TILE_BORDER}px;top:${14 - TILE_BORDER}px">`
+  + `<div class="mono" style="font-size:12px;line-height:18px;letter-spacing:.14em;color:${C.slate}">NAMESPACE</div>`
+  + `<div class="mono" style="font-size:18px;line-height:26px">${FULL_NS}</div></div>`,
+  '', {
+    width: band.w + 'px', height: band.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)',
+  });
 
 // ---------- your KMS (security, temporal-proxy)
 // A tag in a statusTag kind's look (its leading icon unless `icon` is false), drawn at u stage px per screen px, so

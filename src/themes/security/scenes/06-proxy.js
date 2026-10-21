@@ -68,7 +68,7 @@
       // the lane and the Worker tiles first, in chapter 5's order, so the cut shows the same stack
       const root = s.cam = makeCamera(stage);
       Object.assign(s, makeFleet(root));
-      s.band = makeProxyBand(root);
+      s.band = makeProxyBand(root, PROXY_BAND);
       s.tube = makeProxyTube(root, s.out);
       s.proxy = makeProxy(root);
       s.landing = makeRipples(root, 2, RGB.violet);

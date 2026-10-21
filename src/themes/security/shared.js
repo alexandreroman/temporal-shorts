@@ -447,35 +447,13 @@ function makeProxyTube(root, out) {
   svgLayer(root).appendChild(out);
   return tube;
 }
-// The card that goes through the proxy in chapter 6, a lane-size card at scale k, with its Namespace tag under it and
-// the API KEY under that (tagH: their height; nsW and keyW: their widths; gap: the clear space between the card and
-// each tag, 14 px: 16.8 px on screen in chapter 6's shot, 33.6 px in the push into the proxy); h: its height on the
-// stage; nsDy and keyDy: from its center to the Namespace tag's and to the API KEY's
-const PROXY_CARD = { w: PAYLOAD_IN_WORKER.w, k: 0.45, tagH: 28, nsW: 156, keyW: 124, gap: 14 };
-PROXY_CARD.h = payloadLayout(PROXY_CARD.w).h * PROXY_CARD.k;
-PROXY_CARD.nsDy = PROXY_CARD.h / 2 + PROXY_CARD.gap + PROXY_CARD.tagH / 2;
-PROXY_CARD.keyDy = PROXY_CARD.nsDy + PROXY_CARD.tagH + PROXY_CARD.gap;
-// The payments Namespace inside TEMPORAL that the card goes into in chapter 6: its center and size; card: where the
-// card rests in it, under its name, its padlock clear of the name; the API KEY ends about as far above the band's
-// bottom edge as the tags are apart
+// The card that goes through the proxy in chapters 6 and 7, with its Namespace tag and API KEY, is PROXY_CARD
+// (src/shared.js), a card of the lane's width (PAYLOAD_IN_WORKER) at scale k.
+// The payments Namespace inside TEMPORAL that the card goes into in chapter 6 (makeProxyBand): its center and size;
+// card: where the card rests in it, under its name, its padlock clear of the name; the API KEY ends about as far above
+// the band's bottom edge as the tags are apart
 const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: LANE.wire.y, w: 180, h: 280 };
 PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 78 + PROXY_CARD.h / 2 };
-// The payments Namespace band (PROXY_BAND), labelled with its full name at its top left, 18 px from its left edge and
-// 14 px under its top edge (offsets from its padding box, TILE_BORDER inside them)
-const makeProxyBand = root => E(root,
-  `<div style="position:absolute;left:${18 - TILE_BORDER}px;top:${14 - TILE_BORDER}px">`
-  + `<div class="mono" style="font-size:12px;line-height:18px;letter-spacing:.14em;color:${C.slate}">NAMESPACE</div>`
-  + `<div class="mono" style="font-size:18px;line-height:26px">${FULL_NS}</div></div>`,
-  '', {
-    width: PROXY_BAND.w + 'px', height: PROXY_BAND.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)',
-  });
-// A small tag beside the card (PROXY_CARD): a fixed width w, its HTML centered, in the violet look; 15 px (18 px on
-// screen in chapter 6's shot), so the full Namespace name leaves room on both sides in its band
-const proxyCardTag = (root, html, w) => E(root, html, 'mono', {
-  width: w + 'px', height: PROXY_CARD.tagH + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  gap: '6px', fontSize: '15px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1px solid ${C.violet}`,
-  borderRadius: 'var(--rs)', background: 'var(--violet-solid)',
-});
 // ---------- the recap tiles (chapters 11 and 12)
 // The benefits of the recap, [icon, label], one tile each in the use cases' row (USE_CASE_ROW); a <br> splits a label
 // that would crowd its tile

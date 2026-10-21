@@ -70,6 +70,11 @@ const PROXY_WIRE = { x0: PROXY.x + PROXY.w / 2, x1: FLEET.proxyTemporal.x, y: WI
 // TEMPORAL, on the wire's line, high enough to hold a card and its tags; its label above it
 const PROXY_TUBE = { x0: PROXY_WIRE.x0, x1: PROXY_WIRE.x1 + 12, y: WIRE_Y, h: 176 };
 PROXY_TUBE.label = { x: (PROXY_TUBE.x0 + PROXY_TUBE.x1) / 2, y: PROXY_TUBE.y - PROXY_TUBE.h / 2 - 36 };
+// The payments Namespace inside TEMPORAL with the proxy that chapter 2's card goes into (makeProxyBand): its center,
+// in the middle of TEMPORAL, and size; card: where the card (PROXY_CARD) rests in it, under its name, its padlock clear
+// of the name, its tags under it. In PROXY_SHOT it shows whole, at x 1335-1635 and y 305-725 on screen.
+const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: WIRE_Y, w: 200, h: 280 };
+PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 78 + PROXY_CARD.h / 2 };
 // The proxy box at PROXY moved by (dx, dy), at scale s, with opacity o and a violet glow of strength glow (0 to 1)
 function placeProxy(box, { dx = 0, dy = 0, s = 1, o = 1, glow = 0 } = {}) {
   place(box, PROXY.x + dx, PROXY.y + dy, s, o);

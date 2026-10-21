@@ -257,7 +257,7 @@
       // chapter 6's parts first, in its order, so the cut shows the same stack
       const root = s.cam = makeCamera(stage);
       Object.assign(s, makeFleet(root));
-      s.band = makeProxyBand(root);
+      s.band = makeProxyBand(root, PROXY_BAND);
       s.tube = makeProxyTube(root, s.out);
       s.proxy = makeProxy(root);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
