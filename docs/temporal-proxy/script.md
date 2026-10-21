@@ -84,20 +84,21 @@ you can build" chapter.
     TypeScript logos) in YOUR ENVIRONMENT, TEMPORAL on the right, in a
     camera that holds still. A neon light sweeps over the Workers' borders
     as the subtitle reads "every Worker"; the chips ADDRESS, CERTIFICATE,
-    API KEY and CODEC drop into each Worker in step with the words; each
-    Worker draws its own connection to TEMPORAL, light flowing along it,
-    and TEMPORAL lists the six connections (worker-1 to worker-6, each
-    with its language and VERIFIED).
+    API KEY and CODEC drop into each of the six Workers in step with the
+    words; each Worker draws its own connection to TEMPORAL, light flowing
+    along it, and TEMPORAL lists the six connections (worker-1 to
+    worker-6, each with its language and VERIFIED).
 - **0:15** Forget the codec in one Worker, and its payloads go out in
   clear.
-  - Visuals: The bottom-right Worker (Go) never got its CODEC chip: the
-    empty slot blinks red and stays a red dashed NO CODEC outline; its
-    payload card leaves it in clear and grows into TEMPORAL, under the
-    list, as that Worker, its connection and its row turn red. Dramatic
-    beat: a solid red IN CLEAR tag slams onto the card, with red rings, a
-    red flash and a shake, and the card turns red. At the end every chip
-    falls off every Worker and the connections, the list and the card
-    go, leaving the bare fleet that chapter 02 opens on.
+  - Visuals: On "Forget the codec", the bottom-right Worker (Go) loses
+    its CODEC chip, which drops off with a tilt and fades; the empty slot
+    blinks red and stays a red dashed NO CODEC outline; its payload card
+    leaves it in clear and grows into TEMPORAL, under the list, as that
+    Worker, its connection and its row turn red. Dramatic beat: a solid
+    red IN CLEAR tag slams onto the card, with red rings, a red flash and
+    a shake, and the card turns red. At the end every remaining chip
+    falls off the Workers and the connections, the list and the card go,
+    leaving the bare fleet that chapter 02 opens on.
 
 ## 02 One gateway, no secrets
 

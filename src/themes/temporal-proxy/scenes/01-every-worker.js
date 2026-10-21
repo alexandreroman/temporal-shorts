@@ -2,10 +2,10 @@
 // Opens on the bare fleet that the intro ends on (placeBareFleet), in WIDE_SHOT, and holds that framing (the alarm
 // shakes it). A light sweeps over the Workers as the subtitle reads "every Worker"; then each Worker stacks the same
 // four chips (ADDRESS, CERTIFICATE, API KEY, CODEC) in step with the words and opens a connection of its own to
-// Temporal, which lists the six connections. One Worker has no CODEC chip: its empty slot blinks red (NO CODEC) and
-// its payload card goes out in clear into TEMPORAL, where a red IN CLEAR alarm slams onto it with a flash, a shake and
-// rings. Then every chip drops off every Worker and the connections, the list and the card go, leaving the bare fleet
-// that chapter 2 opens on.
+// Temporal, which lists the six connections. Then one Worker forgets its codec: its CODEC chip drops off, its empty
+// slot blinks red (NO CODEC) and its payload card goes out in clear into TEMPORAL, where a red IN CLEAR alarm slams
+// onto it with a flash, a shake and rings. Then every other chip drops off every Worker and the connections, the list
+// and the card go, leaving the bare fleet that chapter 2 opens on.
 // The block keeps every name declared in this file local to this scene.
 {
   // from c[0]: the light sweeps over the Workers (every, everyStep from one column to the next, everyD); each chip
@@ -15,11 +15,13 @@
     every: 0.9, everyStep: 0.12, everyD: 0.4, chips: [2.5, 3.1, 3.45, 4.1], chipStep: 0.07, chipD: 0.35, link: 0.2,
     linkD: 0.6, flow: 4.6,
   };
-  // from c[1]: the empty CODEC slot blinks red (missing, blinks of blink seconds); the card leaves that Worker in clear
-  // (card, cardD); IN CLEAR slams onto it (slam, slamD)
-  const T1 = { missing: 0.3, blink: 0.12, card: 1.8, cardD: 1.2, slam: 3.4, slamD: 0.16 };
+  // from c[1]: the forgetful Worker's CODEC chip drops off as the subtitle says "Forget the codec" (forget, over
+  // END.fallD, like the chips of the ending); its empty slot blinks red once the chip is mostly gone (missing, blinks
+  // of blink seconds); the card leaves that Worker in clear (card, cardD); IN CLEAR slams onto it (slam, slamD)
+  const T1 = { forget: 0.3, missing: 0.75, blink: 0.12, card: 1.8, cardD: 1.2, slam: 3.4, slamD: 0.16 };
   // the ending, in seconds before the end: the chips fall off (fall), each after a hashed delay (up to spread), over
-  // fallD; the card, its alarm and the connections clear (clear). Everything has gone 0.4 s before the cut.
+  // fallD (the forgetful Worker's codec has already gone); the card, its alarm and the connections clear (clear).
+  // Everything has gone 0.4 s before the cut.
   const END = { fall: 1.6, spread: 0.5, fallD: 0.7, clear: 0.45 };
   // the Worker that forgets its codec (in WORKERS) and the CODEC chip (in WORKER_CHIPS)
   const FORGETFUL = 5;
@@ -83,18 +85,20 @@
       placeBareFleet(s.fleet, cam);
 
       // the Workers: the light sweeps over them, then each gets its chips, one at a time, as the subtitle names them
-      // (the forgetful Worker never gets its codec); at the end they fall off, each after a hashed delay
+      // (all six get all four); the forgetful Worker's codec falls off on "Forget the codec", every other chip at the
+      // end, each after a hashed delay
       s.fleet.tiles.forEach((tile, w) => {
         const slot = WORKERS[w];
         tile.chips.forEach((chip, k) => {
           const at = c[0] + T0.chips[k] + w * T0.chipStep;
-          const fall = P(t, fallAt + END.spread * hash(w * 4 + k + 60), END.fallD, linear);
+          const forgotten = w === FORGETFUL && k === CODEC;
+          const fallStart = forgotten ? c[1] + T1.forget : fallAt + END.spread * hash(w * 4 + k + 60);
+          const fall = P(t, fallStart, END.fallD, linear);
           if (t < at || fall >= 1) return;
-          const shown = w === FORGETFUL && k === CODEC ? 0 : 1;
           // it drops into its slot with a little bounce
           const drop = P(t, at, T0.chipD, backOut);
           const tilt = (hash(w * 4 + k + 90) * 2 - 1) * FALL.tilt * fall;
-          chip.style.opacity = shown * P(t, at, 0.15) * (1 - fall);
+          chip.style.opacity = P(t, at, 0.15) * (1 - fall);
           chip.style.transform = `translateY(${((drop - 1) * 22 + FALL.drop * fall * fall).toFixed(2)}px) `
             + `rotate(${tilt.toFixed(2)}deg)`;
         });
@@ -122,7 +126,7 @@
       const listLabel = P(t, c[0] + T0.chips[0] + T0.link + T0.linkD - 0.3, 0.4) * linksO;
       place(s.listLabel, LIST.x, LIST.label + 10, 1, listLabel);
 
-      // the forgotten codec: its empty slot blinks red, then stays outlined
+      // the forgotten codec: once its chip has dropped off, its empty slot blinks red, then stays outlined
       const forgetful = WORKERS[FORGETFUL];
       const missingAt = c[1] + T1.missing;
       const blinking = t - missingAt < 4 * T1.blink;
