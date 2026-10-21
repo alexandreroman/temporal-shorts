@@ -99,8 +99,6 @@
     '<b>terminal</b> curl outside.example',
     '<b>create_ticket</b> outside project',
   ];
-  // the Event History's FLAGGED tag: the theme's solid red look, with a flag (a kind of this scene's own)
-  STATUS_KINDS.hiddenOrderFlag = { background: C.red, color: C.bg, borderColor: C.red, icon: ['flag', C.bg, 2.6] };
 
   // ---------- the beats
   // from c[0]: the case file slams in (file), pins as evidence (pin, pinD); the shared files panel rises in, the new
@@ -600,14 +598,10 @@
       // then rejected by Maya
       const ticketTag = rejected ? 'REJECTED BY MAYA' : 'WAITING FOR MAYA';
       fillHistoryStrip(s.history, t, [
-        { at: flagAt + 0.1, tag: null },
+        { at: flagAt + 0.1, tag: 'FLAGGED', tone: 'flagged' },
         { at: hitAt + 0.15, tag: 'NO INTERNET', tone: 'red' },
         { at: holdAt + 0.2, tag: ticketTag, tone: rejected ? 'red' : 'violet' },
       ]);
-      const flagTag = s.history.tags[0];
-      setStatus(flagTag, 'FLAGGED', 'hiddenOrderFlag');
-      flagTag.style.fontWeight = '700';
-      popScale(flagTag, popIn(t, flagAt + 0.4));
       if (t >= rejectAt) s.history.tags[2].style.transform = `scale(${swell(t, rejectAt + 0.1, 0.14)})`;
     }
   });

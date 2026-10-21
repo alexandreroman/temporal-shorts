@@ -66,10 +66,13 @@ Object.assign(ICONS, {
 const TEMPORAL_SYMBOL = assetUrl('assets/temporal-symbol-light-cropped.svg');
 
 // ---------- statusTag kinds of this theme (for the Event History rows, see fillHistoryStrip): solid fills under
-// bold dark text, the agentTag looks at row size
+// bold dark text, the agentTag looks at row size. alarm: a refused or harmful step (REJECTED BY MAYA); safe: a step
+// that passed; approval: a step waiting for a person (WAITING, HELD); flagged: outside content that came in (FLAGGED).
+// A scene that draws its own tags at another size (chapter 5's) takes their colors and icon from these kinds.
 STATUS_KINDS.alarm = { background: C.red, color: C.bg, borderColor: C.red, icon: ['x', C.bg, 2.8] };
 STATUS_KINDS.safe = { background: C.neon, color: C.bg, borderColor: C.neon, icon: ['check', C.bg, 2.8] };
 STATUS_KINDS.approval = { background: C.violet, color: C.bg, borderColor: C.violet, icon: ['hourglass', C.bg, 2.4] };
+STATUS_KINDS.flagged = { background: C.red, color: C.bg, borderColor: C.red, icon: ['flag', C.bg, 2.6] };
 
 // ---------- the board: the shared stage of the Temporal half of each chapter
 // Stage positions at camera rest, centered on (960, 515) within x 120-1800, y 180-856. Every box gives its center
@@ -102,8 +105,8 @@ const TOOL_TILE = { w: 360, h: 72, pitch: 94, top: 78 };
 // The center [x, y] of tool tile i (0 to 3) in the zone BOARD.tools
 const toolSlot = i => [BOARD.tools.x, BOARD.tools.y - BOARD.tools.h / 2 + TOOL_TILE.top + TOOL_TILE.h / 2
   + i * TOOL_TILE.pitch];
-// A tool tile (TOOL_TILE.w x h): its icon and its label, left-aligned. Hidden until placed (placeBoard places the
-// board's). tile.icon: its <svg>, whose stroke a scene may tint.
+// A tool tile (TOOL_TILE.w x h): its icon and its label, left-aligned. Hidden until placed. tile.icon: its <svg>,
+// whose stroke a scene may tint.
 function makeToolTile(root, { icon, label }) {
   const tile = E(root,
     `${ICON(icon, 32, C.ink, 1.8)}<span class="lbl" style="color:var(--ink)">${label}</span>`,
@@ -578,10 +581,10 @@ function makeHistoryStrip(root, rowsHtml, { uvRow } = {}) {
   });
 }
 // Fills the strip: rows[i] = { at, tag, tone } for row i: it slides in at `at`, and its tag pops in 0.3 s later,
-// tone 'red' (alarm), 'neon' (safe), 'violet' (approval) or 'saved' (the series' SAVED look); tag null for none. Rows
-// with no entry stay hidden.
+// tone 'red' (alarm), 'neon' (safe), 'violet' (approval), 'flagged' (red with a flag) or 'saved' (the series' SAVED
+// look); tag null for none. Rows with no entry stay hidden.
 function fillHistoryStrip(card, t, rows) {
-  const kinds = { red: 'alarm', neon: 'safe', violet: 'approval', saved: 'saved' };
+  const kinds = { red: 'alarm', neon: 'safe', violet: 'approval', flagged: 'flagged', saved: 'saved' };
   card.rows.forEach((row, i) => {
     const entry = rows[i];
     showRow(row, entry ? P(t, entry.at, 0.35) : 0, 26, true);
@@ -616,19 +619,4 @@ function makeBoard(root, { historyRows = [], uvRow, seed } = {}) {
   board.orb = makeModelOrb(root, { ...model, seed });
   board.history = makeHistoryStrip(root, historyRows, { uvRow });
   return board;
-}
-// The opacity of each part of the board that placeBoard() shows: all of them, unless a scene says otherwise
-const BOARD_SHOWN = { model: 1, checkpoint: 1, tools: 1, history: 1, lanes: 1 };
-// Shows the board's parts at rest, each with its opacity in o (BOARD_SHOWN by default): model (the orb and its
-// label), checkpoint, tools (the zone and its tiles), history, lanes. A scene that animates a part (a pop, a slide)
-// places it itself after this call. The orb's and the checkpoint's states stay the scene's (orb.set, cp.check).
-function placeBoard(board, o = {}) {
-  const shown = { ...BOARD_SHOWN, ...o };
-  const { model, checkpoint, tools, history } = BOARD;
-  place(board.orb.el, model.x, model.y, 1, shown.model);
-  place(board.checkpoint.el, checkpoint.x, checkpoint.y, 1, shown.checkpoint);
-  place(board.zone, tools.x, tools.y, 1, shown.tools);
-  board.tools.forEach((tile, i) => place(tile, ...toolSlot(i), 1, shown.tools));
-  place(board.history, history.x, history.y, 1, shown.history);
-  board.lanes.forEach(lane => draw(lane, 1, shown.lanes));
 }

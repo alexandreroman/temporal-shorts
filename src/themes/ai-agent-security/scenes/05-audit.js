@@ -57,14 +57,15 @@
     WORKFLOW: [C.uv, '#FFFFFF'],
     MAYA: [C.violet, C.bg],
   };
-  // the result tags: text, fill, icon, and text color (dark by default)
+  // the result tags: text and look (a STATUS_KINDS entry: background, text color, icon as [name, color, stroke
+  // width]), the theme's kinds where chapters 2 to 4 show the same outcome, so a tag reads the same in every chapter
   const TAGS = {
-    flagged: { text: 'FLAGGED', fill: C.red, icon: 'flag' },
-    sandbox: { text: 'SANDBOX', fill: C.neon, icon: 'sandbox' },
-    held: { text: 'HELD', fill: C.violet, icon: 'hourglass' },
-    rejected: { text: 'REJECTED BY MAYA', fill: C.red, icon: 'x' },
-    cause: { text: 'THE CAUSE', fill: C.red, icon: 'alert' },
-    thisRun: { text: 'THIS RUN', fill: C.uv, icon: 'search', color: '#FFFFFF' },
+    flagged: { text: 'FLAGGED', look: STATUS_KINDS.flagged },
+    sandbox: { text: 'SANDBOX', look: { ...STATUS_KINDS.safe, icon: ['sandbox', C.bg, 2.6] } },
+    held: { text: 'HELD', look: STATUS_KINDS.approval },
+    rejected: { text: 'REJECTED BY MAYA', look: STATUS_KINDS.alarm },
+    cause: { text: 'THE CAUSE', look: { ...STATUS_KINDS.alarm, icon: ['alert', C.bg, 2.6] } },
+    thisRun: { text: 'THIS RUN', look: { background: C.uv, color: '#FFFFFF', icon: ['search', '#FFFFFF', 2.6] } },
   };
   // One run of the agent, as chapters 2 to 4 told it, in order: each row's time, type, event (tool: a tool call, in
   // bold), details and result tag. The shared document at the top is the cause the magnifier walks back to.
@@ -189,13 +190,14 @@
   // A result tag (one of TAGS), font px text: bold uppercase text after an icon on a solid fill, the look of the
   // theme's verdict tags. Its width is computed, not measured (Mono advances 0.7 em per character with the .1em
   // spacing), and even, as its height, so it rests on whole pixels however it is anchored. Hidden until shown.
-  const makeResultTag = (parent, { text, fill, icon, color = C.bg }, font, css = {}) => {
+  const makeResultTag = (parent, { text, look }, font, css = {}) => {
+    const { background, color, icon: [icon, iconColor, stroke] } = look;
     const padX = Math.round(font * 0.6), gap = 6;
     const w = 2 * Math.ceil((2 * padX + font + gap + text.length * font * 0.7) / 2);
-    return E(parent, ICON(icon, font, color, 2.6) + `<span>${text}</span>`, 'mono', {
+    return E(parent, ICON(icon, font, iconColor, stroke) + `<span>${text}</span>`, 'mono', {
       width: w + 'px', height: (font + 12) + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
       gap: gap + 'px', fontSize: font + 'px', fontWeight: 700, letterSpacing: '.1em', whiteSpace: 'nowrap',
-      background: fill, color, borderRadius: '4px', ...css,
+      background, color, borderRadius: '4px', ...css,
     });
   };
 

@@ -107,10 +107,10 @@
   // rounded up to an even number of px
   const providerWidth = name => 2 * Math.ceil((28 + name.length * 11.2) / 2);
   // the verdict tags: CONTAINED under the Worker, as wide as it, halfway between it and the Event History; NOTHING
-  // LOST left of the Event History, 24 px clear of it
+  // LOST on the Event History's top left corner, left-aligned with it and 20 px over it
   const CONTAINED = [WORKER.x, 590];
-  const NOTHING_LOST = [BOARD.history.x - BOARD.history.w / 2 - 24 - agentTagWidth('NOTHING LOST') / 2,
-    BOARD.history.y];
+  const NOTHING_LOST = [BOARD.history.x - BOARD.history.w / 2 + agentTagWidth('NOTHING LOST') / 2,
+    BOARD.history.y - BOARD.history.h / 2 - 20 - AGENT_TAG.h / 2];
   // the lanes: the orb to the checkpoint, the checkpoint to the Worker, and the Worker's commands into the box
   const LANE_IN = [BOARD.model.x + BOARD.model.size / 2 + 16, BOARD.checkpoint.x - CHECKPOINT.w / 2];
   const LANE_WORKER = [BOARD.checkpoint.x + CHECKPOINT.w / 2, WORKER.x - WORKER.w / 2];
@@ -172,12 +172,6 @@
   const isModelRow = i => i === 0;
 
   // ---------- helpers
-  // An add-on icon, a puzzle piece (stroke, 24 grid, the style of ICON()); local to this scene, the only one that
-  // draws add-ons
-  const ADDON_PATH = '<path d="M4 7h4.5a2.5 2.5 0 0 1 5 0H18v4.5a2.5 2.5 0 0 1 0 5V20H4z"/>';
-  const addOnIcon = (size, color, width = 1.8) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" `
-    + `fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="square" stroke-linejoin="miter" `
-    + `style="display:block">${ADDON_PATH}</svg>`;
   // The point where the line from the center of a box { x, y, w, h } toward (x, y) leaves it, 2 px out
   const edgeToward = (box, x, y) => {
     const dx = x - box.x, dy = y - box.y;
@@ -284,7 +278,7 @@
   };
   // An add-on of the store: a puzzle piece on a small tile; e.icon, its <svg>, which turns red when found malicious
   const makeStoreTile = parent => {
-    const e = E(parent, addOnIcon(GRID.icon, C.slate), 'tile', {
+    const e = E(parent, ICON('puzzle', GRID.icon, C.slate), 'tile', {
       width: GRID.size + 'px', height: GRID.size + 'px', display: 'flex', alignItems: 'center',
       justifyContent: 'center',
     });
@@ -296,7 +290,7 @@
   // e.icon, e.step, e.thief and e.bar (the bar's fill) are set by the update.
   const makeAddOn = parent => {
     const e = E(parent,
-      `<div style="display:flex;align-items:center;gap:10px">${addOnIcon(24, C.ink)}`
+      `<div style="display:flex;align-items:center;gap:10px">${ICON('puzzle', 24, C.ink)}`
       + `<span class="mono" style="font-size:18px;line-height:24px;color:${C.ink}">wallet-helper</span></div>`
       + `<div style="position:relative;width:${ADDON.text}px;height:20px;margin-top:12px;white-space:nowrap">`
       + `<div class="step mono" style="position:absolute;left:0;top:0;width:100%;font-size:16px;line-height:20px;`
