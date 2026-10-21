@@ -34,9 +34,9 @@ from a deterministic HTML animation. Each video is a theme:
   Nexus, and Temporal Cloud's compliance: certifications, yearly
   third-party audits, the Trust Center
 - `ai-agent-security`: AI Agent Security, a video for everyone that tells
-  real AI agent incidents of 2025 and 2026, one per chapter, and how
-  Temporal helps prevent each: rules in code, human approvals, keys kept on
-  the Workers, sandboxes, a real stop, the Event History as an audit trail
+  real AI agent incidents of 2026, one per chapter, and how Temporal helps
+  prevent each: rules in code, human approvals, keys kept on the Workers,
+  sandboxes, a real stop, the Event History as an audit trail
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page

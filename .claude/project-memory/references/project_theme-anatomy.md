@@ -485,6 +485,53 @@ below and the card order in [Home page design](feedback_home-page.md).
   camera lowers both chapters by `RECAP_DY` to center the composition with
   its badges: 12's use-case row sits 14 px below `USE_CASE_ROW`.
 
+### ai-agent-security
+
+- Non-technical audience, card title "AI Agent Security", audience
+  "General audience". Kicker "AN EXPLAINER FOR EVERYONE", title "Who
+  keeps an AI agent in check?", tagline "REAL INCIDENTS, AND HOW TEMPORAL
+  HELPS". The user sets the scope: recent examples, all from 2026, and
+  sandboxing and audit as topics of their own (ch5, ch7).
+- One real 2026 incident per chapter, anonymized on screen ("a coding
+  agent", "a work assistant": exact facts and dates, no company names or
+  logos, as some of these companies are Temporal customers), each dated
+  and sourced in `script.md`, `### Sources`: ch2 hidden text in a shared
+  document makes a work assistant leak data (a researcher demonstration,
+  August 2026); ch3 a coding agent deletes a production database and its
+  backups in 9 seconds (April 2026); ch4 1.5M agent keys exposed
+  (February 2026), then a cloud agent reading every storage bucket with
+  its own keys (March 2026); ch5 341 malicious add-ons installing a
+  password thief (February 2026); ch6 an assistant deletes an inbox and
+  ignores STOP typed from a phone (February 2026); ch7 a survey, not an
+  incident, so no case file (Trellix, October 2026: 95% of 600 security
+  chiefs). Ch1's 80% survey is from 2025.
+- Three beats per incident chapter: the **case file** (date, tag,
+  anonymized headline, red INCIDENT stamp) slams in, then pins top left as
+  evidence; the **replay in red**, the dramatic beat; the **Temporal
+  half** on the board ch1 builds: the AI MODEL orb, the WORKFLOW
+  checkpoint (Temporal symbol, "your code", a gate below), the tools in
+  the dashed YOUR WORKERS zone, the Event History strip; a step is an
+  action card (mono tool name, argument) from the model to the checkpoint
+  to its tool, ending on a neon (safe) or red (refused) tag.
+- Maya is the agent's owner: she says no in ch3, cancels in ch6 and
+  appears in the ch7 history. She is never in the replays of real
+  incidents (ch6's owner stays unnamed).
+- Only shipped Temporal behavior is claimed: Workflow code between the
+  model and each tool, durable waits with deadlines, credentials in
+  Activities on the customer's Workers, Task Queues routing risky work to
+  a sandboxed Worker, Cancel with compensations, the Event History.
+  Workflow Pause, Principal Attribution and the Oso identity and policy
+  work stay out. The sandbox is told honestly: a container or VM that runs
+  a Worker; Temporal routes the risky step to it and carries on when the
+  box is thrown away.
+- Cinematic like security: a camera layer per scene, the camera
+  zoom-through (`setCamera`) at every chapter boundary, and a match cut
+  from the intro into ch1 (the orb flies to its place on the board).
+- Ch8 recap: 6 tiles, 3 x 2 (RULES IN CODE, A PERSON SAYS YES, KEYS STAY
+  HOME, SANDBOXED WORK, A REAL STOP, EVERY STEP ON RECORD). Ch9 use cases,
+  set A: support refunds, coding agents, invoice payments, IT help desks;
+  sets B and C are in `docs/plans/2026-10-21-ai-agent-security.md`.
+
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title
 card, header, layout, vocabulary and end card, and each new theme starts

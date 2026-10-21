@@ -41,9 +41,9 @@ Each video is a theme:
   Nexus, and Temporal Cloud's compliance: certifications, yearly
   third-party audits, the Trust Center.
 - **AI Agent Security** (`ai-agent-security`): for everyone, real AI agent
-  incidents of 2025 and 2026, one per chapter, and how Temporal helps
-  prevent each: rules in code, human approvals, keys kept on the Workers,
-  sandboxes, a real stop, the Event History as an audit trail.
+  incidents of 2026, one per chapter, and how Temporal helps prevent each:
+  rules in code, human approvals, keys kept on the Workers, sandboxes, a
+  real stop, the Event History as an audit trail.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal returns the saved results from the Event
