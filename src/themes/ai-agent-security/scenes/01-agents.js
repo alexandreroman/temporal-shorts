@@ -1,23 +1,26 @@
 // ===================== 1. AGENTS THAT ACT
-// Opens on the intro's last frame (a match cut, see INTRO_ORB): the orb already sits at its place on the board. Its
-// AI MODEL label fades in, the four general tools pop in on the right (TERMINAL, BROWSER, CODE, ADD-ONS), and the
+// Opens on the intro's last frame (a match cut, see INTRO_ORB): the orb glides on from there to its place on the
+// board, held lower by the camera (CAMERA) while the loop fills the frame. Its AI MODEL label fades in, the four
+// general tools pop in on the right (TERMINAL, BROWSER, CODE, ADD-ONS), and the
 // agent loops: it reads (a spark runs back from a tool to the orb), decides (the orb thinks) and acts (a spark runs
 // out to the next tool), the READS, DECIDES and ACTS labels lighting in turn. In c[1] the loop clears, each tool
 // lights as it is named, then the tools' reach fans out in red lines to what they can touch, FILES, KEYS, THE
-// INTERNET and DATABASES, and the red beat lands on "the bad included": the targets flare red, ripples and a jolt.
+// INTERNET and DATABASES, the camera rising to the row as it comes in, and the red beat lands on "the bad
+// included": the targets flare red, ripples and a jolt.
 // In c[2] the reach pulls back and the WORKFLOW checkpoint drops in between the orb and the tools: the lanes shoot
 // out of it, YOUR WORKERS draws round the tools and the Event History strip rises under it, the board every later
 // chapter uses. The first step starts: the orb thinks, an action card grows out of it and stops at the checkpoint,
 // which records the model's pick in the Event History. In c[3] each part gets its role: the orb THINKS; the card
 // passes the checkpoint (your code, where the agent's state lives) and lands on its tool, which ACTS on the servers
 // you choose (YOUR WORKERS lights up); the checkpoint KEEPS STATE and the Event History RECORDS the step. The camera
-// holds; the default fade-out plays the camera zoom-through (setCamera) into chapter 2.
+// holds from c[1] on; the default fade-out plays the camera zoom-through (setCamera) into chapter 2.
 // The block keeps every name declared in this file local to this scene.
 {
-  // the beats of c[0], in seconds from c[0]: the AI MODEL label fades in as "AI model" is read (label); the tools pop
-  // in one after the other as "tools" is read (tools, toolStep); the loop's labels fade in (loop) and its first cycle
+  // the beats of c[0], in seconds from c[0]: the orb glides from the intro's spot to its place on the board as the
+  // scene opens (settle, over settleD); the AI MODEL label fades in as "AI model" is read (label); the tools pop in
+  // one after the other as "tools" is read (tools, toolStep); the loop's labels fade in (loop) and its first cycle
   // starts as "reads" is read (cycles)
-  const T0 = { label: 0.9, tools: 1.9, toolStep: 0.1, loop: 2.4, cycles: 2.7 };
+  const T0 = { settle: -0.6, settleD: 1.6, label: 0.9, tools: 1.9, toolStep: 0.1, loop: 2.4, cycles: 2.7 };
   // one cycle of the agent loop, in seconds from its start: it reads (a spark from a tool to the orb, 0 to read),
   // decides (the orb thinks, read to act) and acts (a spark from the orb to the next tool, act to hit); each line
   // fades out over fade seconds before it is drawn again for the next cycle
@@ -27,8 +30,9 @@
   const FIRST_READ = 0;
   const ACT_ON = [1, 2, 3, 0, 1, 2];
   // the beats of c[1], from c[1]: the loop clears (loopOut); each tool lights as it is named (named, add-ons right
-  // after code); the reach fans out of the tools (reach) and the red beat lands on "the bad included" (beat)
-  const T1 = { loopOut: 0.9, named: [1.4, 2.1, 2.8, 3.0], reach: 3.3, beat: 5.0 };
+  // after code); the camera rises to the targets' row (pan, over panD), easing out as the reach fans out of the tools
+  // (reach) and the row comes in; the red beat lands on "the bad included" (beat)
+  const T1 = { loopOut: 0.9, named: [1.4, 2.1, 2.8, 3.0], pan: 2.4, panD: 1.8, reach: 3.3, beat: 5.0 };
   // the beats of c[2], from c[2]: the reach pulls back into the tools and its targets sink away (out, over outD);
   // the checkpoint drops in (drop, dropD, landing at drop + dropD), the lanes shoot out of it (lanes), YOUR WORKERS
   // draws round the tools (zone), the Event History strip rises in (history); the checkpoint glows as "your code" is
@@ -48,6 +52,13 @@
     records: 5.2,
   };
 
+  // the camera: the board shifts 60 px left all along, so the board (x 240-1800) centers on x 960; in c[0], the loop
+  // (y 201-641 on the board) sits dy px lower, centered in the frame, then the camera rises to the board as the
+  // targets' row comes in (T1.pan) and holds there, the row and later the Event History filling the frame's bottom.
+  // The scene opens on the intro's last frame: the orb starts at the intro's spot, (INTRO_ORB.x, INTRO_ORB.y) on
+  // screen, and glides to its place on the board (T0.settle)
+  const CAMERA = { dx: -60, dy: 80 };
+
   // the loop between the orb and the tools: it leaves the orb at (x0, actsY) and comes back to it at (x0, readsY),
   // runs along its top at y top and its bottom at y bottom, level through x mid, and fans out to the tools' left edges
   // at x toolX, the line out (ACTS) split px above a tile's middle, the line back (READS) split px below it
@@ -61,30 +72,37 @@
   ];
 
   // what the tools can reach, a row of tiles under the board's orb and tools: equal tiles, `gap` px apart, the row's
-  // left edge on the orb's left edge (x 240) and its center line on the Event History strip's, which rises there
-  // after them
+  // left edge on the orb's left edge (x 240), its last tile, DATABASES, right under the tool tiles (x 1410-1770, as
+  // wide), and its center line on the Event History strip's, which rises there after them
   const TARGETS = [
     { icon: 'file', label: 'Files' },
     { icon: 'key', label: 'Keys' },
     { icon: 'cloud', label: 'The internet' },
     { icon: 'database', label: 'Databases' },
   ];
-  const TARGET = { w: 264, h: 64, gap: 32, left: BOARD.model.x - BOARD.model.size / 2, y: BOARD.history.y };
+  const TARGET = { w: TOOL_TILE.w, h: 64, gap: 30, left: BOARD.model.x - BOARD.model.size / 2, y: BOARD.history.y };
   const targetX = j => TARGET.left + TARGET.w / 2 + j * (TARGET.w + TARGET.gap);
   const targetTop = TARGET.y - TARGET.h / 2;
+  // how much a target swells at the beat: 8 %, 14 px on either side, inside half the gap between two targets
+  const SWELL = 0.08;
   // the reach lines: each tool's lines leave its left edge at LOOP.toolX, head left, then bend down into the targets'
   // top edges, tool i entering every target spread px right of the tool before it (centered on the target); each line
-  // draws over d seconds, the lines of tool i step * i after the first ones, those to target j stepJ * j after
-  const REACH = { spread: 24, d: 0.7, step: 0.12, stepJ: 0.05 };
+  // draws over d seconds, the lines of tool i step * i after the first ones, those to target j stepJ * j after.
+  // The lines to DATABASES, under the tools, go round them: tool i's line turns down at x downX + i * downStep (the
+  // top tool's outermost, so the lines nest without crossing), runs down to turnY, under the tool column, then
+  // curves right into the tile
+  const REACH = { spread: 24, d: 0.7, step: 0.12, stepJ: 0.05, downX: 1300, downStep: 16, turnY: 650 };
   const reachAt = (c, i, j) => c[1] + T1.reach + i * REACH.step + j * REACH.stepJ;
 
-  // the roles of c[3]: THINKS above the orb, where DECIDES was; ACTS under the YOUR WORKERS zone, 38 px clear of it;
-  // KEEPS STATE above the checkpoint, 30 px clear of it; RECORDS left of the Event History strip, its right edge 24 px
-  // clear of the strip
+  // the roles of c[3]: THINKS above the orb, KEEPS STATE above the checkpoint and ACTS above the YOUR WORKERS zone,
+  // on one line (y 160-186), 24 px above the checkpoint's and the zone's tops (y 210); RECORDS left of the Event
+  // History strip, its right edge 24 px clear of the strip. LABEL_H: a label's height (Mono 20 px on its line)
+  const LABEL_H = 26;
+  const ROLE_Y = BOARD.checkpoint.y - BOARD.checkpoint.h / 2 - 24 - LABEL_H / 2;
   const ROLES = {
-    thinks: { text: 'Thinks', x: BOARD.model.x, y: LOOP_LABELS[1].y },
-    acts: { text: 'Acts', x: BOARD.tools.x, y: BOARD.tools.y + BOARD.tools.h / 2 + 38 },
-    keeps: { text: 'Keeps state', x: BOARD.checkpoint.x, y: BOARD.checkpoint.y - BOARD.checkpoint.h / 2 - 30 },
+    thinks: { text: 'Thinks', x: BOARD.model.x, y: ROLE_Y },
+    acts: { text: 'Acts', x: BOARD.tools.x, y: ROLE_Y },
+    keeps: { text: 'Keeps state', x: BOARD.checkpoint.x, y: ROLE_Y },
     records: { text: 'Records', right: BOARD.history.x - BOARD.history.w / 2 - 24, y: BOARD.history.y },
   };
   // where the checkpoint drops in from: above the frame
@@ -110,10 +128,18 @@
       + ` C 800 ${LOOP.bottom} 600 ${LOOP.readsY} ${LOOP.x0} ${LOOP.readsY}`;
   };
   // SVG path of the reach line from tool i to target j; its first control point stays 60 px right of the target, so a
-  // line to a target near the tools bends straight down without a hook
+  // line to a target near the tools bends straight down without a hook. A target under the tools (DATABASES) gets a
+  // line round them, see REACH
   const reachD = (i, j) => {
     const y = toolSlot(i)[1];
     const x = targetX(j) + (i - 1.5) * REACH.spread;
+    const underTools = targetX(j) - TARGET.w / 2 > LOOP.toolX;
+    if (underTools) {
+      const downX = REACH.downX + i * REACH.downStep;
+      const midY = (REACH.turnY + targetTop) / 2;
+      return `M ${LOOP.toolX} ${y} C ${downX} ${y} ${downX} ${y} ${downX} ${y + 40} L ${downX} ${REACH.turnY}`
+        + ` C ${downX} ${midY} ${x} ${midY} ${x} ${targetTop}`;
+    }
     const bendX = Math.max(LOOP.toolX - 160, x + 60);
     return `M ${LOOP.toolX} ${y} C ${bendX} ${y} ${x} ${targetTop - 200} ${x} ${targetTop}`;
   };
@@ -203,11 +229,12 @@
       const outAt = c[2] + T2.out;
       const landAt = c[2] + T2.drop + T2.dropD;
 
-      // the camera holds; the red beat and the checkpoint's landing jolt it; the default fade-out zooms through to
-      // chapter 2
+      // the camera holds the loop lower in c[0], rises to the board in c[1] and holds; the red beat and the
+      // checkpoint's landing jolt it; the default fade-out zooms through to chapter 2
       const [bx, by] = shake(t, beatAt, 10, 0.45);
       const [jx, jy] = shake(t, landAt, 8, 0.35);
-      setCamera(s.cam, t, this.dur, { dx: bx + jx, dy: by + jy, enter: 1 });
+      const camDy = Math.round(CAMERA.dy * (1 - P(t, c[1] + T1.pan, T1.panD)));
+      setCamera(s.cam, t, this.dur, { dx: CAMERA.dx + bx + jx, dy: camDy + by + jy, enter: 1 });
 
       // ---- c[0]: the agent loop
       // the cycles whose act lands before c[1] starts, then one last read of its result, after which the orb decides
@@ -256,9 +283,12 @@
         label.style.color = lit[i] ? C.ink : C.slate;
       });
 
-      // ---- the orb: its label fades in; it thinks while it decides, looks toward the tools once the loop runs, and
-      // thinks again before its step in c[2]
-      place(board.orb.el, model.x, model.y, 1, 1);
+      // ---- the orb: it glides from the intro's spot on screen to its place; its label fades in; it thinks while it
+      // decides, looks toward the tools once the loop runs, and thinks again before its step in c[2]
+      const settle = P(t, c[0] + T0.settle, T0.settleD);
+      const orbX = Math.round(lerp(INTRO_ORB.x - CAMERA.dx, model.x, settle));
+      const orbY = Math.round(lerp(INTRO_ORB.y - CAMERA.dy, model.y, settle));
+      place(board.orb.el, orbX, orbY, 1, 1);
       board.orb.label.style.opacity = P(t, c[0] + T0.label, 0.5);
       const thinkingInC2 = t >= c[2] + T2.think && t < c[2] + T2.emerge;
       const look = 0.5 * P(t, c[0] + T0.loop, 0.6);
@@ -281,7 +311,7 @@
         const pop = backPop(t, reachedAt, 0.45);
         const flare = t >= beatAt + j * 0.04 ? 1 - P(t, beatAt + j * 0.04, 1.2) : 0;
         const x = targetX(j), y = TARGET.y + Math.round(30 * sink);
-        place(tile, x, y, pop.s * swell(t, beatAt + j * 0.04, 0.1), pop.o * (1 - sink));
+        place(tile, x, y, pop.s * swell(t, beatAt + j * 0.04, SWELL), pop.o * (1 - sink));
         const red = t >= reachedAt;
         tile.style.borderColor = red ? C.red : C.line;
         tile.icon.setAttribute('stroke', red ? C.red : C.slate);

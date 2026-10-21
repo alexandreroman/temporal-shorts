@@ -75,19 +75,20 @@ STATUS_KINDS.approval = { background: C.violet, color: C.bg, borderColor: C.viol
 STATUS_KINDS.flagged = { background: C.red, color: C.bg, borderColor: C.red, icon: ['flag', C.bg, 2.6] };
 
 // ---------- the board: the shared stage of the Temporal half of each chapter
-// Stage positions at camera rest, centered on (960, 515) within x 120-1800, y 180-856. Every box gives its center
-// (x, y) and its size; every scene reads them, so adjust them here, never in a scene.
+// Stage positions at camera rest, within x 240-1800, y 209-856. Every box gives its center (x, y) and its size;
+// every scene reads them, so adjust them here, never in a scene.
 // - laneY: the line the action cards travel along, from the model through the checkpoint's opening to the tools
 // - model: the AI model orb (makeModelOrb), on the left; size, its diameter; its AI MODEL label hangs under it
 // - checkpoint: the WORKFLOW checkpoint (makeCheckpoint), in the middle, its opening on laneY; h, its height (its
 //   width is CHECKPOINT.w)
-// - tools: the YOUR WORKERS zone (makeWorkerZone) on the right, holding the column of tool tiles (TOOLS, toolSlot)
+// - tools: the YOUR WORKERS zone (makeWorkerZone) on the right, holding the column of tool tiles (TOOLS, toolSlot);
+//   its dashed outline's top on the checkpoint's top (y 210)
 // - history: the Event History strip (makeHistoryStrip) under the checkpoint, three rows
 const BOARD = {
   laneY: 410,
   model: { x: 330, y: 410, size: 180 },
   checkpoint: { x: 960, y: 410, h: 400 },
-  tools: { x: 1590, y: 410, w: 420, h: 456 },
+  tools: { x: 1590, y: 437, w: 420, h: 456 },
   history: { x: 960, y: 768, w: 800, h: 176 },
 };
 
