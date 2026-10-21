@@ -78,6 +78,46 @@ function startPlayer() {
   holdMark.innerHTML = '<i></i><i></i>';
   document.body.appendChild(holdMark);
 
+  // Sources: links to where the facts of a scene come from, one per entry of its optional `sources`
+  // ([{ label, url }]), in the top-right corner under the progress segments. Inside the stage, so it scales with
+  // the scene and fades with it; created here only, so the frozen ?t= frames never show it.
+  const sourcesBox = document.createElement('div');
+  sourcesBox.id = 'sources';
+  sourcesBox.hidden = true;
+  stage.appendChild(sourcesBox);
+  // The scene whose sources the box lists, so the links are rebuilt only when the scene changes, never under the
+  // pointer of a viewer about to click.
+  let sourcesScene = null;
+  const OUTWARD_ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+
+  function sourceLink(source) {
+    const link = document.createElement('a');
+    link.href = source.url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    const kicker = document.createElement('span');
+    kicker.className = 'kicker';
+    kicker.textContent = 'Source';
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = source.label;
+    link.append(kicker, label);
+    link.insertAdjacentHTML('beforeend', OUTWARD_ARROW);
+    return link;
+  }
+
+  // Called right after renderAt(time), which sets the opacity of the current scene's root.
+  function updateSources() {
+    const current = scenes.find(sc => time >= sc.start && time < sc.end) ?? null;
+    const sources = current?.sources ?? [];
+    if (current !== sourcesScene) {
+      sourcesScene = current;
+      sourcesBox.replaceChildren(...sources.map(sourceLink));
+      sourcesBox.hidden = sources.length === 0;
+    }
+    if (sources.length > 0) sourcesBox.style.opacity = current.root.style.opacity;
+  }
+
   // Backdrop: the stage's sky and glow move under the transparent stage, into a layer with the stage's
   // coordinates but no clipping, so they also fill the letterbox areas of a window that is not 16:9.
   // They are the stage's first children, so the paint order of everything else stays the same.
@@ -241,6 +281,7 @@ function startPlayer() {
 
   function show() {
     renderAt(time, ambient);
+    updateSources();
     updateControls();
   }
 

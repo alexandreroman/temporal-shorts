@@ -3,8 +3,9 @@
 The text comes from the built page only, so it cannot drift from the video: the title from the theme page's
 <meta name="markdown-title">, the name of the video, which the search-oriented <title> of the page may extend, and
 the summary from its <meta name="description">, then one section per chapter of the scenes
-(src/themes/<theme>/scenes/), its subtitles joined into one paragraph. Each section links to the player at the
-chapter start. The links are absolute paths from the site root, /themes/<theme>/#t=<seconds>, as the site is served
+(src/themes/<theme>/scenes/), its subtitles joined into one paragraph, then the links of the scene's optional
+`sources` ([{ label, url }]), where its facts come from. Each section links to the player at the chapter start.
+The links to the player are absolute paths from the site root, /themes/<theme>/#t=<seconds>, as the site is served
 at a domain root (the player's home button links to /). The file is committed, like social.png: CI has no
 Playwright, so `make html` only copies it to output/themes/<theme>.md.
 
@@ -31,7 +32,7 @@ READ_PAGE = """JSON.stringify({
   title: document.querySelector('meta[name="markdown-title"]')?.content ?? null,
   summary: document.querySelector('meta[name="description"]').content,
   scenes: scenes.map(s => ({chapter: s.chapter || null, title: s.title || null, start: s.start,
-                            subs: s.subs.map(x => x.text)})),
+                            subs: s.subs.map(x => x.text), sources: s.sources ?? []})),
 })"""
 
 # Characters that would start emphasis, code, a link or an HTML tag anywhere in a line.
@@ -41,6 +42,8 @@ HEADING_START = re.compile(r"^#{1,6}(?=\s|$)")
 MARKER_START = re.compile(r"^>|^[+-](?=\s|$)")
 ORDERED_LIST_START = re.compile(r"^(\d{1,9})([.)])(?=\s|$)")
 SETEXT_UNDERLINE = re.compile(r"^=+\s*$")
+# Characters a link destination cannot hold as they are: CommonMark ends it at whitespace or an unbalanced parenthesis.
+URL_UNSAFE = {" ": "%20", "(": "%28", ")": "%29"}
 
 
 def read_page(theme):
@@ -49,10 +52,27 @@ def read_page(theme):
         browser, page = open_page(pw, theme)
         data = json.loads(page.evaluate(READ_PAGE))
         browser.close()
+    for scene in data["scenes"]:
+        check_sources(theme, scene)
     if not data["title"]:
         sys.exit(f'ERROR: src/themes/{theme}/index.html has no <meta name="markdown-title" content="...">, the '
                  "title of its Markdown version")
     return data
+
+
+def check_sources(theme, scene):
+    """Stop with a clear message when a scene's `sources` are not a list of {label, url} with an http(s) URL."""
+    where = f"Chapter {scene['chapter']}" if scene["chapter"] else f"The scene starting at {scene['start']:.2f} s"
+    sources = scene["sources"]
+    if not isinstance(sources, list):
+        sys.exit(f"ERROR: {theme}: {where} has `sources` that are not a list of {{ label, url }}")
+    for source in sources:
+        label = source.get("label") if isinstance(source, dict) else None
+        url = source.get("url") if isinstance(source, dict) else None
+        if not isinstance(label, str) or not label.strip():
+            sys.exit(f"ERROR: {theme}: {where} has a source without a `label`: {source!r}")
+        if not isinstance(url, str) or not url.startswith(("https://", "http://")):
+            sys.exit(f"ERROR: {theme}: {where} has a source whose `url` is not an http(s) URL: {source!r}")
 
 
 def plain_text(text):
@@ -73,6 +93,21 @@ def paragraph(text):
     return "\n".join(escape_line_start(line) for line in lines)
 
 
+def markdown_url(url):
+    """The URL as a link destination, with the characters that would end it percent-encoded."""
+    return "".join(URL_UNSAFE.get(char, char) for char in url)
+
+
+def sources_line(sources):
+    """The "Sources: [label](url), ..." line of a section.
+
+    One line, never wrapped: the URLs outgrow LINE_WIDTH anyway, and a wrap would split a label across lines.
+    """
+    links = [f"[{plain_text(source['label'])}]({markdown_url(source['url'])})" for source in sources]
+    lead = "Source:" if len(links) == 1 else "Sources:"
+    return f"{lead} {', '.join(links)}"
+
+
 def time_label(seconds):
     """m:ss, as in the player's time label."""
     return f"{seconds // 60}:{seconds % 60:02}"
@@ -81,20 +116,22 @@ def time_label(seconds):
 def sections(scenes):
     """Group the subtitles into sections: the lead (scenes before the first chapter), one per chapter, then the outro.
 
-    Each section is a dict with its heading (None for the lead), its start in seconds and its subtitles.
+    Each section is a dict with its heading (None for the lead), its start in seconds, its subtitles and the sources
+    of its scenes.
     """
-    lead = {"heading": None, "start": 0, "subs": []}
+    lead = {"heading": None, "start": 0, "subs": [], "sources": []}
     result = [lead]
     for scene in scenes:
         current = result[-1]
         if scene["chapter"]:
             heading = f"Chapter {scene['chapter']}: {plain_text(scene['title'])}"
-            current = {"heading": heading, "start": scene["start"], "subs": []}
+            current = {"heading": heading, "start": scene["start"], "subs": [], "sources": []}
             result.append(current)
         elif current["heading"] not in (None, OUTRO_HEADING):
-            current = {"heading": OUTRO_HEADING, "start": scene["start"], "subs": []}
+            current = {"heading": OUTRO_HEADING, "start": scene["start"], "subs": [], "sources": []}
             result.append(current)
         current["subs"] += [plain_text(subtitle_text(sub)) for sub in scene["subs"]]
+        current["sources"] += scene["sources"]
     return result
 
 
@@ -121,6 +158,8 @@ def markdown(theme, data):
             blocks.append(f"[Watch from {time_label(seconds)}]({player}#t={seconds})")
         if section["subs"]:
             blocks.append(paragraph(" ".join(section["subs"])))
+        if section["sources"]:
+            blocks.append(sources_line(section["sources"]))
     return "\n\n".join(blocks) + "\n"
 
 

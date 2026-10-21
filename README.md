@@ -264,6 +264,12 @@ section if more than 2 s in), or previous/next step in presenter mode,
 S = speed 1x/0.5x, L = loop on/off, C = subtitles on/off, P = presenter
 mode on/off, F = fullscreen.
 
+A scene with `sources` (see [Editing](#editing)) lists where its facts
+come from in the top-right corner, under the progress segments: one line
+per source, "SOURCE", its label and an arrow, fading with the scene. Each
+is a link that opens in a new tab, paused or playing. The frozen `?t=`
+frames never show it, so the videos have no such link.
+
 `make serve` serves the home page on `/` and each player on
 `/themes/<theme>/`, over HTTP on `127.0.0.1` (rebuilding them first if
 needed), on port 8000 by default (`CASPER_PORT` in a Casper workspace);
@@ -309,7 +315,8 @@ nothing. Each theme therefore has a Markdown version, published at
   with a link to the player at the chapter start
   (`/themes/<theme>/#t=<seconds>`, rounded up to the whole second, so
   that the paused player shows the chapter), then the chapter's subtitles
-  joined into one paragraph, HTML tags stripped
+  joined into one paragraph, HTML tags stripped, and a
+  `Sources: [label](url), ...` line when the scene has `sources`
 - the hook of the intro under the summary, and the closing subtitle under
   `Outro`
 
@@ -398,10 +405,11 @@ with or without `SITE_URL`:
 
 - a transcript: the text of its Markdown version as HTML, an `<h1>` title,
   an `<h2>` per chapter and the subtitles as paragraphs, without the links
-  to the player. It sits in `<article class="transcript">` after the
-  stage, visually hidden (the standard 1px clipped pattern, inline), so
-  that screen readers and crawlers read it while the page shows nothing
-  more; a hidden link would trap keyboard users, hence none. Only the
+  to the player; a chapter's sources keep their labels only. It sits in
+  `<article class="transcript">` after the stage, visually hidden (the
+  standard 1px clipped pattern, inline), so that screen readers and
+  crawlers read it while the page shows nothing more; a hidden link would
+  trap keyboard users, hence none. Only the
   built pages hold it: the frames are captured from `src/`, so it never
   shows in a video. The build stops if it is missing.
 - the site name after the `<title>`, `<title> | Temporal Shorts`, for
@@ -488,6 +496,11 @@ editing different scenes never touch the same file.
   header fades with the scene; the optional `headerOutAt` (scene time, or
   `(c, dur) => time`) fades it out earlier, over 0.4 s, for an ending that
   plays without it.
+- Sources: the optional `sources` of a scene,
+  `[{ label: 'PromptArmor, August 2026', url: 'https://...' }]`, name
+  where the facts it shows come from: the live player links to each, and
+  the Markdown version lists them under the chapter (run `make markdown`
+  after a change). Rendered frames do not change.
 - Chapter title: `title` next to `chapter` on the chapter's scene: each
   chapter is one scene, numbered 1, 2, 3... in playing order. The header
   and the progress segments are derived from them; a theme without chapters

@@ -132,7 +132,8 @@ workspaces run `make setup` automatically.
     `useCaseScene()`; icons used by two or more themes are in `ICONS` in
     `engine.js`, the others in their theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
-    the home page; opens paused at a `#t=<time>` URL fragment
+    the home page; opens paused at a `#t=<time>` URL fragment; links the
+    optional `sources` of the current scene (`[{ label, url }]`)
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
     ordered `<link>` / `<script>` list: shared files as `../../<file>`,
     the theme's own scripts relative to its folder, then `boot()`; its
@@ -160,8 +161,9 @@ workspaces run `make setup` automatically.
   - `themes/<theme>.md`: Markdown version of a theme for coding agents,
     next to its folder: the page `markdown-title` and description, then one
     section per chapter with an absolute link to the player at its start
-    (`/themes/<theme>/#t=<s>`) and its subtitles as prose; written by
-    `make markdown` from the scenes and committed, never edited by hand.
+    (`/themes/<theme>/#t=<s>`), its subtitles as prose and its `sources`
+    links; written by `make markdown` from the scenes and committed, never
+    edited by hand.
     The HTML build copies it to `output/themes/<theme>.md` and links each
     theme page to it (`<link rel="alternate" type="text/markdown"
     href="/themes/<theme>.md">`)
