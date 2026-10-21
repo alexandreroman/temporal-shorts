@@ -1,8 +1,8 @@
 // ===================== 5. WHY 1.0 MATTERS
 // Opens on the shared service at rest that chapter 4 ends on (SERVICE_REST), in SERVICE_SHOT, and pulls back once,
-// left and out, to OUTRO_SHOT as everything but the proxy box fades out. Under the box, a version track draws: the
-// earlier 0.x releases, dim, up to 0.10, then the 1.0 slot, which lights up neon with rings (the dramatic beat), READY
-// FOR PRODUCTION and SUPPORTED under it. Then the 1.0 badge rises onto the proxy box as the track and its tags drop
+// left and out, to OUTRO_SHOT as everything but the proxy box fades out. Under the box, a version track draws: the ten
+// 0.x releases, dim, 0.1 to 0.10, then the 1.0 slot, which lights up neon with rings (the dramatic beat), READY FOR
+// PRODUCTION and SUPPORTED under it. Then the 1.0 badge rises onto the proxy box as the track and its tags drop
 // away, which leaves the box alone, wearing its badge: the outro's first frame.
 // The block keeps every name declared in this file local to this scene.
 {
@@ -14,9 +14,15 @@
     fly: 4.4, flyD: 0.7, leaveD: 0.5,
   };
   // The track's layout in OUTRO_SHOT, in screen px (see onScreen): its line's ends and height (x0 to the 1.0 slot), the
-  // 0.x releases' dots, the 1.0 slot, the faint line on past it (to xEnd), and the two tags side by side, centered
-  // under the slot (tags: their center y and the gap between them)
-  const TRACK = { x0: 470, y: 690, dots: [520, 610, 700, 790, 880], slot: 960, xEnd: 1450, tags: { y: 760, gap: 24 } };
+  // dots of the ten 0.x releases (0.1 to 0.10, the last one as far from the slot's edge as from the dot before it),
+  // the 1.0 slot, the faint line on past it (to xEnd, as far from the slot as x0), the labels of the first and last
+  // dots (labelDy: under the track), and the two tags side by side, centered under the slot, 20 px or more under the
+  // labels (tags: their center y and the gap between them)
+  const RELEASES = 10;
+  const TRACK = {
+    x0: 309, y: 700, dots: Array.from({ length: RELEASES }, (_, i) => 349 + i * 58), slot: 960, xEnd: 1611,
+    labelDy: 30, tags: { y: 786, gap: 24 },
+  };
   // One screen px in OUTRO_SHOT, in stage px: the track's parts are sized in screen px (n * U)
   const U = 1 / OUTRO_SHOT[2];
   // The stage point that OUTRO_SHOT shows at screen point (x, y)
@@ -56,7 +62,8 @@
         width: DOT * U + 'px', height: DOT * U + 'px', borderRadius: '50%', background: C.bg,
         border: `${2 * U}px solid ${C.slate}`,
       }));
-      s.lastLabel = E(root, '0.10', 'mono', { fontSize: 18 * U + 'px', color: C.slate });
+      // the first and last releases' labels
+      s.labels = ['0.1', `0.${RELEASES}`].map(text => E(root, text, 'mono', { fontSize: 18 * U + 'px', color: C.slate }));
       // the empty 1.0 slot, dashed, which the badge lights up
       s.ghost = E(root, '1.0', 'mono', {
         width: VERSION_BADGE.w + 'px', height: VERSION_BADGE.h + 'px', lineHeight: (VERSION_BADGE.h - 4 * U) + 'px',
@@ -88,19 +95,24 @@
       const leave = P(t, flyAt, T0.leaveD);
       const leaveO = 1 - leave, leaveDy = leave * DROP * U;
       const trackAt = c[0] + T0.track;
+      // when the line reaches the dot at dotX
+      const dotAt = dotX => trackAt + T0.trackD * (dotX - TRACK.x0) / (TRACK.slot - TRACK.x0);
       draw(s.line, P(t, trackAt, T0.trackD, linear), leaveO);
       s.line.style.transform = `translateY(${leaveDy}px)`;
       drawDashed(s.past, P(t, trackAt + T0.trackD, 0.4, linear), 0.6 * leaveO, 8 * U, 8 * U);
       drawDashed(s.riseLine, P(t, lightAt + 0.3, 0.4, linear), 0.6 * leaveO, 8 * U, 8 * U);
       s.past.style.transform = `translateY(${leaveDy}px)`;
       TRACK.dots.forEach((dotX, i) => {
-        const at = trackAt + T0.trackD * (dotX - TRACK.x0) / (TRACK.slot - TRACK.x0);
         const [x, y] = onScreen(dotX, TRACK.y);
-        const pop = popIn(t, at, 0.3);
+        const pop = popIn(t, dotAt(dotX), 0.3);
         place(s.dots[i], x, y + leaveDy, pop.s, pop.o * leaveO);
       });
-      const [lastX, lastY] = onScreen(TRACK.dots[TRACK.dots.length - 1], TRACK.y + 30);
-      place(s.lastLabel, lastX, lastY + leaveDy, 1, P(t, trackAt + T0.trackD - 0.1, 0.3) * leaveO);
+      // each label shows as its dot pops in
+      [0, RELEASES - 1].forEach((i, k) => {
+        const dotX = TRACK.dots[i];
+        const [x, y] = onScreen(dotX, TRACK.y + TRACK.labelDy);
+        place(s.labels[k], x, y + leaveDy, 1, P(t, dotAt(dotX), 0.3) * leaveO);
+      });
 
       // the dramatic beat: the 1.0 slot lights up, the neon badge popping over it with rings; READY FOR PRODUCTION
       // and SUPPORTED under it. Then the badge rises onto the proxy box.

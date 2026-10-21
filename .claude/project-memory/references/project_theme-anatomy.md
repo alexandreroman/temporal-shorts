@@ -519,9 +519,10 @@ below and the card order in [Home page design](feedback_home-page.md).
   TEMPORAL, a POLICY panel whose four rules are per-Namespace encryption,
   client authentication, encryption required and metrics; the dramatic
   beat is the policy sweeping out along every team's connection, each team
-  COVERED), why 1.0 matters (ch5, one subtitle: a version track up to 0.10
-  whose 1.0 slot lights up, READY FOR PRODUCTION and SUPPORTED, then the
-  badge rises onto the proxy box). The install formats stay out of the
+  COVERED), why 1.0 matters (ch5, one subtitle: a version track of the ten
+  0.x minor releases, 0.1 (July 22, 2026) to 0.10 (October 16, 2026),
+  labelled at the first and last dots, whose 1.0 slot lights up, READY FOR
+  PRODUCTION and SUPPORTED, then the badge rises onto the proxy box). The install formats stay out of the
   video. A news short ends on its last topic chapter: no "What you get"
   recap, no "What you can build" chapter.
 - Running example: the security theme's transfer card (`TRANSFER`, Nora

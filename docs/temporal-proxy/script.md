@@ -186,8 +186,8 @@ you can build" chapter.
   - Visuals: Opens on chapter 04's last frame; the camera pulls back on,
     left and out, as everything but the proxy box fades, until the box
     sits small at the top of the frame. Under it a version track draws:
-    dim dots for the earlier 0.x releases, the last one labelled 0.10,
-    then an empty 1.0 slot. Dramatic beat: 1.0 lights up neon with rings;
+    ten dim dots for the 0.x releases, labelled 0.1 under the first and
+    0.10 under the last, then an empty 1.0 slot. Dramatic beat: 1.0 lights up neon with rings;
     READY FOR PRODUCTION, then SUPPORTED as the subtitle reads "support
     policy", side by side under it. The 1.0 badge rises up a faint dashed
     line onto the proxy box as the track and its tags drop away, leaving
