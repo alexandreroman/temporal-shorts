@@ -90,6 +90,31 @@ holds the current ones:
   experimental in this theme (no pill).
 - Recap: no date stamps on the tiles (user: confusing).
 
+Script version 4 (2026-10-21, after the content and design audit);
+`docs/ai-agent-security/script.md` holds the new subtitles and sources:
+
+- Ch2: the malicious add-ons case is replaced by the issue-title prompt
+  injection (Clinejection, February 2026): the add-ons tricked the user,
+  which a sandbox round the agent's tools does not answer, whereas here
+  the agent itself ran the attacker's code. Replay: issue, CI runner,
+  shared cache, release job, EXPOSED; Temporal half: `npm install helper`
+  in the sandbox, NO INTERNET, the publishing keys on a release Worker
+  outside the box, "a fresh box at will".
+- Ch3: the key sits in `domains.env` (made for domains, full access) and
+  stays in the box; the same call fails on no internet. Nexus allowlist
+  "in Temporal Cloud"; the deadline "no answer by Friday 18:00: not run";
+  the crashed Worker's tile reads "crashed · restarting".
+- Ch4: the document is uploaded from the web; only `open_link` is the
+  demonstrated leak, the ticket and the search are POSSIBLE routes; c[3]
+  "any step that reaches outside ... the box has no other way out"; c[4]
+  follows the Agent Harness: allowed tools run, others wait for a person
+  or a rule that can refuse (auto mode's rule on a call's arguments).
+- Ch5: Trellix wording (an insider incident tied to an AI agent or other
+  autonomous system, past 12 months); history rows `npm install` NO
+  INTERNET and `delete volume prod-db` "via Nexus: rejected by Maya".
+- Recap: tiles grow in without overshoot. Ch1: the role labels share one
+  line, YOUR WORKERS' top on the checkpoint's, the loop centered.
+
 Subtitles, exact. `<b>` marks a key term at its first mention.
 
 ### Intro (unchanged)
