@@ -137,40 +137,8 @@
     const at = t < backAt ? alongPath(linkEl, P(t, goAt, tripD), true) : alongPath(linkEl, P(t, backAt, tripD));
     return { at, wrapAt, backAt, wrapped: t >= wrapAt + 0.15 };
   };
-  // A tag of the close shot, sized in screen px (font): its HTML after the leading icon of a statusTag kind (unless
-  // `icon` is false), in that kind's look; solid, an opaque fill for a tag over other parts
-  const closeTag = (root, html, kind, font, { solid = null, icon: withIcon = true } = {}) => {
-    const { icon, ...look } = STATUS_KINDS[kind];
-    const lead = icon && withIcon ? ICON(icon[0], font * U, icon[1], icon[2]) : '';
-    // centered, as setStatus() centers a statusTag: a label alone (icon: false) gets extra left padding for
-    // the letter spacing that trails its last letter, which the margin round a leading icon's stroke already offsets
-    const e = E(root, lead + html, 'mono', {
-      fontSize: px(font), lineHeight: px(font * 1.4), letterSpacing: '.1em', padding: `${px(6)} ${px(14)}`,
-      paddingLeft: withIcon ? px(14) : `calc(${px(14)} + .1em)`, borderRadius: px(6), whiteSpace: 'nowrap',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: px(8), border: `${px(2)} solid`, ...look,
-    });
-    if (solid) e.style.background = solid;
-    return e;
-  };
-  // YOUR KMS: its name, the KMS key (e.kmsKey, its icon) and the key servers it can be; NEVER LEAVES beside the key
-  // (e.never)
-  const makeKms = root => {
-    const e = E(root,
-      `<div style="position:absolute;left:${px(22)};top:${px(18)};display:flex;align-items:center;gap:${px(10)}">`
-      + `${ICON('kms', 26 * U, C.slate, 1.8)}<span class="lbl" style="font-size:${px(20)};color:var(--ink)">`
-      + 'Your KMS</span></div>'
-      + `<div style="position:absolute;left:${px(22)};top:${px(62)};display:flex;align-items:center;gap:${px(12)}">`
-      + `<div class="kms-key">${ICON('key', 50 * U, C.violet, 1.9)}</div>`
-      + `<span class="mono" style="font-size:${px(18)};letter-spacing:.12em;color:${C.violet}">KMS KEY</span></div>`
-      + `<div class="mono" style="position:absolute;left:${px(22)};top:${px(144)};font-size:${px(15)};`
-      + `line-height:${px(25)};letter-spacing:.06em;color:${C.slate};white-space:nowrap">`
-      + 'AWS KMS · AZURE KEY VAULT<br>GCP KMS · YOUR KEY SERVER</div>',
-      'tile', { width: KMS.w + 'px', height: KMS.h + 'px', textAlign: 'left' });
-    e.kmsKey = e.querySelector('.kms-key');
-    e.never = closeTag(e, 'NEVER LEAVES', 'ok', 15);
-    Object.assign(e.never.style, { left: 'auto', right: px(22), top: px(70) });
-    return e;
-  };
+  // A tag of the close shot, sized in screen px (font; see scaledTag)
+  const closeTag = (root, html, kind, font, opts = {}) => scaledTag(root, html, kind, font, { ...opts, u: U });
   // The DATA KEY: a key, then its name and number (e.num) over its cipher (e.cipher); under them, its lifetime, a
   // clock and a bar (e.fill) that drains as the key seals payloads (setLife)
   const makeDataKey = root => {
@@ -311,7 +279,7 @@
         textAlign: 'center', color: C.violet, border: `1px solid ${C.violet}`, borderRadius: 'var(--rs)',
         background: VERDICT_FILL.wait,
       });
-      s.kms = makeKms(root);
+      s.kms = makeKms(root, KMS, U);
       s.top = svgLayer(root);
       const { x0, y0, x, x1, y1 } = LINK;
       s.link = path(s.top, roundedPath([[x0, y0], [x, y0], [x, y1], [x1, y1]], 8), C.violet, 2, false);

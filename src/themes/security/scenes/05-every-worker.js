@@ -97,12 +97,7 @@
         boxShadow: `0 0 18px rgba(${RGB.neon},.4)`,
       }));
       // the forgetful Worker's empty CODEC slot, outlined in red
-      s.missing = E(root, 'NO CODEC', 'mono', {
-        width: UPDATE.w + 'px', height: WORKER_TILE.chipH + 'px', lineHeight: (WORKER_TILE.chipH - 3) + 'px',
-        textAlign: 'center', fontSize: '19px', letterSpacing: '.1em', paddingLeft: '.1em', color: C.red,
-        border: `1px dashed ${C.red}`,
-        borderRadius: 'var(--rs)', background: `rgba(${RGB.red},.1)`,
-      });
+      s.missing = makeMissingChip(root, 'NO CODEC');
       s.pill = fixedTag(root, `${ICON('retry', 20, C.violet, 2)}Rotate`, 'violet solid', PILL.w, {
         h: PILL.h, gap: 10,
       });
@@ -110,10 +105,8 @@
       s.sparks = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
       s.card = makePayload(root, { w: CARD.w });
       s.alarm = makeRipples(root, 2, RGB.red);
-      // in the theme's alarm look (STATUS_KINDS.alarm, with its own icon), in bold like the other red verdicts
-      s.inClear = fixedTag(root, `${ICON('eye', 20, C.bg, 2.4)}In clear`, 'red', 200, { gap: 10 });
-      const { icon, ...alarmLook } = STATUS_KINDS.alarm;
-      Object.assign(s.inClear.style, { ...alarmLook, fontWeight: '700' });
+      // in the alarm look of the red verdicts, with its own icon
+      s.inClear = makeAlarmTag(root, `${ICON('eye', 20, C.bg, 2.4)}In clear`, 200);
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);
     },

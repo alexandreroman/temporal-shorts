@@ -233,8 +233,16 @@ const ICONS = {
   shield: `<path d="${SHIELD_OUTLINE}"/><path d="M8.5 12l2.5 2.5 4.5-5"/>`,
   // a key: its bow and its bit
   key: '<circle cx="7.5" cy="12" r="4"/><path d="M11.5 12H21M17.5 12v3.5M20.5 12v2.5"/>',
+  // a key management service (KMS): a vault holding a key
+  kms: '<rect x="3" y="4" width="18" height="16"/><circle cx="8.5" cy="12" r="2.5"/><path d="M11 12h6.5M15.5 12v2.5"/>',
+  // a globe, its equator and a meridian: a network address
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/>'
+    + '<path d="M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z"/>',
+  // an identity badge on its clip: a photo and a name line
+  badge: '<rect x="4" y="5" width="16" height="16"/><path d="M10 2.5h4V7h-4z"/><circle cx="12" cy="11.5" r="2"/>'
+    + '<path d="M8.5 17.5c.7-1.4 2-2.1 3.5-2.1s2.8.7 3.5 2.1"/>',
   // a cloud on a flat base: a hosted service
-  cloud: '<path d="M7 19h10.5a4.5 4.5 0 0 0 .4-9A6 6 0 0 0 6.3 11.6 3.8 3.8 0 0 0 7 19z"/>',
+  cloud:'<path d="M7 19h10.5a4.5 4.5 0 0 0 .4-9A6 6 0 0 0 6.3 11.6 3.8 3.8 0 0 0 7 19z"/>',
   food: '<path d="M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21V3c-2.5 2-3 6-1 9h1"/>',
   hourglass: '<path d="M6 3h12M6 21h12"/><path d="M8 3v3.5l4 5.5-4 5.5V21M16 3v3.5L12 12l4 5.5V21"/>'
     + '<path d="M10 18.5h4"/>',
