@@ -39,6 +39,11 @@ from a deterministic HTML animation. Each video is a theme:
   code; with it, one gateway adds TLS, credentials and the full Namespace
   name, encrypts payloads with data keys wrapped by your KMS, and runs as
   a shared service of a central platform team, one policy for every team
+- `ai-agent-security`: AI Agent Security, a video for everyone that tells
+  real AI agent incidents of 2026, one per chapter, and Temporal's role in
+  each: sandboxed tools, keys kept with their team, behind Nexus, human
+  approvals in code the model cannot bypass, the Event History as a
+  searchable audit trail
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page
@@ -143,7 +148,8 @@ workspaces run `make setup` automatically.
     two or more themes are in `ICONS` in `engine.js`, the others in their
     theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
-    the home page; opens paused at a `#t=<time>` URL fragment
+    the home page; opens paused at a `#t=<time>` URL fragment; links the
+    optional `sources` of the current scene (`[{ label, url }]`)
   - `themes/<theme>/index.html`: theme page, stage skeleton and the
     ordered `<link>` / `<script>` list: shared files as `../../<file>`,
     the theme's own scripts relative to its folder, then `boot()`; its
@@ -171,8 +177,9 @@ workspaces run `make setup` automatically.
   - `themes/<theme>.md`: Markdown version of a theme for coding agents,
     next to its folder: the page `markdown-title` and description, then one
     section per chapter with an absolute link to the player at its start
-    (`/themes/<theme>/#t=<s>`) and its subtitles as prose; written by
-    `make markdown` from the scenes and committed, never edited by hand.
+    (`/themes/<theme>/#t=<s>`), its subtitles as prose and its `sources`
+    links; written by `make markdown` from the scenes and committed, never
+    edited by hand.
     The HTML build copies it to `output/themes/<theme>.md` and links each
     theme page to it (`<link rel="alternate" type="text/markdown"
     href="/themes/<theme>.md">`)

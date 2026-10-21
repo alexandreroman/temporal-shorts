@@ -1716,8 +1716,8 @@ function setCamera(cam, t, dur, { scale = 1, dx = 0, dy = 0, enter = 0.94, enter
 const OFF_SHOT = 0.3;
 // Camera framing eased between stops, like pan(): from and each stop give [x, y, scale], the stage point (x, y)
 // centered on (960, 515) at that scale; a stop is [at, x, y, scale, d = 0.9]. Returns the offsets for
-// setCamera(cam, t, dur, { ...shot(t, from, stops), enter: 1, exit: 1 }), in whole pixels. setCamera() scales
-// around (960, 540), hence the 25 px between 540 and 515 in dy.
+// setCamera(cam, t, dur, { ...shot(t, from, stops) }), in whole pixels; add enter: 1, exit: 1 to drop the
+// zoom-through. setCamera() scales around (960, 540), hence the 25 px between 540 and 515 in dy.
 // It eases each framing's offsets, together with the scale, rather than its center: every stage point's screen
 // position is then a straight blend of its positions in the two framings, so it moves one way. Easing the center
 // and the scale together would swing points far from the center out and back when the scale changes.
@@ -1734,9 +1734,9 @@ function shot(t, from, stops) {
   }
   return { scale, dx: Math.round(dx), dy: Math.round(dy) };
 }
-// Shake of an alarm hit at `at`, as [dx, dy] in whole pixels: a new hashed offset every frame (1/30 s), up to amp
-// px, dying out over d seconds; [0, 0] outside [at, at + d], so the composition rests on the same pixels before and
-// after
+// Shake of a hit at `at`, as [dx, dy] in whole pixels: a new hashed offset every frame (1/30 s), up to amp px, dying
+// out over d seconds; [0, 0] outside [at, at + d], so the composition rests on the same pixels before and after. Add
+// it to setCamera's dx and dy.
 function shake(t, at, amp, d = 0.4) {
   const u = (t - at) / d;
   if (u < 0 || u >= 1) return [0, 0];

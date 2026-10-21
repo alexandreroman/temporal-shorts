@@ -66,6 +66,7 @@ THEME_TOPICS = {
     "worker-tuning": ["Worker tuning", "Task Queue"],
     "security": ["Security", "Temporal Proxy", "Temporal Nexus"],
     "temporal-proxy": ["Temporal Proxy", "Encryption", "Security"],
+    "ai-agent-security": ["AI agent", "AI security", "Human-in-the-loop"],
 }
 
 MIME_TYPES = {
@@ -104,9 +105,12 @@ ICON_LINKS = """
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">"""
 
 # The blocks of a theme's Markdown version (see export_markdown.py), separated by blank lines: the # title and the
-# ## chapter headings, the "[Watch ...](...)" links to the player, and paragraphs of prose.
+# ## chapter headings, the "[Watch ...](...)" links to the player, and paragraphs of prose, the last of a chapter
+# possibly its "Sources: [label](url), ..." line.
 MARKDOWN_HEADING = re.compile(r"(#+) (.+)")
 WATCH_LINK = re.compile(r"\[Watch [^\]]*\]\([^)]*\)")
+# An inline link, [text](url), its text in group 1. Prose escapes its brackets (\[), which the lookbehind skips.
+MARKDOWN_LINK = re.compile(r"(?<!\\)\[((?:\\.|[^\\\]])*)\]\([^)\s]*\)")
 # A backslash escape: in CommonMark, a backslash before any ASCII punctuation character stands for that character.
 MARKDOWN_ESCAPE = re.compile(r"\\([!-/:-@\[-`{-~])")
 # The standard visually hidden pattern: the transcript takes no room on screen, yet screen readers and search engine
@@ -346,15 +350,18 @@ def markdown_version(theme):
 
 
 def markdown_text(text):
-    """The plain text of a Markdown block: whitespace collapsed and backslash escapes resolved."""
-    return MARKDOWN_ESCAPE.sub(r"\1", " ".join(text.split()))
+    """The plain text of a Markdown block: whitespace collapsed, links reduced to their text, backslash escapes
+    resolved."""
+    text = MARKDOWN_LINK.sub(r"\1", " ".join(text.split()))
+    return MARKDOWN_ESCAPE.sub(r"\1", text)
 
 
 def transcript_html(markdown):
     """The text of a theme's Markdown version as a visually hidden <article>, for screen readers and search engines.
 
     The title becomes an <h1>, each chapter heading an <h2>, each paragraph a <p>. The links to the player are
-    dropped: a link hidden from sight but reachable with the Tab key would trap keyboard users.
+    dropped, and the source links keep their text only: a link hidden from sight but reachable with the Tab key
+    would trap keyboard users.
     """
     elements = []
     for block in markdown.read_text(encoding="utf-8").strip().split("\n\n"):

@@ -57,7 +57,8 @@ the visuals belong to each theme (last section).
   chapter, so every chapter title stays true to its content.
 - Use cases: every explainer has a **What you can build** chapter after
   the recap, right before the outro (`NN-use-cases.js`); a product
-  presentation (agent-harness) and a guide (worker-tuning) end on their
+  presentation (agent-harness), a guide (worker-tuning) and
+  ai-agent-security, whose incidents are its concrete cases, end on their
   recap. Topic lists in
   `script.md` leave out both chapters.
   - The scene is one `useCaseScene({ chapter, uses, namedAt, subs })`
@@ -557,6 +558,102 @@ below and the card order in [Home page design](feedback_home-page.md).
   left and out in ch4 and again in ch5. The intro's visual lives in a
   camera held at `WIDE_SHOT`; the 1.0 badge (`makeVersionBadge`) ties the
   intro, ch5 and the outro.
+
+### ai-agent-security
+
+- Non-technical audience, card title "AI Agent Security", audience
+  "General audience". Kicker "AN EXPLAINER FOR EVERYONE", title "Who
+  keeps an AI agent in check?", tagline "REAL INCIDENTS, AND HOW TEMPORAL
+  HELPS". The user sets the scope: recent examples, all from 2026, with
+  sandboxing and audit as topics of their own.
+- Temporal's role is architectural, never a filter on tool names: real
+  agents hold a terminal, a browser and code, and go around any list.
+  The story shows where each step runs and with what power, what the
+  Workflow holds (the state, outside the sandbox) and what it records (a
+  searchable record); the Workflow gates the steps that matter in code
+  the model cannot talk to. The Temporal Agent
+  Harness's per-tool approval rules appear in ch4 as a layer on top of
+  that architecture. In this theme the harness carries no status label:
+  it is never called experimental, on screen or in the docs (user's
+  decision). Ch1's tools are generic: TERMINAL, BROWSER, CODE, ADD-ONS.
+- Chapters: 01 Agents that act; 02 Locked in a sandbox (an issue-title
+  prompt injection, Clinejection, February 2026: a hidden instruction in
+  an issue title made an AI triage bot install an attacker's code, which
+  poisoned a cache shared with the release pipeline and exposed its
+  publishing keys; the sandbox providers Amazon Bedrock AgentCore, Modal,
+  E2B and Daytona named as plain text, never logos; the sandbox answers
+  with no internet, no key, a fresh box at will (box 1 is thrown away
+  after the attack, box 2 runs the next step, then box 3 comes in), the
+  publishing keys on another Worker); 03 Keys out of reach (database and
+  backups wiped in 9 seconds, April 2026, with a key in `domains.env`, an
+  unrelated file, made for domains but with full access; the key file
+  sits in the sandbox with the project, and the call fails because the
+  box has no internet; the database and its key stay with the platform
+  team's Namespace, reachable only through the Temporal Nexus Endpoint
+  `db-operations`, whose allowlist "in Temporal Cloud" lets the agent's
+  Namespace `assistant` in; every Nexus claim follows the security
+  section's Nexus rules; an irreversible step waits for Maya, "no answer
+  by Friday 18:00: not run"); 04 A hidden order (hidden text in a
+  document uploaded from the web, a researcher demonstration, August
+  2026; only `open_link` is the demonstrated leak, the ticket and the
+  search are shown as POSSIBLE routes; the Workflow flags the run durably
+  once outside content is read, then any step that reaches outside waits
+  for a person, and the box has no other way out: Meta's Agents Rule of
+  Two; its last subtitle shows the Agent Harness tool approval policy:
+  `read_file` RUN, `create_ticket` ASK A PERSON, `delete_volume` REFUSED
+  by auto mode's rule on its arguments, the reason sent to the model);
+  05 What went wrong? (Trellix, October 2026, 600 security chiefs: 95%
+  tied an insider incident to "an AI agent or other autonomous system"
+  in the past 12 months; the agent's own account is unreliable; the Event
+  History, out of the agent's reach, traces back to the cause, and holds
+  the outcome of the Nexus operation, "via Nexus: rejected by Maya"; a
+  Workflow search `ReadDocument = "Q3 plan"` on a custom Search Attribute
+  finds every other run); 06 What you get, the closing recap: 4 tiles on
+  `USE_CASE_ROW`, an icon, a label and one line each, without dates
+  (KEYS KEPT APART: "with their team, behind Nexus"), growing in without
+  overshoot so they stay inside x 120-1800. The video has no "What you
+  can build" chapter and ends on the recap, like the guides.
+- Ch2's incident is one where the agent itself ran the attacker's code:
+  a sandbox round the agent's tools answers that kind of incident, not
+  social engineering of the user (a user tricked into pasting a script
+  into a terminal).
+- The Agent Harness semantics: an allowed tool runs (inherently safe,
+  allowed by name, or let through by auto mode); any other call waits for
+  a person; in auto mode a rule on a call's arguments can refuse it, and
+  the reason goes back to the model as the call's result. The harness has
+  no per-tool refuse rule.
+- The sandbox is driven by a Worker, never a Worker itself: the Worker
+  stays outside the box and sends it commands; the agent's progress lives
+  in Temporal. "No internet" and the box's lifecycle are sandbox settings
+  the developer chooses (E2B, Modal and AgentCore defaults differ); files
+  in a thrown-away box are lost unless saved elsewhere, and the Event
+  History lasts until the end of the Namespace retention period.
+- Incidents are anonymized on screen ("a coding agent", "a work
+  assistant": exact facts and dates, no company names or logos, as some
+  of these companies are Temporal customers), each dated and sourced in
+  `script.md`, `### Sources`. Sources show on the case files and the
+  statistic (publisher and month) and as the scenes' `sources` fields.
+- Three beats per incident chapter: the **case file** (date, tag,
+  anonymized headline, source, red INCIDENT stamp) slams in, then pins top
+  left as evidence; the **replay in red**, the dramatic beat; the
+  **Temporal half** on the board ch1 builds: the AI MODEL orb, the
+  WORKFLOW checkpoint (Temporal symbol, "your code", a gate below), the
+  tools on the right, the Event History strip; a step is an action card
+  (mono tool name, argument) from the model to the checkpoint to where it
+  runs, ending on a neon (safe), red (refused) or violet (a person
+  decides) tag.
+- Maya is the agent's owner and appears only in the Temporal halves: she
+  says no in ch3 and ch4, and her answers are in the ch5 history. The
+  replays of real incidents never name her.
+- Only shipped Temporal features, or features explicitly labelled as
+  preview, are claimed; integrations (OpenAI Agents SDK sandboxes, Amazon
+  Bedrock AgentCore) are never called generally available. The Temporal
+  Agent Harness, a temporal-community project, is the one exception,
+  named without a status. Workflow search is told as "find", on Search
+  Attributes the developer sets.
+- Cinematic like security: a camera layer per scene, the camera
+  zoom-through (`setCamera`) at every chapter boundary, and a match cut
+  from the intro into ch1 (the orb flies to its place on the board).
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title
