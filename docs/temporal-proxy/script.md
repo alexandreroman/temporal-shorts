@@ -190,12 +190,14 @@ you can build" chapter.
     under the first and 0.10 under the last, then an empty 1.0 slot; the
     box, the track and its tags form one group centered in the frame.
     Dramatic beat: 1.0 lights up neon with rings; READY FOR PRODUCTION
-    under it, its right edge on the badge's, then SUPPORTED as the
-    subtitle reads "support policy", stacked under it, right-aligned on
-    the same edge. Both tags hold for a moment, then the 1.0 badge rises
-    up a faint dashed line onto the proxy box as the box rises to the top
-    of the frame and the track and its tags drop away, leaving the box
-    alone, wearing its badge: the outro's first frame.
+    under it, about 48 px below the track's labels so that the tags read
+    as a block of their own, its right edge on the badge's, then
+    SUPPORTED as the subtitle reads "support policy", stacked 14 px under
+    it, right-aligned on the same edge. Both tags hold for a moment, then
+    the 1.0 badge rises up a faint dashed line onto the proxy box as the
+    box rises to the top of the frame and the track and its tags drop
+    away, leaving the box alone, wearing its badge: the outro's first
+    frame.
 
 ## Outro
 

@@ -19,15 +19,16 @@
   // dots of the ten 0.x releases (0.1 to 0.10, the last one as far from the slot's edge as from the dot before it),
   // the 1.0 slot, the faint line on past it (to xEnd, as far from the slot as x0), the labels of the first and last
   // dots (labelDy: under the track), and the two tags stacked under the slot, right-aligned on its right edge, the
-  // first 20 px or more under the labels (tags: the first one's center, under the track, and the gap between them).
-  // BOX_SINK: how much lower than its outro place (OUTRO_BOX) the box rests over the track. The box (y 257-467 on
-  // screen), the slot, 125 px under it, and the tags (down to y 772) span y 257-772, centered on y 515.
+  // first about 48 px under the labels, so that they read as a block of their own (tags: the first one's center,
+  // under the track, and the gap between them). BOX_SINK: how much lower than its outro place (OUTRO_BOX) the box
+  // rests over the track. The box (y 245-456 on screen), the slot, 125 px under it, and the tags (down to y 785)
+  // span y 245-785, centered on y 515.
   const RELEASES = 10;
   const TRACK = {
-    x0: 309, y: 612, dots: Array.from({ length: RELEASES }, (_, i) => 349 + i * 58), slot: 960, xEnd: 1611,
-    labelDy: 30, tags: { dy: 86, gap: 14 },
+    x0: 309, y: 601, dots: Array.from({ length: RELEASES }, (_, i) => 349 + i * 58), slot: 960, xEnd: 1611,
+    labelDy: 30, tags: { dy: 110, gap: 14 },
   };
-  const BOX_SINK = 42;
+  const BOX_SINK = 31;
   // One screen px in OUTRO_SHOT, in stage px: the track's parts are sized in screen px (n * U)
   const U = 1 / OUTRO_SHOT[2];
   // The stage point that OUTRO_SHOT shows at screen point (x, y)

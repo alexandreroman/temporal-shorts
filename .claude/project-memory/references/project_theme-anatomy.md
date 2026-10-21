@@ -545,6 +545,8 @@ below and the card order in [Home page design](feedback_home-page.md).
   0.9: WORKER and the Namespace line, the language tag and `proxy:7233`
   fading), so their text stays about 18 px on screen. Ch3's NO CODE
   CHANGE sits under the proxy, where ch2's CREDENTIALS IN ONE PLACE sits.
+  Ch5's tags sit about 48 px under the track's labels, a block of their
+  own under the track, 14 px apart.
 - Cinematic like security, one continuous film: every boundary is a match
   cut on a canonical state built by one function both sides call: intro to
   ch1 and ch1 to ch2 on `placeBareFleet()` in `WIDE_SHOT`; ch2 to ch3 and
