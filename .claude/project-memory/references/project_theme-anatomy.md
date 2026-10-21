@@ -54,7 +54,8 @@ the visuals belong to each theme (last section).
   chapter, so every chapter title stays true to its content.
 - Use cases: every explainer has a **What you can build** chapter after
   the recap, right before the outro (`NN-use-cases.js`); a product
-  presentation (agent-harness) and a guide (worker-tuning) end on their
+  presentation (agent-harness), a guide (worker-tuning) and
+  ai-agent-security, whose incidents are its concrete cases, end on their
   recap. Topic lists in
   `script.md` leave out both chapters.
   - The scene is one `useCaseScene({ chapter, uses, namedAt, subs })`
@@ -490,47 +491,59 @@ below and the card order in [Home page design](feedback_home-page.md).
 - Non-technical audience, card title "AI Agent Security", audience
   "General audience". Kicker "AN EXPLAINER FOR EVERYONE", title "Who
   keeps an AI agent in check?", tagline "REAL INCIDENTS, AND HOW TEMPORAL
-  HELPS". The user sets the scope: recent examples, all from 2026, and
-  sandboxing and audit as topics of their own (ch5, ch7).
-- One real 2026 incident per chapter, anonymized on screen ("a coding
-  agent", "a work assistant": exact facts and dates, no company names or
-  logos, as some of these companies are Temporal customers), each dated
-  and sourced in `script.md`, `### Sources`: ch2 hidden text in a shared
-  document makes a work assistant leak data (a researcher demonstration,
-  August 2026); ch3 a coding agent deletes a production database and its
-  backups in 9 seconds (April 2026); ch4 1.5M agent keys exposed
-  (February 2026), then a cloud agent reading every storage bucket with
-  its own keys (March 2026); ch5 341 malicious add-ons installing a
-  password thief (February 2026); ch6 an assistant deletes an inbox and
-  ignores STOP typed from a phone (February 2026); ch7 a survey, not an
-  incident, so no case file (Trellix, October 2026: 95% of 600 security
-  chiefs). Ch1's 80% survey is from 2025.
+  HELPS". The user sets the scope: recent examples, all from 2026, with
+  sandboxing and audit as topics of their own.
+- Temporal's role is architectural, never a filter on tool names: real
+  agents hold a terminal, a browser and code, and go around any list.
+  Temporal decides where each step runs and with what power, holds the
+  state outside the sandbox, gates the steps that matter in code the model
+  cannot talk to, and keeps a searchable record. Ch1's tools are generic:
+  TERMINAL, BROWSER, CODE, ADD-ONS.
+- Chapters: 01 Agents that act; 02 Locked in a sandbox (malicious
+  add-ons, February 2026; the sandbox providers Amazon Bedrock AgentCore,
+  Modal, E2B and Daytona named as plain text, never logos); 03 Keys out of
+  reach (database and backups wiped in 9 seconds, April 2026, with a
+  forgotten full-access key in the project; the sandbox holds no key, a
+  PROD WORKER keeps its own key and runs one narrow step, and an
+  irreversible step waits for Maya); 04 A hidden order (hidden text in a
+  shared document, a researcher demonstration, August 2026; the Workflow
+  flags the run durably once outside content is read, then any step that
+  sends data out waits for a person, whatever route: Meta's Agents Rule
+  of Two); 05 What went wrong? (Trellix, October 2026, 95% of 600
+  security chiefs; the agent's own account is unreliable; the Event
+  History, out of the agent's reach, traces back to the cause; a Workflow
+  search `ReadDocument = "Q3 plan"` on a custom Search Attribute finds
+  every other run); 06 What you get, the closing recap: 4 tiles on
+  `USE_CASE_ROW`, each stamped with the date of the incident it answers.
+  The video has no "What you can build" chapter and ends on the recap,
+  like the guides.
+- The sandbox is driven by a Worker, never a Worker itself: the Worker
+  stays outside the box and sends it commands; the agent's progress lives
+  in Temporal and the box is thrown away.
+- Incidents are anonymized on screen ("a coding agent", "a work
+  assistant": exact facts and dates, no company names or logos, as some
+  of these companies are Temporal customers), each dated and sourced in
+  `script.md`, `### Sources`. Sources show on the case files and the
+  statistic (publisher and month) and as the scenes' `sources` fields.
 - Three beats per incident chapter: the **case file** (date, tag,
-  anonymized headline, red INCIDENT stamp) slams in, then pins top left as
-  evidence; the **replay in red**, the dramatic beat; the **Temporal
-  half** on the board ch1 builds: the AI MODEL orb, the WORKFLOW
-  checkpoint (Temporal symbol, "your code", a gate below), the tools in
-  the dashed YOUR WORKERS zone, the Event History strip; a step is an
-  action card (mono tool name, argument) from the model to the checkpoint
-  to its tool, ending on a neon (safe) or red (refused) tag.
-- Maya is the agent's owner: she says no in ch3, cancels in ch6 and
-  appears in the ch7 history. She is never in the replays of real
-  incidents (ch6's owner stays unnamed).
-- Only shipped Temporal behavior is claimed: Workflow code between the
-  model and each tool, durable waits with deadlines, credentials in
-  Activities on the customer's Workers, Task Queues routing risky work to
-  a sandboxed Worker, Cancel with compensations, the Event History.
-  Workflow Pause, Principal Attribution and the Oso identity and policy
-  work stay out. The sandbox is told honestly: a container or VM that runs
-  a Worker; Temporal routes the risky step to it and carries on when the
-  box is thrown away.
+  anonymized headline, source, red INCIDENT stamp) slams in, then pins top
+  left as evidence; the **replay in red**, the dramatic beat; the
+  **Temporal half** on the board ch1 builds: the AI MODEL orb, the
+  WORKFLOW checkpoint (Temporal symbol, "your code", a gate below), the
+  tools on the right, the Event History strip; a step is an action card
+  (mono tool name, argument) from the model to the checkpoint to where it
+  runs, ending on a neon (safe), red (refused) or violet (a person
+  decides) tag.
+- Maya is the agent's owner and appears only in the Temporal halves: she
+  says no in ch3 and ch4, and her answers are in the ch5 history. The
+  replays of real incidents never name her.
+- Only shipped Temporal features, or features explicitly labelled as
+  preview, are claimed; integrations (OpenAI Agents SDK sandboxes, Amazon
+  Bedrock AgentCore) are never called generally available. Workflow
+  search is told as "find", on Search Attributes the developer sets.
 - Cinematic like security: a camera layer per scene, the camera
   zoom-through (`setCamera`) at every chapter boundary, and a match cut
   from the intro into ch1 (the orb flies to its place on the board).
-- Ch8 recap: 6 tiles, 3 x 2 (RULES IN CODE, A PERSON SAYS YES, KEYS STAY
-  HOME, SANDBOXED WORK, A REAL STOP, EVERY STEP ON RECORD). Ch9 use cases,
-  set A: support refunds, coding agents, invoice payments, IT help desks;
-  sets B and C are in `docs/plans/2026-10-21-ai-agent-security.md`.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title
