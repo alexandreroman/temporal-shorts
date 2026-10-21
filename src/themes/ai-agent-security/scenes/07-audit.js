@@ -2,11 +2,11 @@
 // No case file: a survey, not an incident. A large red 95% counts up beside a crowd of 100 figures, each standing for
 // 6 of the 600 security chiefs, which turn red as it climbs. Three questions follow, READ? DECIDED? DID?, then fly
 // into the header of the Event History card, which grows to fill the frame: a Web UI-like list (number, time, type,
-// event, details, result) labelled OUTSIDE THE AGENT, whose rows fill in order, from the email that came in to the
-// emails put back. The dramatic beat: the camera pushes in on the latest rows and travels back up the history with a
-// magnifier, which stops at each outcome of the earlier chapters (the cancel, the sandbox, Maya's no, the blocked
-// send) while a red thread links their results one to the next, up to the email at the top, which lights as THE
-// CAUSE with a red flash and a jolt.
+// event, details, result) labelled OUTSIDE THE AGENT, whose rows fill in order, from the shared document the agent
+// read to the emails put back. The dramatic beat: the camera pushes in on the latest rows and travels back up the
+// history with a magnifier, which stops at each outcome of the earlier chapters (the cancel, the sandbox, Maya's no,
+// the blocked link) while a red thread links their results one to the next, up to the document at the top, which
+// lights as THE CAUSE with a red flash and a jolt.
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- 95%: the stat block on the left, the crowd of figures on the right, centered on y 515
@@ -58,9 +58,9 @@
   // result tag (tone 'red' for a refused step, 'neon' for a safe outcome). The rows of chapters 2, 3, 5 and 6 carry
   // the thread (LENS_WALK).
   const ROWS = [
-    { time: '09:14:02', type: 'READ', event: 'email received', detail: 'from: an outside sender' },
-    { time: '09:14:03', type: 'DECIDED', event: 'model call', detail: 'next: send_email' },
-    { time: '09:14:04', type: 'DID', event: 'send_email', code: true, detail: 'to: an outside address',
+    { time: '09:14:02', type: 'READ', event: 'document read', detail: 'a shared document' },
+    { time: '09:14:03', type: 'DECIDED', event: 'model call', detail: 'next: open_url' },
+    { time: '09:14:04', type: 'DID', event: 'open_url', code: true, detail: 'an outside address',
       tag: 'BLOCKED', tone: 'red' },
     { time: '09:14:06', type: 'DECIDED', event: 'model call', detail: 'next: delete_database' },
     { time: '09:52:31', type: 'DID', event: 'delete_database', code: true, detail: 'the live database',
@@ -89,7 +89,7 @@
   const T3 = { push: 0, pushD: 1.1, travel: 1.3, travelD: 2.9, lens: 0.6 };
   // The magnifier's walk back in time, rows by index (0 is #1 on screen): it appears on the latest row, then each move
   // (from c[3] + at, d long) ends on an outcome, where a pin lands and the thread draws from the previous pin; the last
-  // move ends on the email, THE CAUSE
+  // move ends on the document, THE CAUSE
   const LENS_WALK = {
     from: 10,
     moves: [
@@ -218,7 +218,7 @@
     return head;
   };
   // A row segment: its highlight band (seg.band, the magnifier's), its red tint (seg.tint, a linked outcome), its
-  // cells (seg.content, which slides in) and its result tag (seg.tag, or null); the email's row also holds a hidden
+  // cells (seg.content, which slides in) and its result tag (seg.tag, or null); the document's row also holds a hidden
   // "HIDDEN ORDER" note (seg.order) and THE CAUSE tag (seg.cause)
   const makeRow = (card, row, i) => {
     const { rowH } = CARD;
@@ -330,7 +330,7 @@
       },
       // a hold on THE CAUSE before the zoom-through into the recap
       {
-        text: "Follow it back to the cause: the email that started it, the blocked step, Maya's no, the cancel.",
+        text: "Follow it back to the cause: the document that started it, the blocked step, Maya's no, the cancel.",
         after: 1.0,
       },
     ],
@@ -447,7 +447,7 @@
         }
       });
 
-      // the dramatic beat: THE CAUSE slams onto the email's row, red rings spread from it, the hidden order shows
+      // the dramatic beat: THE CAUSE slams onto the document's row, red rings spread from it, the hidden order shows
       const first = s.rows[0];
       const slam = P(t, causeAt, 0.16, easeIn);
       first.cause.style.opacity = P(t, causeAt, 0.08, linear);

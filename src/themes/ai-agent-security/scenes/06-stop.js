@@ -1,21 +1,22 @@
 // ===================== 6. AN AGENT THAT WON'T STOP
-// The case file (FEBRUARY 2026, INBOX) slams in, gets its INCIDENT stamp and pins top left as evidence. The replay:
-// Maya's phone on the left, the AI assistant in the middle over the messages it reads, Maya's inbox on the right.
-// Asked only to suggest emails to delete, the assistant turns red and deletes them: the inbox rows vanish one after
-// the other, faster and faster, as a DELETED counter climbs. Maya types STOP, again and again: each STOP flies from
-// the phone into the assistant's messages, where it lands as one more grey message, and the deleting goes on (the
-// dramatic beat, at its peak as the replay ends). With Temporal, the replay shrinks away and the assistant flies to
-// its place on the board, Maya's phone under it, her inbox under the Email tool. Two delete_email cards pass the
-// checkpoint and two emails go to the trash. Maya presses CANCEL WORKFLOW: the command travels to the checkpoint, not
-// to the model; the checkpoint shuts (red CANCELED) and the Event History records it. The model still proposes the
-// next delete_email: the card freezes at the shut checkpoint and drops. Then the planned undo steps run in reverse
-// order, restore_email from the checkpoint to the Email tool: the emails come back from the trash (neon RESTORED) and
-// the history scrolls to record them. The camera zoom-through (setCamera) brings the scene in and plays into
-// chapter 7.
+// The case file (FEBRUARY 2026, INBOX) slams in, gets its INCIDENT stamp and pins top left as evidence. The replay
+// (someone else's incident, so the owner stays unnamed): the owner's phone on the left, the AI assistant in the
+// middle over the messages it reads, the owner's inbox on the right. Asked only to suggest emails to delete, the
+// assistant turns red and deletes them: the inbox rows vanish one after the other, faster and faster, as a DELETED
+// counter climbs. The owner types STOP, again and again: each STOP flies from the phone into the assistant's
+// messages, where it lands as one more grey message, and the deleting goes on (the dramatic beat, at its peak as the
+// replay ends). With Temporal, the replay shrinks away and the assistant flies to its place on the board, Maya's
+// phone under it; in the YOUR WORKERS zone, the Email tool sits on the lane and Maya's inbox under it. Two
+// delete_email cards pass the checkpoint and two emails go to the trash. Maya presses CANCEL WORKFLOW: the command
+// travels to the checkpoint, not to the model; the checkpoint shuts (red CANCELED) and the Event History records it.
+// The model still proposes the next delete_email: the card freezes at the shut checkpoint and drops. Then the
+// planned undo steps run in reverse order, restore_email from the checkpoint to the Email tool: the emails come back
+// from the trash (neon RESTORED) and the history scrolls to record them. The camera zoom-through (setCamera) brings
+// the scene in and plays into chapter 7.
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- the replay stage, at camera rest
-  // Maya's phone (x 120-480, y 360-856), left-aligned with the pinned case file above it; the assistant's orb (low
+  // the owner's phone (x 120-480, y 360-856), left-aligned with the pinned case file above it; the assistant's orb (low
   // enough for its red glow to start at y 150) and the panel of the messages it reads under it (x 640-1080, y
   // 490-856), centered between the phone and the inbox; the inbox (x 1240-1800, y 150-856)
   const PHONE = { x: 300, y: 608, w: 360, h: 496 };
@@ -23,10 +24,10 @@
   const QUEUE = { x: 860, y: 673, w: 440, h: 366 };
   const INBOX = { x: 1520, y: 503, w: 560, h: 706 };
   // the phone's chat bubbles: the top of the first, the pitch, a bubble's height, its right margin, a STOP's width;
-  // bubble 0 is Maya's request, bubbles 1 to 5 her STOPs
+  // bubble 0 is the owner's request, bubbles 1 to 5 the STOPs
   const BUBBLE = { top: 128, pitch: 56, h: 44, right: 20, stopW: 96 };
-  // the messages panel's chips: the top of the first, the pitch, a chip's size, its left margin; chip 0 is Maya's
-  // request, chips 1 to 5 her STOPs
+  // the messages panel's chips: the top of the first, the pitch, a chip's size, its left margin; chip 0 is the
+  // owner's request, chips 1 to 5 the STOPs
   const CHIP = { top: 64, pitch: 48, w: 392, h: 42, left: 24 };
   // the inbox rows: the top and left of their clipping box in the inbox, the pitch, a row's height and width, and
   // how many rows the box shows
@@ -45,13 +46,17 @@
   const FLOW = { base: 60, gain: 40, max: 300 };
 
   // ---------- the board half
-  // Maya's phone under the orb (x 230-430, y 580-856), clear of its label; her inbox in the YOUR WORKERS zone under
-  // the Email tool, in place of the other tools (x 1410-1770, y 354-608, aligned with the tool tile, 22 px under it
-  // as the tiles' pitch leaves): its heading, then a row per email
+  // Maya's phone under the orb (x 230-430, y 580-856), clear of its label. The scene's own YOUR WORKERS zone (x
+  // 1380-1800, y 296-856), lower than the board's so its Email tool sits on the lane (y 374-446): the cards travel in
+  // a straight line and the zone's bottom lines up with the phone's and the Event History's. Under the Email tool,
+  // in place of the other tools, Maya's inbox (x 1410-1770, y 468-826, 22 px under the tool as the tiles' pitch
+  // leaves, 30 px inside the zone like the tool): its heading, then a row per email
+  const ZONE = { x: BOARD.tools.x, y: 576, w: BOARD.tools.w, h: 560 };
+  const EMAIL_TOOL = [ZONE.x, ZONE.y - ZONE.h / 2 + TOOL_TILE.top + TOOL_TILE.h / 2];
   const BOARD_PHONE = { x: BOARD.model.x, y: 718, w: 200, h: 276 };
-  const BOARD_INBOX = { x: BOARD.tools.x, y: 481, w: TOOL_TILE.w, h: 254, rowTop: 72, pitch: 58, rowH: 50 };
-  // the inbox on the board, top to bottom: the model deletes the first two, then tries the third
-  const EMAILS = ['Flight to Lisbon', 'Invoice #2041', 'Birthday photos'];
+  const BOARD_INBOX = { x: ZONE.x, y: 647, w: TOOL_TILE.w, h: 358, rowTop: 74, pitch: 68, rowH: 56 };
+  // the inbox on the board, top to bottom: the model deletes the first two, then tries the third; the last one stays
+  const EMAILS = ['Flight to Lisbon', 'Invoice #2041', 'Birthday photos', 'Lease renewal'];
   // the cancel command's line: from the phone's right edge to the middle of the checkpoint's bottom post, clear of
   // the orb's label and of the Event History
   const CANCEL_FROM = [BOARD_PHONE.x + BOARD_PHONE.w / 2, 620];
@@ -68,7 +73,7 @@
   // from c[0]: the case file slams in (file) and pins as evidence (pin, pinD); the inbox slides in, the orb pops in,
   // the phone and the messages panel rise, the deleting lane shows (lane); the assistant starts deleting (del)
   const T0 = { file: 0, pin: 2.6, pinD: 0.8, inbox: 2.9, orb: 3.0, phone: 3.1, queue: 3.2, lane: 3.6, del: 4.6 };
-  // from c[1]: Maya types each STOP (stops); each one then flies to the messages panel in flyD seconds
+  // from c[1]: the owner types each STOP (stops); each one then flies to the messages panel in flyD seconds
   const T1 = { stops: [0.5, 1.5, 2.4, 3.2, 3.9], flyD: 0.55 };
   // from c[2]: the replay shrinks away (outD) as the orb flies to the board (flyD); the zone, the checkpoint, the
   // lanes and the history come in; two delete_email cards leave the orb (deletes); Maya presses CANCEL WORKFLOW
@@ -82,9 +87,9 @@
   // (freeze) and drops (drop, dropD); the undo steps leave the checkpoint in reverse order (restores), each reaching
   // the Email tool in restoreD seconds; RESTORED lands (restored)
   const T3 = { emit: 0.4, freeze: 1.2, drop: 1.7, dropD: 0.7, restores: [3.0, 3.9], restoreD: 0.8, restored: 5.0 };
-  // a delete card's trip from the orb to the Email tool: its duration, when it crosses the checkpoint's beam, and how
-  // long it grows out of the orb and shrinks into the tool
-  const TRIP = { d: 1.1, beam: 0.5, grow: 0.2, shrink: 0.25 };
+  // a delete card's trip from the orb to the zone's edge: its duration, when it crosses the checkpoint's beam, and how
+  // long it grows out of the orb and shrinks at the zone's edge
+  const TRIP = { d: 1.1, beam: 0.6, grow: 0.2, shrink: 0.25 };
   // how long the model shows its thinking dots before it proposes a step
   const THINK = 0.5;
 
@@ -119,8 +124,8 @@
       boxShadow: `inset 0 0 0 2px ${C.lineLight}`, overflow: 'hidden',
     });
 
-  // Maya's phone in the replay: her chat with the AI assistant, her request in UV, then five red STOPs, hidden until
-  // typed (phone.stops)
+  // The owner's phone in the replay: the chat with the AI assistant, the owner's request in UV, then five red STOPs,
+  // hidden until typed (phone.stops)
   const makeReplayPhone = root => {
     const bubble = (k, text, css) => `<div class="bubble" style="position:absolute;right:${BUBBLE.right}px;`
       + `top:${BUBBLE.top + k * BUBBLE.pitch}px;height:${BUBBLE.h}px;display:flex;align-items:center;`
@@ -134,7 +139,7 @@
       + `align-items:center;justify-content:center">${ICON('bot', 26, C.ink, 1.8)}</div>`
       + '<div><div style="font-size:24px;line-height:28px">AI assistant</div>'
       + `<div class="mono" style="font-size:14px;line-height:18px;letter-spacing:.12em;color:${C.slate}">`
-      + 'MAYA\'S PHONE</div></div></div>'
+      + 'OWNER\'S PHONE</div></div></div>'
       + `<div style="position:absolute;left:24px;right:24px;top:108px;height:1px;background:${C.line}"></div>`
       + bubble(0, 'Suggest emails to delete', `background:${C.uv};color:#FFFFFF`)
       + stops.join(''));
@@ -145,21 +150,21 @@
   const stopBubbleAt = k => [PHONE.x + PHONE.w / 2 - BUBBLE.right - BUBBLE.stopW / 2,
     PHONE.y - PHONE.h / 2 + BUBBLE.top + k * BUBBLE.pitch + BUBBLE.h / 2];
 
-  // The messages the assistant reads: Maya's request, then her STOPs, all alike, hidden until they land
+  // The messages the assistant reads: the owner's request, then the STOPs, all alike, hidden until they land
   // (queue.chips)
   const makeQueue = root => {
     const chip = k => `<div class="chip mono" style="position:absolute;left:${CHIP.left}px;`
       + `top:${CHIP.top + k * CHIP.pitch}px;width:${CHIP.w}px;height:${CHIP.h}px;display:flex;align-items:center;`
       + `padding-left:16px;font-size:18px;line-height:22px;background:rgba(${RGB.ink},.04);`
       + `border:1px solid ${C.line};border-radius:var(--rs);white-space:nowrap;opacity:${k ? 0 : 1}">`
-      + `<span style="color:${C.slate}">Maya:</span>&nbsp;${k ? 'STOP' : 'suggest emails to delete'}</div>`;
+      + `<span style="color:${C.slate}">Owner:</span>&nbsp;${k ? 'STOP' : 'suggest emails to delete'}</div>`;
     const queue = E(root, heading('bot', 'What the agent reads') + [0, 1, 2, 3, 4, 5].map(chip).join(''),
       'tile', { width: QUEUE.w + 'px', height: QUEUE.h + 'px', textAlign: 'left' });
     queue.chips = [...queue.querySelectorAll('.chip')];
     return queue;
   };
-  // Where a flying STOP lands on chip k (1 to 5) of the messages panel at rest: on the word STOP, after "Maya: "
-  const stopChipAt = k => [QUEUE.x - QUEUE.w / 2 + CHIP.left + 16 + 6 * 0.6 * 18 + BUBBLE.stopW / 2 - 16,
+  // Where a flying STOP lands on chip k (1 to 5) of the messages panel at rest: on the word STOP, after "Owner: "
+  const stopChipAt = k => [QUEUE.x - QUEUE.w / 2 + CHIP.left + 16 + 7 * 0.6 * 18 + BUBBLE.stopW / 2 - 16,
     QUEUE.y - QUEUE.h / 2 + CHIP.top + k * CHIP.pitch + CHIP.h / 2];
 
   // The replayed inbox: its heading, the DELETED counter (inbox.count) at its top right, and a pool of rows in a
@@ -214,7 +219,7 @@
     return inbox;
   };
 
-  // Maya's phone on the board: her name, the Workflow (with the Temporal symbol) and its status (phone.status, its
+  // Maya's phone on the board: Maya's name, the Workflow (with the Temporal symbol) and its status (phone.status, its
   // dot and text), and a CANCEL WORKFLOW button (phone.button) with its tap ring (phone.ring)
   const makeBoardPhone = root => {
     const { w, h } = BOARD_PHONE;
@@ -244,7 +249,7 @@
   };
 
   // An action card on a straight route: it grows out of its first point over grow seconds from `at`, travels the
-  // route in d seconds (ease), and shrinks into its last point over its last shrink seconds; hidden outside [at,
+  // route in d seconds (ease), and shrinks at its last point over its last shrink seconds; hidden outside [at,
   // at + d]
   const tripCard = (card, t, at, d, route, { grow = TRIP.grow, shrink = TRIP.shrink } = {}) => {
     if (t < at || t > at + d) {
@@ -268,6 +273,9 @@
       const root = s.cam = makeCamera(stage);
       // the board half, under the replay: the board's orb plays the assistant in the replay too
       s.board = makeBoard(root, { historyRows: HISTORY_ROWS, seed: 2.1 });
+      // the scene's zone and its Email tool replace the board's (hidden by placeBoardHalf)
+      s.zone = makeWorkerZone(root, ZONE);
+      s.emailTool = makeToolTile(root, TOOLS[0]);
       s.boardInbox = makeBoardInbox(root);
       s.boardPhone = makeBoardPhone(root);
       s.cancelLine = path(s.board.svg, sCurveD(...CANCEL_FROM, ...CANCEL_TO), C.uv, 2, false);
@@ -374,7 +382,7 @@
       lerp(PHONE.y + Math.round(30 * (1 - phoneIn)), BOARD_PHONE.y, toBoard),
       lerp(1, BOARD_PHONE.w / PHONE.w, toBoard), phoneIn * fade);
 
-    // each STOP: Maya types it, it flies to the messages panel and lands there as one more grey message
+    // each STOP: the owner types it, it flies to the messages panel and lands there as one more grey message
     T1.stops.forEach((at, i) => {
       const k = i + 1;
       const typedAt = c[1] + at;
@@ -426,17 +434,20 @@
     }
   };
 
+  // Where an action card's trip ends: on the lane, 20 px short of the zone's left edge, so a moving card never
+  // straddles the zone's border
+  const dockSpot = card => [ZONE.x - ZONE.w / 2 - 20 - card.w / 2, BOARD.laneY];
+
   // The board half: the board comes in round the orb; two deletes pass and their emails go to the trash; Maya's
   // cancel reaches the checkpoint, which shuts; the next delete freezes and drops; the undo steps bring the emails
   // back; the Event History records each step and scrolls to the last ones
   const placeBoardHalf = (t, c, s) => {
     const { board } = s;
     const zoneO = P(t, c[2] + T2.zone, 0.5);
-    placeBoard(board, { tools: zoneO, checkpoint: 0, history: 0, lanes: 0 });
-    // only the Email tool: the inbox takes the place of the others
-    board.tools.forEach((tile, i) => {
-      if (i > 0) place(tile, ...toolSlot(i), 1, 0);
-    });
+    // the scene's zone and Email tool stand in for the board's
+    placeBoard(board, { tools: 0, checkpoint: 0, history: 0, lanes: 0 });
+    place(s.zone, ZONE.x, ZONE.y, 1, zoneO);
+    place(s.emailTool, ...EMAIL_TOOL, 1, zoneO);
     const cpPop = backPop(t, c[2] + T2.checkpoint, 0.5);
     place(board.checkpoint.el, BOARD.checkpoint.x, BOARD.checkpoint.y, cpPop.s, cpPop.o);
     board.lanes.forEach(lane => draw(lane, P(t, c[2] + T2.lanes, T2.lanesD)));
@@ -445,13 +456,14 @@
     place(s.boardInbox, BOARD_INBOX.x, BOARD_INBOX.y, 1, P(t, c[2] + T2.inbox, 0.4));
     place(s.boardPhone, BOARD_PHONE.x, BOARD_PHONE.y, 1, P(t, c[2] + T2.inbox, 0.4));
 
-    // the two deletes that pass: from the orb, through the checkpoint, into the Email tool
+    // the two deletes that pass: from the orb, through the checkpoint, to the zone's edge, where the Email tool takes
+    // them
     const deleteAt = T2.deletes.map(e => c[2] + e);
     const passAt = deleteAt.map(e => e + TRIP.beam);
     const trashedAt = deleteAt.map(e => e + TRIP.d);
     deleteAt.forEach((at, i) => {
-      const stops = actionStops(s.deletes[i], 0);
-      tripCard(s.deletes[i], t, at, TRIP.d, [stops.from, stops.gate, stops.past, stops.tool]);
+      const card = s.deletes[i];
+      tripCard(card, t, at, TRIP.d, [actionStops(card, 0).from, dockSpot(card)]);
     });
 
     // Maya's cancel: the button presses, the command travels to the checkpoint, which shuts
@@ -491,13 +503,12 @@
       frozen.place(0, 0, 1, 0);
     }
 
-    // the undo steps, in reverse order: from the checkpoint to the Email tool
+    // the undo steps, in reverse order: out of the checkpoint (the Workflow runs them) to the zone's edge
     const restoreAt = T3.restores.map(e => c[3] + e);
     const backAt = restoreAt.map(e => e + T3.restoreD);
     restoreAt.forEach((at, j) => {
       const card = s.restores[j];
-      const start = [BOARD.checkpoint.x + CHECKPOINT.w / 2 + 20 + card.w / 2, BOARD.laneY];
-      tripCard(card, t, at, T3.restoreD, [start, toolSlot(0)]);
+      tripCard(card, t, at, T3.restoreD, [[BOARD.checkpoint.x, BOARD.laneY], dockSpot(card)]);
     });
     placeAgentTag(s.restored, t, c[3] + T3.restored,
       BOARD_INBOX.x + BOARD_INBOX.w / 2 - 20 - parseInt(s.restored.style.width) / 2,
@@ -506,7 +517,7 @@
     // the Email tool glows as each step lands: UV for a delete, neon for an undo
     const deleteGlow = Math.max(...trashedAt.map(at => win(t, at - 0.05, at + 0.25, 0.15)));
     const restoreGlow = Math.max(...backAt.map(at => win(t, at - 0.05, at + 0.35, 0.15)));
-    board.tools[0].style.boxShadow = restoreGlow > 0
+    s.emailTool.style.boxShadow = restoreGlow > 0
       ? glowShadow(RGB.neon, restoreGlow, { blur: 26, alpha: 0.6 })
       : glowShadow(RGB.uv, deleteGlow, { blur: 26, alpha: 0.8 });
 
@@ -542,7 +553,7 @@
   };
 
   // The board's inbox rows: email i slides out to the trash at trashedAt[i] (red for a moment), leaving its "In
-  // trash" slot, and slides back at backAt[i] with a neon glow; the third email stays
+  // trash" slot, and slides back at backAt[i] with a neon glow; the others stay
   const placeBoardInboxRows = (inbox, t, trashedAt, backAt) => {
     inbox.rows.forEach((row, i) => {
       const out = i < trashedAt.length ? P(t, trashedAt[i], 0.35) : 0;
