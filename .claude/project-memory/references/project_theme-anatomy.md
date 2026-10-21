@@ -485,6 +485,35 @@ below and the card order in [Home page design](feedback_home-page.md).
   camera lowers both chapters by `RECAP_DY` to center the composition with
   its badges: 12's use-case row sits 14 px below `USE_CASE_ROW`.
 
+### temporal-proxy
+
+- A news short on Temporal Proxy 1.0 (v1.0.0, published on GitHub on
+  2026-10-16) for security teams, platform teams and developers who run
+  Workers: technical, no code or configuration on screen apart from the
+  Worker lines `proxy:7233` / `payments`. Kicker "PRODUCT NEWS, OCTOBER
+  2026", title "Temporal Proxy" / "1.0", tagline "SECURITY MOVES OUT OF
+  YOUR WORKERS"; markdown-title "Temporal Proxy 1.0".
+- The video says "ready for production" and "supported", never "Public
+  Preview", "GA" or "generally available" (user decision). Every claim
+  follows the release, the temporal-proxy README and
+  docs.temporal.io/production-deployment/temporal-proxy (`### Sources`).
+- Four chapters: security in every Worker (ch1), one gateway, no secrets
+  (ch2), encryption with your keys and failing closed (ch3), why 1.0
+  matters and how it installs (ch4). A news short ends on its last topic
+  chapter: no "What you get" recap, no "What you can build" chapter.
+- Running example: the security theme's transfer card (`TRANSFER`, Nora
+  sends €25,000 to Leo). The security components it shares with security
+  (payload card, zones, TLS tube, verdict tags, Worker tiles, proxy box,
+  YOUR KMS, `shot()`) live in `src/shared.js`; its own layout (`FLEET`,
+  `PROXY` at x 1181, `WIDE_SHOT`) is in its `shared.js`.
+- Cinematic like security, one continuous film: every boundary is a match
+  cut on a canonical state built by one function both sides call: intro to
+  ch1 and ch1 to ch2 on `placeBareFleet()` in `WIDE_SHOT`; ch2 to ch3 and
+  ch3 to ch4 on `placeProxyStage()` in `PROXY_SHOT`; ch4 to the outro on
+  the proxy box alone with its neon 1.0 badge in `OUTRO_SHOT`. The intro's
+  visual lives in a camera held at `WIDE_SHOT`; the 1.0 badge
+  (`makeVersionBadge`) ties the intro, ch4 and the outro.
+
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title
 card, header, layout, vocabulary and end card, and each new theme starts

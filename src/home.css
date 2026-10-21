@@ -63,7 +63,8 @@
 /* Durable Execution: the history fills in, row by row from the top, each step square appearing as its line and
    the link to the next step are drawn. The lines are drawn by separate paths, swapped in for the single history
    path during the .65 s fill (last delay + draw): split paths antialias slightly differently at rest.
-   Human-in-the-Loop: the approval check mark is drawn. */
+   Human-in-the-Loop: the approval check mark is drawn. Temporal Proxy: the three lines are drawn into the gateway
+   box in turn, then the line out of it. */
 .home .history-steps{opacity:0}
 .home .theme:is(:hover,:focus-visible) .history{animation:icon-hidden .65s}
 .home .theme:is(:hover,:focus-visible) .history-steps{animation:icon-shown .65s}

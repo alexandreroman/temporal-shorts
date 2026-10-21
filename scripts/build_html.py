@@ -65,6 +65,7 @@ THEME_TOPICS = {
     "agent-harness": ["AI agent", "Temporal Agent Harness"],
     "worker-tuning": ["Worker tuning", "Task Queue"],
     "security": ["Security", "Temporal Proxy", "Temporal Nexus"],
+    "temporal-proxy": ["Temporal Proxy", "Encryption", "Security"],
 }
 
 MIME_TYPES = {

@@ -33,6 +33,12 @@ from a deterministic HTML animation. Each video is a theme:
   and encryption out of the Workers, calls across Namespaces with Temporal
   Nexus, and Temporal Cloud's compliance: certifications, yearly
   third-party audits, the Trust Center
+- `temporal-proxy`: Temporal Proxy 1.0, a news short for security teams
+  and developers: the 1.0 release, ready for production and supported;
+  without it, every Worker carries an address, credentials and encryption
+  code; with it, one gateway adds TLS, credentials and the full Namespace
+  name, encrypts payloads with data keys wrapped by your KMS, fails closed
+  without a key, and runs as a Go binary, a container image or a Helm chart
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page
