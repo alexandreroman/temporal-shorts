@@ -1648,6 +1648,52 @@ function makeKms(root, { w, h }, u = 1) {
   Object.assign(e.never.style, { left: 'auto', right: px(22), top: px(70) });
   return e;
 }
+// The tag of a payload's data key, drawn at u stage px per screen px (see scaledTag), a fixed width so it never moves
+// as its text changes: DATA KEY n on its way to the KMS, then WRAPPED KEY n, behind a lock (setKeyTag)
+function makeKeyTag(root, u) {
+  const e = scaledTag(root, '', 'wait', 15, { u, solid: 'var(--violet-solid)' });
+  e.u = u;
+  return e;
+}
+// Sets a key tag (makeKeyTag) to data key n, wrapped by the KMS or not
+function setKeyTag(e, n, wrapped) {
+  const icon = ICON(wrapped ? 'lock' : 'key', 16 * e.u, wrapped ? C.violet : C.neon, 2);
+  setHtml(e, `${icon}${wrapped ? 'WRAPPED' : 'DATA'} KEY ${n}`);
+  Object.assign(e.style, {
+    width: `${200 * e.u}px`, justifyContent: 'center', borderStyle: wrapped ? 'solid' : 'dashed',
+  });
+}
+// The point at progress p along a path element, from its end back to its start if `back`
+function alongPath(pathEl, p, back = false) {
+  const point = pathEl.getPointAtLength(pathEl._L * clamp(back ? 1 - p : p));
+  return [point.x, point.y];
+}
+// A data key's trip along the KMS link (a path from the KMS to the data key): it leaves the data key at goAt and takes
+// tripD to reach the KMS, stays there `stay` seconds while the KMS wraps it (wrapped from just after wrapAt), then
+// comes back (from backAt). Returns its point (at) and those times.
+function kmsTrip(linkEl, t, goAt, { tripD, stay }) {
+  const wrapAt = goAt + tripD, backAt = wrapAt + stay;
+  const at = t < backAt ? alongPath(linkEl, P(t, goAt, tripD), true) : alongPath(linkEl, P(t, backAt, tripD));
+  return { at, wrapAt, backAt, wrapped: t >= wrapAt + 0.15 };
+}
+// The ciphertext of stored payload i, its first n glyphs (the same glyphs wherever the payload shows)
+const storedCipher = (i, n) => Array.from({ length: n }, (_, col) => cipherGlyph(i + 10, col)).join('');
+// A row of TEMPORAL's list of stored payloads, w x h px: ciphertext, then the payload's wrapped data key behind the
+// violet lock of the key tag (row.key); a wrapped key is ciphertext too, which only your KMS can unwrap. Nothing in it
+// is a key Temporal could use.
+function makeStoredRow(root, i, key, { w, h }) {
+  const row = E(root,
+    `<span class="mono" style="font-size:16px;color:${C.violet}">${storedCipher(i, 5)}</span>`
+    + `<span class="key mono" style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:15px;`
+    + `line-height:20px;letter-spacing:.04em;padding:0 5px;border:1px solid ${C.violet};border-radius:4px;`
+    + `color:${C.violet}">${ICON('lock', 13, C.violet, 2.2)}WRAPPED ${key}</span>`,
+    '', {
+      width: w + 'px', height: h + 'px', display: 'flex', alignItems: 'center', gap: '8px',
+      padding: '0 8px', background: C.bg, border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+    });
+  row.key = row.querySelector('.key');
+  return row;
+}
 
 
 // ===================== camera and motion helpers (camera moves, trails, sparks, ripples)
