@@ -17,9 +17,10 @@
 // sends data out. The model steps up and aside for Maya's phone, which shows the data and the document it came from;
 // the three routes light up converging on the checkpoint (EVERY WAY OUT), and Maya taps Reject: the checkpoint
 // shuts, REJECTED BY MAYA, on record. Then the workers and the sandbox slide away for the Temporal Agent Harness's
-// TOOL APPROVAL POLICY: three rules light up in the subtitle's order, read_file RUN (an allowed tool), create_ticket
-// ASK A PERSON (not on the allowed list), whose violet line reaches Maya's phone, and delete_volume REFUSED by auto
-// mode's rule on its arguments, the reason sent back to the model.
+// TOOL APPROVAL POLICY, and the Event History slides under the held ticket: three columns (the model over Maya's
+// phone, the checkpoint and its history, the policy). Three rules light up in the subtitle's order, read_file RUN
+// (an allowed tool), create_ticket ASK A PERSON (not on the allowed list), as Maya's phone glows violet with it,
+// and delete_volume REFUSED by auto mode's rule on its arguments, the reason sent back to the model.
 // The camera zoom-through (setCamera) brings the scene in and plays into chapter 5.
 // The block keeps every name declared in this file local to this scene.
 {
@@ -56,6 +57,13 @@
   const POSSIBLE_O = 0.72;
   // the action cards' argument size: a value in a held shot reads at 18 px or more (ACTION_CARD.argFont is 17)
   const ARG_FONT = 18;
+  // The width of an action card whose argument reads at ARG_FONT: its longest line, as makeActionCard's, always even
+  const cardWidth = ({ tool, arg, icon }) => {
+    const { toolFont, padX, edge } = ACTION_CARD;
+    const iconW = icon ? 32 + 14 : 0;
+    const textW = Math.max(tool.length * 0.6 * toolFont, arg.length * 0.6 * ARG_FONT);
+    return 2 * Math.ceil((textW + iconW + 2 * padX + edge) / 2);
+  };
   // the x where each flying card's curve turns from the orb's line to its own
   const LEAK_BEND = 1200;
 
@@ -103,15 +111,17 @@
     [BOARD.model.x + 64, laneY - 64], [480, 200], [700, 150],
     [FLAG_SPOT[0] - FLAG_BADGE.w / 2 - 6, FLAG_SPOT[1]],
   ];
-  // the Event History strip, 720 px wide (x 600-1320) where BOARD.history is 800: 60 px clear of the sandbox and of
-  // the policy panel (x 1380); same center, so its bottom stays on the phone's and the sandbox's (y 856)
+  // the Event History strip, 720 px wide (x 600-1320) where BOARD.history is 800: 60 px clear of the sandbox; same
+  // center, so its bottom stays on the phone's and the sandbox's (y 856)
   const HISTORY = { ...BOARD.history, w: 720 };
-  // Maya's phone on the left (x 140-460, as in chapter 3), its bottom on the Event History's bottom edge; the model,
-  // stepped up and aside above it at 2/3 of its size, 40 px clear of the phone's top. Its AI MODEL label fades out
-  // there: the red glow of the fooled model reaches the content frame's top edge (y 148), and the label would crowd
-  // the phone.
-  const PHONE = { x: 300, y: HISTORY.y + HISTORY.h / 2 - APPROVAL_CARD.h / 2 };
-  const ORB_ASIDE = { x: PHONE.x, y: 256, scale: 2 / 3 };
+  // Maya's phone on the left, on the content frame's left edge (x 120-440), its bottom on the Event History's bottom
+  // edge; the model, stepped up and aside above it at 2/3 of its size (120 px), its red glow (216 px) from the
+  // content frame's top (y 150), 38 px clear of the phone. Its AI MODEL label fades out as it steps aside and back
+  // in on its right, 20 px clear, at a size that reads 16 px once scaled: under it, the label would crowd the phone.
+  // The orb and its label (about 94 px) together are centered over the phone. In the orb's own px (before the
+  // scale): the label's font size and its left edge.
+  const PHONE = { x: 280, y: HISTORY.y + HISTORY.h / 2 - APPROVAL_CARD.h / 2 };
+  const ORB_ASIDE = { x: 222, y: 258, scale: 2 / 3, labelFont: 24, labelLeft: BOARD.model.size + 30 };
   // the EVERY WAY OUT caption over the lanes, between the checkpoint and the zone, level with the zone's heading
   const CAPTION = { x: LANE_MID, y: ZONE.y - ZONE.h / 2 + 37, w: 220 };
   const HISTORY_ROWS = [
@@ -155,21 +165,36 @@
   };
   // the routes that light up, as lane indices: tickets, web search, the sandbox
   const ROUTE_LANES = [1, 2, 3];
-  // from c[4]: the zone, the sandbox and their lanes slide away (out, outD) as the policy panel slides in (policy);
-  // its rules light up in the subtitle's order: run, ask, refuse (lit, by row); the ASK row's line draws to Maya's
-  // phone (link, linkD), which glows violet as it arrives; the refused row's reason line slides in (reason)
-  const T4 = { out: 0, outD: 0.5, policy: 0.3, lit: [1.6, 3.0, 4.4], link: 3.3, linkD: 0.7, reason: 4.8 };
+  // from c[4]: the zone, the sandbox and their lanes slide away (out, outD) as the Event History slides left under
+  // the held ticket (shift, shiftD) and the policy panel slides in (policy); its rules light up in the subtitle's
+  // order: run, ask, refuse (lit, by row); Maya's phone glows violet with the ASK row; the refused row's reason line
+  // slides in (reason)
+  const T4 = { out: 0, outD: 0.5, shift: 0.2, shiftD: 0.6, policy: 0.5, lit: [1.6, 3.0, 4.4], reason: 4.8 };
 
-  // ---------- the Temporal Agent Harness's tool approval policy, in the right column the zone and the sandbox leave:
-  // its top on the phone's, its bottom on the Event History's (y 356-856). Its heading, then three rule rows 20 px
-  // apart (rows.h: each one's height, the last one holds a third line), 20 px above the panel's bottom; the middle one
-  // level with the line to Maya's phone (y 644), which runs under the checkpoint (bottom y 610) and over the Event
-  // History (top y 680), from the ASK row's left edge to the phone's right edge. In a row, the tool name (32 px high)
-  // and its lines (24 px high), 4 px apart, are centered.
-  const POLICY = { x: 1590, y: 606, w: 420, h: 500 };
-  const RULE_ROW = { w: 372, top: 112, gap: 20, h: [104, 104, 120], nameH: 32, lineH: 24, lineGap: 4 };
-  const ruleRowTop = i => RULE_ROW.top + RULE_ROW.h.slice(0, i).reduce((sum, h) => sum + h + RULE_ROW.gap, 0);
-  const LINK_Y = POLICY.y - POLICY.h / 2 + ruleRowTop(1) + RULE_ROW.h[1] / 2;
+  // ---------- the c[4] composition: three columns across x 120-1800, their tops on y 150, their bottoms on y 856,
+  // with equal gutters. Left, the model over Maya's phone (x 120-440). Center, from the left edge of the ticket held
+  // at the gate (20 px clear of the checkpoint), the checkpoint under its FLAGGED badge, the Event History under
+  // them, its left edge on the ticket's (x 516-1236). Right, the policy panel, to the content frame's right edge.
+  const COLUMNS = { top: 150, bottom: 856, right: 1800 };
+  const HELD_LEFT = BOARD.checkpoint.x - CHECKPOINT.w / 2 - 20 - cardWidth(TICKET);
+  const GUTTER = HELD_LEFT - (PHONE.x + APPROVAL_CARD.w / 2);
+  const HISTORY_SHIFT = HELD_LEFT + HISTORY.w / 2 - HISTORY.x;
+  const POLICY_LEFT = HELD_LEFT + HISTORY.w + GUTTER;
+
+  // ---------- the Temporal Agent Harness's tool approval policy, the right column (x 1312-1800, y 150-856): its
+  // heading, then three rule rows of one height, 20 px apart, 24 px in from the panel's sides and bottom. In a row,
+  // the tool name (32 px high) with its verdict tag on the right, and its lines under it (28 px high), 4 px apart,
+  // are centered; 20 px of padding on the sides.
+  const POLICY = {
+    x: (POLICY_LEFT + COLUMNS.right) / 2, y: (COLUMNS.top + COLUMNS.bottom) / 2, w: COLUMNS.right - POLICY_LEFT,
+    h: COLUMNS.bottom - COLUMNS.top,
+  };
+  const RULE_INSET = 24, RULES_TOP = 126, RULE_GAP = 20;
+  const RULE_ROW = {
+    w: POLICY.w - 2 * RULE_INSET, h: (POLICY.h - RULE_INSET - RULES_TOP - 2 * RULE_GAP) / 3, top: RULES_TOP,
+    gap: RULE_GAP, nameH: 32, lineH: 28, lineGap: 4, pad: 20,
+  };
+  const ruleRowTop = i => RULE_ROW.top + i * (RULE_ROW.h + RULE_ROW.gap);
   // each rule, as the harness reads it: an allowed tool runs; a tool off the allowed list asks a person; in auto
   // mode, a rule on a call's arguments can refuse it, and the reason goes back to the model as the call's result. The
   // tool, its lines (the last one of a refused tool is its reason, red once refused) and its verdict as a statusTag
@@ -256,13 +281,6 @@
       paddingLeft: (ACTION_CARD.padX + ACTION_CARD.edge) + 'px', textAlign: 'left',
     });
 
-  // The width of an action card whose argument reads at ARG_FONT: its longest line, as makeActionCard's, always even
-  const cardWidth = ({ tool, arg, icon }) => {
-    const { toolFont, padX, edge } = ACTION_CARD;
-    const iconW = icon ? 32 + 14 : 0;
-    const textW = Math.max(tool.length * 0.6 * toolFont, arg.length * 0.6 * ARG_FONT);
-    return 2 * Math.ceil((textW + iconW + 2 * padX + edge) / 2);
-  };
   // An action card whose argument reads at ARG_FONT (card.arg: that line), cardWidth() wide or w px when given
   const makeCard = (root, spec, w = cardWidth(spec)) => {
     const card = makeActionCard(root, spec);
@@ -366,9 +384,9 @@
   // The policy panel: a tile with its heading (the Temporal symbol, TEMPORAL AGENT HARNESS) and TOOL APPROVAL POLICY
   // under it, then a row per rule (panel.rows): the tool name in bold mono, its verdict tag on the right (row.tag,
   // hidden until the rule lights up) and its lines under the name, in the text font (row.lines). The lines read at
-  // 18 px: the longest one, 34 characters, would not fit the row in mono.
+  // 20 px: the longest one, 34 characters, would not fit the row in mono.
   const makePolicyPanel = root => {
-    const { nameH, lineH, lineGap } = RULE_ROW;
+    const { nameH, lineH, lineGap, pad } = RULE_ROW;
     const panel = E(root,
       '<div class="lbl" style="position:absolute;left:24px;top:20px;height:34px;display:flex;align-items:center;'
       + `gap:10px;padding-left:0;font-size:18px;color:var(--ink)"><img src="${TEMPORAL_SYMBOL}" `
@@ -377,22 +395,23 @@
       + `letter-spacing:.12em;color:${C.slate}">TOOL APPROVAL POLICY</div>`,
       'tile', { width: POLICY.w + 'px', height: POLICY.h + 'px', textAlign: 'left' });
     panel.rows = RULES.map(({ tool, lines, verdict, kind }, i) => {
-      const h = RULE_ROW.h[i];
+      const { h } = RULE_ROW;
       const contentTop = (h - nameH - lines.length * (lineH + lineGap)) / 2;
       const lineTop = k => contentTop + nameH + lineGap + k * (lineH + lineGap);
       const row = E(panel,
-        `<div class="mono" style="position:absolute;left:16px;top:${contentTop}px;height:${nameH}px;display:flex;`
-        + `align-items:center;font-size:18px;font-weight:700;color:var(--ink)">${tool}</div>`
-        + lines.map((text, k) => `<div class="line" style="position:absolute;left:16px;top:${lineTop(k)}px;`
-          + `font-size:18px;line-height:${lineH}px;white-space:nowrap;color:${C.slate}">${text}</div>`).join(''),
+        `<div class="mono" style="position:absolute;left:${pad}px;top:${contentTop}px;height:${nameH}px;`
+        + `display:flex;align-items:center;font-size:22px;font-weight:700;color:var(--ink)">${tool}</div>`
+        + lines.map((text, k) => `<div class="line" style="position:absolute;left:${pad}px;top:${lineTop(k)}px;`
+          + `font-size:20px;line-height:${lineH}px;white-space:nowrap;color:${C.slate}">${text}</div>`).join(''),
         'tile', {
-          left: (POLICY.w - RULE_ROW.w) / 2 - 1 + 'px', top: ruleRowTop(i) - 1 + 'px',
+          left: RULE_INSET - 1 + 'px', top: ruleRowTop(i) - 1 + 'px',
           width: RULE_ROW.w + 'px', height: h + 'px', background: C.bg, opacity: 1,
         });
       row.lines = [...row.querySelectorAll('.line')];
-      row.tag = statusTag(row, { font: 16, padX: 10, padY: 4, icon: 16 });
+      // the tag (32 px high: 22 px of text, 4 px of padding, its 1 px border) is level with the tool name
+      row.tag = statusTag(row, { font: 18, padX: 10, padY: 4, icon: 18 });
       Object.assign(row.tag.style, {
-        left: 'auto', right: '16px', top: contentTop + 1 + 'px', lineHeight: '22px', fontWeight: 700,
+        left: 'auto', right: pad + 'px', top: contentTop + 'px', lineHeight: '22px', fontWeight: 700,
       });
       setStatus(row.tag, verdict, kind);
       return row;
@@ -546,12 +565,8 @@
         deadline: 'Answer by 18:00',
       });
 
-      // ---------- the tool approval policy, its line to Maya's phone and the spark that runs it
+      // ---------- the tool approval policy
       s.policy = makePolicyPanel(root);
-      const policySvg = svgLayer(root);
-      s.policyLink = path(policySvg, `M ${POLICY.x - RULE_ROW.w / 2} ${LINK_Y} H ${PHONE.x + APPROVAL_CARD.w / 2}`,
-        C.violet, 3, false);
-      s.policySpark = makeSpark(root, 16, RGB.violet);
 
       // the case file lands over everything
       s.caseFile = makeCaseFile(root, {
@@ -667,17 +682,26 @@
       const lanesIn = P(t, c[2] + T2.lanes, T2.lanesD);
       draw(s.laneIn, lanesIn, 1 - aside);
       s.lanes.forEach((lane, i) => draw(lane, P(t, c[2] + T2.lanes + 0.1 * i, T2.lanesD), kept));
-      rise(s.history, HISTORY.x, HISTORY.y, P(t, c[2] + T2.history, 0.6));
+      // c[4]: the Event History slides left under the held ticket, the center column of the policy's composition
+      const historyX = HISTORY.x + Math.round(HISTORY_SHIFT * P(t, c[4] + T4.shift, T4.shiftD));
+      rise(s.history, historyX, HISTORY.y, P(t, c[2] + T2.history, 0.6));
 
       // the AI model: it pops in beside the shared files and looks at them, turns red as the order reaches it and
       // watches the data leave; with Temporal it flies to its place on the board, calming down, turns red again as
-      // the Q3 plan reaches it, and steps up and aside, shrinking to 2/3, for Maya's phone, its eyes on the held card
+      // the Q3 plan reaches it, and steps up and aside, shrinking to 2/3, for Maya's phone, its eyes on the held card;
+      // its label fades out on the way and back in on its right, at the size that reads 16 px at 2/3
       const orbPop = backPop(t, c[0] + T0.orb, 0.6);
       const fly = P(t, c[2] + T2.fly, T2.flyD);
       const orbX = Math.round(lerp(lerp(REPLAY_ORB.x, model.x, fly), ORB_ASIDE.x, aside));
       const orbY = Math.round(lerp(lerp(REPLAY_ORB.y, model.y, fly), ORB_ASIDE.y, aside));
       place(s.orbMount, orbX, orbY, orbPop.s * lerp(1, ORB_ASIDE.scale, aside), orbPop.o);
-      s.orb.label.style.opacity = 1 - P(aside, 0, 0.5, linear);
+      const label = s.orb.label;
+      const besideOrb = aside >= 0.5;
+      label.style.opacity = (1 - P(aside, 0, 0.4, linear)) + P(aside, 0.6, 0.4, linear);
+      label.style.fontSize = besideOrb ? ORB_ASIDE.labelFont + 'px' : '';
+      label.style.left = besideOrb ? ORB_ASIDE.labelLeft + 'px' : '';
+      label.style.top = besideOrb ? '50%' : '';
+      label.style.transform = besideOrb ? 'translateY(-50%)' : '';
       const mix = t < rehijackAt ? P(t, hijackAt - 0.1, 0.25) * (1 - fly) : P(t, rehijackAt, 0.25);
       const look = lerp(lerp(lerp(-0.7, 0.7, P(t, hijackAt, 0.4)), 0.6, fly), 0.8, aside);
       s.orb.set(mix > 0 ? 'hijacked' : 'idle', { mix, look });
@@ -748,10 +772,11 @@
       const rejected = t >= rejectAt;
       s.ticket.setTone(rejected ? 'red' : t >= holdAt ? 'violet' : null);
       s.ticket.arg.style.color = rejected ? C.red : C.slateDark;
-      const [gateX] = s.ticketStops.gate;
+      // its verdict tags 20 px over it, their left edge on the card's
       const tagY = laneY - ACTION_CARD.h / 2 - 20 - AGENT_TAG.h / 2;
-      placeAgentTag(s.needs, t, holdAt + 0.1, gateX, tagY, rejectAt - 0.15);
-      placeAgentTag(s.rejected, t, rejectAt + 0.1, gateX, tagY);
+      placeAgentTag(s.needs, t, holdAt + 0.1, HELD_LEFT + agentTagWidth('NEEDS APPROVAL') / 2, tagY,
+        rejectAt - 0.15);
+      placeAgentTag(s.rejected, t, rejectAt + 0.1, HELD_LEFT + agentTagWidth('REJECTED BY MAYA') / 2, tagY);
 
       // Maya's phone rises in under the model; the request slides up on its screen; Maya taps Reject
       const phoneIn = P(t, c[3] + T3.phone, 0.7);
@@ -783,8 +808,9 @@
       if (t >= rejectAt) s.history.tags[2].style.transform = `scale(${swell(t, rejectAt + 0.1, 0.14)})`;
 
       // 5. the Temporal Agent Harness: the tool approval policy slides in where the zone and the sandbox were. Each
-      // rule lights up in its verdict's color as its tag pops: run, ask a person (the ASK row's line then runs to
-      // Maya's phone, which glows violet), refuse (its reason slides in, in red: it goes back to the model)
+      // rule lights up in its verdict's color as its tag pops: run, ask a person (Maya's phone glows violet with it:
+      // no line, which would cross the center column), refuse (its reason slides in, in red: it goes back to the
+      // model)
       const policyIn = P(t, c[4] + T4.policy, 0.7);
       place(s.policy, POLICY.x + Math.round(120 * (1 - policyIn)), POLICY.y, 1, policyIn);
       s.policy.rows.forEach((row, i) => {
@@ -803,11 +829,7 @@
           reason.style.transform = `translateX(${Math.round(-16 * (1 - reasonIn))}px)`;
         }
       });
-      const linkAt = c[4] + T4.link;
-      const linked = P(t, linkAt, T4.linkD, linear);
-      draw(s.policyLink, linked);
-      sparkOnPath(s.policySpark, s.policyLink, linked);
-      const phoneGlow = P(t, linkAt + T4.linkD, 0.3);
+      const phoneGlow = P(t, c[4] + T4.lit[1], 0.3);
       s.phone.el.style.borderColor = phoneGlow > 0.5 ? C.violet : C.lineLight;
       s.phone.el.style.boxShadow = glowShadow(RGB.violet, phoneGlow, { blur: 40, alpha: 0.5 });
     }
