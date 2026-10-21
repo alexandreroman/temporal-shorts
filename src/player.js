@@ -79,8 +79,10 @@ function startPlayer() {
   document.body.appendChild(holdMark);
 
   // Sources: links to where the facts of a scene come from, one per entry of its optional `sources`
-  // ([{ label, url }]), in the top-right corner under the progress segments. Inside the stage, so it scales with
-  // the scene and fades with it; created here only, so the frozen ?t= frames never show it.
+  // ([{ label, url }]), in the top-right corner under the progress segments: "SOURCES" then the links, separated by
+  // dots, on one line, or on two when they do not fit, so the box stays above the content frame whatever their
+  // number. Inside the stage, so it scales with the scene and fades with it; created here only, so the frozen ?t=
+  // frames never show it.
   const sourcesBox = document.createElement('div');
   sourcesBox.id = 'sources';
   sourcesBox.hidden = true;
@@ -95,15 +97,51 @@ function startPlayer() {
     link.href = source.url;
     link.target = '_blank';
     link.rel = 'noopener';
-    const kicker = document.createElement('span');
-    kicker.className = 'kicker';
-    kicker.textContent = 'Source';
     const label = document.createElement('span');
     label.className = 'label';
     label.textContent = source.label;
-    link.append(kicker, label);
+    link.append(label);
     link.insertAdjacentHTML('beforeend', OUTWARD_ARROW);
     return link;
+  }
+
+  // One line of the box: the links separated by dots, after the kicker text on the first line (null on the second).
+  function sourcesLine(sources, kickerText) {
+    const line = document.createElement('div');
+    line.className = 'line';
+    if (kickerText) {
+      const kicker = document.createElement('span');
+      kicker.className = 'kicker';
+      kicker.textContent = kickerText;
+      line.append(kicker);
+    }
+    sources.forEach((source, i) => {
+      if (i > 0) {
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.setAttribute('aria-hidden', 'true');
+        dot.textContent = '\u00b7';
+        line.append(dot);
+      }
+      line.append(sourceLink(source));
+    });
+    return line;
+  }
+
+  function anyLabelTruncated() {
+    return [...sourcesBox.querySelectorAll('.label')].some(label => label.scrollWidth > label.clientWidth);
+  }
+
+  // Everything on one line first; when a label would be cut short, half of the links move to a second line, where
+  // CSS shortens a label with an ellipsis only if it still does not fit.
+  function layOutSources(sources) {
+    const kickerText = sources.length === 1 ? 'Source' : 'Sources';
+    sourcesBox.replaceChildren(sourcesLine(sources, kickerText));
+    if (sources.length > 1 && anyLabelTruncated()) {
+      const half = Math.ceil(sources.length / 2);
+      const firstLine = sourcesLine(sources.slice(0, half), kickerText);
+      sourcesBox.replaceChildren(firstLine, sourcesLine(sources.slice(half), null));
+    }
   }
 
   // Called right after renderAt(time), which sets the opacity of the current scene's root.
@@ -112,11 +150,17 @@ function startPlayer() {
     const sources = current?.sources ?? [];
     if (current !== sourcesScene) {
       sourcesScene = current;
-      sourcesBox.replaceChildren(...sources.map(sourceLink));
       sourcesBox.hidden = sources.length === 0;
+      if (sources.length > 0) layOutSources(sources);
+      else sourcesBox.replaceChildren();
     }
     if (sources.length > 0) sourcesBox.style.opacity = current.root.style.opacity;
   }
+  // The line split measures the labels: measure again once the web fonts have loaded.
+  document.fonts.ready.then(() => {
+    sourcesScene = null;
+    updateSources();
+  });
 
   // Backdrop: the stage's sky and glow move under the transparent stage, into a layer with the stage's
   // coordinates but no clipping, so they also fill the letterbox areas of a window that is not 16:9.
