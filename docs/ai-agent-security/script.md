@@ -440,8 +440,8 @@ retention period.
     `outside content read` ("Q3 plan", found online) FLAGGED, the model
     calls, `npm install` (attacker package, in a sandbox) NO INTERNET,
     `box replaced` (a fresh sandbox, progress kept), `delete volume
-    prod-db` (via Nexus: rejected by Maya) REJECTED, `open_link` to an
-    outside address, HELD then REJECTED BY MAYA.
+    prod-db` (via Nexus: rejected by Maya) REJECTED, `create_ticket` to
+    an outside project, HELD then REJECTED BY MAYA.
 - **2:44** Follow it back to the cause, then find every other run that
   read the same document.
   - Visuals: A magnifier walks back up the rows, a red thread linking the

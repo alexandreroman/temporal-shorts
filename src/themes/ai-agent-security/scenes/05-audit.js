@@ -4,9 +4,8 @@
 // agent, whose own answer ("All good, nothing sent.") gets an UNRELIABLE stamp. The questions fly into the header of
 // the Event History card, labelled OUT OF THE AGENT'S REACH, whose rows tell chapters 2 to 4 in order: the document
 // found online read and FLAGGED, npm install of an attacker package in a sandbox (NO INTERNET), the box replaced,
-// the volume's deletion via Nexus, REJECTED, and open_link to an outside address, HELD, then REJECTED BY MAYA. A
-// magnifier walks back up the rows, a red thread linking the outcomes, to
-// the document: THE CAUSE. Then the camera whips right, one way, to a Workflows list in the look of the Temporal Web
+// the volume's deletion via Nexus, REJECTED, and create_ticket to an outside project, HELD, then REJECTED BY MAYA.
+// A magnifier walks back up the rows, a red thread linking the outcomes, to the document: THE CAUSE. Then the camera whips right, one way, to a Workflows list in the look of the Temporal Web
 // UI, where a search on a custom Search Attribute, ReadDocument = "Q3 plan", filters the runs to four: this one and
 // three others, which light up red, FLAGGED, as the dramatic beat (a flash and a jolt): "every run that read it".
 // The block keeps every name declared in this file local to this scene.
@@ -89,10 +88,10 @@
     { time: 'WED 09:59', type: 'DECIDED', event: 'model call', detail: 'next: delete volume' },
     { time: 'THU 16:20', type: 'WORKFLOW', event: 'delete volume prod-db', tool: true,
       detail: 'via Nexus: rejected by Maya', tag: TAGS.rejected },
-    { time: 'THU 16:21', type: 'DECIDED', event: 'model call', detail: 'next: open_link' },
-    { time: 'THU 16:22', type: 'WORKFLOW', event: 'open_link', tool: true, detail: 'to an outside address',
+    { time: 'THU 16:21', type: 'DECIDED', event: 'model call', detail: 'next: create_ticket' },
+    { time: 'THU 16:22', type: 'WORKFLOW', event: 'create_ticket', tool: true, detail: 'to an outside project',
       tag: TAGS.held },
-    { time: 'THU 17:05', type: 'MAYA', event: 'open_link', tool: true, detail: 'to an outside address',
+    { time: 'THU 17:05', type: 'MAYA', event: 'create_ticket', tool: true, detail: 'to an outside project',
       tag: TAGS.rejectedByMaya },
   ];
   CARD.h = CARD.headH + ROWS.length * CARD.rowH + CARD.footH;

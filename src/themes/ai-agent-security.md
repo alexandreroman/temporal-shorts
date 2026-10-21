@@ -1,7 +1,8 @@
 # AI Agent Security with Temporal
 
-How Temporal keeps AI agents in check, told through real incidents: malicious
-add-ons, a wiped database, a hidden order and the audit that follows.
+Real AI agent incidents of 2026, and how Temporal keeps agents in check:
+sandboxed tools, keys behind Nexus, human approvals and a searchable audit
+trail.
 
 [Watch the video](/themes/ai-agent-security/)
 
