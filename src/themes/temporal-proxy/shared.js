@@ -230,8 +230,8 @@ const SERVICE_SHOT = [1289, 579, 1];
 // up in a lane of its own, `laneGap` px from the next one round linkX, midway between the zones: the lower the team,
 // the nearer the box its lane, so the two that run up (ORDERS and FRAUD) nest without crossing. It ends `linkGap` px
 // from the next one on the box. TEMPORAL's Namespace bands, one per team, level with the team zones (bands: their
-// center x and size). tube: where the TLS tube ends, 12 px inside TEMPORAL, and its label's center x, midway between
-// the environment and TEMPORAL.
+// size, wide enough for the longest full name). tube: where the TLS tube ends, 12 px inside TEMPORAL, and its label's
+// center x, midway between the environment and TEMPORAL.
 const SERVICE = {
   env: { x: 449, y: 214, w: 1052, h: 730 },
   temporal: { x: 1653, y: 214, w: 476, h: 730 },
@@ -242,9 +242,12 @@ const SERVICE = {
   linkX: 993,
   laneGap: 30,
   linkGap: 40,
-  bands: { x: 1891, w: 396, h: 84 },
+  bands: { w: 300, h: 84 },
 };
 SERVICE.tube = { x1: SERVICE.temporal.x + 12, labelX: (SERVICE.env.x + SERVICE.env.w + SERVICE.temporal.x) / 2 };
+// The bands' center x: midway between the tube's mouth and TEMPORAL's right edge, so the bands level with the mouth
+// keep as much room from it as from the edge (76 px)
+SERVICE.bands.x = (SERVICE.tube.x1 + TUBE_MOUTH + SERVICE.temporal.x + SERVICE.temporal.w) / 2;
 // A Worker tile in the shared service, px before its scale (SERVICE.k): narrower and shorter than WORKER_TILE, it
 // keeps its heading row (the gear and WORKER) and its Namespace line, raised to lineTop px from its top, while its
 // language tag and the proxy's address, the same in every team, fade out
