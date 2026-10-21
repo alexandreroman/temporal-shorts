@@ -1,6 +1,6 @@
 // ===================== 6. WHAT YOU GET
 // The recap, the last chapter before the outro: one tile per answer of chapters 2 to 5, on the row of USE_CASE_ROW.
-// Each tile pops in as the subtitle names its answer, and its border lights up (UV) until the next one lands. The
+// Each tile grows in as the subtitle names its answer, and its border lights up (UV) until the next one lands. The
 // row holds after the subtitle so the four tiles read, and the camera zoom-through (setCamera) brings the scene in
 // and plays into the outro.
 // The block keeps every name declared in this file local to this scene.
@@ -22,6 +22,15 @@
   const LABEL_LINES = 2;
   // the line under each label: 18 px mono (about 11 px per character), so the longest one fits the 384 px tiles
   const MEANING_FONT = 18;
+  const POP_D = 0.45;
+
+  // The tile's pop: like backPop(), it grows from nothing and is fully opaque halfway, but it eases out without
+  // overshoot. A tile that grew past its native size would spill out of the row's x 120-1800 at the ends and eat into
+  // its 48 px gaps; the border glow is the highlight.
+  const growIn = (t, at) => {
+    const s = P(t, at, POP_D, easeOut);
+    return { s, o: clamp(s * 2) };
+  };
 
   // A recap tile: its icon and two-line uppercase label, then what it means in one lowercase slate line
   const makeAnswerTile = (root, [icon, label, meaning]) => {
@@ -51,7 +60,7 @@
       const landAt = LAND_AT.map(at => c[0] + at);
       s.tiles.forEach((tile, i) => {
         // the tile pops into its slot
-        const pop = backPop(t, landAt[i]);
+        const pop = growIn(t, landAt[i]);
         place(tile, useCaseX(i), USE_CASE_ROW.y, pop.s, pop.o);
 
         // it stays lit until the next one lands; the last one for USE_CASE_LAST_LIT seconds
