@@ -1,8 +1,10 @@
 // ===================== 4. KEYS WITHIN REACH
-// The case file slams in (EARLY 2026, AGENT KEYS) and is pinned in the corner. The incident replays in red: a box of
-// agent keys rattles, its lid blows off with a red flash, and a flood of keys pours out onto a pile as a counter
+// The case file slams in (FEBRUARY 2026, AGENT KEYS) and is pinned in the corner. The incident replays in red: a box
+// of agent keys rattles, its lid blows off with a red flash, and a flood of keys pours out onto a pile as a counter
 // climbs to 1.5M (the dramatic beat). Four keys of the pile then fly into the CONTEXT panel of an AI model, under its
-// orb, as the figure flips to the survey's 23%; the orb is tricked (red) and copies of its keys leak out.
+// orb, as the figure gives way to a row of the company's storage buckets (RESEARCH, MARCH 2026). The orb turns red,
+// and a copy of its Files key, AGENT'S OWN KEY, flies over to the row and opens each bucket in turn, red, while a
+// file flies back from each one to the orb: EVERY BUCKET.
 // With Temporal, the orb and its context slide to their places on the board as it comes in, and the four keys fly
 // into YOUR WORKERS, one docking on each tool tile. A read_file card passes the checkpoint to the Files tool, and only
 // its result comes back to the model. Last, a hidden order, "print your API keys", dives into the orb, which turns
@@ -10,7 +12,8 @@
 // out, and jolts on the two hits.
 // The block keeps every name declared in this file local to this scene.
 {
-  // the replay's two sides: on the left the box of keys, then the orb over its context; on the right the figure
+  // the replay's two sides: on the left the box of keys, then the orb over its context; on the right the figure,
+  // then the storage buckets
   const LEFT_X = 600;
   const STAT = { x: 1320, y: 515, w: 640 };
   // the box of keys: its SVG's size and center, the floor its keys land on (its bottom edge) and the middle of its
@@ -22,6 +25,13 @@
   const FLOOD = { n: 84, emit: 1.8, minSize: 30, maxSize: 40 };
   // the keys of the pile that fly into the model's context, one per tool (TOOLS order)
   const LIFTED = [1, 3, 5, 7];
+  // the company's storage, on the right: the centers (y) of its source line, of the track the agent's key hops along,
+  // of its row of buckets and of its EVERY BUCKET tag; a bucket's size and the pitch between two of them
+  const STORE = { x: STAT.x, labelY: 350, keyY: 440, rowY: 560, tagY: 680 };
+  const BUCKET = { n: 5, w: 104, h: 120, pitch: 128 };
+  const bucketX = i => STORE.x + (i - (BUCKET.n - 1) / 2) * BUCKET.pitch;
+  // the agent's own key, a red chip
+  const OWN_KEY = { w: 252, h: 44 };
 
   // the orb during the replay; the CONTEXT panel under it, during the replay and on the board, where it sits left of
   // the Event History strip, sharing its top and bottom edges
@@ -33,7 +43,7 @@
   // where key i docks on its tool tile, 24 px in from its right edge, and the lock that snaps shut beside it
   const dockSpot = i => [BOARD.tools.x + TOOL_TILE.w / 2 - 24 - KEY_BADGE.size / 2, toolSlot(i)[1]];
   const lockSpot = i => [dockSpot(i)[0] - KEY_BADGE.size / 2 - 26, toolSlot(i)[1]];
-  // the tool the agent calls: Files (TOOLS[3])
+  // the tool the agent calls: Files (TOOLS[3]); during the replay, its key is the one the agent uses on the buckets
   const CALLED = 3;
   const HISTORY_ROWS = [
     '<b>model call</b> next step: read_file',
@@ -45,11 +55,13 @@
   // (rattle) and bursts (burst) as "1.5 million" is read; the figure rises in (stat) and counts up over FLOOD.emit
   const T0 = { pin: 3.2, pinD: 0.8, box: 3.6, rattle: 3.95, burst: 4.4, stat: 4.5 };
   // from c[1]: the pile sinks away (pileOut) as four of its keys fly into the context (lift, liftStep, liftD), under
-  // the orb and the panel popping in (orb, context); the figure flips to 23% (flip); the orb is tricked as "tricked"
-  // is read (hijack), and copies of its keys leak out of the context (leak, leakStep, leakD)
+  // the orb and the panel popping in (orb, context); the figure gives way to the storage (store, bucketStep); the orb
+  // turns red as "using its own keys" is read (act), and the copy of its key leaves the context (key) for the first
+  // bucket (keyD); it stays there (hold), then hops to each next bucket (hop, of which hopD moving); a file flies from
+  // each open bucket to the orb (fileD); EVERY BUCKET slams in after the last one (tag)
   const T1 = {
-    pileOut: 0, lift: 0.15, liftStep: 0.08, liftD: 0.8, orb: 0.1, context: 0.25, flip: 0.9, hijack: 3.4, leak: 3.9,
-    leakStep: 0.25, leakD: 1.3,
+    pileOut: 0, lift: 0.15, liftStep: 0.08, liftD: 0.8, orb: 0.1, context: 0.25, store: 0.6, bucketStep: 0.08,
+    act: 2.2, key: 2.4, keyD: 0.7, hold: 0.4, hop: 0.3, hopD: 0.22, fileD: 0.8, tag: 5.0,
   };
   // from c[2]: the replay leaves (out) as the orb and its context slide to the board (move, moveD) and the board
   // comes in (lanes, checkpoint, zone, tiles, history); the keys fly to their tools (keys, keyStep, keyD) by
@@ -132,6 +144,41 @@
     return stat;
   };
 
+  // A storage bucket (BUCKET.w x h): a bucket over its padlock, slate while shut (bucket.icon, bucket.lock: their
+  // <svg>)
+  const makeBucket = root => {
+    const bucket = E(root,
+      `<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="${C.ink}" stroke-width="1.8"`
+      + ' stroke-linecap="square" stroke-linejoin="miter" style="display:block">'
+      + '<ellipse cx="12" cy="6" rx="8" ry="2.5"/><path d="M4 6l2 13.5c.3 1.4 2.9 2 6 2s5.7-.6 6-2L20 6"/></svg>'
+      + lockSvg(24, { color: C.slate, stroke: 2 }), '', {
+        width: BUCKET.w + 'px', height: BUCKET.h + 'px', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: '14px', border: `2px solid ${C.line}`,
+        borderRadius: 'var(--rs)', background: '#1B1B1F',
+      });
+    [bucket.icon, bucket.lock] = bucket.querySelectorAll('svg');
+    return bucket;
+  };
+  // Colors a bucket: red once the agent's key opens it (open, 0 to 1), its lock's shackle up; glow (0 to 1) as it
+  // opens
+  const setBucket = (bucket, open, glow) => {
+    const red = open > 0.5;
+    bucket.style.borderColor = red ? C.red : C.line;
+    bucket.style.background = red ? '#2B1B1C' : '#1B1B1F';
+    bucket.style.boxShadow = glowShadow(RGB.red, glow, { blur: 30, alpha: 0.7 });
+    bucket.icon.setAttribute('stroke', red ? C.red : C.ink);
+    bucket.lock.setAttribute('stroke', red ? C.red : C.slate);
+    liftShackle(bucket.lock, LOCK_LIFT * open);
+  };
+  // The agent's own key: a red chip, a key and AGENT'S OWN KEY
+  const makeOwnKey = root => E(root,
+    `${ICON('key', 24, C.red, 2)}<span>AGENT'S OWN KEY</span>`, 'mono', {
+      width: OWN_KEY.w + 'px', height: OWN_KEY.h + 'px', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', gap: '10px', fontSize: '18px', letterSpacing: '.08em', color: C.red,
+      border: `2px solid ${C.red}`, borderRadius: 'var(--rs)', background: '#2B1B1C', whiteSpace: 'nowrap',
+      boxShadow: glowShadow(RGB.red, 1, { blur: 24, alpha: 0.5 }),
+    });
+
   // A key badge: a key in a small square, the key the model holds, then its tool (badge.icon: its <svg>)
   const makeKeyBadge = root => {
     const badge = E(root, ICON('key', KEY_BADGE.icon, C.ink, 2), '', {
@@ -172,7 +219,9 @@
         // the flood lands on its pile before the figure flips
         after: 0.4,
       },
-      { text: "In a 2025 survey, 23% of companies said agents had been tricked into revealing access keys." },
+      {
+        text: "March 2026: researchers showed a cloud AI agent using its own keys to read every file of its company.",
+      },
       {
         text: "With Temporal, the keys stay on your own servers, the <b>Workers</b>, "
           + "which run each tool for the agent.",
@@ -210,8 +259,15 @@
         boxShadow: glowShadow(RGB.red, 1, { blur: 14, alpha: 0.9 }),
       });
 
-      s.statA = makeStat(root, 'EARLY 2026', 'agent keys open to anyone');
-      s.statB = makeStat(root, 'SURVEY, 2025', 'of companies saw agents tricked<br>into revealing keys');
+      s.statA = makeStat(root, 'FEBRUARY 2026', 'agent keys open to anyone');
+      // the company's storage: its source line, its buckets, the files read from them and its verdict
+      s.storeLabel = E(root, 'RESEARCH, MARCH 2026', 'mono', {
+        fontSize: '22px', lineHeight: '30px', letterSpacing: '.14em', paddingLeft: '.14em', color: C.slate,
+        whiteSpace: 'nowrap',
+      });
+      s.buckets = Array.from({ length: BUCKET.n }, () => makeBucket(root));
+      s.files = s.buckets.map(() => E(root, ICON('file', 32, C.red, 2), '', { width: '32px', height: '32px' }));
+      s.everyBucket = agentTag('EVERY BUCKET', 'red', root);
       s.burstRipples = makeRipples(root, 3, RGB.red);
       s.box = makeBox(root);
       s.lid = makeLid(root);
@@ -219,13 +275,13 @@
         width: size + 'px', height: size + 'px',
       }));
       s.caseFile = makeCaseFile(root, {
-        date: 'EARLY 2026', tag: 'AGENT KEYS', headline: '1.5 million agent keys left in the open',
+        date: 'FEBRUARY 2026', tag: 'AGENT KEYS', headline: '1.5 million agent keys left in the open',
       });
 
       s.card = makeActionCard(root, { tool: 'read_file', arg: 'report.pdf' });
       s.resultCard = makeResultCard(root, false, 'RESULT');
-      s.ghosts = TOOLS.map(() => E(root, ICON('key', 32, C.red, 2.2), '', { width: '32px', height: '32px' }));
       s.badges = TOOLS.map(() => makeKeyBadge(root));
+      s.ownKey = makeOwnKey(root);
       s.locks = TOOLS.map(() => {
         const lock = E(root, lockSvg(24, { color: C.violet, stroke: 2 }), '', { width: '24px', height: '24px' });
         lock.svg = lock.querySelector('svg');
@@ -242,7 +298,9 @@
     update(t, c, s) {
       const { board } = s;
       const burstAt = c[0] + T0.burst;
-      const flipAt = c[1] + T1.flip;
+      const storeAt = c[1] + T1.store;
+      // the agent's key reaches bucket i and opens it: the first after its flight, each next one a hop later
+      const openAt = i => c[1] + T1.key + T1.keyD + (i > 0 ? T1.hold + (i - 1) * T1.hop + T1.hopD : 0);
       const gateAt = c[2] + T2.card + T2.toGate;
       const pastAt = gateAt + T2.toPast;
       const toolAt = pastAt + T2.toTool;
@@ -308,17 +366,32 @@
         place(key, x, y, scale, o, r);
       });
 
-      // ---------- the figures: 1.5M counts up with the flood, then flips over to 23%, which leaves with the replay
+      // ---------- the figure: 1.5M counts up with the flood, then rises away as the storage comes in
       const statAIn = P(t, c[0] + T0.stat, 0.5);
-      const statAOut = P(t, flipAt, 0.35);
+      const statAOut = P(t, storeAt, 0.35);
       place(s.statA, STAT.x, STAT.y + Math.round(24 * (1 - statAIn)) - Math.round(40 * statAOut), 1,
         statAIn * (1 - statAOut));
       setText(s.statA.n, formatKeys(1.5e6 * easeOut(P(t, burstAt, FLOOD.emit, linear))));
-      const statBIn = P(t, flipAt + 0.25, 0.5);
-      const statBOut = P(t, c[2] + T2.out, 0.5);
-      place(s.statB, STAT.x + Math.round(80 * statBOut), STAT.y + Math.round(40 * (1 - statBIn)), 1,
-        statBIn * (1 - statBOut));
-      setText(s.statB.n, `${Math.round(23 * easeOut(P(t, flipAt + 0.25, 0.9, linear)))}%`);
+
+      // ---------- the storage: its source line and its buckets rise in, then leave to the right with the replay;
+      // each bucket opens red as the agent's key reaches it, and a file flies from it to the orb
+      const storeOut = P(t, c[2] + T2.out, 0.5);
+      const outX = Math.round(80 * storeOut);
+      rise(s.storeLabel, STORE.x + outX, STORE.labelY, P(t, storeAt + 0.2, 0.5) * (1 - storeOut));
+      s.buckets.forEach((bucket, i) => {
+        const pop = backPop(t, storeAt + 0.3 + i * T1.bucketStep, 0.5);
+        place(bucket, bucketX(i) + outX, STORE.rowY, pop.s, pop.o * (1 - storeOut));
+        const open = P(t, openAt(i), 0.2);
+        setBucket(bucket, open, Math.max(0, 1 - Math.abs(t - openAt(i) - 0.1) / 0.4));
+        const read = P(t, openAt(i) + 0.1, T1.fileD);
+        const from = [bucketX(i), STORE.rowY - 40];
+        const [fileX, fileY] = bezier([from, [from[0], from[1] - 160], [REPLAY_ORB[0] + 260, REPLAY_ORB[1]],
+          REPLAY_ORB], read);
+        const fileO = read > 0 && read < 1 ? Math.min(1, read * 8, (1 - read) * 5) : 0;
+        place(s.files[i], fileX, fileY, 1 - 0.3 * read, fileO);
+      });
+      placeAgentTag(s.everyBucket, t, c[1] + T1.tag, STORE.x, STORE.tagY);
+      if (t >= c[2]) place(s.everyBucket, STORE.x + outX, STORE.tagY, 1, 1 - storeOut);
 
       // ---------- the board comes in round the orb and its context
       const { model, checkpoint, tools, history, laneY } = BOARD;
@@ -336,13 +409,13 @@
       // the checkpoint lets the read_file card through, then its result
       board.checkpoint.check(t, t < crossAt ? gateAt : crossAt, 'pass');
 
-      // ---------- the orb: it pops in over its context, is tricked during the survey, calms down as it slides to
-      // the board, thinks before its step, and is hijacked by the hidden order
+      // ---------- the orb: it pops in over its context, turns red as it uses its key on the buckets, calms down as it
+      // slides to the board, thinks before its step, and is hijacked by the hidden order
       const orbPop = backPop(t, c[1] + T1.orb, 0.6);
       place(board.orb.el, lerp(REPLAY_ORB[0], model.x, ctxMove), lerp(REPLAY_ORB[1], model.y, ctxMove), orbPop.s,
         orbPop.o);
-      const trickedRed = P(t, c[1] + T1.hijack, 0.3) * (1 - P(t, c[2], 0.5));
-      const hijack = trickedRed + P(t, impactAt - 0.05, 0.3);
+      const actingRed = P(t, c[1] + T1.act, 0.3) * (1 - P(t, c[2], 0.5));
+      const hijack = actingRed + P(t, impactAt - 0.05, 0.3);
       const thinking = t >= c[2] + T2.think && t < c[2] + T2.card;
       board.orb.set(hijack > 0 ? 'hijacked' : thinking ? 'thinking' : 'idle', { mix: hijack });
 
@@ -368,7 +441,7 @@
         const used = i === CALLED ? win(t, toolAt, toolAt + 0.6, 0.2) : 0;
         const locked = Math.max(0, 1 - Math.abs(t - lockAt(i) - 0.25) / 0.35);
         setKeyBadge(badge, {
-          red: trickedRed, violet: P(t, flyAt(i), 0.2, linear), glow: Math.max(Math.sin(Math.PI * fly), used, locked),
+          red: actingRed, violet: P(t, flyAt(i), 0.2, linear), glow: Math.max(Math.sin(Math.PI * fly), used, locked),
         });
         place(badge, x, y, 1 + 0.25 * Math.sin(Math.PI * fly), P(t, arriveAt(i) - 0.1, 0.15));
         s.keyLabels[i].style.opacity = P(t, arriveAt(i), 0.3) * (1 - P(t, flyAt(i), 0.3));
@@ -384,14 +457,19 @@
         liftShackle(s.locks[i].svg, LOCK_LIFT * (1 - P(t, lockAt(i) + 0.15, 0.12, easeIn)));
       });
 
-      // ---------- the leak: while the model is tricked, red copies of its keys drift out of its context
-      s.ghosts.forEach((ghost, i) => {
-        const u = P(t, c[1] + T1.leak + i * T1.leakStep, T1.leakD, easeOut);
-        const [dx, dy] = keySlot(i);
-        const from = [CONTEXT.replay[0] + dx, CONTEXT.replay[1] + dy];
-        const o = u > 0 && u < 1 ? Math.min(1, u * 6) * (1 - u * u) : 0;
-        place(ghost, from[0] - 220 * u, from[1] - 200 * u, 1 + 0.3 * u, o);
-      });
+      // ---------- the agent's own key: a copy of its Files key grows out of the context and flies over the first
+      // bucket, waits there, then hops along the row, and leaves with the storage
+      const [usedDx, usedDy] = keySlot(CALLED);
+      const usedKey = [CONTEXT.replay[0] + usedDx, CONTEXT.replay[1] + usedDy];
+      const keyFly = P(t, c[1] + T1.key, T1.keyD);
+      let [ownX, ownY] = bezier([usedKey, [usedKey[0] + 200, usedKey[1] - 260], [bucketX(0) - 200, STORE.keyY],
+        [bucketX(0), STORE.keyY]], keyFly);
+      for (let i = 1; i < BUCKET.n; i++) {
+        const hop = P(t, openAt(i) - T1.hopD, T1.hopD);
+        if (hop > 0) ownX = Math.round(lerp(bucketX(i - 1), bucketX(i), hop));
+      }
+      place(s.ownKey, ownX + outX, ownY, lerp(0.4, 1, P(t, c[1] + T1.key, 0.3)),
+        P(t, c[1] + T1.key, 0.15) * (1 - storeOut));
 
       // ---------- the call: the read_file card grows out of the orb, passes the checkpoint and goes into the Files
       // tool; only its result comes back, through the checkpoint, into the orb, and shows in the context
