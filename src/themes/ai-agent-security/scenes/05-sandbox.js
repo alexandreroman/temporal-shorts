@@ -13,7 +13,7 @@
 // camera holds.
 // The block keeps every name declared in this file local to this scene.
 {
-  // ---------- the replay: an add-on store on the left, centered under the pinned case file (x 120-540, y 150-318), a
+  // ---------- the replay: an add-on store on the left, centered under the pinned case file (x 120-540, y 150-338), a
   // user's computer in the middle and the attacker's server on the right; with them, the composition spans x 120-1800,
   // y 150-836
   // the laptop: its screen (bar: the height of its title bar) and its base, centered under it
@@ -383,6 +383,12 @@
 
   scene({
     chapter: 5, title: 'Locked in a sandbox',
+    sources: [
+      {
+        label: 'The Hacker News, February 2026',
+        url: 'https://thehackernews.com/2026/02/researchers-find-341-malicious-clawhub.html',
+      },
+    ],
     subs: [
       {
         text: 'February 2026: 341 add-ons for an AI assistant were found secretly installing a password thief.',
@@ -418,6 +424,7 @@
       });
       s.caseFile = makeCaseFile(s.replay, {
         date: 'FEBRUARY 2026', tag: 'MALICIOUS ADD-ONS', headline: '341 assistant add-ons steal passwords',
+        source: 'THE HACKER NEWS, FEB 2026',
       });
       s.store = makeStore(s.replay);
       s.laptop = makeLaptop(s.replay);

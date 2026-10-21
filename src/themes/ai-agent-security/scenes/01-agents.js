@@ -94,6 +94,12 @@
 
   scene({
     chapter: 1, title: 'Agents that act',
+    sources: [
+      {
+        label: 'SailPoint survey, May 2025',
+        url: 'https://www.hpcwire.com/aiwire/2025/06/04/sailpoint-research-reveals-ai-agents-as-enterprise-security-blind-spot/',
+      },
+    ],
     // a hard cut: the intro ends on this chapter's first frame; the default fade-out to the next scene
     fadeIn: 0,
     subs: [
@@ -132,7 +138,7 @@
         + `<div style="width:${STAT.captionW}px;margin-left:40px">`
         + '<div style="font-size:32px;line-height:40px">of companies saw agents do things nobody asked for</div>'
         + `<div class="mono" style="font-size:16px;line-height:20px;letter-spacing:.14em;color:${C.slate};`
-        + 'margin-top:14px">SURVEY, 2025</div></div>',
+        + 'margin-top:14px">SAILPOINT SURVEY, 2025</div></div>',
         '', {
           width: STAT.w + 'px', height: STAT.h + 'px', display: 'flex', alignItems: 'center',
           justifyContent: 'center',

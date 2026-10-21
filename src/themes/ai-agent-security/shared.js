@@ -350,25 +350,32 @@ function placeAgentTag(e, t, at, x, y, out = Infinity) {
 // Its body's size and folder tab (px); at: its center at rest, mid-frame (body and tab together); pin: the "pinned
 // evidence" corner, top left of the content frame, while the replay plays: the label's center, and the scale the
 // full card shrinks to as it hands over to the label (the label's width over the card's, so both share a width);
-// label: the pinned evidence label's size and folder tab (px), its box from (120, 150) to (540, 318)
+// label: the pinned evidence label's size and folder tab (px), its box from (120, 150) to (540, 338), with room for
+// a source line under the headline
 const CASE_FILE = {
   w: 900, h: 380, tab: { w: 230, h: 40 },
-  at: { x: 960, y: 515 }, pin: { x: 330, y: 234, scale: 420 / 900 },
-  label: { w: 420, h: 168, tab: { w: 140, h: 24 } },
+  at: { x: 960, y: 515 }, pin: { x: 330, y: 244, scale: 420 / 900 },
+  label: { w: 420, h: 188, tab: { w: 140, h: 24 } },
 };
 // The incident dossier: a white folder (a CASE FILE tab on its top left), a date line (e.g. 'JUNE 2025') and a red
 // tag ('ZERO-CLICK') side by side, a large headline on up to two lines (HTML, e.g. 'One email takes over a work
-// assistant'), and a red INCIDENT stamp in its bottom right corner. Hidden until set.
+// assistant'), an optional source line under it (source, in capitals, e.g. 'PROMPTARMOR, AUG 2026', shown as
+// "SOURCE · PROMPTARMOR, AUG 2026" in dark slate mono: it shows in the video too, where the scene's `sources` cannot
+// be clicked), and a red INCIDENT stamp in its bottom right corner. Hidden until set.
 // Pinned, it becomes a compact evidence label at its own size (the full card shrunk that far would be unreadable):
-// the same tab, date and tag on one line, the headline on two lines below, a smaller stamp.
+// the same tab, date and tag on one line, the headline on two lines below, the source line, a smaller stamp.
 // Returns { el, set, pin }:
 // - caseFile.set(t, t0): it slams in from t0 (from 1.3x its size in 0.22 s, a shake as it lands), then the stamp
 //   lands about 0.6 s after t0 (from 2.4x, 0.14 s) with a smaller shake; hidden before t0
 // - caseFile.pin(p, { o = 1, to = CASE_FILE.pin }): places it, from CASE_FILE.at (p = 0) to the pinned corner (p =
 //   1): the full card shrinks toward to.scale and, over the end of the move, dissolves into the label; opacity o;
 //   pass an eased p, e.g. P(t, c[1], 0.8). Call both every frame.
-function makeCaseFile(root, { date, tag, headline }) {
+function makeCaseFile(root, { date, tag, headline, source = null }) {
   const { w, h, tab, label } = CASE_FILE;
+  // the source line of the full card and of the pinned label, at their own sizes; none without a source
+  const sourceLine = (font, lineH, top) => source === null ? ''
+    : `<div class="mono" style="font-size:${font}px;line-height:${lineH}px;letter-spacing:.08em;`
+      + `color:${C.slateDark};margin-top:${top}px;white-space:nowrap">SOURCE · ${source}</div>`;
   // el moves the dossier and stays unscaled, so the label rests at its own size. The full card scales inside cardCam,
   // a zero-size point at the card's center, as a camera framing the card (class cam): the layout check then measures
   // the card as the pin shows it, where it would count a scaled element at its full size
@@ -392,7 +399,8 @@ function makeCaseFile(root, { date, tag, headline }) {
     + `<span class="mono" style="font-size:18px;line-height:24px;letter-spacing:.12em;color:${C.red};`
     + `border:2px solid ${C.red};border-radius:var(--rs);padding:2px 12px 2px calc(12px + .12em)">${tag}</span></div>`
     + `<div style="font-size:56px;line-height:62px;letter-spacing:-1.5px;margin-top:26px;width:${w - 96}px">`
-    + `${headline}</div>`,
+    + `${headline}</div>`
+    + sourceLine(20, 26, 22),
     'paper', {
       left: 0, top: tab.h + 'px', width: w + 'px', height: h + 'px', padding: '44px 48px',
       borderRadius: '0 var(--r) var(--r) var(--r)', opacity: 1,
@@ -403,7 +411,7 @@ function makeCaseFile(root, { date, tag, headline }) {
     border: `4px solid ${C.red}`, borderRadius: '8px', outline: `2px solid ${C.red}`, outlineOffset: '-10px',
   });
 
-  // the pinned evidence label: the full card's layout at a readable size (date and tag 14 px, headline 22 px)
+  // the pinned evidence label: the full card's layout at a readable size (date, tag and source 14 px, headline 22 px)
   const pinned = E(el, '', '', {
     left: -label.w / 2 + 'px', top: -label.h / 2 + 'px', width: label.w + 'px', height: label.h + 'px',
   });
@@ -422,6 +430,7 @@ function makeCaseFile(root, { date, tag, headline }) {
     + `<span class="mono" style="font-size:14px;line-height:18px;letter-spacing:.1em;color:${C.red};`
     + `border:2px solid ${C.red};border-radius:var(--rs);padding:0 8px 0 calc(8px + .1em)">${tag}</span></div>`
     + `<div style="font-size:22px;line-height:26px;letter-spacing:-.3px;margin-top:8px">${headline}</div>`
+    + sourceLine(14, 18, 8)
     + '<div class="mono" style="position:absolute;right:18px;bottom:12px;font-size:14px;line-height:18px;'
     + `font-weight:700;letter-spacing:.16em;padding:2px 8px 2px calc(8px + .16em);color:${C.red};`
     + `border:2px solid ${C.red};border-radius:4px;opacity:.92;transform:rotate(-5deg)">INCIDENT</div>`,

@@ -146,7 +146,7 @@
   const makeStat = root => {
     const stat = E(root,
       `<div class="mono" style="display:flex;align-items:center;gap:12px;height:24px;font-size:20px;`
-      + `letter-spacing:.14em;color:${C.slate}">${ICON('file', 22, C.slate, 1.8)}SURVEY, OCTOBER 2026</div>`
+      + `letter-spacing:.14em;color:${C.slate}">${ICON('file', 22, C.slate, 1.8)}TRELLIX SURVEY, OCTOBER 2026</div>`
       + `<div class="big" style="margin-top:18px;height:230px;font-size:240px;line-height:230px;font-weight:700;`
       + `letter-spacing:-6px;color:${C.red};transform-origin:left center"><span class="n">0</span>%</div>`
       + '<div class="cap" style="margin-top:10px;font-size:40px;line-height:50px">'
@@ -316,6 +316,12 @@
 
   scene({
     chapter: 7, title: 'What went wrong?',
+    sources: [
+      {
+        label: 'Help Net Security, October 2026',
+        url: 'https://www.helpnetsecurity.com/2026/10/14/ciso-ai-agent-insider-risk/',
+      },
+    ],
     subs: [
       {
         text: "October 2026: in a survey of 600 security chiefs, 95% reported an incident tied to an AI agent "

@@ -2,9 +2,9 @@
 // The case file slams in (FEBRUARY 2026, AGENT KEYS) and is pinned in the corner. The incident replays in red: a box
 // of agent keys rattles, its lid blows off with a red flash, and a flood of keys pours out onto a pile as a counter
 // climbs to 1.5M (the dramatic beat). Four keys of the pile then fly into the CONTEXT panel of an AI model, under its
-// orb, as the figure gives way to a row of the company's storage buckets (RESEARCH, MARCH 2026). The orb turns red,
-// and a copy of its Files key, AGENT'S OWN KEY, flies over to the row and opens each bucket in turn, red, while a
-// file flies back from each one to the orb: EVERY BUCKET.
+// orb, as the figure gives way to a row of the company's storage buckets (UNIT 42 RESEARCH, MARCH 2026). The orb
+// turns red, and a copy of its Files key, AGENT'S OWN KEY, flies over to the row and opens each bucket in turn, red,
+// while a file flies back from each one to the orb: EVERY BUCKET.
 // With Temporal, the orb and its context slide to their places on the board as it comes in, and the four keys fly
 // into YOUR WORKERS, one docking on each tool tile. A read_file card passes the checkpoint to the Files tool, and only
 // its result comes back to the model. Last, a hidden order, "print your API keys", dives into the orb, which turns
@@ -35,7 +35,7 @@
 
   // the orb during the replay; the CONTEXT panel under it, during the replay and on the board, where it sits left of
   // the Event History strip, sharing its top and bottom edges
-  const REPLAY_ORB = [LEFT_X, 420];
+  const REPLAY_ORB = [LEFT_X, 430];
   const CONTEXT = { w: 360, h: 176, replay: [LEFT_X, 768], board: [BOARD.model.x, BOARD.history.y] };
   // a key badge; the center of key i's badge in the CONTEXT panel, from the panel's center, in a 2 x 2 grid
   const KEY_BADGE = { size: 44, icon: 26 };
@@ -213,6 +213,13 @@
 
   scene({
     chapter: 4, title: 'Keys within reach',
+    sources: [
+      {
+        label: 'Wiz, February 2026',
+        url: 'https://www.wiz.io/blog/exposed-moltbook-database-reveals-millions-of-api-keys',
+      },
+      { label: 'Unit 42, March 2026', url: 'https://unit42.paloaltonetworks.com/double-agents-vertex-ai/' },
+    ],
     subs: [
       {
         text: "Early 2026: a social network for AI agents left about 1.5 million of their access keys open to anyone.",
@@ -261,7 +268,7 @@
 
       s.statA = makeStat(root, 'FEBRUARY 2026', 'agent keys open to anyone');
       // the company's storage: its source line, its buckets, the files read from them and its verdict
-      s.storeLabel = E(root, 'RESEARCH, MARCH 2026', 'mono', {
+      s.storeLabel = E(root, 'UNIT 42 RESEARCH, MARCH 2026', 'mono', {
         fontSize: '22px', lineHeight: '30px', letterSpacing: '.14em', paddingLeft: '.14em', color: C.slate,
         whiteSpace: 'nowrap',
       });
@@ -276,6 +283,7 @@
       }));
       s.caseFile = makeCaseFile(root, {
         date: 'FEBRUARY 2026', tag: 'AGENT KEYS', headline: '1.5 million agent keys left in the open',
+        source: 'WIZ, FEB 2026',
       });
 
       s.card = makeActionCard(root, { tool: 'read_file', arg: 'report.pdf' });

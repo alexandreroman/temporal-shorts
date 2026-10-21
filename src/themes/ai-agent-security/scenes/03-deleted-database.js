@@ -20,7 +20,7 @@
   const LANE_Y = 600;
   const TOP_ROW_Y = CASE_FILE.pin.y;
   const AGENT = { x: BOARD.model.x, y: LANE_Y };
-  const TASK = { x: 330, y: 410, w: 420, h: 96 };
+  const TASK = { x: 330, y: 424, w: 420, h: 96 };
   const KEY = { x: 960, y: TOP_ROW_Y, w: 440, h: 96 };
   const SLOT = { x: BOARD.checkpoint.x, y: LANE_Y, w: CHECKPOINT.w, h: 260 };
   const DB = { x: BOARD.tools.x, y: LANE_Y, w: 320, h: 150 };
@@ -30,7 +30,7 @@
   // task card's bottom right corner), from the key card's icon to the agent's upper right edge
   const TOKEN = { size: 52 };
   const KEY_ICON_X = KEY.x - KEY.w / 2 + 6 + 22 + 18;
-  const TOKEN_ROUTE = [[KEY_ICON_X, KEY.y], [760, 400], [600, 520], [AGENT.x + 70, LANE_Y - 70]];
+  const TOKEN_ROUTE = [[KEY_ICON_X, KEY.y], [760, 414], [600, 534], [AGENT.x + 70, LANE_Y - 70]];
   // the shards of a shattered tile: a grid of cells, each cut into two triangles, its inner corners jittered
   const SHARDS = { cols: 4, rows: 3, jitter: 0.45, gravity: 1300 };
 
@@ -229,6 +229,10 @@
 
   scene({
     chapter: 3, title: 'A deleted database',
+    sources: [
+      { label: 'Hackread, April 2026', url: 'https://hackread.com/cursor-ai-agent-wipes-pocketos-database-backups/' },
+      { label: 'AI Incident Database', url: 'https://incidentdatabase.ai/cite/1469/' },
+    ],
     subs: [
       { text: "April 2026: a coding agent deleted a company's production database and its backups, in 9 seconds." },
       // the backups shatter, then a short hold on the loss
@@ -303,6 +307,7 @@
       // the case file, on top of everything
       s.file = makeCaseFile(root, {
         date: 'APRIL 2026', tag: '9 SECONDS', headline: 'A coding agent wipes a database and its backups',
+        source: 'HACKREAD, APR 2026',
       });
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);

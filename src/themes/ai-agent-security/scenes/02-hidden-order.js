@@ -173,6 +173,9 @@
 
   scene({
     chapter: 2, title: 'A hidden order',
+    sources: [
+      { label: 'PromptArmor, August 2026', url: 'https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data' },
+    ],
     subs: [
       { text: "August 2026: researchers showed that hidden text in a document could make a work assistant leak data." },
       { text: "The document hid text that read like an order. An AI model cannot always tell data from orders." },
@@ -214,6 +217,7 @@
       // the case file lands over everything
       s.caseFile = makeCaseFile(root, {
         date: 'AUGUST 2026', tag: 'HIDDEN TEXT', headline: 'A shared document takes over<br>a work assistant',
+        source: 'PROMPTARMOR, AUG 2026',
       });
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);

@@ -16,10 +16,10 @@
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- the replay stage, at camera rest
-  // the owner's phone (x 120-480, y 360-856), left-aligned with the pinned case file above it; the assistant's orb (low
+  // the owner's phone (x 120-480, y 380-856), left-aligned with the pinned case file above it; the assistant's orb (low
   // enough for its red glow to start at y 150) and the panel of the messages it reads under it (x 640-1080, y
   // 490-856), centered between the phone and the inbox; the inbox (x 1240-1800, y 150-856)
-  const PHONE = { x: 300, y: 608, w: 360, h: 496 };
+  const PHONE = { x: 300, y: 618, w: 360, h: 476 };
   const ORB = { x: 860, y: 312 };
   const QUEUE = { x: 860, y: 673, w: 440, h: 366 };
   const INBOX = { x: 1520, y: 503, w: 560, h: 706 };
@@ -263,6 +263,9 @@
 
   scene({
     chapter: 6, title: "An agent that won't stop",
+    sources: [
+      { label: 'SF Standard, February 2026', url: 'https://sfstandard.com/2026/02/25/openclaw-goes-rogue/' },
+    ],
     subs: [
       { text: "February 2026: asked only to suggest emails to delete, an AI assistant started deleting them." },
       { text: "Its owner typed STOP from a phone, again and again. To the agent, it was just one more message." },
@@ -311,6 +314,7 @@
 
       s.caseFile = makeCaseFile(root, {
         date: 'FEBRUARY 2026', tag: 'INBOX', headline: 'An assistant deletes the emails it was told to suggest',
+        source: 'SF STANDARD, FEB 2026',
       });
     },
     update(t, c, s) {
