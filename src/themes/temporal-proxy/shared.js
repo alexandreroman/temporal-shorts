@@ -6,25 +6,26 @@
 // The wire's line, stage y: the channel between the two rows of Workers, where their connections run, the proxy
 // sits and its TLS tube goes out
 const WIRE_Y = 515;
-// The wide shot, [x, y, scale] for shot(): the whole fleet, a little smaller than at rest, with room round it. The
-// intro's ending, chapter 1 and chapter 2's opening hold it; the fleet layout (FLEET) fills it: it frames stage
-// x 5-1915 and y 100-930 as the content frame, so the zones (y 150-880) show at y 193-836 on screen.
+// The wide shot, [x, y, scale] for shot(): the whole fleet, a little smaller than at rest. The intro's ending, chapter
+// 1 and chapter 2's opening hold it; the fleet layout (FLEET) fills it: it frames stage x 5-1915 and y 100-930 as the
+// content frame, so the zones (y 117-917) show at y 165-869 on screen, and the composition at x 125-1795.
 const WIDE_SHOT = [960, 515, 0.88];
-// The fleet layout, in stage px. env and temporal: the zones' left edge and width without the proxy (the intro's
-// ending and chapter 1: YOUR ENVIRONMENT holding the six Workers, TEMPORAL wide enough for a card and a list);
-// proxyEnv and proxyTemporal: with the proxy (chapter 2 on), the environment wider, its right edge on the proxy box
-// (PROXY), and TEMPORAL narrower, at the right end, still wide enough for a Namespace band or a list of stored
-// payloads. y and h: both zones' top and height. The Worker tiles (WORKER_TILE, 296 x 262) sit in two rows (rows:
-// their center y) of three columns (cols: their center x), 24 px apart; between the rows runs the channel, on the
-// wire's line, where each Worker's connection has a track of its own, `track` px from the next (fleetLinkD). The
-// environment leaves the Workers as much room on their left as on their right without the proxy (27 px); the zones'
-// widths are even (lerpZone).
+// The fleet layout, in stage px (on screen, 0.88 of it in WIDE_SHOT). env and temporal: the zones' left edge and width
+// without the proxy (the intro's ending and chapter 1: YOUR ENVIRONMENT holding the six Workers, TEMPORAL wide enough
+// for the list of connections, 136 px apart); proxyEnv and proxyTemporal: with the proxy (chapter 2 on), the
+// environment wider, its right edge on the proxy box (PROXY), and TEMPORAL narrower, its right edge kept, wide enough
+// for a Namespace band or a list of stored payloads, 150 px clear of the box for the TLS tube and its label. y and h:
+// both zones' top and height. The Worker tiles (WORKER_TILE, 296 x 262) sit in two rows (rows: their center y) of three
+// columns (cols: their center x), 48 px apart, 44 px inside the environment's sides and 46 px under its heading;
+// between the rows runs a 72 px channel, on the wire's line, where each Worker's connection has a track of its own,
+// `track` px from the next (fleetLinkD); under them, 104 px for a tag (UNDER_WORKERS). The zones' widths are even
+// (lerpZone).
 const FLEET = {
-  y: 150, h: 730,
-  env: { x: 17, w: 990 }, temporal: { x: 1240, w: 660 },
-  proxyEnv: { x: 17, w: 1164 }, proxyTemporal: { x: 1460, w: 440 },
-  rows: [353, 677],
-  cols: [192, 512, 832],
+  y: 117, h: 800,
+  env: { x: 11, w: 1072 }, temporal: { x: 1219, w: 690 },
+  proxyEnv: { x: 11, w: 1248 }, proxyTemporal: { x: 1509, w: 400 },
+  rows: [348, 682],
+  cols: [203, 547, 891],
   track: 6,
 };
 // The zone rectangles for placeZones(): without the proxy (FLEET_ZONES) and with it (PROXY_ZONES)
@@ -60,20 +61,21 @@ const UNDER_WORKERS = {
 
 // ---------- Temporal Proxy
 // The TEMPORAL PROXY box (makeProxy): centered on the right edge of the widened environment (PROXY_ZONES.env), on the
-// wire's line, 100 px clear of the Workers' right column; its size and head as PROXY_BOX's (200 x 300)
+// wire's line, 120 px clear of the Workers' right column; its size and head as PROXY_BOX's (200 x 300)
 const PROXY = { x: FLEET.proxyEnv.x + FLEET.proxyEnv.w, y: WIRE_Y, ...PROXY_BOX };
 // Where the Workers' connections end on the box's left, 4 px short of its edge, so their round caps stay off it
 PROXY.linkEnd = PROXY.x - PROXY.w / 2 - 4;
 // The proxy's connection to TEMPORAL, from the box's right edge to TEMPORAL's left edge with the proxy
 const PROXY_WIRE = { x0: PROXY.x + PROXY.w / 2, x1: FLEET.proxyTemporal.x, y: WIRE_Y };
 // The TLS tube that the proxy adds on the way out (makeTube, placeTube): from the box's right edge to 12 px inside
-// TEMPORAL, on the wire's line, high enough to hold a card and its tags; its label above it
+// TEMPORAL, on the wire's line, high enough to hold a card and its tags; its label above it, centered between the box
+// and TEMPORAL, 19 px clear of both
 const PROXY_TUBE = { x0: PROXY_WIRE.x0, x1: PROXY_WIRE.x1 + 12, y: WIRE_Y, h: 176 };
-PROXY_TUBE.label = { x: (PROXY_TUBE.x0 + PROXY_TUBE.x1) / 2, y: PROXY_TUBE.y - PROXY_TUBE.h / 2 - 36 };
+PROXY_TUBE.label = { x: (PROXY_WIRE.x0 + PROXY_WIRE.x1) / 2, y: PROXY_TUBE.y - PROXY_TUBE.h / 2 - 36 };
 // The payments Namespace inside TEMPORAL with the proxy that chapter 2's card goes into (makeProxyBand): its center,
 // in the middle of TEMPORAL, and size; card: where the card (PROXY_CARD) rests in it, under its name, its padlock clear
-// of the name, its tags under it. In PROXY_SHOT it shows whole, at x 1335-1635 and y 305-725 on screen.
-const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: WIRE_Y, w: 200, h: 280 };
+// of the name, its tags under it. In PROXY_SHOT it shows whole, at x 1320-1680 and y 305-725 on screen.
+const PROXY_BAND = { x: FLEET.proxyTemporal.x + FLEET.proxyTemporal.w / 2, y: WIRE_Y, w: 240, h: 280 };
 PROXY_BAND.card = { x: PROXY_BAND.x, y: PROXY_BAND.y - PROXY_BAND.h / 2 + 78 + PROXY_CARD.h / 2 };
 // The proxy box at PROXY moved by (dx, dy), at scale s, with opacity o and a violet glow of strength glow (0 to 1)
 function placeProxy(box, { dx = 0, dy = 0, s = 1, o = 1, glow = 0 } = {}) {
@@ -105,14 +107,16 @@ function makeFleet(root, linkEnd) {
   const tiles = WORKERS.map(worker => makeWorkerTile(root, worker));
   return { lane, links, tiles };
 }
+// SVG path of the proxy's connection to TEMPORAL, from the box's right edge to 4 px short of TEMPORAL's left edge at
+// x1, so its arrow head stays off the border
+const proxyOutD = x1 => `M ${PROXY_WIRE.x0} ${PROXY_WIRE.y} L ${x1 - 4} ${PROXY_WIRE.y}`;
 // The fleet with the proxy (chapter 2 on): makeFleet() up to PROXY.linkEnd, the proxy's connection to TEMPORAL (out,
 // a violet arrow), the TLS tube round it (tube), with out lifted into an SVG layer of its own over the tube's opaque
 // body, the proxy box (proxy), over the connection's start, then the light that runs along the Workers' connections
 // (sparks, one per Worker) and along the proxy's (outSparks, two).
 function makeProxyFleet(root) {
   const fleet = makeFleet(root, PROXY.linkEnd);
-  const { x0, x1, y } = PROXY_WIRE;
-  fleet.out = path(fleet.lane.svg, `M ${x0} ${y} L ${x1 - 4} ${y}`, C.violet, 3);
+  fleet.out = path(fleet.lane.svg, proxyOutD(PROXY_WIRE.x1), C.violet, 3);
   fleet.tube = makeTube(root, PROXY_TUBE);
   svgLayer(root).appendChild(fleet.out);
   fleet.proxy = makeProxy(root);
@@ -163,10 +167,11 @@ const WORKER_HEAD = { top: 16, h: 30 };
 // Frames a Worker tile placed at center y and scale k for the shot cam, as frameLaneEdges() frames the zones: the tile
 // clips to the content frame (see contentBand), so a close shot never runs it under the chapter header or the
 // subtitles, and its heading row fades out as the frame's top edge moves from the tile's top edge down to it, so the
-// clip never cuts a label. In WIDE_SHOT the tiles lie inside the frame and show whole. Call it after placing the tile.
-function frameWorker(tile, y, k, cam) {
+// clip never cuts a label. In WIDE_SHOT the tiles lie inside the frame and show whole. tileH: the tile's height, px
+// (the shared service makes it shorter). Call it after placing the tile.
+function frameWorker(tile, y, k, cam, tileH = WORKER_TILE.h) {
   const band = contentBand(cam);
-  const h = WORKER_TILE.h * k, top = y - h / 2;
+  const h = tileH * k, top = y - h / 2;
   // the clip is in the tile's own px, before its scale
   const cutTop = Math.max(0, band.top - top) / k, cutBottom = Math.max(0, top + h - band.bottom) / k;
   tile.style.clipPath = cutTop > 0 || cutBottom > 0
@@ -175,11 +180,11 @@ function frameWorker(tile, y, k, cam) {
 }
 // Chapter 2 to 3, and chapter 3 to 4: the close shot on the proxy, [x, y, scale] for shot(), and the proxy fleet at
 // rest in it. Chapter 2's camera pushes right and in to PROXY_SHOT, where its card goes through the proxy; chapter 3
-// holds it (the content comes to the camera); chapter 4 pulls back from it. On screen it frames stage x 770-1890 and
-// y 272-758: the proxy box at x 737 (y 290-740), the TLS tube, TEMPORAL with the proxy (x 1155-1815) cropped at the
-// top and bottom; the Workers and their connections come in from the left, cropped. Room for YOUR KMS: on the proxy's
-// left, over the dimmed Workers (stage x 780-1060, y 280-480).
-const PROXY_SHOT = [1330, 515, 1.5];
+// holds it (the content comes to the camera); chapter 4 pulls back from it. On screen it frames stage x 789-1909 and
+// y 272-758: the proxy box at x 675-975 (y 290-740), the TLS tube, TEMPORAL with the proxy (x 1200-1800) cropped at
+// the top and bottom; the Workers and their connections come in from the left, cropped. Room for YOUR KMS: on the
+// proxy's left, over the dimmed Workers (on screen x 120-561, 114 px clear of the box).
+const PROXY_SHOT = [1349, 515, 1.5];
 // The proxy fleet at rest in PROXY_SHOT (makeProxyFleet), the state at both cuts: the zones with the proxy
 // (PROXY_ZONES), dimmed to OFF_SHOT as the shot crops them (their headings faded by frameLaneEdges); the six Workers,
 // each with its two lines (WORKER_LINES, the Namespace in violet), and their connections drawn, with their light, all
@@ -213,29 +218,38 @@ const SERVICE_TEAMS = [
 ];
 // The framing of the shared service, [x, y, scale] for shot(): chapter 4's camera pulls back to it from PROXY_SHOT,
 // left and out, and chapter 5's pulls back on from it to OUTRO_SHOT, left and out again. At its scale of 1, a stage
-// point shows 300 px to its left.
-const SERVICE_SHOT = [1260, 515, 1];
-// The layout of the shared service, stage px: the zones (env: YOUR ENVIRONMENT, with the proxy inside it, x 220-1100
-// on screen; temporal: TEMPORAL, x 1160-1700 on screen, both as high as the fleet's); the PLATFORM TEAM zone round the
-// proxy box and the POLICY panel docked under the box (platform, policy); the three team zones, stacked under the
-// environment's heading (teams: their left edge, size, the first one's top, the pitch), each with its two Workers side
-// by side at scale k; each team's connection to the proxy, from its zone's right edge to the box, runs down or up at
-// linkX and ends `linkGap` px from the next one on the box; TEMPORAL's Namespace bands, one per team, level with the
-// team zones (bands: their center x and size).
+// point shows 329 px to its left and 64 px higher.
+const SERVICE_SHOT = [1289, 579, 1];
+// The layout of the shared service, stage px (on screen: 329 px to the left, 64 px higher). The zones: env, YOUR
+// ENVIRONMENT, with the proxy inside it (x 120-1172 on screen), and temporal, TEMPORAL (x 1324-1800), both filling the
+// content frame's height, 152 px apart for the TLS tube's label. Inside the environment, 36 px from its sides and under
+// its heading: the three team zones stacked on the left, 40 px apart (teams: their left edge, size, the first one's
+// top, the pitch), each with its two Workers side by side at scale k (SERVICE_TILE); 120 px on their right, the
+// PLATFORM TEAM zone round the proxy box, as high as the team zones' stack, with the POLICY panel docked 36 px under
+// the box (platform, policy). Each team's connection to the proxy, from its zone's right edge to the box, runs down or
+// up at linkX, midway between the zones, and ends `linkGap` px from the next one on the box. TEMPORAL's Namespace
+// bands, one per team, level with the team zones (bands: their center x and size). tube: where the TLS tube ends, 12 px
+// inside TEMPORAL, and its label's center x, midway between the environment and TEMPORAL.
 const SERVICE = {
-  env: { x: 520, y: FLEET.y, w: 880, h: FLEET.h },
-  temporal: { x: FLEET.proxyTemporal.x, y: FLEET.y, w: 540, h: FLEET.h },
-  platform: { x: PROXY.x - 180, y: 300, w: 360, h: 564 },
-  policy: { x: PROXY.x, y: 765, w: 328, h: 168 },
-  teams: { x: 548, w: 392, h: 202, top: 216, pitch: 218 },
-  k: 0.58,
-  linkX: 970,
+  env: { x: 449, y: 214, w: 1052, h: 730 },
+  temporal: { x: 1653, y: 214, w: 476, h: 730 },
+  platform: { x: PROXY.x - 206, y: 305, w: 412, h: 602 },
+  policy: { x: PROXY.x, y: 787, w: 344, h: 172 },
+  teams: { x: 485, w: 448, h: 174, top: 305, pitch: 214 },
+  k: 0.9,
+  linkX: 993,
   linkGap: 40,
-  bands: { x: 1730, w: 380, h: 84 },
+  bands: { x: 1891, w: 396, h: 84 },
 };
-// A team zone's look: where its label sits (left, top, line height) and the top of its Workers, px from its top edge;
-// the gap between its two Workers
-const TEAM_ZONE = { label: { left: 16, top: 8, line: 24 }, tilesTop: 38, gap: 16 };
+SERVICE.tube = { x1: SERVICE.temporal.x + 12, labelX: (SERVICE.env.x + SERVICE.env.w + SERVICE.temporal.x) / 2 };
+// A Worker tile in the shared service, px before its scale (SERVICE.k): narrower and shorter than WORKER_TILE, it
+// keeps its heading row (the gear and WORKER) and its Namespace line, raised to lineTop px from its top, while its
+// language tag and the proxy's address, the same in every team, fade out
+const SERVICE_TILE = { w: 200, h: 100, lineTop: 52 };
+// A team zone's look: where its label sits (left, top, line height) and its verdict (right), and the top of its
+// Workers, px from its edges; the gap between its two Workers. The PLATFORM TEAM zone shares it: the proxy box's top
+// lies tilesTop px under the zone's.
+const TEAM_ZONE = { label: { left: 24, top: 16, line: 24 }, verdictRight: 16, tilesTop: 60, gap: 40 };
 // The rectangle of team zone i (SERVICE_TEAMS)
 const teamZone = i => ({
   x: SERVICE.teams.x, y: SERVICE.teams.top + i * SERVICE.teams.pitch, w: SERVICE.teams.w, h: SERVICE.teams.h,
@@ -243,10 +257,10 @@ const teamZone = i => ({
 // A Worker's slot in its team zone (its column's team, its row's side): its center
 function serviceSlot(worker) {
   const zone = teamZone(worker.col);
-  const half = (WORKER_TILE.w * SERVICE.k + TEAM_ZONE.gap) / 2;
+  const half = (SERVICE_TILE.w * SERVICE.k + TEAM_ZONE.gap) / 2;
   return {
     x: zone.x + zone.w / 2 + (worker.row ? half : -half),
-    y: zone.y + TEAM_ZONE.tilesTop + WORKER_TILE.h * SERVICE.k / 2,
+    y: zone.y + TEAM_ZONE.tilesTop + SERVICE_TILE.h * SERVICE.k / 2,
   };
 }
 // SVG path of team i's connection to the proxy, from the middle of its zone's right edge to the box's left edge, a
@@ -269,22 +283,29 @@ function makeTeamZone(root, name, { w, h }) {
       width: w + 'px', height: h + 'px', border: `1px solid rgba(${RGB.violet},.45)`, borderRadius: 'var(--r)',
       background: `rgba(${RGB.violet},.04)`,
     });
-  zone.covered = makeHeadingVerdict(zone, { font: 14, h: line, right: 10, top: top - TILE_BORDER });
+  zone.covered = makeHeadingVerdict(zone, {
+    font: 14, h: line, right: TEAM_ZONE.verdictRight - TILE_BORDER, top: top - TILE_BORDER,
+  });
   return zone;
 }
 // The rules of the platform team's policy, as the POLICY panel lists them
 const POLICY_RULES = ['Per-Namespace encryption', 'Client authentication', 'Encryption required', 'Metrics'];
+// The POLICY panel's inside, px: its padding on the left, the top of its heading row (the shield and POLICY), then the
+// rules' rows (the first one's top, their pitch and height); the panel (SERVICE.policy) ends `pad` px under the last
+const POLICY_PANEL = { pad: 20, headTop: 14, rulesTop: 50, pitch: 28, rowH: 24 };
 // The POLICY panel (SERVICE.policy): a shield and POLICY, then one row per rule (panel.rules), each an empty box that a
 // neon check fills as the rule ticks on (setRule)
 function makePolicyPanel(root) {
   const { w, h } = SERVICE.policy;
-  const rule = (label, i) => `<div class="rule" style="position:absolute;left:14px;top:${48 + i * 28}px;height:24px;`
-    + 'display:flex;align-items:center;gap:10px"><span class="mark" style="position:relative;width:18px;height:18px">'
+  const { pad, headTop, rulesTop, pitch, rowH } = POLICY_PANEL;
+  const rule = (label, i) => `<div class="rule" style="position:absolute;left:${pad}px;top:${rulesTop + i * pitch}px;`
+    + `height:${rowH}px;display:flex;align-items:center;gap:10px">`
+    + '<span class="mark" style="position:relative;width:18px;height:18px">'
     + `<span class="box" style="position:absolute;inset:0;border:1.5px solid ${C.slate};border-radius:4px"></span>`
     + `<span class="check" style="position:absolute;inset:0;opacity:0">${ICON('check', 18, C.neon, 2.6)}</span></span>`
     + `<span class="mono text" style="font-size:17px;letter-spacing:.06em">${label.toUpperCase()}</span></div>`;
   const panel = E(root,
-    `<div style="position:absolute;left:14px;top:12px;display:flex;align-items:center;gap:8px">`
+    `<div style="position:absolute;left:${pad}px;top:${headTop}px;display:flex;align-items:center;gap:8px">`
     + `${ICON('shield', 20, C.violet, 1.8)}<span class="mono" style="font-size:16px;letter-spacing:.14em;`
     + `color:${C.slate}">POLICY</span></div>${POLICY_RULES.map(rule).join('')}`,
     'tile', { width: w + 'px', height: h + 'px', textAlign: 'left', borderColor: C.violet });
@@ -325,8 +346,10 @@ function makeServiceStage(root) {
   Object.assign(workerCam.style, { width: '0px', height: '0px' });
   root.insertBefore(workerCam, fleet.tiles[0]);
   fleet.tiles.forEach(tile => workerCam.appendChild(tile));
-  // one Namespace band per team, its full name larger than the payments band's
-  const bands = SERVICE_TEAMS.map(team => makeProxyBand(root, SERVICE.bands, { name: `${team.ns}.a1b2c`, font: 20 }));
+  // one Namespace band per team, its full name larger than the payments band's, its NAMESPACE label 14 px
+  const bands = SERVICE_TEAMS.map(team => makeProxyBand(root, SERVICE.bands, {
+    name: `${team.ns}.a1b2c`, font: 20, labelFont: 14,
+  }));
   const policy = makePolicyPanel(root);
   const teamSparks = SERVICE_TEAMS.map(() => makeSpark(root, 10, RGB.violet));
   return { ...fleet, workerCam, teams, platform, teamLinks, bands, policy, teamSparks };
@@ -336,11 +359,25 @@ const SERVICE_REST = {
   regroup: 1, platform: 1, teams: [1, 1, 1], retype: 1, links: [1, 1, 1], flow: 1, bands: [1, 1, 1], policy: 1,
   ticks: [1, 1, 1, 1], covered: [1, 1, 1].map(() => ({ s: 1, o: 1 })), glow: 0, fade: 0,
 };
+// A Worker tile of the shared service at regroup p (0 to 1): from the fleet's tile (WORKER_TILE) to the shared
+// service's (SERVICE_TILE). Its language tag and its first line (the proxy's address) fade out over the first half,
+// as its second line (the Namespace) rises to its new place. Returns its height, px.
+function shapeServiceWorker(tile, p) {
+  const w = lerp(WORKER_TILE.w, SERVICE_TILE.w, p), h = lerp(WORKER_TILE.h, SERVICE_TILE.h, p);
+  tile.style.width = w + 'px';
+  tile.style.height = h + 'px';
+  const redundant = 1 - clamp(p * 2);
+  tile.langTag.style.opacity = redundant;
+  tile.lines[0].style.opacity = redundant;
+  tile.lines[1].style.transform = `translateY(${lerp(0, SERVICE_TILE.lineTop - workerSlotTop(1), p)}px)`;
+  return h;
+}
 // The shared service in state p, for the shot cam (chapter 4 builds it from the proxy stage; chapter 5 opens on it at
 // rest, SERVICE_REST, and fades it out):
 // - regroup (0 to 1, eased by the scene): from the proxy stage (placeProxyStage, at 0) to the shared service: the zones
-//   move from PROXY_ZONES to SERVICE's and come into focus, the Workers travel from their fleet slots to their team
-//   zones (serviceSlot), shrinking to SERVICE.k, and the fleet's connections fade out;
+//   move from PROXY_ZONES to SERVICE's and come into focus, the TLS tube stretches to TEMPORAL's new edge, the Workers
+//   travel from their fleet slots to their team zones (serviceSlot), shrinking to SERVICE.k as their tiles take the
+//   shared service's shape (shapeServiceWorker), and the fleet's connections fade out;
 // - platform, teams[i], bands[i], policy: the opacity of the PLATFORM TEAM zone, of team zone i and of its Namespace
 //   band (each rising in), and of the POLICY panel (docking up under the box);
 // - retype: the Workers of ORDERS and FRAUD type their team's Namespace over payments; links[i], flow: team i's
@@ -370,13 +407,18 @@ function placeServiceStage(st, cam, p) {
     setText(tile.lines[0], WORKER_LINES[0]);
     setText(tile.lines[1], retyped(WORKER_LINES[1], SERVICE_TEAMS[worker.col].ns, p.retype));
     tile.lines[1].style.color = C.violet;
-    frameWorker(tile, y, k, cam);
+    const tileH = shapeServiceWorker(tile, p.regroup);
+    frameWorker(tile, y, k, cam, tileH);
   });
   const fleetLinks = OFF_SHOT * (1 - clamp(p.regroup * 2));
   st.links.forEach(link => draw(link, 1, fleetLinks));
+  // the proxy's connection and its tube reach TEMPORAL's edge as it moves
+  const tubeX1 = lerp(PROXY_TUBE.x1, SERVICE.tube.x1, p.regroup);
+  setD(st.out, proxyOutD(tubeX1 - (PROXY_TUBE.x1 - PROXY_WIRE.x1)));
   draw(st.out, 1, keep);
   flowFleetLight(st, fleetLinks, keep);
-  placeTube(st.tube, PROXY_TUBE, { o: keep });
+  const label = { x: lerp(PROXY_TUBE.label.x, SERVICE.tube.labelX, p.regroup), y: PROXY_TUBE.label.y };
+  placeTube(st.tube, { ...PROXY_TUBE, x1: tubeX1, label }, { o: keep });
   placeProxy(st.proxy, { glow: p.glow });
 
   const center = zone => [zone.x + zone.w / 2, zone.y + zone.h / 2];

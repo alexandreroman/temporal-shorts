@@ -8,14 +8,15 @@
 {
   // the title block, on the stage (outside the camera): its center
   const TITLE = { x: 560, y: 515 };
-  // the visual, in stage px seen through WIDE_SHOT: the proxy box, drawn larger (k), with its glow; the three Workers
-  // on its left (x, the y of each, a tile's size), the first row of the fleet (WORKERS 0 to 2), in that order; the
-  // lines converge from the Workers' right edges to the box's left edge, ending `spread` px apart; the violet
-  // connection leaves the box's right edge for x1
-  const BOX = { x: 1520, y: WIRE_Y, k: 1.3 };
-  const MINI = { x: 1150, ys: [WIRE_Y - 175, WIRE_Y, WIRE_Y + 175], w: 160, h: 68 };
+  // the visual, in stage px seen through WIDE_SHOT (on screen x 992-1800, 120 px clear of the title): the proxy box,
+  // drawn larger (k), with its glow; the three Workers on its left (x, the y of each, a tile's size), the first row of
+  // the fleet (WORKERS 0 to 2), in that order, the outer two level with the box's top and bottom edges; the lines
+  // converge from the Workers' right edges to the box's left edge, ending `spread` px apart; the violet connection
+  // leaves the box's right edge for x1, the frame's right side
+  const BOX = { x: 1551, y: WIRE_Y, k: 1.3 };
+  const MINI = { x: 1076, ys: [WIRE_Y - 195, WIRE_Y, WIRE_Y + 195], w: 160, h: 68 };
   const LINES = { x0: MINI.x + MINI.w / 2 + 4, x1: BOX.x - BOX.k * PROXY.w / 2 - 4, spread: 48 };
-  const OUT = { x0: BOX.x + BOX.k * PROXY.w / 2, x1: 1880 };
+  const OUT = { x0: BOX.x + BOX.k * PROXY.w / 2, x1: 1914 };
   // from the start: the box pops in (box), the Workers pop in one after the other (minis, miniStep), their lines draw
   // (lines, lineStep, lineD), then the connection out (out, outD); the light flows from `flow`
   const T = { box: 0.5, minis: 0.9, miniStep: 0.12, lines: 1.4, lineStep: 0.12, lineD: 0.6, out: 2.0, outD: 0.5,

@@ -145,8 +145,8 @@ you can build" chapter.
     card rides in from the bottom-right Worker, in clear, dropping under
     the KMS and its link; a dashed DATA KEY 1 tag pops in the proxy, its
     key flies onto the card's lock, the lock snaps shut and the fields
-    scramble into ciphertext, with violet rings; NO CODE CHANGE beside the
-    Worker's lines. The DATA KEY travels along the link to the KMS's
+    scramble into ciphertext, with violet rings; NO CODE CHANGE under the
+    proxy, where chapter 02 shows CREDENTIALS IN ONE PLACE. The DATA KEY travels along the link to the KMS's
     bottom edge, whose key swells and glows, and comes back as WRAPPED
     KEY 1, behind a lock, to dock on the card. The card goes out through
     the TLS tube and lands in TEMPORAL as a row of STORED PAYLOADS:
@@ -163,8 +163,10 @@ you can build" chapter.
     ENVIRONMENT moves to hold the proxy inside it, TEMPORAL widens, a
     PLATFORM TEAM zone forms round the proxy, the six Workers travel into
     three team zones stacked on the left, PAYMENTS, ORDERS and FRAUD, two
-    Workers each, and the Workers of ORDERS and FRAUD type their team's
-    Namespace over `payments`. Each team's connection draws into the
+    Workers side by side in each; on the way each Worker tile turns
+    compact, keeping WORKER and its Namespace line while its language tag
+    and `proxy:7233` fade out, and the Workers of ORDERS and FRAUD type
+    their team's Namespace over `payments`. Each team's connection draws into the
     proxy, light flowing along it, and TEMPORAL shows one Namespace band
     per team: payments.a1b2c, orders.a1b2c, fraud.a1b2c.
 - **0:50** One policy for all: per-Namespace encryption, client

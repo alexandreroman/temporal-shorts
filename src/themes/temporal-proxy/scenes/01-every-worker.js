@@ -44,15 +44,20 @@
   ];
   // the order the codecs flip in: down each column, from left to right
   const CODEC_ORDER = [0, 3, 1, 4, 2, 5];
-  // a team tag: its size and font, px, in the top right corner of its Worker tile, centered on the gear's row (y from
-  // the tile's top), 20 px clear of WORKER on its left
-  const TEAM_TAG = { w: 112, h: 28, font: 15, y: 31 };
+  // a team tag: its size and font, px (16 px: 14 px on screen at 0.88), in the top right corner of its Worker tile,
+  // centered on the gear's row (y from the tile's top), 20 px clear of WORKER on its left (on screen)
+  const TEAM_TAG = { w: 104, h: 28, font: 16, y: 31 };
   // the verdict under the Workers (UNDER_WORKERS): its font, px, 19.4 px on screen at 0.88; 20 px clear of the bottom
   // row and of the environment's bottom edge
   const VERDICT_FONT = 22;
-  // TEMPORAL's list of the six connections, under its logo: its center x, its label's top, the rows' top, pitch,
-  // height and width
-  const LIST = { x: FLEET.temporal.x + FLEET.temporal.w / 2, label: 226, top: 256, pitch: 36, h: 32, w: 560 };
+  // TEMPORAL's list of the six connections, under its logo, as far under it as the Workers are under their zone's
+  // heading (its label's top level with theirs): its center x, its label's top and line height, the rows' top, pitch,
+  // height, width (45 px inside TEMPORAL's sides) and font
+  const LIST = {
+    x: FLEET.temporal.x + FLEET.temporal.w / 2, label: FLEET.rows[0] - WORKER_TILE.h / 2, labelH: 22, pitch: 50, h: 36,
+    w: FLEET.temporal.w - 90, font: 20,
+  };
+  LIST.top = LIST.label + 44;
 
   // A team tag (TEAM_TAG): the team's name in violet capitals, in a violet outline. It stays hidden until placed.
   const makeTeamTag = (root, team) => E(root, team.toUpperCase(), 'mono', {
@@ -94,7 +99,9 @@
         chip.label = chip.querySelector('span');
         chip.icon = chip.querySelector('svg');
       }));
-      s.listLabel = E(root, 'Connections', 'lbl', { fontSize: '17px', width: LIST.w + 'px', paddingLeft: '0' });
+      s.listLabel = E(root, 'Connections', 'lbl', {
+        fontSize: '17px', lineHeight: LIST.labelH + 'px', width: LIST.w + 'px', paddingLeft: '0',
+      });
       s.rows = WORKERS.map((w, i) => makeConnectionRow(root, `worker-${i + 1}`, w.lang, LIST));
       s.teams = WORKERS.map(w => makeTeamTag(root, TEAMS[w.col]));
       s.sparks = WORKERS.map(() => makeSpark(root, 12, RGB.violet));
@@ -174,7 +181,7 @@
         rise(s.rows[w], LIST.x, LIST.top + w * LIST.pitch + LIST.h / 2, arrived * linksO, 16);
       });
       const listLabel = P(t, c[0] + T0.chips[0] + T0.link + T0.linkD - 0.3, 0.4) * linksO;
-      place(s.listLabel, LIST.x, LIST.label + 10, 1, listLabel);
+      place(s.listLabel, LIST.x, LIST.label + LIST.labelH / 2, 1, listLabel);
 
       // the dramatic beat: NO CENTRAL CONTROL slams in under the Workers from above its size, with red rings, a red
       // flash and a shake

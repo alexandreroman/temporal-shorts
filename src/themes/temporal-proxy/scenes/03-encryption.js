@@ -36,18 +36,19 @@
   // onto the card starts)
   const SEAL = { x: PROXY.x, y: 571 };
   const DATA_KEY = { x: PROXY.x, y: 483, icon: [-50, 0] };
-  // YOUR KMS on the proxy's left, over the top right Worker, at the top of the close shot (on screen x 101-542,
-  // y 175-415): center and size. It stays above the DATA KEY's row, so its link reaches the proxy under its name.
-  const KMS = { x: 906, y: 368, w: 294, h: 160 };
+  // YOUR KMS on the proxy's left, over the top right Worker, at the top of the close shot (on screen x 120-561,
+  // y 175-415, 114 px clear of the box): center and size. It stays above the DATA KEY's row, so its link reaches the
+  // proxy under its name.
+  const KMS = { x: 936, y: 368, w: 294, h: 160 };
   // The KMS link: from the KMS's bottom edge at x, down to the DATA KEY's row, then into the proxy's side, where it
   // ends 4 px short of the box (end), as the Workers' connections do. The data key's trip (kmsTrip) runs along the
   // same line on to the DATA KEY's center (x1), inside the box, where the key tag covers it. x keeps the travelling
   // tag (200 screen px wide) about 50 px clear of the box, so it never crosses the proxy's name.
-  const LINK = { x: 960, y0: KMS.y + KMS.h / 2, y1: DATA_KEY.y, end: PROXY.linkEnd, x1: DATA_KEY.x };
-  // NO CODE CHANGE, in your environment under the connections, its right edge about under YOUR KMS's, beside the
-  // sending Worker's lines, clear of them on its left (on screen about 400, 794): low enough to balance YOUR KMS at the
-  // top of the shot round the content frame's middle
-  const NO_CODE = { x: 958, y: 700 };
+  const LINK = { x: 990, y0: KMS.y + KMS.h / 2, y1: DATA_KEY.y, end: PROXY.linkEnd, x1: DATA_KEY.x };
+  // NO CODE CHANGE under the proxy, where chapter 2 shows CREDENTIALS IN ONE PLACE (on screen about 825, 797), clear
+  // of the sending Worker's tile on its left: low enough to balance YOUR KMS at the top of the shot round the content
+  // frame's middle
+  const NO_CODE = { x: PROXY.x, y: PROXY.y + PROXY.h / 2 + 38 };
   // the Worker that YOUR KMS covers (in WORKERS): its language tag and lines fade out under the KMS, so no clipped
   // label shows past it
   const COVERED = 2;
@@ -58,9 +59,12 @@
 
   // The card's way in from its Worker: it leaves the Worker's track in the channel and drops to the sealing row at
   // once, so it rides in more than 20 px under YOUR KMS and its link, then straight into the proxy
-  const rideIn = () => [[860, WORKERS[SENDER].trackY], [860, SEAL.y + 45], [1000, SEAL.y], [SEAL.x, SEAL.y]];
+  const rideIn = () => {
+    const { x, trackY } = WORKERS[SENDER];
+    return [[x + 28, trackY], [x + 28, SEAL.y + 45], [PROXY.linkEnd - 77, SEAL.y], [SEAL.x, SEAL.y]];
+  };
   // Its way out, from where it was sealed, through the tube to its row in TEMPORAL's list
-  const rideOut = () => [[SEAL.x, SEAL.y], [1330, WIRE_Y], [LIST.x - 80, LIST.row], [LIST.x, LIST.row]];
+  const rideOut = () => [[SEAL.x, SEAL.y], [PROXY.x + 149, WIRE_Y], [LIST.x - 80, LIST.row], [LIST.x, LIST.row]];
   // A tag of the close shot, sized in screen px (font; see scaledTag)
   const closeTag = (root, html, kind, font, opts = {}) => scaledTag(root, html, kind, font, { ...opts, u: U });
 
@@ -158,7 +162,7 @@
       s.kms.kmsKey.style.transform = `scale(${swell(t, trip.wrapAt, 0.3).toFixed(4)})`;
       s.kms.kmsKey.style.filter = `drop-shadow(0 0 ${(14 * U * kmsGlow).toFixed(2)}px rgba(${RGB.violet},.9))`;
 
-      // NO CODE CHANGE, in your environment, where the Workers' connections come from
+      // NO CODE CHANGE, under the proxy that does the work
       const noCode = popIn(t, c[0] + T0.noCode);
       place(s.noCode, NO_CODE.x, NO_CODE.y, noCode.s, noCode.o * left);
 

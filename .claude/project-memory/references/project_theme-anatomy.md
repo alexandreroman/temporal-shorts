@@ -529,12 +529,21 @@ below and the card order in [Home page design](feedback_home-page.md).
   (payload card, zones, TLS tube, verdict tags, Worker tiles, proxy box,
   YOUR KMS, the data key tag and its trip to the KMS, stored payload rows,
   `shot()`) live in `src/shared.js`; its own layout (`FLEET`, `PROXY` at
-  x 1181, `WIDE_SHOT`, `PROXY_SHOT`, `SERVICE`, `SERVICE_SHOT`) is in its
+  x 1259, `WIDE_SHOT`, `PROXY_SHOT`, `SERVICE`, `SERVICE_SHOT`) is in its
   `shared.js`. In the close shot the dimmed Worker tiles clip to the
   content frame and their headings fade (`frameWorker()`), as the zones do
   (`frameLaneEdges()`). The shared service shrinks the Worker tiles
   through a camera layer of their own (`workerCam`, sizeless), so the
   layout check measures them at their smaller resting size.
+- Spacing follows the agent-harness grid, measured on screen: about 40 px
+  between tiles in a zone, 120 px between zones (152 px in ch4, where the
+  TLS label sits between YOUR ENVIRONMENT and TEMPORAL, 20 px clear of
+  each), 36-40 px from a zone's border and heading to its content; YOUR
+  KMS sits 114 px clear of the proxy box. In ch4 the Worker tiles turn
+  compact on their way into the team zones (`SERVICE_TILE`, 200 x 100 at
+  0.9: WORKER and the Namespace line, the language tag and `proxy:7233`
+  fading), so their text stays about 18 px on screen. Ch3's NO CODE
+  CHANGE sits under the proxy, where ch2's CREDENTIALS IN ONE PLACE sits.
 - Cinematic like security, one continuous film: every boundary is a match
   cut on a canonical state built by one function both sides call: intro to
   ch1 and ch1 to ch2 on `placeBareFleet()` in `WIDE_SHOT`; ch2 to ch3 and
