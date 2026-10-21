@@ -79,10 +79,11 @@ function startPlayer() {
   document.body.appendChild(holdMark);
 
   // Sources: links to where the facts of a scene come from, one per entry of its optional `sources`
-  // ([{ label, url }]), in the top-right corner under the progress segments: "SOURCES" then the links, spaced apart,
-  // on one line, or on two when they do not fit, so the box stays above the content frame whatever their
-  // number. Inside the stage, so it scales with the scene and fades with it; created here only, so the frozen ?t=
-  // frames never show it.
+  // ([{ label, url }]), on one line on the header band: "SOURCES" then the links, spaced apart, vertically centered on
+  // the chapter header and right-aligned just left of the progress segments, well above the content frame. The links
+  // that do not fit between the header and the segments hide behind a "+N" button, which opens a popover listing
+  // every source. Inside the stage, so it scales with the scene and fades with it; created here only, so the frozen
+  // ?t= frames never show it.
   const sourcesBox = document.createElement('div');
   sourcesBox.id = 'sources';
   sourcesBox.hidden = true;
@@ -90,6 +91,11 @@ function startPlayer() {
   // The scene whose sources the box lists, so the links are rebuilt only when the scene changes, never under the
   // pointer of a viewer about to click.
   let sourcesScene = null;
+  // The "+N" button and its popover, null while every link fits on the line.
+  let moreButton = null;
+  let morePopover = null;
+  // Clear space, in stage px, between the box and the chapter header on its left and the segments on its right.
+  const SOURCES_CLEARANCE = 32;
   const OUTWARD_ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>';
 
   function sourceLink(source) {
@@ -105,52 +111,116 @@ function startPlayer() {
     return link;
   }
 
-  // One line of the box: the links, after the kicker text on the first line (null on the second).
-  function sourcesLine(sources, kickerText) {
+  // The line: the kicker, the first `shown` links, then a "+N" button for the others, if any.
+  function sourcesLine(sources, shown) {
     const line = document.createElement('div');
     line.className = 'line';
-    if (kickerText) {
-      const kicker = document.createElement('span');
-      kicker.className = 'kicker';
-      kicker.textContent = kickerText;
-      line.append(kicker);
+    const kicker = document.createElement('span');
+    kicker.className = 'kicker';
+    kicker.textContent = sources.length === 1 ? 'Source' : 'Sources';
+    line.append(kicker);
+    for (const source of sources.slice(0, shown)) line.append(sourceLink(source));
+    const hidden = sources.length - shown;
+    if (hidden > 0) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'more';
+      button.textContent = `+${hidden}`;
+      button.setAttribute('aria-label', `${hidden} more ${hidden === 1 ? 'source' : 'sources'}`);
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-controls', 'sources-popover');
+      line.append(button);
     }
-    for (const source of sources) line.append(sourceLink(source));
     return line;
   }
 
-  function anyLabelTruncated() {
-    return [...sourcesBox.querySelectorAll('.label')].some(label => label.scrollWidth > label.clientWidth);
+  // Every source, one per line, under the header band.
+  function sourcesPopover(sources) {
+    const popover = document.createElement('div');
+    popover.id = 'sources-popover';
+    popover.className = 'popover';
+    popover.setAttribute('aria-label', 'Sources');
+    popover.hidden = true;
+    for (const source of sources) popover.append(sourceLink(source));
+    return popover;
   }
 
-  // Everything on one line first; when a label would be cut short, half of the links move to a second line, where
-  // CSS shortens a label with an ellipsis only if it still does not fit.
+  // Places the box on the header line, its right edge just left of the segments, and returns the width left for
+  // it between the header and the segments, in stage px. The header shows the current chapter title: renderAt()
+  // has just set it.
+  function placeSourcesBox() {
+    const header = document.getElementById('hdr');
+    const segments = document.getElementById('segs');
+    sourcesBox.style.top = `${header.offsetTop}px`;
+    sourcesBox.style.height = `${header.offsetHeight}px`;
+    sourcesBox.style.right = `${stage.offsetWidth - segments.offsetLeft + SOURCES_CLEARANCE}px`;
+    const headerRight = header.offsetLeft + header.offsetWidth;
+    return segments.offsetLeft - headerRight - 2 * SOURCES_CLEARANCE;
+  }
+
+  // Every link on the line first; while the line is too wide, the last shown link moves behind the "+N" button.
   function layOutSources(sources) {
-    const kickerText = sources.length === 1 ? 'Source' : 'Sources';
-    sourcesBox.replaceChildren(sourcesLine(sources, kickerText));
-    if (sources.length > 1 && anyLabelTruncated()) {
-      const half = Math.ceil(sources.length / 2);
-      const firstLine = sourcesLine(sources.slice(0, half), kickerText);
-      sourcesBox.replaceChildren(firstLine, sourcesLine(sources.slice(half), null));
+    const available = placeSourcesBox();
+    let shown = sources.length;
+    let line = sourcesLine(sources, shown);
+    sourcesBox.replaceChildren(line);
+    while (shown > 0 && line.offsetWidth > available) {
+      shown--;
+      line = sourcesLine(sources, shown);
+      sourcesBox.replaceChildren(line);
+    }
+    moreButton = line.querySelector('.more');
+    morePopover = null;
+    if (moreButton) {
+      morePopover = sourcesPopover(sources);
+      sourcesBox.append(morePopover);
+      // Keep mouse clicks from focusing the button, as for the controls, so Space stays a global play/pause key.
+      moreButton.addEventListener('mousedown', event => event.preventDefault());
+      moreButton.addEventListener('click', () => setPopoverOpen(morePopover.hidden));
     }
   }
 
-  // Called right after renderAt(time), which sets the opacity of the current scene's root.
+  function setPopoverOpen(open) {
+    morePopover.hidden = !open;
+    moreButton.setAttribute('aria-expanded', String(open));
+  }
+
+  function isPopoverOpen() {
+    return morePopover !== null && !morePopover.hidden;
+  }
+
+  // Called right after renderAt(time), which sets the opacity of the current scene's root and the header's title.
   function updateSources() {
     const current = scenes.find(sc => time >= sc.start && time < sc.end) ?? null;
     const sources = current?.sources ?? [];
     if (current !== sourcesScene) {
       sourcesScene = current;
       sourcesBox.hidden = sources.length === 0;
-      if (sources.length > 0) layOutSources(sources);
-      else sourcesBox.replaceChildren();
+      if (sources.length > 0) {
+        layOutSources(sources);
+      } else {
+        sourcesBox.replaceChildren();
+        moreButton = null;
+        morePopover = null;
+      }
     }
     if (sources.length > 0) sourcesBox.style.opacity = current.root.style.opacity;
   }
-  // The line split measures the labels: measure again once the web fonts have loaded.
+  // The fitting measures the header and the links: measure again once the web fonts have loaded.
   document.fonts.ready.then(() => {
     sourcesScene = null;
     updateSources();
+  });
+  // A click or tap outside the box closes the popover; the button's own click toggles it.
+  document.addEventListener('pointerdown', event => {
+    if (isPopoverOpen() && !sourcesBox.contains(event.target)) setPopoverOpen(false);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !isPopoverOpen()) return;
+    // Focus inside the popover would be lost with it: give it back to the button that opened it.
+    const focusInside = morePopover.contains(document.activeElement);
+    setPopoverOpen(false);
+    if (focusInside) moreButton.focus();
   });
 
   // Backdrop: the stage's sky and glow move under the transparent stage, into a layer with the stage's

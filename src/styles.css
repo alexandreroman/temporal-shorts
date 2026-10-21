@@ -205,29 +205,38 @@ html,body{margin:0;background:var(--bg)}
 @keyframes hold-breathe{to{opacity:.55}}
 /* No breathing: a steady opacity close to its average. */
 @media (prefers-reduced-motion:reduce){#hold i{animation:none}.held #hold{opacity:.55}}
-/* Sources of a scene (its optional `sources`): "SOURCES" then the links, spaced apart, on one or two lines
-   (player.js splits them), right-aligned under the progress segments (#segs ends at y 67) and ending at y 138 at
-   most, above the content frame (y 150). A label that still does not fit its line ends with an ellipsis. In stage
-   pixels, inside the stage. */
-#sources{
-  position:absolute;right:80px;top:88px;max-width:1000px;display:flex;flex-direction:column;align-items:flex-end;gap:2px;
-}
+/* Sources of a scene (its optional `sources`): one line on the header band, "SOURCES" then the links, spaced apart.
+   player.js sets its top, height and right edge from the #hdr and #segs boxes, so the line is vertically centered on
+   the chapter header (bottom at y 83) and right-aligned 32 px left of the segments, and keeps only the links that
+   fit, the others behind a "+N" button whose popover lists every source under the header band. In stage pixels,
+   inside the stage. */
+#sources{position:absolute;display:flex;align-items:center}
 #sources[hidden]{display:none}
 #sources .line{
-  display:flex;align-items:center;justify-content:flex-end;gap:12px;max-width:100%;font-family:'Mono',monospace;
-  font-size:17px;line-height:24px;white-space:nowrap;
+  display:flex;align-items:center;gap:12px;width:max-content;font-family:'Mono',monospace;font-size:15px;
+  line-height:24px;white-space:nowrap;
 }
-#sources .kicker{flex:none;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate)}
-#sources a{
-  display:flex;align-items:center;gap:8px;min-width:0;color:var(--ink);text-decoration:none;border-radius:var(--rs);
-}
+#sources .kicker{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate)}
+#sources a{display:flex;align-items:center;gap:8px;color:var(--ink);text-decoration:none;border-radius:var(--rs)}
 /* Spacing alone separates the links: 28 px between two links, the line's 12 px after the kicker. */
-#sources a + a{margin-left:16px}
-/* The bottom padding leaves room for the hover underline, which the ellipsis' overflow clipping would cut. */
-#sources .label{min-width:0;overflow:hidden;text-overflow:ellipsis;padding-bottom:4px;margin-bottom:-4px}
+#sources .line a + a,#sources .line a + .more{margin-left:16px}
 #sources a:hover .label{text-decoration:underline 2px var(--uv);text-underline-offset:5px}
-#sources a:focus-visible{outline:2px solid var(--uv);outline-offset:3px}
+#sources a:focus-visible,#sources .more:focus-visible{outline:2px solid var(--uv);outline-offset:3px}
 #sources svg{
   flex:none;width:15px;height:15px;fill:none;stroke:var(--slate);stroke-width:2;stroke-linecap:round;
   stroke-linejoin:round;
 }
+#sources .more{
+  padding:0;border:0;background:none;font:inherit;letter-spacing:.06em;color:var(--ink);border-radius:var(--rs);
+  cursor:pointer;
+}
+#sources .more:hover,#sources .more[aria-expanded=true]{
+  text-decoration:underline 2px var(--uv);text-underline-offset:5px;
+}
+/* Every source, one per line, 16 px under the box: it may cover the top of the content while open. */
+#sources .popover{
+  position:absolute;top:calc(100% + 16px);right:0;display:flex;flex-direction:column;gap:12px;padding:16px 20px;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r);font-family:'Mono',monospace;
+  font-size:15px;line-height:24px;white-space:nowrap;
+}
+#sources .popover[hidden]{display:none}
