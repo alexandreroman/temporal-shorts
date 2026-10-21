@@ -69,8 +69,8 @@ you can build" chapter.
 - **0:01** Meet Temporal Proxy 1.0: released on October 16, 2026, and
   ready for production.
   - Visuals: Temporal logo, kicker "PRODUCT NEWS, OCTOBER 2026", title
-    "Temporal" / "Proxy 1.0", tagline "SECURITY MOVES OUT OF YOUR
-    WORKERS"; on the right, on a soft violet glow, the TEMPORAL PROXY box,
+    "Temporal" / "Proxy 1.0", tagline "SECURE EVERY WORKFLOW FROM ONE
+    PLACE"; on the right, on a soft violet glow, the TEMPORAL PROXY box,
     three small Workers on its left (Go, Java, TypeScript logos) whose
     lines converge into it, and one violet connection leaving it, light
     flowing along them. As the subtitle reads "1.0", a neon 1.0 badge
@@ -197,5 +197,5 @@ you can build" chapter.
   control.
   - Visuals: Opens on the proxy box with its 1.0 badge, small at the top;
     the end card fades in under it: title "Temporal Proxy 1.0", tagline
-    "SECURITY OUT OF YOUR WORKER CODE", Temporal logo; a neon ring leaves
-    the badge and the box's glow swells once.
+    "SECURE EVERY WORKFLOW FROM ONE PLACE", Temporal logo; a neon ring
+    leaves the badge and the box's glow swells once.

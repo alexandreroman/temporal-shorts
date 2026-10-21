@@ -22,7 +22,7 @@
       s.box = makeProxy(root);
       s.badge = makeVersionBadge(root);
       s.rings = makeRipples(root, 2, RGB.neon);
-      s.card = makeEndCard(stage, 'Temporal Proxy 1.0', 'SECURITY OUT OF YOUR WORKER CODE');
+      s.card = makeEndCard(stage, 'Temporal Proxy 1.0', 'SECURE EVERY WORKFLOW FROM ONE PLACE');
     },
     update(t, c, s) {
       const cam = shot(t, OUTRO_SHOT, []);
