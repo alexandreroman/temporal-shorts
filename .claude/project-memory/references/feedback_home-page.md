@@ -20,7 +20,8 @@ The theme picker (`src/index.html`, `src/home.css`) follows these rules:
 - Card order: Meet Temporal (the entry point for newcomers, with a
   handshake icon), Introduction to Durable Execution, Human-in-the-Loop,
   Durable AI Agents, Temporal Agent Harness, Tuning Temporal Workers,
-  Security (a shield whose lock snaps shut on hover).
+  Security (a shield whose lock snaps shut on hover), Temporal Proxy 1.0
+  (a gateway box whose converging lines draw in on hover).
 - The home page `<meta name="description">` names the themes and is
   edited by hand.
 - Cards show no video duration.

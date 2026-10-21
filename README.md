@@ -40,6 +40,12 @@ Each video is a theme:
   encryption out of the Workers, calls across Namespaces with Temporal
   Nexus, and Temporal Cloud's compliance: certifications, yearly
   third-party audits, the Trust Center.
+- **Temporal Proxy 1.0** (`temporal-proxy`): for security teams and
+  developers, a news short on the 1.0 release of
+  [Temporal Proxy][temporal-proxy-repo], ready for production and
+  supported: one gateway that keeps the address, credentials and payload
+  encryption out of every Worker, with data keys wrapped by your KMS, run
+  as a shared service by a central platform team.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal returns the saved results from the Event
@@ -47,6 +53,7 @@ History](preview.png)
 
 [agent-harness]: https://github.com/temporal-community/temporal-agent-harness
 [temporal-proxy]: https://docs.temporal.io/production-deployment/temporal-proxy
+[temporal-proxy-repo]: https://github.com/temporalio/temporal-proxy
 
 ## Getting started
 

@@ -43,7 +43,10 @@ the visuals belong to each theme (last section).
   a theme visual on the right, one subtitle. The kicker names the audience
   or format ("AN EXPLAINER FOR EVERYONE", "AN EXPERIMENTAL PROJECT"); the
   title is a question for explainers ("How does an AI agent work?") or
-  the product name; the uppercase tagline ties the topic to Temporal. This
+  the product name; the uppercase tagline ties the topic to Temporal. A
+  product title splits after "Temporal" ("Temporal<br>Agent Harness",
+  "Temporal<br>Proxy 1.0"): a version number stays with the product name,
+  never alone on a line, which reads unbalanced. This
   title card is the theme's `social.png` (README.md, Social link
   previews).
 - Chapters: `chapter` and `title` drive the `NN / TITLE` header and the
@@ -484,6 +487,76 @@ below and the card order in [Home page design](feedback_home-page.md).
   same slots. The recap tiles carry padlock badges above them, so the
   camera lowers both chapters by `RECAP_DY` to center the composition with
   its badges: 12's use-case row sits 14 px below `USE_CASE_ROW`.
+
+### temporal-proxy
+
+- A news short on Temporal Proxy 1.0 (v1.0.0, published on GitHub on
+  2026-10-16) for security teams, platform teams and developers who run
+  Workers: technical, no code or configuration on screen apart from the
+  Worker lines `proxy:7233` / `payments`. Kicker "PRODUCT NEWS, OCTOBER
+  2026", title "Temporal" / "Proxy 1.0"; intro and outro share the
+  tagline "SECURE EVERY WORKFLOW FROM ONE PLACE" (user decision);
+  markdown-title "Temporal Proxy 1.0".
+- The video says "ready for production" and "supported", never "Public
+  Preview", "GA" or "generally available" (user decision). Every claim
+  follows the release, the temporal-proxy README and
+  docs.temporal.io/production-deployment/temporal-proxy (`### Sources`).
+- Five chapters: security in every team (ch1: the six Workers belong to
+  three teams, PAYMENTS, ORDERS and FRAUD, a column of two each, and
+  their chips diverge, a codec version per Worker, expiring certificates,
+  API keys in env vars, until no two match; no payload goes out in clear;
+  the dramatic beat is a solid red NO CENTRAL CONTROL verdict under the
+  Workers, on the spot of ch2's NO SECRETS), one gateway, no secrets
+  (ch2), encryption with your keys (ch3, one subtitle, "your payloads",
+  not "every payload": the proxy seals codec-capable payloads and Search
+  Attributes stay in clear; the dramatic beat is the data key sealing the
+  card in the proxy, then wrapped at YOUR KMS, at the top of the shot and
+  linked into the proxy's side under its name, and the sealed card stored
+  as ciphertext and WRAPPED 1; fail-closed encryption stays out of the
+  video), security as a shared service (ch4: the proxy in a
+  PLATFORM TEAM zone inside YOUR ENVIRONMENT, the Workers in three team
+  zones typing their team's Namespace, one Namespace band per team in
+  TEMPORAL, a POLICY panel whose four rules are per-Namespace encryption,
+  client authentication, encryption required and metrics; the dramatic
+  beat is the policy sweeping out along every team's connection, each team
+  COVERED), why 1.0 matters (ch5, one subtitle: a version track of the ten
+  0.x minor releases, 0.1 (July 22, 2026) to 0.10 (October 16, 2026),
+  labelled at the first and last dots, whose 1.0 slot lights up, READY FOR
+  PRODUCTION and SUPPORTED, then the badge rises onto the proxy box). The install formats stay out of the
+  video. A news short ends on its last topic chapter: no "What you get"
+  recap, no "What you can build" chapter.
+- Running example: the security theme's transfer card (`TRANSFER`, Nora
+  sends €25,000 to Leo). The security components it shares with security
+  (payload card, zones, TLS tube, verdict tags, Worker tiles, proxy box,
+  YOUR KMS, the data key tag and its trip to the KMS, stored payload rows,
+  `shot()`) live in `src/shared.js`; its own layout (`FLEET`, `PROXY` at
+  x 1259, `WIDE_SHOT`, `PROXY_SHOT`, `SERVICE`, `SERVICE_SHOT`) is in its
+  `shared.js`. In the close shot the dimmed Worker tiles clip to the
+  content frame and their headings fade (`frameWorker()`), as the zones do
+  (`frameLaneEdges()`). The shared service shrinks the Worker tiles
+  through a camera layer of their own (`workerCam`, sizeless), so the
+  layout check measures them at their smaller resting size.
+- Spacing follows the agent-harness grid, measured on screen: about 40 px
+  between tiles in a zone, 120 px between zones (152 px in ch4, where the
+  TLS label sits between YOUR ENVIRONMENT and TEMPORAL, 20 px clear of
+  each), 36-40 px from a zone's border and heading to its content; YOUR
+  KMS sits 114 px clear of the proxy box. In ch4 the Worker tiles turn
+  compact on their way into the team zones (`SERVICE_TILE`, 200 x 100 at
+  0.9: WORKER and the Namespace line, the language tag and `proxy:7233`
+  fading), so their text stays about 18 px on screen. Ch3's NO CODE
+  CHANGE sits under the proxy, where ch2's CREDENTIALS IN ONE PLACE sits.
+  Ch5's tags sit about 48 px under the track's labels, a block of their
+  own under the track, 14 px apart.
+- Cinematic like security, one continuous film: every boundary is a match
+  cut on a canonical state built by one function both sides call: intro to
+  ch1 and ch1 to ch2 on `placeBareFleet()` in `WIDE_SHOT`; ch2 to ch3 and
+  ch3 to ch4 on `placeProxyStage()` in `PROXY_SHOT`; ch4 to ch5 on
+  `placeServiceStage()` at `SERVICE_REST` in `SERVICE_SHOT`; ch5 to the
+  outro on the proxy box alone with its neon 1.0 badge in `OUTRO_SHOT`.
+  The camera pushes right and in during ch2, holds in ch3, then pulls back
+  left and out in ch4 and again in ch5. The intro's visual lives in a
+  camera held at `WIDE_SHOT`; the 1.0 badge (`makeVersionBadge`) ties the
+  intro, ch5 and the outro.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title
