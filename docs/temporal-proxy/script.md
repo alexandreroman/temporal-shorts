@@ -20,9 +20,9 @@ The video states the problem in one chapter (every Worker carries an
 address, credentials and encryption code, and with many teams, each
 wires its own, with no central control), then shows the proxy: one
 gateway that adds TLS, the credentials and the full Namespace name on
-the way out, encrypts every payload with data keys wrapped by your KMS,
-with no Worker code change, and fails closed when encryption is required
-and no key is configured. Then it shows governance at company scale: a
+the way out, and encrypts your payloads with data keys wrapped by your
+KMS, with no Worker code change. Then it shows governance at company
+scale: a
 central platform team runs the proxy as a shared service for every team,
 with one policy for all. It closes on what 1.0 means: ready for
 production, and supported.
@@ -33,8 +33,8 @@ Leo. One payload card carries it, the same card as in the security theme:
 00`, `name: Leo Martin`, `amount: €25,000`.
 
 Topics, in order: security in every team without the proxy (ch1); one
-gateway, no secrets in the Workers (ch2); encryption with your keys,
-failing closed (ch3); the proxy as a shared service run by a platform
+gateway, no secrets in the Workers (ch2); encryption with your keys
+(ch3); the proxy as a shared service run by a platform
 team, one policy for all (ch4); what 1.0 means (ch5).
 
 Wording: the video says "ready for production" and "supported", never
@@ -134,37 +134,28 @@ you can build" chapter.
 
 ## 03 Encryption with your keys
 
-- **0:37** It encrypts every payload with data keys wrapped by your KMS,
+- **0:37** It encrypts your payloads with data keys wrapped by your KMS,
   with no Worker code change.
   - Visuals: Opens on chapter 02's last frame, and the camera holds the
     close shot on the proxy. YOUR KMS (KMS KEY; AWS KMS, Azure Key Vault,
-    GCP KMS, your key server) pops in on the proxy's left, over the dimmed
-    Workers, and its link draws into the proxy. A payload card rides in
-    from the bottom-right Worker, in clear; a dashed DATA KEY 1 tag pops
-    in the proxy, its key flies onto the card's lock, the lock snaps shut
-    and the fields scramble into ciphertext, with violet rings; NO CODE
-    CHANGE under the Workers' connections. The DATA KEY travels along the
-    link to the KMS, whose key swells and glows, and comes back as WRAPPED
+    GCP KMS, your key server) pops in on the proxy's left, at the top of
+    the shot over the dimmed Workers, and its link draws from the KMS's
+    bottom edge down and into the proxy's side, under its name. A payload
+    card rides in from the bottom-right Worker, in clear, dropping under
+    the KMS and its link; a dashed DATA KEY 1 tag pops in the proxy, its
+    key flies onto the card's lock, the lock snaps shut and the fields
+    scramble into ciphertext, with violet rings; NO CODE CHANGE beside the
+    Worker's lines. The DATA KEY travels along the link to the KMS's
+    bottom edge, whose key swells and glows, and comes back as WRAPPED
     KEY 1, behind a lock, to dock on the card. The card goes out through
     the TLS tube and lands in TEMPORAL as a row of STORED PAYLOADS:
-    ciphertext and WRAPPED 1, never a key Temporal could use.
-- **0:44** With encryption required, the proxy refuses to start without a
-  key: it fails closed.
-  - Visuals: ENCRYPTION REQUIRED pops in the proxy. The KMS link turns red
-    with a red cross on it and the KMS dims, out of reach. The proxy goes
-    down to restart: its name dims, its border turns slate, the TLS tube,
-    its connection to TEMPORAL and the light on every connection go dark.
-    Dramatic beat: a solid red REFUSED TO START slams onto the proxy, its
-    border red, with red rings, a red flash and a shake; nothing leaves.
-    The link draws again from the KMS, and the proxy starts: neon rings, a
-    swell of its glow, the tube and the light back on, a neon STARTED.
-    Before the cut the KMS, its link, the proxy's tags and the stored
-    payloads fade out, leaving the close shot on the proxy that chapter 04
-    opens on.
+    ciphertext and WRAPPED 1, never a key Temporal could use. Before the
+    cut the KMS, its link, NO CODE CHANGE and the stored payloads fade
+    out, leaving the close shot on the proxy that chapter 04 opens on.
 
 ## 04 Security as a shared service
 
-- **0:51** A central platform team can run the proxy as a shared service
+- **0:45** A central platform team can run the proxy as a shared service
   for every team.
   - Visuals: Opens on chapter 03's last frame; the camera pulls back, left
     and out, to the whole environment as the fleet regroups: YOUR
@@ -175,7 +166,7 @@ you can build" chapter.
     Namespace over `payments`. Each team's connection draws into the
     proxy, light flowing along it, and TEMPORAL shows one Namespace band
     per team: payments.a1b2c, orders.a1b2c, fraud.a1b2c.
-- **0:57** One policy for all: per-Namespace encryption, client
+- **0:50** One policy for all: per-Namespace encryption, client
   authentication, encryption required, metrics.
   - Visuals: A POLICY panel docks under the proxy, in the PLATFORM TEAM
     zone; its four rules, PER-NAMESPACE ENCRYPTION, CLIENT
@@ -187,7 +178,7 @@ you can build" chapter.
 
 ## 05 Why 1.0 matters
 
-- **1:06** Version 1.0 is ready for production, and Temporal's support
+- **0:59** Version 1.0 is ready for production, and Temporal's support
   policy covers it.
   - Visuals: Opens on chapter 04's last frame; the camera pulls back on,
     left and out, as everything but the proxy box fades, until the box
@@ -201,7 +192,7 @@ you can build" chapter.
 
 ## Outro
 
-- **1:13** Credentials and encryption leave your Workers for one place you
+- **1:06** Credentials and encryption leave your Workers for one place you
   control.
   - Visuals: Opens on the proxy box with its 1.0 badge, small at the top;
     the end card fades in under it: title "Temporal Proxy 1.0", tagline

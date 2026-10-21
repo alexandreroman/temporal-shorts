@@ -506,10 +506,13 @@ below and the card order in [Home page design](feedback_home-page.md).
   API keys in env vars, until no two match; no payload goes out in clear;
   the dramatic beat is a solid red NO CENTRAL CONTROL verdict under the
   Workers, on the spot of ch2's NO SECRETS), one gateway, no secrets
-  (ch2), encryption with your keys and failing closed (ch3: the data key
-  wrapped at YOUR KMS, the sealed card stored as ciphertext and WRAPPED 1;
-  the dramatic beat is a solid red REFUSED TO START on the proxy once the
-  KMS link is cut), security as a shared service (ch4: the proxy in a
+  (ch2), encryption with your keys (ch3, one subtitle, "your payloads",
+  not "every payload": the proxy seals codec-capable payloads and Search
+  Attributes stay in clear; the dramatic beat is the data key sealing the
+  card in the proxy, then wrapped at YOUR KMS, at the top of the shot and
+  linked into the proxy's side under its name, and the sealed card stored
+  as ciphertext and WRAPPED 1; fail-closed encryption stays out of the
+  video), security as a shared service (ch4: the proxy in a
   PLATFORM TEAM zone inside YOUR ENVIRONMENT, the Workers in three team
   zones typing their team's Namespace, one Namespace band per team in
   TEMPORAL, a POLICY panel whose four rules are per-Namespace encryption,

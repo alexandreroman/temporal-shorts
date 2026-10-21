@@ -37,9 +37,8 @@ from a deterministic HTML animation. Each video is a theme:
   and developers: the 1.0 release, ready for production and supported;
   without it, every Worker carries an address, credentials and encryption
   code; with it, one gateway adds TLS, credentials and the full Namespace
-  name, encrypts payloads with data keys wrapped by your KMS, fails closed
-  without a key, and runs as a shared service of a central platform team,
-  one policy for every team
+  name, encrypts payloads with data keys wrapped by your KMS, and runs as
+  a shared service of a central platform team, one policy for every team
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page
