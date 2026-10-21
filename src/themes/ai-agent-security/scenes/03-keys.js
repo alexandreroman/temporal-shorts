@@ -1,4 +1,4 @@
-// ===================== 3. A DELETED DATABASE
+// ===================== 3. KEYS OUT OF REACH
 // The case file slams in (APRIL 2026, 9 SECONDS) and gets its INCIDENT stamp. It pins to the top left corner and the
 // incident replays in red: a coding agent sits under its task (fix a staging issue), an empty dashed slot marks where
 // nobody approves, and an unrelated key with full account access lies in the top row. A red key token flies from it
@@ -226,7 +226,7 @@
   };
 
   scene({
-    chapter: 3, title: 'A deleted database',
+    chapter: 3, title: 'Keys out of reach',
     sources: [
       { label: 'Hackread, April 2026', url: 'https://hackread.com/cursor-ai-agent-wipes-pocketos-database-backups/' },
       { label: 'AI Incident Database', url: 'https://incidentdatabase.ai/cite/1469/' },
@@ -234,12 +234,18 @@
     subs: [
       { text: "April 2026: a coding agent deleted a company's production database and its backups, in 9 seconds." },
       // the backups shatter, then a short hold on the loss
-      { text: "It found a key with too much power and used it. Nobody had to approve a step that could not be undone.",
-        after: 0.4 },
-      { text: "With Temporal, risky steps wait for a person: the Workflow holds the step until Maya says yes or no." },
+      {
+        text: "It found a forgotten key with full access in the project files, and called the cloud on its own.",
+        after: 0.4,
+      },
+      {
+        text: "With Temporal, the sandbox holds no key. Powerful steps run apart, on a Worker that keeps its own key.",
+      },
       // Maya's no, the history row and SAFE, then a hold
-      { text: "The wait can last days, survives crashes and costs nothing. No answer by the deadline means no.",
-        after: 1.4 },
+      {
+        text: "A step that cannot be undone waits for a person, for days if needed: Maya says no, and it is on record.",
+        after: 1.4,
+      },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);

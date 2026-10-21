@@ -2,12 +2,13 @@
 // Opens on the intro's last frame (a match cut, see INTRO_ORB): the orb already sits at its place on the board. Its
 // AI MODEL label fades in, the four tools pop in on the right, and the agent loops: it reads (a spark runs back from
 // a tool to the orb), decides (the orb thinks) and acts (a spark runs out to the next tool), the READS, DECIDES and
-// ACTS labels lighting in turn. The survey's 80% counts up under the loop, while each tool the agent reaches flickers
-// red. Then the dramatic beat: the loop clears and the WORKFLOW checkpoint drops in between the orb and the tools,
-// the lanes shoot out of it, YOUR WORKERS draws round the tools and the Event History strip rises into the stat's
-// place: the board every later chapter uses. Last, an action card grows out of the orb (SUGGESTS), waits at the
-// checkpoint, passes it in a neon flash (DECIDES), lands on its tool, and two rows are written into the Event History
-// (RECORDS). The camera holds; the default fade-out plays the camera zoom-through (setCamera) into chapter 2.
+// ACTS labels lighting in turn. Once c[1] starts, each tool the agent reaches flickers red (a placeholder for the
+// tools' reach over files, keys and the internet). Then the dramatic beat: the loop clears and the WORKFLOW
+// checkpoint drops in between the orb and the tools, the lanes shoot out of it, YOUR WORKERS draws round the tools
+// and the Event History strip rises under it: the board every later chapter uses. Last, an action card grows out of
+// the orb (SUGGESTS), waits at the checkpoint, passes it in a neon flash (DECIDES), lands on its tool, and two rows
+// are written into the Event History (RECORDS). The camera holds; the default fade-out plays the camera
+// zoom-through (setCamera) into chapter 2.
 // The block keeps every name declared in this file local to this scene.
 {
   // the beats of c[0], in seconds from c[0]: the AI MODEL label fades in as "AI model" is read (label); the tools pop
@@ -18,13 +19,11 @@
   // decides (the orb thinks, read to act) and acts (a spark from the orb to the next tool, act to hit); each line
   // fades out over fade seconds before it is drawn again for the next cycle
   const CYCLE = { d: 1.9, read: 0.6, act: 1.2, hit: 1.8, fade: 0.3 };
-  // the tool each read comes from: the first one reads an email, every next one the tool the agent just acted on;
-  // the tools the agent acts on, in turn
+  // the tool each read comes from: the first one reads the terminal, every next one the tool the agent just acted
+  // on; the tools the agent acts on, in turn
   const FIRST_READ = 0;
   const ACT_ON = [1, 2, 3, 0, 1, 2];
-  // the beats of c[1], from c[1]: the stat rises in (stat) and its number counts up to 80 (count, countD)
-  const T1 = { stat: 0.2, count: 0.5, countD: 1.3, value: 80 };
-  // the beats of c[2], from c[2]: the loop and the stat clear (out); the checkpoint drops in (drop, dropD, landing at
+  // the beats of c[2], from c[2]: the loop clears (out); the checkpoint drops in (drop, dropD, landing at
   // drop + dropD), the lanes shoot out of it (lanes), YOUR WORKERS draws round the tools (zone), the Event History
   // strip rises in (history); the checkpoint glows as "your code" is read (yourCode)
   const T2 = { out: 0, drop: 0.5, dropD: 0.45, lanes: 1.0, zone: 1.5, history: 2.1, yourCode: 3.2 };
@@ -58,16 +57,13 @@
       text: 'Records', x: BOARD.history.x - BOARD.history.w / 2 - 24 - ROLE_W / 2, y: BOARD.history.y,
     },
   };
-  // the survey stat, in the Event History strip's place: its box, the number's box (right-aligned in it, so the
-  // count-up keeps its right edge) and the caption's width
-  const STAT = { x: BOARD.history.x, y: BOARD.history.y, w: 800, h: 176, numW: 300, numFont: 150, captionW: 440 };
   // where the checkpoint drops in from: above the frame
   const DROP_FROM = -120;
   // the action card and the rows it leaves in the Event History
-  const ACTION = { tool: 'send_email', arg: 'to: the sales team', toolIndex: 0 };
+  const ACTION = { tool: 'open_page', arg: 'a supplier price list', toolIndex: 1 };
   const HISTORY_ROWS = [
-    'model suggests <b>send_email</b>',
-    '<b>send_email</b> to the sales team',
+    'model suggests <b>open_page</b>',
+    '<b>open_page</b> supplier price list',
   ];
   // a spark drops from the checkpoint's bottom to the strip's top as each row is written, over WRITE_D seconds
   const WRITE_D = 0.3;
@@ -94,24 +90,20 @@
 
   scene({
     chapter: 1, title: 'Agents that act',
-    sources: [
-      {
-        label: 'SailPoint survey, May 2025',
-        url: 'https://www.hpcwire.com/aiwire/2025/06/04/'
-          + 'sailpoint-research-reveals-ai-agents-as-enterprise-security-blind-spot/',
-      },
-    ],
     // a hard cut: the intro ends on this chapter's first frame; the default fade-out to the next scene
     fadeIn: 0,
     subs: [
       { text: "An <b>AI agent</b> is an AI model with tools: it reads, decides, then acts, one step after another." },
-      { text: "In a 2025 survey, 80% of companies said their agents had already done things nobody asked for." },
+      { text: "Its tools are often a terminal, a browser or code: almost anything is possible, the bad included." },
       {
         text: "With <b>Temporal</b>, the agent runs as a <b>Workflow</b>: your code, "
-          + "which checks and records every step.",
+          + "which runs and records every step.",
       },
       // the card's journey ends on the second row, then a hold before the zoom-through
-      { text: "The model suggests the next step. The Workflow decides if it runs, then writes it down.", after: 0.6 },
+      {
+        text: "The model thinks, the tools act, each where you choose. Temporal keeps the state and the record.",
+        after: 0.6,
+      },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
@@ -131,20 +123,6 @@
       s.readSpark = makeSpark(root, 16, RGB.violet);
       s.loopLabels = LOOP_LABELS.map(({ text }) => makeLabel(root, text));
       s.ripples = makeRipples(root, 2, RGB.violet);
-
-      // the survey stat: the count, its caption and its source
-      s.stat = E(root,
-        `<div class="num" style="width:${STAT.numW}px;text-align:right;font-size:${STAT.numFont}px;`
-        + `line-height:${STAT.numFont}px;letter-spacing:-4px;color:${C.red}">0%</div>`
-        + `<div style="width:${STAT.captionW}px;margin-left:40px">`
-        + '<div style="font-size:32px;line-height:40px">of companies saw agents do things nobody asked for</div>'
-        + `<div class="mono" style="font-size:16px;line-height:20px;letter-spacing:.14em;color:${C.slate};`
-        + 'margin-top:14px">SAILPOINT SURVEY, 2025</div></div>',
-        '', {
-          width: STAT.w + 'px', height: STAT.h + 'px', display: 'flex', alignItems: 'center',
-          justifyContent: 'center',
-        });
-      s.statNum = s.stat.querySelector('.num');
 
       s.card = makeActionCard(root, ACTION);
       s.roles = Object.fromEntries(Object.entries(ROLES).map(([name, { text }]) => [name, makeLabel(root, text)]));
@@ -176,7 +154,7 @@
       const acting = k >= 0 && k < cycleCount && phase >= CYCLE.act;
       const readFrom = i => i === 0 ? FIRST_READ : ACT_ON[i - 1];
       const loopO = P(t, c[0] + T0.loop, 0.5) * (1 - P(t, outAt, 0.4));
-      // a red act: one that lands after c[1] starts, when the agent does things nobody asked for
+      // a red act: one that lands after c[1] starts, when the subtitle turns to what the tools can reach
       const actLandsAt = i => cyclesAt + i * CYCLE.d + CYCLE.hit;
       const isRed = i => actLandsAt(i) >= c[1];
 
@@ -249,13 +227,6 @@
         tile.icon.setAttribute('stroke', red > 0.5 ? C.red : C.ink);
         tile.style.boxShadow = rgb ? glowShadow(rgb, glow, { blur: 26, alpha: 0.6 }) : '';
       });
-
-      // ---- c[1]: the survey stat rises into the strip's place, counts up, and clears for the strip
-      const statO = P(t, c[1] + T1.stat, 0.5) * (1 - P(t, outAt, 0.5));
-      rise(s.stat, STAT.x, STAT.y, statO);
-      if (t >= outAt) s.stat.style.transform += ` translateY(${Math.round(P(t, outAt, 0.5) * 30)}px)`;
-      const count = Math.round(T1.value * P(t, c[1] + T1.count, T1.countD, easeOut));
-      setText(s.statNum, count + '%');
 
       // ---- c[2]: the dramatic beat. The checkpoint drops in from above the frame and lands between the orb and the
       // tools; the lanes shoot out of it, YOUR WORKERS draws round the tools, the Event History strip rises in.

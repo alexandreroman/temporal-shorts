@@ -1,4 +1,4 @@
-// ===================== 7. WHAT WENT WRONG?
+// ===================== 5. WHAT WENT WRONG?
 // No case file: a survey, not an incident. A large red 95% counts up beside a crowd of 100 figures, each standing for
 // 6 of the 600 security chiefs, which turn red as it climbs. Three questions follow, READ? DECIDED? DID?, then fly
 // into the header of the Event History card, which grows to fill the frame: a Web UI-like list (number, time, type,
@@ -320,12 +320,13 @@
   };
 
   scene({
-    chapter: 7, title: 'What went wrong?',
+    chapter: 5, title: 'What went wrong?',
     sources: [
       {
         label: 'Help Net Security, October 2026',
         url: 'https://www.helpnetsecurity.com/2026/10/14/ciso-ai-agent-insider-risk/',
       },
+      { label: 'Temporal docs', url: 'https://docs.temporal.io/search-attribute' },
     ],
     subs: [
       {
@@ -333,15 +334,15 @@
           + "that year.",
       },
       {
-        text: "Then comes the question: what did the agent read, decide and do? Temporal has it written down.",
+        text: "Then come the questions: what did the agent read, decide and do? Its own account may be wrong.",
       },
       {
-        text: "The <b>Event History</b> records each model call, each tool call, each approval, in order, "
-          + "outside the agent.",
+        text: "The <b>Event History</b> records each model call, tool call and approval, in order, "
+          + "out of the agent's reach.",
       },
       // a hold on THE CAUSE before the zoom-through into the recap
       {
-        text: "Follow it back to the cause: the document that started it, the blocked step, Maya's no, the cancel.",
+        text: "Follow it back to the cause, then find every other run that read the same document.",
         after: 1.0,
       },
     ],

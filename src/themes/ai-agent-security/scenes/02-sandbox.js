@@ -1,11 +1,12 @@
-// ===================== 5. LOCKED IN A SANDBOX
+// ===================== 2. LOCKED IN A SANDBOX
 // The case file (February 2026, malicious add-ons) slams in, then pins to the corner as an add-on store and a user's
 // computer rise in: folders, files, saved passwords and the network round the AI assistant. An add-on,
 // wallet-helper, leaves the store for the assistant; its fake setup step, "install prerequisites", runs and turns out
 // to install a password thief: the add-on turns red, and a few more add-ons of the store with it (341 malicious). Its
 // red tendrils reach every item as the subtitle names them (FULL ACCESS), then three of them fly off to the attacker's
-// server, which rose in on the right as the thief showed. With Temporal, the board comes in: the model's `run_addon` card passes the WORKFLOW checkpoint, which routes
-// it down a fork, away from YOUR WORKERS, into a glass SANDBOX box: a sealed Worker, with no keys and no internet.
+// server, which rose in on the right as the thief showed. With Temporal, the board comes in: the model's `run_addon`
+// card passes the WORKFLOW checkpoint, which routes it down a fork, away from YOUR WORKERS, into a glass SANDBOX
+// box: a sealed Worker, with no keys and no internet.
 // The dramatic beat: the add-on's code turns red and lashes out at the walls of the box, four hits with sparks, each
 // one shaking the box alone; the glass cracks, the box drops out of the frame, a fresh one pops in, and the Workflow
 // carries on: CONTAINED, the `run_addon · SANDBOX` row of the Event History gets its tag and the model's next step
@@ -380,11 +381,19 @@
   };
 
   scene({
-    chapter: 5, title: 'Locked in a sandbox',
+    chapter: 2, title: 'Locked in a sandbox',
     sources: [
       {
         label: 'The Hacker News, February 2026',
         url: 'https://thehackernews.com/2026/02/researchers-find-341-malicious-clawhub.html',
+      },
+      {
+        label: 'Temporal blog, April 2026',
+        url: 'https://temporal.io/blog/introducing-temporal-and-agentic-sandboxes-openai-agents-sdk',
+      },
+      {
+        label: 'Temporal blog, September 2026',
+        url: 'https://temporal.io/blog/amazon-bedrock-agentcore-with-temporal-serverless-workers',
       },
     ],
     subs: [
@@ -395,18 +404,20 @@
         after: 0.8,
       },
       {
-        text: 'Those add-ons ran with full access: every file, every saved password, the whole network.',
+        text: "They ran on the user's computer, with full access: every file, every saved password, "
+          + "the whole network.",
         // the last leak lands at c[1] + 6.15: the attacker's server then holds about 1.2 s
         after: 1.0,
       },
       {
-        text: 'With Temporal, risky work like add-ons or AI-written code goes to a <b>sandbox</b>: '
-          + 'a sealed Worker, no keys.',
+        text: "With Temporal, the agent's tools run in a <b>sandbox</b>, such as Amazon Bedrock AgentCore, "
+          + "Modal, E2B or Daytona.",
         // the badges pop in at c[2] + 6.45: the sealed box then holds about 1.1 s
         after: 0.6,
       },
       {
-        text: "If the code misbehaves, the damage stays in the box. The box is thrown away; the Workflow carries on.",
+        text: "No keys, no internet, thrown away at every step: the agent's progress lives in Temporal, "
+          + "not in the box.",
         // the model's next step is recorded at c[3] + 6.1: the board then holds about 2 s before the fade
         after: 1.0,
       },

@@ -1,4 +1,4 @@
-// ===================== 2. A HIDDEN ORDER
+// ===================== 4. A HIDDEN ORDER
 // The case file (AUGUST 2026, HIDDEN TEXT) slams in, gets its INCIDENT stamp and pins top left as evidence. The replay
 // of the researchers' demonstration: a SHARED FILES list whose new document is marked SHARED, the AI model beside it,
 // an outside web address on the right. A scanner sweeps the document and reveals a hidden line, an order; it reaches
@@ -8,7 +8,7 @@
 // bolts onto the checkpoint: APPROVED ADDRESSES, *.yourcompany.com. The model proposes `open_url` to the outside web
 // address; the checkpoint compares it with the rule and blocks it, the card bounces back to the model, and the Event
 // History records `open_url` as BLOCKED. The camera zoom-through (setCamera) brings the scene in and plays into
-// chapter 3.
+// chapter 5.
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- the replay stage, at camera rest
@@ -172,18 +172,19 @@
   };
 
   scene({
-    chapter: 2, title: 'A hidden order',
+    chapter: 4, title: 'A hidden order',
     sources: [
       {
         label: 'PromptArmor, August 2026',
         url: 'https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data',
       },
+      { label: 'Meta, October 2025', url: 'https://ai.meta.com/blog/practical-ai-agent-security/' },
     ],
     subs: [
       { text: "August 2026: researchers showed that hidden text in a document could make a work assistant leak data." },
-      { text: "The document hid text that read like an order. An AI model cannot always tell data from orders." },
-      { text: "With Temporal, the rules live in code, not in the prompt: data only goes to approved addresses." },
-      { text: "The model can be fooled, not the code: the Workflow checks every step before it runs." },
+      { text: "No filter catches every trick: a fooled agent can hide data in a link, a ticket or a search." },
+      { text: "With Temporal, the Workflow notes that outside content came in, and the model cannot erase that note." },
+      { text: "From then on, any step that sends data out waits for a person, whatever route the agent picks." },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);

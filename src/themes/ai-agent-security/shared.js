@@ -1,20 +1,25 @@
 // ===================== AI Agent Security helpers (shared by the scenes of this theme)
 //
 // Conventions for every scene of this theme (read them before building a chapter):
-// - Story: each incident chapter (2 to 6) has three beats. 1. The case file (makeCaseFile) slams in and gets its red
+// - Story: each incident chapter (2 to 4) has three beats. 1. The case file (makeCaseFile) slams in and gets its red
 //   INCIDENT stamp. 2. The incident replays in red on a small stage, the chapter's one dramatic beat (glitch,
-//   shatter, leak, flood), the case file pinned in a corner as evidence (caseFile.pin). 3. The same move meets the
-//   Temporal control on the board (BOARD, makeBoard) and ends on an agentTag: neon for a safe outcome (SAFE,
-//   CONTAINED, RESTORED, NO KEYS HERE), red for a refused step (BLOCKED, REJECTED BY MAYA), violet while a person
-//   decides (NEEDS APPROVAL).
+//   shatter, leak, flood), the case file pinned in a corner as evidence (caseFile.pin). 3. The same move meets
+//   Temporal on the board (BOARD, makeBoard) and ends on an agentTag: neon for a safe outcome (SAFE, CONTAINED,
+//   NOTHING LOST, NO KEYS HERE), red for a refused step (REJECTED BY MAYA), violet while a person decides (NEEDS
+//   APPROVAL). Chapter 5 (a survey, no case file) follows the Event History back to the cause; chapter 6, the recap,
+//   closes the video before the outro.
+// - Temporal's role is architectural: the Temporal half never filters tool names (real agents hold a terminal, a
+//   browser and code, and go around any list). It shows where a step runs (a throwaway sandbox, a separate Worker),
+//   with what power (the keys a Worker holds, none in the sandbox), what the Workflow gates (a person's yes for a
+//   step that cannot be undone or that sends data out) and what it records (the Event History).
 // - Camera: build each scene in a camera layer (makeCamera) and frame it with setCamera(): its zoom-through brings
 //   every chapter in and plays into the next one. The one exception is chapter 1, which opens on the intro's last
 //   frame (a match cut, see INTRO_ORB). Within a scene the camera moves one way only (shot() in src/shared.js, see
 //   the project memory note on camera moves); shake() jolts it on a hit.
 // - Colors: the incident replay is red (C.red, RGB.red); Temporal is UV (the checkpoint); the model is the violet
 //   orb; neon is for status only (a step that passes, a safe outcome).
-// - Maya is the agent's owner: she says no in chapter 3, cancels in chapter 6 and shows in chapter 7's history. Name
-//   her; never use a pronoun for her.
+// - Maya is the agent's owner: Maya says no in chapters 3 and 4 and shows in chapter 5's history. Name her; never use
+//   a pronoun for her.
 // - Ambient loops (the orb's blink and glitch, the checkpoint's violet pulse) read G; story animations read t, keyed
 //   to the subtitle starts c[i].
 // - Deterministic: hash(n) for anything scattered, never Math.random.
@@ -28,20 +33,18 @@ Object.assign(ICONS, {
   // a database: a cylinder of two stacked disks
   database: '<ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/>'
     + '<path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
-  // a trash can: its lid, its handle and two slats
-  trash: '<path d="M4 6.5h16M9.5 6.5v-3h5v3M6 6.5l1 14h10l1-14M10 10.5v6M14 10.5v6"/>',
-  // undo: an arrow that turns back on itself
-  undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  // a terminal: a window with a prompt and a cursor line
+  terminal: '<rect x="2.5" y="4" width="19" height="16" rx="2"/><path d="M6.5 9.5l3 2.5-3 2.5M12 15h5"/>',
+  // an add-on: a puzzle piece, a knob on its top and on its right, a notch on its left
+  puzzle: '<path d="M5 7h3.5a2.5 2.5 0 1 1 5 0H17v3.5a2.5 2.5 0 1 1 0 5V19H5v-3.5a2.5 2.5 0 1 0 0-5z"/>',
+  // a flag on its pole: content marked for attention
+  flag: '<path d="M5.5 21V3.5M5.5 4h12l-3 4.25 3 4.25h-12"/>',
   // a folder, its tab on the left
   folder: '<path d="M3 5h6.5l2 2.5H21V19H3z"/>',
   // a sheet of paper, its corner folded
   file: '<path d="M6 3h8.5L19 7.5V21H6z"/><path d="M14 3v5h5"/>',
-  // an inbox tray
-  inbox: '<path d="M3 13.5L5.5 5h13l2.5 8.5V20H3z"/><path d="M3 13.5h5l1.5 2.5h5l1.5-2.5h5"/>',
   // a warning: an exclamation mark in a triangle
   alert: '<path d="M12 3.5L21.5 20h-19z"/><path d="M12 9.5v5M12 17.5h.01"/>',
-  // a stop sign: an octagon with an exclamation mark
-  stop: '<path d="M8.3 3h7.4L21 8.3v7.4L15.7 21H8.3L3 15.7V8.3z"/><path d="M12 7.5v5.5M12 16.5h.01"/>',
   // a sandbox: code brackets inside a dashed box
   sandbox: '<rect x="3" y="3" width="18" height="18" stroke-dasharray="3 2.2"/>'
     + '<path d="M9.5 9l-3 3 3 3M14.5 9l3 3-3 3"/>',
@@ -85,13 +88,13 @@ const BOARD = {
   history: { x: 960, y: 768, w: 800, h: 176 },
 };
 
-// The tools on the board, top to bottom in the YOUR WORKERS zone: each one's icon, label and the tool name its
-// action cards carry
+// The tools on the board, top to bottom in the YOUR WORKERS zone: the general tools real agents hold, each one's
+// icon and label
 const TOOLS = [
-  { icon: 'mail', label: 'Email', tool: 'send_email' },
-  { icon: 'database', label: 'Database', tool: 'delete_database' },
-  { icon: 'card', label: 'Payments', tool: 'pay_invoice' },
-  { icon: 'folder', label: 'Files', tool: 'read_file' },
+  { icon: 'terminal', label: 'Terminal' },
+  { icon: 'globe', label: 'Browser' },
+  { icon: 'code', label: 'Code' },
+  { icon: 'puzzle', label: 'Add-ons' },
 ];
 // A tool tile: its size, and the pitch between the centers of two tiles of the column, px. The column starts 78 px
 // under the zone's top edge, below the zone's heading.
@@ -349,7 +352,7 @@ function placeAgentTag(e, t, at, x, y, out = Infinity) {
   place(e, x, y, lerp(1.5, 1, land), P(t, at, 0.08, linear) * (1 - P(t, out, 0.3)));
 }
 
-// ---------- the case file: the incident dossier that opens chapters 2 to 6
+// ---------- the case file: the incident dossier that opens chapters 2 to 4
 // Its body's size and folder tab (px); at: its center at rest, mid-frame (body and tab together); pin: the "pinned
 // evidence" corner, top left of the content frame, while the replay plays: the label's center, and the scale the
 // full card shrinks to as it hands over to the label (the label's width over the card's, so both share a width);
