@@ -156,11 +156,9 @@
   const LANE_BEND = (HOLD.x + COLUMN_LEFT) / 2;
   const ZONE_LANE_D = `M ${GATE.x + GATE.w / 2} ${LANE_Y} H ${HOLD.x} `
     + `C ${LANE_BEND} ${LANE_Y} ${LANE_BEND} ${DB_SAFE.y} ${COLUMN_LEFT} ${DB_SAFE.y}`;
-  // the SAFE tag, in the database tile's top right corner; the CRASH tag in the middle of the Worker tile, which goes
-  // dark under it (NEEDS APPROVAL leaves no room beside the tile)
+  // the SAFE tag, in the database tile's top right corner
   const SAFE_X = DB_SAFE.x + DB_SAFE.w / 2 - 20 - agentTagWidth('SAFE') / 2;
   const SAFE_Y = DB_SAFE.y - DB_SAFE.h / 2 + 16 + AGENT_TAG.h / 2;
-  const CRASH_X = WORKER.x, CRASH_Y = WORKER.y;
   // the card's route: out of the stepped-aside model down onto the lane, then along it to the Endpoint's doorway
   // (where it stops), then on to the handler's spot; it crosses the checkpoint's middle at a fraction of its first
   // leg (CROSS_CP, along the route), from which update() finds when the checkpoint lets it pass
@@ -396,18 +394,23 @@
     return box;
   };
 
-  // The platform team's Worker: a tile with a key icon, CLOUD KEY over "on the team's Worker", and a padlock on its
-  // right (tile.lock, its <svg>, whose shackle snaps shut on cue)
+  // The platform team's Worker: a tile with a key icon (tile.icon, its <svg>), CLOUD KEY over "on the team's Worker"
+  // (tile.status, which reads WORKER_CRASHED while it is down), and a padlock on its right (tile.lock, its <svg>,
+  // whose shackle snaps shut on cue)
+  const WORKER_STATUS = "on the team's Worker";
+  const WORKER_CRASHED = 'crashed · restarting';
   const makeWorkerTile = root => {
     const tile = E(root,
       `${ICON('key', 28, C.ink, 1.8)}<div style="flex:1;text-align:left">`
       + '<div class="lbl" style="font-size:16px;line-height:20px;color:var(--ink)">Cloud key</div>'
-      + `<div class="mono" style="font-size:18px;line-height:22px;margin-top:4px;color:${C.slate}">`
-      + "on the team's Worker</div></div><div class=\"lockbox\">" + lockSvg(30, { stroke: 2, color: C.ink }) + '</div>',
+      + `<div class="mono status" style="font-size:18px;line-height:22px;margin-top:4px;color:${C.slate}">`
+      + WORKER_STATUS + '</div></div><div class="lockbox">' + lockSvg(30, { stroke: 2, color: C.ink }) + '</div>',
       'tile', {
         width: WORKER.w + 'px', height: WORKER.h + 'px', display: 'flex', alignItems: 'center', gap: '16px',
         padding: '0 20px',
       });
+    tile.icon = tile.querySelector('svg');
+    tile.status = tile.querySelector('.status');
     tile.lockBox = tile.querySelector('.lockbox');
     tile.lock = tile.lockBox.querySelector('svg');
     return tile;
@@ -603,7 +606,6 @@
       s.shutRipples = makeRipples(root, 2, RGB.red);
       s.safe = agentTag('SAFE', 'neon', root);
       s.safeRipples = makeRipples(root, 2, RGB.neon);
-      s.crashTag = agentTag('CRASH', 'red', root);
 
       // the case file, on top of everything
       s.file = makeCaseFile(root, {
@@ -776,7 +778,8 @@
 
       // ---------- the platform team's side: the database and its backups come back whole in its column, where the
       // database ends SAFE (neon); its Namespace closes round them, its Worker pops in and its key locks. The Worker
-      // crashes: it jitters and flickers red, goes dark under a CRASH tag, then comes back.
+      // crashes: it jitters and flickers red, then its border and key turn red and its line reads "crashed ·
+      // restarting" in red until it comes back, while the held step keeps waiting.
       const safe = t >= safeAt;
       [[s.dbSafe, DB_SAFE, T2.db, true], [s.backupsSafe, BACKUPS_SAFE, T2.backups, false]].forEach(
         ([tile, box, backAt, guarded]) => {
@@ -789,14 +792,17 @@
       const zoneIn = P(t, c[2] + T2.zone, T2.zoneD);
       place(s.zone, PLATFORM.x, PLATFORM.y, lerp(1.03, 1, zoneIn), zoneIn);
       const glitch = crashGlitch(t, crashAt);
-      const down = t >= crashAt ? 1 - P(t, crashAt + T3.crashD - 0.3, 0.4) : 0;
+      const down = t >= crashAt && t < crashAt + T3.crashD;
       const workerPop = backPop(t, c[2] + T2.worker);
-      place(s.worker, WORKER.x + glitch.dx, WORKER.y, workerPop.s, workerPop.o * lerp(1, 0.35, down));
-      s.worker.style.borderColor = glitch.red || down > 0.5 ? C.red : C.line;
+      place(s.worker, WORKER.x + glitch.dx, WORKER.y, workerPop.s, workerPop.o);
+      const workerRed = glitch.red || down;
+      s.worker.style.borderColor = workerRed ? C.red : C.line;
+      s.worker.icon.setAttribute('stroke', workerRed ? C.red : C.ink);
+      setText(s.worker.status, down ? WORKER_CRASHED : WORKER_STATUS);
+      s.worker.status.style.color = down ? C.red : C.slate;
       const lockAt = c[2] + T2.lock;
       liftShackle(s.worker.lock, LOCK_LIFT * (1 - P(t, lockAt, 0.2, easeIn)));
       s.worker.lockBox.style.transform = `scale(${swell(t, lockAt + 0.15, 0.25).toFixed(3)})`;
-      placeAgentTag(s.crashTag, t, crashAt, CRASH_X, CRASH_Y, crashAt + T3.crashD);
 
       // ---------- the agent: it pops in, turns red as it uses the key, calms down as the replay leaves while its
       // label turns from CODING AGENT to AI MODEL; it moves onto the lane as the sandbox drops away, then steps up
