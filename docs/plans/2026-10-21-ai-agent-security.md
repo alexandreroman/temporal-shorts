@@ -219,31 +219,45 @@ Subtitles, exact. `<b>` marks a key term at its first mention.
 
 ## Sources
 
-To copy into `docs/ai-agent-security/script.md`, `### Sources`.
+To copy into `docs/ai-agent-security/script.md`, `### Sources`. Every
+incident is from 2026 (the user asked for recent examples, 2026-10-21);
+the ch1 survey is from 2025.
 
-- EchoLeak, CVE-2025-32711, June 2025:
-  https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711,
-  https://thehackernews.com/2025/06/zero-click-ai-vulnerability-exposes.html
-- Database deleted during a code freeze, July 2025:
-  https://www.eweek.com/news/replit-ai-coding-assistant-failure/ (1,206
-  executive records)
-- Moltbook, about 1.5M agent API tokens exposed, early 2026 (Wiz):
-  https://www.techradar.com/pro/security/ai-agent-social-media-network-moltbook-is-a-security-disaster-millions-of-credentials-and-other-details-left-unsecured
-- SailPoint / Dimensional Research, May 2025, 80% unintended actions, 23%
-  tricked into revealing credentials:
-  https://www.hpcwire.com/aiwire/2025/06/04/sailpoint-research-reveals-ai-agents-as-enterprise-security-blind-spot/
-- Nx "s1ngularity", August 2025:
-  https://github.com/nrwl/nx/security/advisories/GHSA-cxm3-wv7p-598c
-- Inbox deleted, stop ignored, February 2026: OWASP GenAI Exploit Round-up
-  Q1 2026,
+- Ch2, hidden text in a shared document, researcher demonstration
+  (PromptArmor, reported May 23, published Aug 5, 2026):
+  https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data
+- Ch3, production database and backups deleted in 9 seconds by a coding
+  agent, April 24, 2026 (AI Incident Database #1469):
+  https://hackread.com/cursor-ai-agent-wipes-pocketos-database-backups/,
+  https://incidentdatabase.ai/cite/1469/
+- Ch4, about 1.5M agent API tokens exposed (Wiz, Feb 2, 2026):
+  https://www.wiz.io/blog/exposed-moltbook-database-reveals-millions-of-api-keys;
+  an AI agent reading every storage bucket of its project with its own
+  service account credentials (Unit 42, Mar 31, 2026):
+  https://unit42.paloaltonetworks.com/double-agents-vertex-ai/
+- Ch5, 341 malicious add-ons out of 2,857, 335 installing a password
+  stealer (Koi Security, February 2026):
+  https://thehackernews.com/2026/02/researchers-find-341-malicious-clawhub.html
+- Ch6, inbox deleted, STOP ignored from a phone, February 2026:
+  https://sfstandard.com/2026/02/25/openclaw-goes-rogue/, OWASP GenAI
+  Exploit Round-up Q1 2026,
   https://genai.owasp.org/2026/04/14/owasp-genai-exploit-round-up-report-q1-2026/
-- Trellix, October 14, 2026, 600 CISOs, 95%:
+- Ch7, Trellix, October 14, 2026, 600 CISOs, 95%:
   https://www.helpnetsecurity.com/2026/10/14/ciso-ai-agent-insider-risk/
+- Ch1, SailPoint / Dimensional Research, May 2025, 80% unintended
+  actions:
+  https://www.hpcwire.com/aiwire/2025/06/04/sailpoint-research-reveals-ai-agents-as-enterprise-security-blind-spot/
 - Context: OWASP Top 10 for Agentic Applications 2026; Meta "Agents Rule
-  of Two"; Temporal blog "Accelerating AI agent security" (2026-10-06)
-  and "From agent zoo to agent orchestra" (2026-04-23); docs on
-  message passing, Activity and Workflow cancellation, the saga pattern,
-  data encryption; OpenAI Agents SDK integration (GA 2026-03-23).
+  of Two"; NIST CAISI request for information on securing AI agent
+  systems (Jan 12, 2026); Temporal blog "Accelerating AI agent security"
+  (2026-10-06) and "From agent zoo to agent orchestra" (2026-04-23); docs
+  on message passing, cancellation, the saga pattern, data encryption;
+  OpenAI Agents SDK integration (GA 2026-03-23).
+
+Ruling: the 2025 incidents (EchoLeak, the code-freeze database, the 23%
+survey, Nx s1ngularity) are replaced by 2026 ones, because the user asked
+for recent examples; the final subtitles live in the scene files and in
+`docs/ai-agent-security/script.md`, not in the Script section above.
 
 ---
 
