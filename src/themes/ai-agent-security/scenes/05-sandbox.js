@@ -13,8 +13,8 @@
 // camera holds.
 // The block keeps every name declared in this file local to this scene.
 {
-  // ---------- the replay: an add-on store on the left, under the pinned case file (x 120-480, y 150-318), a user's
-  // computer in the middle and the attacker's server on the right; with them, the composition spans x 140-1800,
+  // ---------- the replay: an add-on store on the left, centered under the pinned case file (x 120-540, y 150-318), a
+  // user's computer in the middle and the attacker's server on the right; with them, the composition spans x 120-1800,
   // y 150-836
   // the laptop: its screen (bar: the height of its title bar) and its base, centered under it
   const SCREEN = { x: 940, y: 570, w: 720, h: 460, bar: 44 };
@@ -44,7 +44,7 @@
   // the add-on store on the left, centered under the pinned case file: its heading, then a grid of add-ons (cols x
   // rows tiles of size px, pitch px apart, the first row's top at top px inside the store) and, under it, the red
   // count of the malicious ones (its center readout px inside the store)
-  const STORE = { x: 300, y: 576, w: 320, h: 364, readout: 328 };
+  const STORE = { x: CASE_FILE.pin.x, y: 576, w: 320, h: 364, readout: 328 };
   const GRID = { cols: 4, rows: 3, size: 56, icon: 26, pitch: 70, top: 100 };
   // the grid slot of wallet-helper, the add-on that leaves for the computer, and of the other malicious add-ons the
   // researchers found (row-major indexes)
