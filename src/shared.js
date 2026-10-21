@@ -1443,8 +1443,8 @@ function setVerdict(e, label, kind) {
   }
 }
 // A verdict tag in the heading row of a tile or a Namespace (a statusTag, its icon as large as its text, font px):
-// h px high, its right edge `right` px and its top `top` px from the parent's padding box; it pops from its right
-// edge (popVerdict) and stays hidden until then
+// h px high, its right edge `right` px and its top `top` px from the parent's padding box; it scales from its right
+// edge as it pops in and stays hidden until then
 function makeHeadingVerdict(parent, { font, h, right, top }) {
   const e = statusTag(parent, { font, icon: font });
   Object.assign(e.style, {
@@ -1452,22 +1452,9 @@ function makeHeadingVerdict(parent, { font, h, right, top }) {
   });
   return e;
 }
-// Pops verdict tag e in at `at`, with its label and kind (see setVerdict)
-function popVerdict(e, t, label, kind, at) {
-  setVerdict(e, label, kind);
-  popScale(e, popIn(t, at));
-}
 // The opaque fill of each verdict kind, for a tag that straddles an edge or lies over a line, which must not show
 // through it
 const VERDICT_FILL = { alarm: C.red, wait: 'var(--violet-solid)' };
-// A tag of fixed width w in the alarm look (STATUS_KINDS.alarm), in bold: its HTML (an icon and a label, gap px
-// apart) centered in it, e.g. IN CLEAR on a payload card that leaves without encryption. It stays hidden until placed.
-function makeAlarmTag(root, html, w, { gap = 10 } = {}) {
-  const e = fixedTag(root, html, 'red', w, { gap });
-  const { icon, ...alarmLook } = STATUS_KINDS.alarm;
-  Object.assign(e.style, { ...alarmLook, fontWeight: '700' });
-  return e;
-}
 
 // ---------- Worker tiles (security, temporal-proxy)
 // The official logo of each Workers' language (their sources and licenses are in the README of their folder), its
@@ -1517,16 +1504,19 @@ function makeWorkerTile(root, worker) {
   tile.lines = [...tile.querySelectorAll('.code')];
   return tile;
 }
-// The empty slot of a missing chip in a Worker tile (a chip's size), outlined in red dashes, its label centered in red
-// (NO CODEC). It stays hidden until placed.
-function makeMissingChip(root, label) {
-  return E(root, label, 'mono', {
-    width: (WORKER_TILE.w - 2 * WORKER_TILE.inset) + 'px', height: WORKER_TILE.chipH + 'px',
-    lineHeight: (WORKER_TILE.chipH - 3) + 'px', textAlign: 'center', fontSize: '19px', letterSpacing: '.1em',
-    paddingLeft: '.1em', color: C.red, border: `1px dashed ${C.red}`, borderRadius: 'var(--rs)',
-    background: `rgba(${RGB.red},.1)`,
-  });
+// How far a Worker tile's chip falls when it drops off, px, and how far it may tilt, degrees
+const CHIP_FALL = { drop: 140, tilt: 40 };
+// When chip k of Worker w (its index in the fleet) starts to fall off, after the fall's start: a hashed delay of up to
+// spread seconds, so the chips fall one by one
+const chipFallDelay = (w, k, spread) => spread * hash(w * 4 + k + 60);
+// The transform of chip k of Worker w: it drops into its slot with a little bounce as drop (eased with backOut) goes
+// to 1, then falls off as fall goes from 0 to 1, tilting by a hashed angle
+function chipDropTransform(w, k, drop, fall) {
+  const tilt = (hash(w * 4 + k + 90) * 2 - 1) * CHIP_FALL.tilt * fall;
+  return `translateY(${((drop - 1) * 22 + CHIP_FALL.drop * fall * fall).toFixed(2)}px) rotate(${tilt.toFixed(2)}deg)`;
 }
+// How long the light takes to run along a Worker's own connection to Temporal, seconds
+const WORKER_FLOW_PERIOD = 2.4;
 
 // A row of TEMPORAL's list of connections, w x h px: the Worker's name and language on the left, a quiet VERIFIED on
 // the right (Temporal checked the credentials that Worker presented, it does not keep them). It stays hidden until
@@ -1571,6 +1561,9 @@ function setProxyGlow(box, glow) {
 // the full Namespace name that the proxy writes over the short one on the way out.
 const WORKER_LINES = ['proxy:7233', 'payments'];
 const FULL_NS = 'payments.a1b2c';
+// The first round(p * length) characters of text: it types in as p goes from 0 to 1 (a Worker's lines, the full
+// Namespace name)
+const typed = (text, p) => text.slice(0, Math.round(clamp(p) * text.length));
 // How long the light takes to run along a connection to or from the proxy, seconds
 const PROXY_FLOW_PERIOD = 2.0;
 // The Namespace tag's text: the full name's room always laid out (the tag's font is monospace), its first `shown`
@@ -1583,28 +1576,28 @@ function namespaceHtml(shown, caret) {
     + `<span style="opacity:0">${FULL_NS.slice(shown)}</span>${cursor}</span>`;
 }
 
-// The card that goes through the proxy, a payload card w px wide at scale k (security's lane-size card), with its
-// Namespace tag under it and the API KEY under that (tagH: their height; nsW and keyW: their widths; gap: the clear
-// space between the card and each tag, 14 px: 16.8 px on screen at 1.2, 33.6 px at 2.4); h: its height on the stage;
-// nsDy and keyDy: from its center to the Namespace tag's and to the API KEY's
+// The card that goes through the proxy, a payload card w px wide at scale k, with its Namespace tag under it and the
+// API KEY under that (tagH: their height; nsW and keyW: their widths; gap: the clear space between the card and each
+// tag); h: its height on the stage; nsDy and keyDy: from its center to the Namespace tag's and to the API KEY's
 const PROXY_CARD = { w: 340, k: 0.45, tagH: 28, nsW: 156, keyW: 124, gap: 14 };
 PROXY_CARD.h = payloadLayout(PROXY_CARD.w).h * PROXY_CARD.k;
 PROXY_CARD.nsDy = PROXY_CARD.h / 2 + PROXY_CARD.gap + PROXY_CARD.tagH / 2;
 PROXY_CARD.keyDy = PROXY_CARD.nsDy + PROXY_CARD.tagH + PROXY_CARD.gap;
-// A small tag beside the card (PROXY_CARD): a fixed width w, its HTML centered, in the violet look; 15 px (18 px on
-// screen at 1.2), so the full Namespace name leaves room on both sides in its band
+// A small tag beside the card (PROXY_CARD): a fixed width w, its HTML centered, in the violet look; 15 px, so the full
+// Namespace name leaves room on both sides in its band
 const proxyCardTag = (root, html, w) => E(root, html, 'mono', {
   width: w + 'px', height: PROXY_CARD.tagH + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center',
   gap: '6px', fontSize: '15px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1px solid ${C.violet}`,
   borderRadius: 'var(--rs)', background: 'var(--violet-solid)',
 });
-// The payments Namespace band inside TEMPORAL that the card goes into, of the size of band ({ w, h }, each theme's
-// PROXY_BAND), labelled with its full name (FULL_NS) at its top left, 18 px from its left edge and 14 px under its top
-// edge (offsets from its padding box, TILE_BORDER inside them)
-const makeProxyBand = (root, band) => E(root,
+// A Namespace band inside TEMPORAL, of the size of band ({ w, h }, e.g. each theme's PROXY_BAND): NAMESPACE, then its
+// full name (name, by default the payments Namespace that the card goes into, FULL_NS; font px, on a line 8 px higher)
+// at its top left, 18 px from its left edge and 14 px under its top edge (offsets from its padding box, TILE_BORDER
+// inside them)
+const makeProxyBand = (root, band, { name = FULL_NS, font = 18 } = {}) => E(root,
   `<div style="position:absolute;left:${18 - TILE_BORDER}px;top:${14 - TILE_BORDER}px">`
   + `<div class="mono" style="font-size:12px;line-height:18px;letter-spacing:.14em;color:${C.slate}">NAMESPACE</div>`
-  + `<div class="mono" style="font-size:18px;line-height:26px">${FULL_NS}</div></div>`,
+  + `<div class="mono" style="font-size:${font}px;line-height:${font + 8}px">${name}</div></div>`,
   '', {
     width: band.w + 'px', height: band.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)',
   });
@@ -1694,7 +1687,6 @@ function makeStoredRow(root, i, key, { w, h }) {
   row.key = row.querySelector('.key');
   return row;
 }
-
 
 // ===================== camera and motion helpers (camera moves, trails, sparks, ripples)
 // Deterministic pseudo-random number in [0, 1) for an integer n: the same n gives the same value on every page and

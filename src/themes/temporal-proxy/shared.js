@@ -272,12 +272,6 @@ function makeTeamZone(root, name, { w, h }) {
   zone.covered = makeHeadingVerdict(zone, { font: 14, h: line, right: 10, top: top - TILE_BORDER });
   return zone;
 }
-// A Namespace band in TEMPORAL, w x h px: NAMESPACE, then the team's full Namespace name, at its top left
-const makeNamespaceBand = (root, ns, { w, h }) => E(root,
-  `<div style="position:absolute;left:${18 - TILE_BORDER}px;top:${14 - TILE_BORDER}px">`
-  + `<div class="mono" style="font-size:12px;line-height:18px;letter-spacing:.14em;color:${C.slate}">NAMESPACE</div>`
-  + `<div class="mono" style="font-size:20px;line-height:28px">${ns}.a1b2c</div></div>`,
-  '', { width: w + 'px', height: h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)' });
 // The rules of the platform team's policy, as the POLICY panel lists them
 const POLICY_RULES = ['Per-Namespace encryption', 'Client authentication', 'Encryption required', 'Metrics'];
 // The POLICY panel (SERVICE.policy): a shield and POLICY, then one row per rule (panel.rules), each an empty box that a
@@ -331,7 +325,8 @@ function makeServiceStage(root) {
   Object.assign(workerCam.style, { width: '0px', height: '0px' });
   root.insertBefore(workerCam, fleet.tiles[0]);
   fleet.tiles.forEach(tile => workerCam.appendChild(tile));
-  const bands = SERVICE_TEAMS.map(team => makeNamespaceBand(root, team.ns, SERVICE.bands));
+  // one Namespace band per team, its full name larger than the payments band's
+  const bands = SERVICE_TEAMS.map(team => makeProxyBand(root, SERVICE.bands, { name: `${team.ns}.a1b2c`, font: 20 }));
   const policy = makePolicyPanel(root);
   const teamSparks = SERVICE_TEAMS.map(() => makeSpark(root, 10, RGB.violet));
   return { ...fleet, workerCam, teams, platform, teamLinks, bands, policy, teamSparks };

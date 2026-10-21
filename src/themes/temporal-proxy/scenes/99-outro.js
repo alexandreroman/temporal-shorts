@@ -1,5 +1,5 @@
 // ===================== OUTRO
-// Opens on the proxy box that chapter 4 ends on, alone, small at the top, wearing its 1.0 badge (OUTRO_SHOT); the end
+// Opens on the proxy box that chapter 5 ends on, alone, small at the top, wearing its 1.0 badge (OUTRO_SHOT); the end
 // card fades in under it as a neon ring leaves the badge and the box's glow swells once.
 // The block keeps every name declared in this file local to this scene.
 {
@@ -11,13 +11,13 @@
 
   scene({
     pre: 0.4, post: 2.6,
-    // a hard cut: chapter 4 ends on this scene's first frame
+    // a hard cut: chapter 5 ends on this scene's first frame
     fadeIn: 0,
     subs: [
       { text: "Credentials and encryption leave your Workers for one place you control." },
     ],
     build(stage, s) {
-      // the box and its badge in a camera layer framed as chapter 4 leaves them; the end card on the stage
+      // the box and its badge in a camera layer framed as chapter 5 leaves them; the end card on the stage
       const root = s.cam = makeCamera(stage);
       s.box = makeProxy(root);
       s.badge = makeVersionBadge(root);

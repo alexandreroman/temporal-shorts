@@ -136,6 +136,13 @@ function placeCorridor(corridor, { drawn = 1, o = 1 } = {}) {
   corridor.style.clipPath = `inset(-40px ${((1 - drawn) * 100).toFixed(3)}% -40px 0)`;
 }
 
+// ---------- verdict tags (chapters 2 and 9)
+// Pops verdict tag e in at `at`, with its label and kind (see setVerdict)
+function popVerdict(e, t, label, kind, at) {
+  setVerdict(e, label, kind);
+  popScale(e, popIn(t, at));
+}
+
 // ---------- the Namespaces (chapters 2 and 3)
 // The Namespaces inside TEMPORAL, top to bottom: each one's name, the middle y and height of its band. The Worker's
 // own, payments, surrounds the Event History, level with the wire and the tube.
@@ -402,6 +409,24 @@ function fleetLinkD({ x, row, trackY }, x1) {
   const edgeY = row ? FLEET.rows[1] - FLEET.tile.h / 2 : FLEET.rows[0] + FLEET.tile.h / 2;
   return roundedPath([[x, edgeY], [x, trackY], [x1, trackY]], 4);
 }
+// A tag of fixed width w in the alarm look (STATUS_KINDS.alarm), in bold: its HTML (an icon and a label, gap px
+// apart) centered in it, e.g. IN CLEAR on a payload card that leaves without encryption. It stays hidden until placed.
+function makeAlarmTag(root, html, w, { gap = 10 } = {}) {
+  const e = fixedTag(root, html, 'red', w, { gap });
+  const { icon, ...alarmLook } = STATUS_KINDS.alarm;
+  Object.assign(e.style, { ...alarmLook, fontWeight: '700' });
+  return e;
+}
+// The empty slot of a missing chip in a Worker tile (a chip's size), outlined in red dashes, its label centered in red
+// (NO CODEC). It stays hidden until placed.
+function makeMissingChip(root, label) {
+  return E(root, label, 'mono', {
+    width: (WORKER_TILE.w - 2 * WORKER_TILE.inset) + 'px', height: WORKER_TILE.chipH + 'px',
+    lineHeight: (WORKER_TILE.chipH - 3) + 'px', textAlign: 'center', fontSize: '19px', letterSpacing: '.1em',
+    paddingLeft: '.1em', color: C.red, border: `1px dashed ${C.red}`, borderRadius: 'var(--rs)',
+    background: `rgba(${RGB.red},.1)`,
+  });
+}
 
 // ---------- Temporal Proxy (chapters 6 to 8)
 // The TEMPORAL PROXY box (makeProxy): centered on the right edge of the widened environment (PROXY_ZONES.env), on the
@@ -448,7 +473,8 @@ function makeProxyTube(root, out) {
   return tube;
 }
 // The card that goes through the proxy in chapters 6 and 7, with its Namespace tag and API KEY, is PROXY_CARD
-// (src/shared.js), a card of the lane's width (PAYLOAD_IN_WORKER) at scale k.
+// (src/shared.js), a card of the lane's width (PAYLOAD_IN_WORKER) at scale k. Its 14 px gaps read 16.8 px on screen
+// at 1.2, 33.6 px at 2.4; its tags' 15 px text, 18 px at 1.2.
 // The payments Namespace inside TEMPORAL that the card goes into in chapter 6 (makeProxyBand): its center and size;
 // card: where the card rests in it, under its name, its padlock clear of the name; the API KEY ends about as far above
 // the band's bottom edge as the tags are apart

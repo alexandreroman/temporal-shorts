@@ -77,8 +77,9 @@ you can build" chapter.
     slams onto the box with neon rings and a swell of its glow. At the end
     the title fades, the lines pull back into the Workers, the box shrinks
     away, and the Workers fly out into the six slots of a fleet (copies
-    peel off them to a second row) as YOUR ENVIRONMENT and TEMPORAL fade in
-    round them: chapter 1 opens on that frame.
+    peel out from under the flying Workers down to a second row) as YOUR
+    ENVIRONMENT and TEMPORAL fade in round them: chapter 1 opens on that
+    frame.
 
 ## 01 Security in every team
 

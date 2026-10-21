@@ -49,9 +49,6 @@
   // CREDENTIALS IN ONE PLACE, under the proxy
   const CREDENTIALS = { x: PROXY.x, y: PROXY.y + PROXY.h / 2 + 38 };
 
-  // The first round(p * length) characters of text: it types in as p goes from 0 to 1
-  const typed = (text, p) => text.slice(0, Math.round(clamp(p) * text.length));
-
   scene({
     chapter: 6, title: 'Meet Temporal Proxy',
     // hard cuts: chapter 5 ends on this chapter's first frame, this chapter on the next one's (PROXY_SHOT)

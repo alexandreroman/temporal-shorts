@@ -58,9 +58,12 @@
       { text: "Meet <b>Temporal Proxy</b> 1.0: released on October 16, 2026, and ready for production.", after: 1.5 },
     ],
     build(stage, s) {
-      // the bare fleet first, in chapter 1's order, so the cut shows the same stack; the visual over it
+      // the bare fleet first, as chapter 1 builds it; the visual over it
       const root = s.cam = makeCamera(stage);
       s.fleet = makeFleet(root, TEMPORAL_LINK_END);
+      // the second row's tiles under the first's, so each copy peels out from under the tile it copies; at rest no
+      // two tiles overlap, so the cut shows the same frame
+      s.fleet.tiles.slice(3).forEach(tile => root.insertBefore(tile, s.fleet.tiles[0]));
       // a soft glow behind the box, sized to stay inside the content frame: the layout check counts it
       s.glow = E(root, '', '', {
         width: '600px', height: '600px', borderRadius: '50%', background: haloBackground(0.2, 0.08, 40, 68),
@@ -100,24 +103,27 @@
       });
 
       // the Workers: each small tile pops in, then flies to its slot as it grows into the fleet's tile, which takes
-      // over halfway; the copies peel off them down to the second row
+      // over halfway; the copies peel off the flying tiles down to the second row
       const fly = end('fly', END.flyD);
       const swap = clamp((fly - END.swap[0]) / (END.swap[1] - END.swap[0]));
       const miniK = MINI.w / WORKER_TILE.w;
       s.minis.forEach((mini, i) => {
         const slot = WORKERS[i];
         const pop = backPop(t, T.minis + i * T.miniStep);
-        const x = lerp(MINI.x, slot.x, fly), y = lerp(MINI.ys[i], slot.y, fly);
+        const x = lerp(MINI.x, slot.x, fly);
+        const y = lerp(MINI.ys[i], slot.y, fly);
+        const fleetK = lerp(miniK, 1, fly);
         // at the same size on screen as the fleet tile it turns into
         const k = lerp(1, 1 / miniK, fly);
         gearSpin(mini, 1);
         place(mini, x, y, pop.s * k, pop.o * (1 - swap));
-        place(s.fleet.tiles[i], x, y, lerp(miniK, 1, fly), swap);
-      });
-      s.fleet.tiles.slice(3).forEach((tile, i) => {
-        const from = WORKERS[i], slot = WORKERS[i + 3];
+        place(s.fleet.tiles[i], x, y, fleetK, swap);
+
+        // its copy leaves from where the tile is now, slightly smaller, and never shows more than the tile it copies
         const copy = P(t, endAt + END.copies + i * END.copyStep, END.copyD);
-        place(tile, lerp(from.x, slot.x, copy), lerp(from.y, slot.y, copy), lerp(0.92, 1, copy), clamp(copy * 6));
+        const copySlot = WORKERS[i + 3];
+        place(s.fleet.tiles[i + 3], lerp(x, copySlot.x, copy), lerp(y, copySlot.y, copy),
+          lerp(0.92 * fleetK, 1, copy), clamp(copy * 6) * swap);
       });
 
       // the lines converge into the box, then pull back into the Workers; the light flows along them
@@ -139,7 +145,8 @@
       const hitGlow = Math.max(0, 1 - Math.abs(t - hitAt) / 0.6);
       place(s.box, BOX.x, BOX.y, boxK, boxPop.o * (1 - gone));
       setProxyGlow(s.box, hitGlow);
-      place(s.glow, BOX.x, BOX.y, 1 + 0.04 * Math.sin(G * 1.4), P(t, T.box, 0.9) * (0.75 + 0.25 * hitGlow) * (1 - gone));
+      const glowO = P(t, T.box, 0.9) * (0.75 + 0.25 * hitGlow) * (1 - gone);
+      place(s.glow, BOX.x, BOX.y, 1 + 0.04 * Math.sin(G * 1.4), glowO);
 
       // the dramatic beat: the 1.0 badge slams onto the box from above its size, with neon rings and a swell of the
       // box's glow

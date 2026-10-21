@@ -50,10 +50,6 @@
   // the verdict under the Workers (UNDER_WORKERS): its font, px, 19.4 px on screen at 0.88; 20 px clear of the bottom
   // row and of the environment's bottom edge
   const VERDICT_FONT = 22;
-  // how far a chip falls when it drops off, px, and how far it may tilt, degrees
-  const FALL = { drop: 140, tilt: 40 };
-  // how long the light takes to run along a connection, seconds
-  const FLOW_PERIOD = 2.4;
   // TEMPORAL's list of the six connections, under its logo: its center x, its label's top, the rows' top, pitch,
   // height and width
   const LIST = { x: FLEET.temporal.x + FLEET.temporal.w / 2, label: 226, top: 256, pitch: 36, h: 32, w: 560 };
@@ -141,7 +137,7 @@
         const slot = WORKERS[w];
         tile.chips.forEach((chip, k) => {
           const at = c[0] + T0.chips[k] + w * T0.chipStep;
-          const fall = P(t, fallAt + END.spread * hash(w * 4 + k + 60), END.fallD, linear);
+          const fall = P(t, fallAt + chipFallDelay(w, k, END.spread), END.fallD, linear);
           if (t < at || fall >= 1) return;
           // it turns edge-on and back as it flips, and shows its variant from halfway
           const variant = s.variants[w][k];
@@ -151,11 +147,9 @@
           setChipLook(chip, chipLabel(t, k, variant, flipAt), flipping);
           // it drops into its slot with a little bounce
           const drop = P(t, at, T0.chipD, backOut);
-          const tilt = (hash(w * 4 + k + 90) * 2 - 1) * FALL.tilt * fall;
           const squash = flipping ? ` scaleY(${Math.abs(Math.cos(Math.PI * flip)).toFixed(3)})` : '';
           chip.style.opacity = P(t, at, 0.15) * (1 - fall);
-          chip.style.transform = `translateY(${((drop - 1) * 22 + FALL.drop * fall * fall).toFixed(2)}px) `
-            + `rotate(${tilt.toFixed(2)}deg)${squash}`;
+          chip.style.transform = chipDropTransform(w, k, drop, fall) + squash;
         });
         const everyAt = c[0] + T0.every + slot.col * T0.everyStep;
         const sweeping = t >= everyAt && t < everyAt + T0.everyD;
@@ -174,7 +168,7 @@
       s.fleet.links.forEach((link, w) => {
         const drawAt = c[0] + T0.chips[0] + w * T0.chipStep + T0.link;
         draw(link, P(t, drawAt, T0.linkD), linksO);
-        sparkOnPath(s.sparks[w], link, (G / FLOW_PERIOD + w / WORKERS.length) % 1, flow);
+        sparkOnPath(s.sparks[w], link, (G / WORKER_FLOW_PERIOD + w / WORKERS.length) % 1, flow);
         // its row in TEMPORAL's list rises in as the connection arrives
         const arrived = P(t, drawAt + T0.linkD - 0.1, 0.4);
         rise(s.rows[w], LIST.x, LIST.top + w * LIST.pitch + LIST.h / 2, arrived * linksO, 16);

@@ -1,12 +1,12 @@
 // ===================== 4. SECURITY AS A SHARED SERVICE
 // Opens on the proxy stage that chapter 3 ends on (placeProxyStage), in PROXY_SHOT, and pulls back once, left and
-// out, to SERVICE_SHOT as the fleet regroups into the shared service (placeServiceStage): YOUR ENVIRONMENT moves to hold
-// the proxy inside it, a PLATFORM TEAM zone forms round the proxy, the Workers travel into their team zones (PAYMENTS,
-// ORDERS, FRAUD, two Workers each) and type their team's Namespace, each team's connection draws into the proxy, and
-// TEMPORAL shows a Namespace band per team. Then a POLICY panel docks under the proxy and its four rules tick on as the
-// subtitle reads them. The dramatic beat: the policy sweeps out from the proxy along every team's connection in neon,
-// and each team zone lights up, COVERED. It ends on the shared service at rest (SERVICE_REST), which chapter 5 opens
-// on.
+// out, to SERVICE_SHOT as the fleet regroups into the shared service (placeServiceStage): YOUR ENVIRONMENT moves to
+// hold the proxy inside it, a PLATFORM TEAM zone forms round the proxy, the Workers travel into their team zones
+// (PAYMENTS, ORDERS, FRAUD, two Workers each) and type their team's Namespace, each team's connection draws into the
+// proxy, and TEMPORAL shows a Namespace band per team. Then a POLICY panel docks under the proxy and its four rules
+// tick on as the subtitle reads them. The dramatic beat: the policy sweeps out from the proxy along every team's
+// connection in neon, and each team zone lights up, COVERED. It ends on the shared service at rest (SERVICE_REST),
+// which chapter 5 opens on.
 // The block keeps every name declared in this file local to this scene.
 {
   // from c[0]: the camera pulls back (pull, pullD) as the fleet regroups (regroup, regroupD); the PLATFORM TEAM zone

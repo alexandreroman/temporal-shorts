@@ -45,9 +45,6 @@
   // how far the proxy slides in from the right, px
   const SLIDE = 180;
 
-  // The first round(p * length) characters of text: it types in as p goes from 0 to 1
-  const typed = (text, p) => text.slice(0, Math.round(clamp(p) * text.length));
-
   scene({
     chapter: 2, title: 'One gateway, no secrets',
     // hard cuts: chapter 1 ends on this chapter's first frame (placeBareFleet), this chapter on the next one's
