@@ -13,8 +13,10 @@
 // The dramatic beat: the add-on in the box turns red and reaches for the saved passwords (there are none: NO KEYS)
 // and for the internet (its tendril hits the glass: NO INTERNET); the glass cracks, the box is thrown away (it drops
 // out of the frame) and a fresh one pops in (CONTAINED). The Event History keeps its rows and records the new box
-// (NOTHING LOST), and the agent carries on: the model's next step runs in the fresh box. The camera zoom-through
-// (setCamera) brings the scene in and plays into the next one; in between, the camera holds.
+// (NOTHING LOST), and the agent carries on: the model's next step runs in SANDBOX 2 ("a fresh box for every step"),
+// which is thrown away in turn once that step ends, and SANDBOX 3 pops in for the next one; the Event History scrolls
+// up as it records them. The camera zoom-through (setCamera) brings the scene in and plays into the next one; in
+// between, the camera holds.
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- the replay: an add-on store on the left, centered under the pinned case file (x 120-540, y 150-338), a
@@ -155,21 +157,27 @@
   // c[3]: the add-on turns red (red) and reaches for the keys, then for the internet: each tendril grows (reaches,
   // over reach seconds) and its badge shows as it gets there, then it pulls back (retract); the glass cracks
   // (crack), the box drops out (drop, dropD) as "thrown away" is read and fades (fade), CONTAINED lands (contained),
-  // a fresh box pops in (fresh) and the history records it (row3); the history glows as "the agent's progress" is
+  // SANDBOX 2 pops in (fresh) and the history records it (row3); the history glows as "the agent's progress" is
   // read (kept) and NOTHING LOST lands (lost); the orb thinks (think), its next card grows out of it (card), passes
-  // the gate (gate, pass), rides into the Worker (ride) and the Worker's command runs the code in the fresh box
-  // (command)
+  // the gate (gate, pass), rides into the Worker (ride) and the Worker's command runs the code in SANDBOX 2
+  // (command), its run line filling over runD seconds; the history records the step (row4), SANDBOX 2 is thrown
+  // away in turn (drop2, fade2), SANDBOX 3 pops in (fresh3) and the history records it (row5)
   const T3 = {
     red: 0, reaches: [0.4, 0.95], reach: 0.3, retract: 0.15, crack: 1.3, drop: 1.65, dropD: 0.6, fade: 1.85,
-    contained: 1.9, fresh: 2.45, row3: 2.7, kept: 3.3, lost: 3.6, think: 4.1, card: 4.7, gate: 5.35, pass: 5.45,
-    ride: 5.55, command: 6.25,
+    contained: 1.9, fresh: 2.3, row3: 2.5, kept: 3.3, lost: 3.6, think: 2.2, card: 2.8, gate: 3.3, pass: 3.4,
+    ride: 3.5, command: 4.1, runD: 1.0, row4: 5.4, drop2: 5.6, fade2: 5.8, fresh3: 6.1, row5: 6.3,
   };
 
-  // The Event History rows of the board: the model's call, the add-on's step in the first box, the new box
+  // The Event History rows of the board: the model's call, the add-on's step in the first box, the new box, the code's
+  // step in it and the box after it. The strip shows three rows: it scrolls up one row before the fourth and the
+  // fifth slide in (HISTORY_SCROLL: how long the top row takes to fade out, then the others to move up, s).
   const HISTORY_ROWS = [
     '<b>model</b> suggests run_addon', '<b>add-on step</b> · sandbox 1', '<b>box replaced</b> · sandbox 2',
+    '<b>run_code</b> · sandbox 2', '<b>box replaced</b> · sandbox 3',
   ];
   const isModelRow = i => i === 0;
+  const HISTORY_VISIBLE = 3;
+  const HISTORY_SCROLL = { fade: 0.2, move: 0.35 };
 
   // ---------- helpers
   // The point where the line from the center of a box { x, y, w, h } toward (x, y) leaves it, 2 px out
@@ -362,13 +370,14 @@
     return [left + providerWidth(PROVIDERS[i].name) / 2, PROVIDER_ROWS_TOP[row] + PROVIDER.h / 2];
   };
 
-  // The SANDBOX box number n: an unstyled holder that moves the whole box (box.el), and in it, the glass (box.glass: a
-  // pale border, a faint fill, the sandbox icon with SANDBOX n and "sealed, throwaway", a red tint for the hits
+  // The SANDBOX box number n, whose step's run line reads `running: <step>`: an unstyled holder that moves the whole
+  // box (box.el), and in it, the glass (box.glass: a pale border, a faint fill, the sandbox icon with SANDBOX n and
+  // its note under it, "sealed, throwaway" by default, a red tint for the hits
   // (box.tint), a sheen that sweeps across it on cue (box.sheen)), the agent's tools (box.tiles, the board's tool
   // tiles; tile.label, its label, and tile.name, the tool's), the badges at the bottom (box.badges, hidden until
   // shown), a layer for the cracks (box.crackSvg) and one for the add-on's tendrils (box.tendrilSvg, glowing red). The
   // tiles sit outside the glass, so they can show before it forms.
-  const makeSandbox = (root, n, step) => {
+  const makeSandbox = (root, n, step, note = 'sealed, throwaway') => {
     const { w, h, border } = BOX;
     const box = { el: E(root, '', '', { width: w + 'px', height: h + 'px' }) };
     box.glass = E(box.el,
@@ -376,7 +385,7 @@
       + `align-items:center;gap:10px">${ICON('sandbox', 22, C.ink, 1.8)}<span class="lbl" style="padding-left:0;`
       + `font-size:18px;color:var(--ink)">Sandbox ${n}</span></div>`
       + `<div class="mono" style="position:absolute;left:${24 - border}px;top:${58 - border}px;font-size:16px;`
-      + `line-height:20px;color:${C.slate}">sealed, throwaway</div>`,
+      + `line-height:20px;color:${C.slate}">${note}</div>`,
       '', {
         width: w + 'px', height: h + 'px', border: `${border}px solid rgba(${RGB.ink},.55)`,
         borderRadius: 'var(--r)', overflow: 'hidden',
@@ -468,6 +477,24 @@
     const x = lerp(stops.gate[0], WORKER.x, u);
     card.place(Math.round(x), BOARD.laneY, lerp(1, 0.4, absorb), 1 - absorb);
   };
+  // Scrolls the Event History strip (call it after fillHistoryStrip, every frame): before row k slides in at
+  // rowAts[k], beyond the HISTORY_VISIBLE rows the strip shows, the top row fades out, then the rows move up one pitch
+  const scrollHistory = (card, t, rowAts) => {
+    const { fade, move } = HISTORY_SCROLL;
+    const scrolled = rowAts.slice(HISTORY_VISIBLE)
+      .reduce((sum, at) => sum + P(t, at - move, move), 0);
+    card.rows.forEach((row, i) => {
+      const slot = i - scrolled;
+      row.style.top = Math.round(card.rowTop(slot)) + 'px';
+      card.tags[i].style.top = Math.round(card.rowTop(slot) + 3) + 'px';
+      // row i leaves the top once row i + HISTORY_VISIBLE comes in
+      const nextAt = rowAts[i + HISTORY_VISIBLE];
+      if (nextAt === undefined) return;
+      const stay = 1 - P(t, nextAt - move - fade, fade);
+      row.style.opacity = (+row.style.opacity * stay).toFixed(3);
+      card.tags[i].style.opacity = (+card.tags[i].style.opacity * stay).toFixed(3);
+    });
+  };
 
   scene({
     chapter: 2, title: 'Locked in a sandbox',
@@ -507,7 +534,7 @@
       {
         text: "No keys, no internet, thrown away at every step: the agent's progress lives in Temporal, "
           + "not in the box.",
-        // the next step reaches the fresh box at c[3] + 6.55: the board then holds about 1.5 s before the fade
+        // SANDBOX 3 is up at c[3] + 6.6 and its history row at about c[3] + 7: the board then holds about 1.6 s
         after: 1.0,
       },
     ],
@@ -574,7 +601,9 @@
       // the glass cracks from the internet reach's hit, three ways
       s.cracks = [0, 1, 2].map(i => path(s.box.crackSvg, crackD(...REACHES[1].to, WALL_NORMAL, 40 + 7 * i),
         `rgba(${RGB.ink},.85)`, 2, false));
-      s.freshBox = makeSandbox(root, 2, 'make a report');
+      // the boxes after it, one per step
+      s.box2 = makeSandbox(root, 2, 'make a report', 'a fresh box for every step');
+      s.box3 = makeSandbox(root, 3, 'next step', 'a fresh box for every step');
       s.providers = PROVIDERS.map(({ name }) => makeProviderTag(root, name));
 
       s.cards = [
@@ -795,17 +824,26 @@
       // the glass cracks from the hit before the box is thrown away
       s.cracks.forEach((crack, i) => draw(crack, P(t, c[3] + T3.crack + i * 0.06, 0.3)));
 
-      // ---------- the fresh box pops in, glass and badges ready, and shines once; the next step's code runs in it
-      const freshPop = backPop(t, c[3] + T3.fresh, 0.5);
+      // ---------- SANDBOX 2 pops in, glass and badges ready, and shines once; the next step's code runs in it, then
+      // it is thrown away in turn, and SANDBOX 3 pops in for the step after
       const shown = { s: 1, o: 1 };
-      placeSandbox(s.freshBox, {
-        s: freshPop.s, o: freshPop.o, glass: shown, tiles: BOX_TOOLS.map(() => shown), badges: [shown, shown], t,
-        shineAt: c[3] + T3.fresh + 0.3, run: { o: P(t, codeRunsAt, 0.3), p: P(t, codeRunsAt, RUN.d, linear) },
+      const readyBox = { glass: shown, tiles: BOX_TOOLS.map(() => shown), badges: [shown, shown], t };
+      const box2Pop = backPop(t, c[3] + T3.fresh, 0.5);
+      const drop2 = P(t, c[3] + T3.drop2, T3.dropD, easeIn);
+      placeSandbox(s.box2, {
+        ...readyBox, dy: Math.round(380 * drop2), rot: 9 * drop2, s: box2Pop.s,
+        o: box2Pop.o * (1 - P(t, c[3] + T3.fade2, 0.3)), shineAt: c[3] + T3.fresh + 0.3,
+        run: { o: P(t, codeRunsAt, 0.3), p: P(t, codeRunsAt, T3.runD, linear) },
       });
-      s.freshBox.tiles.forEach((tile, i) => {
+      s.box2.tiles.forEach((tile, i) => {
         const runs = i === CODE_TOOL && t >= codeRunsAt;
         setToolTone(tile, runs ? 'run' : null, P(t, codeRunsAt, 0.2));
       });
+      const box3Pop = backPop(t, c[3] + T3.fresh3, 0.5);
+      // its sheen sweeps early, done before the layout check samples the end of the subtitle: the check counts the
+      // sheen at full size, though the glass clips it
+      placeSandbox(s.box3, { ...readyBox, s: box3Pop.s, o: box3Pop.o, shineAt: c[3] + T3.fresh3 + 0.1 });
+      s.box3.tiles.forEach(tile => setToolTone(tile, null));
 
       // the providers pop in as the subtitle names them
       PROVIDERS.forEach(({ at }, i) => {
@@ -815,11 +853,9 @@
 
       // ---------- the outcome: CONTAINED; the Event History keeps its rows and records the new box, NOTHING LOST
       placeAgentTag(s.contained, t, c[3] + T3.contained, ...CONTAINED);
-      fillHistoryStrip(s.history, t, [
-        { at: c[2] + T2.row1, tag: 'SAVED', tone: 'saved' },
-        { at: c[2] + T2.row2, tag: 'SAVED', tone: 'saved' },
-        { at: c[3] + T3.row3, tag: 'SAVED', tone: 'saved' },
-      ]);
+      const rowAts = [c[2] + T2.row1, c[2] + T2.row2, c[3] + T3.row3, c[3] + T3.row4, c[3] + T3.row5];
+      fillHistoryStrip(s.history, t, rowAts.map(at => ({ at, tag: 'SAVED', tone: 'saved' })));
+      scrollHistory(s.history, t, rowAts);
       const keptAt = c[3] + T3.kept;
       const kept = P(t, keptAt, 0.3) * (1 - P(t, keptAt + 1.4, 0.6));
       s.history.style.boxShadow = glowShadow(RGB.neon, kept, { blur: 40, alpha: 0.55, spread: 2 });
