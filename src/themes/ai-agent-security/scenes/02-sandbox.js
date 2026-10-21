@@ -4,14 +4,17 @@
 // wallet-helper, leaves the store for the assistant; its fake setup step, "install prerequisites", runs and turns out
 // to install a password thief: the add-on turns red, and a few more add-ons of the store with it (341 malicious). Its
 // red tendrils reach every item as the subtitle names them (FULL ACCESS), then three of them fly off to the attacker's
-// server, which rose in on the right as the thief showed. With Temporal, the board comes in: the model's `run_addon`
-// card passes the WORKFLOW checkpoint, which routes it down a fork, away from YOUR WORKERS, into a glass SANDBOX
-// box: a sealed Worker, with no keys and no internet.
-// The dramatic beat: the add-on's code turns red and lashes out at the walls of the box, four hits with sparks, each
-// one shaking the box alone; the glass cracks, the box drops out of the frame, a fresh one pops in, and the Workflow
-// carries on: CONTAINED, the `run_addon · SANDBOX` row of the Event History gets its tag and the model's next step
-// follows. The camera zoom-through (setCamera) brings the scene in and plays into the next one; in between, the
-// camera holds.
+// server, which rose in on the right as the thief showed.
+// With Temporal, the board comes in: the model, the WORKFLOW checkpoint, a Worker on the right and the Event History.
+// The agent's tools (terminal, code, add-ons) pop in beside the Worker and a glass SANDBOX box forms round them as
+// "sandbox" is read: the box is not the Worker, which stays outside it and sends it commands. The model's `run_addon`
+// card passes the checkpoint into the Worker, whose command runs the add-on in the box. The sandbox providers pop in
+// under the box as the subtitle names them, as plain text tags.
+// The dramatic beat: the add-on in the box turns red and reaches for the saved passwords (there are none: NO KEYS)
+// and for the internet (its tendril hits the glass: NO INTERNET); the glass cracks, the box is thrown away (it drops
+// out of the frame) and a fresh one pops in (CONTAINED). The Event History keeps its rows and records the new box
+// (NOTHING LOST), and the agent carries on: the model's next step runs in the fresh box. The camera zoom-through
+// (setCamera) brings the scene in and plays into the next one; in between, the camera holds.
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- the replay: an add-on store on the left, centered under the pinned case file (x 120-540, y 150-338), a
@@ -65,48 +68,65 @@
   const LEAK_D = 0.55;
   const CHIP = 48;
 
-  // ---------- the board: the model and the checkpoint at BOARD's places, the Event History strip at BOARD.history; on
-  // the right, a compact YOUR WORKERS zone over the SANDBOX box, both in the column x 1420-1800
-  const ZONE = { x: 1610, y: 263, w: 380, h: 162 };
-  // the zone's tool tiles, in a row: their icons, size, icon size, pitch and center line
-  const TOOL_ICONS = ['mail', 'database', 'card', 'folder'];
-  const TOOL = { size: 64, icon: 30, pitch: 84, y: 288 };
-  // the sandbox: a glass box, its bottom level with the Event History's (y 856), 60 px right of it
-  const BOX = { x: 1610, y: 640, w: 380, h: 432, border: 2 };
+  // ---------- the board: the model, the checkpoint and the Event History strip at BOARD's places; on the right, the
+  // Worker beside the SANDBOX box, and the sandbox providers under the box. With them, the composition spans
+  // x 120-1800, y 184-856.
+  // the Worker, on the lane, centered between the checkpoint (right edge x 1060) and the box (left edge x 1400)
+  const WORKER = { x: 1230, y: BOARD.laneY, w: 180, h: 180 };
+  // the box: glass, x 1400-1800, y 184-740, its border px wide
+  const BOX = { x: 1600, y: 462, w: 400, h: 556, border: 2 };
   const BOX_LEFT = BOX.x - BOX.w / 2, BOX_TOP = BOX.y - BOX.h / 2;
-  // its badges, side by side at its bottom: size, icon size, distance of each center from the box's middle, bottom
-  // inset; [icon, label] of each
-  const BADGE = { w: 160, h: 88, icon: 32, dx: 88, bottom: 24 };
-  // (the sandboxed Worker still reaches Temporal, hence no internet rather than no network)
+  // the agent's tools in the box, top to bottom (the board's tool tiles, TOOL_TILE in size), and the center of each
+  // in the box's coordinates (from its top left corner): under the box's heading, 20 px in from its sides
+  const BOX_TOOLS = [TOOLS[0], TOOLS[2], TOOLS[3]];
+  const boxToolSpot = i => [BOX.w / 2, 100 + TOOL_TILE.h / 2 + i * 88];
+  // the tool of each step: the add-on (wallet-helper, then the step that misbehaves), the code (the next step)
+  const ADDON_TOOL = 2;
+  const CODE_TOOL = 1;
+  // the box's badges, side by side at its bottom, as wide as the tiles above them: size, icon size, centers in the
+  // box's coordinates; [icon, label] of each
+  const BADGE = { w: 172, h: 80, icon: 32, xs: [106, 294], y: BOX.h - 20 - 40 };
+  // (the sandbox still reaches the Worker, hence no internet rather than no network)
   const BADGES = [['keyOff', 'No keys'], ['wifiOff', 'No internet']];
-  // the action card at rest in the box, centered between the box's heading and its badges
-  const CARD_REST = [1610, 623];
-  // the CONTAINED tag, between the zone and the box, 20 px clear of each
-  const CONTAINED = [1610, 384];
-  // the lanes: the orb to the checkpoint, then a fork from the checkpoint's right edge to the zone and to the card's
-  // place in the box (the card rides that lower branch)
-  const LANE_IN = [BOARD.model.x + BOARD.model.size / 2 + 16, BOARD.checkpoint.x - CHECKPOINT.w / 2];
-  const GATE_RIGHT = BOARD.checkpoint.x + CHECKPOINT.w / 2;
-  const FORK_UP = sCurveD(GATE_RIGHT, BOARD.laneY, ZONE.x - ZONE.w / 2, ZONE.y);
-  const FORK_DOWN = sCurveD(GATE_RIGHT, BOARD.laneY, BOX_LEFT, CARD_REST[1]);
-  // the same lower branch as Bezier control points (see sCurveD), for the card's route
-  const FORK_MID = (GATE_RIGHT + BOX_LEFT) / 2;
-  const FORK_DOWN_CURVE = [[GATE_RIGHT, BOARD.laneY], [FORK_MID, BOARD.laneY], [FORK_MID, CARD_REST[1]],
-    [BOX_LEFT, CARD_REST[1]]];
-  // the card's route past the gate: points along the lower branch, then into the box
-  const ROUTE = [...Array.from({ length: 17 }, (_, k) => bezier(FORK_DOWN_CURVE, k / 16)), CARD_REST];
-
-  // ---------- the beat, in the box's own coordinates (from its outer top left corner): the code's four hits on the
-  // walls, in order. from: where the tendril leaves the card; to: where it hits the wall (2 px inside, on the glass);
-  // normal: the wall's outward direction; badge: the badge that swells at the hit (index in BADGES), or null
-  const HITS = [
-    { from: [278, 190], to: [376, 150], normal: [1, 0], badge: 1 },
-    { from: [240, 161], to: [290, 4], normal: [0, -1], badge: 0 },
-    { from: [102, 205], to: [4, 175], normal: [-1, 0], badge: null },
-    { from: [124, 237], to: [4, 300], normal: [-1, 0], badge: null },
+  // the run line of the step in the box, between the tiles and the badges (its center in the box's coordinates), and
+  // its progress bar's width and how long the bar takes to fill, s
+  const RUN = { y: 402, bar: 240, d: 3 };
+  // the providers, in the subtitle's order, in two rows under the box, left-aligned with it, the last row's bottom
+  // level with the Event History's (y 856); at: when each pops in, seconds after c[2], as the subtitle names it
+  const PROVIDER = { h: 36, gap: 12, rowGap: 12, font: 16 };
+  const PROVIDERS = [
+    { name: 'Amazon Bedrock AgentCore', row: 0, at: 4.0 },
+    { name: 'Modal', row: 1, at: 5.8 },
+    { name: 'E2B', row: 1, at: 6.25 },
+    { name: 'Daytona', row: 1, at: 6.7 },
   ];
-  // sparks thrown back into the box at each hit: how many, their size, how far they fly, for how long
-  const SPARKS = { n: 6, size: 8, dist: [36, 80], d: 0.45 };
+  // the top of each row of providers
+  const PROVIDERS_BOTTOM = BOARD.history.y + BOARD.history.h / 2;
+  const PROVIDER_ROWS_TOP = [PROVIDERS_BOTTOM - 2 * PROVIDER.h - PROVIDER.rowGap, PROVIDERS_BOTTOM - PROVIDER.h];
+  // a provider tag's width: its side padding and text (Mono 16 px with .1em spacing advances 11.2 px per character),
+  // rounded up to an even number of px
+  const providerWidth = name => 2 * Math.ceil((28 + name.length * 11.2) / 2);
+  // the verdict tags: CONTAINED under the Worker, as wide as it, halfway between it and the Event History; NOTHING
+  // LOST left of the Event History, 24 px clear of it
+  const CONTAINED = [WORKER.x, 590];
+  const NOTHING_LOST = [BOARD.history.x - BOARD.history.w / 2 - 24 - agentTagWidth('NOTHING LOST') / 2,
+    BOARD.history.y];
+  // the lanes: the orb to the checkpoint, the checkpoint to the Worker, and the Worker's commands into the box
+  const LANE_IN = [BOARD.model.x + BOARD.model.size / 2 + 16, BOARD.checkpoint.x - CHECKPOINT.w / 2];
+  const LANE_WORKER = [BOARD.checkpoint.x + CHECKPOINT.w / 2, WORKER.x - WORKER.w / 2];
+  const LANE_COMMANDS = [WORKER.x + WORKER.w / 2 + 2, BOX_LEFT - 4];
+
+  // ---------- the beat, in the box's coordinates: the add-on's two reaches. from: where the tendril leaves the add-on
+  // tile; to: where it ends, on the NO KEYS badge's top edge (keys) or on the glass of the right wall (internet);
+  // badge: the badge that shows when it gets there (index in BADGES)
+  const REACHES = [
+    { from: [146, 350], to: [106, 454], badge: 0 },
+    { from: [334, 350], to: [396, 424], badge: 1 },
+  ];
+  // the wall the internet reach hits: its outward direction
+  const WALL_NORMAL = [1, 0];
+  // sparks thrown back into the box by the hit: how many, their size, how far they fly, for how long
+  const SPARKS = { n: 7, size: 8, dist: [36, 80], d: 0.45 };
 
   // ---------- the beats, in seconds after each subtitle start
   // c[0]: the case file slams in (file), pins to the corner (pin, pinD) as the store (store) and the laptop (laptop)
@@ -121,29 +141,35 @@
   // c[1]: FULL ACCESS lands as "full access" is read (full); the tendrils reach the items (ITEMS.grab), then the
   // leaks fly (LEAKS)
   const T1 = { full: 1.7 };
-  // c[2]: the replay sinks away (away, awayD) as the board pops in (orb, checkpoint, lanes, zone, tools, box, history);
-  // the orb thinks (think), the card grows out of it (card) and reaches the gate (gate), which lets it pass (pass);
-  // it rides the lower branch (ride, rideD), which lights up, into the box; the history records the model call
-  // (row1) and the routed step (row2); the box shines as "sandbox" is read (shine), glows at "sealed" (sealed), and
-  // its badges pop in at "no keys" (badges, badgeStep)
+  // c[2]: the replay sinks away (away, awayD) as the board pops in (orb, checkpoint, worker, lanes, history); the
+  // tools pop in as "tools" is read (tools, toolStep) and the glass forms round them at "sandbox" (box), its sheen
+  // sweeping across it (shine), the Worker's command line drawing to it (commands); the orb thinks (think), its card
+  // grows out of it (card), reaches the gate (gate), passes it (pass) and rides into the Worker (ride, rideD), which
+  // sends the command into the box (command, commandD): the add-on runs; the history records the model's call (row1)
+  // and the add-on's step (row2); the providers pop in as they are named (PROVIDERS.at)
   const T2 = {
-    away: -0.05, awayD: 0.5, orb: 0.3, checkpoint: 0.45, lanes: 0.7, zone: 0.6, tools: 0.7, box: 0.75, history: 0.6,
-    think: 0.9, card: 1.6, gate: 2.35, pass: 2.45, ride: 2.6, rideD: 1.4, row1: 1.7, row2: 3.3, shine: 4.5,
-    sealed: 5.25, badges: 6.15, badgeStep: 0.3,
+    away: -0.05, awayD: 0.5, orb: 0.3, checkpoint: 0.45, worker: 0.6, lanes: 0.7, history: 0.6, tools: 1.6,
+    toolStep: 0.1, box: 2.85, shine: 3.15, commands: 3.0, think: 0.9, card: 1.6, gate: 2.35, pass: 2.45, ride: 2.55,
+    rideD: 0.6, command: 3.25, commandD: 0.3, row1: 1.7, row2: 3.6,
   };
-  // c[3]: the code turns red at "misbehaves" (red) and lashes out (hits, the last one at "stays in the box"); each
-  // tendril grows over reach seconds and pulls back after retract; the glass cracks (crack), the box drops out
-  // (drop, dropD) at "thrown away", a fresh one pops in (fresh); CONTAINED lands (contained), the routed step's row
-  // gets its tag at "the Workflow carries on" (rowTag), the orb thinks again (think) and its next step is recorded
-  // (row3)
+  // c[3]: the add-on turns red (red) and reaches for the keys, then for the internet: each tendril grows (reaches,
+  // over reach seconds) and its badge shows as it gets there, then it pulls back (retract); the glass cracks
+  // (crack), the box drops out (drop, dropD) as "thrown away" is read and fades (fade), CONTAINED lands (contained),
+  // a fresh box pops in (fresh) and the history records it (row3); the history glows as "the agent's progress" is
+  // read (kept) and NOTHING LOST lands (lost); the orb thinks (think), its next card grows out of it (card), passes
+  // the gate (gate, pass), rides into the Worker (ride) and the Worker's command runs the code in the fresh box
+  // (command)
   const T3 = {
-    red: 0.9, hits: [1.4, 1.8, 2.2, 2.6], reach: 0.25, retract: 0.1, crack: 3.5, drop: 4.0, dropD: 0.6, fresh: 4.5,
-    contained: 5.0, rowTag: 5.3, think: 5.5, row3: 5.8,
+    red: 0, reaches: [0.4, 0.95], reach: 0.3, retract: 0.15, crack: 1.3, drop: 1.65, dropD: 0.6, fade: 1.85,
+    contained: 1.9, fresh: 2.45, row3: 2.7, kept: 3.3, lost: 3.6, think: 4.1, card: 4.7, gate: 5.35, pass: 5.45,
+    ride: 5.55, command: 6.25,
   };
 
-  // The Event History rows of the board: the model's call, the routed step, the model's next step
-  const HISTORY_ROWS = ['<b>model</b> suggests run_addon', '<b>run_addon</b> · SANDBOX', '<b>model</b> next step'];
-  const isModelRow = i => i !== 1;
+  // The Event History rows of the board: the model's call, the add-on's step in the first box, the new box
+  const HISTORY_ROWS = [
+    '<b>model</b> suggests run_addon', '<b>add-on step</b> · sandbox 1', '<b>box replaced</b> · sandbox 2',
+  ];
+  const isModelRow = i => i === 0;
 
   // ---------- helpers
   // An add-on icon, a puzzle piece (stroke, 24 grid, the style of ICON()); local to this scene, the only one that
@@ -196,24 +222,17 @@
     }
     return d + branch;
   };
-  // An SVG layer w x h px inside a box with a border of `border` px, in the box's outer coordinates
-  const boxSvg = (parent, w, h, border, css = {}) => {
+  // An SVG layer w x h px at the top left of parent
+  const sizedSvg = (parent, w, h, css = {}) => {
     const svg = document.createElementNS(SVGNS, 'svg');
     svg.setAttribute('width', w);
     svg.setAttribute('height', h);
     svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-    Object.assign(svg.style, { position: 'absolute', left: -border + 'px', top: -border + 'px', ...css });
+    Object.assign(svg.style, { position: 'absolute', left: 0, top: 0, overflow: 'visible', ...css });
     parent.appendChild(svg);
     return svg;
   };
-  // Places a child of a bordered box at (x, y) in the box's outer coordinates (children sit in its padding box)
-  const placeInBox = (e, x, y, border, s = 1, o = 1) => place(e, x - border, y - border, s, o);
-  // A stage point (x, y) of something inside the box, once the box is moved by (dx, dy) and turned by rot degrees
-  // round its center
-  const boxPoint = (x, y, dx, dy, rot) => {
-    const a = rot * Math.PI / 180, ox = x - BOX.x, oy = y - BOX.y;
-    return [BOX.x + dx + ox * Math.cos(a) - oy * Math.sin(a), BOX.y + dy + ox * Math.sin(a) + oy * Math.cos(a)];
-  };
+
 
   // An item on the laptop's screen: its icon over its label; e.icon, its <svg>, which turns red when grabbed
   const makeItem = (parent, { icon, label }) => {
@@ -322,62 +341,138 @@
   const pageRowIcon = i => [PAGE.x - PAGE.w / 2 + PAGE.inset + 4 + 14 + 11,
     PAGE.y - PAGE.h / 2 + PAGE.rowTop + i * PAGE.pitch + PAGE.rowH / 2];
 
-  // The SANDBOX box: glass (a pale border, a faint fill, a sheen that sweeps across it on cue), its heading (the
-  // sandbox icon, SANDBOX, "a sealed Worker"), a red tint for the hits (box.tint), its badges at the bottom
-  // (box.badges, hidden until popped), a layer for the code's tendrils (box.tendrilSvg, glowing red) and one for the
-  // cracks (box.crackSvg)
-  const makeSandbox = root => {
+  // The Worker: a server icon, WORKER and "sends commands" on a tile; it drives the box from outside it
+  const makeWorker = root => E(root,
+    ICON('server', 40, C.ink, 1.8)
+    + '<div class="mono" style="font-size:20px;line-height:24px;letter-spacing:.14em;padding-left:.14em;'
+    + 'margin-top:14px">WORKER</div>'
+    + `<div class="mono" style="font-size:16px;line-height:20px;color:${C.slate};margin-top:6px">sends commands</div>`,
+    'tile', {
+      width: WORKER.w + 'px', height: WORKER.h + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center',
+    });
+  // A sandbox provider: its name in capitals on a plain pill (no logo)
+  const makeProviderTag = (root, name) => E(root, name, 'mono', {
+    width: providerWidth(name) + 'px', height: PROVIDER.h + 'px', display: 'flex', alignItems: 'center',
+    justifyContent: 'center', paddingLeft: '.1em', fontSize: PROVIDER.font + 'px', lineHeight: '20px',
+    letterSpacing: '.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', color: C.ink,
+    border: `2px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
+  });
+  // The stage center of provider tag i: its row's tags side by side from the box's left edge, PROVIDER.gap apart
+  const providerSpot = i => {
+    const { row } = PROVIDERS[i];
+    let left = BOX_LEFT;
+    for (let k = 0; k < i; k++) {
+      if (PROVIDERS[k].row === row) left += providerWidth(PROVIDERS[k].name) + PROVIDER.gap;
+    }
+    return [left + providerWidth(PROVIDERS[i].name) / 2, PROVIDER_ROWS_TOP[row] + PROVIDER.h / 2];
+  };
+
+  // The SANDBOX box number n: an unstyled holder that moves the whole box (box.el), and in it, the glass (box.glass: a
+  // pale border, a faint fill, the sandbox icon with SANDBOX n and "sealed, throwaway", a red tint for the hits
+  // (box.tint), a sheen that sweeps across it on cue (box.sheen)), the agent's tools (box.tiles, the board's tool
+  // tiles; tile.label, its label, and tile.name, the tool's), the badges at the bottom (box.badges, hidden until
+  // shown), a layer for the cracks (box.crackSvg) and one for the add-on's tendrils (box.tendrilSvg, glowing red). The
+  // tiles sit outside the glass, so they can show before it forms.
+  const makeSandbox = (root, n, step) => {
     const { w, h, border } = BOX;
-    const box = E(root,
+    const box = { el: E(root, '', '', { width: w + 'px', height: h + 'px' }) };
+    box.glass = E(box.el,
       `<div style="position:absolute;left:${24 - border}px;top:${20 - border}px;height:34px;display:flex;`
       + `align-items:center;gap:10px">${ICON('sandbox', 22, C.ink, 1.8)}<span class="lbl" style="padding-left:0;`
-      + 'font-size:18px;color:var(--ink)">Sandbox</span></div>'
+      + `font-size:18px;color:var(--ink)">Sandbox ${n}</span></div>`
       + `<div class="mono" style="position:absolute;left:${24 - border}px;top:${58 - border}px;font-size:16px;`
-      + `line-height:20px;color:${C.slate}">a sealed Worker</div>`,
+      + `line-height:20px;color:${C.slate}">sealed, throwaway</div>`,
       '', {
         width: w + 'px', height: h + 'px', border: `${border}px solid rgba(${RGB.ink},.55)`,
         borderRadius: 'var(--r)', overflow: 'hidden',
         background: `linear-gradient(135deg, rgba(${RGB.ink},.12) 0%, rgba(${RGB.ink},.04) 38%, `
           + `rgba(${RGB.uv},.1) 100%)`,
       });
-    // the red tint of a hit, under the badges
-    box.tint = E(box, '', '', {
+    box.tint = E(box.glass, '', '', {
       left: -border + 'px', top: -border + 'px', width: w + 'px', height: h + 'px',
       background: `radial-gradient(closest-side, rgba(${RGB.red},.1), rgba(${RGB.red},.26))`,
     });
-    box.sheen = E(box, '', '', {
+    box.sheen = E(box.glass, '', '', {
       width: '140px', height: (h + 240) + 'px',
       background: `linear-gradient(90deg, rgba(${RGB.ink},0), rgba(${RGB.ink},.22), rgba(${RGB.ink},0))`,
     });
-    box.badges = BADGES.map(([icon, label]) => E(box,
+    box.tiles = BOX_TOOLS.map(tool => {
+      const tile = makeToolTile(box.el, tool);
+      tile.label = tile.querySelector('.lbl');
+      tile.name = tool.label;
+      return tile;
+    });
+    box.badges = BADGES.map(([icon, label]) => E(box.el,
       ICON(icon, BADGE.icon, C.ink, 1.8)
       + `<div class="lbl" style="font-size:16px;line-height:20px;margin-top:10px;color:var(--ink)">${label}</div>`,
       'tile', {
         width: BADGE.w + 'px', height: BADGE.h + 'px', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', background: C.bg,
       }));
-    box.crackSvg = boxSvg(box, w, h, border);
-    box.tendrilSvg = boxSvg(box, w, h, border, { filter: `drop-shadow(0 0 6px rgba(${RGB.red},.8))` });
+    box.run = E(box.el,
+      `<div class="mono" style="font-size:16px;line-height:20px;color:${C.slate};white-space:nowrap">`
+      + `running: ${step}</div>`
+      + `<div style="width:${RUN.bar}px;height:4px;margin-top:12px;border-radius:2px;background:${C.line};`
+      + `overflow:hidden"><div class="bar" style="width:0;height:4px;background:${C.uv}"></div></div>`,
+      '', { width: (RUN.bar + 40) + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center' });
+    box.run.bar = box.run.querySelector('.bar');
+    box.crackSvg = sizedSvg(box.el, w, h);
+    box.tendrilSvg = sizedSvg(box.el, w, h, { filter: `drop-shadow(0 0 6px rgba(${RGB.red},.8))` });
     return box;
   };
-  // Places a sandbox at its spot, moved by (dx, dy), turned by rot degrees, at scale s and opacity o; its sheen sweeps
-  // across it from shineAt (0.6 s); badges: the pop of each badge ({ s, o }); glow: the white glow of its rim (0 to
-  // 1), red: the red flash of a hit (0 to 1)
-  const placeSandbox = (box, { dx = 0, dy = 0, rot = 0, s = 1, o = 1, shineAt = -1, t = 0, badges, glow = 0,
-    red = 0 }) => {
-    place(box, BOX.x + dx, BOX.y + dy, s, o, rot);
+  // A tool tile's look: 'run' (UV, the step runs there), 'red' (the add-on misbehaves: it shows its name,
+  // wallet-helper, as in the replay) or null (idle); k, the strength of its glow (0 to 1)
+  const setToolTone = (tile, tone, k = 1) => {
+    const color = { run: C.uv, red: C.red }[tone];
+    const rgb = { run: RGB.uv, red: RGB.red }[tone];
+    tile.style.borderColor = color || C.line;
+    tile.style.boxShadow = rgb ? glowShadow(rgb, k, { blur: 28, alpha: 0.55 }) : '';
+    tile.icon.setAttribute('stroke', tone === 'red' ? C.red : C.ink);
+    tile.label.style.color = tone === 'red' ? C.red : C.ink;
+    setText(tile.label, tone === 'red' ? 'wallet-helper' : tile.name);
+  };
+  // Places a sandbox at its spot, moved by (dx, dy) and turned by rot degrees, at scale s and opacity o, every frame.
+  // glass: the glass's opacity and its scale as it forms ({ s, o }); tiles and badges: the pop of each ({ s, o }), and
+  // tileDx, a sideways jitter of each tile (whole px); shineAt: when its sheen sweeps across it (0.6 s); glow: the
+  // white glow of its rim (0 to 1); red: the red flash of a hit (0 to 1); run: the run line's opacity and its bar's
+  // progress ({ o, p }, hidden by default)
+  const placeSandbox = (box, {
+    dx = 0, dy = 0, rot = 0, s = 1, o = 1, glass, tiles, tileDx = [0, 0, 0], badges, t = 0, shineAt = -1, glow = 0,
+    red = 0, run = { o: 0, p: 0 },
+  }) => {
+    place(box.el, BOX.x + dx, BOX.y + dy, s, o, rot);
+    place(box.glass, BOX.w / 2, BOX.h / 2, glass.s, glass.o);
+    box.tiles.forEach((tile, i) => {
+      const [x, y] = boxToolSpot(i);
+      place(tile, x + tileDx[i], y, tiles[i].s, tiles[i].o);
+    });
+    box.badges.forEach((badge, i) => place(badge, BADGE.xs[i], BADGE.y, badges[i].s, badges[i].o));
+    place(box.run, BOX.w / 2, RUN.y, 1, run.o);
+    box.run.bar.style.width = Math.round(run.p * RUN.bar) + 'px';
     const sweep = P(t, shineAt, 0.6, linear);
     box.sheen.style.opacity = sweep > 0 && sweep < 1 ? 1 : 0;
     box.sheen.style.transform = `translate(${Math.round(lerp(-220, BOX.w + 80, sweep))}px,-120px) rotate(20deg)`;
-    box.badges.forEach((badge, i) => {
-      const x = BOX.w / 2 + (i === 0 ? -BADGE.dx : BADGE.dx);
-      const y = BOX.h - BADGE.bottom - BADGE.h / 2;
-      placeInBox(badge, x, y, BOX.border, badges[i].s, badges[i].o);
-    });
     box.tint.style.opacity = red.toFixed(3);
-    box.style.borderColor = red > 0.5 ? C.red : `rgba(${RGB.ink},${(0.55 + 0.45 * glow).toFixed(3)})`;
-    box.style.boxShadow = red > 0 ? glowShadow(RGB.red, red, { blur: 40, alpha: 0.7 })
+    box.glass.style.borderColor = red > 0.5 ? C.red : `rgba(${RGB.ink},${(0.55 + 0.45 * glow).toFixed(3)})`;
+    box.glass.style.boxShadow = red > 0 ? glowShadow(RGB.red, red, { blur: 40, alpha: 0.7 })
       : glowShadow(RGB.ink, glow, { blur: 36, alpha: 0.45 });
+  };
+  // An action card's place, every frame: it grows out of the orb from `card` and reaches the gate at `gate`, waits,
+  // then from `ride` travels through the checkpoint's opening into the Worker over rideD seconds, shrinking and fading
+  // into it; hidden before `card` and once in the Worker
+  const placeCard = (card, t, { card: cardAt, gate, ride, rideD }) => {
+    const stops = actionStops(card, 0);
+    if (t < ride) {
+      const grow = P(t, cardAt, gate - cardAt);
+      const [x, y] = lerp2(stops.from, stops.gate, grow);
+      card.place(Math.round(x), Math.round(y), lerp(0.3, 1, grow), P(t, cardAt, 0.2));
+      return;
+    }
+    const u = P(t, ride, rideD);
+    const absorb = P(u, 0.6, 0.4, linear);
+    const x = lerp(stops.gate[0], WORKER.x, u);
+    card.place(Math.round(x), BOARD.laneY, lerp(1, 0.4, absorb), 1 - absorb);
   };
 
   scene({
@@ -412,13 +507,13 @@
       {
         text: "With Temporal, the agent's tools run in a <b>sandbox</b>, such as Amazon Bedrock AgentCore, "
           + "Modal, E2B or Daytona.",
-        // the badges pop in at c[2] + 6.45: the sealed box then holds about 1.1 s
+        // the last provider pops in at c[2] + 6.7: the board then holds about 1.2 s
         after: 0.6,
       },
       {
         text: "No keys, no internet, thrown away at every step: the agent's progress lives in Temporal, "
           + "not in the box.",
-        // the model's next step is recorded at c[3] + 6.1: the board then holds about 2 s before the fade
+        // the next step reaches the fresh box at c[3] + 6.55: the board then holds about 1.5 s before the fade
         after: 1.0,
       },
     ],
@@ -465,48 +560,51 @@
         borderColor: C.red, background: C.bg, boxShadow: glowShadow(RGB.red, 1, { blur: 20, alpha: 0.6 }),
       }));
 
-      // the board, in stacking order: the zone and its tools, the lanes, the checkpoint, the orb, the history, the
-      // sandboxes, then the card, the sparks of the beat and the tag
-      s.zone = makeWorkerZone(root, ZONE);
-      s.tools = TOOL_ICONS.map(icon => E(root, ICON(icon, TOOL.icon, C.ink, 1.8), 'tile', {
-        width: TOOL.size + 'px', height: TOOL.size + 'px', display: 'flex', alignItems: 'center',
-        justifyContent: 'center',
-      }));
+      // the board, in stacking order: the lanes, the checkpoint, the orb, the Worker, the history, the boxes and the
+      // providers, then the cards, the command spark, the effects of the beat and the tags
       s.boardSvg = svgLayer(root);
       const { laneY } = BOARD;
-      s.lanes = [
-        path(s.boardSvg, `M ${LANE_IN[0]} ${laneY} H ${LANE_IN[1]}`, C.line, 2, false),
-        path(s.boardSvg, FORK_UP, C.line, 2, false),
-        path(s.boardSvg, FORK_DOWN, C.line, 2, false),
-      ];
-      // the lower branch lights up in UV as the card rides it
-      s.route = path(s.boardSvg, FORK_DOWN, C.uv, 3, false);
+      s.lanes = [LANE_IN, LANE_WORKER].map(([x0, x1]) => path(s.boardSvg, `M ${x0} ${laneY} H ${x1}`, C.line, 2,
+        false));
+      // the Worker's commands flow into the box along a dashed line (on G)
+      s.commands = path(s.boardSvg, `M ${LANE_COMMANDS[0]} ${laneY} H ${LANE_COMMANDS[1]}`, C.slate, 2, true,
+        '8 8');
       s.checkpoint = makeCheckpoint(root, BOARD.checkpoint);
       s.orb = makeModelOrb(root, BOARD.model);
+      s.worker = makeWorker(root);
       s.history = makeHistoryStrip(root, HISTORY_ROWS, { uvRow: isModelRow });
 
-      s.box = makeSandbox(root);
-      s.tendrils = HITS.map(({ from, to }, i) => path(s.box.tendrilSvg, tendrilD(...from, ...to, 20 + i, 12), C.red,
-        4, false));
-      s.cracks = HITS.map(({ to, normal }, i) => path(s.box.crackSvg, crackD(...to, normal, 40 + 7 * i),
+      s.box = makeSandbox(root, 1, 'wallet-helper');
+      s.tendrils = REACHES.map(({ from, to }, i) => path(s.box.tendrilSvg, tendrilD(...from, ...to, 20 + i, 12),
+        C.red, 4, false));
+      // the glass cracks from the internet reach's hit, three ways
+      s.cracks = [0, 1, 2].map(i => path(s.box.crackSvg, crackD(...REACHES[1].to, WALL_NORMAL, 40 + 7 * i),
         `rgba(${RGB.ink},.85)`, 2, false));
-      s.freshBox = makeSandbox(root);
+      s.freshBox = makeSandbox(root, 2, 'make a report');
+      s.providers = PROVIDERS.map(({ name }) => makeProviderTag(root, name));
 
-      s.card = makeActionCard(root, { tool: 'run_addon', arg: 'wallet-helper' });
-      s.tips = HITS.map(() => makeSpark(root, 10, RGB.red));
-      s.wallFlashes = HITS.map(({ normal }) => E(root, '', '', {
-        width: (normal[0] ? 6 : 120) + 'px', height: (normal[0] ? 120 : 6) + 'px', borderRadius: '3px',
-        background: C.red, boxShadow: glowShadow(RGB.red, 1, { blur: 18, alpha: 0.9, spread: 2 }),
-      }));
-      s.impactRings = HITS.map(() => makeRipples(root, 1, RGB.red));
-      s.sparks = HITS.map(() => Array.from({ length: SPARKS.n }, () => makeSpark(root, SPARKS.size, RGB.red)));
+      s.cards = [
+        makeActionCard(root, { tool: 'run_addon', arg: 'wallet-helper' }),
+        makeActionCard(root, { tool: 'run_code', arg: 'make a report' }),
+      ];
+      s.commandSpark = makeSpark(root, 12, RGB.uv);
+      s.tips = REACHES.map(() => makeSpark(root, 10, RGB.red));
+      s.probeRings = REACHES.map(() => makeRipples(root, 1, RGB.red));
+      s.wallFlash = E(root, '', '', {
+        width: '6px', height: '120px', borderRadius: '3px', background: C.red,
+        boxShadow: glowShadow(RGB.red, 1, { blur: 18, alpha: 0.9, spread: 2 }),
+      });
+      s.sparks = Array.from({ length: SPARKS.n }, () => makeSpark(root, SPARKS.size, RGB.red));
       s.contained = agentTag('CONTAINED', 'neon', root);
+      s.nothingLost = agentTag('NOTHING LOST', 'neon', root);
     },
     update(t, c, s) {
       const hijackAt = c[0] + T0.hijack;
-      // the camera holds; the hijack jolts it. The camera zoom-through (setCamera) in and out.
-      const [jx, jy] = shake(t, hijackAt, 6, 0.4);
-      setCamera(s.cam, t, this.dur, { dx: jx, dy: jy });
+      const wallHitAt = c[3] + T3.reaches[1];
+      // the camera holds; the hijack and the hit on the glass jolt it. The camera zoom-through (setCamera) in and out.
+      const [hx, hy] = shake(t, hijackAt, 6, 0.4);
+      const [wx, wy] = shake(t, wallHitAt, 5, 0.3);
+      setCamera(s.cam, t, this.dur, { dx: hx + wx, dy: hy + wy });
 
       // ---------- the replay
       // it sinks away as the board comes in
@@ -601,126 +699,137 @@
 
       // ---------- the board pops in
       const pop = at => backPop(t, c[2] + at);
-      const { model, checkpoint, history, laneY } = BOARD;
+      const { model, checkpoint, history } = BOARD;
       const orbPop = pop(T2.orb);
       place(s.orb.el, model.x, model.y, orbPop.s, orbPop.o);
       const cpPop = pop(T2.checkpoint);
       place(s.checkpoint.el, checkpoint.x, checkpoint.y, cpPop.s, cpPop.o);
-      s.checkpoint.check(t, c[2] + T2.pass, 'pass');
-      draw(s.lanes[0], P(t, c[2] + T2.lanes, 0.4));
-      s.lanes.slice(1).forEach(lane => draw(lane, P(t, c[2] + T2.lanes + 0.3, 0.4)));
-      const zonePop = pop(T2.zone);
-      place(s.zone, ZONE.x, ZONE.y, zonePop.s, zonePop.o);
-      s.tools.forEach((tool, i) => {
-        const toolPop = pop(T2.tools + i * 0.06);
-        place(tool, ZONE.x + (i - 1.5) * TOOL.pitch, TOOL.y, toolPop.s, toolPop.o);
-      });
+      const passAt = t >= c[3] + T3.pass ? c[3] + T3.pass : c[2] + T2.pass;
+      s.checkpoint.check(t, passAt, 'pass');
+      s.lanes.forEach((lane, i) => draw(lane, P(t, c[2] + T2.lanes + 0.3 * i, 0.4)));
+      draw(s.commands, P(t, c[2] + T2.commands, 0.4));
       rise(s.history, history.x, history.y, P(t, c[2] + T2.history, 0.6));
 
-      // the orb thinks, then proposes the step; it thinks again when the Workflow carries on
-      const thinking = (t >= c[2] + T2.think && t < c[2] + T2.card) || t >= c[3] + T3.think;
-      s.orb.set(thinking ? 'thinking' : 'idle', { look: 0.5 * P(t, c[2] + T2.card, 0.4) });
+      // the Worker pops in; it flashes UV as each card reaches it
+      const workerPop = pop(T2.worker);
+      place(s.worker, WORKER.x, WORKER.y, workerPop.s, workerPop.o);
+      const received = [c[2] + T2.ride + T2.rideD, c[3] + T3.ride + T2.rideD];
+      const workerFlash = Math.max(...received.map(at => t >= at - 0.15 ? Math.max(0, 1 - (t - at + 0.15) / 0.6) : 0));
+      s.worker.style.borderColor = workerFlash > 0.3 ? C.uv : C.line;
+      s.worker.style.boxShadow = glowShadow(RGB.uv, workerFlash, { blur: 30, alpha: 0.6 });
 
-      // ---------- the card: it grows out of the orb, passes the gate, rides the lower branch into the box
-      const stops = actionStops(s.card, 0);
-      const grow = P(t, c[2] + T2.card, T2.gate - T2.card);
-      const ride = P(t, c[2] + T2.ride, T2.rideD);
-      const routeAt = pointAlong([stops.gate, ...ROUTE], ride);
-      draw(s.route, P(t, c[2] + T2.ride + 0.2, T2.rideD - 0.4), 1 - P(t, c[3] + T3.drop, 0.5));
+      // the orb thinks before each step it proposes
+      const thinking = (t >= c[2] + T2.think && t < c[2] + T2.card) || (t >= c[3] + T3.think && t < c[3] + T3.card);
+      const look = t >= c[3] + T3.think ? 0.5 * P(t, c[3] + T3.card, 0.4) : 0.5 * P(t, c[2] + T2.card, 0.4);
+      s.orb.set(thinking ? 'thinking' : 'idle', { look });
 
-      // ---------- the sandbox and the beat
-      const hits = T3.hits.map(at => c[3] + at);
-      // each hit shakes the box alone, along the wall it strikes
-      let shakeX = 0, shakeY = 0;
-      HITS.forEach(({ normal }, i) => {
-        const push = dampedShake(t, hits[i], 12, 0.4, 5);
-        shakeX += push * normal[0];
-        shakeY += push * normal[1];
-      });
-      // the box drops out, turning, and fades
-      const dropAt = c[3] + T3.drop;
-      const drop = P(t, dropAt, T3.dropD, easeIn);
-      const dx = Math.round(shakeX), dy = Math.round(shakeY + 360 * drop);
-      const rot = 9 * drop;
-      const boxPop = pop(T2.box);
-      const boxO = boxPop.o * (1 - P(t, dropAt + 0.3, 0.3));
-      const redFlash = Math.max(0, ...hits.map(hit => t >= hit ? 1 - (t - hit) / 0.35 : 0));
-      const badgePop = i => {
-        const shown = popIn(t, c[2] + T2.badges + i * T2.badgeStep, 0.2);
-        const swellAt = HITS.findIndex(hit => hit.badge === i);
-        return { s: shown.s * (swellAt < 0 ? 1 : swell(t, hits[swellAt], 0.14)), o: shown.o };
-      };
-      const sealed = Math.max(0, 1 - Math.abs(t - c[2] - T2.sealed - 0.15) / 0.45);
-      placeSandbox(s.box, {
-        dx, dy, rot, s: boxPop.s, o: boxO, t, shineAt: c[2] + T2.shine, badges: [badgePop(0), badgePop(1)],
-        glow: sealed, red: redFlash,
-      });
+      // ---------- the cards: each one grows out of the orb, passes the gate and rides into the Worker, which sends
+      // its command into the box: a spark along the dashed line
+      placeCard(s.cards[0], t, { card: c[2] + T2.card, gate: c[2] + T2.gate, ride: c[2] + T2.ride, rideD: T2.rideD });
+      placeCard(s.cards[1], t, { card: c[3] + T3.card, gate: c[3] + T3.gate, ride: c[3] + T3.ride, rideD: T2.rideD });
+      const commandAt = t >= c[3] + T3.command ? c[3] + T3.command : c[2] + T2.command;
+      sparkOnPath(s.commandSpark, s.commands, P(t, commandAt, T2.commandD, linear));
+      const addOnRunsAt = c[2] + T2.command + T2.commandD;
+      const codeRunsAt = c[3] + T3.command + T2.commandD;
 
-      // the fresh box pops in, glass and badges ready, and shines once
-      const freshPop = backPop(t, c[3] + T3.fresh, 0.5);
-      placeSandbox(s.freshBox, {
-        s: freshPop.s, o: freshPop.o, t, shineAt: c[3] + T3.fresh + 0.3, badges: [{ s: 1, o: 1 }, { s: 1, o: 1 }],
-      });
-
-      // the card: on the way, then in the box, where it misbehaves (red, jittering) and falls with it
-      const misbehaving = t >= c[3] + T3.red && t < c[3] + T3.hits[3] + 0.4;
+      // ---------- the first box: the tools pop in, the glass forms round them; the add-on runs, then misbehaves
+      const toolPops = BOX_TOOLS.map((_, i) => pop(T2.tools + i * T2.toolStep));
+      const glassIn = P(t, c[2] + T2.box, 0.45, easeOut);
+      const formed = Math.max(0, 1 - Math.abs(t - c[2] - T2.box - 0.35) / 0.45);
+      const redAt = c[3] + T3.red;
+      const reachAts = T3.reaches.map(at => c[3] + at);
+      const misbehaving = t >= redAt && t < c[3] + T3.drop;
+      // the misbehaving add-on jitters sideways, a new hashed offset every frame
       const jitter = misbehaving ? Math.round((hash(Math.floor(t * 30)) * 2 - 1) * 3) : 0;
-      s.card.setTone(t >= c[3] + T3.red ? 'red' : null);
-      if (t < c[2] + T2.ride) {
-        const [x, y] = lerp2(stops.from, stops.gate, grow);
-        s.card.place(Math.round(x), Math.round(y), lerp(0.3, 1, grow), P(t, c[2] + T2.card, 0.2));
-      } else if (ride < 1) {
-        s.card.place(routeAt[0], routeAt[1]);
-      } else {
-        const [x, y] = boxPoint(CARD_REST[0] + jitter, CARD_REST[1], dx, dy, rot);
-        place(s.card.el, Math.round(x), Math.round(y), 1, boxO, rot);
-      }
+      s.box.tiles.forEach((tile, i) => {
+        if (i !== ADDON_TOOL) setToolTone(tile, null);
+        else if (t >= redAt) setToolTone(tile, 'red', P(t, redAt, 0.2));
+        else setToolTone(tile, t >= addOnRunsAt ? 'run' : null, P(t, addOnRunsAt, 0.2));
+      });
+      // the internet reach shakes the box along the wall it strikes; the box then drops out, turning, and fades
+      const shakeX = Math.round(dampedShake(t, wallHitAt, 10, 0.4, 5));
+      const drop = P(t, c[3] + T3.drop, T3.dropD, easeIn);
+      const boxO = 1 - P(t, c[3] + T3.fade, 0.3);
+      // a red flash at each reach's end, the hit on the glass the stronger
+      const redFlash = Math.max(0, ...reachAts.map((at, i) => {
+        if (t < at) return 0;
+        return (i === 1 ? 1 : 0.5) * (1 - (t - at) / 0.4);
+      }));
+      // each badge shows as its reach gets to it
+      const badgePops = reachAts.map(at => popIn(t, at, 0.2));
+      placeSandbox(s.box, {
+        dx: shakeX, dy: Math.round(380 * drop), rot: 9 * drop, o: boxO,
+        glass: { s: lerp(1.06, 1, glassIn), o: P(t, c[2] + T2.box, 0.3) }, tiles: toolPops,
+        tileDx: BOX_TOOLS.map((_, i) => i === ADDON_TOOL ? jitter : 0), badges: badgePops, t,
+        shineAt: c[2] + T2.shine, glow: formed, red: redFlash,
+        // the add-on's run line, until it misbehaves
+        run: { o: P(t, addOnRunsAt, 0.3) * (1 - P(t, redAt, 0.2)), p: P(t, addOnRunsAt, RUN.d, linear) },
+      });
 
-      // The dramatic beat: the code lashes out at the walls; each tendril strikes, the wall flashes red, sparks fly
-      // back into the box, then the tendril pulls back
-      HITS.forEach((hit, i) => {
-        const at = hits[i];
-        const reach = P(t, at - T3.reach, T3.reach, easeIn);
+      // The dramatic beat: the add-on reaches for the saved passwords, finds none (NO KEYS), then for the internet,
+      // and hits the glass (NO INTERNET); each tendril pulls back once it gets there
+      REACHES.forEach((reach, i) => {
+        const at = reachAts[i];
+        const grow = P(t, at - T3.reach, T3.reach, easeIn);
         const back = P(t, at + T3.retract, 0.3);
-        draw(s.tendrils[i], reach * (1 - back));
-        const [tipX, tipY] = [BOX_LEFT + hit.to[0] + dx, BOX_TOP + hit.to[1] + dy];
-        // the spark on the growing tendril's tip (sparkOnPath() reads stage coordinates; the tendril is the box's)
-        if (t < at && reach > 0) {
-          const tip = s.tendrils[i].getPointAtLength(s.tendrils[i]._L * reach);
-          place(s.tips[i], BOX_LEFT + tip.x + dx, BOX_TOP + tip.y + dy, 1, Math.min(1, reach * 6));
+        draw(s.tendrils[i], grow * (1 - back));
+        // the spark on the growing tendril's tip (the tendril is drawn in the box's coordinates)
+        if (t < at && grow > 0) {
+          const tip = s.tendrils[i].getPointAtLength(s.tendrils[i]._L * grow);
+          place(s.tips[i], BOX_LEFT + tip.x + shakeX, BOX_TOP + tip.y, 1, Math.min(1, grow * 6));
         } else {
           place(s.tips[i], 0, 0, 1, 0);
         }
-        const flash = t >= at ? Math.max(0, 1 - (t - at) / 0.5) : 0;
-        place(s.wallFlashes[i], tipX, tipY, 1, flash);
-        placeRipples(s.impactRings[i], t, at, tipX, tipY, 12, 120, { d: 0.5 });
-        s.sparks[i].forEach((spark, k) => {
-          const u = (t - at) / SPARKS.d;
-          if (u < 0 || u >= 1) {
-            place(spark, 0, 0, 1, 0);
-            return;
-          }
-          const inward = Math.atan2(-hit.normal[1], -hit.normal[0]);
-          const angle = inward + (hash(i * 31 + k) - 0.5) * 2.4;
-          const dist = lerp(SPARKS.dist[0], SPARKS.dist[1], hash(i * 31 + k + 7)) * easeOut(u);
-          place(spark, tipX + Math.cos(angle) * dist, tipY + Math.sin(angle) * dist, 1, 1 - u);
-        });
+        placeRipples(s.probeRings[i], t, at, BOX_LEFT + reach.to[0] + shakeX, BOX_TOP + reach.to[1], 12, 110,
+          { d: 0.5 });
       });
-      // the glass cracks from every hit before the box is thrown away
-      s.cracks.forEach((crack, i) => draw(crack, P(t, c[3] + T3.crack + i * 0.05, 0.3)));
+      // the hit on the glass: the wall flashes red and sparks fly back into the box
+      const hit = REACHES[1].to;
+      const [hitX, hitY] = [BOX_LEFT + hit[0] + shakeX, BOX_TOP + hit[1]];
+      place(s.wallFlash, hitX, hitY, 1, t >= wallHitAt ? Math.max(0, 1 - (t - wallHitAt) / 0.5) : 0);
+      s.sparks.forEach((spark, k) => {
+        const u = (t - wallHitAt) / SPARKS.d;
+        if (u < 0 || u >= 1) {
+          place(spark, 0, 0, 1, 0);
+          return;
+        }
+        const inward = Math.atan2(-WALL_NORMAL[1], -WALL_NORMAL[0]);
+        const angle = inward + (hash(31 + k) - 0.5) * 2.4;
+        const dist = lerp(SPARKS.dist[0], SPARKS.dist[1], hash(38 + k)) * easeOut(u);
+        place(spark, hitX + Math.cos(angle) * dist, hitY + Math.sin(angle) * dist, 1, 1 - u);
+      });
+      // the glass cracks from the hit before the box is thrown away
+      s.cracks.forEach((crack, i) => draw(crack, P(t, c[3] + T3.crack + i * 0.06, 0.3)));
 
-      // ---------- the outcome: CONTAINED, and the Workflow carries on in the history
+      // ---------- the fresh box pops in, glass and badges ready, and shines once; the next step's code runs in it
+      const freshPop = backPop(t, c[3] + T3.fresh, 0.5);
+      const shown = { s: 1, o: 1 };
+      placeSandbox(s.freshBox, {
+        s: freshPop.s, o: freshPop.o, glass: shown, tiles: BOX_TOOLS.map(() => shown), badges: [shown, shown], t,
+        shineAt: c[3] + T3.fresh + 0.3, run: { o: P(t, codeRunsAt, 0.3), p: P(t, codeRunsAt, RUN.d, linear) },
+      });
+      s.freshBox.tiles.forEach((tile, i) => {
+        const runs = i === CODE_TOOL && t >= codeRunsAt;
+        setToolTone(tile, runs ? 'run' : null, P(t, codeRunsAt, 0.2));
+      });
+
+      // the providers pop in as the subtitle names them
+      PROVIDERS.forEach(({ at }, i) => {
+        const providerPop = popIn(t, c[2] + at);
+        place(s.providers[i], ...providerSpot(i), providerPop.s, providerPop.o);
+      });
+
+      // ---------- the outcome: CONTAINED; the Event History keeps its rows and records the new box, NOTHING LOST
       placeAgentTag(s.contained, t, c[3] + T3.contained, ...CONTAINED);
       fillHistoryStrip(s.history, t, [
         { at: c[2] + T2.row1, tag: 'SAVED', tone: 'saved' },
-        { at: c[2] + T2.row2, tag: null },
+        { at: c[2] + T2.row2, tag: 'SAVED', tone: 'saved' },
         { at: c[3] + T3.row3, tag: 'SAVED', tone: 'saved' },
       ]);
-      // the routed step's tag lands only once the box is thrown away
-      const routedTag = s.history.tags[1];
-      setStatus(routedTag, 'CONTAINED', 'safe');
-      routedTag.style.fontWeight = '700';
-      popScale(routedTag, popIn(t, c[3] + T3.rowTag));
+      const keptAt = c[3] + T3.kept;
+      const kept = P(t, keptAt, 0.3) * (1 - P(t, keptAt + 1.4, 0.6));
+      s.history.style.boxShadow = glowShadow(RGB.neon, kept, { blur: 40, alpha: 0.55, spread: 2 });
+      placeAgentTag(s.nothingLost, t, c[3] + T3.lost, ...NOTHING_LOST);
     }
   });
 }
