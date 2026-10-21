@@ -1,19 +1,21 @@
 // ===================== 3. KEYS OUT OF REACH
 // The case file slams in (APRIL 2026, 9 SECONDS) and gets its INCIDENT stamp, then pins to the top left corner as the
 // replay comes in: the coding agent on the left, its project files over its terminal in the middle, the stopwatch,
-// the production database and its backups on the right. The agent searches its files: the search lands on an old
-// notes file, which reveals a CLOUD KEY with full access; the key flies into a cloud API call the agent types in its
-// terminal; the call races to the database, which shatters, then its backups (the dramatic beat: red flashes, camera
-// shakes) as the stopwatch stops at 0:09. With Temporal, a glass SANDBOX closes round the same files and terminal,
-// without the old file: the same search finds nothing (NO KEY HERE) and the same call fails (no key, no internet).
-// Then the sandbox drops away and the database and its backups stay with their team: the PLATFORM TEAM's Namespace
-// (platform) closes round them and its Worker, which keeps the cloud key, locked. The agent's WORKFLOW checkpoint (in
-// its own Namespace, assistant) comes in on the left, and between the two a Temporal Nexus Endpoint, db-operations,
-// rises as a gate: its operations over its ALLOWLIST. The model asks to delete the database: the card passes the
-// checkpoint, stops in the Endpoint's doorway, where the allowlist lets assistant in (ALLOWED), and goes on into the
-// platform Namespace, where the handler holds it, as it cannot be undone (IRREVERSIBLE, NEEDS APPROVAL), and sends
-// the request to Maya's phone; the hours tick by, the platform Worker crashes and comes back while the step keeps
-// waiting, then Maya taps Reject: REJECTED BY MAYA, the Event History records it and the database stays whole (SAFE).
+// the production database and its backups on the right. The agent searches its files: the search lands on an
+// unrelated file, domains.env, which reveals a DOMAIN KEY with full access; the key flies into a cloud API call the
+// agent types in its terminal; the call races to the database, which shatters, then its backups (the dramatic beat:
+// red flashes, camera shakes) as the stopwatch stops at 0:09. With Temporal, a glass SANDBOX with NO INTERNET closes
+// round the same files and terminal, the key file included: the same search finds the key again, the same call
+// fails on the box's wall (no internet). Then the sandbox drops away and the database and its backups stay with
+// their team: the PLATFORM TEAM's Namespace (platform) closes round them and its Worker, which keeps the cloud key,
+// locked. The agent's WORKFLOW checkpoint (in its own Namespace, assistant) comes in on the left, the empty Event
+// History under it all, and between the two a Temporal Nexus Endpoint, db-operations, rises as a gate: its
+// operations over its ALLOWLIST. The model asks to delete the database: the card passes the checkpoint, stops in the
+// Endpoint's doorway, where the allowlist lets assistant in (ALLOWED), and goes on into the platform Namespace, where
+// the handler holds it, as it cannot be undone (IRREVERSIBLE, NEEDS APPROVAL), and sends the request to Maya's phone
+// (no answer by Friday 18:00: not run, on record); the hours tick by, the platform Worker crashes and comes back
+// while the step keeps waiting, then Maya taps Reject: REJECTED BY MAYA, the Event History records it and the
+// database stays whole (SAFE).
 // The camera zoom-through (setCamera) brings the scene in and plays into the next one; the hits shake it.
 // The block keeps every name declared in this file local to this scene.
 {
@@ -28,26 +30,28 @@
   // the first one, under the 44 px title bar; the pitch; the left inset; a tree level's indent; the typing speed of
   // the agent's commands (characters per second) and the pause between two typed lines
   const ROW = { top: 54, pitch: 30, left: 20, indent: 28 };
-  const LINE = { top: 54, pitch: 28, left: 20, cps: 90, sandboxCps: 120, gap: 0.05 };
+  const LINE = { top: 54, pitch: 28, left: 20, cps: 90, sandboxCps: 140, gap: 0.05 };
   // Noto Sans Mono advances 0.6 em per character: 10.8 px at the terminal's 18 px
   const CHAR_W = 0.6 * 18;
   // the coding agent (the AI model in the Temporal half), left of the terminal
   const AGENT = { x: 330, y: 545 };
-  // the right column of the replay, x 1420-1800: the stopwatch over the database and its backups
+  // the right column of the replay, x 1420-1800, lined up with the middle column (y 233-837): the stopwatch, its top
+  // on the files' top, over the database and its backups, the backups' bottom on the terminal's bottom
   const COL_X = 1610, COL_W = 380;
-  const TIMER = { x: COL_X, y: 380, w: COL_W, h: 116, seconds: 9 };
-  const DB = { x: COL_X, y: 608, w: COL_W, h: 152 };
-  const BACKUPS = { x: COL_X, y: DB.y + DB.h + 20, w: COL_W, h: DB.h };
+  const TIMER = { x: COL_X, y: FILES.y - FILES.h / 2 + 58, w: COL_W, h: 116, seconds: 9 };
+  const BACKUPS = { x: COL_X, y: TERM.y + TERM.h / 2 - 76, w: COL_W, h: 152 };
+  const DB = { x: COL_X, y: BACKUPS.y - BACKUPS.h - 20, w: COL_W, h: BACKUPS.h };
   // the shards of a shattered tile: a grid of cells, each cut into two triangles, its inner corners jittered
   const SHARDS = { cols: 4, rows: 3, jitter: 0.45, gravity: 1300 };
 
-  // ---------- the project files: the tree's rows (icon, name, level), the old notes file that holds the key
-  // (KEY_FILE), and the search hit that opens under it, in the slot after it, pushing the rows below down
+  // ---------- the project files: the tree's rows (icon, name, level), the unrelated file that holds the key, made for
+  // managing domains (KEY_FILE), and the search hit that opens under it, in the slot after it, pushing the rows below
+  // down
   const FILE_ROWS = [
     { icon: 'folder', name: 'shop-app', level: 0 },
     { icon: 'folder', name: 'src', level: 1 },
     { icon: 'folder', name: 'config', level: 1 },
-    { icon: 'file', name: 'old-deploy-notes.txt', level: 1 },
+    { icon: 'file', name: 'domains.env', level: 1 },
     { icon: 'file', name: 'package.json', level: 1 },
     { icon: 'file', name: 'README.md', level: 1 },
   ];
@@ -64,15 +68,14 @@
   const KEY_PREFIX = '    -H "Authorization: Bearer ';
   const KEY_LINE = [[KEY_PREFIX, C.ink], ['7f3a…', C.red], ['" \\', C.ink]];
   const BODY_LINE = [["    -d 'mutation { volumeDelete(…) }'", C.ink]];
+  const HIT_LINE = [['domains.env: ', C.slate], ['DOMAIN_TOKEN=7f3a…', C.red]];
   // the replay: the task, the search and its hit, the call with the key, then the cloud's answer
   const REPLAY_LINES = [
-    TASK_LINE, GREP_LINE, [['old-deploy-notes.txt: ', C.slate], ['TOKEN=7f3a…', C.red]],
-    ...CURL_HEAD, KEY_LINE, BODY_LINE, [['{"data":{"volumeDelete":true}}', C.red]],
+    TASK_LINE, GREP_LINE, HIT_LINE, ...CURL_HEAD, KEY_LINE, BODY_LINE, [['{"data":{"volumeDelete":true}}', C.red]],
   ];
-  // the sandbox, under the same task line: the same search finds nothing, the same call (with no key to add) fails
-  const SANDBOX_LINES = [
-    GREP_LINE, [['(no match)', C.slate]], ...CURL_HEAD, BODY_LINE, [['error: no key · no internet', C.red]],
-  ];
+  // the sandbox, under the same task line: the same search finds the key again, the same call with it fails, as the
+  // box has no internet
+  const SANDBOX_LINES = [GREP_LINE, HIT_LINE, ...CURL_HEAD, KEY_LINE, BODY_LINE, [['error: no internet', C.red]]];
   // the number of characters of a line
   const lineLength = runs => runs.reduce((n, [text]) => n + text.length, 0);
   // The start of each line of a block typed one after the other at cps, in seconds from the start of the block,
@@ -86,12 +89,14 @@
     });
     return { starts, end: at - LINE.gap };
   };
-  // the replay's call (lines 3 to 6) and the sandbox's (lines 2 to 4 of SANDBOX_LINES)
+  // the replay's call (lines 3 to 6) and the sandbox's (lines 2 to 5 of SANDBOX_LINES): the same four lines on the
+  // same terminal lines
   const REPLAY_CALL = typeSchedule(REPLAY_LINES.slice(3, 7), LINE.cps);
-  const SANDBOX_CALL = typeSchedule(SANDBOX_LINES.slice(2, 5), LINE.sandboxCps);
-  // when the key gets typed into the call, from the call's start, and the stage center of its first four characters,
-  // where the key token lands
+  const SANDBOX_CALL = typeSchedule(SANDBOX_LINES.slice(2, 6), LINE.sandboxCps);
+  // when the key gets typed into each call, from the call's start, and the stage center of its first four
+  // characters, where the key token lands
   const KEY_TYPED = REPLAY_CALL.starts[2] + KEY_PREFIX.length / LINE.cps;
+  const SANDBOX_KEY_TYPED = SANDBOX_CALL.starts[2] + KEY_PREFIX.length / LINE.sandboxCps;
   const lineY = i => TERM.y - TERM.h / 2 + TILE_BORDER + LINE.top + i * LINE.pitch + LINE.pitch / 2;
   const KEY_SPOT = [Math.round(TERM.x - TERM.w / 2 + TILE_BORDER + LINE.left + (KEY_PREFIX.length + 2) * CHAR_W),
     lineY(5)];
@@ -100,39 +105,43 @@
   const TOKEN_ROUTE = [HIT_ICON, [HIT_ICON[0] + 200, HIT_ICON[1] + 40], [KEY_SPOT[0] + 60, KEY_SPOT[1] - 160],
     KEY_SPOT];
   // the call's lane, from the terminal's right edge (at the key's line) to the database's left edge; in the sandbox
-  // the call hits the box's right wall, level with the call's middle line
+  // the call hits the box's right wall, level with the key's line
   const LANE_D = sCurveD(TERM.x + TERM.w / 2, lineY(5), DB.x - DB.w / 2, DB.y);
-  const WALL = [BOX.x + BOX.w / 2, lineY(3)];
-  // the NO KEY HERE tag, in the files, centered in the room under the five rows left once the old file is gone
-  const NO_KEY = [FILES.x,
-    FILES.y - FILES.h / 2 + TILE_BORDER + (ROW.top + 5 * ROW.pitch + FILES.h - 2 * TILE_BORDER) / 2];
+  const WALL = [BOX.x + BOX.w / 2, lineY(5)];
   // the cursor shown while a line types
   const CURSOR = '<span style="display:inline-block;width:10px;height:20px;margin-left:1px;vertical-align:-4px;'
     + `background:${C.ink}"></span>`;
 
   // ---------- the Temporal half once the sandbox drops away: one lane (LANE_Y) from the model through the agent's
-  // WORKFLOW checkpoint (CP) and the Nexus Endpoint's gate (GATE, its two tiles as tall as the checkpoint's posts,
-  // its doorway as tall as the checkpoint's opening) into the platform team's Namespace (PLATFORM, x 1060-1800), 50 px
-  // apart. In the Namespace, 24 px in: its heading row; on the right, a column of the Worker (WORKER) over the
-  // database (on the lane) and its backups; on the left, the handler's spot (HOLD), where the card waits, its verdict
-  // tag 20 px above it, its IRREVERSIBLE flag 20 px under it and the waiting clock 20 px under that. The Event History
-  // under the checkpoint and the gate, its left edge on the checkpoint's; Maya's phone on the left, its bottom on the
-  // Event History's; the model on the lane, then stepped aside above the phone at 2/3 of its size. The agent's
-  // Namespace label under the checkpoint and the ALLOWED tag under the gate share a line.
+  // WORKFLOW checkpoint (CP) and the Nexus Endpoint's gate (GATE, its two tiles spanning the checkpoint's height, its
+  // doorway 10 px short of the checkpoint's opening) into the platform team's Namespace (PLATFORM, x 1060-1800, its
+  // top on the checkpoint's, its bottom on the ALLOWED tag's), 40 px apart. In the Namespace, 24 px in: its heading
+  // row; on the right, 20 px under the heading, a column of the Worker (WORKER) over the database and its backups, 20
+  // px apart; on the left, the handler's spot (HOLD), where the card waits, its verdict tag 24 px above it, its
+  // IRREVERSIBLE flag 24 px under it and the waiting clock 24 px under that. The lane runs to the handler, then bends
+  // into the database's middle. The Event History under it all, 30 px down, from the checkpoint's left edge to the
+  // Namespace's right edge; Maya's phone on the left, its bottom on the Event History's; the model on the lane, then
+  // stepped aside above the phone at 2/3 of its size. The agent's Namespace label under the checkpoint and the
+  // ALLOWED tag under the gate share a line.
   const LANE_Y = 390;
   const CP = { x: 620, y: LANE_Y, h: 400 };
-  const GATE = { x: 890, w: 240, tileH: (CP.h - CHECKPOINT.gap) / 2 };
-  const PLATFORM = { x: 1430, y: 404, w: 740, h: 488, inset: 24 };
+  const GATE = { x: 890, w: 260, tileH: 140, gap: CP.h - 2 * 140 };
+  const PLATFORM = { x: 1430, y: 420, w: 740, h: 460, inset: 24 };
+  const PLATFORM_TOP = PLATFORM.y - PLATFORM.h / 2;
   const COLUMN = { x: 1590, w: 372 };
-  const WORKER = { x: COLUMN.x, y: 268, w: COLUMN.w, h: 68 };
-  const DB_SAFE = { x: COLUMN.x, y: LANE_Y, w: COLUMN.w, h: 136 };
+  // the heading row: 20 px down, 34 px high
+  const WORKER = { x: COLUMN.x, y: PLATFORM_TOP + 20 + 34 + 20 + 34, w: COLUMN.w, h: 68 };
+  const DB_SAFE = { x: COLUMN.x, y: WORKER.y + WORKER.h / 2 + 20 + 63, w: COLUMN.w, h: 126 };
   const BACKUPS_SAFE = { x: COLUMN.x, y: DB_SAFE.y + DB_SAFE.h + 20, w: COLUMN.w, h: DB_SAFE.h };
   const HOLD = { x: 1240, y: LANE_Y };
-  const VERDICT_Y = HOLD.y - ACTION_CARD.h / 2 - 20 - AGENT_TAG.h / 2;
-  const FLAG_Y = HOLD.y + ACTION_CARD.h / 2 + 20 + AGENT_TAG.h / 2;
-  const CLOCK = { x: HOLD.x, y: FLAG_Y + AGENT_TAG.h / 2 + 20 + 28, w: 240, h: 56 };
-  const HISTORY = { x: CP.x - CHECKPOINT.w / 2 + BOARD.history.w / 2, y: BOARD.history.y };
-  const PHONE = { x: 300, y: HISTORY.y + BOARD.history.h / 2 - APPROVAL_CARD.h / 2 };
+  const VERDICT_Y = HOLD.y - ACTION_CARD.h / 2 - 24 - AGENT_TAG.h / 2;
+  const FLAG_Y = HOLD.y + ACTION_CARD.h / 2 + 24 + AGENT_TAG.h / 2;
+  const CLOCK = { x: HOLD.x, y: FLAG_Y + AGENT_TAG.h / 2 + 24 + 28, w: 240, h: 56 };
+  const HISTORY_LEFT = CP.x - CHECKPOINT.w / 2, HISTORY_RIGHT = PLATFORM.x + PLATFORM.w / 2;
+  const HISTORY = {
+    x: (HISTORY_LEFT + HISTORY_RIGHT) / 2, y: BOARD.history.y, w: HISTORY_RIGHT - HISTORY_LEFT, h: BOARD.history.h,
+  };
+  const PHONE = { x: 300, y: HISTORY.y + HISTORY.h / 2 - APPROVAL_CARD.h / 2 };
   const ORB_LANE = { x: PHONE.x, y: LANE_Y };
   const ORB_ASIDE = { x: PHONE.x, y: 226, scale: 2 / 3 };
   const UNDER_Y = 630;
@@ -140,26 +149,33 @@
   // centers a 20 px heading row, an 18 px line (Temporal Cloud) 2 px under it, then a 10 px gap and the row, 100 px
   // in all, so the row's middle sits 25 px under the tile's
   const ALLOW_ROW = { w: 172, h: 50 };
-  const ALLOW_ROW_Y = LANE_Y + CHECKPOINT.gap / 2 + GATE.tileH / 2 + 25;
-  // the SAFE tag, in the database tile's top right corner; the CRASH tag outside the Worker tile, 20 px left of it,
-  // 2 px above its top edge, so it stays 20 px clear of NEEDS APPROVAL under it
+  const ALLOW_ROW_Y = LANE_Y + GATE.gap / 2 + GATE.tileH / 2 + 25;
+  // the lane from the gate: along LANE_Y to the handler's spot (under the held card), then an S-curve into the
+  // middle of the database's left edge
+  const COLUMN_LEFT = COLUMN.x - COLUMN.w / 2;
+  const LANE_BEND = (HOLD.x + COLUMN_LEFT) / 2;
+  const ZONE_LANE_D = `M ${GATE.x + GATE.w / 2} ${LANE_Y} H ${HOLD.x} `
+    + `C ${LANE_BEND} ${LANE_Y} ${LANE_BEND} ${DB_SAFE.y} ${COLUMN_LEFT} ${DB_SAFE.y}`;
+  // the SAFE tag, in the database tile's top right corner; the CRASH tag in the middle of the Worker tile, which goes
+  // dark under it (NEEDS APPROVAL leaves no room beside the tile)
   const SAFE_X = DB_SAFE.x + DB_SAFE.w / 2 - 20 - agentTagWidth('SAFE') / 2;
   const SAFE_Y = DB_SAFE.y - DB_SAFE.h / 2 + 16 + AGENT_TAG.h / 2;
-  const CRASH_X = WORKER.x - WORKER.w / 2 - 20 - agentTagWidth('CRASH') / 2;
-  const CRASH_Y = WORKER.y - WORKER.h / 2 - 2 + AGENT_TAG.h / 2;
+  const CRASH_X = WORKER.x, CRASH_Y = WORKER.y;
   // the card's route: out of the stepped-aside model down onto the lane, then along it to the Endpoint's doorway
   // (where it stops), then on to the handler's spot; it crosses the checkpoint's middle at a fraction of its first
   // leg (CROSS_CP, along the route), from which update() finds when the checkpoint lets it pass
   const ROUTE = [[ORB_ASIDE.x, ORB_ASIDE.y], [ORB_ASIDE.x + 120, LANE_Y], [GATE.x, LANE_Y]];
   const ROUTE_DROP = Math.hypot(ROUTE[1][0] - ROUTE[0][0], ROUTE[1][1] - ROUTE[0][1]);
   const CROSS_CP = (ROUTE_DROP + CP.x - ROUTE[1][0]) / (ROUTE_DROP + GATE.x - ROUTE[1][0]);
-  // the clock's start (Wednesday 10:00) and the time Maya answers, in minutes from it (Thursday 16:20)
+  // the clock's start (Wednesday 10:00) and the time Maya answers, in minutes from it (Thursday 16:20); the deadline
+  // on Maya's phone, and what the Event History records happens at it
   const WAIT = { startMin: 10 * 60, answerMin: 30 * 60 + 20, days: ['WED', 'THU', 'FRI'] };
+  const DEADLINE = 'Answer by Friday 18:00';
 
   // the subtitles of the Temporal half; the times of words in them, at 16 characters per second plus 0.3 s
-  const SUB_NEXUS = 'With Temporal, the sandbox holds no key. The database stays with its team, reachable only through '
-    + '<b>Nexus</b>.';
-  const SUB_MAYA = 'Only allowed agents get in, and a step that cannot be undone waits for a person: Maya says no, '
+  const SUB_NEXUS = 'With Temporal, the box cannot reach the cloud, key or not. The database stays with its team, '
+    + 'behind <b>Nexus</b>.';
+  const SUB_MAYA = 'Only listed teams get in, and a step that cannot be undone waits for a person: Maya says no, '
     + 'on record.';
   const wordAt = (text, word) => text.replace(/<[^>]+>/g, '').indexOf(word) / 16 + 0.3;
 
@@ -170,35 +186,38 @@
     file: 0.2, pin: 4.2, pinD: 0.8, agent: 4.6, files: 4.8, rows: 5.0, rowStep: 0.06, term: 5.0, task: 5.4,
     db: 5.2, backups: 5.3, timer: 5.4, lane: 5.6,
   };
-  // from c[1]: the agent types its search; the highlight sweeps the rows down to the old file (found), the search's
-  // hit prints, the hit opens under the file as "full access" is read (reveal); the agent types the call (curl), the
-  // key token flying into it as it is typed; Enter (enter after the call is typed): the call races to the database
-  // (goD), which shatters, then its backups `chain` s later as the stopwatch stops; the outlines of what was lost
+  // from c[1]: the agent types its search; the highlight sweeps the rows down to the key file (found), the search's
+  // hit prints, the hit opens under the file as "made for domains" is read (reveal); the agent types the call (curl),
+  // the key token flying into it as it is typed; Enter (enter after the call is typed): the call races to the
+  // database (goD), which shatters, then its backups `chain` s later as the stopwatch stops; the outlines of what was
+  // lost
   const T1 = {
-    grep: 0, sweep: 0.3, sweepD: 0.7, result: 1.05, reveal: 1.5, revealD: 0.3, curl: 2.3, flyD: 0.8, enter: 0.25,
+    grep: 0, sweep: 0.3, sweepD: 0.7, result: 1.05, reveal: 1.8, revealD: 0.3, curl: 2.6, flyD: 0.8, enter: 0.25,
     goD: 0.8, chain: 0.25, lost: 0.6,
   };
-  // from c[2]: the replay leaves (out); the old file and its hit fade (fold), then the rows below slide up (slide);
-  // the sandbox closes round the files and the terminal (box), its sheen sweeps (shine); the database and the
-  // backups come back, in the platform team's column; the same search (grep, sweep) finds nothing (noMatch, noKey);
-  // the same call (curl) fails on the wall. The sandbox drops away (away) as the model moves onto the lane (orb); the
-  // platform Namespace closes round the database (zone), its Worker pops (worker) and its key locks (lock); the
-  // checkpoint (cp) and its Namespace label (ns) come in, the lane from the model draws (orbLane); the Endpoint's gate
-  // rises (gate), the lanes to it and from it draw (cpLane, zoneLane) and it glows as "Nexus" is read (nexus)
+  // from c[2]: the replay leaves (out); the hit folds back into the key file (fold); the sandbox closes round the
+  // files and the terminal (box), its sheen sweeps (shine); the database and the backups come back, in the platform
+  // team's column; the same search (grep, sweep) finds the key again: its hit prints (result) and opens under the
+  // file again (reopen); the same call (curl), the key flying into it, fails on the wall (no internet). The sandbox
+  // drops away (away) as the model moves onto the lane (orb); the platform Namespace closes round the database (zone),
+  // its Worker pops (worker) and its key locks (lock); the empty Event History rises (history); the checkpoint (cp)
+  // and its Namespace label (ns) come in, the lane from the model draws (orbLane); the Endpoint's gate rises (gate),
+  // the lanes to it and from it draw (cpLane, zoneLane) and it glows as "Nexus" is read (nexus)
   const T2 = {
-    out: 0, outD: 0.6, fold: 0.3, foldD: 0.3, slide: 0.55, slideD: 0.45, box: 0.5, boxD: 0.6, shine: 0.9,
-    db: 0.7, backups: 0.8, grep: 1.2, sweep: 1.45, sweepD: 0.6, noMatch: 2.1, noKey: 2.2, curl: 2.2,
-    away: 4.0, awayD: 0.5, orb: 4.0, orbD: 0.7, zone: 4.3, zoneD: 0.6, worker: 4.7, lock: 5.2, cp: 5.0, ns: 5.2,
-    orbLane: 5.3, gate: 5.6, gateD: 0.5, cpLane: 5.9, zoneLane: 6.1, nexus: wordAt(SUB_NEXUS, 'Nexus'),
+    out: 0, outD: 0.6, fold: 0.3, foldD: 0.4, box: 0.5, boxD: 0.6, shine: 0.9, db: 0.7, backups: 0.8,
+    grep: 1.2, sweep: 1.4, sweepD: 0.6, result: 2.05, reopen: 2.1, reopenD: 0.3, curl: 2.5,
+    away: 4.4, awayD: 0.5, orb: 4.4, orbD: 0.7, zone: 4.6, zoneD: 0.6, worker: 5.0, lock: 5.5, history: 4.9,
+    cp: 5.1, ns: 5.3, orbLane: 5.4, gate: 5.6, gateD: 0.5, cpLane: 5.9, zoneLane: 6.1,
+    nexus: wordAt(SUB_NEXUS, 'Nexus'),
   };
-  // from c[3]: the model steps up and aside (aside) and the Event History rises (history); the card grows out of the
-  // model (card) and goes to the Endpoint's doorway (go), passing the checkpoint; there the allowlist row lights and
-  // ALLOWED lands (allowed, after it arrives); it goes on to the handler (leave), which holds it; IRREVERSIBLE lands
-  // under it (flag, after the hold), NEEDS APPROVAL above it (needs); Maya's phone rises, a violet spark reaches it,
-  // the request slides up on its screen; the waiting clock pops in and runs; the platform Worker crashes and comes
-  // back; Maya taps Reject, a red spark carries it back to the card; the history row, then SAFE
+  // from c[3]: the model steps up and aside (aside); the card grows out of the model (card) and goes to the
+  // Endpoint's doorway (go), passing the checkpoint; there the allowlist row lights and ALLOWED lands (allowed, after
+  // it arrives); it goes on to the handler (leave), which holds it; IRREVERSIBLE lands under it (flag, after the
+  // hold), NEEDS APPROVAL above it (needs); Maya's phone rises, a violet spark reaches it, the request slides up on
+  // its screen; the waiting clock pops in and runs; the platform Worker crashes and comes back; Maya taps Reject, a
+  // red spark carries it back to the card; the history row, then SAFE
   const T3 = {
-    aside: 0, asideD: 0.6, history: 0.1, card: 0.4, go: 0.6, goD: 1.0, allowed: 0.1, leave: 1.95, leaveD: 0.5,
+    aside: 0, asideD: 0.6, card: 0.4, go: 0.6, goD: 1.0, allowed: 0.1, leave: 1.95, leaveD: 0.5,
     flag: 0.5, needs: 1.05, phone: 2.9, spark: 3.7, sparkD: 0.5, screen: 4.2, rowAsked: 4.4, clock: 3.9, run: 4.1,
     crash: 4.8, crashD: 0.9, reject: 5.9, back: 6.0, backD: 0.4, row: 6.7, safe: 7.1,
   };
@@ -212,6 +231,16 @@
     width: box.w + 'px', height: box.h + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center',
   });
+
+  // The Event History: the board's strip (makeHistoryStrip, same rows and tags) at HISTORY's size, wider than the
+  // board's; uvRow(i): whether row i reads in UV. Hidden until placed; fill it with fillHistoryStrip().
+  const makeWideHistory = (root, rowsHtml, uvRow) => {
+    const { rowTop, pitch, rowH, font } = HISTORY_STRIP;
+    return makeHistoryCard(root, rowsHtml, {
+      w: HISTORY.w, h: HISTORY.h, uvRow, headerFont: 16, rowTop: i => rowTop + i * pitch, font, rowH, padY: 2,
+      tagTop: i => rowTop + i * pitch + 3, tagRight: 30, tag: { font: 14, padY: 3, icon: 14 },
+    });
+  };
 
   // The shards of a tile (box, its content html(color)): copies of the red tile clipped to triangles of a jittered
   // grid. Each one keeps its centroid (its rotation origin) and a velocity away from the point of impact `hit` ([x,
@@ -302,9 +331,9 @@
     row.style.visibility = o > 0 ? 'visible' : 'hidden';
   };
 
-  // The search hit under the old file: a red chip, a key icon and CLOUD KEY · full access, one level deeper
+  // The search hit under the key file: a red chip, a key icon and DOMAIN KEY · full access, one level deeper
   const makeHit = parent => E(parent,
-    `${ICON('key', 20, C.red, 2)}<span>CLOUD KEY · full access</span>`,
+    `${ICON('key', 20, C.red, 2)}<span>DOMAIN KEY · full access</span>`,
     'mono', {
       left: (ROW.left + 2 * ROW.indent) + 'px', top: (ROW.top + (KEY_FILE + 1) * ROW.pitch + 2) + 'px',
       height: (ROW.pitch - 4) + 'px', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px',
@@ -338,19 +367,28 @@
   });
 
   // The SANDBOX: a glass box (a pale border, a faint fill, a sheen that sweeps across it on cue) with its heading at
-  // its top left corner (the sandbox icon and SANDBOX); box.sheen, the sheen
+  // its top left corner (the sandbox icon and SANDBOX) and its NO INTERNET badge at its top right corner (the
+  // no-network icon and the label in a pill, ch2's badge in short), which turns red as the call hits the wall;
+  // box.sheen, the sheen; box.badge, the badge, with its icon and label
   const makeSandbox = root => {
     const { w, h, border } = BOX;
     const box = E(root,
       `<div style="position:absolute;left:${24 - border}px;top:${18 - border}px;height:34px;display:flex;`
       + `align-items:center;gap:10px">${ICON('sandbox', 22, C.ink, 1.8)}<span class="lbl" style="padding-left:0;`
-      + 'font-size:18px;color:var(--ink)">Sandbox</span></div>',
+      + 'font-size:18px;color:var(--ink)">Sandbox</span></div>'
+      + `<div class="badge" style="position:absolute;right:${24 - border}px;top:${18 - border}px;height:34px;`
+      + 'display:flex;align-items:center;gap:8px;padding:0 12px;border:2px solid;border-radius:var(--rs)">'
+      + `${ICON('wifiOff', 20, C.ink, 1.8)}<span class="lbl" style="padding-left:0;font-size:16px">No internet</span>`
+      + '</div>',
       '', {
         width: w + 'px', height: h + 'px', border: `${border}px solid rgba(${RGB.ink},.55)`,
         borderRadius: 'var(--r)', overflow: 'hidden',
         background: `linear-gradient(135deg, rgba(${RGB.ink},.12) 0%, rgba(${RGB.ink},.04) 38%, `
           + `rgba(${RGB.uv},.1) 100%)`,
       });
+    box.badge = box.querySelector('.badge');
+    box.badge.icon = box.badge.querySelector('svg');
+    box.badge.label = box.badge.querySelector('.lbl');
     box.sheen = E(box, '', '', {
       width: '140px', height: (h + 240) + 'px',
       background: `linear-gradient(90deg, rgba(${RGB.ink},0), rgba(${RGB.ink},.22), rgba(${RGB.ink},0))`,
@@ -364,7 +402,7 @@
     const tile = E(root,
       `${ICON('key', 28, C.ink, 1.8)}<div style="flex:1;text-align:left">`
       + '<div class="lbl" style="font-size:16px;line-height:20px;color:var(--ink)">Cloud key</div>'
-      + `<div class="mono" style="font-size:16px;line-height:20px;margin-top:4px;color:${C.slate}">`
+      + `<div class="mono" style="font-size:18px;line-height:22px;margin-top:4px;color:${C.slate}">`
       + "on the team's Worker</div></div><div class=\"lockbox\">" + lockSvg(30, { stroke: 2, color: C.ink }) + '</div>',
       'tile', {
         width: WORKER.w + 'px', height: WORKER.h + 'px', display: 'flex', alignItems: 'center', gap: '16px',
@@ -389,8 +427,8 @@
     `<div class="mono" style="font-size:14px;line-height:18px;letter-spacing:.14em;padding-left:.14em;`
     + `color:${C.violet}">NEXUS ENDPOINT</div>`
     + '<div class="mono" style="font-size:20px;line-height:26px;margin-top:4px;color:var(--ink)">db-operations</div>'
-    + `<div class="mono" style="font-size:16px;line-height:20px;margin-top:10px;color:${C.slate}">delete volume</div>`
-    + `<div class="mono" style="font-size:16px;line-height:20px;color:${C.slate}">restore backup</div>`);
+    + `<div class="mono" style="font-size:18px;line-height:22px;margin-top:10px;color:${C.slate}">delete volume</div>`
+    + `<div class="mono" style="font-size:18px;line-height:22px;color:${C.slate}">restore backup</div>`);
   // The gate's bottom tile: ALLOWLIST, "in Temporal Cloud" (the Endpoint allowlist is a Temporal Cloud feature),
   // and its one row, the agent's Namespace: NAMESPACE over assistant (tile.row, its check tile.check)
   const makeAllowlistTile = root => {
@@ -457,11 +495,12 @@
       { text: "April 2026: a coding agent deleted a company's production database and its backups, in 9 seconds." },
       // the backups shatter, then a short hold on the loss
       {
-        text: "It found a forgotten key with full access in the project files, and called the cloud on its own.",
-        after: 0.4,
+        text: 'It found a key in an unrelated file, made for domains but with full access, and called the cloud '
+          + 'itself.',
+        after: 0.6,
       },
       // the Endpoint glows as "Nexus" is read, then a short hold on the setting
-      { text: SUB_NEXUS, after: 0.3 },
+      { text: SUB_NEXUS, after: 0.5 },
       // Maya's no, the history row and SAFE, then a hold
       { text: SUB_MAYA, after: 1.6 },
     ],
@@ -487,7 +526,7 @@
       s.backupsShards = makeShards(root, BACKUPS, BACKUPS_HTML, [BACKUPS.w / 2, 0]);
 
       // the middle column, in a stage-size group that drops away with the sandbox: the sandbox, the project files
-      // (rows, search highlight, the hit, NO KEY HERE) and the terminal (the task line, the replay's lines, the
+      // (rows, search highlight, the hit) and the terminal (the task line, the replay's lines, the
       // sandbox's lines), the ripples of the call hitting the wall
       s.middle = E(root, '', '', { width: '1920px', height: '1080px', opacity: 1 });
       s.box = makeSandbox(s.middle);
@@ -498,7 +537,6 @@
       });
       s.rows = FILE_ROWS.map(row => makeRow(s.files, row));
       s.hit = makeHit(s.files);
-      s.noKey = agentTag('NO KEY HERE', 'neon', s.middle);
       s.term = makeWindow(s.middle, TERM, 'terminal', 'Terminal', '#0E0F13');
       s.taskLine = makeLine(s.term, 0);
       s.replayLines = REPLAY_LINES.slice(1).map((_, i) => makeLine(s.term, i + 1));
@@ -514,7 +552,7 @@
       const cpLeft = CP.x - CHECKPOINT.w / 2, cpRight = CP.x + CHECKPOINT.w / 2;
       s.orbLane = path(s.svg, `M ${ORB_LANE.x + BOARD.model.size / 2 + 16} ${LANE_Y} H ${cpLeft}`, C.line, 2, false);
       s.cpLane = path(s.svg, `M ${cpRight} ${LANE_Y} H ${GATE.x - GATE.w / 2}`, C.line, 2, false);
-      s.zoneLane = path(s.svg, `M ${GATE.x + GATE.w / 2} ${LANE_Y} H ${COLUMN.x - COLUMN.w / 2}`, C.line, 2, false);
+      s.zoneLane = path(s.svg, ZONE_LANE_D, C.line, 2, false);
       s.callSpark = makeSpark(root, 22, RGB.red);
 
       // the checkpoint and its Namespace's name under it; the Endpoint's gate and ALLOWED under it
@@ -530,12 +568,15 @@
       // it steps aside), the Event History
       s.orbMount = E(root, '', 'cam', { width: 0, height: 0, opacity: 1 });
       s.orb = makeModelOrb(s.orbMount, { x: 0, y: 0, size: BOARD.model.size, label: 'CODING AGENT' });
-      s.history = makeHistoryStrip(root, [
-        '<b>model</b> asks: delete volume prod-db', 'approval sent to Maya', '<b>delete volume prod-db</b>',
-      ], { uvRow: i => i === 0 });
+      s.history = makeWideHistory(root, [
+        '<b>model</b> asks: delete volume prod-db', 'approval sent to Maya · no answer by Friday 18:00: not run',
+        '<b>delete volume prod-db</b>',
+      ], i => i === 0);
 
       // the held card, its tags, the waiting clock; the stopwatch; the key token
       s.card = makeActionCard(root, { tool: 'delete volume', arg: 'prod-db' });
+      // its argument at the values' 18 px (the toolkit's card sets 17; the tool name sets the card's width)
+      s.card.el.querySelectorAll('.mono')[1].style.fontSize = '18px';
       s.flag = agentTag('IRREVERSIBLE', 'red', root);
       s.needs = agentTag('NEEDS APPROVAL', 'violet', root);
       s.rejected = agentTag('REJECTED BY MAYA', 'red', root);
@@ -551,8 +592,11 @@
       s.phone = makeApprovalCard(root, {
         who: 'Maya',
         question: 'Delete volume <span style="white-space:nowrap">prod-db</span>, the production database?',
-        deadline: 'Answer by Friday 18:00',
+        deadline: DEADLINE,
       });
+      // the deadline at the values' 18 px (the toolkit's phone sets 16)
+      const deadline = [...s.phone.el.querySelectorAll('span')].find(e => e.textContent === DEADLINE);
+      Object.assign(deadline.style, { fontSize: '18px', lineHeight: '22px' });
       s.toPhone = makeSpark(root, 18, RGB.violet);
       s.toCard = makeSpark(root, 18, RGB.red);
       s.phoneRipples = makeRipples(root, 2, RGB.violet);
@@ -577,8 +621,10 @@
       const goAt = curlAt + REPLAY_CALL.end + T1.enter;
       const hitAt = goAt + T1.goD;
       const backupsAt = hitAt + T1.chain;
-      // the sandbox's call fails on the wall once typed
+      // the sandbox's call: the key typed into it at sandboxKeyAt (the token lands then); it fails on the wall once
+      // typed
       const sandboxCallAt = c[2] + T2.curl;
+      const sandboxKeyAt = sandboxCallAt + SANDBOX_KEY_TYPED;
       const failAt = sandboxCallAt + SANDBOX_CALL.end + 0.1;
       // the Temporal half's call: the card crosses the checkpoint (passAt), reaches the Endpoint's doorway (gateAt),
       // is let in (allowAt), reaches the handler, which holds it (holdAt); the platform Worker's crash, Maya's no,
@@ -618,53 +664,59 @@
       s.middle.style.visibility = away >= 1 ? 'hidden' : 'visible';
 
       // the sandbox closes round the files and the terminal, its sheen sweeps across it; its border flashes red as
-      // the call hits its wall
+      // the call hits its wall, and its NO INTERNET badge turns red and stays red
       const boxIn = P(t, c[2] + T2.box, T2.boxD);
       const wallRed = win(t, failAt, failAt + 0.5, 0.08);
       place(s.box, BOX.x, BOX.y, lerp(1.04, 1, boxIn), boxIn);
       s.box.style.borderColor = wallRed > 0.5 ? C.red : `rgba(${RGB.ink},.55)`;
       s.box.style.boxShadow = glowShadow(RGB.red, wallRed, { blur: 40, alpha: 0.6 });
+      const blocked = t >= failAt;
+      const badgeColor = blocked ? C.red : C.ink;
+      s.box.badge.style.borderColor = blocked ? C.red : `rgba(${RGB.ink},.55)`;
+      s.box.badge.style.background = blocked ? `rgba(${RGB.red},.14)` : 'transparent';
+      s.box.badge.style.transform = `scale(${swell(t, failAt, 0.2).toFixed(3)})`;
+      s.box.badge.icon.setAttribute('stroke', badgeColor);
+      s.box.badge.label.style.color = badgeColor;
       const sweep = P(t, c[2] + T2.shine, 0.6, linear);
       s.box.sheen.style.opacity = sweep > 0 && sweep < 1 ? 1 : 0;
       s.box.sheen.style.transform = `translate(${Math.round(lerp(-220, BOX.w + 80, sweep))}px,-120px) rotate(20deg)`;
       placeRipples(s.wallRipples, t, failAt, WALL[0], WALL[1], 30, 200, { d: 0.7, step: 0.15 });
 
-      // the project files pop in, then their rows one by one; the hit opens under the old file and pushes the rows
-      // below it down; in the sandbox the old file and its hit fold away and the rows below slide back up
+      // the project files pop in, then their rows one by one; the hit opens under the key file and pushes the rows
+      // below it down; as the replay leaves it folds back into the file, the rows below sliding back up, and the
+      // sandbox's search opens it again
       const filesPop = backPop(t, c[0] + T0.files);
       place(s.files, FILES.x, FILES.y, filesPop.s, filesPop.o);
       const open = P(t, c[1] + T1.reveal, T1.revealD);
       const fold = P(t, c[2] + T2.fold, T2.foldD);
-      const slide = P(t, c[2] + T2.slide, T2.slideD);
-      const found = t >= c[1] + T1.sweep + T1.sweepD;
+      const reopen = P(t, c[2] + T2.reopen, T2.reopenD);
+      const hitOpen = open * (1 - fold) + reopen;
+      const sandboxFound = c[2] + T2.sweep + T2.sweepD;
+      const found = (t >= c[1] + T1.sweep + T1.sweepD && t < c[2] + T2.fold) || t >= sandboxFound;
       s.rows.forEach((row, i) => {
         const shown = P(t, c[0] + T0.rows + i * T0.rowStep, 0.3);
-        let slot = i;
-        if (i > KEY_FILE) slot = lerp(i + open, i - 1, slide);
-        placeRow(row, slot, i === KEY_FILE ? shown * (1 - fold) : shown);
+        placeRow(row, i > KEY_FILE ? i + hitOpen : i, shown);
       });
       s.rows[KEY_FILE].name.style.color = found ? C.red : '';
-      s.hit.style.transform = `scale(${lerp(0.6, 1, open).toFixed(3)})`;
-      s.hit.style.opacity = open * (1 - fold);
+      s.hit.style.transform = `scale(${lerp(0.6, 1, hitOpen).toFixed(3)})`;
+      s.hit.style.opacity = hitOpen;
 
-      // the search highlight: in the replay it sweeps down to the old file and stays on it, red; in the sandbox it
-      // sweeps every row and fades out at the bottom
+      // the search highlight: it sweeps down to the key file and stays on it, red, in the replay, then again in the
+      // sandbox
       const replayScan = P(t, c[1] + T1.sweep, T1.sweepD, linear);
       const sandboxScan = P(t, c[2] + T2.sweep, T2.sweepD, linear);
       let scanSlot = KEY_FILE * replayScan;
       let scanO = (replayScan > 0 ? 1 : 0) * (1 - out);
       if (t >= c[2] + T2.sweep) {
-        scanSlot = 4 * sandboxScan;
-        scanO = 1 - P(t, c[2] + T2.sweep + T2.sweepD, 0.3);
+        scanSlot = KEY_FILE * sandboxScan;
+        scanO = 1;
       }
-      const scanRed = found && t < c[2] + T2.sweep;
       s.scan.style.top = Math.round(ROW.top + scanSlot * ROW.pitch) + 'px';
       s.scan.style.opacity = scanO;
-      s.scan.style.background = scanRed ? `rgba(${RGB.red},.16)` : `rgba(${RGB.violet},.2)`;
-      placeAgentTag(s.noKey, t, c[2] + T2.noKey, NO_KEY[0], NO_KEY[1]);
+      s.scan.style.background = found ? `rgba(${RGB.red},.16)` : `rgba(${RGB.violet},.2)`;
 
       // the terminal: the task line; the replay's search, its hit, the call and the cloud's answer, which fade as
-      // the replay leaves; the sandbox's search, its empty result, the call and its error
+      // the replay leaves; the sandbox's search, its hit, the same call and its error
       const termPop = backPop(t, c[0] + T0.term);
       place(s.term, TERM.x, TERM.y, termPop.s, termPop.o);
       showLine(s.taskLine, TASK_LINE, t, c[0] + T0.task, true);
@@ -677,17 +729,19 @@
         el.style.opacity = 1 - P(t, c[2] + T2.out, 0.4);
       });
       const sandboxAt = [
-        [c[2] + T2.grep, true], [c[2] + T2.noMatch, false],
+        [c[2] + T2.grep, true], [c[2] + T2.result, false],
         ...SANDBOX_CALL.starts.map(start => [sandboxCallAt + start, true]), [failAt, false],
       ];
       s.sandboxLines.forEach((el, i) => showLine(el, SANDBOX_LINES[i], t, ...sandboxAt[i], LINE.sandboxCps));
 
-      // the key token lifts off the hit, flies into the call as the key is typed, and sinks into it
-      const pickAt = keyAt - T1.flyD;
+      // the key token lifts off the hit, flies into the call as the key is typed, and sinks into it: in the replay,
+      // then in the sandbox (the later flight once it has started)
+      const flightKeyAt = t >= sandboxKeyAt - T1.flyD ? sandboxKeyAt : keyAt;
+      const pickAt = flightKeyAt - T1.flyD;
       const flight = P(t, pickAt, T1.flyD, easeOut);
       const [tokenX, tokenY] = bezier(TOKEN_ROUTE, flight);
-      const tokenO = P(t, pickAt, 0.12, linear) * (1 - P(t, keyAt, 0.12, linear));
-      place(s.token, tokenX, tokenY, lerp(1, 0.5, P(t, keyAt - 0.1, 0.2, linear)), tokenO);
+      const tokenO = P(t, pickAt, 0.12, linear) * (1 - P(t, flightKeyAt, 0.12, linear));
+      place(s.token, tokenX, tokenY, lerp(1, 0.5, P(t, flightKeyAt - 0.1, 0.2, linear)), tokenO);
 
       // ---------- the right column: the stopwatch runs from Enter to the last shattering and stops at 0:09 in red;
       // it slides down and fades as the replay leaves
@@ -763,22 +817,22 @@
 
       // ---------- the agent's side: the checkpoint pops in with its Namespace's name under it; the lane from the
       // model draws, and fades as the model steps aside; the Endpoint's gate rises, the lanes to it and from it draw,
-      // and it glows as "Nexus" is read. The Event History rises.
+      // and it glows as "Nexus" is read. The empty Event History rises under it all.
       const cpPop = backPop(t, c[2] + T2.cp);
       place(s.cp.el, CP.x, CP.y, cpPop.s, cpPop.o);
       rise(s.cpNamespace, CP.x, UNDER_Y, P(t, c[2] + T2.ns, 0.5));
       draw(s.orbLane, P(t, c[2] + T2.orbLane, 0.4), 1 - aside);
       const gateUp = P(t, c[2] + T2.gate, T2.gateD);
-      rise(s.endpoint, GATE.x, LANE_Y - CHECKPOINT.gap / 2 - GATE.tileH / 2, gateUp);
-      rise(s.allowlist, GATE.x, LANE_Y + CHECKPOINT.gap / 2 + GATE.tileH / 2, P(t, c[2] + T2.gate + 0.1, T2.gateD));
+      rise(s.endpoint, GATE.x, LANE_Y - GATE.gap / 2 - GATE.tileH / 2, gateUp);
+      rise(s.allowlist, GATE.x, LANE_Y + GATE.gap / 2 + GATE.tileH / 2, P(t, c[2] + T2.gate + 0.1, T2.gateD));
       draw(s.cpLane, P(t, c[2] + T2.cpLane, 0.3), 1);
       draw(s.zoneLane, P(t, c[2] + T2.zoneLane, 0.5), 1);
       const nexusAt = c[2] + T2.nexus;
       const nexusGlow = Math.max(0, 1 - Math.abs(t - nexusAt - 0.2) / 0.5);
       s.endpoint.style.boxShadow = glowShadow(RGB.violet, nexusGlow, { blur: 36, alpha: 0.7 });
-      placeRipples(s.nexusRipples, t, nexusAt, GATE.x, LANE_Y - CHECKPOINT.gap / 2 - GATE.tileH / 2, 160, 420,
+      placeRipples(s.nexusRipples, t, nexusAt, GATE.x, LANE_Y - GATE.gap / 2 - GATE.tileH / 2, 160, 420,
         { d: 0.8, step: 0.16 });
-      const historyIn = P(t, c[3] + T3.history, 0.6);
+      const historyIn = P(t, c[2] + T2.history, 0.6);
       place(s.history, HISTORY.x, HISTORY.y + Math.round(60 * (1 - historyIn)), 1, historyIn);
 
       // the card grows out of the model, drops onto the lane and runs to the Endpoint's doorway, the checkpoint
