@@ -5,13 +5,16 @@
 // notes file, which reveals a CLOUD KEY with full access; the key flies into a cloud API call the agent types in its
 // terminal; the call races to the database, which shatters, then its backups (the dramatic beat: red flashes, camera
 // shakes) as the stopwatch stops at 0:09. With Temporal, a glass SANDBOX closes round the same files and terminal,
-// without the old file: the same search finds nothing (NO KEY HERE) and the same call fails (no key, no internet);
-// apart, on the right, a PROD WORKER slides in with its own locked key and one narrow step, "delete volume prod-db".
-// Then the sandbox drops away: the model asks for that step, which cannot be undone, so the WORKFLOW checkpoint holds
-// it (IRREVERSIBLE, NEEDS APPROVAL) and sends the request to Maya's phone; the hours tick by, the PROD WORKER crashes
-// and comes back while the step keeps waiting, then Maya taps Reject: REJECTED BY MAYA, the checkpoint shuts, the
-// Event History records it and the database stays whole (SAFE). The camera zoom-through (setCamera) brings the scene
-// in and plays into the next one; the hits shake it.
+// without the old file: the same search finds nothing (NO KEY HERE) and the same call fails (no key, no internet).
+// Then the sandbox drops away and the database and its backups stay with their team: the PLATFORM TEAM's Namespace
+// (platform) closes round them and its Worker, which keeps the cloud key, locked. The agent's WORKFLOW checkpoint (in
+// its own Namespace, assistant) comes in on the left, and between the two a Temporal Nexus Endpoint, db-operations,
+// rises as a gate: its operations over its ALLOWLIST. The model asks to delete the database: the card passes the
+// checkpoint, stops in the Endpoint's doorway, where the allowlist lets assistant in (ALLOWED), and goes on into the
+// platform Namespace, where the handler holds it, as it cannot be undone (IRREVERSIBLE, NEEDS APPROVAL), and sends
+// the request to Maya's phone; the hours tick by, the platform Worker crashes and comes back while the step keeps
+// waiting, then Maya taps Reject: REJECTED BY MAYA, the Event History records it and the database stays whole (SAFE).
+// The camera zoom-through (setCamera) brings the scene in and plays into the next one; the hits shake it.
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- the stage at camera rest
@@ -30,16 +33,11 @@
   const CHAR_W = 0.6 * 18;
   // the coding agent (the AI model in the Temporal half), left of the terminal
   const AGENT = { x: 330, y: 545 };
-  // the right column, x 1420-1800: the stopwatch over the database and its backups in the replay; in the Temporal
-  // half, the PROD WORKER zone over the database and its backups, with its key row and its one step (on the
-  // checkpoint's lane, y 410) inside
+  // the right column of the replay, x 1420-1800: the stopwatch over the database and its backups
   const COL_X = 1610, COL_W = 380;
   const TIMER = { x: COL_X, y: 380, w: COL_W, h: 116, seconds: 9 };
   const DB = { x: COL_X, y: 608, w: COL_W, h: 152 };
   const BACKUPS = { x: COL_X, y: DB.y + DB.h + 20, w: COL_W, h: DB.h };
-  const ZONE = { x: COL_X, y: 327, w: COL_W, h: 290 };
-  const KEY_ROW = { x: COL_X, y: 296, w: 332, h: 64 };
-  const STEP = { x: COL_X, y: 410, w: 332, h: 76 };
   // the shards of a shattered tile: a grid of cells, each cut into two triangles, its inner corners jittered
   const SHARDS = { cols: 4, rows: 3, jitter: 0.45, gravity: 1300 };
 
@@ -112,26 +110,56 @@
   const CURSOR = '<span style="display:inline-block;width:10px;height:20px;margin-left:1px;vertical-align:-4px;'
     + `background:${C.ink}"></span>`;
 
-  // ---------- the Temporal half once the sandbox drops away: the checkpoint and the Event History share a column
-  // (x 940); the held card waits in front of the checkpoint, far enough left for its widest verdict tag to clear it,
-  // its verdict tag 20 px above it, its IRREVERSIBLE flag 20 px under it and the waiting clock 20 px under that, as
-  // wide as the card; Maya's phone on the left, its bottom on the Event History's bottom edge; the model, stepped
-  // aside above the phone at 2/3 of its size
-  const CP = { x: 940, y: BOARD.laneY };
-  const HISTORY = { x: 940, y: BOARD.history.y };
-  const HOLD = { x: 640, y: BOARD.laneY };
+  // ---------- the Temporal half once the sandbox drops away: one lane (LANE_Y) from the model through the agent's
+  // WORKFLOW checkpoint (CP) and the Nexus Endpoint's gate (GATE, its two tiles as tall as the checkpoint's posts,
+  // its doorway as tall as the checkpoint's opening) into the platform team's Namespace (PLATFORM, x 1060-1800), 50 px
+  // apart. In the Namespace, 24 px in: its heading row; on the right, a column of the Worker (WORKER) over the
+  // database (on the lane) and its backups; on the left, the handler's spot (HOLD), where the card waits, its verdict
+  // tag 20 px above it, its IRREVERSIBLE flag 20 px under it and the waiting clock 20 px under that. The Event History
+  // under the checkpoint and the gate, its left edge on the checkpoint's; Maya's phone on the left, its bottom on the
+  // Event History's; the model on the lane, then stepped aside above the phone at 2/3 of its size. The agent's
+  // Namespace label under the checkpoint and the ALLOWED tag under the gate share a line.
+  const LANE_Y = 390;
+  const CP = { x: 620, y: LANE_Y, h: 400 };
+  const GATE = { x: 890, w: 240, tileH: (CP.h - CHECKPOINT.gap) / 2 };
+  const PLATFORM = { x: 1430, y: 404, w: 740, h: 488, inset: 24 };
+  const COLUMN = { x: 1590, w: 372 };
+  const WORKER = { x: COLUMN.x, y: 268, w: COLUMN.w, h: 68 };
+  const DB_SAFE = { x: COLUMN.x, y: LANE_Y, w: COLUMN.w, h: 136 };
+  const BACKUPS_SAFE = { x: COLUMN.x, y: DB_SAFE.y + DB_SAFE.h + 20, w: COLUMN.w, h: DB_SAFE.h };
+  const HOLD = { x: 1240, y: LANE_Y };
   const VERDICT_Y = HOLD.y - ACTION_CARD.h / 2 - 20 - AGENT_TAG.h / 2;
   const FLAG_Y = HOLD.y + ACTION_CARD.h / 2 + 20 + AGENT_TAG.h / 2;
   const CLOCK = { x: HOLD.x, y: FLAG_Y + AGENT_TAG.h / 2 + 20 + 28, w: 240, h: 56 };
+  const HISTORY = { x: CP.x - CHECKPOINT.w / 2 + BOARD.history.w / 2, y: BOARD.history.y };
   const PHONE = { x: 300, y: HISTORY.y + BOARD.history.h / 2 - APPROVAL_CARD.h / 2 };
+  const ORB_LANE = { x: PHONE.x, y: LANE_Y };
   const ORB_ASIDE = { x: PHONE.x, y: 226, scale: 2 / 3 };
-  // the SAFE tag, in the database tile's top right corner; the CRASH tag in the PROD WORKER's heading row
-  const SAFE_X = DB.x + DB.w / 2 - 20 - agentTagWidth('SAFE') / 2;
-  const SAFE_Y = DB.y - DB.h / 2 + 16 + AGENT_TAG.h / 2;
-  const CRASH_X = ZONE.x + ZONE.w / 2 - 20 - agentTagWidth('CRASH') / 2;
-  const CRASH_Y = ZONE.y - ZONE.h / 2 + 37;
+  const UNDER_Y = 630;
+  // the allowlist's one row, in the gate's bottom tile: its size, and its center y (for the ripples): the tile
+  // centers a 20 px heading row, a 12 px gap and the row, whose middle sits 16 px under the tile's
+  const ALLOW_ROW = { w: 172, h: 40 };
+  const ALLOW_ROW_Y = LANE_Y + CHECKPOINT.gap / 2 + GATE.tileH / 2 + 16;
+  // the SAFE tag, in the database tile's top right corner; the CRASH tag in the Worker tile, on its right
+  const SAFE_X = DB_SAFE.x + DB_SAFE.w / 2 - 20 - agentTagWidth('SAFE') / 2;
+  const SAFE_Y = DB_SAFE.y - DB_SAFE.h / 2 + 16 + AGENT_TAG.h / 2;
+  const CRASH_X = WORKER.x + WORKER.w / 2 - 20 - agentTagWidth('CRASH') / 2;
+  const CRASH_Y = WORKER.y;
+  // the card's route: out of the stepped-aside model down onto the lane, then along it to the Endpoint's doorway
+  // (where it stops), then on to the handler's spot; it crosses the checkpoint's middle at a fraction of its first
+  // leg (CROSS_CP, along the route), from which update() finds when the checkpoint lets it pass
+  const ROUTE = [[ORB_ASIDE.x, ORB_ASIDE.y], [ORB_ASIDE.x + 120, LANE_Y], [GATE.x, LANE_Y]];
+  const ROUTE_DROP = Math.hypot(ROUTE[1][0] - ROUTE[0][0], ROUTE[1][1] - ROUTE[0][1]);
+  const CROSS_CP = (ROUTE_DROP + CP.x - ROUTE[1][0]) / (ROUTE_DROP + GATE.x - ROUTE[1][0]);
   // the clock's start (Wednesday 10:00) and the time Maya answers, in minutes from it (Thursday 16:20)
   const WAIT = { startMin: 10 * 60, answerMin: 30 * 60 + 20, days: ['WED', 'THU', 'FRI'] };
+
+  // the subtitles of the Temporal half; the times of words in them, at 16 characters per second plus 0.3 s
+  const SUB_NEXUS = 'With Temporal, the sandbox holds no key. The database stays with its team, reachable only through '
+    + '<b>Nexus</b>.';
+  const SUB_MAYA = 'Only allowed agents get in, and a step that cannot be undone waits for a person: Maya says no, '
+    + 'on record.';
+  const wordAt = (text, word) => text.replace(/<[^>]+>/g, '').indexOf(word) / 16 + 0.3;
 
   // the beats, in seconds from each cue: c[0], the case file slams in, then pins to its corner as the replay comes
   // in (the agent, the files and their rows one by one, the terminal and its task line, the database, the backups,
@@ -150,24 +178,27 @@
   };
   // from c[2]: the replay leaves (out); the old file and its hit fade (fold), then the rows below slide up (slide);
   // the sandbox closes round the files and the terminal (box), its sheen sweeps (shine); the database and the
-  // backups come back; the same search (grep, sweep) finds nothing (noMatch, noKey); the same call (curl) fails on
-  // the wall; the PROD WORKER slides in (zone), its step pops (step), its link to the database draws (link), its key
-  // row pops (key) and locks (lock)
+  // backups come back, in the platform team's column; the same search (grep, sweep) finds nothing (noMatch, noKey);
+  // the same call (curl) fails on the wall. The sandbox drops away (away) as the model moves onto the lane (orb); the
+  // platform Namespace closes round the database (zone), its Worker pops (worker) and its key locks (lock); the
+  // checkpoint (cp) and its Namespace label (ns) come in, the lane from the model draws (orbLane); the Endpoint's gate
+  // rises (gate), the lanes to it and from it draw (cpLane, zoneLane) and it glows as "Nexus" is read (nexus)
   const T2 = {
     out: 0, outD: 0.6, fold: 0.3, foldD: 0.3, slide: 0.55, slideD: 0.45, box: 0.5, boxD: 0.6, shine: 0.9,
-    db: 0.7, backups: 0.8, grep: 1.2, sweep: 1.45, sweepD: 0.6, noMatch: 2.1, noKey: 2.2, curl: 2.5, zone: 3.6,
-    zoneD: 0.7, step: 4.1, link: 4.4, key: 4.9, lock: 5.5,
+    db: 0.7, backups: 0.8, grep: 1.2, sweep: 1.45, sweepD: 0.6, noMatch: 2.1, noKey: 2.2, curl: 2.2,
+    away: 4.0, awayD: 0.5, orb: 4.0, orbD: 0.7, zone: 4.3, zoneD: 0.6, worker: 4.7, lock: 5.2, cp: 5.0, ns: 5.2,
+    orbLane: 5.3, gate: 5.6, gateD: 0.5, cpLane: 5.9, zoneLane: 6.1, nexus: wordAt(SUB_NEXUS, 'Nexus'),
   };
-  // from c[3]: the sandbox drops away (out) as the model steps up and aside; the checkpoint, the Event History and
-  // the lane to the PROD WORKER come in; the card grows out of the model and goes to the checkpoint, which holds it;
-  // IRREVERSIBLE lands under it (flag, after the hold), NEEDS APPROVAL above it (needs); Maya's phone rises, a violet
-  // spark reaches it, the request slides up on its screen; the waiting clock pops in and runs; the deadline line
-  // lights; the PROD WORKER crashes and comes back; Maya taps Reject, a red spark carries it to the checkpoint, which
-  // shuts; the history row, then SAFE
+  // from c[3]: the model steps up and aside (aside) and the Event History rises (history); the card grows out of the
+  // model (card) and goes to the Endpoint's doorway (go), passing the checkpoint; there the allowlist row lights and
+  // ALLOWED lands (allowed, after it arrives); it goes on to the handler (leave), which holds it; IRREVERSIBLE lands
+  // under it (flag, after the hold), NEEDS APPROVAL above it (needs); Maya's phone rises, a violet spark reaches it,
+  // the request slides up on its screen; the waiting clock pops in and runs; the platform Worker crashes and comes
+  // back; Maya taps Reject, a red spark carries it back to the card; the history row, then SAFE
   const T3 = {
-    out: 0, outD: 0.5, aside: 0, asideD: 0.7, cp: 0.5, history: 0.55, lane: 0.7, card: 0.8, go: 1.0, goD: 0.7,
-    flag: 0.05, needs: 0.5, phone: 2.0, spark: 2.5, sparkD: 0.5, screen: 2.9, rowAsked: 3.1, clock: 2.4, run: 2.6,
-    deadline: 3.4, crash: 3.9, crashD: 0.9, reject: 5.0, back: 5.1, backD: 0.4, row: 5.9, safe: 6.4,
+    aside: 0, asideD: 0.6, history: 0.1, card: 0.4, go: 0.6, goD: 1.0, allowed: 0.1, leave: 1.95, leaveD: 0.5,
+    flag: 0.5, needs: 1.05, phone: 2.9, spark: 3.7, sparkD: 0.5, screen: 4.2, rowAsked: 4.4, clock: 3.9, run: 4.1,
+    crash: 4.8, crashD: 0.9, reject: 5.9, back: 6.0, backD: 0.4, row: 6.7, safe: 7.1,
   };
 
   // A storage tile of the right column (box.w x box.h): its icon over its label, in color
@@ -325,31 +356,54 @@
     return box;
   };
 
-  // The PROD WORKER's key row: a tile with a key icon, CLOUD KEY over "kept on this Worker", and a padlock on its
-  // right (row.lock, its <svg>, whose shackle snaps shut on cue)
-  const makeKeyRow = root => {
-    const row = E(root,
+  // The platform team's Worker: a tile with a key icon, CLOUD KEY over "on the team's Worker", and a padlock on its
+  // right (tile.lock, its <svg>, whose shackle snaps shut on cue)
+  const makeWorkerTile = root => {
+    const tile = E(root,
       `${ICON('key', 28, C.ink, 1.8)}<div style="flex:1;text-align:left">`
       + '<div class="lbl" style="font-size:16px;line-height:20px;color:var(--ink)">Cloud key</div>'
       + `<div class="mono" style="font-size:16px;line-height:20px;margin-top:4px;color:${C.slate}">`
-      + 'kept on this Worker</div></div><div class="lockbox">' + lockSvg(30, { stroke: 2, color: C.ink }) + '</div>',
+      + "on the team's Worker</div></div><div class=\"lockbox\">" + lockSvg(30, { stroke: 2, color: C.ink }) + '</div>',
       'tile', {
-        width: KEY_ROW.w + 'px', height: KEY_ROW.h + 'px', display: 'flex', alignItems: 'center', gap: '16px',
+        width: WORKER.w + 'px', height: WORKER.h + 'px', display: 'flex', alignItems: 'center', gap: '16px',
         padding: '0 20px',
       });
-    row.lockBox = row.querySelector('.lockbox');
-    row.lock = row.lockBox.querySelector('svg');
-    return row;
+    tile.lockBox = tile.querySelector('.lockbox');
+    tile.lock = tile.lockBox.querySelector('svg');
+    return tile;
   };
-  // The PROD WORKER's one step: a tile with ONE STEP over the step in mono
-  const makeStepTile = root => E(root,
-    '<div class="lbl" style="font-size:14px;line-height:18px">One step</div>'
-    + '<div class="mono" style="font-size:20px;line-height:26px;margin-top:6px;color:var(--ink)">'
-    + 'delete volume prod-db</div>',
-    'tile', {
-      width: STEP.w + 'px', height: STEP.h + 'px', display: 'flex', flexDirection: 'column',
-      justifyContent: 'center', textAlign: 'left', paddingLeft: '22px',
-    });
+  // A Namespace's name on one line: NAMESPACE in small slate capitals, a dot, the name in mono (as security's
+  // chapter 9 heads its Namespaces)
+  const namespaceHtml = name => `<span class="mono" style="font-size:14px;letter-spacing:.14em;color:${C.slate}">`
+    + `NAMESPACE ·</span><span class="mono" style="font-size:20px;line-height:26px;color:var(--ink)">${name}</span>`;
+  const NAMESPACE_CSS = { display: 'flex', alignItems: 'baseline', gap: '10px', whiteSpace: 'nowrap' };
+  // A tile of the Endpoint's gate, GATE.w x GATE.tileH, in Temporal Nexus' violet: html stacked and centered
+  const makeGateTile = (root, html) => E(root, html, 'tile', {
+    width: GATE.w + 'px', height: GATE.tileH + 'px', display: 'flex', flexDirection: 'column', alignItems: 'center',
+    justifyContent: 'center', borderColor: C.violet, background: 'var(--violet-solid)',
+  });
+  // The gate's top tile: NEXUS ENDPOINT, the Endpoint's name, then its operations as plain words
+  const makeEndpointTile = root => makeGateTile(root,
+    `<div class="mono" style="font-size:14px;line-height:18px;letter-spacing:.14em;padding-left:.14em;`
+    + `color:${C.violet}">NEXUS ENDPOINT</div>`
+    + '<div class="mono" style="font-size:20px;line-height:26px;margin-top:4px;color:var(--ink)">db-operations</div>'
+    + `<div class="mono" style="font-size:16px;line-height:20px;margin-top:10px;color:${C.slate}">delete volume</div>`
+    + `<div class="mono" style="font-size:16px;line-height:20px;color:${C.slate}">restore backup</div>`);
+  // The gate's bottom tile: ALLOWLIST and its one row, the agent's Namespace, assistant (tile.row, its check
+  // tile.check)
+  const makeAllowlistTile = root => {
+    const tile = makeGateTile(root,
+      `<div style="display:flex;align-items:center;gap:8px">${ICON('shield', 20, C.violet, 1.8)}`
+      + `<span class="mono" style="font-size:14px;line-height:18px;letter-spacing:.14em;color:${C.violet}">`
+      + 'ALLOWLIST</span></div>'
+      + `<div class="row" style="margin-top:12px;width:${ALLOW_ROW.w}px;height:${ALLOW_ROW.h}px;display:flex;`
+      + 'align-items:center;justify-content:center;gap:8px;border:1px solid;border-radius:var(--rs);'
+      + `background:${C.bg}"><span class="check">${ICON('check', 18, C.slate, 2.6)}</span>`
+      + '<span class="mono" style="font-size:18px;color:var(--ink)">assistant</span></div>');
+    tile.row = tile.querySelector('.row');
+    tile.check = tile.querySelector('.check svg');
+    return tile;
+  };
 
   // The stopwatch: ELAPSED over the time (0:00 to 0:09), in a tile; timer.n holds the time
   const makeTimer = root => {
@@ -391,6 +445,7 @@
     sources: [
       { label: 'Hackread, April 2026', url: 'https://hackread.com/cursor-ai-agent-wipes-pocketos-database-backups/' },
       { label: 'AI Incident Database', url: 'https://incidentdatabase.ai/cite/1469/' },
+      { label: 'Temporal docs, Nexus security', url: 'https://docs.temporal.io/nexus/security' },
     ],
     subs: [
       { text: "April 2026: a coding agent deleted a company's production database and its backups, in 9 seconds." },
@@ -399,24 +454,24 @@
         text: "It found a forgotten key with full access in the project files, and called the cloud on its own.",
         after: 0.4,
       },
-      {
-        text: "With Temporal, the sandbox holds no key. Powerful steps run apart, on a Worker that keeps its own key.",
-      },
+      // the Endpoint glows as "Nexus" is read, then a short hold on the setting
+      { text: SUB_NEXUS, after: 0.3 },
       // Maya's no, the history row and SAFE, then a hold
-      {
-        text: "A step that cannot be undone waits for a person, for days if needed: Maya says no, and it is on record.",
-        after: 1.4,
-      },
+      { text: SUB_MAYA, after: 1.6 },
     ],
     build(stage, s) {
       const root = s.cam = makeCamera(stage);
-      // the right column: the PROD WORKER zone, its key row and its step, its link to the database
-      s.zone = makeWorkerZone(root, { ...ZONE, label: 'Prod worker' });
-      s.keyRow = makeKeyRow(root);
-      s.step = makeStepTile(root);
-      s.zoneSvg = svgLayer(root);
-      s.link = path(s.zoneSvg, `M ${ZONE.x} ${ZONE.y + ZONE.h / 2 + 4} V ${DB.y - DB.h / 2 - 6}`, C.lineLight, 2);
-      // the database and its backups, what is left of them, and their shards
+      // the platform team's Namespace: its heading, its name on the right of the heading row, its Worker, the
+      // database and its backups
+      s.zone = makeWorkerZone(root, { ...PLATFORM, label: 'Platform team' });
+      E(s.zone, namespaceHtml('platform'), '', {
+        ...NAMESPACE_CSS, left: 'auto', right: PLATFORM.inset + 'px', top: '20px', height: '34px', alignItems: 'center',
+        opacity: 1,
+      });
+      s.worker = makeWorkerTile(root);
+      s.dbSafe = E(root, DB_HTML(C.ink), 'tile', tileCss(DB_SAFE));
+      s.backupsSafe = E(root, BACKUPS_HTML(C.ink), 'tile', tileCss(BACKUPS_SAFE));
+      // the replay's database and its backups, what is left of them, and their shards
       s.db = E(root, DB_HTML(C.ink), 'tile', tileCss(DB));
       s.backups = E(root, BACKUPS_HTML(C.ink), 'tile', tileCss(BACKUPS));
       s.dbLost = makeLost(root, DB, 'Database deleted');
@@ -444,18 +499,29 @@
       s.sandboxLines = SANDBOX_LINES.map((_, i) => makeLine(s.term, i + 1));
       s.wallRipples = makeRipples(s.middle, 2, RGB.red);
 
-      // the lanes: the call's lane (slate, then drawn over in red by the call), the checkpoint's lane to the PROD
-      // WORKER
+      // the lanes: the replay's call (slate, then drawn over in red by the call); the Temporal half's lane, from the
+      // model to the checkpoint, from the checkpoint to the gate, from the gate to the database
       s.svg = svgLayer(root);
       s.lane = path(s.svg, LANE_D, C.line, 2, false);
       s.redLane = path(s.svg, LANE_D, C.red, 4, false);
       s.redLane.style.filter = `drop-shadow(0 0 6px rgba(${RGB.red},.9))`;
-      s.cpLane = path(s.svg, `M ${CP.x + CHECKPOINT.w / 2} ${CP.y} H ${ZONE.x - ZONE.w / 2}`, C.line, 2, false);
+      const cpLeft = CP.x - CHECKPOINT.w / 2, cpRight = CP.x + CHECKPOINT.w / 2;
+      s.orbLane = path(s.svg, `M ${ORB_LANE.x + BOARD.model.size / 2 + 16} ${LANE_Y} H ${cpLeft}`, C.line, 2, false);
+      s.cpLane = path(s.svg, `M ${cpRight} ${LANE_Y} H ${GATE.x - GATE.w / 2}`, C.line, 2, false);
+      s.zoneLane = path(s.svg, `M ${GATE.x + GATE.w / 2} ${LANE_Y} H ${COLUMN.x - COLUMN.w / 2}`, C.line, 2, false);
       s.callSpark = makeSpark(root, 22, RGB.red);
 
-      // the checkpoint, the model (on a zero-size mount, a camera for the layout check as the pinned case file, which
-      // scales it when it steps aside), the Event History
+      // the checkpoint and its Namespace's name under it; the Endpoint's gate and ALLOWED under it
       s.cp = makeCheckpoint(root, CP);
+      s.cpNamespace = E(root, namespaceHtml('assistant'), '', NAMESPACE_CSS);
+      s.endpoint = makeEndpointTile(root);
+      s.allowlist = makeAllowlistTile(root);
+      s.allowed = agentTag('ALLOWED', 'neon', root);
+      s.allowRipples = makeRipples(root, 2, RGB.neon);
+      s.nexusRipples = makeRipples(root, 2, RGB.violet);
+
+      // the model (on a zero-size mount, a camera for the layout check as the pinned case file, which scales it when
+      // it steps aside), the Event History
       s.orbMount = E(root, '', 'cam', { width: 0, height: 0, opacity: 1 });
       s.orb = makeModelOrb(s.orbMount, { x: 0, y: 0, size: BOARD.model.size, label: 'CODING AGENT' });
       s.history = makeHistoryStrip(root, [
@@ -475,14 +541,14 @@
         boxShadow: glowShadow(RGB.red, 1, { blur: 24, alpha: 0.7 }),
       });
 
-      // Maya's phone and the sparks between it and the checkpoint
+      // Maya's phone and the sparks between it and the held card
       s.phone = makeApprovalCard(root, {
         who: 'Maya',
         question: 'Delete volume <span style="white-space:nowrap">prod-db</span>, the production database?',
         deadline: 'Answer by Friday 18:00',
       });
       s.toPhone = makeSpark(root, 18, RGB.violet);
-      s.toCheckpoint = makeSpark(root, 18, RGB.red);
+      s.toCard = makeSpark(root, 18, RGB.red);
       s.phoneRipples = makeRipples(root, 2, RGB.violet);
       s.shutRipples = makeRipples(root, 2, RGB.red);
       s.safe = agentTag('SAFE', 'neon', root);
@@ -508,8 +574,15 @@
       // the sandbox's call fails on the wall once typed
       const sandboxCallAt = c[2] + T2.curl;
       const failAt = sandboxCallAt + SANDBOX_CALL.end + 0.1;
-      // the Temporal half's wait: the card held, the PROD WORKER's crash, Maya's no, the checkpoint shut, SAFE
-      const holdAt = c[3] + T3.go + T3.goD;
+      // the Temporal half's call: the card crosses the checkpoint (passAt), reaches the Endpoint's doorway (gateAt),
+      // is let in (allowAt), reaches the handler, which holds it (holdAt); the platform Worker's crash, Maya's no,
+      // the card refused, SAFE
+      const goStart = c[3] + T3.go;
+      const passAt = goStart + T3.goD * (1 - Math.cbrt(1 - CROSS_CP));
+      const gateAt = goStart + T3.goD;
+      const allowAt = gateAt + T3.allowed;
+      const leaveAt = c[3] + T3.leave;
+      const holdAt = leaveAt + T3.leaveD;
       const crashAt = c[3] + T3.crash;
       const rejectAt = c[3] + T3.reject;
       const shutAt = c[3] + T3.back + T3.backD;
@@ -532,8 +605,8 @@
       const out = P(t, c[2] + T2.out, T2.outD);
       s.file.pin(pinned, { o: 1 - out, to: { ...CASE_FILE.pin, y: CASE_FILE.pin.y - Math.round(40 * out) } });
 
-      // ---------- the middle column: it drops away with the sandbox as the checkpoint comes in
-      const away = P(t, c[3] + T3.out, T3.outD);
+      // ---------- the middle column: it drops away with the sandbox before the platform Namespace closes in
+      const away = P(t, c[2] + T2.away, T2.awayD);
       s.middle.style.transform = away > 0 ? `translateY(${Math.round(60 * away)}px)` : '';
       s.middle.style.opacity = 1 - away;
       s.middle.style.visibility = away >= 1 ? 'hidden' : 'visible';
@@ -627,98 +700,113 @@
       draw(s.redLane, race, 1 - out);
       sparkOnPath(s.callSpark, s.redLane, race);
 
-      // the database and its backups: the call hits the database at hitAt, which shatters, then the backups at
-      // backupsAt; the outlines of what was lost fade in, then out as both come back whole in the Temporal half,
-      // where the database ends SAFE (neon)
+      // the replay's database and its backups: the call hits the database at hitAt, which shatters, then the
+      // backups at backupsAt; the outlines of what was lost fade in, then out as the replay leaves
       const storage = [
-        [s.db, DB, s.dbShards, s.dbLost, T0.db, T2.db, hitAt],
-        [s.backups, BACKUPS, s.backupsShards, s.backupsLost, T0.backups, T2.backups, backupsAt],
+        [s.db, DB, s.dbShards, s.dbLost, T0.db, hitAt],
+        [s.backups, BACKUPS, s.backupsShards, s.backupsLost, T0.backups, backupsAt],
       ];
-      storage.forEach(([tile, box, shards, lost, popAt, backAt, breakAt]) => {
-        const back = backPop(t, c[2] + backAt);
-        const pop = t < breakAt ? backPop(t, c[0] + popAt) : back;
-        const broken = t >= breakAt - 0.06 && t < c[2] + backAt;
-        const safe = t >= safeAt;
-        let border = C.line;
-        if (broken) border = C.red;
-        else if (safe) border = C.neon;
-        tile.style.borderColor = border;
-        tile.style.boxShadow = safe ? glowShadow(RGB.neon, P(t, safeAt, 0.4), { blur: 30, alpha: 0.4 }) : '';
-        place(tile, box.x, box.y, pop.s, t >= breakAt && t < c[2] + backAt ? 0 : pop.o);
+      storage.forEach(([tile, box, shards, lost, popAt, breakAt]) => {
+        const pop = backPop(t, c[0] + popAt);
+        tile.style.borderColor = t >= breakAt - 0.06 ? C.red : C.line;
+        place(tile, box.x, box.y, pop.s, t >= breakAt ? 0 : pop.o);
         placeShards(shards, t, breakAt, box);
         place(lost, box.x, box.y, 1, P(t, breakAt + T1.lost, 0.5) * (1 - out));
       });
 
-      // the PROD WORKER slides in from the right with its step and its key row, which locks; its link to the database
-      // draws. It crashes: it jitters and flickers red, goes dark under a CRASH tag, then comes back.
+      // ---------- the platform team's side: the database and its backups come back whole in its column, where the
+      // database ends SAFE (neon); its Namespace closes round them, its Worker pops in and its key locks. The Worker
+      // crashes: it jitters and flickers red, goes dark under a CRASH tag, then comes back.
+      const safe = t >= safeAt;
+      [[s.dbSafe, DB_SAFE, T2.db, true], [s.backupsSafe, BACKUPS_SAFE, T2.backups, false]].forEach(
+        ([tile, box, backAt, guarded]) => {
+          const back = backPop(t, c[2] + backAt);
+          place(tile, box.x, box.y, back.s, back.o);
+          tile.style.borderColor = guarded && safe ? C.neon : C.line;
+          tile.style.boxShadow = guarded && safe ? glowShadow(RGB.neon, P(t, safeAt, 0.4), { blur: 30, alpha: 0.4 }) : '';
+        });
       const zoneIn = P(t, c[2] + T2.zone, T2.zoneD);
+      place(s.zone, PLATFORM.x, PLATFORM.y, lerp(1.03, 1, zoneIn), zoneIn);
       const glitch = crashGlitch(t, crashAt);
       const down = t >= crashAt ? 1 - P(t, crashAt + T3.crashD - 0.3, 0.4) : 0;
-      const zoneDx = Math.round(80 * (1 - zoneIn)) + glitch.dx;
-      const dim = lerp(1, 0.35, down);
-      place(s.zone, ZONE.x + zoneDx, ZONE.y, 1, zoneIn);
-      s.zone.querySelector('rect').setAttribute('stroke', glitch.red || down > 0.5 ? C.red : C.slate);
-      const stepPop = backPop(t, c[2] + T2.step);
-      place(s.step, STEP.x + zoneDx, STEP.y, stepPop.s, stepPop.o * dim);
-      const keyPop = backPop(t, c[2] + T2.key);
-      place(s.keyRow, KEY_ROW.x + zoneDx, KEY_ROW.y, keyPop.s, keyPop.o * dim);
+      const workerPop = backPop(t, c[2] + T2.worker);
+      place(s.worker, WORKER.x + glitch.dx, WORKER.y, workerPop.s, workerPop.o * lerp(1, 0.35, down));
+      s.worker.style.borderColor = glitch.red || down > 0.5 ? C.red : C.line;
       const lockAt = c[2] + T2.lock;
-      liftShackle(s.keyRow.lock, LOCK_LIFT * (1 - P(t, lockAt, 0.2, easeIn)));
-      s.keyRow.lockBox.style.transform = `scale(${swell(t, lockAt + 0.15, 0.25).toFixed(3)})`;
-      draw(s.link, P(t, c[2] + T2.link, 0.4), dim);
+      liftShackle(s.worker.lock, LOCK_LIFT * (1 - P(t, lockAt, 0.2, easeIn)));
+      s.worker.lockBox.style.transform = `scale(${swell(t, lockAt + 0.15, 0.25).toFixed(3)})`;
       placeAgentTag(s.crashTag, t, crashAt, CRASH_X, CRASH_Y, crashAt + T3.crashD);
 
       // ---------- the agent: it pops in, turns red as it uses the key, calms down as the replay leaves while its
-      // label turns from CODING AGENT to AI MODEL; then it steps up and aside, shrinking to 2/3, above Maya's phone
+      // label turns from CODING AGENT to AI MODEL; it moves onto the lane as the sandbox drops away, then steps up
+      // and aside, shrinking to 2/3, above Maya's phone
       const agentPop = backPop(t, c[0] + T0.agent);
       const red = P(t, keyAt, 0.3) * (1 - P(t, c[2] + T2.out, 0.6));
+      const onLane = P(t, c[2] + T2.orb, T2.orbD);
       const aside = P(t, c[3] + T3.aside, T3.asideD);
-      const orbX = Math.round(lerp(AGENT.x, ORB_ASIDE.x, aside));
-      const orbY = Math.round(lerp(AGENT.y, ORB_ASIDE.y, aside));
+      const orbX = Math.round(lerp(lerp(AGENT.x, ORB_LANE.x, onLane), ORB_ASIDE.x, aside));
+      const orbY = Math.round(lerp(lerp(AGENT.y, ORB_LANE.y, onLane), ORB_ASIDE.y, aside));
       place(s.orbMount, orbX, orbY, lerp(1, ORB_ASIDE.scale, aside), 1);
       place(s.orb.el, 0, 0, agentPop.s, agentPop.o);
-      const look = lerp(0.55 + 0.15 * Math.sin(G * 0.8), 0.7, aside);
+      const look = lerp(0.55 + 0.15 * Math.sin(G * 0.8), 0.7, Math.max(onLane, aside));
       s.orb.set(red > 0 ? 'hijacked' : 'idle', { mix: red, look });
       const relabel = P(t, c[2] + T2.out, 0.6);
       setText(s.orb.label, relabel < 0.5 ? 'CODING AGENT' : 'AI MODEL');
       s.orb.label.style.opacity = Math.abs(1 - 2 * relabel) ** 2;
 
-      // ---------- the Temporal half: the checkpoint pops in, the Event History rises, the lane to the PROD WORKER
-      // draws
-      const cpPop = backPop(t, c[3] + T3.cp);
+      // ---------- the agent's side: the checkpoint pops in with its Namespace's name under it; the lane from the
+      // model draws, and fades as the model steps aside; the Endpoint's gate rises, the lanes to it and from it draw,
+      // and it glows as "Nexus" is read. The Event History rises.
+      const cpPop = backPop(t, c[2] + T2.cp);
       place(s.cp.el, CP.x, CP.y, cpPop.s, cpPop.o);
+      rise(s.cpNamespace, CP.x, UNDER_Y, P(t, c[2] + T2.ns, 0.5));
+      draw(s.orbLane, P(t, c[2] + T2.orbLane, 0.4), 1 - aside);
+      const gateUp = P(t, c[2] + T2.gate, T2.gateD);
+      rise(s.endpoint, GATE.x, LANE_Y - CHECKPOINT.gap / 2 - GATE.tileH / 2, gateUp);
+      rise(s.allowlist, GATE.x, LANE_Y + CHECKPOINT.gap / 2 + GATE.tileH / 2, P(t, c[2] + T2.gate + 0.1, T2.gateD));
+      draw(s.cpLane, P(t, c[2] + T2.cpLane, 0.3), 1);
+      draw(s.zoneLane, P(t, c[2] + T2.zoneLane, 0.5), 1);
+      const nexusAt = c[2] + T2.nexus;
+      const nexusGlow = Math.max(0, 1 - Math.abs(t - nexusAt - 0.2) / 0.5);
+      s.endpoint.style.boxShadow = glowShadow(RGB.violet, nexusGlow, { blur: 36, alpha: 0.7 });
+      placeRipples(s.nexusRipples, t, nexusAt, GATE.x, LANE_Y - CHECKPOINT.gap / 2 - GATE.tileH / 2, 160, 420,
+        { d: 0.8, step: 0.16 });
       const historyIn = P(t, c[3] + T3.history, 0.6);
       place(s.history, HISTORY.x, HISTORY.y + Math.round(60 * (1 - historyIn)), 1, historyIn);
-      draw(s.cpLane, P(t, c[3] + T3.lane, 0.5), 1);
 
-      // the card grows out of the model and goes to the checkpoint, which holds it (violet), then shuts once Maya
-      // says no; IRREVERSIBLE under it, NEEDS APPROVAL above it, then REJECTED BY MAYA
+      // the card grows out of the model, drops onto the lane and runs to the Endpoint's doorway, the checkpoint
+      // letting it pass on the way; there the allowlist lets the agent's Namespace in (ALLOWED); it goes on to the
+      // handler, which holds it (violet) until Maya says no (red); IRREVERSIBLE under it, NEEDS APPROVAL above it,
+      // then REJECTED BY MAYA
       const grow = P(t, c[3] + T3.card, 0.3);
-      const go = P(t, c[3] + T3.go, T3.goD);
-      const [cardX, cardY] = lerp2([ORB_ASIDE.x, ORB_ASIDE.y], [HOLD.x, HOLD.y], go);
-      s.card.place(Math.round(cardX), Math.round(cardY), lerp(0.4, 1, grow), grow);
+      const leave = P(t, leaveAt, T3.leaveD);
+      const [routeX, routeY] = pointAlong(ROUTE, P(t, goStart, T3.goD, easeOut));
+      const cardX = lerp(routeX, HOLD.x, leave);
+      s.card.place(Math.round(cardX), Math.round(routeY), lerp(0.4, 1, grow), grow);
       if (t >= shutAt) s.card.setTone('red');
       else if (t >= holdAt) s.card.setTone('violet');
       else s.card.setTone(null);
-      if (t >= shutAt) s.cp.check(t, shutAt, 'block');
-      else s.cp.check(t, holdAt, 'hold');
+      s.cp.check(t, passAt, 'pass');
+      const listed = t >= allowAt;
+      s.allowlist.row.style.borderColor = listed ? C.neon : C.lineLight;
+      s.allowlist.check.setAttribute('stroke', listed ? C.neon : C.slate);
+      s.allowlist.row.style.boxShadow = glowShadow(RGB.neon, listed ? 0.5 : 0, { blur: 16, alpha: 0.5 });
+      placeRipples(s.allowRipples, t, allowAt, GATE.x, ALLOW_ROW_Y, 60, 240, { d: 0.6, step: 0.14 });
+      placeAgentTag(s.allowed, t, allowAt + 0.1, GATE.x, UNDER_Y);
       placeAgentTag(s.flag, t, holdAt + T3.flag, HOLD.x, FLAG_Y);
       placeAgentTag(s.needs, t, holdAt + T3.needs, HOLD.x, VERDICT_Y, shutAt - 0.15);
       placeAgentTag(s.rejected, t, shutAt, HOLD.x, VERDICT_Y);
-      placeRipples(s.shutRipples, t, shutAt, CP.x, CP.y, 120, 460, { d: 0.8, step: 0.16 });
+      placeRipples(s.shutRipples, t, shutAt, HOLD.x, HOLD.y, 120, 460, { d: 0.8, step: 0.16 });
 
-      // Maya's phone rises in under the model; a violet spark carries the request to it, and the request slides up
-      // on its screen. The deadline line lights as "for days" is read. Maya taps Reject: a red spark carries her no
-      // back to the checkpoint.
+      // Maya's phone rises in under the model; a violet spark carries the request from the handler to it, over the
+      // gate and the checkpoint, and the request slides up on its screen. Maya taps Reject: a red spark carries her
+      // no back to the card.
       const phoneIn = P(t, c[3] + T3.phone, 0.7);
       place(s.phone.el, PHONE.x, PHONE.y + Math.round(80 * (1 - phoneIn)), 1, phoneIn);
       s.phone.set(t, c[3] + T3.screen, 'reject', rejectAt);
-      const lit = P(t, c[3] + T3.deadline, 0.3);
-      s.phone.deadline.style.color = lit > 0.5 ? C.ink : C.slate;
-      s.phone.deadline.style.textShadow = glowShadow(RGB.violet, lit, { blur: 14, alpha: 0.9 });
-      const cpTop = [CP.x - CHECKPOINT.w / 2, CP.y - 150];
+      const needsTop = [HOLD.x, VERDICT_Y - AGENT_TAG.h / 2 - 12];
       const phoneEdge = [PHONE.x + APPROVAL_CARD.w / 2, PHONE.y - APPROVAL_CARD.h / 2 + 60];
-      const arc = [cpTop, [cpTop[0] - 140, 170], [phoneEdge[0] + 120, 190], phoneEdge];
+      const arc = [needsTop, [needsTop[0] - 80, 70], [phoneEdge[0] + 180, 70], phoneEdge];
       const toPhone = P(t, c[3] + T3.spark, T3.sparkD);
       const [ax, ay] = bezier(arc, toPhone);
       place(s.toPhone, ax, ay, 1, toPhone > 0 && toPhone < 1 ? 1 : 0);
@@ -726,7 +814,7 @@
         { d: 0.7, step: 0.15 });
       const back = P(t, c[3] + T3.back, T3.backD);
       const [bx, by] = bezier([...arc].reverse(), back);
-      place(s.toCheckpoint, bx, by, 1, back > 0 && back < 1 ? 1 : 0);
+      place(s.toCard, bx, by, 1, back > 0 && back < 1 ? 1 : 0);
 
       // the waiting clock runs from WED 10:00 to Maya's answer, through the crash, then leaves with the verdict
       const clockPop = popIn(t, c[3] + T3.clock);
@@ -742,7 +830,7 @@
 
       // the database stays whole: SAFE, in its tile
       placeAgentTag(s.safe, t, safeAt, SAFE_X, SAFE_Y);
-      placeRipples(s.safeRipples, t, safeAt, DB.x, DB.y, 120, 520, { d: 0.9, step: 0.18 });
+      placeRipples(s.safeRipples, t, safeAt, DB_SAFE.x, DB_SAFE.y, 120, 520, { d: 0.9, step: 0.18 });
     }
   });
 }
