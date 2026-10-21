@@ -1,28 +1,33 @@
 // ===================== 5. WHY 1.0 MATTERS
 // Opens on the shared service at rest that chapter 4 ends on (SERVICE_REST), in SERVICE_SHOT, and pulls back once,
-// left and out, to OUTRO_SHOT as everything but the proxy box fades out. Under the box, a version track draws: the ten
+// left and out, to OUTRO_SHOT as everything but the proxy box fades out, the box sinking a little lower than its
+// outro place so that it and the track under it center as one group. Under the box, a version track draws: the ten
 // 0.x releases, dim, 0.1 to 0.10, then the 1.0 slot, which lights up neon with rings (the dramatic beat), READY FOR
-// PRODUCTION and SUPPORTED under it. Then the 1.0 badge rises onto the proxy box as the track and its tags drop
-// away, which leaves the box alone, wearing its badge: the outro's first frame.
+// PRODUCTION and SUPPORTED under it. Then the 1.0 badge rises onto the proxy box as the box rises back to its outro
+// place and the track and its tags drop away, which leaves the box alone, wearing its badge: the outro's first frame.
 // The block keeps every name declared in this file local to this scene.
 {
-  // from c[0]: the camera pulls back (pull, pullD) as the service fades out (fadeD); the track draws (track, trackD)
-  // and the 1.0 slot shows, dim (ghost); 1.0 lights up (light); READY FOR PRODUCTION (ready) and SUPPORTED (supported)
-  // as the subtitle reads them; the badge rises onto the box (fly, flyD) as the track and its tags leave (leaveD)
+  // from c[0]: the camera pulls back (pull, pullD) as the service fades out (fadeD), the box sinking once the service
+  // has nearly gone (sink, sinkD); the track draws (track, trackD) and the 1.0 slot shows, dim (ghost); 1.0 lights up
+  // (light); READY FOR PRODUCTION (ready) and SUPPORTED (supported) as the subtitle reads them; both tags rest 1.5 s,
+  // then the badge rises onto the box (fly, flyD) as the box rises back and the track and its tags leave (leaveD)
   const T0 = {
-    pull: -0.5, pullD: 1.4, fadeD: 0.8, track: 0.6, trackD: 0.6, ghost: 0.9, light: 1.4, ready: 1.9, supported: 3.5,
-    fly: 4.4, flyD: 0.7, leaveD: 0.5,
+    pull: -0.5, pullD: 1.4, fadeD: 0.8, sink: 0.1, sinkD: 0.8, track: 0.6, trackD: 0.6, ghost: 0.9, light: 1.4,
+    ready: 1.9, supported: 3.4, fly: 5.2, flyD: 0.7, leaveD: 0.5,
   };
   // The track's layout in OUTRO_SHOT, in screen px (see onScreen): its line's ends and height (x0 to the 1.0 slot), the
   // dots of the ten 0.x releases (0.1 to 0.10, the last one as far from the slot's edge as from the dot before it),
   // the 1.0 slot, the faint line on past it (to xEnd, as far from the slot as x0), the labels of the first and last
   // dots (labelDy: under the track), and the two tags stacked under the slot, right-aligned on its right edge, the
-  // first 20 px or more under the labels (tags: the first one's center y and the gap between them)
+  // first 20 px or more under the labels (tags: the first one's center, under the track, and the gap between them).
+  // BOX_SINK: how much lower than its outro place (OUTRO_BOX) the box rests over the track. The box (y 257-467 on
+  // screen), the slot, 125 px under it, and the tags (down to y 772) span y 257-772, centered on y 515.
   const RELEASES = 10;
   const TRACK = {
-    x0: 309, y: 700, dots: Array.from({ length: RELEASES }, (_, i) => 349 + i * 58), slot: 960, xEnd: 1611,
-    labelDy: 30, tags: { y: 786, gap: 14 },
+    x0: 309, y: 612, dots: Array.from({ length: RELEASES }, (_, i) => 349 + i * 58), slot: 960, xEnd: 1611,
+    labelDy: 30, tags: { dy: 86, gap: 14 },
   };
+  const BOX_SINK = 42;
   // One screen px in OUTRO_SHOT, in stage px: the track's parts are sized in screen px (n * U)
   const U = 1 / OUTRO_SHOT[2];
   // The stage point that OUTRO_SHOT shows at screen point (x, y)
@@ -41,7 +46,7 @@
     fadeIn: 0, fadeOut: 0,
     subs: [
       // the badge's rise, then a moment on the box wearing it
-      { text: "Version 1.0 is ready for production, and Temporal's support policy covers it.", after: 0.6 },
+      { text: "Version 1.0 is ready for production, and Temporal's support policy covers it.", after: 0.9 },
     ],
     build(stage, s) {
       // the shared service first, in chapter 4's order, so the cut shows the same stack
@@ -55,8 +60,8 @@
       const [xEnd] = onScreen(TRACK.xEnd, TRACK.y);
       s.line = path(svg, `M ${x0} ${y} L ${slotLeft} ${y}`, C.slate, 2 * U, false);
       s.past = path(svg, `M ${slotRight} ${y} L ${xEnd} ${y}`, C.line, 2 * U, false);
-      // a faint dashed rise from the 1.0 slot up to the proxy box, the badge's way up
-      const boxBottom = PROXY.y + PROXY.h / 2;
+      // a faint dashed rise from the 1.0 slot up to the proxy box, resting sunk, the badge's way up
+      const boxBottom = PROXY.y + PROXY.h / 2 + BOX_SINK * U;
       s.riseLine = path(svg, `M ${slotX} ${y - VERSION_BADGE.h / 2} L ${slotX} ${boxBottom}`, C.line, 2 * U, false);
       s.dots = TRACK.dots.map(() => E(root, '', '', {
         width: DOT * U + 'px', height: DOT * U + 'px', borderRadius: '50%', background: C.bg,
@@ -85,10 +90,13 @@
       const cam = shot(t, SERVICE_SHOT, [[pullAt, ...OUTRO_SHOT, T0.pullD]]);
       setCamera(s.cam, t, this.dur, { ...cam, enter: 1, exit: 1 });
 
-      // the shared service, as chapter 4 left it, fades out but for the proxy box, whose glow swells as the badge
-      // lands on it
+      // the shared service, as chapter 4 left it, fades out but for the proxy box, which sinks over the track and
+      // rises back to its outro place with the badge, its glow swelling as the badge lands on it
       const landPulse = Math.max(0, 1 - Math.abs(t - landAt - 0.1) / 0.5);
       placeServiceStage(s.service, cam, { ...SERVICE_REST, fade: P(t, pullAt, T0.fadeD), glow: landPulse });
+      const up = P(t, flyAt, T0.flyD);
+      const boxDy = BOX_SINK * U * (P(t, c[0] + T0.sink, T0.sinkD) - up);
+      placeProxy(s.service.proxy, { dy: boxDy, glow: landPulse });
 
       // the track draws under the box, its dots popping in as the line reaches them; it drops away as the badge
       // leaves it
@@ -119,15 +127,14 @@
       const [slotX, slotY] = SLOT;
       place(s.ghost, slotX, slotY + leaveDy, 1, P(t, c[0] + T0.ghost, 0.3) * (t < lightAt + 0.2 ? 1 : 0));
       const pop = backPop(t, lightAt, 0.4);
-      const up = P(t, flyAt, T0.flyD);
-      place(s.badge, slotX, lerp(slotY, ON_BOX[1], up), pop.s, pop.o);
+      place(s.badge, slotX, lerp(slotY, ON_BOX[1] + boxDy, up), pop.s, pop.o);
       placeRipples(s.rings, t, lightAt, slotX, slotY, 80 * U, 300 * U, { d: 0.9, step: 0.18 });
       // the tags, stacked under the slot, their right edges on the badge's: their sizes, measured unrounded (stage
       // px), so the edges match to the pixel
       const width = e => parseFloat(getComputedStyle(e).width);
       const height = e => parseFloat(getComputedStyle(e).height);
       const tagsRight = slotX + VERSION_BADGE.w / 2;
-      const [, readyY] = onScreen(TRACK.slot, TRACK.tags.y);
+      const [, readyY] = onScreen(TRACK.slot, TRACK.y + TRACK.tags.dy);
       const supportedY = readyY + (height(s.ready) + height(s.supported)) / 2 + TRACK.tags.gap * U;
       [[s.ready, readyY, T0.ready], [s.supported, supportedY, T0.supported]].forEach(([tag, tagY, at]) => {
         const tagPop = popIn(t, c[0] + at);

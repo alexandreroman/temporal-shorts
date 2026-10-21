@@ -184,20 +184,22 @@ you can build" chapter.
 - **0:59** Version 1.0 is ready for production, and Temporal's support
   policy covers it.
   - Visuals: Opens on chapter 04's last frame; the camera pulls back on,
-    left and out, as everything but the proxy box fades, until the box
-    sits small at the top of the frame. Under it a version track draws:
-    ten dim dots for the 0.x releases, labelled 0.1 under the first and
-    0.10 under the last, then an empty 1.0 slot. Dramatic beat: 1.0 lights
-    up neon with rings; READY FOR PRODUCTION under it, its right edge on
-    the badge's, then SUPPORTED as the subtitle reads "support policy",
-    stacked under it, right-aligned on the same edge. The 1.0 badge rises
-    up a faint dashed line onto the proxy box as the track and its tags
-    drop away, leaving the box alone, wearing its badge: the outro's first
-    frame.
+    left and out, as everything but the proxy box fades, the box settling
+    small in the upper half of the frame. Under it, about 125 px lower, a
+    version track draws: ten dim dots for the 0.x releases, labelled 0.1
+    under the first and 0.10 under the last, then an empty 1.0 slot; the
+    box, the track and its tags form one group centered in the frame.
+    Dramatic beat: 1.0 lights up neon with rings; READY FOR PRODUCTION
+    under it, its right edge on the badge's, then SUPPORTED as the
+    subtitle reads "support policy", stacked under it, right-aligned on
+    the same edge. Both tags hold for a moment, then the 1.0 badge rises
+    up a faint dashed line onto the proxy box as the box rises to the top
+    of the frame and the track and its tags drop away, leaving the box
+    alone, wearing its badge: the outro's first frame.
 
 ## Outro
 
-- **1:06** Credentials and encryption leave your Workers for one place you
+- **1:07** Credentials and encryption leave your Workers for one place you
   control.
   - Visuals: Opens on the proxy box with its 1.0 badge, small at the top;
     the end card fades in under it: title "Temporal Proxy 1.0", tagline
