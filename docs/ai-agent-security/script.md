@@ -405,15 +405,16 @@ retention period.
 - **2:14** With the Temporal Agent Harness, allowed tools run; others wait
   for a person or a rule that can refuse.
   - Visuals: YOUR WORKERS, the sandbox and their lanes slide away and a
-    panel slides in where they were: the Temporal symbol and TEMPORAL
-    AGENT HARNESS over TOOL APPROVAL POLICY, then three rule rows, each a
+    full-height panel slides into the right column (three columns with
+    equal gutters: the model and Maya's phone, the Workflow with its held
+    ticket over the Event History, the panel): the Temporal symbol and
+    TEMPORAL AGENT HARNESS over TOOL APPROVAL POLICY, then three rule rows, each a
     mono tool name, its case and its verdict: `read_file` ("allowed:
     inherently safe") RUN, `create_ticket` ("not on the allowed list") ASK
     A PERSON, `delete_volume` ("auto mode: a rule on its arguments",
     "reason sent to the model") REFUSED. They light up in the subtitle's
     order, each in its verdict's color as its tag pops: RUN (neon), ASK A
-    PERSON (violet, a violet line then runs from its row to Maya's phone,
-    which glows violet), REFUSED (red, its reason sliding in in red: it
+    PERSON (violet, Maya's phone glows violet with it), REFUSED (red, its reason sliding in in red: it
     goes back to the model). No status pill: the harness is never labeled
     experimental in this theme.
 
