@@ -1518,12 +1518,12 @@ function chipDropTransform(w, k, drop, fall) {
 // How long the light takes to run along a Worker's own connection to Temporal, seconds
 const WORKER_FLOW_PERIOD = 2.4;
 
-// A row of TEMPORAL's list of connections, w x h px: the Worker's name and language on the left, a quiet VERIFIED on
-// the right (Temporal checked the credentials that Worker presented, it does not keep them). It stays hidden until
-// placed.
-function makeConnectionRow(root, name, lang, { w, h }) {
+// A row of TEMPORAL's list of connections, w x h px: the Worker's name and language on the left (font px), a quiet
+// VERIFIED on the right (Temporal checked the credentials that Worker presented, it does not keep them). It stays
+// hidden until placed.
+function makeConnectionRow(root, name, lang, { w, h, font = 18 }) {
   return E(root,
-    `<span class="mono" style="font-size:18px">${name} <span style="color:${C.slate}">·</span> `
+    `<span class="mono" style="font-size:${font}px">${name} <span style="color:${C.slate}">·</span> `
     + `${lang}</span><span class="mono" style="display:flex;align-items:center;gap:6px;font-size:16px;`
     + `letter-spacing:.1em;color:${C.neon}">${ICON('check', 16, C.neon, 2.6)}VERIFIED</span>`,
     '', {
@@ -1590,13 +1590,14 @@ const proxyCardTag = (root, html, w) => E(root, html, 'mono', {
   gap: '6px', fontSize: '15px', letterSpacing: '.06em', whiteSpace: 'pre', border: `1px solid ${C.violet}`,
   borderRadius: 'var(--rs)', background: 'var(--violet-solid)',
 });
-// A Namespace band inside TEMPORAL, of the size of band ({ w, h }, e.g. each theme's PROXY_BAND): NAMESPACE, then its
-// full name (name, by default the payments Namespace that the card goes into, FULL_NS; font px, on a line 8 px higher)
-// at its top left, 18 px from its left edge and 14 px under its top edge (offsets from its padding box, TILE_BORDER
-// inside them)
-const makeProxyBand = (root, band, { name = FULL_NS, font = 18 } = {}) => E(root,
+// A Namespace band inside TEMPORAL, of the size of band ({ w, h }, e.g. each theme's PROXY_BAND): NAMESPACE (labelFont
+// px, on a line 6 px higher), then its full name (name, by default the payments Namespace that the card goes into,
+// FULL_NS; font px, on a line 8 px higher) at its top left, 18 px from its left edge and 14 px under its top edge
+// (offsets from its padding box, TILE_BORDER inside them)
+const makeProxyBand = (root, band, { name = FULL_NS, font = 18, labelFont = 12 } = {}) => E(root,
   `<div style="position:absolute;left:${18 - TILE_BORDER}px;top:${14 - TILE_BORDER}px">`
-  + `<div class="mono" style="font-size:12px;line-height:18px;letter-spacing:.14em;color:${C.slate}">NAMESPACE</div>`
+  + `<div class="mono" style="font-size:${labelFont}px;line-height:${labelFont + 6}px;letter-spacing:.14em;`
+  + `color:${C.slate}">NAMESPACE</div>`
   + `<div class="mono" style="font-size:${font}px;line-height:${font + 8}px">${name}</div></div>`,
   '', {
     width: band.w + 'px', height: band.h + 'px', border: `1px solid ${C.line}`, borderRadius: 'var(--r)',
