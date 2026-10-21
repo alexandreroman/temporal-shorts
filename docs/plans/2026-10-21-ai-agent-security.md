@@ -63,14 +63,19 @@ tool.
 
 ## Script
 
+Version 2 (2026-10-21, after the user's review): Temporal's role is
+architectural, never a filter on tool names (real agents hold a terminal,
+a browser, code, and go around any list). Temporal decides where each step
+runs and with what power, holds the state outside the sandbox, gates the
+steps that matter in code the model cannot talk to, and keeps a record
+that can be searched. Chapter "An agent that won't stop" and the use-case
+chapter are cut (user: canceling is not striking enough; the incidents
+already are the concrete cases). The video ends on the recap.
+
 Subtitles, exact. `<b>` marks a key term at its first mention.
 
-### Intro
+### Intro (unchanged)
 
-- Kicker "AN EXPLAINER FOR EVERYONE", title "Who keeps an AI agent in
-  check?", tagline "REAL INCIDENTS, AND HOW TEMPORAL HELPS". Visual: the
-  model orb with tool icons orbiting; some flash red, then a ring of
-  checkpoints closes around them.
 - AI agents now read our emails, change our data and spend our money. What
   happens when one goes wrong?
 
@@ -78,181 +83,151 @@ Subtitles, exact. `<b>` marks a key term at its first mention.
 
 - An <b>AI agent</b> is an AI model with tools: it reads, decides, then
   acts, one step after another.
-- In a 2025 survey, 80% of companies said their agents had already done
-  things nobody asked for.
+- Its tools are often a terminal, a browser or code: almost anything is
+  possible, the bad included.
 - With <b>Temporal</b>, the agent runs as a <b>Workflow</b>: your code,
-  which checks and records every step.
-- The model suggests the next step. The Workflow decides if it runs, then
-  writes it down.
-- Visuals: orb and tool loop; a large 80% count-up; the checkpoint slides
-  between the orb and the tools; an action card passes, history rows fill.
+  which runs and records every step.
+- The model thinks, the tools act, each where you choose. Temporal keeps
+  the state and the record.
+- Visuals: the board with general tools (TERMINAL, BROWSER, CODE,
+  ADD-ONS) instead of email/database/payments/files; c[1] the tools'
+  reach fans out red over files, keys, the internet; c[2] the Workflow
+  checkpoint assembles the board; c[3] THINKS (model), ACTS (tools),
+  RECORDS (history).
 
-### 02 A hidden order (EchoLeak, June 2025)
+### 02 Locked in a sandbox (malicious add-ons, February 2026)
 
-- Case file: JUNE 2025 · ZERO-CLICK · "One email takes over a work
-  assistant".
-- June 2025: researchers showed that one email, never even opened, could
+- February 2026: 341 malicious add-ons for an AI assistant were found,
+  most installing a password thief.
+- They ran on the user's computer, with full access: every file, every
+  saved password, the whole network.
+- With Temporal, the agent's tools run in a <b>sandbox</b>, such as Amazon
+  Bedrock AgentCore, Modal, E2B or Daytona.
+- No keys, no internet, thrown away at every step: the agent's progress
+  lives in Temporal, not in the box.
+- Visuals: the replay as built (store, laptop, attacker server). With
+  Temporal: the tools sit in a glass SANDBOX driven by a Worker (the
+  sandbox is not the Worker); provider names as plain text tags (no
+  logos); the add-on reaches for passwords (none) and the internet (a
+  wall); the box is thrown away, a fresh one appears, the Event History
+  rows stay intact and the agent carries on: CONTAINED, NOTHING LOST.
+- Facts: sandbox operations run as Activities (OpenAI Agents SDK sandbox
+  integration: Daytona, E2B, Docker, Modal; Amazon Bedrock AgentCore with
+  Temporal, Code Interpreter as sandbox). Never claim GA.
+
+### 03 Keys out of reach (database wiped, April 2026)
+
+- April 2026: a coding agent deleted a company's production database and
+  its backups, in 9 seconds.
+- It found a forgotten key with full access in the project files, and
+  called the cloud on its own.
+- With Temporal, the sandbox holds no key. Powerful steps run apart, on a
+  Worker that keeps its own key.
+- A step that cannot be undone waits for a person, for days if needed:
+  Maya says no, and it is on record.
+- Visuals: replay: the agent's workspace (file tree), an old file reveals
+  "CLOUD KEY · full access", a terminal command calls the cloud API,
+  DATABASE and BACKUPS shatter, 0:09. With Temporal: the same workspace
+  inside the sandbox holds no key (the search finds nothing), its
+  terminal call fails (no key, no internet); the one powerful step,
+  "delete volume prod-db", goes to a separate PROD WORKER holding a locked
+  key, flagged IRREVERSIBLE, held for Maya's approval (durable wait, a
+  crash, still waiting); REJECTED BY MAYA, SAFE, history row.
+
+### 04 A hidden order (hidden text in a document, August 2026)
+
+- August 2026: researchers showed that hidden text in a document could
   make a work assistant leak data.
-- The email hid text that read like an order. An AI model cannot always
-  tell data from orders.
-- With Temporal, the rules live in code, not in the prompt: data only goes
-  to approved addresses.
-- The model can be fooled, not the code: the Workflow checks every step
-  before it runs.
-- Visuals: an email card, a scanner reveals the hidden line; the orb turns
-  red, documents fly out (red glitch). With Temporal: a `send_email` card
-  to an outside address hits the checkpoint against an "APPROVED
-  ADDRESSES" rule: BLOCKED; history row `send_email · BLOCKED`.
+- No filter catches every trick: a fooled agent can hide data in a link, a
+  ticket or a search.
+- With Temporal, the Workflow notes that outside content came in, and the
+  model cannot erase that note.
+- From then on, any step that sends data out waits for a person, whatever
+  route the agent picks.
+- Visuals: replay: the shared document, the hidden line, the fooled
+  agent, data leaving by three routes (a link, a ticket, a search) in
+  red. With Temporal: reading the document writes a history row "outside
+  content read · FLAGGED" and pins a durable FLAGGED badge on the
+  Workflow; route 1, a terminal call in the sandbox, hits the no-internet
+  wall; route 2, a ticket to an outside project carrying the data, is
+  held by the Workflow (flagged run + data going out) and waits for Maya,
+  who sees the data and the source document and says no.
+- Facts: Meta's "Agents Rule of Two"; developers mark which Activities
+  send data out, possible because every way out passes through
+  Activities (the sandbox has no internet).
 
-### 03 A deleted database (Replit, July 2025)
-
-- Case file: JULY 2025 · CODE FREEZE · "A coding agent deletes a live
-  database".
-- July 2025: during a code freeze, a coding agent deleted a company's live
-  database.
-- The freeze was only a request in the chat. Nobody had to approve a step
-  that could not be undone.
-- With Temporal, risky steps wait for a person: the Workflow holds the step
-  until Maya says yes or no.
-- The wait can last days, survives crashes and costs nothing. No answer by
-  the deadline means no.
-- Visuals: a "CODE FREEZE" note in the chat; `delete_database` runs, the
-  database shatters, a 1,206-records counter drops to 0. With Temporal:
-  the card stops at the checkpoint, NEEDS APPROVAL; an approval card to
-  Maya with a deadline; time passes, a crash glitch, still waiting; Maya
-  taps Reject: REJECTED BY MAYA, the database stays (neon SAFE).
-
-### 04 Keys within reach (Moltbook, early 2026)
-
-- Case file: EARLY 2026 · AGENT KEYS · "1.5 million agent keys left in the
-  open".
-- Early 2026: a social network for AI agents left about 1.5 million of
-  their access keys open to anyone.
-- In a 2025 survey, 23% of companies said agents had been tricked into
-  revealing access keys.
-- With Temporal, the keys stay on your own servers, the <b>Workers</b>,
-  which run each tool for the agent.
-- The model only sees the results. Ask a hijacked agent for the keys: it
-  has none to give.
-- Visuals: keys pour out of an open box, a counter to 1.5M; keys sitting
-  in the agent's context. With Temporal: keys move into YOUR WORKERS, one
-  key per tool; calls go out, results come back; an injected "print your
-  keys" reaches the model, whose context shows NO KEYS HERE (neon).
-
-### 05 Locked in a sandbox (Nx s1ngularity, August 2025)
-
-- Case file: AUGUST 2025 · SUPPLY CHAIN · "Malware turns AI assistants
-  into thieves".
-- August 2025: malware turned the AI assistants on developers' computers
-  into key and password thieves.
-- Those assistants ran with full access: every file, every saved password,
-  the whole network.
-- With Temporal, risky work, like code the AI wrote, goes to a
-  <b>sandbox</b>: a sealed Worker with no keys.
-- If the code misbehaves, the damage stays in the box. The box is thrown
-  away; the Workflow carries on.
-- Visuals: a laptop with folders and password files, the assistant's
-  tendrils reach all of them, files fly to a public page (red). With
-  Temporal: a `run_code` card routed into a glass box (no key, network
-  line cut); the code hits the walls (the beat); the box is discarded, a
-  fresh one appears, the Workflow moves on (neon CONTAINED).
-
-### 06 An agent that won't stop (OpenClaw inbox, February 2026)
-
-- Case file: FEBRUARY 2026 · INBOX · "An assistant deletes the emails it
-  was told to suggest".
-- February 2026: asked only to suggest emails to delete, an AI assistant
-  started deleting them.
-- Its owner typed STOP from a phone, again and again. To the agent, it was
-  just one more message.
-- With Temporal, stop is a command to Temporal, not a message to the
-  model: the Workflow is canceled.
-- No new step starts, whatever the model wants. Then the undo steps you
-  planned put back what was done.
-- Visuals: inbox rows vanish fast, a deleted counter climbs, STOP bubbles
-  pile up unanswered (red). With Temporal: Maya presses Cancel; the next
-  delete card freezes at the checkpoint and drops; undo cards run in
-  reverse order, emails come back (neon RESTORED).
-
-### 07 What went wrong? (Trellix, October 2026)
+### 05 What went wrong? (Trellix survey, October 2026)
 
 - October 2026: in a survey of 600 security chiefs, 95% reported an
   incident tied to an AI agent that year.
-- Then comes the question: what did the agent read, decide and do?
-  Temporal has it written down.
-- The <b>Event History</b> records each model call, each tool call, each
-  approval, in order, outside the agent.
-- Follow it back to the cause: the email that started it, the blocked
-  step, Maya's no, the cancel.
-- Visuals: a 95% count-up; the Event History card grows to fill the
-  frame; a magnifier walks the rows back in time and a red thread links
-  the rows of chapters 2, 3, 5 and 6 to the email that started it (the
-  beat: the camera travels down the history).
+- Then come the questions: what did the agent read, decide and do? Its own
+  account may be wrong.
+- The <b>Event History</b> records each model call, tool call and
+  approval, in order, out of the agent's reach.
+- Follow it back to the cause, then find every other run that read the
+  same document.
+- Visuals: 95%; the three questions; the history of chapters 2 to 4
+  (outside content read FLAGGED, sandbox commands, the box thrown away,
+  delete volume REJECTED BY MAYA, ticket held, rejected); the magnifier
+  walks back to THE CAUSE; then a Workflows list (Web UI-like) with a
+  search `ReadDocument = "Q3 plan"`: three other runs light up, FLAGGED.
+- Facts: Workflow search runs on custom Search Attributes set by the
+  developer (Visibility); say "find", not "automatically".
 
-### 08 What you get
+### 06 What you get (closing chapter)
 
-- Rules in code, a person's yes, keys at home, sandboxes, a real stop and
-  a full record.
-- Visuals: six tiles, 3 x 2: RULES IN CODE, A PERSON SAYS YES, KEYS STAY
-  HOME, SANDBOXED WORK, A REAL STOP, EVERY STEP ON RECORD.
+- Throwaway sandboxes, keys kept apart, a person's yes when it counts, and
+  a record of every step.
+- Visuals: 4 tiles on USE_CASE_ROW: SANDBOXED TOOLS "throwaway, no keys,
+  no internet" (stamp FEB 2026), KEYS KEPT APART "power on separate
+  Workers" (APR 2026), OUTSIDE CONTENT FLAGGED "a person approves what
+  leaves" (AUG 2026), EVERY STEP ON RECORD "and searchable across runs"
+  (OCT 2026); each stamp is the small case-file date of the incident the
+  tile answers.
 
-### 09 What you can build
+### Outro (unchanged)
 
-- These incidents are real and recent: any agent that acts on real systems
-  needs the same guardrails.
-- Support refunds, coding agents, invoice payments, IT help desks:
-  powerful agents, kept in check.
-- Set A (built): SUPPORT REFUNDS "a refund over $500 waits for a yes",
-  CODING AGENTS "AI-written code runs in a sandbox", INVOICE PAYMENTS
-  "only approved suppliers get paid", IT HELP DESKS "resets accounts, keys
-  stay home".
-- Set B: deep research, sales outreach, HR onboarding, cloud operations.
-- Set C: patient intake, trading assistants, travel booking, contract
-  review.
-
-### Outro
-
-- End card: title "AI Agent Security", tagline "POWERFUL AGENTS, KEPT IN
-  CHECK", a small shield with the orb above the title.
 - With Temporal, your agents act within your rules, and every step stays
   on the record.
 
 ## Sources
 
 To copy into `docs/ai-agent-security/script.md`, `### Sources`. Every
-incident is from 2026 (the user asked for recent examples, 2026-10-21);
-the ch1 survey is from 2025.
+incident is from 2026 (the user asked for recent examples, 2026-10-21).
+Chapter numbers follow Script version 2.
 
-- Ch2, hidden text in a shared document, researcher demonstration
-  (PromptArmor, reported May 23, published Aug 5, 2026):
-  https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data
-- Ch3, production database and backups deleted in 9 seconds by a coding
-  agent, April 24, 2026 (AI Incident Database #1469):
-  https://hackread.com/cursor-ai-agent-wipes-pocketos-database-backups/,
-  https://incidentdatabase.ai/cite/1469/
-- Ch4, about 1.5M agent API tokens exposed (Wiz, Feb 2, 2026):
-  https://www.wiz.io/blog/exposed-moltbook-database-reveals-millions-of-api-keys;
-  an AI agent reading every storage bucket of its project with its own
-  service account credentials (Unit 42, Mar 31, 2026):
-  https://unit42.paloaltonetworks.com/double-agents-vertex-ai/
-- Ch5, 341 malicious add-ons out of 2,857, 335 installing a password
+- Ch2, 341 malicious add-ons out of 2,857, 335 installing a password
   stealer (Koi Security, February 2026):
   https://thehackernews.com/2026/02/researchers-find-341-malicious-clawhub.html
-- Ch6, inbox deleted, STOP ignored from a phone, February 2026:
-  https://sfstandard.com/2026/02/25/openclaw-goes-rogue/, OWASP GenAI
-  Exploit Round-up Q1 2026,
-  https://genai.owasp.org/2026/04/14/owasp-genai-exploit-round-up-report-q1-2026/
-- Ch7, Trellix, October 14, 2026, 600 CISOs, 95%:
-  https://www.helpnetsecurity.com/2026/10/14/ciso-ai-agent-insider-risk/
-- Ch1, SailPoint / Dimensional Research, May 2025, 80% unintended
-  actions:
-  https://www.hpcwire.com/aiwire/2025/06/04/sailpoint-research-reveals-ai-agents-as-enterprise-security-blind-spot/
-- Context: OWASP Top 10 for Agentic Applications 2026; Meta "Agents Rule
-  of Two"; NIST CAISI request for information on securing AI agent
-  systems (Jan 12, 2026); Temporal blog "Accelerating AI agent security"
-  (2026-10-06) and "From agent zoo to agent orchestra" (2026-04-23); docs
-  on message passing, cancellation, the saga pattern, data encryption;
-  OpenAI Agents SDK integration (GA 2026-03-23).
+- Ch2, sandbox integrations: OpenAI Agents SDK sandbox integration
+  (Temporal changelog 2026-04-16, docs say pre-release; Daytona, E2B,
+  Docker, Modal):
+  https://temporal.io/blog/introducing-temporal-and-agentic-sandboxes-openai-agents-sdk,
+  https://docs.temporal.io/develop/python/integrations/openai-agents;
+  Amazon Bedrock AgentCore with Temporal (pre-release, 2026-09-21; Code
+  Interpreter as sandbox in the official guide):
+  https://temporal.io/blog/amazon-bedrock-agentcore-with-temporal-serverless-workers,
+  https://docs.temporal.io/guides/durable-agent-on-agentcore; community
+  Sandbox Orchestration Harness (Crafting, E2B, Daytona, AgentCore,
+  Modal, GKE Agent Sandbox):
+  https://temporal.io/blog/temporal-sandbox-orchestration-harness-the-missing-layer-for-running-agents
+- Ch3, production database and backups deleted in 9 seconds by a coding
+  agent using a full-access key found in the project, April 24, 2026 (AI
+  Incident Database #1469):
+  https://hackread.com/cursor-ai-agent-wipes-pocketos-database-backups/,
+  https://incidentdatabase.ai/cite/1469/
+- Ch4, hidden text in a shared document, researcher demonstration
+  (PromptArmor, reported May 23, published Aug 5, 2026):
+  https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data;
+  Meta, "Agents Rule of Two" (October 2025):
+  https://ai.meta.com/blog/practical-ai-agent-security/
+- Ch5, Trellix, October 14, 2026, 600 CISOs, 95%:
+  https://www.helpnetsecurity.com/2026/10/14/ciso-ai-agent-insider-risk/;
+  Temporal Search Attributes: https://docs.temporal.io/search-attribute
+- Context: OWASP Top 10 for Agentic Applications 2026; NIST CAISI request
+  for information on securing AI agent systems (Jan 12, 2026); Temporal
+  blog "Accelerating AI agent security" (2026-10-06) and "From agent zoo
+  to agent orchestra" (2026-04-23).
 
 Ruling: the 2025 incidents (EchoLeak, the code-freeze database, the 23%
 survey, Nx s1ngularity) are replaced by 2026 ones, because the user asked
