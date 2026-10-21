@@ -65,7 +65,7 @@ you can build" chapter.
 - **0:01** Meet Temporal Proxy 1.0: released on October 16, 2026, and
   ready for production.
   - Visuals: Temporal logo, kicker "PRODUCT NEWS, OCTOBER 2026", title
-    "Temporal Proxy" / "1.0", tagline "SECURITY MOVES OUT OF YOUR
+    "Temporal" / "Proxy 1.0", tagline "SECURITY MOVES OUT OF YOUR
     WORKERS"; on the right, on a soft violet glow, the TEMPORAL PROXY box,
     three small Workers on its left (Go, Java, TypeScript logos) whose
     lines converge into it, and one violet connection leaving it, light

@@ -491,7 +491,7 @@ below and the card order in [Home page design](feedback_home-page.md).
   2026-10-16) for security teams, platform teams and developers who run
   Workers: technical, no code or configuration on screen apart from the
   Worker lines `proxy:7233` / `payments`. Kicker "PRODUCT NEWS, OCTOBER
-  2026", title "Temporal Proxy" / "1.0", tagline "SECURITY MOVES OUT OF
+  2026", title "Temporal" / "Proxy 1.0", tagline "SECURITY MOVES OUT OF
   YOUR WORKERS"; markdown-title "Temporal Proxy 1.0".
 - The video says "ready for production" and "supported", never "Public
   Preview", "GA" or "generally available" (user decision). Every claim

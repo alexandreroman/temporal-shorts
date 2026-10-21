@@ -77,7 +77,7 @@
       s.box = makeProxy(root);
       s.badge = makeVersionBadge(root);
       s.rings = makeRipples(root, 2, RGB.neon);
-      s.title = makeTitleBlock(stage, 'PRODUCT NEWS, OCTOBER 2026', 'Temporal Proxy<br>1.0',
+      s.title = makeTitleBlock(stage, 'PRODUCT NEWS, OCTOBER 2026', 'Temporal<br>Proxy 1.0',
         'SECURITY MOVES OUT OF YOUR WORKERS');
     },
     update(t, c, s) {
