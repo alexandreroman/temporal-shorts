@@ -2,19 +2,22 @@
 // No case file: a survey, not an incident. A large red 95% counts up beside a crowd of 100 figures, each standing for
 // 6 of the 600 security chiefs, which turn red as it climbs. Three questions follow, READ? DECIDED? DID?, put to the
 // agent, whose own answer ("All good, nothing sent.") gets an UNRELIABLE stamp. The questions fly into the header of
-// the Event History card, labelled OUT OF THE AGENT'S REACH, whose rows tell chapters 2 to 4 in order: the shared
-// document read and FLAGGED, the add-on step in a sandbox, the box replaced, the deleted volume and the ticket to an
-// outside project, both REJECTED BY MAYA. A magnifier walks back up the rows, a red thread linking the outcomes, to
+// the Event History card, labelled OUT OF THE AGENT'S REACH, whose rows tell chapters 2 to 4 in order: the document
+// found online read and FLAGGED, npm install of an attacker package in a sandbox (NO INTERNET), the box replaced,
+// the volume's deletion via Nexus, REJECTED, and open_link to an outside address, HELD, then REJECTED BY MAYA. A
+// magnifier walks back up the rows, a red thread linking the outcomes, to
 // the document: THE CAUSE. Then the camera whips right, one way, to a Workflows list in the look of the Temporal Web
 // UI, where a search on a custom Search Attribute, ReadDocument = "Q3 plan", filters the runs to four: this one and
 // three others, which light up red, FLAGGED, as the dramatic beat (a flash and a jolt): "every run that read it".
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- 95%: the stat block on the left, the crowd of figures on the right, centered on y 515
-  // the stat block: its center and size (source line 24 + 18, number 230, 10 + caption 2 x 50)
-  const STAT = { x: 570, y: 515, w: 760, h: 382 };
+  // the stat block: its left edge, center y and size (source line 24 + 18, number 230, 10 + caption 2 x 50)
+  const STAT = { left: 120, y: 515, w: 820, h: 382 };
+  STAT.x = STAT.left + STAT.w / 2;
   // the crowd: 10 x 10 figures (icon px, pitch px), the first `hit` of them red, and a legend under them; its center
-  const CROWD = { x: 1450, y: 515, icon: 40, pitch: 52, cols: 10, count: 100, hit: 95, legendGap: 26, legendH: 20 };
+  // (the grid at x 1240-1800, y 212-772, the legend at y 792-812)
+  const CROWD = { x: 1520, y: 512, icon: 56, pitch: 56, cols: 10, count: 100, hit: 95, legendGap: 20, legendH: 20 };
   CROWD.gridW = (CROWD.cols - 1) * CROWD.pitch + CROWD.icon;
   CROWD.h = CROWD.gridW + CROWD.legendGap + CROWD.legendH;
   // the beats from c[0]: the source line, the number and the crowd come in; the count runs from `count` for countD
@@ -23,17 +26,18 @@
 
   // ---------- the three questions, put to the agent
   // their tiles: size, the first one's center x, the pitch and line; each one's icon, word, short note, and the
-  // header chip it becomes (x 140-1220, y 315-715)
-  const QUESTION = { w: 320, h: 400, x0: 300, pitch: 380, y: 515, icon: 104 };
+  // header chip it becomes (x 120-1299, 60 px apart, y 299-731: from the bubble's top to the agent label's bottom)
+  const QUESTION = { w: 353, h: 432, x0: 120 + 353 / 2, pitch: 413, y: 515, icon: 104 };
   const QUESTIONS = [
     { icon: 'eye', word: 'READ?', note: 'what came in', chip: 'READ' },
     { icon: 'face', word: 'DECIDED?', note: 'what the model chose', chip: 'DECIDED' },
     { icon: 'bolt', word: 'DID?', note: 'what it ran', chip: 'DID' },
   ];
-  // the agent on the right: the orb (x 1450-1630, y 520-700, its label under it) and its speech bubble above it, its
-  // top level with the tiles' (y 315-485), the tail pointing down at the orb; the stamp in the bubble's lower half
-  const AGENT = { x: 1540, y: 610, size: 180, look: -0.6 };
-  const BUBBLE = { x: 1540, y: 400, w: 440, h: 170, tail: 22, stampTop: 92 };
+  // the agent on the right, 60 px right of the tiles: the orb (x 1489-1669, y 504-684, its label under it, ending
+  // level with the tiles' bottom) and its speech bubble above it (x 1359-1799), its top level with the tiles'
+  // (y 299-469), the tail pointing down at the orb; the stamp in the bubble's lower half
+  const AGENT = { x: 1579, y: 594, size: 180, look: -0.6 };
+  const BUBBLE = { x: 1579, y: 384, w: 440, h: 170, tail: 22, stampTop: 92 };
   // the beats from c[1]: the 95% slides out (out, outD) and the orb pops in (agent); the tiles pop in one after the
   // other (tiles, tileStep) and swell as their word is read ("read", "decide", "do"); the bubble pops in as "Its own
   // account" is read (bubble) and the stamp slams onto it as "wrong" is read (stamp)
@@ -48,7 +52,8 @@
   // px from the right edge; the type chip's size
   const COL = { num: 44, time: 92, type: 214, event: 360, detail: 640, result: 48, typeW: 116, typeH: 28 };
   // the header: title on the left, the three chips after it (x0, w, gap, h), OUT OF THE AGENT'S REACH on the right
-  const HEAD = { titleLeft: 32, titleH: 80, chipX0: 300, chipW: 132, chipGap: 12, chipH: 32, labelRight: 32 };
+  // (its right edge level with the result tags')
+  const HEAD = { titleLeft: 32, titleH: 80, chipX0: 300, chipW: 132, chipGap: 12, chipH: 32, labelRight: COL.result };
   // the look of each type chip: background and text color; WORKFLOW, in Temporal's UV, marks what the Workflow did
   const TYPE_LOOK = {
     READ: ['#E2E8F0', C.slateDark],
@@ -61,30 +66,34 @@
   // width]), the theme's kinds where chapters 2 to 4 show the same outcome, so a tag reads the same in every chapter
   const TAGS = {
     flagged: { text: 'FLAGGED', look: STATUS_KINDS.flagged },
-    sandbox: { text: 'SANDBOX', look: { ...STATUS_KINDS.safe, icon: ['sandbox', C.bg, 2.6] } },
+    noInternet: { text: 'NO INTERNET', look: STATUS_KINDS.alarm },
     held: { text: 'HELD', look: STATUS_KINDS.approval },
-    rejected: { text: 'REJECTED BY MAYA', look: STATUS_KINDS.alarm },
+    rejected: { text: 'REJECTED', look: STATUS_KINDS.alarm },
+    rejectedByMaya: { text: 'REJECTED BY MAYA', look: STATUS_KINDS.alarm },
     cause: { text: 'THE CAUSE', look: { ...STATUS_KINDS.alarm, icon: ['alert', C.bg, 2.6] } },
     thisRun: { text: 'THIS RUN', look: { background: C.uv, color: '#FFFFFF', icon: ['search', '#FFFFFF', 2.6] } },
   };
   // One run of the agent, as chapters 2 to 4 told it, in order: each row's time, type, event (tool: a tool call, in
-  // bold), details and result tag. The shared document at the top is the cause the magnifier walks back to. The times
-  // follow chapter 3's waiting clock: the request goes to Maya on WED 10:00 and she answers on THU 16:20.
+  // bold), details and result tag, each tool named as its chapter shows it. The document at the top, chapter 4's, is
+  // the cause the magnifier walks back to. Chapter 2's attacker package finds no internet in the sandbox, which is
+  // replaced. Maya rejects the volume's deletion in the platform team's Namespace: this history holds the outcome of
+  // the Nexus operation. The times follow chapter 3's waiting clock: the request goes to Maya on WED 10:00 and she
+  // answers on THU 16:20.
   const ROWS = [
-    { time: 'WED 09:52', type: 'READ', event: 'outside content read', detail: '"Q3 plan", a shared document',
+    { time: 'WED 09:52', type: 'READ', event: 'outside content read', detail: '"Q3 plan", found online',
       tag: TAGS.flagged },
-    { time: 'WED 09:53', type: 'DECIDED', event: 'model call', detail: 'next: add-on step' },
-    { time: 'WED 09:55', type: 'DID', event: 'add-on step', tool: true, detail: 'wallet-helper, in a sandbox',
-      tag: TAGS.sandbox },
+    { time: 'WED 09:53', type: 'DECIDED', event: 'model call', detail: 'next: npm install' },
+    { time: 'WED 09:55', type: 'DID', event: 'npm install', tool: true, detail: 'attacker package, in a sandbox',
+      tag: TAGS.noInternet },
     { time: 'WED 09:57', type: 'WORKFLOW', event: 'box replaced', detail: 'a fresh sandbox, progress kept' },
     { time: 'WED 09:59', type: 'DECIDED', event: 'model call', detail: 'next: delete volume' },
-    { time: 'THU 16:20', type: 'MAYA', event: 'delete volume prod-db', tool: true, detail: 'cannot be undone',
-      tag: TAGS.rejected },
-    { time: 'THU 16:21', type: 'DECIDED', event: 'model call', detail: 'next: create ticket' },
-    { time: 'THU 16:22', type: 'WORKFLOW', event: 'create ticket', tool: true, detail: 'to an outside project',
+    { time: 'THU 16:20', type: 'WORKFLOW', event: 'delete volume prod-db', tool: true,
+      detail: 'via Nexus: rejected by Maya', tag: TAGS.rejected },
+    { time: 'THU 16:21', type: 'DECIDED', event: 'model call', detail: 'next: open_link' },
+    { time: 'THU 16:22', type: 'WORKFLOW', event: 'open_link', tool: true, detail: 'to an outside address',
       tag: TAGS.held },
-    { time: 'THU 17:05', type: 'MAYA', event: 'create ticket', tool: true, detail: 'to an outside project',
-      tag: TAGS.rejected },
+    { time: 'THU 17:05', type: 'MAYA', event: 'open_link', tool: true, detail: 'to an outside address',
+      tag: TAGS.rejectedByMaya },
   ];
   CARD.h = CARD.headH + ROWS.length * CARD.rowH + CARD.footH;
   // the beats from c[2]: the orb and its bubble slide out (out, outD); as the card grows from the middle (grow,
@@ -209,8 +218,8 @@
       + `letter-spacing:.14em;color:${C.slate}">${ICON('file', 22, C.slate, 1.8)}TRELLIX SURVEY, OCTOBER 2026</div>`
       + `<div class="big" style="margin-top:18px;height:230px;font-size:240px;line-height:230px;font-weight:700;`
       + `letter-spacing:-6px;color:${C.red};transform-origin:left center"><span class="n">0</span>%</div>`
-      + '<div class="cap" style="margin-top:10px;font-size:40px;line-height:50px">'
-      + 'of 600 security chiefs reported<br>an incident tied to an AI agent</div>',
+      + '<div class="cap" style="margin-top:10px;font-size:40px;line-height:50px;white-space:nowrap">'
+      + 'of 600 security chiefs tied an insider incident<br>to an AI agent or other autonomous system</div>',
       '', { width: STAT.w + 'px', height: STAT.h + 'px' });
     stat.big = stat.querySelector('.big');
     stat.num = stat.querySelector('.n');
@@ -526,8 +535,8 @@
     ],
     subs: [
       {
-        text: "October 2026: in a survey of 600 security chiefs, 95% reported an incident tied to an AI agent "
-          + "that year.",
+        text: "October 2026: in a survey of 600 security chiefs, 95% tied an insider incident to an AI agent "
+          + "in a year.",
       },
       {
         text: "Then come the questions: what did the agent read, decide and do? Its own account may be wrong.",
