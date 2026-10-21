@@ -16,12 +16,12 @@
   // The track's layout in OUTRO_SHOT, in screen px (see onScreen): its line's ends and height (x0 to the 1.0 slot), the
   // dots of the ten 0.x releases (0.1 to 0.10, the last one as far from the slot's edge as from the dot before it),
   // the 1.0 slot, the faint line on past it (to xEnd, as far from the slot as x0), the labels of the first and last
-  // dots (labelDy: under the track), and the two tags side by side, centered under the slot, 20 px or more under the
-  // labels (tags: their center y and the gap between them)
+  // dots (labelDy: under the track), and the two tags stacked under the slot, right-aligned on its right edge, the
+  // first 20 px or more under the labels (tags: the first one's center y and the gap between them)
   const RELEASES = 10;
   const TRACK = {
     x0: 309, y: 700, dots: Array.from({ length: RELEASES }, (_, i) => 349 + i * 58), slot: 960, xEnd: 1611,
-    labelDy: 30, tags: { y: 786, gap: 24 },
+    labelDy: 30, tags: { y: 786, gap: 14 },
   };
   // One screen px in OUTRO_SHOT, in stage px: the track's parts are sized in screen px (n * U)
   const U = 1 / OUTRO_SHOT[2];
@@ -122,15 +122,16 @@
       const up = P(t, flyAt, T0.flyD);
       place(s.badge, slotX, lerp(slotY, ON_BOX[1], up), pop.s, pop.o);
       placeRipples(s.rings, t, lightAt, slotX, slotY, 80 * U, 300 * U, { d: 0.9, step: 0.18 });
-      // the tags' row, centered under the slot: their widths, measured, in stage px
-      const widths = [s.ready.offsetWidth, s.supported.offsetWidth];
-      const gap = TRACK.tags.gap * U;
-      const [, tagsY] = onScreen(TRACK.slot, TRACK.tags.y);
-      let tagLeft = slotX - (widths[0] + gap + widths[1]) / 2;
-      [[s.ready, T0.ready], [s.supported, T0.supported]].forEach(([tag, at], i) => {
+      // the tags, stacked under the slot, their right edges on the badge's: their sizes, measured unrounded (stage
+      // px), so the edges match to the pixel
+      const width = e => parseFloat(getComputedStyle(e).width);
+      const height = e => parseFloat(getComputedStyle(e).height);
+      const tagsRight = slotX + VERSION_BADGE.w / 2;
+      const [, readyY] = onScreen(TRACK.slot, TRACK.tags.y);
+      const supportedY = readyY + (height(s.ready) + height(s.supported)) / 2 + TRACK.tags.gap * U;
+      [[s.ready, readyY, T0.ready], [s.supported, supportedY, T0.supported]].forEach(([tag, tagY, at]) => {
         const tagPop = popIn(t, c[0] + at);
-        place(tag, tagLeft + widths[i] / 2, tagsY + leaveDy, tagPop.s, tagPop.o * leaveO);
-        tagLeft += widths[i] + gap;
+        place(tag, tagsRight - width(tag) / 2, tagY + leaveDy, tagPop.s, tagPop.o * leaveO);
       });
     }
   });
