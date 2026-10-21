@@ -227,9 +227,11 @@ const SERVICE_SHOT = [1289, 579, 1];
 // top, the pitch), each with its two Workers side by side at scale k (SERVICE_TILE); 120 px on their right, the
 // PLATFORM TEAM zone round the proxy box, as high as the team zones' stack, with the POLICY panel docked 36 px under
 // the box (platform, policy). Each team's connection to the proxy, from its zone's right edge to the box, runs down or
-// up at linkX, midway between the zones, and ends `linkGap` px from the next one on the box. TEMPORAL's Namespace
-// bands, one per team, level with the team zones (bands: their center x and size). tube: where the TLS tube ends, 12 px
-// inside TEMPORAL, and its label's center x, midway between the environment and TEMPORAL.
+// up in a lane of its own, `laneGap` px from the next one round linkX, midway between the zones: the lower the team,
+// the nearer the box its lane, so the two that run up (ORDERS and FRAUD) nest without crossing. It ends `linkGap` px
+// from the next one on the box. TEMPORAL's Namespace bands, one per team, level with the team zones (bands: their
+// center x and size). tube: where the TLS tube ends, 12 px inside TEMPORAL, and its label's center x, midway between
+// the environment and TEMPORAL.
 const SERVICE = {
   env: { x: 449, y: 214, w: 1052, h: 730 },
   temporal: { x: 1653, y: 214, w: 476, h: 730 },
@@ -238,6 +240,7 @@ const SERVICE = {
   teams: { x: 485, w: 448, h: 174, top: 305, pitch: 214 },
   k: 0.9,
   linkX: 993,
+  laneGap: 30,
   linkGap: 40,
   bands: { x: 1891, w: 396, h: 84 },
 };
@@ -268,7 +271,8 @@ function serviceSlot(worker) {
 function teamLinkD(i, reversed = false) {
   const zone = teamZone(i);
   const fromY = zone.y + zone.h / 2, toY = PROXY.y + (i - 1) * SERVICE.linkGap;
-  const points = [[zone.x + zone.w, fromY], [SERVICE.linkX, fromY], [SERVICE.linkX, toY], [PROXY.linkEnd, toY]];
+  const laneX = SERVICE.linkX + (i - 1) * SERVICE.laneGap;
+  const points = [[zone.x + zone.w, fromY], [laneX, fromY], [laneX, toY], [PROXY.linkEnd, toY]];
   return roundedPath(reversed ? points.reverse() : points, 8);
 }
 // A team zone, w x h px: a violet outline round its Workers, its name at its top left in violet capitals, as chapter
