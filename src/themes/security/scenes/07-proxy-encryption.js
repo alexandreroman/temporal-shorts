@@ -125,52 +125,8 @@
   // The center of row i of TEMPORAL's list in the close shot, and in the wide one
   const closeRow = i => [LIST_AT.x, LIST_AT.top + i * LIST_AT.pitch];
   const wideRow = i => [WIDE_LIST.x, WIDE_LIST.top + i * WIDE_LIST.pitch];
-  // The point at progress p along a path element, from its end back to its start if `back`
-  const alongPath = (pathEl, p, back = false) => {
-    const point = pathEl.getPointAtLength(pathEl._L * clamp(back ? 1 - p : p));
-    return [point.x, point.y];
-  };
-  // A data key's trip along the KMS link: it leaves the DATA KEY at goAt and takes tripD to reach the KMS, stays
-  // there `stay` seconds while the KMS wraps it (wrapped from just after wrapAt), then comes back (from backAt)
-  const kmsTrip = (linkEl, t, goAt, { tripD, stay }) => {
-    const wrapAt = goAt + tripD, backAt = wrapAt + stay;
-    const at = t < backAt ? alongPath(linkEl, P(t, goAt, tripD), true) : alongPath(linkEl, P(t, backAt, tripD));
-    return { at, wrapAt, backAt, wrapped: t >= wrapAt + 0.15 };
-  };
-  // A tag of the close shot, sized in screen px (font): its HTML after the leading icon of a statusTag kind (unless
-  // `icon` is false), in that kind's look; solid, an opaque fill for a tag over other parts
-  const closeTag = (root, html, kind, font, { solid = null, icon: withIcon = true } = {}) => {
-    const { icon, ...look } = STATUS_KINDS[kind];
-    const lead = icon && withIcon ? ICON(icon[0], font * U, icon[1], icon[2]) : '';
-    // centered, as setStatus() centers a statusTag: a label alone (icon: false) gets extra left padding for
-    // the letter spacing that trails its last letter, which the margin round a leading icon's stroke already offsets
-    const e = E(root, lead + html, 'mono', {
-      fontSize: px(font), lineHeight: px(font * 1.4), letterSpacing: '.1em', padding: `${px(6)} ${px(14)}`,
-      paddingLeft: withIcon ? px(14) : `calc(${px(14)} + .1em)`, borderRadius: px(6), whiteSpace: 'nowrap',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: px(8), border: `${px(2)} solid`, ...look,
-    });
-    if (solid) e.style.background = solid;
-    return e;
-  };
-  // YOUR KMS: its name, the KMS key (e.kmsKey, its icon) and the key servers it can be; NEVER LEAVES beside the key
-  // (e.never)
-  const makeKms = root => {
-    const e = E(root,
-      `<div style="position:absolute;left:${px(22)};top:${px(18)};display:flex;align-items:center;gap:${px(10)}">`
-      + `${ICON('kms', 26 * U, C.slate, 1.8)}<span class="lbl" style="font-size:${px(20)};color:var(--ink)">`
-      + 'Your KMS</span></div>'
-      + `<div style="position:absolute;left:${px(22)};top:${px(62)};display:flex;align-items:center;gap:${px(12)}">`
-      + `<div class="kms-key">${ICON('key', 50 * U, C.violet, 1.9)}</div>`
-      + `<span class="mono" style="font-size:${px(18)};letter-spacing:.12em;color:${C.violet}">KMS KEY</span></div>`
-      + `<div class="mono" style="position:absolute;left:${px(22)};top:${px(144)};font-size:${px(15)};`
-      + `line-height:${px(25)};letter-spacing:.06em;color:${C.slate};white-space:nowrap">`
-      + 'AWS KMS · AZURE KEY VAULT<br>GCP KMS · YOUR KEY SERVER</div>',
-      'tile', { width: KMS.w + 'px', height: KMS.h + 'px', textAlign: 'left' });
-    e.kmsKey = e.querySelector('.kms-key');
-    e.never = closeTag(e, 'NEVER LEAVES', 'ok', 15);
-    Object.assign(e.never.style, { left: 'auto', right: px(22), top: px(70) });
-    return e;
-  };
+  // A tag of the close shot, sized in screen px (font; see scaledTag)
+  const closeTag = (root, html, kind, font, opts = {}) => scaledTag(root, html, kind, font, { ...opts, u: U });
   // The DATA KEY: a key, then its name and number (e.num) over its cipher (e.cipher); under them, its lifetime, a
   // clock and a bar (e.fill) that drains as the key seals payloads (setLife)
   const makeDataKey = root => {
@@ -197,31 +153,6 @@
   // The share of a data key's lifetime left, 0 to 1, as the length of its bar
   const setLife = (e, left) => {
     e.fill.style.transform = `scaleX(${clamp(left).toFixed(4)})`;
-  };
-  // The tag of a card's data key, a fixed width so it never moves as its text changes: DATA KEY n on its way to the
-  // KMS, then WRAPPED KEY n, behind a lock (setKeyTag)
-  const makeKeyTag = root => closeTag(root, '', 'wait', 15, { solid: 'var(--violet-solid)' });
-  const setKeyTag = (e, n, wrapped) => {
-    const icon = ICON(wrapped ? 'lock' : 'key', 16 * U, wrapped ? C.violet : C.neon, 2);
-    setHtml(e, `${icon}${wrapped ? 'WRAPPED' : 'DATA'} KEY ${n}`);
-    Object.assign(e.style, { width: px(200), justifyContent: 'center', borderStyle: wrapped ? 'solid' : 'dashed' });
-  };
-  // The ciphertext of stored payload i, its first n glyphs (the same glyphs in both lists and in the windows)
-  const storedCipher = (i, n) => Array.from({ length: n }, (_, col) => cipherGlyph(i + 10, col)).join('');
-  // A row of the close shot's list (ROW): ciphertext, then the payload's wrapped data key behind the violet lock of
-  // the cards' WRAPPED KEY tag (row.key); a wrapped key is ciphertext too, which only your KMS can unwrap
-  const makeListRow = (root, i, key) => {
-    const row = E(root,
-      `<span class="mono" style="font-size:16px;color:${C.violet}">${storedCipher(i, 5)}</span>`
-      + `<span class="key mono" style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:15px;`
-      + `line-height:20px;letter-spacing:.04em;padding:0 5px;border:1px solid ${C.violet};border-radius:4px;`
-      + `color:${C.violet}">${ICON('lock', 13, C.violet, 2.2)}WRAPPED ${key}</span>`,
-      '', {
-        width: ROW.w + 'px', height: ROW.h + 'px', display: 'flex', alignItems: 'center', gap: '8px',
-        padding: '0 8px', background: C.bg, border: `1px solid ${C.lineLight}`, borderRadius: 'var(--rs)',
-      });
-    row.key = row.querySelector('.key');
-    return row;
   };
   // A row of the wide shot's list: a neon lock and the payload's ciphertext, at camera rest (values 18.5 px on screen)
   const makeWideRow = (root, i) => E(root,
@@ -289,7 +220,7 @@
       // chapter 6's parts first, in its order, so the cut shows the same stack
       const root = s.cam = makeCamera(stage);
       Object.assign(s, makeFleet(root));
-      s.band = makeProxyBand(root);
+      s.band = makeProxyBand(root, PROXY_BAND);
       s.tube = makeProxyTube(root, s.out);
       s.proxy = makeProxy(root);
       s.sparks = s.apps.map(() => makeSpark(root, 10, RGB.violet));
@@ -300,7 +231,7 @@
 
       // this chapter's parts: TEMPORAL's list, YOUR KMS and its link, the DATA KEY
       s.listLabel = E(root, 'Stored payloads', 'lbl', { fontSize: '16px', width: ROW.w + 'px', paddingLeft: '0' });
-      s.rows = RUNS.map((run, i) => makeListRow(root, i, run.key));
+      s.rows = RUNS.map((run, i) => makeStoredRow(root, i, run.key, ROW));
       s.wideLabel = E(root, 'Stored<br>payloads', 'lbl', {
         fontSize: '21px', lineHeight: '28px', width: WIDE_LIST.w + 'px', paddingLeft: '0',
       });
@@ -311,7 +242,7 @@
         textAlign: 'center', color: C.violet, border: `1px solid ${C.violet}`, borderRadius: 'var(--rs)',
         background: VERDICT_FILL.wait,
       });
-      s.kms = makeKms(root);
+      s.kms = makeKms(root, KMS, U);
       s.top = svgLayer(root);
       const { x0, y0, x, x1, y1 } = LINK;
       s.link = path(s.top, roundedPath([[x0, y0], [x, y0], [x, y1], [x1, y1]], 8), C.violet, 2, false);
@@ -320,7 +251,7 @@
       s.oldKey = makeDataKey(root);
       s.dataKey = makeDataKey(root);
       s.rotated = closeTag(root, 'ROTATED', 'ok', 14, { solid: 'var(--neon-solid)', icon: false });
-      s.rotateTag = makeKeyTag(root);
+      s.rotateTag = makeKeyTag(root, U);
       s.rotateRipples = [0, 1].map(() => makeRipples(root, 2, RGB.violet));
       s.codec = E(root,
         `${ICON('server', 26, C.ink, 1.8)}<div class="lbl" style="font-size:21px;line-height:26px;color:var(--ink);`
@@ -335,7 +266,7 @@
       // the cards of the runs, each with its data key's tag and the key that flies onto it
       s.runs = RUNS.map(() => {
         const card = makePayload(root, { w: CARD.w });
-        const keyTag = makeKeyTag(root);
+        const keyTag = makeKeyTag(root, U);
         const fly = E(root, ICON('key', 26 * U, C.neon, 2.2), '', {
           filter: `drop-shadow(0 0 ${px(8)} rgba(${RGB.neon},.8))`,
         });

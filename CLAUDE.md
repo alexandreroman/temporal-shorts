@@ -33,6 +33,12 @@ from a deterministic HTML animation. Each video is a theme:
   and encryption out of the Workers, calls across Namespaces with Temporal
   Nexus, and Temporal Cloud's compliance: certifications, yearly
   third-party audits, the Trust Center
+- `temporal-proxy`: Temporal Proxy 1.0, a news short for security teams
+  and developers: the 1.0 release, ready for production and supported;
+  without it, every Worker carries an address, credentials and encryption
+  code; with it, one gateway adds TLS, credentials and the full Namespace
+  name, encrypts payloads with data keys wrapped by your KMS, and runs as
+  a shared service of a central platform team, one policy for every team
 - `ai-agent-security`: AI Agent Security, a video for everyone that tells
   real AI agent incidents of 2026, one per chapter, and Temporal's role in
   each: sandboxed tools, keys kept with their team, behind Nexus, human
@@ -128,11 +134,19 @@ workspaces run `make setup` automatically.
     `highlightJs()`, `setCodeLine()`), status tags, counters, crash and
     takeover effects, the recap row of benefit tiles, small animation
     helpers such as `popScale()` and `backPop()`, camera and motion
-    helpers (`makeCamera`, `setCamera`, `shot()`, `shake()`, `hash`,
-    ripples, sparks on paths), title and end cards) and the whole "What you
-    can build" chapter,
-    `useCaseScene()`; icons used by two or more themes are in `ICONS` in
-    `engine.js`, the others in their theme's `shared.js`
+    helpers (`makeCamera`, `setCamera`, `shot()`, `shake()`, `OFF_SHOT`,
+    `hash`, ripples, sparks on paths), title and end cards, the security
+    components of security and temporal-proxy (the transfer payload card,
+    `makePayload()`, with its padlock and scramble; the zones YOUR
+    ENVIRONMENT and TEMPORAL, `makeZones()`, `placeZones()`,
+    `frameLaneEdges()`; the TLS tube, `makeTube()`; the red verdict tags;
+    Worker tiles with language logos and chips, `makeWorkerTile()`; the
+    TEMPORAL PROXY box, `makeProxy()`; YOUR KMS, `makeKms()`, the data key
+    tag and its trip to the KMS, `makeKeyTag()`, `kmsTrip()`, and the
+    stored payload rows, `makeStoredRow()`)) and the
+    whole "What you can build" chapter, `useCaseScene()`; icons used by
+    two or more themes are in `ICONS` in `engine.js`, the others in their
+    theme's `shared.js`
   - `player.js`: live-mode player (`startPlayer()`), with a button back to
     the home page; opens paused at a `#t=<time>` URL fragment; links the
     optional `sources` of the current scene (`[{ label, url }]`)
