@@ -279,7 +279,8 @@ the answer to the incident.
     the left, NAMESPACE · assistant under it, and between the two a
     Temporal Nexus Endpoint rises as a violet gate: NEXUS ENDPOINT
     `db-operations` (delete volume, restore backup) over its ALLOWLIST
-    (`assistant`); it glows, with violet ripples, as "Nexus" is read.
+    tile ("in Temporal Cloud", entry NAMESPACE `assistant`); it glows,
+    with violet ripples, as "Nexus" is read.
 - **1:35** Only allowed agents get in, and a step that cannot be undone
   waits for a person: Maya says no, on record.
   - Visuals: The model steps up and aside, smaller, and the Event History
@@ -291,7 +292,8 @@ the answer to the incident.
     Maya's phone: "Delete volume prod-db, the production database?",
     "Answer by Friday 18:00", APPROVE and REJECT. A WAITING clock ticks
     the hours by, from WED 10:00; the platform team's Worker crashes
-    (CRASH) and comes back while the step keeps waiting. Maya taps Reject
+    (a CRASH tag beside its tile) and comes back while the step keeps
+    waiting. Maya taps Reject
     on THU 16:20: a red spark carries her no back, REJECTED BY MAYA, the
     Event History records the request (NEEDS APPROVAL), "approval sent to
     Maya" (WAITING) and the rejection, and the database stays whole
