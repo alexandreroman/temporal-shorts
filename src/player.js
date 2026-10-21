@@ -79,8 +79,8 @@ function startPlayer() {
   document.body.appendChild(holdMark);
 
   // Sources: links to where the facts of a scene come from, one per entry of its optional `sources`
-  // ([{ label, url }]), in the top-right corner under the progress segments: "SOURCES" then the links, separated by
-  // dots, on one line, or on two when they do not fit, so the box stays above the content frame whatever their
+  // ([{ label, url }]), in the top-right corner under the progress segments: "SOURCES" then the links, spaced apart,
+  // on one line, or on two when they do not fit, so the box stays above the content frame whatever their
   // number. Inside the stage, so it scales with the scene and fades with it; created here only, so the frozen ?t=
   // frames never show it.
   const sourcesBox = document.createElement('div');
@@ -105,7 +105,7 @@ function startPlayer() {
     return link;
   }
 
-  // One line of the box: the links separated by dots, after the kicker text on the first line (null on the second).
+  // One line of the box: the links, after the kicker text on the first line (null on the second).
   function sourcesLine(sources, kickerText) {
     const line = document.createElement('div');
     line.className = 'line';
@@ -115,16 +115,7 @@ function startPlayer() {
       kicker.textContent = kickerText;
       line.append(kicker);
     }
-    sources.forEach((source, i) => {
-      if (i > 0) {
-        const dot = document.createElement('span');
-        dot.className = 'dot';
-        dot.setAttribute('aria-hidden', 'true');
-        dot.textContent = '\u00b7';
-        line.append(dot);
-      }
-      line.append(sourceLink(source));
-    });
+    for (const source of sources) line.append(sourceLink(source));
     return line;
   }
 

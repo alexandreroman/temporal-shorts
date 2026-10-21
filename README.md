@@ -267,8 +267,8 @@ mode on/off, F = fullscreen.
 
 A scene with `sources` (see [Editing](#editing)) lists where its facts
 come from in the top-right corner, under the progress segments, fading
-with the scene: "SOURCES", then each label with an arrow, separated by
-dots, on one line, or on two when they do not fit (half of the links
+with the scene: "SOURCES", then each label with an arrow, spaced apart,
+on one line, or on two when they do not fit (half of the links
 each), so the box stays above the content frame; a label still too long
 for its line ends with an ellipsis. Each label is a link that opens in a
 new tab, paused or playing. The frozen `?t=` frames never show it, so the
