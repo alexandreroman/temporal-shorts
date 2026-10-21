@@ -348,25 +348,33 @@ function placeAgentTag(e, t, at, x, y, out = Infinity) {
 
 // ---------- the case file: the incident dossier that opens chapters 2 to 6
 // Its body's size and folder tab (px); at: its center at rest, mid-frame (body and tab together); pin: the "pinned
-// evidence" corner, its center and scale, top left of the content frame, while the replay plays
+// evidence" corner, top left of the content frame, while the replay plays: the label's center, and the scale the
+// full card shrinks to as it hands over to the label (the label's width over the card's, so both share a width);
+// label: the pinned evidence label's size and folder tab (px), its box from (120, 150) to (540, 318)
 const CASE_FILE = {
   w: 900, h: 380, tab: { w: 230, h: 40 },
-  at: { x: 960, y: 515 }, pin: { x: 300, y: 234, scale: 0.4 },
+  at: { x: 960, y: 515 }, pin: { x: 330, y: 234, scale: 420 / 900 },
+  label: { w: 420, h: 168, tab: { w: 140, h: 24 } },
 };
 // The incident dossier: a white folder (a CASE FILE tab on its top left), a date line (e.g. 'JUNE 2025') and a red
 // tag ('ZERO-CLICK') side by side, a large headline on up to two lines (HTML, e.g. 'One email takes over a work
 // assistant'), and a red INCIDENT stamp in its bottom right corner. Hidden until set.
+// Pinned, it becomes a compact evidence label at its own size (the full card shrunk that far would be unreadable):
+// the same tab, date and tag on one line, the headline on two lines below, a smaller stamp.
 // Returns { el, set, pin }:
 // - caseFile.set(t, t0): it slams in from t0 (from 1.3x its size in 0.22 s, a shake as it lands), then the stamp
 //   lands about 0.6 s after t0 (from 2.4x, 0.14 s) with a smaller shake; hidden before t0
 // - caseFile.pin(p, { o = 1, to = CASE_FILE.pin }): places it, from CASE_FILE.at (p = 0) to the pinned corner (p =
-//   1, at to.scale), opacity o; pass an eased p, e.g. P(t, c[1], 0.8). Call both every frame.
+//   1): the full card shrinks toward to.scale and, over the end of the move, dissolves into the label; opacity o;
+//   pass an eased p, e.g. P(t, c[1], 0.8). Call both every frame.
 function makeCaseFile(root, { date, tag, headline }) {
-  const { w, h, tab } = CASE_FILE;
-  // pin() scales el, a zero-size point at the card's center, as a camera framing the card (class cam): the layout
-  // check then measures the card as the pin shows it, where it would count a scaled element at its full size
-  const el = E(root, '', 'cam', { width: 0, height: 0 });
-  const inner = E(el, '', '', {
+  const { w, h, tab, label } = CASE_FILE;
+  // el moves the dossier and stays unscaled, so the label rests at its own size. The full card scales inside cardCam,
+  // a zero-size point at the card's center, as a camera framing the card (class cam): the layout check then measures
+  // the card as the pin shows it, where it would count a scaled element at its full size
+  const el = E(root, '', '', { width: 0, height: 0 });
+  const cardCam = E(el, '', 'cam', { width: 0, height: 0 });
+  const inner = E(cardCam, '', '', {
     left: -w / 2 + 'px', top: -(h + tab.h) / 2 + 'px', width: w + 'px', height: (h + tab.h) + 'px', opacity: 1,
   });
   E(inner,
@@ -394,6 +402,34 @@ function makeCaseFile(root, { date, tag, headline }) {
     letterSpacing: '.18em', paddingLeft: 'calc(20px + .18em)', paddingRight: '20px', color: C.red,
     border: `4px solid ${C.red}`, borderRadius: '8px', outline: `2px solid ${C.red}`, outlineOffset: '-10px',
   });
+
+  // the pinned evidence label: the full card's layout at a readable size (date and tag 14 px, headline 22 px)
+  const pinned = E(el, '', '', {
+    left: -label.w / 2 + 'px', top: -label.h / 2 + 'px', width: label.w + 'px', height: label.h + 'px',
+  });
+  E(pinned,
+    `${ICON('folder', 14, C.slateDark, 2)}<span class="mono" style="font-size:14px;line-height:16px;`
+    + `letter-spacing:.12em;color:${C.slateDark}">CASE FILE</span>`,
+    'paper', {
+      left: 0, top: 0, width: label.tab.w + 'px', height: (label.tab.h + 8) + 'px', display: 'flex', gap: '6px',
+      alignItems: 'flex-start', paddingTop: '5px', paddingLeft: '14px', borderRadius: 'var(--rs) var(--rs) 0 0',
+      opacity: 1,
+    });
+  E(pinned,
+    '<div style="display:flex;align-items:center;gap:10px">'
+    + `<span class="mono" style="font-size:14px;line-height:20px;letter-spacing:.12em;color:${C.slateDark}">`
+    + `${date}</span>`
+    + `<span class="mono" style="font-size:14px;line-height:18px;letter-spacing:.1em;color:${C.red};`
+    + `border:2px solid ${C.red};border-radius:var(--rs);padding:0 8px 0 calc(8px + .1em)">${tag}</span></div>`
+    + `<div style="font-size:22px;line-height:26px;letter-spacing:-.3px;margin-top:8px">${headline}</div>`
+    + '<div class="mono" style="position:absolute;right:18px;bottom:12px;font-size:14px;line-height:18px;'
+    + `font-weight:700;letter-spacing:.16em;padding:2px 8px 2px calc(8px + .16em);color:${C.red};`
+    + `border:2px solid ${C.red};border-radius:4px;opacity:.92;transform:rotate(-5deg)">INCIDENT</div>`,
+    'paper', {
+      left: 0, top: label.tab.h + 'px', width: label.w + 'px', height: (label.h - label.tab.h) + 'px',
+      padding: '12px 18px', borderRadius: '0 var(--rs) var(--rs) var(--rs)', opacity: 1,
+    });
+
   const set = (t, t0) => {
     const land = P(t, t0, 0.22, easeIn);
     const stampAt = t0 + 0.6;
@@ -406,7 +442,14 @@ function makeCaseFile(root, { date, tag, headline }) {
   };
   const pin = (p, { o = 1, to = CASE_FILE.pin } = {}) => {
     const { at } = CASE_FILE;
-    place(el, lerp(at.x, to.x, p), lerp(at.y, to.y, p), lerp(1, to.scale, p), o);
+    // over the end of the move the card dissolves into the label, scaled to the card's width: it reaches its own
+    // size, at rest, as the card reaches to.scale
+    const handover = P(p, 0.7, 0.3, linear);
+    const cardScale = lerp(1, to.scale, p);
+    place(el, lerp(at.x, to.x, p), lerp(at.y, to.y, p), 1, o);
+    place(cardCam, 0, 0, cardScale, 1 - handover);
+    pinned.style.opacity = handover;
+    pinned.style.transform = handover > 0 && handover < 1 ? `scale(${(cardScale / to.scale).toFixed(4)})` : '';
   };
   return { el, set, pin };
 }
@@ -419,7 +462,8 @@ const APPROVAL_CARD = { w: 320, h: 500 };
 // 18:00'), then Approve (neon) and Reject (red) buttons. Hidden until placed: place(card.el, x, y, scale, opacity).
 // Returns { el, set, setDeadline }:
 // - card.set(t, t0, decision, decidedAt): the screen slides up into the phone from t0 (0.6 s); decision 'approve' |
-//   'reject' | null: at decidedAt the chosen button presses (a dip and a tap ring) and fills, the other one dims
+//   'reject' | null: at decidedAt the chosen button presses (a dip and a tap ring) and fills, the other one dims, and
+//   the header reads APPROVED (neon) or REJECTED (red)
 // - card.setDeadline(text): rewrites the deadline line (e.g. a countdown)
 function makeApprovalCard(root, { who, question, deadline }) {
   const { w, h } = APPROVAL_CARD;
@@ -437,7 +481,7 @@ function makeApprovalCard(root, { who, question, deadline }) {
     + `<div style="width:48px;height:48px;border-radius:50%;border:2px solid ${C.violet};display:flex;`
     + `align-items:center;justify-content:center">${ICON('user', 26, C.ink, 1.8)}</div>`
     + `<div><div style="font-size:24px;line-height:28px">${who}</div>`
-    + `<div class="mono" style="font-size:13px;line-height:18px;letter-spacing:.12em;color:${C.violet}">`
+    + `<div class="status mono" style="font-size:14px;line-height:18px;letter-spacing:.12em;color:${C.violet}">`
     + 'APPROVAL NEEDED</div></div></div>'
     + `<div style="position:absolute;left:24px;right:24px;top:120px;height:1px;background:${C.line}"></div>`
     + '<div style="position:absolute;left:24px;right:24px;top:144px;font-size:28px;line-height:36px">'
@@ -451,6 +495,9 @@ function makeApprovalCard(root, { who, question, deadline }) {
   const buttons = { approve: screen.querySelector('.btn-approve'), reject: screen.querySelector('.btn-reject') };
   const colors = { approve: C.neon, reject: C.red };
   const deadlineEl = screen.querySelector('.deadline');
+  // the header's status, which reports the decision once the chosen button fills
+  const statusEl = screen.querySelector('.status');
+  const statusTexts = { approve: 'APPROVED', reject: 'REJECTED' };
   // the tap ring, centered on the chosen button by set()
   const ring = E(screen, '', '', { width: '56px', height: '56px', borderRadius: '50%', border: `3px solid ${C.ink}` });
 
@@ -468,6 +515,9 @@ function makeApprovalCard(root, { who, question, deadline }) {
       btn.style.opacity = decided && !chosen ? 0.3 : 1;
       btn.style.transform = chosen ? `scale(${(1 - 0.08 * bumpAt(t, decidedAt)).toFixed(3)})` : '';
     });
+    const reported = decision !== null && t >= decidedAt + 0.08;
+    setText(statusEl, reported ? statusTexts[decision] : 'APPROVAL NEEDED');
+    statusEl.style.color = reported ? colors[decision] : C.violet;
     if (decision === null) {
       place(ring, 0, 0, 1, 0);
       return;
