@@ -72,6 +72,24 @@ that can be searched. Chapter "An agent that won't stop" and the use-case
 chapter are cut (user: canceling is not striking enough; the incidents
 already are the concrete cases). The video ends on the recap.
 
+Script version 3 (2026-10-21), after the user's second review; the
+subtitles below are those of version 2, and `docs/ai-agent-security/script.md`
+holds the current ones:
+
+- Ch2: a fresh sandbox for every step: box 1 is thrown away after the
+  attack, box 2 runs `run_code`, then box 3 comes in; the Event History
+  rows scroll.
+- Ch3: Temporal Nexus: the database and its key stay with the platform
+  team's Namespace, reachable only through the Nexus Endpoint
+  `db-operations`, whose allowlist lets `assistant` in; new c[2] and c[3]
+  subtitles. The recap tile KEYS KEPT APART reads "with their team,
+  behind Nexus".
+- Ch4: a fifth subtitle on the Temporal Agent Harness tool approval
+  policy (`read_file` RUN, `create_ticket` ASK A PERSON, `delete_volume`
+  REFUSED with the reason sent to the model); the harness is never called
+  experimental in this theme (no pill).
+- Recap: no date stamps on the tiles (user: confusing).
+
 Subtitles, exact. `<b>` marks a key term at its first mention.
 
 ### Intro (unchanged)

@@ -495,31 +495,43 @@ below and the card order in [Home page design](feedback_home-page.md).
   sandboxing and audit as topics of their own.
 - Temporal's role is architectural, never a filter on tool names: real
   agents hold a terminal, a browser and code, and go around any list.
-  Temporal decides where each step runs and with what power, holds the
-  state outside the sandbox, gates the steps that matter in code the model
-  cannot talk to, and keeps a searchable record. Ch1's tools are generic:
-  TERMINAL, BROWSER, CODE, ADD-ONS.
+  The story shows where each step runs and with what power, what the
+  Workflow holds (the state, outside the sandbox) and what it records (a
+  searchable record); the Workflow gates the steps that matter in code
+  the model cannot talk to. The Temporal Agent
+  Harness's per-tool approval rules appear in ch4 as a layer on top of
+  that architecture. In this theme the harness carries no status label:
+  it is never called experimental, on screen or in the docs (user's
+  decision). Ch1's tools are generic: TERMINAL, BROWSER, CODE, ADD-ONS.
 - Chapters: 01 Agents that act; 02 Locked in a sandbox (malicious
   add-ons, February 2026; the sandbox providers Amazon Bedrock AgentCore,
-  Modal, E2B and Daytona named as plain text, never logos); 03 Keys out of
-  reach (database and backups wiped in 9 seconds, April 2026, with a
-  forgotten full-access key in the project; the sandbox holds no key, a
-  PROD WORKER keeps its own key and runs one narrow step, and an
+  Modal, E2B and Daytona named as plain text, never logos; a fresh box for
+  every step: box 1 is thrown away after the attack, box 2 runs the next
+  step, then box 3 comes in); 03 Keys out of reach (database and backups
+  wiped in 9 seconds, April 2026, with a forgotten full-access key in the
+  project; the sandbox holds no key; the database and its key stay with
+  the platform team's Namespace, reachable only through the Temporal
+  Nexus Endpoint `db-operations`, whose allowlist lets the agent's
+  Namespace `assistant` in; the Endpoint allowlist is Temporal Cloud's,
+  and every Nexus claim follows the security section's Nexus rules; an
   irreversible step waits for Maya); 04 A hidden order (hidden text in a
   shared document, a researcher demonstration, August 2026; the Workflow
   flags the run durably once outside content is read, then any step that
   sends data out waits for a person, whatever route: Meta's Agents Rule
-  of Two); 05 What went wrong? (Trellix, October 2026, 95% of 600
-  security chiefs; the agent's own account is unreliable; the Event
-  History, out of the agent's reach, traces back to the cause; a Workflow
-  search `ReadDocument = "Q3 plan"` on a custom Search Attribute finds
-  every other run); 06 What you get, the closing recap: 4 tiles on
-  `USE_CASE_ROW`, each stamped with the date of the incident it answers.
+  of Two; its last subtitle shows the Agent Harness tool approval policy:
+  `read_file` RUN, `create_ticket` ASK A PERSON, `delete_volume` REFUSED
+  with the reason sent to the model); 05 What went wrong? (Trellix,
+  October 2026, 95% of 600 security chiefs; the agent's own account is
+  unreliable; the Event History, out of the agent's reach, traces back to
+  the cause; a Workflow search `ReadDocument = "Q3 plan"` on a custom
+  Search Attribute finds every other run); 06 What you get, the closing
+  recap: 4 tiles on `USE_CASE_ROW`, an icon, a label and one line each,
+  without dates (KEYS KEPT APART: "with their team, behind Nexus").
   The video has no "What you can build" chapter and ends on the recap,
   like the guides.
 - The sandbox is driven by a Worker, never a Worker itself: the Worker
   stays outside the box and sends it commands; the agent's progress lives
-  in Temporal and the box is thrown away.
+  in Temporal, and each step gets a fresh box, thrown away after it.
 - Incidents are anonymized on screen ("a coding agent", "a work
   assistant": exact facts and dates, no company names or logos, as some
   of these companies are Temporal customers), each dated and sourced in
@@ -539,8 +551,10 @@ below and the card order in [Home page design](feedback_home-page.md).
   replays of real incidents never name her.
 - Only shipped Temporal features, or features explicitly labelled as
   preview, are claimed; integrations (OpenAI Agents SDK sandboxes, Amazon
-  Bedrock AgentCore) are never called generally available. Workflow
-  search is told as "find", on Search Attributes the developer sets.
+  Bedrock AgentCore) are never called generally available. The Temporal
+  Agent Harness, a temporal-community project, is the one exception,
+  named without a status. Workflow search is told as "find", on Search
+  Attributes the developer sets.
 - Cinematic like security: a camera layer per scene, the camera
   zoom-through (`setCamera`) at every chapter boundary, and a match cut
   from the intro into ch1 (the orb flies to its place on the board).

@@ -38,11 +38,11 @@ Sources: [The Hacker News, February 2026](https://thehackernews.com/2026/02/rese
 April 2026: a coding agent deleted a company's production database and its
 backups, in 9 seconds. It found a forgotten key with full access in the project
 files, and called the cloud on its own. With Temporal, the sandbox holds no key.
-Powerful steps run apart, on a Worker that keeps its own key. A step that cannot
-be undone waits for a person, for days if needed: Maya says no, and it is on
-record.
+The database stays with its team, reachable only through Nexus. Only allowed
+agents get in, and a step that cannot be undone waits for a person: Maya says
+no, on record.
 
-Sources: [Hackread, April 2026](https://hackread.com/cursor-ai-agent-wipes-pocketos-database-backups/), [AI Incident Database](https://incidentdatabase.ai/cite/1469/)
+Sources: [Hackread, April 2026](https://hackread.com/cursor-ai-agent-wipes-pocketos-database-backups/), [AI Incident Database](https://incidentdatabase.ai/cite/1469/), [Temporal docs, Nexus security](https://docs.temporal.io/nexus/security)
 
 ## Chapter 4: A hidden order
 
@@ -52,13 +52,14 @@ August 2026: researchers showed that hidden text in a document could make a work
 assistant leak data. No filter catches every trick: a fooled agent can hide data
 in a link, a ticket or a search. With Temporal, the Workflow notes that outside
 content came in, and the model cannot erase that note. From then on, any step
-that sends data out waits for a person, whatever route the agent picks.
+that sends data out waits for a person, whatever route the agent picks. With the
+Temporal Agent Harness, each tool gets its rule: run, refuse, or ask a person.
 
-Sources: [PromptArmor, August 2026](https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data), [Meta, October 2025](https://ai.meta.com/blog/practical-ai-agent-security/)
+Sources: [PromptArmor, August 2026](https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data), [Meta, October 2025](https://ai.meta.com/blog/practical-ai-agent-security/), [Temporal blog, August 2026](https://temporal.io/blog/temporal-agent-harness-durable-agent-infrastructure), [Temporal Agent Harness](https://github.com/temporal-community/temporal-agent-harness)
 
 ## Chapter 5: What went wrong?
 
-[Watch from 2:15](/themes/ai-agent-security/#t=135)
+[Watch from 2:22](/themes/ai-agent-security/#t=142)
 
 October 2026: in a survey of 600 security chiefs, 95% reported an incident tied
 to an AI agent that year. Then come the questions: what did the agent read,
@@ -70,14 +71,14 @@ Sources: [Help Net Security, October 2026](https://www.helpnetsecurity.com/2026/
 
 ## Chapter 6: What you get
 
-[Watch from 2:45](/themes/ai-agent-security/#t=165)
+[Watch from 2:52](/themes/ai-agent-security/#t=172)
 
 Throwaway sandboxes, keys kept apart, a person's yes when it counts, and a
 record of every step.
 
 ## Outro
 
-[Watch from 2:55](/themes/ai-agent-security/#t=175)
+[Watch from 3:02](/themes/ai-agent-security/#t=182)
 
 With Temporal, your agents act within your rules, and every step stays on the
 record.
