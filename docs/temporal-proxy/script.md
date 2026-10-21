@@ -3,9 +3,7 @@
 Subtitles are the only narration (no audio). Each subtitle lasts as long
 as its text needs (`autoDur` in `src/engine.js`), plus its `after` pause.
 Run `make timeline THEME=temporal-proxy` for the live values; the start
-times below are a snapshot from 2026-10-21. Chapters 03 and 04 are still
-to be built: their start times read `-:--` until then, and the outro's
-time is the snapshot without them.
+times below are a snapshot from 2026-10-21.
 
 Each entry gives the subtitle start time and its exact text, then what the
 animation shows.
@@ -24,8 +22,10 @@ wires its own, with no central control), then shows the proxy: one
 gateway that adds TLS, the credentials and the full Namespace name on
 the way out, encrypts every payload with data keys wrapped by your KMS,
 with no Worker code change, and fails closed when encryption is required
-and no key is configured. It closes on what 1.0 means (ready for
-production, supported) and how the proxy runs next to the Workers.
+and no key is configured. Then it shows governance at company scale: a
+central platform team runs the proxy as a shared service for every team,
+with one policy for all. It closes on what 1.0 means: ready for
+production, and supported.
 
 Running example: the security theme's transfer, Nora sends €25,000 to
 Leo. One payload card carries it, the same card as in the security theme:
@@ -34,7 +34,8 @@ Leo. One payload card carries it, the same card as in the security theme:
 
 Topics, in order: security in every team without the proxy (ch1); one
 gateway, no secrets in the Workers (ch2); encryption with your keys,
-failing closed (ch3); what 1.0 means and how to install it (ch4).
+failing closed (ch3); the proxy as a shared service run by a platform
+team, one policy for all (ch4); what 1.0 means (ch5).
 
 Wording: the video says "ready for production" and "supported", never
 "Public Preview", "GA" or "generally available". A news short ends on its
@@ -55,8 +56,11 @@ you can build" chapter.
   server through an extension server), data keys rotating automatically;
   encryption fails closed (a failed wrap or unwrap fails the request), and
   `--require-encryption` stops the proxy from starting unless an
-  encryption key is configured; a built-in Codec Server for the Web UI and
-  the CLI; installs as a Go binary, a container image or a Helm chart.
+  encryption key is configured; encryption settings per Namespace
+  (`encryption.overrides`); optional client authentication on the gateway
+  (a static token or JWKS); Prometheus metrics; a built-in Codec Server for
+  the Web UI and the CLI; installs as a Go binary, a container image or a
+  Helm chart.
 - Docs: <https://docs.temporal.io/production-deployment/temporal-proxy>:
   "Temporal's support policy covers v1.0 and later."
 
@@ -105,7 +109,7 @@ you can build" chapter.
 
 ## 02 One gateway, no secrets
 
-- **0:22** Temporal Proxy is one gateway in your network: Workers only know
+- **0:23** Temporal Proxy is one gateway in your network: Workers only know
   a local address.
   - Visuals: Opens on chapter 01's last frame. YOUR ENVIRONMENT widens as
     TEMPORAL narrows to the right, and the TEMPORAL PROXY box slides onto
@@ -113,12 +117,13 @@ you can build" chapter.
     the Workers' connections converge into it, and one violet connection
     leaves it for TEMPORAL, light flowing along them. Each Worker types
     `proxy:7233` and `payments` (in violet); NO SECRETS under the Workers.
-- **0:28** On the way out, it adds TLS, the credentials and the full
+- **0:29** On the way out, it adds TLS, the credentials and the full
   Namespace name.
   - Visuals: A payload card, with a `payments` tag under it, leaves the
     top-right Worker and rides its connection into the proxy as the camera
     pushes right and in to a close shot on the proxy (the Workers and the
-    zones dim). Dramatic beat, three clicks at the proxy, each with neon
+    zones dim, the Workers clipped to the content frame, their top row's
+    headings fading). Dramatic beat, three clicks at the proxy, each with neon
     rings and a swell of its glow: the TLS tube draws to TEMPORAL (the
     card's border turns neon), an API KEY tag docks, `.a1b2c` types after
     `payments`. The card goes out through the tube into the
@@ -129,37 +134,74 @@ you can build" chapter.
 
 ## 03 Encryption with your keys
 
-- **-:--** It encrypts every payload with data keys wrapped by your KMS,
+- **0:37** It encrypts every payload with data keys wrapped by your KMS,
   with no Worker code change.
-  - Visuals: Close on the proxy: a clear card from a Worker is sealed
-    inside it (the lock snaps shut, the fields scramble, violet rings), NO
-    CODE CHANGE; YOUR KMS beside the proxy (AWS KMS, Azure Key Vault, GCP
-    KMS, your key server), a DATA KEY wrapped at the KMS (WRAPPED); the
-    sealed card lands in TEMPORAL's stored payloads as ciphertext.
-- **-:--** With encryption required, the proxy refuses to start without a
+  - Visuals: Opens on chapter 02's last frame, and the camera holds the
+    close shot on the proxy. YOUR KMS (KMS KEY; AWS KMS, Azure Key Vault,
+    GCP KMS, your key server) pops in on the proxy's left, over the dimmed
+    Workers, and its link draws into the proxy. A payload card rides in
+    from the bottom-right Worker, in clear; a dashed DATA KEY 1 tag pops
+    in the proxy, its key flies onto the card's lock, the lock snaps shut
+    and the fields scramble into ciphertext, with violet rings; NO CODE
+    CHANGE under the Workers' connections. The DATA KEY travels along the
+    link to the KMS, whose key swells and glows, and comes back as WRAPPED
+    KEY 1, behind a lock, to dock on the card. The card goes out through
+    the TLS tube and lands in TEMPORAL as a row of STORED PAYLOADS:
+    ciphertext and WRAPPED 1, never a key Temporal could use.
+- **0:44** With encryption required, the proxy refuses to start without a
   key: it fails closed.
-  - Visuals: Dramatic beat: the KMS link is cut, the proxy restarts and
-    does not come up: a solid red REFUSED TO START verdict, the
-    connection to TEMPORAL stays dark and no clear payload leaves. The
-    link comes back and the proxy starts, neon.
+  - Visuals: ENCRYPTION REQUIRED pops in the proxy. The KMS link turns red
+    with a red cross on it and the KMS dims, out of reach. The proxy goes
+    down to restart: its name dims, its border turns slate, the TLS tube,
+    its connection to TEMPORAL and the light on every connection go dark.
+    Dramatic beat: a solid red REFUSED TO START slams onto the proxy, its
+    border red, with red rings, a red flash and a shake; nothing leaves.
+    The link draws again from the KMS, and the proxy starts: neon rings, a
+    swell of its glow, the tube and the light back on, a neon STARTED.
+    Before the cut the KMS, its link, the proxy's tags and the stored
+    payloads fade out, leaving the close shot on the proxy that chapter 04
+    opens on.
 
-## 04 Why 1.0 matters
+## 04 Security as a shared service
 
-- **-:--** Version 1.0 is ready for production, and Temporal's support
+- **0:51** A central platform team can run the proxy as a shared service
+  for every team.
+  - Visuals: Opens on chapter 03's last frame; the camera pulls back, left
+    and out, to the whole environment as the fleet regroups: YOUR
+    ENVIRONMENT moves to hold the proxy inside it, TEMPORAL widens, a
+    PLATFORM TEAM zone forms round the proxy, the six Workers travel into
+    three team zones stacked on the left, PAYMENTS, ORDERS and FRAUD, two
+    Workers each, and the Workers of ORDERS and FRAUD type their team's
+    Namespace over `payments`. Each team's connection draws into the
+    proxy, light flowing along it, and TEMPORAL shows one Namespace band
+    per team: payments.a1b2c, orders.a1b2c, fraud.a1b2c.
+- **0:57** One policy for all: per-Namespace encryption, client
+  authentication, encryption required, metrics.
+  - Visuals: A POLICY panel docks under the proxy, in the PLATFORM TEAM
+    zone; its four rules, PER-NAMESPACE ENCRYPTION, CLIENT
+    AUTHENTICATION, ENCRYPTION REQUIRED and METRICS, tick on with a neon
+    check as the subtitle names them. Dramatic beat: the policy sweeps out
+    from the proxy along every team's connection, a neon trail with a
+    spark at its head; each team zone it reaches lights up neon, with neon
+    rings and a COVERED tag. Chapter 05 opens on that frame.
+
+## 05 Why 1.0 matters
+
+- **1:06** Version 1.0 is ready for production, and Temporal's support
   policy covers it.
-  - Visuals: The camera pulls back to a version track: the earlier 0.x
-    releases dim, up to 0.10, then 1.0 lights up neon with READY FOR
-    PRODUCTION and SUPPORTED tags.
-- **-:--** It runs next to your Workers: a Go binary, a container image or
-  a Helm chart.
-  - Visuals: Three install tiles, GO BINARY, CONTAINER IMAGE and HELM
-    CHART, next to the proxy inside YOUR ENVIRONMENT. At the end
-    everything clears but the proxy box, wearing its 1.0 badge, as the
-    camera pulls back until it sits small at the top of the frame.
+  - Visuals: Opens on chapter 04's last frame; the camera pulls back on,
+    left and out, as everything but the proxy box fades, until the box
+    sits small at the top of the frame. Under it a version track draws:
+    dim dots for the earlier 0.x releases, the last one labelled 0.10,
+    then an empty 1.0 slot. Dramatic beat: 1.0 lights up neon with rings;
+    READY FOR PRODUCTION, then SUPPORTED as the subtitle reads "support
+    policy", side by side under it. The 1.0 badge rises up a faint dashed
+    line onto the proxy box as the track and its tags drop away, leaving
+    the box alone, wearing its badge: the outro's first frame.
 
 ## Outro
 
-- **0:36** Credentials and encryption leave your Workers for one place you
+- **1:13** Credentials and encryption leave your Workers for one place you
   control.
   - Visuals: Opens on the proxy box with its 1.0 badge, small at the top;
     the end card fades in under it: title "Temporal Proxy 1.0", tagline

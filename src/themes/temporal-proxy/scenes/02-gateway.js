@@ -115,6 +115,8 @@
         const typeAt = k => c[0] + (k ? T0.namespace : T0.address) + w * T0.step;
         tile.lines.forEach((line, k) => setText(line, typed(WORKER_LINES[k], P(t, typeAt(k), T0.typeD, linear))));
         tile.lines[1].style.color = C.violet;
+        // the push runs them into the header and subtitle bands: they clip to the content frame
+        frameWorker(tile, WORKERS[w].y, 1, cam);
       });
       // under the Workers, out of the frame once the camera pushes in
       const noSecrets = popIn(t, c[0] + T0.noSecrets);

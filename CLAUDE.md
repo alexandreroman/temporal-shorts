@@ -38,7 +38,8 @@ from a deterministic HTML animation. Each video is a theme:
   without it, every Worker carries an address, credentials and encryption
   code; with it, one gateway adds TLS, credentials and the full Namespace
   name, encrypts payloads with data keys wrapped by your KMS, fails closed
-  without a key, and runs as a Go binary, a container image or a Helm chart
+  without a key, and runs as a shared service of a central platform team,
+  one policy for every team
 
 No theme is the default: make targets cover every theme unless `THEME=<theme>`
 narrows them, and the per-theme scripts require `--theme`. A home page
@@ -136,7 +137,9 @@ workspaces run `make setup` automatically.
     ENVIRONMENT and TEMPORAL, `makeZones()`, `placeZones()`,
     `frameLaneEdges()`; the TLS tube, `makeTube()`; the red verdict tags;
     Worker tiles with language logos and chips, `makeWorkerTile()`; the
-    TEMPORAL PROXY box, `makeProxy()`; YOUR KMS, `makeKms()`)) and the
+    TEMPORAL PROXY box, `makeProxy()`; YOUR KMS, `makeKms()`, the data key
+    tag and its trip to the KMS, `makeKeyTag()`, `kmsTrip()`, and the
+    stored payload rows, `makeStoredRow()`)) and the
     whole "What you can build" chapter, `useCaseScene()`; icons used by
     two or more themes are in `ICONS` in `engine.js`, the others in their
     theme's `shared.js`

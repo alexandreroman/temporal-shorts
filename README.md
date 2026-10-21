@@ -44,8 +44,9 @@ Each video is a theme:
   developers, a news short on the 1.0 release of
   [Temporal Proxy][temporal-proxy-repo], ready for production and
   supported: one gateway that keeps the address, credentials and payload
-  encryption out of every Worker, with data keys wrapped by your KMS, and
-  a proxy that fails closed.
+  encryption out of every Worker, with data keys wrapped by your KMS, a
+  proxy that fails closed, run as a shared service by a central platform
+  team.
 
 ![Durable AI Agents at 2:40: after a crash, the agent resumes on another
 app instance and Temporal returns the saved results from the Event

@@ -500,27 +500,47 @@ below and the card order in [Home page design](feedback_home-page.md).
   Preview", "GA" or "generally available" (user decision). Every claim
   follows the release, the temporal-proxy README and
   docs.temporal.io/production-deployment/temporal-proxy (`### Sources`).
-- Four chapters: security in every team (ch1: the six Workers belong to
+- Five chapters: security in every team (ch1: the six Workers belong to
   three teams, PAYMENTS, ORDERS and FRAUD, a column of two each, and
   their chips diverge, a codec version per Worker, expiring certificates,
   API keys in env vars, until no two match; no payload goes out in clear;
   the dramatic beat is a solid red NO CENTRAL CONTROL verdict under the
   Workers, on the spot of ch2's NO SECRETS), one gateway, no secrets
-  (ch2), encryption with your keys and failing closed (ch3), why 1.0
-  matters and how it installs (ch4). A news short ends on its last topic
-  chapter: no "What you get" recap, no "What you can build" chapter.
+  (ch2), encryption with your keys and failing closed (ch3: the data key
+  wrapped at YOUR KMS, the sealed card stored as ciphertext and WRAPPED 1;
+  the dramatic beat is a solid red REFUSED TO START on the proxy once the
+  KMS link is cut), security as a shared service (ch4: the proxy in a
+  PLATFORM TEAM zone inside YOUR ENVIRONMENT, the Workers in three team
+  zones typing their team's Namespace, one Namespace band per team in
+  TEMPORAL, a POLICY panel whose four rules are per-Namespace encryption,
+  client authentication, encryption required and metrics; the dramatic
+  beat is the policy sweeping out along every team's connection, each team
+  COVERED), why 1.0 matters (ch5, one subtitle: a version track up to 0.10
+  whose 1.0 slot lights up, READY FOR PRODUCTION and SUPPORTED, then the
+  badge rises onto the proxy box). The install formats stay out of the
+  video. A news short ends on its last topic chapter: no "What you get"
+  recap, no "What you can build" chapter.
 - Running example: the security theme's transfer card (`TRANSFER`, Nora
   sends €25,000 to Leo). The security components it shares with security
   (payload card, zones, TLS tube, verdict tags, Worker tiles, proxy box,
-  YOUR KMS, `shot()`) live in `src/shared.js`; its own layout (`FLEET`,
-  `PROXY` at x 1181, `WIDE_SHOT`) is in its `shared.js`.
+  YOUR KMS, the data key tag and its trip to the KMS, stored payload rows,
+  `shot()`) live in `src/shared.js`; its own layout (`FLEET`, `PROXY` at
+  x 1181, `WIDE_SHOT`, `PROXY_SHOT`, `SERVICE`, `SERVICE_SHOT`) is in its
+  `shared.js`. In the close shot the dimmed Worker tiles clip to the
+  content frame and their headings fade (`frameWorker()`), as the zones do
+  (`frameLaneEdges()`). The shared service shrinks the Worker tiles
+  through a camera layer of their own (`workerCam`, sizeless), so the
+  layout check measures them at their smaller resting size.
 - Cinematic like security, one continuous film: every boundary is a match
   cut on a canonical state built by one function both sides call: intro to
   ch1 and ch1 to ch2 on `placeBareFleet()` in `WIDE_SHOT`; ch2 to ch3 and
-  ch3 to ch4 on `placeProxyStage()` in `PROXY_SHOT`; ch4 to the outro on
-  the proxy box alone with its neon 1.0 badge in `OUTRO_SHOT`. The intro's
-  visual lives in a camera held at `WIDE_SHOT`; the 1.0 badge
-  (`makeVersionBadge`) ties the intro, ch4 and the outro.
+  ch3 to ch4 on `placeProxyStage()` in `PROXY_SHOT`; ch4 to ch5 on
+  `placeServiceStage()` at `SERVICE_REST` in `SERVICE_SHOT`; ch5 to the
+  outro on the proxy box alone with its neon 1.0 badge in `OUTRO_SHOT`.
+  The camera pushes right and in during ch2, holds in ch3, then pulls back
+  left and out in ch4 and again in ch5. The intro's visual lives in a
+  camera held at `WIDE_SHOT`; the 1.0 badge (`makeVersionBadge`) ties the
+  intro, ch5 and the outro.
 
 **Why:** the themes form one series under the Temporal brand, reviewed
 closely frame by frame: a viewer moving between them meets the same title
