@@ -1,14 +1,16 @@
 // ===================== 1. AGENTS THAT ACT
 // Opens on the intro's last frame (a match cut, see INTRO_ORB): the orb already sits at its place on the board. Its
-// AI MODEL label fades in, the four tools pop in on the right, and the agent loops: it reads (a spark runs back from
-// a tool to the orb), decides (the orb thinks) and acts (a spark runs out to the next tool), the READS, DECIDES and
-// ACTS labels lighting in turn. Once c[1] starts, each tool the agent reaches flickers red (a placeholder for the
-// tools' reach over files, keys and the internet). Then the dramatic beat: the loop clears and the WORKFLOW
-// checkpoint drops in between the orb and the tools, the lanes shoot out of it, YOUR WORKERS draws round the tools
-// and the Event History strip rises under it: the board every later chapter uses. Last, an action card grows out of
-// the orb (SUGGESTS), waits at the checkpoint, passes it in a neon flash (DECIDES), lands on its tool, and two rows
-// are written into the Event History (RECORDS). The camera holds; the default fade-out plays the camera
-// zoom-through (setCamera) into chapter 2.
+// AI MODEL label fades in, the four general tools pop in on the right (TERMINAL, BROWSER, CODE, ADD-ONS), and the
+// agent loops: it reads (a spark runs back from a tool to the orb), decides (the orb thinks) and acts (a spark runs
+// out to the next tool), the READS, DECIDES and ACTS labels lighting in turn. In c[1] the loop clears, each tool
+// lights as it is named, then the tools' reach fans out in red lines to what they can touch, FILES, KEYS, THE
+// INTERNET and DATABASES, and the red beat lands on "the bad included": the targets flare red, ripples and a jolt.
+// In c[2] the reach pulls back and the WORKFLOW checkpoint drops in between the orb and the tools: the lanes shoot
+// out of it, YOUR WORKERS draws round the tools and the Event History strip rises under it, the board every later
+// chapter uses. In c[3] each part gets its role: the orb THINKS and an action card grows out of it, passes the
+// checkpoint (your code, where the agent's state lives) and lands on its tool, which ACTS on the servers you choose
+// (YOUR WORKERS lights up); the checkpoint KEEPS STATE and the Event History RECORDS the step. The camera holds; the
+// default fade-out plays the camera zoom-through (setCamera) into chapter 2.
 // The block keeps every name declared in this file local to this scene.
 {
   // the beats of c[0], in seconds from c[0]: the AI MODEL label fades in as "AI model" is read (label); the tools pop
@@ -23,17 +25,22 @@
   // on; the tools the agent acts on, in turn
   const FIRST_READ = 0;
   const ACT_ON = [1, 2, 3, 0, 1, 2];
-  // the beats of c[2], from c[2]: the loop clears (out); the checkpoint drops in (drop, dropD, landing at
-  // drop + dropD), the lanes shoot out of it (lanes), YOUR WORKERS draws round the tools (zone), the Event History
-  // strip rises in (history); the checkpoint glows as "your code" is read (yourCode)
-  const T2 = { out: 0, drop: 0.5, dropD: 0.45, lanes: 1.0, zone: 1.5, history: 2.1, yourCode: 3.2 };
-  // the beats of c[3], from c[3]: the orb thinks (think), then the action card grows out of it and travels to the
-  // checkpoint (emerge, emergeD) as SUGGESTS lights (suggests); it passes the checkpoint (through, throughD) as
-  // DECIDES lights; the Event History records the suggestion (rows[0], with RECORDS), and the step once the card has
-  // landed on its tool (toTool, toToolD, then rows[1])
+  // the beats of c[1], from c[1]: the loop clears (loopOut); each tool lights as it is named (named, add-ons right
+  // after code); the reach fans out of the tools (reach) and the red beat lands on "the bad included" (beat)
+  const T1 = { loopOut: 0.9, named: [1.4, 2.1, 2.8, 3.0], reach: 3.3, beat: 5.0 };
+  // the beats of c[2], from c[2]: the reach pulls back into the tools and its targets sink away (out, over outD);
+  // the checkpoint drops in (drop, dropD, landing at drop + dropD), the lanes shoot out of it (lanes), YOUR WORKERS
+  // draws round the tools (zone), the Event History strip rises in (history); the checkpoint glows as "your code" is
+  // read (yourCode)
+  const T2 = { out: 0, outD: 0.45, drop: 0.5, dropD: 0.45, lanes: 1.0, zone: 1.5, history: 2.1, yourCode: 3.2 };
+  // the beats of c[3], from c[3]: THINKS lights and the orb thinks (think); the action card grows out of it and
+  // travels to the checkpoint (emerge, emergeD), passes it (through, throughD) and lands on its tool (toTool,
+  // toToolD); ACTS lights as "the tools act" is read (acts) and YOUR WORKERS glows on "each where you choose"
+  // (zone); the Event History writes the model's pick and the step (rows); KEEPS STATE lights with the checkpoint's
+  // glow on "keeps the state" (keeps), RECORDS with the strip's glow on "the record" (records)
   const T3 = {
-    think: 0.2, emerge: 0.7, emergeD: 0.9, suggests: 0.9, through: 2.6, throughD: 0.5, toTool: 3.2, toToolD: 0.8,
-    rows: [3.1, 4.2],
+    think: 0.2, emerge: 0.6, emergeD: 0.8, through: 1.4, throughD: 0.5, toTool: 1.95, toToolD: 0.8,
+    acts: 1.4, zone: 2.1, rows: [1.9, 3.0], keeps: 3.9, records: 5.2,
   };
 
   // the loop between the orb and the tools: it leaves the orb at (x0, actsY) and comes back to it at (x0, readsY),
@@ -47,22 +54,40 @@
     { text: 'Decides', x: BOARD.model.x, y: BOARD.model.y - BOARD.model.size / 2 - 64 },
     { text: 'Acts', x: LOOP.mid, y: LOOP.top - 36 },
   ];
-  // the roles of c[3]: SUGGESTS above the orb, where DECIDES was, DECIDES above the checkpoint, RECORDS left of the
-  // Event History strip, its right edge 24 px clear of the strip
-  const ROLE_W = 136;
+
+  // what the tools can reach, a row of tiles under the board's orb and tools: equal tiles, `gap` px apart, the row's
+  // left edge on the orb's left edge (x 240) and its center line on the Event History strip's, which rises there
+  // after them
+  const TARGETS = [
+    { icon: 'file', label: 'Files' },
+    { icon: 'key', label: 'Keys' },
+    { icon: 'cloud', label: 'The internet' },
+    { icon: 'database', label: 'Databases' },
+  ];
+  const TARGET = { w: 264, h: 64, gap: 32, left: BOARD.model.x - BOARD.model.size / 2, y: BOARD.history.y };
+  const targetX = j => TARGET.left + TARGET.w / 2 + j * (TARGET.w + TARGET.gap);
+  const targetTop = TARGET.y - TARGET.h / 2;
+  // the reach lines: each tool's lines leave its left edge at LOOP.toolX, head left, then bend down into the targets'
+  // top edges, tool i entering every target spread px right of the tool before it (centered on the target); each line
+  // draws over d seconds, the lines of tool i step * i after the first ones, those to target j stepJ * j after
+  const REACH = { spread: 24, d: 0.7, step: 0.12, stepJ: 0.05 };
+  const reachAt = (c, i, j) => c[1] + T1.reach + i * REACH.step + j * REACH.stepJ;
+
+  // the roles of c[3]: THINKS above the orb, where DECIDES was; ACTS under the YOUR WORKERS zone, 38 px clear of it;
+  // KEEPS STATE above the checkpoint, 30 px clear of it; RECORDS left of the Event History strip, its right edge 24 px
+  // clear of the strip
   const ROLES = {
-    suggests: { text: 'Suggests', x: BOARD.model.x, y: LOOP_LABELS[1].y },
-    decides: { text: 'Decides', x: BOARD.checkpoint.x, y: BOARD.checkpoint.y - BOARD.checkpoint.h / 2 - 30 },
-    records: {
-      text: 'Records', x: BOARD.history.x - BOARD.history.w / 2 - 24 - ROLE_W / 2, y: BOARD.history.y,
-    },
+    thinks: { text: 'Thinks', x: BOARD.model.x, y: LOOP_LABELS[1].y },
+    acts: { text: 'Acts', x: BOARD.tools.x, y: BOARD.tools.y + BOARD.tools.h / 2 + 38 },
+    keeps: { text: 'Keeps state', x: BOARD.checkpoint.x, y: BOARD.checkpoint.y - BOARD.checkpoint.h / 2 - 30 },
+    records: { text: 'Records', right: BOARD.history.x - BOARD.history.w / 2 - 24, y: BOARD.history.y },
   };
   // where the checkpoint drops in from: above the frame
   const DROP_FROM = -120;
   // the action card and the rows it leaves in the Event History
   const ACTION = { tool: 'open_page', arg: 'a supplier price list', toolIndex: 1 };
   const HISTORY_ROWS = [
-    'model suggests <b>open_page</b>',
+    'model picks <b>open_page</b>',
     '<b>open_page</b> supplier price list',
   ];
   // a spark drops from the checkpoint's bottom to the strip's top as each row is written, over WRITE_D seconds
@@ -79,14 +104,43 @@
     return `M ${LOOP.toolX} ${y} C 1250 ${y} 1200 ${LOOP.bottom} ${LOOP.mid} ${LOOP.bottom}`
       + ` C 800 ${LOOP.bottom} 600 ${LOOP.readsY} ${LOOP.x0} ${LOOP.readsY}`;
   };
-  // A label of fixed even width, so it rests on whole pixels at a whole center
-  const makeLabel = (root, text) => E(root, text, 'lbl', { width: ROLE_W + 'px', textAlign: 'center' });
-  // A flicker of a tool hit at `at`: 1 or a dim 0.25, changing every frame (1/30 s) for 0.5 s, from hash(); 0 outside
-  const flicker = (t, at, seed) => {
-    const age = t - at;
-    if (age < 0 || age >= 0.5) return 0;
-    return hash(seed * 31 + Math.floor(age * 30)) > 0.35 ? 1 : 0.25;
+  // SVG path of the reach line from tool i to target j; its first control point stays 60 px right of the target, so a
+  // line to a target near the tools bends straight down without a hook
+  const reachD = (i, j) => {
+    const y = toolSlot(i)[1];
+    const x = targetX(j) + (i - 1.5) * REACH.spread;
+    const bendX = Math.max(LOOP.toolX - 160, x + 60);
+    return `M ${LOOP.toolX} ${y} C ${bendX} ${y} ${x} ${targetTop - 200} ${x} ${targetTop}`;
   };
+  // The width of a label of this text, px: Mono 20 px with .12em spacing advances 14.4 px per character, plus its
+  // padding-left of .12em; even, so the label rests on whole pixels at a whole center
+  const labelWidth = text => 2 * Math.ceil((text.length * 14.4 + 2.4) / 2) + 2;
+  // A label of fixed even width (see labelWidth), its text centered
+  const makeLabel = (root, text) => E(root, text, 'lbl', { width: labelWidth(text) + 'px', textAlign: 'center' });
+  // A target tile (TARGET.w x h): its icon and its label, centered side by side. tile.icon: its <svg>.
+  const makeTargetTile = (root, { icon, label }) => {
+    const tile = E(root,
+      `${ICON(icon, 28, C.slate, 1.8)}<span class="lbl" style="color:var(--ink)">${label}</span>`,
+      'tile', {
+        width: TARGET.w + 'px', height: TARGET.h + 'px', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', gap: '14px',
+      });
+    tile.icon = tile.querySelector('svg');
+    return tile;
+  };
+  // A red outline round a target tile, which grows out of it and fades at the beat (see placePulse)
+  const makePulse = root => E(root, '', '', { border: `3px solid ${C.red}`, borderRadius: 'var(--r)' });
+  // The pulse grows from the tile's size to `grow` px wider and higher over d seconds from `at`, fading out; sized,
+  // not scaled, so it keeps its 3 px line, and in even sizes, so it stays centered on whole pixels
+  const placePulse = (e, t, at, x, y, { grow = 64, d = 0.8 } = {}) => {
+    const p = P(t, at, d, easeOut);
+    const extra = 2 * Math.round(grow * p / 2);
+    e.style.width = (TARGET.w + extra) + 'px';
+    e.style.height = (TARGET.h + extra) + 'px';
+    place(e, x, y, 1, p > 0 && p < 1 ? 0.9 * (1 - p) : 0);
+  };
+  // A glow that peaks at `at` and fades in and out over `half` seconds on either side; 0 outside
+  const peak = (t, at, half) => Math.max(0, 1 - Math.abs(t - at) / half);
 
   scene({
     chapter: 1, title: 'Agents that act',
@@ -99,7 +153,7 @@
         text: "With <b>Temporal</b>, the agent runs as a <b>Workflow</b>: your code, "
           + "which runs and records every step.",
       },
-      // the card's journey ends on the second row, then a hold before the zoom-through
+      // the strip's glow on "the record", then a hold before the zoom-through
       {
         text: "The model thinks, the tools act, each where you choose. Temporal keeps the state and the record.",
         after: 0.6,
@@ -110,18 +164,23 @@
       // the checkpoint's halo as it lands, under the board
       s.halo = E(root, '', '', { width: '560px', height: '560px', borderRadius: '50%',
         background: haloBackground(0.24, 0.12, 40, 68) });
+      // the targets of the tools' reach, under the board (the strip rises where they were)
+      s.targets = TARGETS.map(target => makeTargetTile(root, target));
+      s.targetPulses = TARGETS.map(() => [makePulse(root), makePulse(root)]);
       // the board, its orb with the intro's seed, so its blink matches across the cut
       s.board = makeBoard(root, { historyRows: HISTORY_ROWS, uvRow: i => i === 0, seed: INTRO_ORB.seed });
       s.board.orb.label.style.opacity = 0;
-      // the loop's two lines and the sparks that run along them (violet; red once the agent goes astray), in the
-      // board's SVG layer, under the checkpoint and the orb
+      s.zoneRect = s.board.zone.querySelector('rect');
+      // the loop's two lines and the sparks that run along them, in the board's SVG layer, under the checkpoint and
+      // the orb
       s.acts = path(s.board.svg, actsD(0), C.slate, 2.5);
-      s.actsHeads = { slate: s.acts._marker, red: arrowHead(s.board.svg, C.red) };
       s.reads = path(s.board.svg, readsD(0), C.slate, 2.5);
       s.actSpark = makeSpark(root, 16, RGB.violet);
-      s.actRedSpark = makeSpark(root, 16, RGB.red);
       s.readSpark = makeSpark(root, 16, RGB.violet);
       s.loopLabels = LOOP_LABELS.map(({ text }) => makeLabel(root, text));
+      // the reach: one red line from each tool to each target, a red spark on the head of each while it draws
+      s.reach = TOOLS.map((_, i) => TARGETS.map((__, j) => path(s.board.svg, reachD(i, j), C.red, 2, false)));
+      s.reachSparks = TOOLS.map(() => TARGETS.map(() => makeSpark(root, 10, RGB.red)));
       s.ripples = makeRipples(root, 2, RGB.violet);
 
       s.card = makeActionCard(root, ACTION);
@@ -134,29 +193,31 @@
       const { board } = s;
       const { model, checkpoint, tools, history, laneY } = BOARD;
       const cyclesAt = c[0] + T0.cycles;
+      const loopOutAt = c[1] + T1.loopOut;
+      const beatAt = c[1] + T1.beat;
       const outAt = c[2] + T2.out;
       const landAt = c[2] + T2.drop + T2.dropD;
 
-      // the camera holds; the checkpoint's landing jolts it; the default fade-out zooms through to chapter 2
+      // the camera holds; the red beat and the checkpoint's landing jolt it; the default fade-out zooms through to
+      // chapter 2
+      const [bx, by] = shake(t, beatAt, 10, 0.45);
       const [jx, jy] = shake(t, landAt, 8, 0.35);
-      setCamera(s.cam, t, this.dur, { dx: jx, dy: jy, enter: 1 });
+      setCamera(s.cam, t, this.dur, { dx: bx + jx, dy: by + jy, enter: 1 });
 
-      // ---- c[0] and c[1]: the agent loop
-      // the cycles whose act lands before the loop clears, then one last read of its result, after which the orb
-      // decides until the checkpoint drops in; the cycle k running at t and how far into it (phase)
-      const cycleCount = Math.min(ACT_ON.length, Math.floor((outAt - cyclesAt - CYCLE.hit) / CYCLE.d) + 1);
+      // ---- c[0]: the agent loop
+      // the cycles whose act lands before c[1] starts, then one last read of its result, after which the orb decides
+      // until the loop clears; the cycle k running at t and how far into it (phase)
+      const actLandsAt = i => cyclesAt + i * CYCLE.d + CYCLE.hit;
+      const cycleCount = Math.min(ACT_ON.length, Math.floor((c[1] - actLandsAt(0)) / CYCLE.d) + 1);
       const k = Math.floor((t - cyclesAt) / CYCLE.d);
       const phase = t - cyclesAt - k * CYCLE.d;
       const reading = k >= 0 && k <= cycleCount && phase < CYCLE.read;
       const deciding = k >= 0 && (k < cycleCount
         ? phase >= CYCLE.read && phase < CYCLE.act
-        : (k > cycleCount || phase >= CYCLE.read) && t < outAt + 0.3);
+        : (k > cycleCount || phase >= CYCLE.read) && t < loopOutAt + 0.3);
       const acting = k >= 0 && k < cycleCount && phase >= CYCLE.act;
       const readFrom = i => i === 0 ? FIRST_READ : ACT_ON[i - 1];
-      const loopO = P(t, c[0] + T0.loop, 0.5) * (1 - P(t, outAt, 0.4));
-      // a red act: one that lands after c[1] starts, when the subtitle turns to what the tools can reach
-      const actLandsAt = i => cyclesAt + i * CYCLE.d + CYCLE.hit;
-      const isRed = i => actLandsAt(i) >= c[1];
+      const loopO = P(t, c[0] + T0.loop, 0.5) * (1 - P(t, loopOutAt, 0.4));
 
       // the line back: drawn from the tool to the orb as the spark runs it, faded before the next cycle's read
       const readK = Math.min(k, cycleCount);
@@ -170,23 +231,17 @@
         draw(s.reads, 0);
         sparkOnPath(s.readSpark, s.reads, 0);
       }
-      // the line out: drawn from the orb to the tool as the spark runs it, faded before the next cycle's act; red
-      // once the agent goes astray
+      // the line out: drawn from the orb to the tool as the spark runs it, faded before the next cycle's act
       const actK = Math.min(acting ? k : k - 1, cycleCount - 1);
       if (actK >= 0) {
         setD(s.acts, actsD(ACT_ON[actK]));
-        const red = isRed(actK);
-        s.acts.setAttribute('stroke', red ? C.red : C.slate);
-        s.acts._marker = red ? s.actsHeads.red : s.actsHeads.slate;
         const prog = acting ? clamp((phase - CYCLE.act) / (CYCLE.hit - CYCLE.act)) : 1;
         const fade = !acting && k < cycleCount ? P(phase, CYCLE.act - CYCLE.fade, CYCLE.fade, linear) : 0;
         draw(s.acts, prog, loopO * (1 - fade));
-        sparkOnPath(s.actSpark, s.acts, acting && !red ? prog : 0, loopO);
-        sparkOnPath(s.actRedSpark, s.acts, acting && red ? prog : 0, loopO);
+        sparkOnPath(s.actSpark, s.acts, acting ? prog : 0, loopO);
       } else {
         draw(s.acts, 0);
         sparkOnPath(s.actSpark, s.acts, 0);
-        sparkOnPath(s.actRedSpark, s.acts, 0);
       }
       // the labels: each one lights while its part of the cycle runs
       const lit = [reading, deciding, acting && phase < CYCLE.hit + 0.1];
@@ -196,53 +251,84 @@
         label.style.color = lit[i] ? C.ink : C.slate;
       });
 
-      // ---- the orb: its label fades in; it thinks while it decides, looks toward the tools while the loop runs, and
-      // thinks again before it suggests the next step in c[3]
+      // ---- the orb: its label fades in; it thinks while it decides, looks toward the tools once the loop runs, and
+      // thinks again before its step in c[3]
       place(board.orb.el, model.x, model.y, 1, 1);
       board.orb.label.style.opacity = P(t, c[0] + T0.label, 0.5);
       const thinkingInC3 = t >= c[3] + T3.think && t < c[3] + T3.emerge;
       const look = 0.5 * P(t, c[0] + T0.loop, 0.6);
       board.orb.set(deciding || thinkingInC3 ? 'thinking' : 'idle', { look });
 
-      // ---- the tools: they pop in; each one the loop reaches lights violet, or flickers red after c[1] starts; the
-      // card's tool lights neon as it lands
+      // ---- c[1]: the reach. Each line draws out of its tool into its target, then pulls back into the tool as
+      // c[2] starts; the lines flare at the beat
+      const pullBack = 1 - P(t, outAt, T2.outD, easeIn);
+      const beatGlow = t >= beatAt ? 1 - P(t, beatAt, 0.9) : 0;
+      s.reach.forEach((lines, i) => lines.forEach((line, j) => {
+        const prog = P(t, reachAt(c, i, j), REACH.d, easeOut);
+        draw(line, prog * pullBack, lerp(0.55, 1, beatGlow));
+        sparkOnPath(s.reachSparks[i][j], line, prog < 1 ? prog : 0);
+      }));
+      // the targets: each pops in as its first line reaches it, flares red at the beat (a swell, pulses), keeps a red
+      // border, and sinks away as c[2] starts
+      const sink = P(t, outAt, T2.outD, easeIn);
+      s.targets.forEach((tile, j) => {
+        const reachedAt = reachAt(c, 0, j) + REACH.d * 0.8;
+        const pop = backPop(t, reachedAt, 0.45);
+        const flare = t >= beatAt + j * 0.04 ? 1 - P(t, beatAt + j * 0.04, 1.2) : 0;
+        const x = targetX(j), y = TARGET.y + Math.round(30 * sink);
+        place(tile, x, y, pop.s * swell(t, beatAt + j * 0.04, 0.1), pop.o * (1 - sink));
+        const red = t >= reachedAt;
+        tile.style.borderColor = red ? C.red : C.line;
+        tile.icon.setAttribute('stroke', red ? C.red : C.slate);
+        tile.style.background = t >= beatAt ? `rgba(${RGB.red},.14)` : '';
+        tile.style.boxShadow = red ? glowShadow(RGB.red, Math.max(0.35, flare), { blur: 30, alpha: 0.7 }) : '';
+        s.targetPulses[j].forEach((pulse, n) => placePulse(pulse, t, beatAt + j * 0.04 + n * 0.18, x, TARGET.y));
+      });
+
+      // ---- the tools: they pop in; each one the loop reaches lights violet; in c[1] each lights violet as it is
+      // named, then turns red as its reach fans out, flares at the beat and calms as c[2] starts; the card's tool
+      // lights neon as it lands in c[3]
       const cardLandsAt = c[3] + T3.toTool + T3.toToolD;
       board.tools.forEach((tile, i) => {
         const pop = backPop(t, c[0] + T0.tools + i * T0.toolStep, 0.5);
         const [x, y] = toolSlot(i);
         place(tile, x, y, pop.s, pop.o);
-        let violet = 0, red = 0;
+        let violet = 0;
         for (let j = 0; j < cycleCount; j++) {
-          if (ACT_ON[j] !== i) continue;
           const since = t - actLandsAt(j);
-          if (isRed(j)) red = Math.max(red, flicker(t, actLandsAt(j), j + 1));
-          else if (since >= 0 && since < 0.6) violet = Math.max(violet, 1 - since / 0.6);
+          if (ACT_ON[j] === i && since >= 0 && since < 0.6) violet = Math.max(violet, 1 - since / 0.6);
         }
+        // named, it glows violet until its reach turns it red
+        const namedAt = c[1] + T1.named[i];
+        const redAt = reachAt(c, i, 0);
+        if (t >= namedAt && t < redAt) violet = Math.max(violet, 1 - 0.4 * P(t, namedAt, 0.6));
+        const red = t >= redAt ? Math.max(0.45, beatGlow) * (1 - P(t, outAt, T2.outD)) : 0;
         const neon = i === ACTION.toolIndex && t >= cardLandsAt ? 1 - 0.6 * P(t, cardLandsAt + 0.2, 0.8) : 0;
         let color = C.line, rgb = null, glow = 0;
         if (red > 0) [color, rgb, glow] = [C.red, RGB.red, red];
         else if (neon > 0) [color, rgb, glow] = [C.neon, RGB.neon, neon];
         else if (violet > 0) [color, rgb, glow] = [C.violet, RGB.violet, violet];
         tile.style.borderColor = glow > 0.3 ? color : C.line;
-        tile.icon.setAttribute('stroke', red > 0.5 ? C.red : C.ink);
+        tile.icon.setAttribute('stroke', red > 0.3 ? C.red : C.ink);
         tile.style.boxShadow = rgb ? glowShadow(rgb, glow, { blur: 26, alpha: 0.6 }) : '';
       });
 
-      // ---- c[2]: the dramatic beat. The checkpoint drops in from above the frame and lands between the orb and the
-      // tools; the lanes shoot out of it, YOUR WORKERS draws round the tools, the Event History strip rises in.
+      // ---- c[2]: the checkpoint drops in from above the frame and lands between the orb and the tools; the lanes
+      // shoot out of it, YOUR WORKERS draws round the tools, the Event History strip rises in.
       const drop = P(t, c[2] + T2.drop, T2.dropD, easeIn);
       const cpY = Math.round(lerp(DROP_FROM, checkpoint.y, drop));
       place(board.checkpoint.el, checkpoint.x, cpY, 1, P(t, c[2] + T2.drop, 0.1, linear));
       placeRipples(s.ripples, t, landAt, checkpoint.x, laneY, 200, 640, { d: 0.9, step: 0.2 });
-      const yourCodeGlow = Math.max(0, 1 - Math.abs(t - c[2] - T2.yourCode - 0.3) / 0.6);
+      const yourCodeGlow = peak(t, c[2] + T2.yourCode + 0.3, 0.6);
+      const keepsGlow = peak(t, c[3] + T3.keeps + 0.4, 0.7);
       const landGlow = t >= landAt ? 1 - P(t, landAt, 1.0) : 0;
-      place(s.halo, checkpoint.x, checkpoint.y, 1, Math.max(landGlow, 0.8 * yourCodeGlow));
+      place(s.halo, checkpoint.x, checkpoint.y, 1, Math.max(landGlow, 0.8 * yourCodeGlow, 0.8 * keepsGlow));
       board.lanes.forEach((lane, i) => draw(lane, P(t, c[2] + T2.lanes + i * 0.15, 0.5, easeOut)));
       const zone = P(t, c[2] + T2.zone, 0.6);
       place(board.zone, tools.x, tools.y, lerp(1.04, 1, zone), zone);
       rise(board.history, history.x, history.y, P(t, c[2] + T2.history, 0.6), 30);
 
-      // ---- c[3]: the model suggests a step; the Workflow decides, then writes it down
+      // ---- c[3]: the model thinks up a step, which passes the Workflow and lands on its tool; each part's role
       const emergeAt = c[3] + T3.emerge;
       const throughAt = c[3] + T3.through;
       // the card reaches the beam halfway through its pass (the pass eases in and out)
@@ -261,19 +347,29 @@
       s.card.setTone(t >= passAt ? 'neon' : null);
       board.checkpoint.check(t, passAt, 'pass');
 
-      // the roles: SUGGESTS as the card grows out of the orb, DECIDES as it passes, RECORDS with the first row
-      const rowsAt = T3.rows.map(at => c[3] + at);
-      const roleAt = { suggests: c[3] + T3.suggests, decides: passAt - 0.1, records: rowsAt[0] - WRITE_D };
+      // YOUR WORKERS glows on "each where you choose": its outline turns violet, a soft glow round it
+      const zoneGlow = peak(t, c[3] + T3.zone + 0.5, 0.8);
+      s.zoneRect.setAttribute('stroke', zoneGlow > 0.3 ? C.violet : C.slate);
+      board.zone.style.filter = zoneGlow > 0 ? `drop-shadow(0 0 ${Math.round(14 * zoneGlow)}px `
+        + `rgba(${RGB.violet},${(0.8 * zoneGlow).toFixed(3)}))` : '';
+      // the Event History glows on "the record"
+      const recordGlow = peak(t, c[3] + T3.records + 0.5, 0.8);
+      board.history.style.boxShadow = glowShadow(RGB.violet, recordGlow, { blur: 40, alpha: 0.7 });
+
+      // the roles, each rising as its part is read
+      const roleAt = { thinks: T3.think, acts: T3.acts, keeps: T3.keeps, records: T3.records };
       Object.entries(s.roles).forEach(([name, label]) => {
-        const { x, y } = ROLES[name];
-        rise(label, x, y, P(t, roleAt[name], 0.4), 12);
+        const { x, right, y } = ROLES[name];
+        const centerX = x === undefined ? right - labelWidth(ROLES[name].text) / 2 : x;
+        rise(label, centerX, y, P(t, c[3] + roleAt[name], 0.4), 12);
         label.style.color = C.ink;
       });
 
       // the Event History: a spark drops from the checkpoint to the strip, then the row slides in
+      const rowsAt = T3.rows.map(at => c[3] + at);
       fillHistoryStrip(board.history, t, [
         { at: rowsAt[0], tag: 'SAVED', tone: 'saved' },
-        { at: rowsAt[1], tag: 'ALLOWED', tone: 'neon' },
+        { at: rowsAt[1], tag: 'DONE', tone: 'neon' },
       ]);
       const writing = rowsAt.map(at => (t - (at - WRITE_D)) / WRITE_D).find(u => u > 0 && u < 1);
       const cpBottom = checkpoint.y + checkpoint.h / 2;
