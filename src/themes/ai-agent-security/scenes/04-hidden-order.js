@@ -14,7 +14,10 @@
 // an outside project stops at the checkpoint, which holds it (NEEDS APPROVAL) as the run is flagged and the step
 // sends data out. The model steps up and aside for Maya's phone, which shows the data and the document it came from;
 // the three routes light up converging on the checkpoint (WHATEVER ROUTE), and Maya taps Reject: the checkpoint
-// shuts, REJECTED BY MAYA, on record. The camera zoom-through (setCamera) brings the scene in and plays into chapter 5.
+// shuts, REJECTED BY MAYA, on record. Then the workers and the sandbox slide away for the Temporal Agent Harness's
+// TOOL APPROVAL POLICY: three rules light up in the subtitle's order, read_file RUN, delete_volume REFUSED (the reason
+// goes back to the model), create_ticket to an outside project ASK A PERSON, whose violet line reaches Maya's phone.
+// The camera zoom-through (setCamera) brings the scene in and plays into chapter 5.
 // The block keeps every name declared in this file local to this scene.
 {
   // ---------- the replay stage, at camera rest
@@ -132,6 +135,30 @@
   };
   // the routes that light up, as lane indices: tickets, web search, the sandbox
   const ROUTE_LANES = [1, 2, 3];
+  // from c[4]: the zone, the sandbox and their lanes slide away (out, outD) as the policy panel slides in (policy);
+  // its rules light up in the subtitle's order: run, refuse, ask (lit, by row); the ASK row's line draws to Maya's
+  // phone (link, linkD), which glows violet as it arrives
+  const T4 = { out: 0, outD: 0.5, policy: 0.3, lit: [1.3, 3.5, 2.4], link: 3.7, linkD: 0.7 };
+
+  // ---------- the Temporal Agent Harness's tool approval policy, in the right column the zone and the sandbox leave:
+  // its top on the phone's, its bottom on the Event History's. Its heading, then three rule rows 20 px apart, the
+  // middle one level with the line to Maya's phone, which runs under the checkpoint (bottom y 610) and over the Event
+  // History (top y 680), from the ASK row's left edge to the phone's right edge
+  const POLICY = { x: 1590, y: 606, w: 420, h: 500 };
+  const RULE_ROW = { w: 372, h: 108, top: 112, pitch: 128 };
+  const LINK_Y = POLICY.y - POLICY.h / 2 + RULE_ROW.top + RULE_ROW.pitch + RULE_ROW.h / 2;
+  // each rule: the tool, the case it covers or what follows, and its verdict as a statusTag kind of this theme
+  const RULES = [
+    { tool: 'read_file', note: 'files in the project', verdict: 'RUN', kind: 'safe', rgb: RGB.neon, color: C.neon },
+    {
+      tool: 'create_ticket', note: 'outside project', verdict: 'ASK A PERSON', kind: 'approval', rgb: RGB.violet,
+      color: C.violet,
+    },
+    {
+      tool: 'delete_volume', note: 'reason sent to the model', verdict: 'REFUSED', kind: 'alarm', rgb: RGB.red,
+      color: C.red,
+    },
+  ];
 
   // The glitch of the beat, from `at` for d seconds: every 0.05 s the picture jumps sideways (dx, whole px) and splits
   // into red and UV copies `split` px apart; { dx: 0, split: 0 } outside it
@@ -262,6 +289,36 @@
     return badge;
   };
 
+  // The policy panel: a tile with its heading (the Temporal symbol, TEMPORAL AGENT HARNESS) and TOOL APPROVAL POLICY
+  // under it, then a row per rule (panel.rows): the tool name in bold mono, its verdict tag on the right (row.tag,
+  // hidden until the rule lights up) and its note under the name (row.note)
+  const makePolicyPanel = root => {
+    const panel = E(root,
+      '<div class="lbl" style="position:absolute;left:24px;top:20px;height:34px;display:flex;align-items:center;'
+      + `gap:10px;padding-left:0;font-size:18px;color:var(--ink)"><img src="${TEMPORAL_SYMBOL}" `
+      + 'style="width:22px;height:22px;display:block">Temporal Agent Harness</div>'
+      + '<div class="mono" style="position:absolute;left:24px;top:60px;font-size:16px;line-height:22px;'
+      + `letter-spacing:.12em;color:${C.slate}">TOOL APPROVAL POLICY</div>`,
+      'tile', { width: POLICY.w + 'px', height: POLICY.h + 'px', textAlign: 'left' });
+    panel.rows = RULES.map(({ tool, note, verdict, kind }, i) => {
+      const row = E(panel,
+        '<div class="mono" style="position:absolute;left:16px;top:18px;height:32px;display:flex;align-items:center;'
+        + `font-size:18px;font-weight:700;color:var(--ink)">${tool}</div>`
+        + '<div class="note mono" style="position:absolute;left:16px;top:58px;font-size:16px;line-height:22px;'
+        + `color:${C.slate}">${note}</div>`,
+        'tile', {
+          left: (POLICY.w - RULE_ROW.w) / 2 - 1 + 'px', top: RULE_ROW.top + i * RULE_ROW.pitch - 1 + 'px',
+          width: RULE_ROW.w + 'px', height: RULE_ROW.h + 'px', background: C.bg, opacity: 1,
+        });
+      row.note = row.querySelector('.note');
+      row.tag = statusTag(row, { font: 16, padX: 10, padY: 4, icon: 16 });
+      Object.assign(row.tag.style, { left: 'auto', right: '16px', top: '18px', lineHeight: '22px', fontWeight: 700 });
+      setStatus(row.tag, verdict, kind);
+      return row;
+    });
+    return panel;
+  };
+
   // Small sparks thrown back from a hit at `at`: each flies dist px from (x, y) along its own hashed angle within
   // [from, to] degrees, fading over 0.45 s
   const placeHitSparks = (sparks, t, at, x, y, from, to, dist, seed) => {
@@ -282,6 +339,11 @@
         url: 'https://www.promptarmor.com/resources/atlassian-rovo-exfiltrates-data',
       },
       { label: 'Meta, October 2025', url: 'https://ai.meta.com/blog/practical-ai-agent-security/' },
+      {
+        label: 'Temporal blog, August 2026',
+        url: 'https://temporal.io/blog/temporal-agent-harness-durable-agent-infrastructure',
+      },
+      { label: 'Temporal Agent Harness', url: 'https://github.com/temporal-community/temporal-agent-harness' },
     ],
     subs: [
       { text: "August 2026: researchers showed that hidden text in a document could make a work assistant leak data." },
@@ -291,6 +353,10 @@
         text: "From then on, any step that sends data out waits for a person, whatever route the agent picks.",
         // Maya rejects at c[3] + 6.0, then the verdict holds
         after: 2.0,
+      },
+      {
+        // the line to Maya's phone lands at c[4] + 4.4, which leaves the policy about 1.7 s on screen
+        text: "With the Temporal Agent Harness, each tool gets its rule: run, refuse, or ask a person.",
       },
     ],
     build(stage, s) {
@@ -387,6 +453,13 @@
         deadline: 'Answer by 18:00',
       });
 
+      // ---------- the tool approval policy, its line to Maya's phone and the spark that runs it
+      s.policy = makePolicyPanel(root);
+      const policySvg = svgLayer(root);
+      s.policyLink = path(policySvg, `M ${POLICY.x - RULE_ROW.w / 2} ${LINK_Y} H ${PHONE.x + APPROVAL_CARD.w / 2}`,
+        C.violet, 3, false);
+      s.policySpark = makeSpark(root, 16, RGB.violet);
+
       // the case file lands over everything
       s.caseFile = makeCaseFile(root, {
         date: 'AUGUST 2026', tag: 'HIDDEN TEXT', headline: 'A shared document takes over<br>a work assistant',
@@ -406,6 +479,10 @@
       const hitAt = c[3] + T3.strike + T3.strikeD;
       const holdAt = c[3] + T3.emitB + T3.legB;
       const rejectAt = c[3] + T3.reject;
+      // c[4]: the zone, the sandbox and their lanes slide 120 px right and fade out
+      const gone = P(t, c[4] + T4.out, T4.outD);
+      const goneX = Math.round(120 * gone);
+      const kept = 1 - gone;
 
       // the camera: the zoom-through in and out, no other move; the hijack jolts it and splits its colors, Maya's
       // rejection jolts it again
@@ -470,15 +547,15 @@
       // 3. with Temporal, the board builds round the model: the zone and its tools slide in from the right, the
       // sandbox after them, the checkpoint pops in, the lanes draw, the Event History rises
       const zoneIn = P(t, c[2] + T2.zone, 0.7);
-      place(s.zone, ZONE.x + Math.round(120 * (1 - zoneIn)), ZONE.y, 1, zoneIn);
+      place(s.zone, ZONE.x + Math.round(120 * (1 - zoneIn)) + goneX, ZONE.y, 1, zoneIn * kept);
       s.tools.forEach((tile, i) => {
         const tileIn = P(t, c[2] + T2.tiles + i * T2.tileStep, 0.6);
         const [x, y] = zoneSlot(i);
-        place(tile, x + Math.round(120 * (1 - tileIn)), y, 1, tileIn);
+        place(tile, x + Math.round(120 * (1 - tileIn)) + goneX, y, 1, tileIn * kept);
       });
       const boxIn = P(t, c[2] + T2.box, 0.7);
       const boxShake = Math.round(dampedShake(t, hitAt, 6, 0.4, 5));
-      place(s.box, BOX.x + Math.round(120 * (1 - boxIn)) + boxShake, BOX.y, 1, boxIn);
+      place(s.box, BOX.x + Math.round(120 * (1 - boxIn)) + boxShake + goneX, BOX.y, 1, boxIn * kept);
       const cp = s.checkpoint;
       const cpPop = backPop(t, c[2] + T2.checkpoint, 0.6);
       place(cp.el, checkpoint.x, checkpoint.y, cpPop.s, cpPop.o);
@@ -488,7 +565,7 @@
       const aside = P(t, c[3] + T3.aside, T3.asideD);
       const lanesIn = P(t, c[2] + T2.lanes, T2.lanesD);
       draw(s.laneIn, lanesIn, 1 - aside);
-      s.lanes.forEach((lane, i) => draw(lane, P(t, c[2] + T2.lanes + 0.1 * i, T2.lanesD)));
+      s.lanes.forEach((lane, i) => draw(lane, P(t, c[2] + T2.lanes + 0.1 * i, T2.lanesD), kept));
       rise(s.history, history.x, history.y, P(t, c[2] + T2.history, 0.6));
 
       // the AI model: it pops in beside the shared files and looks at them, turns red as the order reaches it and
@@ -543,8 +620,8 @@
       const [callX, callY] = t < passAt
         ? lerp2(s.callStops.from, s.callStops.gate, callTravel)
         : pointAlong(s.callRoute, P(t, passAt, T3.legA2));
-      s.call.place(Math.round(callX) + boxShake * (t >= passAt + T3.legA2 ? 1 : 0), Math.round(callY),
-        lerp(0.3, 1, P(t, emitA, 0.4)), P(t, emitA, 0.15));
+      s.call.place(Math.round(callX) + boxShake * (t >= passAt + T3.legA2 ? 1 : 0) + goneX, Math.round(callY),
+        lerp(0.3, 1, P(t, emitA, 0.4)), P(t, emitA, 0.15) * kept);
       const callFailed = t >= hitAt;
       s.call.setTone(callFailed ? 'red' : null);
       s.call.arg.style.color = callFailed ? C.red : C.slateDark;
@@ -592,7 +669,7 @@
         if (tile && tile.marker) tile.marker.style.transform = `scale(${swell(t, at, 0.2) * swell(t, holdAt, 0.2)})`;
       });
       const captionPop = popIn(t, c[3] + T3.caption);
-      place(s.caption, CAPTION.x, CAPTION.y, captionPop.s, captionPop.o);
+      place(s.caption, CAPTION.x, CAPTION.y, captionPop.s, captionPop.o * kept);
 
       // the Event History: the flagged read, the terminal call that found no internet, the ticket waiting for Maya,
       // then rejected by Maya
@@ -603,6 +680,29 @@
         { at: holdAt + 0.2, tag: ticketTag, tone: rejected ? 'red' : 'violet' },
       ]);
       if (t >= rejectAt) s.history.tags[2].style.transform = `scale(${swell(t, rejectAt + 0.1, 0.14)})`;
+
+      // 5. the Temporal Agent Harness: the tool approval policy slides in where the zone and the sandbox were. Each
+      // rule lights up in its verdict's color as its tag pops: run, refuse (its note turns red: the reason goes back
+      // to the model), ask a person; the ASK row's line then runs to Maya's phone, which glows violet
+      const policyIn = P(t, c[4] + T4.policy, 0.7);
+      place(s.policy, POLICY.x + Math.round(120 * (1 - policyIn)), POLICY.y, 1, policyIn);
+      s.policy.rows.forEach((row, i) => {
+        const { rgb, color, kind } = RULES[i];
+        const litAt = c[4] + T4.lit[i];
+        const lit = P(t, litAt, 0.3);
+        row.style.borderColor = lit > 0.5 ? color : C.line;
+        row.style.background = lit > 0 ? `rgba(${rgb},${(0.1 * lit).toFixed(3)})` : C.bg;
+        row.style.boxShadow = glowShadow(rgb, win(t, litAt, litAt + 0.6, 0.2), { blur: 26, alpha: 0.5 });
+        popScale(row.tag, popIn(t, litAt));
+        if (kind === 'alarm') row.note.style.color = lit > 0.5 ? C.red : C.slate;
+      });
+      const linkAt = c[4] + T4.link;
+      const linked = P(t, linkAt, T4.linkD, linear);
+      draw(s.policyLink, linked);
+      sparkOnPath(s.policySpark, s.policyLink, linked);
+      const phoneGlow = P(t, linkAt + T4.linkD, 0.3);
+      s.phone.el.style.borderColor = phoneGlow > 0.5 ? C.violet : C.lineLight;
+      s.phone.el.style.boxShadow = glowShadow(RGB.violet, phoneGlow, { blur: 40, alpha: 0.5 });
     }
   });
 }
