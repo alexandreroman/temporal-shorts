@@ -100,8 +100,8 @@
   // reveals from the top (doc.order's clip), over a red tint (doc.tint), with a HIDDEN TEXT tag (doc.tag).
   const makeDocument = root => {
     const lines = HIDDEN.lines.join('<br>');
-    const order = (color, cls = '') => `<div class="mono ${cls}" style="position:absolute;left:24px;top:${HIDDEN.top + 8}px;`
-      + `font-size:18px;line-height:26px;font-weight:700;color:${color};white-space:nowrap">${lines}</div>`;
+    const order = (color, cls = '') => `<div class="mono ${cls}" style="position:absolute;left:24px;`
+      + `top:${HIDDEN.top + 8}px;font-size:18px;line-height:26px;font-weight:700;color:${color};white-space:nowrap">${lines}</div>`;
     const bar = (top, w) => `<div style="position:absolute;left:24px;top:${top}px;width:${w}px;height:10px;`
       + 'border-radius:5px;background:#D5DAE3"></div>';
     const doc = E(root,
